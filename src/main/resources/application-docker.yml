@@ -9,7 +9,7 @@ spring:
     username: hec_new #artemis
     password: aGFuZGhhbmQ= #MTIzNDU2TXMz
   redis:
-    host: localhost
+    host: 192.168.12.104
     port: 6379
 
 auth:
