@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArtemisAuthorizationCodeServicesTest extends AuthServiceH2Test {
 
-    @Autowired
+   /* @Autowired
     private ArtemisAuthorizationCodeServices artemisAuthorizationCodeServices;
 
     @Autowired
@@ -21,5 +21,5 @@ public class ArtemisAuthorizationCodeServicesTest extends AuthServiceH2Test {
         assertThat(code.isEmpty()).isFalse();
         artemisAuthorizationCodeServices.readAuthentication(code);
         artemisAuthorizationCodeServices.consumeAuthorizationCode(code);
-    }
+    }*/
 }
