@@ -1,0 +1,26 @@
+server:
+  port: 9999
+  context-path: /auth
+liquibase:
+  change-log: classpath:db/liquibase/master.xml
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+security:
+  oauth2:
+    resource:
+      filter-order: 3
+mybatis:
+  mapper-locations: com/helioscloud/atlantis/persistence/*Mapper.xml
+  type-aliases-package: com.helioscloud.atlantis.domain
+  type-handlers-package: com.helioscloud.atlantis.persistence.typehandler
+  configuration:
+    map-underscore-to-camel-case: true
+helios:
+   mybatis-plus:
+     enable-performance-interceptor: false
+     enable-sql-explain-interceptor: false

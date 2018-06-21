@@ -1,0 +1,44 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://106.15.120.125:21906/artemis?useUnicode=true&characterEncoding=utf8
+    name:
+    username: artemis
+    password: 123456Ms3
+  redis:
+    host: localhost
+    port: 6379
+#    password: foobared
+
+auth:
+  cache:
+    expire-time: 30
+#logging:
+#  config: classpath:logback/logback-dev.xml
+
+dingtalk:
+    server:
+      getDingTalkUserInfoURL: http://apiuat.huilianyi.com/dingtalk/common/get/user/info
+
+single-sign:
+  server:
+    host: http://localhost:11059
+    access-token-uri: http://localhost:8081/oauth/token
+    client-id: implement-integration
+    client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+
+wechat:
+    wechatUrl: http://wechat-service:11001/wechat-service/wechat/
+
+haima:
+    server:
+        userMapping: http://haima-service:9090/haima/api/user/mapping
+        userInfo: http://haima-service:9090/haima/api/user/userInfo
+
+app-center:
+  authentication:
+    download-url: http://downloads.huilianyi.com/app/sit
+    client-id: ArtemisWeb

@@ -1,0 +1,40 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+  redis:
+    host: localhost
+    port: 6379
+#    password: foobared
+  datasource:
+    druid:
+      db-type: h2
+      url: jdbc:h2:mem:auth_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL;
+      username: test
+      password: test
+    schema: classpath:db/init_table.sql
+
+auth:
+  cache:
+    expire-time: 30
+#logging:
+#  config: classpath:logback/logback-dev.xml
+
+dingtalk:
+    server:
+        getDingTalkUserInfoURL: http://apiuat.huilianyi.com/dingtalk/common/get/user/info
+
+single-sign:
+  server:
+    host: http://localhost:11059
+    access-token-uri: http://localhost:8081/oauth/token
+    client-id: implement-integration
+    client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+
+wechat:
+    wechatUrl: http://wechat-service:11001/wechat-service/wechat/
+
+haima:
+    server:
+        userMapping: http://haima-service:9090/haima/api/user/mapping
+        userInfo: http://haima-service:9090/haima/api/user/userInfo

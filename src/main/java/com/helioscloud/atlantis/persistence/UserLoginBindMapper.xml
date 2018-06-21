@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.helioscloud.atlantis.persistence.UserLoginBindMapper">
+
+    <resultMap id="UserLoginBindResultMap"
+               type="com.helioscloud.atlantis.domain.UserLoginBind">
+        <id column="id" property="id"/>
+        <result column="user_oid" property="userOID"/>
+        <result column="login" property="login"/>
+        <result column="bind_type" property="bindType"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_date" property="lastModifiedDate"/>
+        <result column="last_updated_by" property="lastModifiedBy"/>
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,3 @@
+[submodule "src/main/docker/drone-cifiles"]
+	path = src/main/docker/drone-cifiles
+	url = https://code.huilianyi.com/devops/drone-cifiles.git

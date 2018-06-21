@@ -1,0 +1,100 @@
+workspace:
+  base: /work
+ #和uri路径统一
+  path: src/code.huilianyi.com/huilianyi/auth-service
+
+clone:
+  git:
+    image: plugins/git
+    depth: 1
+   #需要submodules才设置成true
+    recursive: true
+    tags: false
+    skip_verify: true
+
+pipeline:
+  build:
+    image: registry-vpc.huilianyi.com:5000/devops/docker-maven:3.5.3-alp
+    commands:
+      - bash /usr/local/bin/mvn-entrypoint.sh
+      - mvn -T 1C -Dmaven.test.skip=true -s /usr/share/maven/ref/settings-docker.xml package
+    volumes:
+      - /data/mavenio:/usr/share/maven/ref/repository
+
+  wxbuildfail:
+    image: registry-vpc.huilianyi.com:5000/devops/drone-wechat
+    secrets: [ plugin_corpid, plugin_corp_secret, plugin_agent_id ]
+    to_user: ""
+    to_tag: "4"
+    title: ${DRONE_REPO} 编译失败
+    description: "${DRONE_COMMIT_SHA}，分支${DRONE_COMMIT_BRANCH}，代码提交人${DRONE_COMMIT_AUTHOR}。<div class=\"gray\">自动编号${DRONE_BUILD_NUMBER}</div>"
+    msg_url: ${DRONE_COMMIT_LINK}
+    when:
+      status: [ failure ]
+
+  wxbuildpass:
+    image: registry-vpc.huilianyi.com:5000/devops/drone-wechat
+    secrets: [ plugin_corpid, plugin_corp_secret, plugin_agent_id ]
+    to_user: ""
+    to_tag: "4"
+    title: ${DRONE_REPO} 编译成功
+    description: "${DRONE_COMMIT_SHA}，分支${DRONE_COMMIT_BRANCH}，代码提交人${DRONE_COMMIT_AUTHOR}。<div class=\"gray\">自动编号${DRONE_BUILD_NUMBER}</div>"
+    msg_url: ${DRONE_COMMIT_LINK}
+    when:
+      status: [ success ]
+
+  publish:
+    image: plugins/docker:17
+    mirror: https://zon13xl6.mirror.aliyuncs.com
+   #确认修改提交的NameSpace
+    repo: registry-vpc.huilianyi.com:5000/huilianyi/auth-service
+    registry: registry-vpc.huilianyi.com:5000
+    dockerfile: src/main/docker/drone-cifiles/generic/Dockerfile
+   #POM_FINAL_NAME是target/下的打包文件
+    build_args:
+      - POM_FINAL_NAME=auth-service.war
+      - CI_PROJECT_NAME=${DRONE_REPO_NAME}.war
+    storage_driver: overlay
+    tags:
+      - ${DRONE_COMMIT_SHA:0:10}
+    insecure: true
+    debug: false
+    custom_dns:
+      - 192.168.110.100
+
+  devdeploy:
+    image: peloton/drone-rancher
+    url: http://192.168.60.20:8080
+    access_key: C948CD3D9C289BCD4474
+    secret_key: g8ke1C4T7ujkDLJbLHMS529KYgcNCmFrsaB9kie7
+    service: Default/auth-service
+   #确认发布的镜像
+    docker_image: registry-vpc.huilianyi.com:5000/huilianyi/auth-service:${DRONE_COMMIT_SHA:0:10}
+    start_first: false
+    confirm: true
+    timeout: 1800
+
+ # uatdeploy:
+ #  image: peloton/drone-rancher
+ #   url: http://192.168.60.20:8080
+ #   secrets: [ rancher_access_key, rancher_secret_key ]
+ #   service: artemis-uat/auth-service
+ #  #确认发布的镜像
+ #   docker_image: registry-vpc.huilianyi.com:5000/huilianyi/auth-service:${DRONE_COMMIT_SHA:0:10}
+ #   start_first: false
+ #   confirm: true
+ #   timeout: 1800
+
+
+  wxsitdone:
+    image: registry-vpc.huilianyi.com:5000/devops/drone-wechat
+    secrets: [ plugin_corpid, plugin_corp_secret, plugin_agent_id ]
+    to_user: ""
+    to_party: "2"
+    title: ${DRONE_REPO}已发布SIT
+    description: "${DRONE_COMMIT_SHA}，分支${DRONE_COMMIT_BRANCH}，代码提交人${DRONE_COMMIT_AUTHOR}。<div class=\"gray\">自动编号${DRONE_BUILD_NUMBER}</div>"
+    msg_url: ${DRONE_COMMIT_LINK}
+    when:
+      status: [ success ]
+
+branches: develop
