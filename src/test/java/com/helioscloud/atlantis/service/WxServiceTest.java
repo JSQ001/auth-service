@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis.service;
 
-import com.helioscloud.atlantis.AuthServiceSelectTest;
+
 import com.helioscloud.atlantis.domain.CompanyConfiguration;
 import com.helioscloud.atlantis.domain.ConfigurationDetail;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
@@ -16,9 +16,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-public class WxServiceTest extends AuthServiceSelectTest {
+public class WxServiceTest  {
 
-    @Autowired
+ /*   @Autowired
     private WxService wxService;
 
     @MockBean
@@ -60,5 +60,5 @@ public class WxServiceTest extends AuthServiceSelectTest {
         c.setConfiguration(configuration);
         rs.add(c);
         return rs;
-    }
+    }*/
 }

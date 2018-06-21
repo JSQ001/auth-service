@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis.service;
 
-import com.helioscloud.atlantis.AuthenticationServiceTestConfig;
+
 import com.helioscloud.atlantis.OAuthHelperH2;
 import com.helioscloud.atlantis.dto.AuthenticationCode;
 import com.helioscloud.atlantis.dto.UserDTO;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
-public class AuthenticationServiceTest extends AuthenticationServiceTestConfig {
+public class AuthenticationServiceTest  {
 
   /*  @Autowired
     private AuthenticationService authenticationService;

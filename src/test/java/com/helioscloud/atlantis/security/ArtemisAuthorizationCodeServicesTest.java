@@ -1,13 +1,13 @@
 package com.helioscloud.atlantis.security;
 
-import com.helioscloud.atlantis.AuthServiceH2Test;
+
 import com.helioscloud.atlantis.OAuthHelperH2;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ArtemisAuthorizationCodeServicesTest extends AuthServiceH2Test {
+public class ArtemisAuthorizationCodeServicesTest {
 
    /* @Autowired
     private ArtemisAuthorizationCodeServices artemisAuthorizationCodeServices;

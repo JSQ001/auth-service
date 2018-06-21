@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis.service;
 
-import com.helioscloud.atlantis.AuthServiceSelectTest;
+
 import com.helioscloud.atlantis.domain.UserLoginBind;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
 import com.helioscloud.atlantis.persistence.CompanySecurityMapper;
@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-public class UserDetailsServiceImplementsTest extends AuthServiceSelectTest {
+public class UserDetailsServiceImplementsTest {
 
-    @Autowired
+   /* @Autowired
     private UserDetailsServiceImplements userDetailsServiceImplements;
 
     @MockBean
@@ -47,5 +47,5 @@ public class UserDetailsServiceImplementsTest extends AuthServiceSelectTest {
                 .isInstanceOf(UserNotActivatedException.class)
                 .hasMessage("user.was.leaved");
 
-    }
+    }*/
 }

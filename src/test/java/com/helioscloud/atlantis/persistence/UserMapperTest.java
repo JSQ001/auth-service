@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.persistence;
 
+/*
 import com.helioscloud.atlantis.AuthServiceSelectTest;
 import com.helioscloud.atlantis.dto.UserDTO;
 import org.junit.Test;
@@ -56,4 +57,4 @@ public class UserMapperTest extends AuthServiceSelectTest {
         UserDTO userDTO = userMapper.findOneByID(s);
         assertThat(userDTO.getId()).isEqualTo(s);
     }
-}
+}*/

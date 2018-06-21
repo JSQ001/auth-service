@@ -19,13 +19,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
 
+/*
 @RunWith(SpringRunner.class)
 @ActiveProfiles("select")
 @SpringBootTest(classes={DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class,
          AppCenterProperties.class, AppConfigurationSelectTest.class, OAuthHelperH2.class})
 public abstract class AuthenticationServiceTestConfig {
 }
+*/
 
+/*
 @TestConfiguration
 @MapperScan(basePackages = "com.helioscloud.atlantis.persistence")
 @ComponentScan(basePackages = "com.helioscloud.atlantis.service")
@@ -54,4 +57,4 @@ class AppConfigurationSelectTest {
     public TokenEnhancer tokenEnhancer() {
         return new ArtemisTokenEnhancer();
     }
-}
+}*/

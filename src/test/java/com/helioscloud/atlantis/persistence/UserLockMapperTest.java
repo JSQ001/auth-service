@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.persistence;
 
+/*
 import com.helioscloud.atlantis.AuthServiceSelectTest;
 import com.helioscloud.atlantis.domain.enumeration.UserLockedEnum;
 import org.junit.Test;
@@ -25,4 +26,4 @@ public class UserLockMapperTest extends AuthServiceSelectTest {
     public void updateUserLockStatus() {
         userLockMapper.updateUserLockStatus(975916080787894271L, UserLockedEnum.UNLOCKED.getID());
     }
-}
+}*/

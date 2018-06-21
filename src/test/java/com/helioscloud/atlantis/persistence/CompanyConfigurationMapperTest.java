@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.persistence;
 
+/*
 import com.helioscloud.atlantis.AuthServiceSelectTest;
 import com.helioscloud.atlantis.domain.CompanyConfiguration;
 import org.junit.Test;
@@ -18,4 +19,4 @@ public class CompanyConfigurationMapperTest extends AuthServiceSelectTest {
         CompanyConfiguration companyConfiguration = companyConfigurationMapper.testMapper(s);
         assertThat(companyConfiguration.getCompanyOID().toString()).isEqualTo(s);
     }
-}
+}*/

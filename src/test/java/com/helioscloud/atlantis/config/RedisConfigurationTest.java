@@ -7,6 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
+/*
 @RunWith(SpringRunner.class)
 @ActiveProfiles("select")
 @SpringBootTest(classes={RedisConfiguration.class})
@@ -16,4 +17,4 @@ public class RedisConfigurationTest {
     public void config () {
 
     }
-}
+}*/
