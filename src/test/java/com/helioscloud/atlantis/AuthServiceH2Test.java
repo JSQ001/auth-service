@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
 
+/*
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes={DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class,
@@ -47,4 +48,4 @@ class AppConfigurationTest {
     public TokenEnhancer tokenEnhancer() {
         return new ArtemisTokenEnhancer();
     }
-}
+}*/

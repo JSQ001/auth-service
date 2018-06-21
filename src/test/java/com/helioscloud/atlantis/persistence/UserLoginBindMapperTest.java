@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.persistence;
 
+/*
 import com.helioscloud.atlantis.AuthServiceSelectTest;
 import com.helioscloud.atlantis.domain.UserLoginBind;
 import org.junit.Test;
@@ -18,4 +19,4 @@ public class UserLoginBindMapperTest extends AuthServiceSelectTest {
         UserLoginBind userLoginBind = userLoginBindMapper.testMapper(s);
         assertThat(userLoginBind.getId().toString()).isEqualTo(s);
     }
-}
+}*/

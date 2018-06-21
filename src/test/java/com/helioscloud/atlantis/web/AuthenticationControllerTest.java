@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/*
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {AuthenticationController.class, AuthServerConfig.class, AccountResource.class})
 @ActiveProfiles("control")
@@ -57,4 +58,4 @@ public class AuthenticationControllerTest {
         mockMvc.perform(get("/api/check_token"))
                 .andExpect(status().is(500));
     }
-}
+}*/
