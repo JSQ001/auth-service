@@ -21,6 +21,7 @@ import java.util.UUID;
 @Data
 public class PrincipalLite implements UserDetails {
 
+
     private static final long serialVersionUID = 1;
 
     protected UUID userOID;
