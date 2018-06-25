@@ -1,13 +1,10 @@
 spring:
-  devtools:
-    restart:
-      enabled: true
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://115.159.108.80:25206/artemis?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://115.159.108.80:3306/artemis_uat?useUnicode=true&characterEncoding=utf-8&useSSL=false
     name:
     username: standarddb #artemis
-    password: aGFuZGhhbmQ= #MTIzNDU2TXMz
+    password: bXlzcWwxMTIzNTg= #MTIzNDU2TXMz
   redis:
     host: localhost
     port: 6379
@@ -48,9 +45,9 @@ trialService:
         get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
         bind_wechat_user: ${trialService.api.host}/trial/public/bind
 elasticsearch:
-  cluster-name : docker-cluster
-  host: 116.228.77.183
-  tcp-port: 25293
+  cluster-name : elasticsearch
+  host: 115.159.108.80
+  tcp-port: 9300
   user: elastic
   password: changeme
   enable: true
