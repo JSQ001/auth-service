@@ -1,0 +1,56 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://115.159.108.80:25206/artemis?useUnicode=true&characterEncoding=utf8
+    name:
+    username: standarddb #artemis
+    password: aGFuZGhhbmQ= #MTIzNDU2TXMz
+  redis:
+    host: localhost
+    port: 6379
+
+auth:
+  cache:
+    expire-time: 30
+logging:
+  config: classpath:logback/logback-dev.xml
+
+single-sign:
+  server:
+    host: http://sso-service:11059
+    access-token-uri: http://auth-service:9999/auth/oauth/token
+    client-id: implement-integration
+    client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+
+wechat:
+    wechatUrl: http://wechat-service:11001/wechat-service/wechat/
+
+haima:
+    server:
+        userMapping: http://haima-service:9090/haima/api/user/mapping
+        userInfo: http://haima-service:9090/haima/api/user/userInfo
+
+dingtalk:
+    server:
+        getDingTalkUserInfoURL: http://dingtalk-service:11004/dingtalk/common/get/user/info
+
+app-center:
+  authentication:
+    download-url: http://downloads.huilianyi.com/app/sit
+    client-id: ArtemisWeb
+
+trialService:
+    api:
+        host: http://apiuat.huilianyi.com
+        get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
+        bind_wechat_user: ${trialService.api.host}/trial/public/bind
+elasticsearch:
+  cluster-name : docker-cluster
+  host: 116.228.77.183
+  tcp-port: 25293
+  user: elastic
+  password: changeme
+  enable: true
