@@ -40,6 +40,9 @@ public class CompanyService {
     public List<CompanySecurity> getTenantCompanySecurity(Long tenantId) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("tenant_id", tenantId);
-        return companySecurityMapper.selectByMap(paramMap);
+        List<CompanySecurity>   companySecurities=companySecurityMapper.selectByMap(paramMap);
+        System.out.println(companySecurities);
+        return companySecurities;
+
     }
 }

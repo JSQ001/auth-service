@@ -17,8 +17,8 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(
-        prefix = "helios",
-        exceptionIfInvalid = false
+        prefix = "helios"//,
+      //  exceptionIfInvalid = false
 )
 public class HeliosCloudProperties {
     private final HeliosCloudProperties.Datasource datasource = new HeliosCloudProperties.Datasource();

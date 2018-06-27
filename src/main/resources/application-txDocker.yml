@@ -1,19 +1,20 @@
 spring:
+  dbType: mysql
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://115.159.108.80:3306/artemis_uat?useUnicode=true&characterEncoding=utf-8&useSSL=false
     name:
     username: standarddb #artemis
-    password: bXlzcWwxMTIzNTg= #MTIzNDU2TXMz
+    password: mysql112358 #MTIzNDU2TXMz
   redis:
-    host: localhost
+    host: 172.17.0.4
     port: 6379
 
 auth:
   cache:
     expire-time: 30
 logging:
-  config: classpath:logback/logback-dev.xml
+  config: classpath:logback/logback-sit.xml
 
 single-sign:
   server:
@@ -30,9 +31,6 @@ haima:
         userMapping: http://haima-service:9090/haima/api/user/mapping
         userInfo: http://haima-service:9090/haima/api/user/userInfo
 
-dingtalk:
-    server:
-        getDingTalkUserInfoURL: http://dingtalk-service:11004/dingtalk/common/get/user/info
 
 app-center:
   authentication:
@@ -45,7 +43,7 @@ trialService:
         get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
         bind_wechat_user: ${trialService.api.host}/trial/public/bind
 elasticsearch:
-  cluster-name : elasticsearch
+  cluster-name : docker-cluster
   host: 115.159.108.80
   tcp-port: 9300
   user: elastic

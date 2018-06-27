@@ -5,6 +5,7 @@
 
 package com.helioscloud.atlantis.service;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.helioscloud.atlantis.domain.CompanySecurity;
 import com.helioscloud.atlantis.domain.PasswordHistory;
 import com.helioscloud.atlantis.domain.UserLoginBind;
@@ -155,13 +156,20 @@ public class UserService {
     }
 
     public List<UserLoginBind> getUserLoginBindInfo(UUID userOid) {
-        Map<String, Object> paramMap = new HashMap<>();
+       Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("user_oid", userOid);
         paramMap.put("is_active", true);
         paramMap.put("is_enabled", true);
         paramMap.put("is_deleted", false);
-        userLoginBindMapper.selectById(1);
-        List<UserLoginBind> list = userLoginBindMapper.selectByMap(paramMap);
+    //  userLoginBindMapper.selectById(1);
+      /*  List<UserLoginBind> list=    userLoginBindMapper.selectList(new EntityWrapper<UserLoginBind>()
+                .eq("user_oid",userOid)
+                .eq("is_active",true)
+                .eq("is_enabled",true)
+                .eq("is_deleted",false)
+        );*/
+       // List<UserLoginBind> list=    userLoginBindMapper.findOneByUserOID(userOid);
+       List<UserLoginBind> list = userLoginBindMapper.selectByMap(paramMap);
         return list;
     }
 

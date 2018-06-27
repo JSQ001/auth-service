@@ -1,9 +1,9 @@
 package com.helioscloud.atlantis.service;
 
+import com.cloudhelios.atlantis.exception.core.ValidationError;
+import com.cloudhelios.atlantis.exception.core.ValidationException;
 import com.helioscloud.atlantis.domain.UserDevice;
 import com.helioscloud.atlantis.domain.enumeration.DeviceStatusEnum;
-import com.helioscloud.atlantis.exception.core.ValidationError;
-import com.helioscloud.atlantis.exception.core.ValidationException;
 import com.helioscloud.atlantis.persistence.UserDeviceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

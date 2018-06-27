@@ -21,18 +21,18 @@ import java.util.UUID;
 @Data
 public class UserLoginBind implements Serializable {
 
-
+    @TableField("id")
     protected Long id;
 
     @TableField(value = "user_oid")
     protected UUID userOID;
 
-
+    @TableField("login")
     protected String login;
 
-
+    @TableField("bind_type")
     protected int bindType;
-
+    @TableField("is_active")
     protected boolean isActive;
 
     @TableField(value = "is_enabled")

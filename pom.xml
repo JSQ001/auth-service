@@ -13,108 +13,117 @@
     <artifactId>auth-service</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
+
+       <!-- <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.5.4.RELEASE</version>
+        <relativePath/>  lookup parent from repository -->
+    <parent>
+        <groupId>com.hand.hec.cloud</groupId>
+        <artifactId>hec-core-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
-        <spring-security.version>4.0.2.RELEASE</spring-security.version>
         <docker.image.prefix>registry.cloud.saas.hand-china.com/hec/auth-service</docker.image.prefix>
     </properties>
 
     <dependencies>
-        <dependency>
+       <!-- <dependency>
+            <groupId>com.cloudhelios.atlantis</groupId>
+            <artifactId>helios-core</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <optional>true</optional>
+        </dependency>-->
+     <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>${spring-boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-data</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>-->
+       <!-- <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <version>2.0.12.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
+            <version>2.3.3.RELEASE</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.31</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.liquibase</groupId>-->
-            <!--<artifactId>liquibase-core</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
+        <!--&lt;!&ndash;<dependency>&ndash;&gt;
+            &lt;!&ndash;<groupId>org.liquibase</groupId>&ndash;&gt;
+            &lt;!&ndash;<artifactId>liquibase-core</artifactId>&ndash;&gt;
+        &lt;!&ndash;</dependency>&ndash;&gt;-->
+        <!--<dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>1.3.0</version>
-        </dependency>
-        <dependency>
+        </dependency>-->
+       <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
-        <dependency>
+        </dependency>-->
+       <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-devtools</artifactId>-->
-            <!--<version>${spring-boot.version}</version>-->
-            <!--<scope>runtime</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.h2database</groupId>-->
-            <!--<artifactId>h2</artifactId>-->
-            <!--<scope>runtime</scope>-->
-        <!--</dependency>-->
+      <!--  &lt;!&ndash;<dependency>&ndash;&gt;
+            &lt;!&ndash;<groupId>org.springframework.boot</groupId>&ndash;&gt;
+            &lt;!&ndash;<artifactId>spring-boot-devtools</artifactId>&ndash;&gt;
+            &lt;!&ndash;<version>${spring-boot.version}</version>&ndash;&gt;
+            &lt;!&ndash;<scope>runtime</scope>&ndash;&gt;
+        &lt;!&ndash;</dependency>&ndash;&gt;
+        &lt;!&ndash;<dependency>&ndash;&gt;
+            &lt;!&ndash;<groupId>com.h2database</groupId>&ndash;&gt;
+            &lt;!&ndash;<artifactId>h2</artifactId>&ndash;&gt;
+            &lt;!&ndash;<scope>runtime</scope>&ndash;&gt;
+        &lt;!&ndash;</dependency>&ndash;&gt;-->
+     <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.47</version>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>${spring-boot.version}</version>
             <optional>true</optional>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
+     <!--   <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
+            <version>2.3</version>
+        </dependency>-->
+       <!-- <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.8.8</version>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>com.helioscloud.atlantis</groupId>
             <artifactId>helios-core</artifactId>
             <version>1.0.4-SNAPSHOT</version>
@@ -124,13 +133,17 @@
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
+        </dependency>-->
+       <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>2.9.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
@@ -156,7 +169,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -192,7 +204,6 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <version>4.2.2.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -205,20 +216,18 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>5.5.3</version>
+            <version>5.6.10</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>x-pack-transport</artifactId>
-            <version>5.5.3</version>
+            <version>5.6.10</version>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.springframework.cloud</groupId>-->
-            <!--<artifactId>spring-cloud-starter-oauth2</artifactId>-->
-            <!--<version>1.1.3.RELEASE</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
+       <!-- <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>2.3.3.RELEASE</version>
+        </dependency>-->
     </dependencies>
 
     <repositories>
@@ -244,17 +253,15 @@
             <name>Snapshot</name>
             <url>https://nexus.huilianyi.com/repository/maven-snapshots</url>
         </repository>
-        <!-- add the elasticsearch repo -->
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>elasticsearch-releases</id>
-            <url>https://artifacts.elastic.co/maven</url>
-        </repository>
+    <repository>
+        <id>hec.snapshots</id>
+        <name>183maven</name>
+        <url>http://116.228.77.183:25296/nexus/content/groups/public</url>
+    </repository>
+    <repository>
+        <id>spring</id>
+        <url>http://repo.spring.io/plugins-release/</url>
+    </repository>
     </repositories>
 
     <build>

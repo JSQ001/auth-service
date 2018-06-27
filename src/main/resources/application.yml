@@ -1,19 +1,16 @@
 server:
-  port: 9999
-  context-path: /auth
-liquibase:
-  change-log: classpath:db/liquibase/master.xml
+  port: 9082
+  servlet:
+    context-path: /auth
 spring:
+  application:
+    name: oauth-service
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
     date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
-security:
-  oauth2:
-    resource:
-      filter-order: 3
 mybatis:
   mapper-locations: com/helioscloud/atlantis/persistence/*Mapper.xml
   type-aliases-package: com.helioscloud.atlantis.domain
@@ -24,3 +21,14 @@ helios:
    mybatis-plus:
      enable-performance-interceptor: false
      enable-sql-explain-interceptor: false
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: 115.159.108.80
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
+    ip-address: 115.159.108.80
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
+    registryFetchIntervalSeconds: 10

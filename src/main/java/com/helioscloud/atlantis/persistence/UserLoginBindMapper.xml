@@ -20,5 +20,19 @@
         <result column="last_updated_date" property="lastModifiedDate"/>
         <result column="last_updated_by" property="lastModifiedBy"/>
     </resultMap>
-
+    <select id="findOneByUserOID" resultMap="UserLoginBindResultMap">
+       SELECT
+	  u.id,
+      u.user_oid,
+      u.bind_type,
+      u.created_by,
+      u.created_date
+      FROM
+     	art_user_login_bind u
+     WHERE
+         u.user_oid = #{userOID}
+      and u.is_active=1
+  and u.is_enabled=1
+  and  u.is_deleted=0
+    </select>
 </mapper>

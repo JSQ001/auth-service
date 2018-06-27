@@ -4,8 +4,11 @@
  */
 package com.helioscloud.atlantis.config;
 
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.helioscloud.atlantis.dto.AuthenticationCode;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -15,15 +18,16 @@ import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -31,6 +35,7 @@ import java.util.List;
 
 @Configuration
 @EnableCaching
+@ConditionalOnClass(RedisOperations.class)
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfiguration extends CachingConfigurerSupport {
 
@@ -43,7 +48,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             sentinelConfigurationProvider.getIfAvailable();
     }
 
-    private JedisPoolConfig jedisPoolConfig() {
+    /*private JedisPoolConfig jedisPoolConfig() {
         JedisPoolConfig config = new JedisPoolConfig();
         RedisProperties.Pool props = this.properties.getPool();
         config.setMaxTotal(props.getMaxActive());
@@ -51,7 +56,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         config.setMinIdle(props.getMinIdle());
         config.setMaxWaitMillis((long) props.getMaxWait());
         return config;
-    }
+    }*/
 
     protected final RedisSentinelConfiguration getSentinelConfig() {
         if (this.sentinelConfiguration != null) {
@@ -71,7 +76,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     private List<RedisNode> createSentinels(RedisProperties.Sentinel sentinel) {
         ArrayList nodes = new ArrayList();
-        String[] var3 = StringUtils.commaDelimitedListToStringArray(sentinel.getNodes());
+        String[] var3 = (String[]) sentinel.getNodes().toArray();
         int var4 = var3.length;
 
         for (int var5 = 0; var5 < var4; ++var5) {
@@ -89,7 +94,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         return nodes;
     }
 
-    @Bean
+   /* @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         JedisPoolConfig poolConfig = this.properties.getPool() != null ? this.jedisPoolConfig() : new JedisPoolConfig();
         JedisConnectionFactory jedisConnectionFactory = this.getSentinelConfig() != null
@@ -106,8 +111,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         }
         return jedisConnectionFactory;
     }
-
-    @Bean
+*/
+    /*@Bean
     public RedisTemplate redisTemplate() {
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(this.jedisConnectionFactory());
@@ -116,12 +121,31 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         return redisTemplate;
-    }
+    }*/
+   @Bean(name = "redisTemplate")
+   @SuppressWarnings("unchecked")
+   @ConditionalOnMissingBean(name = "redisTemplate")
+   public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+       RedisTemplate<Object, Object> template = new RedisTemplate<>();
+
+       //使用fastjson序列化
+       FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
+       // value值的序列化采用fastJsonRedisSerializer
+       template.setValueSerializer(fastJsonRedisSerializer);
+       template.setHashValueSerializer(fastJsonRedisSerializer);
+       // key的序列化采用StringRedisSerializer
+       template.setKeySerializer(new StringRedisSerializer());
+       template.setHashKeySerializer(new StringRedisSerializer());
+
+       template.setConnectionFactory(redisConnectionFactory);
+       return template;
+   }
+
 
     @Bean
-    public RedisTemplate<String, AuthenticationCode> authenticationServiceredisTemplate() {
-        RedisTemplate<String, AuthenticationCode> redisTemplate = new RedisTemplate();
-        redisTemplate.setConnectionFactory(this.jedisConnectionFactory());
+    public RedisTemplate<String, AuthenticationCode> authenticationServiceredisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, AuthenticationCode> redisTemplate =new  RedisTemplate<String, AuthenticationCode>();
+     redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
         redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
@@ -130,14 +154,18 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     }
 
     @Bean
-    public CacheManager cacheManager(@SuppressWarnings("rawtypes") RedisTemplate redisTemplate) {
-        RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate());
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        RedisCacheManager cacheManager = RedisCacheManager
+                .RedisCacheManagerBuilder
+                .fromConnectionFactory(redisConnectionFactory).build() ;
+        /*RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate());
         // Number of seconds before expiration. Defaults to unlimited (0)
         cacheManager.setDefaultExpiration(7200); // Sets the default expire time (in seconds)
-        cacheManager.setUsePrefix(true);
+        cacheManager.setUsePrefix(true);*/
         cacheManager.afterPropertiesSet();
         return cacheManager;
     }
+
     @Bean
     public KeyGenerator wiselyKeyGenerator() {
         return new KeyGenerator() {

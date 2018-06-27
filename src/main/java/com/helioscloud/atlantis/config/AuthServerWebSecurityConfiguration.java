@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -68,7 +69,8 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+     //   return new BCryptPasswordEncoder();
     }
 
     @Override
@@ -131,5 +133,10 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
         authenticationProvider.setSsourl(ssourl);
         return authenticationProvider;
     }
+  /*  @Bean
+    public PasswordEncoder passwordEncoder() {
+        //return new BCryptPasswordEncoder();
+
+    }*/
 }
 

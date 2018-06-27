@@ -21,9 +21,13 @@ import java.util.UUID;
 @TableName(value = "art_password_history")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PasswordHistory {
-
+  //  @TableField(value = "user_oid")
+   /* @NotNull
+    @Type(type = "uuid-char")
+    @Column(name = "user_oid", length = 36, nullable = false)*/
     @TableField(value = "user_oid")
-    protected UUID userOID;
+    protected UUID  userOID;
+
 
     @TableField(value = "password")
     protected String password;

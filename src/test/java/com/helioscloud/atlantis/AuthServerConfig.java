@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Configuration
 @EnableWebSecurity
-@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+@Order(SecurityProperties.BASIC_AUTH_ORDER)//ACCESS_OVERRIDE_ORDER
 public class AuthServerConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	@SuppressWarnings("static-method")

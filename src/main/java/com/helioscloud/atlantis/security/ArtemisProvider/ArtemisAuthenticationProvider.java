@@ -8,12 +8,11 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
-import org.springframework.security.authentication.dao.SaltSource;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -23,9 +22,10 @@ import java.util.Map;
  * Created by Yuvia on 2017/2/27.
  */
 public class ArtemisAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
-    private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
+    private PasswordEncoder passwordEncoder = NoOpPasswordEncoder.getInstance();
+   // private PasswordEncoder passwordEncoder = new PlaintextPasswordEncoder();
 
-    private SaltSource saltSource;
+   // private SaltSource saltSource;
 
     @Autowired
     private WxService wxService;
@@ -158,7 +158,7 @@ public class ArtemisAuthenticationProvider extends AbstractUserDetailsAuthentica
 
         if (passwordEncoder instanceof org.springframework.security.crypto.password.PasswordEncoder) {
             final org.springframework.security.crypto.password.PasswordEncoder delegate = (org.springframework.security.crypto.password.PasswordEncoder) passwordEncoder;
-            this.passwordEncoder = new PasswordEncoder() {
+            this.passwordEncoder =delegate;/* new PasswordEncoder() {
                 private void checkSalt(Object salt) {
                     Assert.isNull(salt,
                             "Salt value must be null when used with crypto module PasswordEncoder");
@@ -175,7 +175,7 @@ public class ArtemisAuthenticationProvider extends AbstractUserDetailsAuthentica
                     return delegate.matches(rawPass, encPass);
                 }
             };
-
+*/
             return;
         }
 
@@ -183,9 +183,9 @@ public class ArtemisAuthenticationProvider extends AbstractUserDetailsAuthentica
                 "passwordEncoder must be a PasswordEncoder instance");
     }
 
-    protected SaltSource getSaltSource() {
-        return saltSource;
-    }
+//    protected SaltSource getSaltSource() {
+ //       return saltSource;
+  //  }
 
     /**
      * The source of salts to use when decoding passwords. <code>null</code> is
@@ -200,7 +200,7 @@ public class ArtemisAuthenticationProvider extends AbstractUserDetailsAuthentica
      * @param saltSource to use when attempting to decode passwords via the
      *                   <code>PasswordEncoder</code>
      */
-    public void setSaltSource(SaltSource saltSource) {
-        this.saltSource = saltSource;
-    }
+   // public void setSaltSource(SaltSource saltSource) {
+  //      this.saltSource = saltSource;
+   // }
 }

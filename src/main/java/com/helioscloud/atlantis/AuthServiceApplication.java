@@ -12,7 +12,7 @@ package com.helioscloud.atlantis;
  * Create By:zongyun.zhou@hand-china.com
  */
 
-import com.helioscloud.atlantis.annotation.EnableMyBatis;
+import com.cloudhelios.atlantis.annotation.EnableHeliosBasedConfiguration;
 import com.helioscloud.atlantis.config.Constants;
 import com.helioscloud.atlantis.config.HeliosCloudProperties;
 import org.mybatis.spring.annotation.MapperScan;
@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
@@ -31,8 +32,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
-@EnableMyBatis
+//@EnableMyBatis
+//@EnableHeliosBasedConfiguration
 @EnableConfigurationProperties({RedisProperties.class, HeliosCloudProperties.class,DataSourceProperties.class, MybatisProperties.class})
+@EnableDiscoveryClient
 @MapperScan("com.helioscloud.atlantis.persistence*")
 public class AuthServiceApplication {
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
