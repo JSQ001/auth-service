@@ -59,7 +59,3 @@ elasticsearch:
   user: elastic
   password: changeme
   enable: true
-management:
-  health:
-    elasticsearch:
-      enabled: ${elasticsearch.enable}
