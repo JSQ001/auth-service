@@ -9,7 +9,17 @@ spring:
   redis:
     host: 172.17.0.4
     port: 6379
-
+eureka:
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 10
+    leaseExpirationDurationInSeconds: 30
+    ip-address: 115.159.108.80
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
+    registryFetchIntervalSeconds: 10
 auth:
   cache:
     expire-time: 30
@@ -49,3 +59,7 @@ elasticsearch:
   user: elastic
   password: changeme
   enable: true
+management:
+  health:
+    elasticsearch:
+      enabled: ${elasticsearch.enable}

@@ -10,7 +10,7 @@ stages:
 
 build:
     stage: build
-    script: "mvn clean install"
+    script: "mvn -U clean install"
 
 dev-release:
     stage: dev-release
