@@ -1,3 +1,5 @@
+server:
+  port: 9082
 spring:
   dbType: mysql
   datasource:
@@ -7,7 +9,7 @@ spring:
     username: standarddb #artemis
     password: mysql112358 #MTIzNDU2TXMz
   redis:
-    host: 172.17.0.4
+    host: redis
     port: 6379
 eureka:
   instance:
@@ -59,3 +61,8 @@ elasticsearch:
   user: elastic
   password: changeme
   enable: true
+feign:
+  httpclient:
+    enabled: false
+  okhttp:
+    enable: true
