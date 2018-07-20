@@ -85,6 +85,7 @@ public class DatabaseConfiguration {
         mybatisConfiguration.setDefaultScriptingLanguage(MybatisXMLLanguageDriver.class);
         mybatisConfiguration.setMapUnderscoreToCamelCase(true);
         mybatisSqlSessionFactoryBean.setConfiguration(mybatisConfiguration);
+
         if (StringUtils.hasLength(this.properties.getTypeAliasesPackage())) {
             mybatisSqlSessionFactoryBean.setTypeAliasesPackage(this.properties.getTypeAliasesPackage());
         }

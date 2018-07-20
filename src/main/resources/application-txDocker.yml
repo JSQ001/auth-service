@@ -22,6 +22,10 @@ eureka:
     serviceUrl:
       defaultZone: ${EUREKA_DEFAULT_ZONE}
     registryFetchIntervalSeconds: 10
+mybatis:
+  mapper-locations: com/helioscloud/atlantis/persistence/*Mapper.xml
+  type-aliases-package: com.helioscloud.atlantis.domain
+  type-handlers-package: com.helioscloud.atlantis.persistence.typehandler
 auth:
   cache:
     expire-time: 30
