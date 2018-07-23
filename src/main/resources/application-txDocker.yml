@@ -30,7 +30,7 @@ auth:
   cache:
     expire-time: 30
 logging:
-  config: classpath:logback/logback-sit.xml
+  config: classpath:logback/logback-dev.xml
 
 single-sign:
   server:
@@ -70,3 +70,4 @@ feign:
     enabled: false
   okhttp:
     enable: true
+debug: true

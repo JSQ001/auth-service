@@ -24,12 +24,12 @@
         </encoder>
     </appender>
 
-    <logger name="com.helioscloud.atlantis" level="DEBUG"/>
-
+    <logger name="com.helioscloud.atlantis" level="INFO"/>
+    <logger name="com.handchina" level="INFO"/>
     <logger name="javax.activation" level="ERROR"/>
     <logger name="javax.mail" level="ERROR"/>
     <logger name="javax.xml.bind" level="ERROR"/>
-    <logger name="ch.qos.logback" level="ERROR"/>
+    <logger name="ch.qos.logback" level="INFO"/>
     <logger name="com.codahale.metrics" level="ERROR"/>
     <logger name="com.ryantenney" level="ERROR"/>
     <logger name="com.sun.xml.internal.bind" level="ERROR"/>
@@ -41,18 +41,18 @@
     <logger name="org.hibernate.validator" level="ERROR"/>
     <logger name="org.hibernate" level="ERROR"/>
     <logger name="org.hibernate.ejb.HibernatePersistence" level="OFF"/>
-    <logger name="org.springframework" level="ERROR"/>
-    <logger name="org.springframework.web" level="ERROR"/>
-    <logger name="org.springframework.security" level="ERROR"/>
-    <logger name="org.springframework.cache" level="ERROR"/>
-    <logger name="org.springframework.security.authentication" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.cache" level="INFO"/>
+    <logger name="org.springframework.security.authentication" level="INFO"/>
     <logger name="org.thymeleaf" level="ERROR"/>
     <logger name="org.xnio" level="ERROR"/>
     <logger name="springfox" level="ERROR"/>
     <logger name="sun.rmi" level="ERROR"/>
-    <logger name="liquibase" level="ERROR"/>
-    <logger name="sun.rmi.transport" level="ERROR"/>
-
+    <logger name="liquibase" level="INFO"/>
+    <logger name="sun.rmi.transport" level="INFO"/>
+    <logger name="org.elasticsearch" level="INFO"/>
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
