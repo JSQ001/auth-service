@@ -64,7 +64,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
@@ -102,7 +102,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
@@ -114,7 +114,7 @@
         LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
         WHERE 1 = 1
         AND u.is_deleted = FALSE
-        AND p.number = #{mobile}
+        AND p.PHONE_NUMBER = #{mobile}
     </select>
     <select id="findUserByUserBind" resultMap="UserEntityResultMap">
         SELECT u.id,
@@ -139,7 +139,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
@@ -182,7 +182,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
@@ -222,7 +222,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
@@ -261,7 +261,7 @@
         cc.tenant_id,
         cc.company_code,
         cc.name  company_name,
-        p.number mobile,
+        p.PHONE_NUMBER mobile,
         d.name   department_name,
         d.department_oid,
         d.id department_id
