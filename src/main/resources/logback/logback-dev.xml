@@ -7,10 +7,10 @@
     <property name="CONSOLE_LOG_PATTERN"
               value="%(${LOG_LEVEL_PATTERN:-%5p})"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/mnt/app/logs/auth/auth.log</file>
+        <file>logs/auth/auth.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 每小时滚动文件 -->
-            <fileNamePattern>/mnt/app/logs/auth/auth.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/auth/auth.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
 
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -41,10 +41,10 @@
     <logger name="org.hibernate.validator" level="ERROR"/>
     <logger name="org.hibernate" level="ERROR"/>
     <logger name="org.hibernate.ejb.HibernatePersistence" level="OFF"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="org.springframework.web" level="INFO"/>
-    <logger name="org.springframework.security" level="INFO"/>
-    <logger name="org.springframework.cache" level="INFO"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.security" level="WARN"/>
+    <logger name="org.springframework.cache" level="WARN"/>
     <logger name="org.springframework.security.authentication" level="INFO"/>
     <logger name="org.thymeleaf" level="ERROR"/>
     <logger name="org.xnio" level="ERROR"/>
@@ -53,6 +53,8 @@
     <logger name="liquibase" level="INFO"/>
     <logger name="sun.rmi.transport" level="INFO"/>
     <logger name="org.elasticsearch" level="INFO"/>
+    <logger name="io.lettuce" level="WARN"/>
+
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
