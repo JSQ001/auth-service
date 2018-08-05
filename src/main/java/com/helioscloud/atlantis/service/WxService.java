@@ -5,12 +5,13 @@
 
 package com.helioscloud.atlantis.service;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.handchina.yunmart.artemis.security.PrincipalLite;
 import com.helioscloud.atlantis.domain.CompanyConfiguration;
 import com.helioscloud.atlantis.domain.ConfigurationDetail;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
-import net.sf.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +49,12 @@ public class WxService {
     @Autowired
     private CompanyService companyService;
 
-    public net.sf.json.JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
-        net.sf.json.JSONObject jsonResp = null;
+    public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
+        JSONObject jsonResp = null;
         String retMsg;
         try {
             String url = wechatUrl + "authenticate";
-            net.sf.json.JSONObject jsonReq = buildBaseJson(companyOid, "JSSDK", corpId, suiteId);
+            JSONObject jsonReq = buildBaseJson(companyOid, "JSSDK", corpId, suiteId);
             jsonReq.put("code", code);
             HttpURLConnection conn;
 
@@ -68,7 +69,7 @@ public class WxService {
             sendStatus.read(jsonBytes);
             retMsg = new String(jsonBytes, "UTF-8");
             log.info("retMsg:{}", retMsg);
-            jsonResp = net.sf.json.JSONObject.fromObject(retMsg);
+            jsonResp = JSONObject.parseObject(retMsg);
             sendStatus.close();
             conn.disconnect();
         } catch (JSONException e) {
@@ -81,8 +82,8 @@ public class WxService {
         return jsonResp;
     }
 
-    public net.sf.json.JSONObject buildBaseJson(String companyOID, String tokenType, String corpId, String suiteId) {
-        net.sf.json.JSONObject baseJson = new net.sf.json.JSONObject();
+    public JSONObject buildBaseJson(String companyOID, String tokenType, String corpId, String suiteId) {
+        JSONObject baseJson = new JSONObject();
         String secret = null;
         if (companyOID != null && !companyOID.trim().equals("")) {
             ConfigurationDetail.WxConfiguration wxConfiguration = getCompanyConfiguration(UUID.fromString(companyOID)).getConfiguration().getWxConfiguration();
@@ -138,7 +139,7 @@ public class WxService {
            /*empCode是微信通讯录中的帐号,方案:
         1、保证微信通讯录中号码/邮箱的信息必须存在，可通过获取帐号调微信接口获取号码;
         2、数据库表中建立帐号与用户对应关系，由帐号确认用户身份*/
-        net.sf.json.JSONObject userInfo = authenticate(code, companyStr, suiteId, corpId, (Map) null);//员工在微信通讯录中的帐号
+        JSONObject userInfo = authenticate(code, companyStr, suiteId, corpId, (Map) null);//员工在微信通讯录中的帐号
         UUID userOID = null;
         if (userInfo != null && userInfo.containsKey("errcode") && userInfo.getString("errcode").equals("0") && userInfo.containsKey("userOID")) {
             userOID = UUID.fromString(userInfo.getString("userOID"));

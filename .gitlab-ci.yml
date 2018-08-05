@@ -11,11 +11,18 @@ stages:
 build:
     stage: build
     script: "mvn -U clean install"
+    only:
+    - tags
+    - master
+    - development
+    - /^release-.*$/
 
 dev-release:
     stage: dev-release
     only:
-    - "development"
+    - tags
+    - development
+    - /^release-.*$/
     when: manual
     script:
     - "mvn install docker:build"
