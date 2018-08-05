@@ -15,7 +15,7 @@ build:
 dev-release:
     stage: dev-release
     only:
-    - "development-boot2"
+    - "development"
     when: manual
     script:
     - "mvn install docker:build"
