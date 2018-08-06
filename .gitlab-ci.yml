@@ -7,8 +7,7 @@ stages:
 - dev-release
 cache:
     key: one-key-to-rull-them-all
-    paths:
-    - /cache
+
 build:
     stage: build
     script: "mvn -U clean package"
