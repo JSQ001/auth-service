@@ -2,15 +2,15 @@ image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cibase:0.5.0
 
 variables:
     MAVEN_OPTS: -Dmaven.repo.local=/cache
-    OAUTH_IMAGE: registry.cloud.saas.hand-china.com/hec/auth-service
-    OAUTH_DEV_VERSION: dev-1.0.$CI_PIPELINE_ID
+#    OAUTH_IMAGE: registry.cloud.saas.hand-china.com/hec/auth-service
+#    OAUTH_DEV_VERSION: dev-1.0.$CI_PIPELINE_ID
 stages:
 - build
 - dev-release
 
 build:
     stage: build
-    script: "mvn -U clean install"
+    script: "mvn -U clean package"
     only:
     - tags
     - master
@@ -25,10 +25,10 @@ dev-release:
     - /^release-.*$/
     when: manual
     script:
-    - "mvn install docker:build"
-    - "docker login -u5268 -pDick0101 registry.cloud.saas.hand-china.com"
-    - "docker tag $OAUTH_IMAGE $OAUTH_IMAGE:$OAUTH_DEV_VERSION"
-    - "docker push $OAUTH_IMAGE:$OAUTH_DEV_VERSION"
+    - "mvn compile jib:build -Dci_pipeline_id=$CI_PIPELINE_ID"
+#    - "docker login -u5268 -pDick0101 registry.cloud.saas.hand-china.com"
+#    - "docker tag $OAUTH_IMAGE $OAUTH_IMAGE:$OAUTH_DEV_VERSION"
+#    - "docker push $OAUTH_IMAGE:$OAUTH_DEV_VERSION"
 
 
 
