@@ -1,14 +1,13 @@
 image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cibase:0.5.0
 
 variables:
-    MAVEN_OPTS: -Dmaven.repo.local=/cache/local/repo
+    MAVEN_OPTS: -Dmaven.repo.local=/cache
 stages:
 - build
 - dev-release
 cache:
     key: one-key-to-rull-them-all
-    paths:
-    - /cache/local/repo
+
 build:
     stage: build
     script: "mvn -U clean package"
