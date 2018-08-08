@@ -23,7 +23,7 @@ dev-release:
     - /^release-.*$/
     when: manual
     script:
-    - "mvn compile jib:build -Dci_pipeline_id=$CI_PIPELINE_ID"
+    - "mvn compile jib:build -Dregistry_url=$REGISTRY_URL -Dregistry_username=$REGISTRY_USERNAME -Dregistry_password=$REGISTRY_PASSWORD -Dci_pipeline_id=$CI_PIPELINE_ID"
 
 
 
