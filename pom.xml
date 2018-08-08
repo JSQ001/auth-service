@@ -25,7 +25,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <docker.image.prefix>registry.cloud.saas.hand-china.com/hec</docker.image.prefix>
     </properties>
 
     <dependencies>
@@ -163,37 +162,19 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
             </plugin>
-            <!--<plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
-                <configuration>
-                    <imageName>${docker.image.prefix}</imageName>
-                    <dockerDirectory>src/main/docker</dockerDirectory>
-                    <dockerHost>https://115.159.108.80:25750</dockerHost>
-                    <dockerCertPath>src/main/docker/dockerKey</dockerCertPath>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.war</include>
-                        </resource>
-                    </resources>
-                </configuration>
-            </plugin>-->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>0.9.8</version>
                 <configuration>
                     <from>
-                        <image>frolvlad/alpine-oraclejdk8</image>
+                        <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
                     </from>
                     <to>
-                        <image>${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
+                        <image>${registry_url}/hec/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
                         <auth>
-                            <username>5268</username>
-                            <password>Dick0101</password>
+                            <username>${registry_username}</username>
+                            <password>${registry_password}</password>
                         </auth>
                     </to>
                     <container>
