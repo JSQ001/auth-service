@@ -12,7 +12,11 @@ package com.helioscloud.atlantis;
  * Create By:zongyun.zhou@hand-china.com
  */
 
-import com.cloudhelios.atlantis.annotation.EnableHeliosBasedConfiguration;
+import com.cloudhelios.atlantis.annotation.I18nDomainScan;
+import com.cloudhelios.atlantis.config.CacheConfiguration;
+import com.cloudhelios.atlantis.config.OauthConfiguration;
+import com.cloudhelios.atlantis.config.RedisConfiguration;
+import com.cloudhelios.atlantis.service.RestService;
 import com.helioscloud.atlantis.config.Constants;
 import com.helioscloud.atlantis.config.HeliosCloudProperties;
 import org.mybatis.spring.annotation.MapperScan;
@@ -25,6 +29,8 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
@@ -36,8 +42,13 @@ import java.net.UnknownHostException;
 //@EnableHeliosBasedConfiguration
 @EnableConfigurationProperties({RedisProperties.class, HeliosCloudProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @EnableDiscoveryClient
+@ComponentScan(value={"com.helioscloud.atlantis","com.cloudhelios.atlantis"},excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { OauthConfiguration.class, RestService.class, CacheConfiguration.class, RedisConfiguration.class})})
 @MapperScan("com.helioscloud.atlantis.persistence*")
+@I18nDomainScan(basePackages = {"com.cloudhelios.atlantis.domain","com.helioscloud.atlantis.domain"})
 public class AuthServiceApplication {
+    /**
+     * @apiDefine Auth2Service 角色权限
+     */
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);

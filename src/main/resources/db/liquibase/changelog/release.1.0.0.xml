@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="show" value="1" dbms="oracle"/>
+    <property name="show" value="true" dbms="mysql"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+
+    <changeSet id="201808140932001" author="houyin.zhang">
+        <createTable tableName="sys_role" remarks="角色表">
+            <column name="id" type="bigint" remarks="角色id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_role_id"/>
+            </column>
+            <column name="role_code" type="varchar(100)" remarks="角色代码">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="id_unq_sys_role_code"/>
+            </column>
+            <column name="role_name" type="varchar(50)" remarks="角色名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_tenant_id_deleted" tableName="sys_role">
+            <column name="tenant_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_tenant_id" tableName="sys_role">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_menu" remarks="功能菜单表">
+            <column name="id" type="bigint" remarks="菜单id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_menu_id"/>
+            </column>
+            <column name="menu_code" type="varchar(100)" remarks="菜单代码">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="id_unq_sys_menu_code"/>
+            </column>
+            <column name="menu_name" type="varchar(50)" remarks="菜单名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_menu_id" type="bigint" remarks="父菜单id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="seq_number" type="int" remarks="排序号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="menu_type" type="int" remarks="菜单类型 1000 功能 1001 目录 1002 组件">
+                <constraints nullable="false"/>
+            </column>
+            <column name="menu_icon" type="varchar(200)" remarks="菜单图标">
+                <constraints nullable="true"/>
+            </column>
+            <column name="menu_url" type="varchar(300)" remarks="菜单URL">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!--  添加索引 -->
+        <createIndex indexName="idx_parent_menu_id_deleted" tableName="sys_menu">
+            <column name="parent_menu_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_parent_menu_id" tableName="sys_menu">
+            <column name="parent_menu_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_menu_button" remarks="菜单按钮表">
+            <column name="id" type="bigint" remarks="按钮id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_menu_button_id"/>
+            </column>
+            <column name="menu_id" type="bigint" remarks="菜单id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="button_code" type="varchar(200)" remarks="按钮代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_hide" type="boolean" defaultValue="${show}" remarks="是否隐藏">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_menu_button_id" tableName="sys_menu_button">
+            <column name="menu_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_user_role" remarks="用户角色关联表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_user_role_id"/>
+            </column>
+            <column name="user_id" type="bigint" remarks="用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint" remarks="角色id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!--  添加索引 -->
+        <createIndex indexName="idx_user_role_id" tableName="sys_user_role">
+            <column name="user_id"/>
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_id" tableName="sys_user_role">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_id" tableName="sys_user_role">
+            <column name="role_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_role_menu" remarks="角色菜单关联表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_role_menu_id"/>
+            </column>
+            <column name="menu_id" type="bigint" remarks="菜单id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint" remarks="角色id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_menu_role_id" tableName="sys_role_menu">
+            <column name="menu_id"/>
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex indexName="idx_menu_id" tableName="sys_role_menu">
+            <column name="menu_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_id2" tableName="sys_role_menu">
+            <column name="role_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_role_menu_button" remarks="角色菜单按钮关联表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_role_menu_button_id"/>
+            </column>
+            <column name="button_id" type="bigint" remarks="按钮id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint" remarks="角色id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_role_menu_button_id" tableName="sys_role_menu_button">
+            <column name="button_id"/>
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex indexName="idx_button_id" tableName="sys_role_menu_button">
+            <column name="button_id"/>
+        </createIndex>
+        <createIndex indexName="idx_role_id3" tableName="sys_role_menu_button">
+            <column name="role_id"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>
