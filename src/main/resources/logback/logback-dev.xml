@@ -23,8 +23,7 @@
             <pattern>%date %(${LOG_LEVEL_PATTERN:-%5p}) [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
     </appender>
-
-    <logger name="com.helioscloud.atlantis" level="INFO"/>
+    <logger name="com.helioscloud.atlantis" level="DEBUG"/>
     <logger name="com.handchina" level="INFO"/>
     <logger name="javax.activation" level="ERROR"/>
     <logger name="javax.mail" level="ERROR"/>
@@ -54,7 +53,6 @@
     <logger name="sun.rmi.transport" level="INFO"/>
     <logger name="org.elasticsearch" level="INFO"/>
     <logger name="io.lettuce" level="WARN"/>
-
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>

@@ -23,20 +23,14 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class AuthenticationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
+    @Autowired
     private AppCenterProperties appCenterProperties;
-
+    @Autowired
     private RedisTemplate<String, AuthenticationCode> redisTemplate;
-
+    @Autowired
     private UserService userService;
 
-    @Autowired
-    public AuthenticationService(AppCenterProperties appCenterProperties,
-                                 RedisTemplate<String, AuthenticationCode> redisTemplate,
-                                 UserService userService) {
-        this.appCenterProperties = appCenterProperties;
-        this.redisTemplate = redisTemplate;
-        this.userService = userService;
-    }
+
 
     public String getAuthentication() {
         AuthenticationCode authenticationCode = new AuthenticationCode();
