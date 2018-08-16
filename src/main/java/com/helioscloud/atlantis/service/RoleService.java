@@ -152,7 +152,8 @@ public class RoleService extends BaseService<RoleMapper, Role> {
     public List<Role> getRolesByTenantId(Long tenantId, Boolean isEnabled, Page page) {
         return roleMapper.selectPage(page, new EntityWrapper<Role>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("tenant_id", tenantId));
+                .eq("tenant_id", tenantId)
+                .orderBy("role_code"));
 
         /* if (isDeleted == null || "".equals(isDeleted)) {
             return roleMapper.selectPage(page, new EntityWrapper<Role>()

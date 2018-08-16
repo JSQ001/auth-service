@@ -142,7 +142,9 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      */
     public List<Menu> getMenus(Boolean isEnabled, Page page) {
         return menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled));
+                .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                .orderBy("seq_number")
+                .orderBy("menu_code"));
        /* if(isDeleted == null || "".equals(isDeleted)){
             return menuMapper.selectPage(page,new EntityWrapper<Menu>()
                     .eq("is_deleted",false)

@@ -146,7 +146,8 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         List<RoleMenuDTO> result = new ArrayList<RoleMenuDTO>();
         List<RoleMenu> list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("role_id", roleId));
+                .eq("role_id", roleId)
+                .orderBy("last_updated_date"));
 
         /* if (isDeleted == null) {
             list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()

@@ -140,7 +140,8 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId,Boolean isEnabled, Page page) {
         List<RoleMenuButton> list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("role_id", roleId));
+                .eq("role_id", roleId)
+                .orderBy("last_updated_date"));
         /*if (isDeleted == null) {
             list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
                     .eq("is_deleted", false)

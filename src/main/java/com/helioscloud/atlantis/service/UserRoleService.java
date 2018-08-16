@@ -143,7 +143,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         List<UserRoleDTO> result = new ArrayList<UserRoleDTO>();
         List<UserRole> list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("user_id", userId));
+                .eq("user_id", userId)
+                .orderBy("last_updated_date"));
        /* if (isDeleted == null) {
             list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
                     .eq("is_deleted", false)

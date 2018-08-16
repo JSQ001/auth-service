@@ -143,7 +143,8 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
     public List<MenuButton> getMenuButtons(Long menuId, Boolean isEnabled, Page page) {
         return menuButtonMapper.selectPage(page, new EntityWrapper<MenuButton>()
                 .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
-                .eq("menu_id", menuId));
+                .eq("menu_id", menuId)
+                .orderBy("button_code"));
     }
 
     /**
