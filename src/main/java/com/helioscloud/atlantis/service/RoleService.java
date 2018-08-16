@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
@@ -77,6 +76,12 @@ public class RoleService extends BaseService<RoleMapper, Role> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
+        if(role.getIsEnabled() == null){
+            role.setIsEnabled(rr.getIsEnabled());
+        }
+        if(role.getIsDeleted() == null){
+            role.setIsDeleted(rr.getIsDeleted());
+        }
         role.setCreatedBy(rr.getCreatedBy());
         role.setCreatedDate(rr.getCreatedDate());
         role.setRoleCode(rr.getRoleCode());
@@ -104,9 +109,12 @@ public class RoleService extends BaseService<RoleMapper, Role> {
      */
     @Transactional
     public void deleteRole(Long id) {
-        Role role = roleMapper.selectById(id);
+        if(id != null ){
+            this.deleteById(id);
+        }
+        /*Role role = roleMapper.selectById(id);
         role.setIsDeleted(true);
-        roleMapper.updateById(role);
+        roleMapper.updateById(role);*/
         //this.deleteById(id);
     }
 
@@ -117,7 +125,8 @@ public class RoleService extends BaseService<RoleMapper, Role> {
     @Transactional
     public void deleteBatchRole(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
-            List<Role> result = null;
+            this.deleteBatchIds(ids);
+            /*List<Role> result = null;
             List<Role> list = roleMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(role -> {
@@ -127,7 +136,7 @@ public class RoleService extends BaseService<RoleMapper, Role> {
             }
             if(result != null){
                 this.updateBatchById(result);
-            }
+            }*/
         }
     }
 
@@ -137,12 +146,15 @@ public class RoleService extends BaseService<RoleMapper, Role> {
      *
      * @param tenantId
      * @param page
-     * @param isDeleted 如果不传，默认取所有未删除的
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Role> getRolesByTenantId(Long tenantId, Boolean isDeleted, Boolean isEnabled, Page page) {
-        if (isDeleted == null || "".equals(isDeleted)) {
+    public List<Role> getRolesByTenantId(Long tenantId, Boolean isEnabled, Page page) {
+        return roleMapper.selectPage(page, new EntityWrapper<Role>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("tenant_id", tenantId));
+
+        /* if (isDeleted == null || "".equals(isDeleted)) {
             return roleMapper.selectPage(page, new EntityWrapper<Role>()
                     .eq("is_deleted", false)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
@@ -152,7 +164,7 @@ public class RoleService extends BaseService<RoleMapper, Role> {
                     .eq("is_deleted", isDeleted)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
                     .eq("tenant_id", tenantId));
-        }
+        }*/
     }
 
     /**

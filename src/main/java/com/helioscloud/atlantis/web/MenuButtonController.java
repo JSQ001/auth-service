@@ -183,12 +183,11 @@ public class MenuButtonController {
      * @apiDescription 查询菜单关联按钮【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} menuId 菜单ID
-     * @apiParam (请求参数) {Boolean} [isDeleted] 删除标识 如果不传，默认取所有未删除的
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menuButton/query/menu?menuId=1029977144029360129&isDeleted=true&page=0&size=2
+     * http://localhost:9082/api/menuButton/query/menu?menuId=1029977144029360129&isEnabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -221,11 +220,10 @@ public class MenuButtonController {
      */
     @GetMapping("/query/menu")
     public ResponseEntity<List<RoleMenuDTO>> getRoleMenusByRoleId(@RequestParam(required = true) Long menuId,
-                                                                  @RequestParam(required = false) Boolean isDeleted,
                                                                   @RequestParam(required = false) Boolean isEnabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<MenuButton> list = menuButtonService.getMenuButtons(menuId, isDeleted, isEnabled, page);
+        List<MenuButton> list = menuButtonService.getMenuButtons(menuId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menuButton/query/menu");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

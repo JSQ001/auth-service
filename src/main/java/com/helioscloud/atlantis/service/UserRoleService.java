@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
@@ -70,6 +69,14 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         if (userRole == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
+        if (userRole1.getIsEnabled() == null) {
+            userRole1.setIsEnabled(userRole.getIsEnabled());
+        }
+        if (userRole1.getIsDeleted() == null) {
+            userRole1.setIsDeleted(userRole.getIsDeleted());
+        }
+        userRole1.setCreatedBy(userRole.getCreatedBy());
+        userRole1.setCreatedDate(userRole.getCreatedDate());
         this.updateById(userRole1);
         return userRole1;
     }
@@ -93,9 +100,12 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      */
     @Transactional
     public void deleteUserRole(Long id) {
-        UserRole userRole = userRoleMapper.selectById(id);
+        if (id != null) {
+            this.deleteById(id);
+        }
+        /*UserRole userRole = userRoleMapper.selectById(id);
         userRole.setIsDeleted(true);
-        userRoleMapper.updateById(userRole);
+        userRoleMapper.updateById(userRole);*/
     }
 
     /**
@@ -105,7 +115,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     @Transactional
     public void deleteBatchUserRole(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
-            List<UserRole> result = null;
+            this.deleteBatchIds(ids);
+            /*List<UserRole> result = null;
             List<UserRole> list = userRoleMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(userRole -> {
@@ -115,7 +126,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             }
             if(result != null){
                 this.updateBatchById(result);
-            }
+            }*/
         }
     }
 
@@ -124,15 +135,16 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * 根据用户Id，获取分配的所有角色
      *
      * @param userId    用户ID
-     * @param isDeleted 如果不传，默认取所有未删除的
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<UserRoleDTO> getUserRolesByUserId(Long userId, Boolean isDeleted, Boolean isEnabled, Page page) {
-        List<UserRoleDTO> result =  new ArrayList<UserRoleDTO>();
-        List<UserRole> list = new ArrayList<UserRole>();
-        if (isDeleted == null) {
+    public List<UserRoleDTO> getUserRolesByUserId(Long userId, Boolean isEnabled, Page page) {
+        List<UserRoleDTO> result = new ArrayList<UserRoleDTO>();
+        List<UserRole> list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("user_id", userId));
+       /* if (isDeleted == null) {
             list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
                     .eq("is_deleted", false)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
@@ -142,7 +154,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                     .eq("is_deleted", isDeleted)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
                     .eq("user_id", userId));
-        }
+        }*/
         if (CollectionUtils.isNotEmpty(list)) {
             list.stream().forEach(e -> {
                 UserRoleDTO userRoleDTO = new UserRoleDTO();

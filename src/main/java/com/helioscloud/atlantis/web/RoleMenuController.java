@@ -173,12 +173,11 @@ public class RoleMenuController {
      * @apiDescription 查询角色关联菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
-     * @apiParam (请求参数) {Boolean} [isDeleted] 删除标识 如果不传，默认取所有未删除的
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/roleMenu/query/role?roleId=1029919265725378561&isDeleted=true&page=0&size=2
+     * http://localhost:9082/api/roleMenu/query/role?roleId=1029919265725378561&isEnabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -229,11 +228,10 @@ public class RoleMenuController {
      */
     @GetMapping("/query/role")
     public ResponseEntity<List<RoleMenuDTO>> getRoleMenusByRoleId(@RequestParam(required = true) Long roleId,
-                                                                  @RequestParam(required = false) Boolean isDeleted,
                                                                   @RequestParam(required = false) Boolean isEnabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<RoleMenuDTO> list = roleMenuService.getRoleMenusByRoleId(roleId, isDeleted, isEnabled, page);
+        List<RoleMenuDTO> list = roleMenuService.getRoleMenusByRoleId(roleId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/roleMenu/query/role");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

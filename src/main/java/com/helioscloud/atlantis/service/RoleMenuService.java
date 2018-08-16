@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
@@ -70,6 +69,17 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         if (roleMenu1 == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
+        if (roleMenu1 == null) {
+            throw new BizException(RespCode.DB_NOT_EXISTS);
+        }
+        if(roleMenu.getIsEnabled() == null){
+            roleMenu.setIsEnabled(roleMenu1.getIsEnabled());
+        }
+        if(roleMenu.getIsDeleted() == null){
+            roleMenu.setIsDeleted(roleMenu1.getIsDeleted());
+        }
+        roleMenu.setCreatedBy(roleMenu1.getCreatedBy());
+        roleMenu.setCreatedDate(roleMenu1.getCreatedDate());
         this.updateById(roleMenu);
         return roleMenu;
     }
@@ -93,9 +103,12 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      */
     @Transactional
     public void deleteRoleMenu(Long id) {
-        RoleMenu roleMenu = roleMenuMapper.selectById(id);
+        if(id != null){
+            roleMenuMapper.deleteById(id);
+        }
+        /*RoleMenu roleMenu = roleMenuMapper.selectById(id);
         roleMenu.setIsDeleted(true);
-        roleMenuMapper.updateById(roleMenu);
+        roleMenuMapper.updateById(roleMenu);*/
     }
 
     /**
@@ -105,7 +118,8 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     @Transactional
     public void deleteBatchRoleMenu(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
-            List<RoleMenu> result = null;
+            this.deleteBatchIds(ids);
+            /*List<RoleMenu> result = null;
             List<RoleMenu> list = roleMenuMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(roleMenu -> {
@@ -115,7 +129,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
             }
             if(result != null){
                 this.updateBatchById(result);
-            }
+            }*/
         }
     }
 
@@ -124,15 +138,17 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      * 根据角色Id，获取分配的所有菜单
      *
      * @param roleId    角色ID
-     * @param isDeleted 如果不传，默认取所有未删除的
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<RoleMenuDTO> getRoleMenusByRoleId(Long roleId, Boolean isDeleted, Boolean isEnabled, Page page) {
+    public List<RoleMenuDTO> getRoleMenusByRoleId(Long roleId,Boolean isEnabled, Page page) {
         List<RoleMenuDTO> result = new ArrayList<RoleMenuDTO>();
-        List<RoleMenu> list = new ArrayList<RoleMenu>();
-        if (isDeleted == null) {
+        List<RoleMenu> list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("role_id", roleId));
+
+        /* if (isDeleted == null) {
             list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
                     .eq("is_deleted", false)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
@@ -142,7 +158,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
                     .eq("is_deleted", isDeleted)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
                     .eq("role_id", roleId));
-        }
+        }*/
         if (CollectionUtils.isNotEmpty(list)) {
             list.stream().forEach(e -> {
                 RoleMenuDTO roleMenuDto = new RoleMenuDTO();

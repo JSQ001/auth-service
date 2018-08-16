@@ -188,12 +188,11 @@ public class MenuController {
      * @api {GET} /api/menu/query/{id} 【角色权限】查询菜单【分页】
      * @apiDescription 查询所有菜单 分页
      * @apiGroup Auth2Service
-     * @apiParam (请求参数) {Boolean} [isDeleted] 删除标识 如果不传，默认取所有未删除的
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menu/query?isDeleted=false&page=0&size=2
+     * http://localhost:9082/api/menu/query?isEnabled=false&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -233,11 +232,10 @@ public class MenuController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Menu>> getRoles(@RequestParam(required = false) Boolean isDeleted,
-                                               @RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Menu>> getRoles( @RequestParam(required = false) Boolean isEnabled,
                                                Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Menu> list = menuService.getMenus(isDeleted, isEnabled, page);
+        List<Menu> list = menuService.getMenus(isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -247,12 +245,11 @@ public class MenuController {
      * @apiDescription 查询父菜单对应的所有子菜单 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} parentMenuId 父菜单ID
-     * @apiParam (请求参数) {Boolean} [isDeleted] 删除标识 如果不传，默认取所有未删除的
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menu/query/byParentMenuId?parentMenuId=1029973941745364994&isDeleted=true&page=0&size=2
+     * http://localhost:9082/api/menu/query/byParentMenuId?parentMenuId=1029973941745364994&isEnabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -294,11 +291,10 @@ public class MenuController {
     @GetMapping("/query/byParentMenuId")
     public ResponseEntity<List<Menu>> getRolesByParentId(
             @RequestParam(required = true) Long parentMenuId,
-            @RequestParam(required = false) Boolean isDeleted,
             @RequestParam(required = false) Boolean isEnabled,
             Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, isDeleted, isEnabled, page);
+        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query/byParentMenuId");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

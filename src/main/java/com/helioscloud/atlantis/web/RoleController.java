@@ -179,12 +179,11 @@ public class RoleController {
      * @apiDescription 查询租户下的所有角色 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} tenantId 租户ID
-     * @apiParam (请求参数) {Boolean} [isDeleted] 删除标识 如果不传，默认取所有未删除的
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/role/query/tenant?tenantId=1022057230117146625&isDeleted=true&page=0&size=2
+     * http://localhost:9082/api/role/query/tenant?tenantId=1022057230117146625&isEnabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -217,11 +216,10 @@ public class RoleController {
      */
     @GetMapping("/query/tenant")
     public ResponseEntity<List<Role>> getRolesByTenantId(@RequestParam(required = true) Long tenantId,
-                                                         @RequestParam(required = false) Boolean isDeleted,
                                                          @RequestParam(required = false) Boolean isEnabled,
                                                          Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Role> list = roleService.getRolesByTenantId(tenantId, isDeleted, isEnabled, page);
+        List<Role> list = roleService.getRolesByTenantId(tenantId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/role/query/tenant");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

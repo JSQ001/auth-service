@@ -11,9 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
@@ -69,6 +67,14 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
         if (roleMenu1 == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
+        if(roleMenuButton.getIsEnabled() == null){
+            roleMenuButton.setIsEnabled(roleMenu1.getIsEnabled());
+        }
+        if(roleMenuButton.getIsDeleted() == null){
+            roleMenuButton.setIsDeleted(roleMenu1.getIsDeleted());
+        }
+        roleMenuButton.setCreatedBy(roleMenu1.getCreatedBy());
+        roleMenuButton.setCreatedDate(roleMenu1.getCreatedDate());
         this.updateById(roleMenuButton);
         return roleMenuButton;
     }
@@ -92,9 +98,12 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
      */
     @Transactional
     public void deleteRoleMenuButton(Long id) {
-        RoleMenuButton roleMenuButton = roleMenuButtonMapper.selectById(id);
+        if(id != null){
+            this.deleteById(id);
+        }
+        /*RoleMenuButton roleMenuButton = roleMenuButtonMapper.selectById(id);
         roleMenuButton.setIsDeleted(true);
-        roleMenuButtonMapper.updateById(roleMenuButton);
+        roleMenuButtonMapper.updateById(roleMenuButton);*/
     }
 
     /**
@@ -104,7 +113,8 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     @Transactional
     public void deleteBatchRoleMenuButton(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
-            List<RoleMenuButton> result = null;
+            this.deleteBatchIds(ids);
+            /*List<RoleMenuButton> result = null;
             List<RoleMenuButton> list = roleMenuButtonMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(menu -> {
@@ -114,7 +124,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
             }
             if(result != null){
                 this.updateBatchById(result);
-            }
+            }*/
         }
     }
 
@@ -123,14 +133,15 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
      * 根据角色Id，获取分配的所有菜单按钮
      *
      * @param roleId    角色ID
-     * @param isDeleted 如果不传，默认取所有未删除的
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId, Boolean isDeleted, Boolean isEnabled, Page page) {
-        List<RoleMenuButton> list = new ArrayList<RoleMenuButton>();
-        if (isDeleted == null) {
+    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId,Boolean isEnabled, Page page) {
+        List<RoleMenuButton> list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("role_id", roleId));
+        /*if (isDeleted == null) {
             list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
                     .eq("is_deleted", false)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
@@ -140,7 +151,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
                     .eq("is_deleted", isDeleted)
                     .eq(isEnabled != null, "is_enabled", isEnabled)
                     .eq("role_id", roleId));
-        }
+        }*/
         return list;
     }
 
