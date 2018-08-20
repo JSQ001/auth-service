@@ -26,7 +26,7 @@ public class Menu extends VersionDomainObject {
     private Integer menuTypeEnum;// 菜单类型 1000：功能，1001：目录，1002：组件，引用MenuTypeEnum枚举类
 
     @TableField("parent_menu_id")
-    private Long parentMenuId;//父菜单ID
+    private Long parentMenuId;//父菜单ID 如果没有上线，则默认为0
 
     @TableField("menu_icon")
     private String menuIcon;// 菜单图标

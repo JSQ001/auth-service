@@ -69,10 +69,10 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         if (userRole == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (userRole1.getIsEnabled() == null) {
+        if (userRole1.getIsEnabled() == null || "".equals(userRole1.getIsEnabled())) {
             userRole1.setIsEnabled(userRole.getIsEnabled());
         }
-        if (userRole1.getIsDeleted() == null) {
+        if (userRole1.getIsDeleted() == null || "".equals(userRole1.getIsDeleted())) {
             userRole1.setIsDeleted(userRole.getIsDeleted());
         }
         userRole1.setCreatedBy(userRole.getCreatedBy());

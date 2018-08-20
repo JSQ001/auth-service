@@ -10,6 +10,7 @@
     <property name="show" value="true" dbms="mysql"/>
     <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
 
+    <!-- 角色权限需要用到的相关表 -->
     <changeSet id="201808140932001" author="houyin.zhang">
         <createTable tableName="sys_role" remarks="角色表">
             <column name="id" type="bigint" remarks="角色id">

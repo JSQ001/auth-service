@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="show" value="1" dbms="oracle"/>
+    <property name="show" value="true" dbms="mysql"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <!--  前端新框架需要用到的相关表 -->
+    <changeSet id="201808201053001" author="houyin.zhang">
+        <createTable tableName="sys_module" remarks="模块表">
+            <column name="id" type="bigint" remarks="模块id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_module_id"/>
+            </column>
+            <column name="module_code" type="varchar(100)" remarks="模块代码">
+                <constraints nullable="false"
+                             unique="true"
+                             uniqueConstraintName="id_unq_sys_module_code"/>
+            </column>
+            <column name="module_name" type="varchar(50)" remarks="模块名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_module_code_deleted" tableName="sys_module">
+            <column name="module_code"/>
+            <column name="is_deleted"/>
+        </createIndex>
+
+        <createTable tableName="sys_component" remarks="系统组件表">
+            <column name="id" type="bigint" remarks="组件id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_component_id"/>
+            </column>
+            <column name="component_name" type="varchar(50)" remarks="组件名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="module_id" type="bigint" remarks="模块id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="component_type" type="int" remarks="组件类型 1为组件,2为界面">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!--  添加索引 -->
+        <createIndex indexName="idx_module_id_deleted" tableName="sys_component">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_component_type" tableName="sys_component">
+            <column name="component_type"/>
+        </createIndex>
+
+        <createTable tableName="sys_version" remarks="组件版本表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_version_id"/>
+            </column>
+            <column name="component_id" type="bigint" remarks="组件ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" type="varchar(2000)" remarks="备注说明">
+            </column>
+            <column name="contents" type="varchar(2000)"  remarks="内容信息">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_sys_component_id" tableName="sys_version">
+            <column name="component_id"/>
+        </createIndex>
+
+        <createTable tableName="sys_interface" remarks="接口管理表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_interface_id"/>
+            </column>
+            <column name="module_id" type="bigint" remarks="模块id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interface_name" type="varchar(200)" remarks="接口名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_protocol" type="varchar(50)" remarks="请求协议">
+            </column>
+            <column name="request_method" type="varchar(30)" remarks="请求方法">
+            </column>
+            <column name="request_format" type="varchar(30)" remarks="请求格式">
+            </column>
+            <column name="req_url" type="varchar(150)" remarks="请求URL">
+            </column>
+            <column name="response_format" type="varchar(30)" remarks="响应格式">
+            </column>
+            <column name="remark" type="varchar(30)" remarks="备注说明">
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!--  添加索引 -->
+        <createIndex indexName="idx_module_deleted_id" tableName="sys_interface">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_interface_name" tableName="sys_interface">
+            <column name="interface_name"/>
+        </createIndex>
+
+        <createTable tableName="sys_language" remarks="系统语言表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_sys_language_id"/>
+            </column>
+            <column name="module_id" type="bigint" remarks="模块id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="varchar(100)" remarks="代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zh_cn" type="varchar(100)" remarks="中文">
+            </column>
+            <column name="en_us" type="varchar(100)" remarks="英文">
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_sys_lang_module_id" tableName="sys_language">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_language_code" tableName="sys_language">
+            <column name="code"/>
+        </createIndex>
+
+        <createTable tableName="sys_request" remarks="请求参数表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_sys_request_id"/>
+            </column>
+            <column name="interface_id" type="bigint" remarks="接口表ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint" remarks="上级id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)" remarks="请求名称">
+            </column>
+            <column name="req_type" type="varchar(50)" remarks="参数类型">
+            </column>
+            <column name="position" type="varchar(50)" remarks="参数位置">
+            </column>
+            <column name="code" type="varchar(50)" remarks="代码">
+            </column>
+            <column name="remark" type="varchar(500)" remarks="备注说明">
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_sys_request_inter_id" tableName="sys_request">
+            <column name="interface_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_request_code" tableName="sys_request">
+            <column name="code"/>
+        </createIndex>
+
+        <createTable tableName="sys_response" remarks="响应参数表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_sys_response_id"/>
+            </column>
+            <column name="interface_id" type="bigint" remarks="接口表ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint" remarks="上级id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)" remarks="响应名称">
+            </column>
+            <column name="resp_type" type="varchar(50)" remarks="响应类型">
+            </column>
+            <column name="code" type="varchar(50)" remarks="代码">
+            </column>
+            <column name="remark" type="varchar(500)" remarks="备注说明">
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!--  添加索引 -->
+        <createIndex indexName="idx_sys_response_inter_id" tableName="sys_response">
+            <column name="interface_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_response_code" tableName="sys_response">
+            <column name="code"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="2018082017230002" author="houyin.zhang">
+        <!-- 添加索引 -->
+        <createIndex indexName="idx_code_deleted_enabled" tableName="sys_module">
+            <column name="module_code"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_id_deleted_enabled" tableName="sys_component">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_component_type_enabled" tableName="sys_component">
+            <column name="component_type"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_component_id_enabled" tableName="sys_version">
+            <column name="component_id"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_module_deleted_enabled_id" tableName="sys_interface">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_interface_name_enabled" tableName="sys_interface">
+            <column name="interface_name"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_lang_module_enabled" tableName="sys_language">
+            <column name="module_id"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_language_code_enabled" tableName="sys_language">
+            <column name="code"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_request_enabled" tableName="sys_request">
+            <column name="interface_id"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_requestId_enabled" tableName="sys_request">
+            <column name="code"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_response_inter_enable" tableName="sys_response">
+            <column name="interface_id"/>
+            <column name="is_deleted"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_sys_response_enabled" tableName="sys_response">
+            <column name="code"/>
+            <column name="is_enabled"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
