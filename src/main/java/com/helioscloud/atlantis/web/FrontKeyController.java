@@ -262,4 +262,21 @@ public class FrontKeyController {
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
+
+
+    /**
+     * @api {GET} /api/frontKey/sync/{language} 【系统框架】界面Title同步
+     * @apiDescription 根据language，将所有中文下未同步到language的界面Title，同步到language里去。
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {String} language 语言代码
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/sync/en_US
+     * @apiSuccessExample {json} 返回报文:
+     * []
+     */
+    @GetMapping("/sync/{language}")
+    public ResponseEntity syncFrontKeyByLanguage(@PathVariable String language) {
+        frontKeyService.syncFrontKeyByLanguage(language);
+        return ResponseEntity.ok().build();
+    }
 }
