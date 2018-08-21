@@ -24,4 +24,25 @@ public interface RespCode {
     String BUTTON_CODE_NOT_UNION = "10051";// 按钮代码在菜单中已经存在
 
     String ROLE_MENU_BUTTON_EXISTS = "10061"; // 角色菜单按钮组合已经存在
+
+    String COMPONENT_NAME_NULL = "10071";// 组件名称不允许为空
+    String COMPONENT_TYPE_INVALID = "10072";// 组件类型值无效,只能为1或2.
+
+    String MODULE_CODE_NULL = "10081";// 模块代码不允许为空
+    String MODULE_NAME_NULL = "10082";// 模块名称不允许为空
+    String MODULE_CODE_NOT_UNION = "10083";// 模块代码已经存在
+
+    String FRONT_KEY_NULL = "10093";// Key不允许为空
+    String MODULE_ID_NULL = "10094";// 必须关联模块
+    String FRONT_KEY_NOT_UNION = "10095";// KEY必须唯一
+
+    String REQUEST_NAME_NULL = "10110";// 请求名称不允许为空
+    String REQUEST_INTERFACE_NULL = "10111";// 请求必须关联接口
+
+    String RESPONSE_NAME_NULL = "10120";// 响应名称不允许为空
+    String RESPONSE_INTERFACE_NULL = "10121";// 响应必须关联接口
+
+    String LANGUAGE_CODE_NULL = "10131";// 语言代码不允许为空
+    String LANGUAGE_NAME_NULL = "10132";// 语言名称不允许为空
+    String LANGUAGE_CODE_NOT_UNION = "10133";// 语言代码已经存在
 }

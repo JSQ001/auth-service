@@ -49,6 +49,9 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         if (count != null && count > 0) {
             throw new BizException(RespCode.CODE_NOT_UNION);
         }
+        if(menu.getParentMenuId() == null || "".equals(menu.getParentMenuId())){
+            menu.setParentMenuId(0L);//如果没有上级，则默认为0
+        }
         menuMapper.insert(menu);
         return menu;
     }
@@ -73,11 +76,14 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         if (mm == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (menu.getIsEnabled() == null) {
+        if (menu.getIsEnabled() == null || "".equals(menu.getIsEnabled())) {
             menu.setIsEnabled(mm.getIsEnabled());
         }
-        if (menu.getIsDeleted() == null) {
+        if (menu.getIsDeleted() == null || "".equals(menu.getIsDeleted())) {
             menu.setIsDeleted(mm.getIsDeleted());
+        }
+        if(menu.getParentMenuId() == null || "".equals(menu.getParentMenuId())){
+            menu.setParentMenuId(mm.getParentMenuId());//如果没有上级，则默认为0
         }
         menu.setCreatedBy(mm.getCreatedBy());
         menu.setCreatedDate(mm.getCreatedDate());

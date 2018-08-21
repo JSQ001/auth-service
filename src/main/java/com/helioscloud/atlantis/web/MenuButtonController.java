@@ -28,7 +28,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {POST} /api/menuButton/create 【角色权限】创建按钮
+     * @api {POST} /api/menuButton/create 【角色权限】按钮创建
      * @apiDescription 给菜单创建按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {String} buttonCode 按钮代码
@@ -72,7 +72,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {POST} /api/menuButton/update 【角色权限】更新按钮
+     * @api {POST} /api/menuButton/update 【角色权限】按钮更新
      * @apiDescription 更新角色关联菜单 只允许修改hide,isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
@@ -121,7 +121,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {DELETE} /api/menuButton/delete/{id} 【角色权限】删除按钮
+     * @api {DELETE} /api/menuButton/delete/{id} 【角色权限】按钮删除
      * @apiDescription 删除按钮[逻辑删除]
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -136,7 +136,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {POST} /api/menuButton/batch/delete 【角色权限】批量删除按钮
+     * @api {POST} /api/menuButton/batch/delete 【角色权限】按钮批量删除
      * @apiDescription 批量删除按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -152,7 +152,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {GET} /api/menuButton/query/{id} 【角色权限】查询按钮
+     * @api {GET} /api/menuButton/query/{id} 【角色权限】按钮查询
      * @apiDescription 查询按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -179,7 +179,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {GET} /api/menuButton/query/menu 【角色权限】查询菜单的按钮
+     * @api {GET} /api/menuButton/query/menu 【角色权限】菜单的按钮查询
      * @apiDescription 查询菜单关联按钮【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} menuId 菜单ID

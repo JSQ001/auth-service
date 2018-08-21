@@ -76,10 +76,10 @@ public class RoleService extends BaseService<RoleMapper, Role> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if(role.getIsEnabled() == null){
+        if (role.getIsEnabled() == null || "".equals(role.getIsEnabled())) {
             role.setIsEnabled(rr.getIsEnabled());
         }
-        if(role.getIsDeleted() == null){
+        if (role.getIsDeleted() == null || "".equals(role.getIsDeleted())) {
             role.setIsDeleted(rr.getIsDeleted());
         }
         role.setCreatedBy(rr.getCreatedBy());
@@ -109,7 +109,7 @@ public class RoleService extends BaseService<RoleMapper, Role> {
      */
     @Transactional
     public void deleteRole(Long id) {
-        if(id != null ){
+        if (id != null) {
             this.deleteById(id);
         }
         /*Role role = roleMapper.selectById(id);

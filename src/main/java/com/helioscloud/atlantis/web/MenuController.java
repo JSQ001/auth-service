@@ -27,7 +27,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/create 【菜单权限】创建菜单
+     * @api {POST} /api/menu/create 【菜单权限】菜单创建
      * @apiDescription 创建菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {String} menuCode 菜单代码
@@ -72,7 +72,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/update 【菜单权限】更新菜单
+     * @api {POST} /api/menu/update 【菜单权限】菜单更新
      * @apiDescription 更新菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 菜单ID
@@ -123,7 +123,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/delete 【菜单权限】删除菜单
+     * @api {POST} /api/menu/delete 【菜单权限】菜单删除
      * @apiDescription 删除菜单
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -138,7 +138,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/batch/delete 【角色权限】批量删除菜单
+     * @api {POST} /api/menu/batch/delete 【角色权限】菜单批量删除
      * @apiDescription 批量删除菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -154,7 +154,7 @@ public class MenuController {
     }
 
     /**
-     * @api {GET} /api/menu/query/{id} 【角色权限】查询菜单
+     * @api {GET} /api/menu/query/{id} 【角色权限】菜单查询
      * @apiDescription 查询菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 菜单ID
@@ -185,7 +185,7 @@ public class MenuController {
     }
 
     /**
-     * @api {GET} /api/menu/query/{id} 【角色权限】查询菜单【分页】
+     * @api {GET} /api/menu/query/{id} 【角色权限】菜单查询【分页】
      * @apiDescription 查询所有菜单 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
@@ -241,7 +241,7 @@ public class MenuController {
     }
 
     /**
-     * @api {GET} /api/menu/query/byParentMenuId 【角色权限】查询子菜单【分页】
+     * @api {GET} /api/menu/query/byParentMenuId 【角色权限】菜单查询【分页】
      * @apiDescription 查询父菜单对应的所有子菜单 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} parentMenuId 父菜单ID

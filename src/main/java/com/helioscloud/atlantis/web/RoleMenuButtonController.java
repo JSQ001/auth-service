@@ -27,7 +27,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/create 【角色权限】创建角色菜单按钮
+     * @api {POST} /api/roleMenuButton/create 【角色权限】角色菜单按钮创建
      * @apiDescription 创建角色关联菜单按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
@@ -67,7 +67,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/update 【角色权限】更新角色菜单按钮
+     * @api {POST} /api/roleMenuButton/update 【角色权限】角色菜单按钮更新
      * @apiDescription 更新角色关联菜单按钮 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
@@ -111,7 +111,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/delete 【角色权限】删除角色菜单按钮
+     * @api {POST} /api/roleMenuButton/delete 【角色权限】角色菜单按钮删除
      * @apiGroup Auth2Service
      * @apiDescription 删除角色关联菜单按钮[逻辑删除]
      * @apiParamExample {json} 请求报文:
@@ -126,7 +126,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/batch/delete 【角色权限】批量删除角色菜单按钮
+     * @api {POST} /api/roleMenuButton/batch/delete 【角色权限】角色菜单按钮批量删除
      * @apiDescription 批量删除角色菜单按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -142,7 +142,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {GET} /api/roleMenuButton/query/{id} 【角色权限】查询角色菜单按钮
+     * @api {GET} /api/roleMenuButton/query/{id} 【角色权限】角色菜单按钮查询
      * @apiDescription 查询角色关联菜单按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -168,7 +168,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {GET} /api/roleMenuButton/query/role 【角色权限】查询角色菜单按钮分页
+     * @api {GET} /api/roleMenuButton/query/role 【角色权限】角色菜单按钮查询分页
      * @apiDescription 查询角色关联菜单菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID

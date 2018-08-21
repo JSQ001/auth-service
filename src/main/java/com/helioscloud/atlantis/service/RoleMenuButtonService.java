@@ -67,10 +67,10 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
         if (roleMenu1 == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if(roleMenuButton.getIsEnabled() == null){
+        if (roleMenuButton.getIsEnabled() == null || "".equals(roleMenuButton.getIsEnabled())) {
             roleMenuButton.setIsEnabled(roleMenu1.getIsEnabled());
         }
-        if(roleMenuButton.getIsDeleted() == null){
+        if (roleMenuButton.getIsDeleted() == null || "".equals(roleMenuButton.getIsDeleted())) {
             roleMenuButton.setIsDeleted(roleMenu1.getIsDeleted());
         }
         roleMenuButton.setCreatedBy(roleMenu1.getCreatedBy());
@@ -98,7 +98,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
      */
     @Transactional
     public void deleteRoleMenuButton(Long id) {
-        if(id != null){
+        if (id != null) {
             this.deleteById(id);
         }
         /*RoleMenuButton roleMenuButton = roleMenuButtonMapper.selectById(id);
@@ -137,7 +137,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
      * @param page
      * @return
      */
-    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId,Boolean isEnabled, Page page) {
+    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId, Boolean isEnabled, Page page) {
         List<RoleMenuButton> list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("role_id", roleId)

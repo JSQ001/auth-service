@@ -49,6 +49,9 @@ public class AuthServiceApplication {
     /**
      * @apiDefine Auth2Service 角色权限
      */
+    /**
+     * @apiDefine SysFrameWork 系统框架
+     */
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);

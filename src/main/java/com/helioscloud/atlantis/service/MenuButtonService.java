@@ -67,13 +67,13 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (mb == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (menuButton.getHide() == null) {
+        if (menuButton.getHide() == null || "".equals(menuButton.getHide())) {
             menuButton.setHide(mb.getHide());
         }
-        if (menuButton.getIsEnabled() == null) {
+        if (menuButton.getIsEnabled() == null || "".equals(menuButton.getIsEnabled())) {
             menuButton.setIsEnabled(mb.getIsEnabled());
         }
-        if (menuButton.getIsDeleted() == null) {
+        if (menuButton.getIsDeleted() == null || "".equals(menuButton.getIsDeleted())) {
             menuButton.setIsDeleted(mb.getIsDeleted());
         }
         menuButton.setCreatedBy(mb.getCreatedBy());

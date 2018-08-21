@@ -28,7 +28,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {POST} /api/roleMenu/create 【角色权限】创建角色菜单
+     * @api {POST} /api/roleMenu/create 【角色权限】角色菜单创建
      * @apiDescription 创建角色关联菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
@@ -68,7 +68,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {POST} /api/roleMenu/update 【角色权限】更新角色菜单
+     * @api {POST} /api/roleMenu/update 【角色权限】角色菜单更新
      * @apiDescription 更新角色关联菜单 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
@@ -112,7 +112,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {DELETE} /api/roleMenu/delete/{id} 【角色权限】删除角色菜单
+     * @api {DELETE} /api/roleMenu/delete/{id} 【角色权限】角色菜单删除
      * @apiDescription 删除角色关联菜单[逻辑删除]
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -127,7 +127,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {POST} /api/roleMenu/batch/delete 【角色权限】批量删除角色菜单
+     * @api {POST} /api/roleMenu/batch/delete 【角色权限】角色菜单批量删除
      * @apiDescription 批量删除角色的菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -143,7 +143,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {GET} /api/roleMenu/query/{id} 【角色权限】查询角色菜单
+     * @api {GET} /api/roleMenu/query/{id} 【角色权限】角色菜单查询
      * @apiDescription 查询角色关联菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -169,7 +169,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {GET} /api/roleMenu/query/role 【角色权限】查询角色菜单
+     * @api {GET} /api/roleMenu/query/role 【角色权限】角色菜单查询
      * @apiDescription 查询角色关联菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
