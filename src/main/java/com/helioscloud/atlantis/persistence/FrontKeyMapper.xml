@@ -12,7 +12,7 @@
     <select id="getListFrontKeysNotInLanguage" resultType="com.helioscloud.atlantis.domain.FrontKey">
         select id,
         module_id,
-        key,
+        key_code,
         lang,
         descriptions,
         version_number,
@@ -22,7 +22,7 @@
   where k.lang = 'zh_CN'
     and not exists (select 1
            from sys_front_key sfk
-          where sfk.id = k.id
+          where sfk.key = k.key
             and sfk.lang = #{lanugage})
     </select>
 </mapper>

@@ -39,14 +39,14 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (frontKey == null || frontKey.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
         }
-        if (frontKey.getKey() == null || "".equals(frontKey.getKey())) {
+        if (frontKey.getKeyCode() == null || "".equals(frontKey.getKeyCode())) {
             throw new BizException(RespCode.FRONT_KEY_NULL);
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
             throw new BizException(RespCode.MODULE_ID_NULL);
         }
         //检查key是否唯一
-        Integer count = getFrontKeyByKeyAndLang(frontKey.getKey(),frontKey.getLang());
+        Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(),frontKey.getLang());
         if (count != null && count > 0) {
             throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
         }
@@ -85,7 +85,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         }
         frontKey.setCreatedBy(rr.getCreatedBy());
         frontKey.setCreatedDate(rr.getCreatedDate());
-        frontKey.setKey(rr.getKey());
+        frontKey.setKeyCode(rr.getKeyCode());
         this.updateById(frontKey);
         return frontKey;
     }

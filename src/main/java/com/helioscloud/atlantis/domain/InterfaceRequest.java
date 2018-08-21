@@ -24,8 +24,8 @@ public class InterfaceRequest extends VersionDomainObject {
     @TableField("position")
     private String position; // 位置
 
-    @TableField("key")
-    private String code; // 请求代码
+    @TableField("key_code")
+    private String keyCode; // 请求代码
 
     @TableField("parent_id")
     private Long parentId; // 上级ID

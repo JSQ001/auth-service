@@ -15,8 +15,8 @@ import lombok.Data;
 @TableName("sys_front_key")
 public class FrontKey extends VersionDomainObject {
 
-    @TableField("key")
-    private String key; //界面Key
+    @TableField("key_code")
+    private String keyCode; //界面keyCode
 
     @TableField("lang")
     private String lang; // 语言
