@@ -100,7 +100,7 @@
             <column name="component_type"/>
         </createIndex>
 
-        <createTable tableName="sys_version" remarks="组件版本表">
+        <createTable tableName="sys_component_version" remarks="组件版本表">
             <column name="id" type="bigint" remarks="id">
                 <constraints nullable="false"
                              primaryKey="true"
@@ -137,7 +137,7 @@
             </column>
         </createTable>
         <!--  添加索引 -->
-        <createIndex indexName="idx_sys_component_id" tableName="sys_version">
+        <createIndex indexName="idx_sys_component_id" tableName="sys_component_version">
             <column name="component_id"/>
         </createIndex>
 
@@ -197,21 +197,21 @@
             <column name="interface_name"/>
         </createIndex>
 
-        <createTable tableName="sys_language" remarks="系统语言表">
+        <createTable tableName="sys_front_key" remarks="系统语言表">
             <column name="id" type="bigint" remarks="id">
                 <constraints nullable="false"
                              primaryKey="true"
-                             primaryKeyName="pk_sys_language_id"/>
+                             primaryKeyName="pk_sys_front_key_id"/>
             </column>
             <column name="module_id" type="bigint" remarks="模块id">
                 <constraints nullable="false"/>
             </column>
-            <column name="code" type="varchar(100)" remarks="代码">
+            <column name="key" type="varchar(100)" remarks="界面Key值">
                 <constraints nullable="false"/>
             </column>
-            <column name="zh_cn" type="varchar(100)" remarks="中文">
+            <column name="lang" type="varchar(100)" remarks="语言">
             </column>
-            <column name="en_us" type="varchar(100)" remarks="英文">
+            <column name="descriptions" type="varchar(100)" remarks="语言描述">
             </column>
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
@@ -236,15 +236,14 @@
             </column>
         </createTable>
         <!--  添加索引 -->
-        <createIndex indexName="idx_sys_lang_module_id" tableName="sys_language">
+        <createIndex indexName="idx_sys_front_module_id" tableName="sys_front_key">
             <column name="module_id"/>
             <column name="is_deleted"/>
         </createIndex>
-        <createIndex indexName="idx_language_code" tableName="sys_language">
-            <column name="code"/>
+        <createIndex indexName="idx_sys_front_key" tableName="sys_front_key">
+            <column name="key"/>
         </createIndex>
-
-        <createTable tableName="sys_request" remarks="请求参数表">
+        <createTable tableName="sys_interface_request" remarks="接口请求参数表">
             <column name="id" type="bigint" remarks="id">
                 <constraints nullable="false"
                              primaryKey="true"
@@ -262,7 +261,7 @@
             </column>
             <column name="position" type="varchar(50)" remarks="参数位置">
             </column>
-            <column name="code" type="varchar(50)" remarks="代码">
+            <column name="key" type="varchar(50)" remarks="代码">
             </column>
             <column name="remark" type="varchar(500)" remarks="备注说明">
             </column>
@@ -289,15 +288,15 @@
             </column>
         </createTable>
         <!--  添加索引 -->
-        <createIndex indexName="idx_sys_request_inter_id" tableName="sys_request">
+        <createIndex indexName="idx_sys_request_inter_id" tableName="sys_interface_request">
             <column name="interface_id"/>
             <column name="is_deleted"/>
         </createIndex>
-        <createIndex indexName="idx_sys_request_code" tableName="sys_request">
-            <column name="code"/>
+        <createIndex indexName="idx_sys_request_code" tableName="sys_interface_request">
+            <column name="key"/>
         </createIndex>
 
-        <createTable tableName="sys_response" remarks="响应参数表">
+        <createTable tableName="sys_interface_response" remarks="响应参数表">
             <column name="id" type="bigint" remarks="id">
                 <constraints nullable="false"
                              primaryKey="true"
@@ -313,7 +312,7 @@
             </column>
             <column name="resp_type" type="varchar(50)" remarks="响应类型">
             </column>
-            <column name="code" type="varchar(50)" remarks="代码">
+            <column name="key" type="varchar(50)" remarks="代码">
             </column>
             <column name="remark" type="varchar(500)" remarks="备注说明">
             </column>
@@ -340,12 +339,12 @@
             </column>
         </createTable>
         <!--  添加索引 -->
-        <createIndex indexName="idx_sys_response_inter_id" tableName="sys_response">
+        <createIndex indexName="idx_sys_response_inter_id" tableName="sys_interface_response">
             <column name="interface_id"/>
             <column name="is_deleted"/>
         </createIndex>
-        <createIndex indexName="idx_sys_response_code" tableName="sys_response">
-            <column name="code"/>
+        <createIndex indexName="idx_sys_response_code" tableName="sys_interface_response">
+            <column name="key"/>
         </createIndex>
     </changeSet>
     <changeSet id="2018082017230002" author="houyin.zhang">
@@ -364,7 +363,7 @@
             <column name="component_type"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_component_id_enabled" tableName="sys_version">
+        <createIndex indexName="idx_sys_component_id_enabled" tableName="sys_component_version">
             <column name="component_id"/>
             <column name="is_enabled"/>
         </createIndex>
@@ -377,31 +376,68 @@
             <column name="interface_name"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_lang_module_enabled" tableName="sys_language">
+        <createIndex indexName="idx_sys_lang_module_enabled" tableName="sys_front_key">
             <column name="module_id"/>
             <column name="is_deleted"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_language_code_enabled" tableName="sys_language">
-            <column name="code"/>
+        <createIndex indexName="idx_language_key_enabled" tableName="sys_front_key">
+            <column name="key"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_request_enabled" tableName="sys_request">
+        <createIndex indexName="idx_sys_request_enabled" tableName="sys_interface_request">
             <column name="interface_id"/>
             <column name="is_deleted"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_requestId_enabled" tableName="sys_request">
-            <column name="code"/>
+        <createIndex indexName="idx_sys_requestId_enabled" tableName="sys_interface_request">
+            <column name="key"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_response_inter_enable" tableName="sys_response">
+        <createIndex indexName="idx_sys_response_inter_enable" tableName="sys_interface_response">
             <column name="interface_id"/>
             <column name="is_deleted"/>
             <column name="is_enabled"/>
         </createIndex>
-        <createIndex indexName="idx_sys_response_enabled" tableName="sys_response">
-            <column name="code"/>
+        <createIndex indexName="idx_sys_response_enabled" tableName="sys_interface_response">
+            <column name="key"/>
+            <column name="is_enabled"/>
+        </createIndex>
+        <addUniqueConstraint tableName="sys_front_key" columnNames="key,lang" constraintName="udx_front_key_lang"/>
+    </changeSet>
+    <changeSet id="201808210001" author="houyin.zhang">
+        <createTable tableName="sys_language_enabled" remarks="语言启用记录表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_language_enabled_id"/>
+            </column>
+            <column name="language" type="varchar(50)" remarks="语言 中文 zh_CN 英文 eu">
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_sys_language_enabled" tableName="sys_language_enabled">
+            <column name="language"/>
             <column name="is_enabled"/>
         </createIndex>
     </changeSet>

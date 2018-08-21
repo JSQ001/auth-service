@@ -2,8 +2,8 @@ package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
-import com.helioscloud.atlantis.domain.Request;
-import com.helioscloud.atlantis.service.RequestService;
+import com.helioscloud.atlantis.domain.InterfaceRequest;
+import com.helioscloud.atlantis.service.InterfaceRequestService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,23 +15,23 @@ import java.util.List;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
- * 请求控制类
+ * 接口请求控制类
  */
 @RestController
-@RequestMapping("/api/request")
-public class RequestController {
-    private final RequestService requestService;
+@RequestMapping("/api/interfaceRequest")
+public class InterfaceRequestController {
+    private final InterfaceRequestService interfaceRequestService;
 
-    public RequestController(RequestService requestService) {
-        this.requestService = requestService;
+    public InterfaceRequestController(InterfaceRequestService interfaceRequestService) {
+        this.interfaceRequestService = interfaceRequestService;
     }
 
     /**
-     * @api {POST} /api/request/create 【系统框架】创建请求
-     * @apiDescription 创建请求
+     * @api {POST} /api/interfaceRequest/create 【系统框架】接口请求创建
+     * @apiDescription 创建接口请求
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} name 请求名称
-     * @apiParam (请求参数) {String} code 请求代码
+     * @apiParam (请求参数) {String} key 请求代码
      * @apiParam (请求参数) {String} reqType 请求类型
      * @apiParam (请求参数) {String} position 位置
      * @apiParam (请求参数) {Long} parentId 上级ID
@@ -42,14 +42,14 @@ public class RequestController {
      * "name":"Query模块",
      * "reqType":"GET",
      * "position":"header",
-     * "code":"Query",
+     * "key":"Query",
      * "parentId":"",
      * "remark":"测试111",
      * "interfaceId":"1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
-     * @apiSuccess (返回参数) {String} code 请求代码
+     * @apiSuccess (返回参数) {String} key 请求代码
      * @apiSuccess (返回参数) {String} reqType 请求类型
      * @apiSuccess (返回参数) {String} position 位置
      * @apiSuccess (返回参数) {Long} parentId 上级ID
@@ -75,24 +75,24 @@ public class RequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query",
+     * "key": "Query",
      * "parentId": 0,
      * "remark": "测试111",
      * "interfaceId": "1031509686226259969"
      * }
      */
     @PostMapping("/create")
-    public ResponseEntity<Request> createRequest(@RequestBody Request request) {
-        return ResponseEntity.ok(requestService.createRequest(request));
+    public ResponseEntity<InterfaceRequest> createInterfaceRequest(@RequestBody InterfaceRequest interfaceRequest) {
+        return ResponseEntity.ok(interfaceRequestService.createInterfaceRequest(interfaceRequest));
     }
 
     /**
-     * @api {PUT} /api/request/update 【系统框架】更新请求
-     * @apiDescription 更新请求
+     * @api {PUT} /api/interfaceRequest/update 【系统框架】接口请求更新
+     * @apiDescription 更新接口请求
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 请求ID
      * @apiParam (请求参数) {String} name 请求名称
-     * @apiParam (请求参数) {String} code 请求代码
+     * @apiParam (请求参数) {String} key 请求代码
      * @apiParam (请求参数) {String} reqType 请求类型
      * @apiParam (请求参数) {String} position 位置
      * @apiParam (请求参数) {Long} parentId 上级ID
@@ -110,14 +110,14 @@ public class RequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query",
+     * "key": "Query",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "interfaceId": "1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
-     * @apiSuccess (返回参数) {String} code 请求代码
+     * @apiSuccess (返回参数) {String} key 请求代码
      * @apiSuccess (返回参数) {String} reqType 请求类型
      * @apiSuccess (返回参数) {String} position 位置
      * @apiSuccess (返回参数) {Long} parentId 上级ID
@@ -143,35 +143,35 @@ public class RequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query",
+     * "key": "Query",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "interfaceId": "1031509686226259969"
      * }
      */
     @PutMapping("/update")
-    public ResponseEntity<Request> updateRequest(@RequestBody Request request) {
-        return ResponseEntity.ok(requestService.updateRequest(request));
+    public ResponseEntity<InterfaceRequest> updateInterfaceRequest(@RequestBody InterfaceRequest interfaceRequest) {
+        return ResponseEntity.ok(interfaceRequestService.updateInterfaceRequest(interfaceRequest));
     }
 
     /**
-     * @api {DELETE} /api/request/delete/{id} 【系统框架】删除请求
-     * @apiDescription 删除请求
+     * @api {DELETE} /api/interfaceRequest/delete/{id} 【系统框架】接口请求删除
+     * @apiDescription 删除接口请求
      * @apiGroup SysFrameWork
      * @apiParamExample {json} 请求报文:
-     * http://localhost:9082/api/request/delete/1031552701984743426
+     * http://localhost:9082/api/interfaceRequest/delete/1031552701984743426
      * @apiSuccessExample {json} 返回报文:
      * []
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteRequest(@PathVariable Long id) {
-        requestService.deleteRequest(id);
+    public ResponseEntity deleteInterfaceRequest(@PathVariable Long id) {
+        interfaceRequestService.deleteInterfaceRequest(id);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * @api {POST} /api/request/batch/delete 【系统框架】批量删除请求
-     * @apiDescription 批量删除请求
+     * @api {POST} /api/interfaceRequest/batch/delete 【系统框架】接口请求批量删除
+     * @apiDescription 批量删除接口请求
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 请求ID
      * @apiParamExample {json} 请求报文
@@ -180,18 +180,18 @@ public class RequestController {
      * []
      */
     @PostMapping("/batch/delete")
-    public ResponseEntity deleteRequestByIds(@RequestBody List<Long> ids) {
-        requestService.deleteBatchRequest(ids);
+    public ResponseEntity deleteBatchInterfaceRequest(@RequestBody List<Long> ids) {
+        interfaceRequestService.deleteBatchInterfaceRequest(ids);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * @api {GET} /api/request/query/{id} 【系统框架】查询请求
-     * @apiDescription 查询请求
+     * @api {GET} /api/interfaceRequest/query/{id} 【系统框架】接口请求查询
+     * @apiDescription 查询接口请求
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 请求ID
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/request/query/1031554065301315585
+     * http://localhost:9082/api/interfaceRequest/query/1031554065301315585
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031554065301315585",
@@ -205,19 +205,19 @@ public class RequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query4",
+     * "key": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"
      * }
      */
     @GetMapping("/query/{id}")
-    public ResponseEntity<Request> getRequestById(@PathVariable Long id) {
-        return ResponseEntity.ok(requestService.getRequestById(id));
+    public ResponseEntity<InterfaceRequest> getInterfaceRequestById(@PathVariable Long id) {
+        return ResponseEntity.ok(interfaceRequestService.getInterfaceRequestById(id));
     }
 
     /**
-     * @api {GET} /api/request/query 【系统框架】查询请求分页
+     * @api {GET} /api/interfaceRequest/query 【系统框架】接口请求查询分页
      * @apiDescription 根据接口Id，查询接口的所有请求 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} interfaceId 接口ID
@@ -225,7 +225,7 @@ public class RequestController {
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/request/query?interfaceId=1031509686226259969&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/interfaceRequest/query?interfaceId=1031509686226259969&isEnabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -240,7 +240,7 @@ public class RequestController {
      * "name": "Query模块3",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query33",
+     * "key": "Query33",
      * "parentId": 0,
      * "remark": "测试2333",
      * "interfaceId": "1031509686226259969"
@@ -257,7 +257,7 @@ public class RequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query4",
+     * "key": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"
@@ -265,25 +265,25 @@ public class RequestController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Request>> getRequestsByInterfaceId(@RequestParam(required = true) Long interfaceId,
-                                                                  @RequestParam(required = false) Boolean isEnabled,
-                                                                  Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<InterfaceRequest>> getInterfaceRequestsByInterfaceId(@RequestParam(required = true) Long interfaceId,
+                                                                           @RequestParam(required = false) Boolean isEnabled,
+                                                                           Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Request> list = requestService.getRequestsByInterfaceId(interfaceId, isEnabled, page);
-        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/request/query");
+        List<InterfaceRequest> list = interfaceRequestService.getInterfaceRequestsByInterfaceId(interfaceId, isEnabled, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interfaceRequest/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
     /**
-     * @api {GET} /api/request/query/parent 【系统框架】查询请求分页
-     * @apiDescription 根据parentId，查询所有子请求 分页
+     * @api {GET} /api/interfaceRequest/query/parent 【系统框架】接口请求查询分页
+     * @apiDescription 根据parentId，查询所有子接口请求 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} parentId 上级ID
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/request/query/parent?parentId=0&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/interfaceRequest/query/parent?parentId=0&isEnabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -298,7 +298,7 @@ public class RequestController {
      * "name": "Query模块3",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query33",
+     * "key": "Query33",
      * "parentId": 0,
      * "remark": "测试2333",
      * "interfaceId": "1031509686226259969"
@@ -315,7 +315,7 @@ public class RequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "code": "Query4",
+     * "key": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"
@@ -323,12 +323,12 @@ public class RequestController {
      * ]
      */
     @GetMapping("/query/parent")
-    public ResponseEntity<List<Request>> getRequestsByParentId(@RequestParam(required = true) Long parentId,
-                                                               @RequestParam(required = false) Boolean isEnabled,
-                                                               Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<InterfaceRequest>> getInterfaceRequestsByParentId(@RequestParam(required = true) Long parentId,
+                                                                        @RequestParam(required = false) Boolean isEnabled,
+                                                                        Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Request> list = requestService.getRequestsByParentId(parentId, isEnabled, page);
-        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/request/query/parent");
+        List<InterfaceRequest> list = interfaceRequestService.getInterfaceRequestsByParentId(parentId, isEnabled, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interfaceRequest/query/parent");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 }

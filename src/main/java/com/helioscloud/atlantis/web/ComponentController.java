@@ -27,7 +27,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {POST} /api/component/create 【系统框架】创建组件
+     * @api {POST} /api/component/create 【系统框架】组件创建
      * @apiDescription 创建组件
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} componentType 组件类型 1 为组件，2为界面
@@ -71,7 +71,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {PUT} /api/component/update 【系统框架】更新组件
+     * @api {PUT} /api/component/update 【系统框架】组件更新
      * @apiDescription 更新组件
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 组件ID
@@ -123,7 +123,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {DELETE} /api/component/delete/{id} 【系统框架】删除组件
+     * @api {DELETE} /api/component/delete/{id} 【系统框架】组件删除
      * @apiDescription 删除组件
      * @apiGroup SysFrameWork
      * @apiParamExample {json} 请求报文:
@@ -138,7 +138,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {POST} /api/component/batch/delete 【系统框架】批量删除组件
+     * @api {POST} /api/component/batch/delete 【系统框架】组件批量删除
      * @apiDescription 批量删除组件
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 组件ID
@@ -154,7 +154,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {GET} /api/component/query/{id} 【系统框架】查询组件
+     * @api {GET} /api/component/query/{id} 【系统框架】组件查询
      * @apiDescription 查询组件
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 组件ID
@@ -181,7 +181,7 @@ public class ComponentController {
     }
 
     /**
-     * @api {GET} /api/component/query 【系统框架】查询组件分页
+     * @api {GET} /api/component/query 【系统框架】组件查询分页
      * @apiDescription 根据模块Id，查询所有组件 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID

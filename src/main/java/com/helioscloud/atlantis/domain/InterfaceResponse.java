@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_response")
-public class Response extends VersionDomainObject {
+public class InterfaceResponse extends VersionDomainObject {
 
     @TableField("name")
     private String name; //响应名称
@@ -21,7 +21,7 @@ public class Response extends VersionDomainObject {
     @TableField("resp_type")
     private String respType; // 响应协议
 
-    @TableField("code")
+    @TableField("key")
     private String code; // 响应代码
 
     @TableField("parent_id")

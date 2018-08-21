@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_request")
-public class Request extends VersionDomainObject {
+public class InterfaceRequest extends VersionDomainObject {
 
     @TableField("name")
     private String name; //请求名称
@@ -24,7 +24,7 @@ public class Request extends VersionDomainObject {
     @TableField("position")
     private String position; // 位置
 
-    @TableField("code")
+    @TableField("key")
     private String code; // 请求代码
 
     @TableField("parent_id")

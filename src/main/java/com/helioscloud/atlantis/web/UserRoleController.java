@@ -28,7 +28,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {POST} /api/userRole/create 【角色权限】创建用户角色
+     * @api {POST} /api/userRole/create 【角色权限】用户角色创建
      * @apiDescription 创建用户角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID
@@ -68,7 +68,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {POST} /api/userRole/update 【角色权限】更新用户角色
+     * @api {POST} /api/userRole/update 【角色权限】用户角色更新
      * @apiDescription 更新用户关联角色 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
@@ -112,7 +112,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {DELETE} /api/userRole/delete/{id} 【角色权限】删除用户角色
+     * @api {DELETE} /api/userRole/delete/{id} 【角色权限】用户角色删除
      * @apiDescription 删除用户关联角色[逻辑删除]
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -127,7 +127,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {POST} /api/userRole/batch/delete 【角色权限】批量删除用户角色
+     * @api {POST} /api/userRole/batch/delete 【角色权限】用户角色批量删除
      * @apiDescription 批量删除用户关联角色[逻辑删除]
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -143,7 +143,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {GET} /api/userRole/query/{id} 【角色权限】查询用户角色
+     * @api {GET} /api/userRole/query/{id} 【角色权限】用户角色查询
      * @apiDescription 查询用户关联角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID
@@ -169,7 +169,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {GET} /api/roleMenu/query/role 【角色权限】查询角色菜单
+     * @api {GET} /api/roleMenu/query/role 【角色权限】角色菜单查询
      * @apiDescription 查询角色关联菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID

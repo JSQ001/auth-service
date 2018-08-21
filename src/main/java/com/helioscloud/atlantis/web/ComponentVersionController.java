@@ -2,8 +2,8 @@ package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
-import com.helioscloud.atlantis.domain.Version;
-import com.helioscloud.atlantis.service.VersionService;
+import com.helioscloud.atlantis.domain.ComponentVersion;
+import com.helioscloud.atlantis.service.ComponentVersionService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,20 +15,20 @@ import java.util.List;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
- * 版本控制类
+ * 组件版本控制类
  */
 @RestController
-@RequestMapping("/api/version")
-public class VersionController {
-    private final VersionService versionService;
+@RequestMapping("/api/componentVersion")
+public class ComponentVersionController {
+    private final ComponentVersionService componentVersionService;
 
-    public VersionController(VersionService versionService) {
-        this.versionService = versionService;
+    public ComponentVersionController(ComponentVersionService componentVersionService) {
+        this.componentVersionService = componentVersionService;
     }
 
     /**
-     * @api {POST} /api/version/create 【系统框架】创建版本
-     * @apiDescription 创建版本
+     * @api {POST} /api/componentVersion/create 【系统框架】组件版本创建
+     * @apiDescription 创建组件版本
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} componentId 组件ID
      * @apiParam (请求参数) {String} remark 备注说明
@@ -66,13 +66,13 @@ public class VersionController {
      * }
      */
     @PostMapping("/create")
-    public ResponseEntity<Version> createVersion(@RequestBody Version version) {
-        return ResponseEntity.ok(versionService.createVersion(version));
+    public ResponseEntity<ComponentVersion> createComponentVersion(@RequestBody ComponentVersion componentVersion) {
+        return ResponseEntity.ok(componentVersionService.createComponentVersion(componentVersion));
     }
 
     /**
-     * @api {PUT} /api/version/update 【系统框架】更新版本
-     * @apiDescription 更新版本
+     * @api {PUT} /api/componentVersion/update 【系统框架】组件版本更新
+     * @apiDescription 更新组件版本
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 版本ID
      * @apiSuccess (请求参数) {Long} componentId 组件ID
@@ -118,28 +118,28 @@ public class VersionController {
      * }
      */
     @PutMapping("/update")
-    public ResponseEntity<Version> updateVersion(@RequestBody Version version) {
-        return ResponseEntity.ok(versionService.updateVersion(version));
+    public ResponseEntity<ComponentVersion> updateComponentVersion(@RequestBody ComponentVersion componentVersion) {
+        return ResponseEntity.ok(componentVersionService.updateComponentVersion(componentVersion));
     }
 
     /**
-     * @api {DELETE} /api/version/delete/{id} 【系统框架】删除版本
-     * @apiDescription 删除版本
+     * @api {DELETE} /api/componentVersion/delete/{id} 【系统框架】组件版本删除
+     * @apiDescription 删除组件版本
      * @apiGroup SysFrameWork
      * @apiParamExample {json} 请求报文:
-     * http://localhost:9082/api/version/delete/1031484643240869889
+     * http://localhost:9082/api/componentVersion/delete/1031484643240869889
      * @apiSuccessExample {json} 返回报文:
      * []
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteVersion(@PathVariable Long id) {
-        versionService.deleteVersion(id);
+    public ResponseEntity deleteComponentVersion(@PathVariable Long id) {
+        componentVersionService.deleteComponentVersion(id);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * @api {POST} /api/version/batch/delete 【系统框架】批量删除版本
-     * @apiDescription 批量删除版本
+     * @api {POST} /api/componentVersion/batch/delete 【系统框架】组件版本批量删除
+     * @apiDescription 批量删除组件版本
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 版本ID
      * @apiParamExample {json} 请求报文
@@ -148,18 +148,18 @@ public class VersionController {
      * []
      */
     @PostMapping("/batch/delete")
-    public ResponseEntity deleteVersionByIds(@RequestBody List<Long> ids) {
-        versionService.deleteBatchVersion(ids);
+    public ResponseEntity deleteBatchComponentVersion(@RequestBody List<Long> ids) {
+        componentVersionService.deleteBatchComponentVersion(ids);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * @api {GET} /api/version/query/{id} 【系统框架】查询版本
-     * @apiDescription 查询版本
+     * @api {GET} /api/componentVersion/query/{id} 【系统框架】组件版本查询
+     * @apiDescription 查询组件版本
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Long} id 版本ID
+     * @apiParam (请求参数) {Long} id 组件版本ID
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/version/query/1031485826063958018
+     * http://localhost:9082/api/componentVersion/query/1031485826063958018
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031485826063958018",
@@ -176,20 +176,20 @@ public class VersionController {
      * }
      */
     @GetMapping("/query/{id}")
-    public ResponseEntity<Version> getVersionById(@PathVariable Long id) {
-        return ResponseEntity.ok(versionService.getVersionById(id));
+    public ResponseEntity<ComponentVersion> getComponentVersionById(@PathVariable Long id) {
+        return ResponseEntity.ok(componentVersionService.getComponentVersionById(id));
     }
 
     /**
-     * @api {GET} /api/version/query 【系统框架】查询版本分页
-     * @apiDescription 根据组件Id，查询所有版本 分页
+     * @api {GET} /api/componentVersion/query 【系统框架】组件版本查询分页
+     * @apiDescription 根据组件Id，查询所有组件版本 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} componentId 组件ID
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/version/query?componentId=1031480667845984258&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/componentVersion/query?componentId=1031480667845984258&isEnabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -221,12 +221,12 @@ public class VersionController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Version>> getVersionsByComponentId(@RequestParam Long componentId,
-                                                                  @RequestParam(required = false) Boolean isEnabled,
-                                                                  Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<ComponentVersion>> getComponentVersionsByComponentId(@RequestParam Long componentId,
+                                                                           @RequestParam(required = false) Boolean isEnabled,
+                                                                           Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Version> list = versionService.getVersionsByComponentId(componentId, isEnabled, page);
-        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/version/query");
+        List<ComponentVersion> list = componentVersionService.getComponentVersionsByComponentId(componentId, isEnabled, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/componentVersion/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 

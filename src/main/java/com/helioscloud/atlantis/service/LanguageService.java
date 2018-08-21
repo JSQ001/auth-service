@@ -14,21 +14,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Created by houyin.zhang@hand-china.com on 2018/8/20.
- * 多语言Service
+ * Created by houyin.zhang@hand-china.com on 2018/8/13.
+ * 语言Service
  */
 @Service
 public class LanguageService extends BaseService<LanguageMapper, Language> {
 
     private final LanguageMapper languageMapper;
 
-    public LanguageService(LanguageMapper moduleMapper) {
-        this.languageMapper = moduleMapper;
+    public LanguageService(LanguageMapper languageMapper) {
+        this.languageMapper = languageMapper;
     }
 
     /**
      * 创建语言
-     *
      * @param language
      * @return
      */
@@ -38,23 +37,22 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
         if (language == null || language.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
         }
-        if (language.getCode() == null || "".equals(language.getCode())) {
-            throw new BizException(RespCode.MODULE_CODE_NULL);
+        if (language.getLanguage() == null || "".equals(language.getLanguage())) {
+            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
         }
-        if (language.getModuleId() == null || "".equals(language.getModuleId())) {
-            throw new BizException(RespCode.MODULE_ID_NULL);
+        if (language.getLanguageName() == null || "".equals(language.getLanguageName())) {
+            throw new BizException(RespCode.LANGUAGE_NAME_NULL);
         }
-        //检查语言代码是否唯一
-        Integer count = getLanguageCountByModuleIdAndCode(language.getModuleId(), language.getCode());
+        //检查是否已经存在该语言代码
+        Integer count = getLanguageByCode(language.getLanguage());
         if (count != null && count > 0) {
             throw new BizException(RespCode.LANGUAGE_CODE_NOT_UNION);
         }
         languageMapper.insert(language);
         return language;
     }
-
     /**
-     * 更新语言（代码不允许修改）
+     * 更新语言
      *
      * @param language
      * @return
@@ -65,29 +63,17 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
         if (language == null || language.getId() == null) {
             throw new BizException(RespCode.ID_NULL);
         }
-        if (language.getCode() == null || "".equals(language.getCode())) {
-            throw new BizException(RespCode.MODULE_CODE_NULL);
+        if (language.getLanguage() == null || "".equals(language.getLanguage())) {
+            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
         }
-        if (language.getModuleId() == null || "".equals(language.getModuleId())) {
-            throw new BizException(RespCode.MODULE_ID_NULL);
+        if (language.getLanguageName() == null || "".equals(language.getLanguageName())) {
+            throw new BizException(RespCode.LANGUAGE_NAME_NULL);
         }
         //校验ID是否在数据库中存在
         Language rr = languageMapper.selectById(language.getId());
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (language.getIsEnabled() == null || "".equals(language.getIsEnabled())) {
-            language.setIsEnabled(rr.getIsEnabled());
-        }
-        if (language.getIsDeleted() == null || "".equals(language.getIsDeleted())) {
-            language.setIsDeleted(rr.getIsDeleted());
-        }
-        if (language.getModuleId() == null || "".equals(language.getModuleId())) {
-            language.setModuleId(rr.getModuleId());
-        }
-        language.setCreatedBy(rr.getCreatedBy());
-        language.setCreatedDate(rr.getCreatedDate());
-        language.setCode(rr.getCode());
         this.updateById(language);
         return language;
     }
@@ -95,13 +81,12 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
     /**
      * 检查是否存在相同的语言代码
      *
-     * @param code
+     * @param language
      * @return
      */
-    public Integer getLanguageCountByModuleIdAndCode(Long moduleId, String code) {
+    public Integer getLanguageByCode(String language) {
         return languageMapper.selectCount(new EntityWrapper<Language>()
-                .eq("module_id", moduleId)
-                .eq("code", code));
+                .eq("language", language));
     }
 
     /**
@@ -125,38 +110,16 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
             this.deleteBatchIds(ids);
         }
     }
-
-
     /**
-     * 根据模块，取所有多语言 分页
-     *
-     * @param moduleId  模块Id
+     * 所有语言 分页
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Language> getLanguagesByModuleId(Long moduleId, Boolean isEnabled, Page page) {
-        return languageMapper.selectPage(page, new EntityWrapper<Language>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("module_id", moduleId)
-                .orderBy("code"));
+    public List<Language> getLanguages(Page page) {
+        return languageMapper.selectPage(page, new EntityWrapper<Language>().orderBy("id"));
     }
-
     /**
-     * 取所有多语言 分页
-     *
-     * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
-     * @return
-     */
-    public List<Language> getLanguages(Boolean isEnabled, Page page) {
-        return languageMapper.selectPage(page, new EntityWrapper<Language>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
-                .orderBy("code"));
-    }
-
-    /**
-     * 根据ID，获取对应的多语言信息
+     * 根据ID，获取对应的语言信息
      *
      * @param id
      * @return

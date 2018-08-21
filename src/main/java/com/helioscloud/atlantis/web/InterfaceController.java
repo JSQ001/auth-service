@@ -27,7 +27,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {POST} /api/interface/create 【系统框架】创建接口
+     * @api {POST} /api/interface/create 【系统框架】接口创建
      * @apiDescription 创建接口
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} interfaceName 接口名称
@@ -91,7 +91,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {PUT} /api/interface/update 【系统框架】更新接口
+     * @api {PUT} /api/interface/update 【系统框架】接口更新
      * @apiDescription 更新接口
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 接口ID
@@ -158,7 +158,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {DELETE} /api/interface/delete/{id} 【系统框架】删除接口
+     * @api {DELETE} /api/interface/delete/{id} 【系统框架】接口删除
      * @apiDescription 删除接口
      * @apiGroup SysFrameWork
      * @apiParamExample {json} 请求报文:
@@ -173,7 +173,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {POST} /api/interface/batch/delete 【系统框架】批量删除接口
+     * @api {POST} /api/interface/batch/delete 【系统框架】接口批量删除
      * @apiDescription 批量删除接口
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 接口ID
@@ -189,7 +189,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {GET} /api/interface/query/{id} 【系统框架】查询接口
+     * @api {GET} /api/interface/query/{id} 【系统框架】接口查询
      * @apiDescription 查询接口
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 接口ID
@@ -221,7 +221,7 @@ public class InterfaceController {
     }
 
     /**
-     * @api {GET} /api/interface/query 【系统框架】查询接口分页
+     * @api {GET} /api/interface/query 【系统框架】接口查询分页
      * @apiDescription 根据模块Id，查询模块下所有接口 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID

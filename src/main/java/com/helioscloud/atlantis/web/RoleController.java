@@ -27,7 +27,7 @@ public class RoleController {
     }
 
     /**
-     * @api {POST} /api/role/create 【角色权限】创建角色
+     * @api {POST} /api/role/create 【角色权限】角色创建
      * @apiDescription 创建角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {String} roleCode 角色代码
@@ -68,7 +68,7 @@ public class RoleController {
     }
 
     /**
-     * @api {PUT} /api/role/update 【角色权限】更新角色
+     * @api {PUT} /api/role/update 【角色权限】角色更新
      * @apiDescription 更新角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -117,7 +117,7 @@ public class RoleController {
     }
 
     /**
-     * @api {DELETE} /api/role/delete/{id} 【角色权限】删除角色
+     * @api {DELETE} /api/role/delete/{id} 【角色权限】角色删除
      * @apiDescription 删除角色
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -132,7 +132,7 @@ public class RoleController {
     }
 
     /**
-     * @api {POST} /api/role/batch/delete 【角色权限】批量删除角色
+     * @api {POST} /api/role/batch/delete 【角色权限】角色批量删除
      * @apiDescription 批量删除角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -148,7 +148,7 @@ public class RoleController {
     }
 
     /**
-     * @api {GET} /api/role/query/{id} 【角色权限】查询角色
+     * @api {GET} /api/role/query/{id} 【角色权限】角色查询
      * @apiDescription 查询角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 角色ID
@@ -175,7 +175,7 @@ public class RoleController {
     }
 
     /**
-     * @api {GET} /api/role/query/{id} 【角色权限】查询角色分页
+     * @api {GET} /api/role/query/{id} 【角色权限】角色查询分页
      * @apiDescription 查询租户下的所有角色 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} tenantId 租户ID

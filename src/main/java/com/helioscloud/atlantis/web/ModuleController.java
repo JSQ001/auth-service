@@ -27,7 +27,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {POST} /api/module/create 【系统框架】创建模块
+     * @api {POST} /api/module/create 【系统框架】模块创建
      * @apiDescription 创建模块
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} moduleCode 模块代码
@@ -67,7 +67,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {PUT} /api/module/update 【系统框架】更新模块
+     * @api {PUT} /api/module/update 【系统框架】模块更新
      * @apiDescription 更新模块
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 模块ID
@@ -114,7 +114,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {DELETE} /api/module/delete/{id} 【系统框架】删除模块
+     * @api {DELETE} /api/module/delete/{id} 【系统框架】模块删除
      * @apiDescription 删除模块
      * @apiGroup SysFrameWork
      * @apiParamExample {json} 请求报文:
@@ -129,7 +129,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {POST} /api/module/batch/delete 【系统框架】批量删除模块
+     * @api {POST} /api/module/batch/delete 【系统框架】模块批量删除
      * @apiDescription 批量删除模块
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 模块ID
@@ -145,7 +145,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {GET} /api/module/query/{id} 【系统框架】查询模块
+     * @api {GET} /api/module/query/{id} 【系统框架】模块查询
      * @apiDescription 查询模块
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 模块ID
@@ -171,7 +171,7 @@ public class ModuleController {
     }
 
     /**
-     * @api {GET} /api/module/query 【系统框架】查询模块分页
+     * @api {GET} /api/module/query 【系统框架】模块查询分页
      * @apiDescription 查询所有模块 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制

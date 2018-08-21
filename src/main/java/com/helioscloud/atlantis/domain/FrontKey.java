@@ -9,20 +9,23 @@ import lombok.Data;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
- * 组件版本表
+ * 语言
  */
 @Data
-@TableName("sys_version")
-public class Version extends VersionDomainObject {
+@TableName("sys_front_key")
+public class FrontKey extends VersionDomainObject {
 
-    @TableField("remark")
-    private String remark; //备注
+    @TableField("key")
+    private String key; //界面Key
 
-    @TableField("contents")
-    private String contents; // 内容信息
+    @TableField("lang")
+    private String lang; // 语言
 
-    @TableField("component_id")
+    @TableField("descriptions")
+    private String descriptions; // 语言描述
+
+    @TableField("module_id")
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long componentId;  // 组件ID
+    private Long moduleId;  // 模块ID
 
 }
