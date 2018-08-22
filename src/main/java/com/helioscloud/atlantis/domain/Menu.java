@@ -3,6 +3,8 @@ package com.helioscloud.atlantis.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
@@ -25,6 +27,7 @@ public class Menu extends VersionDomainObject implements Comparable<Menu>{
     @TableField("menu_type")
     private Integer menuTypeEnum;// 菜单类型 1000：功能，1001：目录，1002：组件，引用MenuTypeEnum枚举类
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @TableField("parent_menu_id")
     private Long parentMenuId=0L;//父菜单ID 如果没有上线，则默认为0
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.helioscloud.atlantis.util.deserialize.CustomDateTimeDeserializer;
 import com.helioscloud.atlantis.util.serialize.CustomDateTimeSerializer;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @TableName("art_user_device")
 public class UserDevice {
     @TableId
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     @TableField("user_oid")

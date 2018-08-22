@@ -175,7 +175,7 @@ public class RoleController {
     }
 
     /**
-     * @api {GET} /api/role/query/{id} 【角色权限】角色查询分页
+     * @api {GET} /api/role/query/tenant 【角色权限】角色查询分页
      * @apiDescription 查询租户下的所有角色 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} tenantId 租户ID

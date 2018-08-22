@@ -185,7 +185,7 @@ public class MenuController {
     }
 
     /**
-     * @api {GET} /api/menu/query/{id} 【角色权限】菜单查询【分页】
+     * @api {GET} /api/menu/query 【角色权限】菜单查询分页
      * @apiDescription 查询所有菜单 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制

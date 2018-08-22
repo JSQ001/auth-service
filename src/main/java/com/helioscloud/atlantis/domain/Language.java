@@ -2,6 +2,8 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
@@ -10,6 +12,7 @@ import lombok.Data;
 @Data
 @TableName("art_language")
 public class Language {
+    @JsonSerialize(using = ToStringSerializer.class)
     @TableField("id")
     private Long id;
     @TableField("language")
