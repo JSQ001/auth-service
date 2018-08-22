@@ -3,7 +3,9 @@ package com.helioscloud.atlantis.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.UserRole;
+import com.helioscloud.atlantis.dto.MenuDTO;
 import com.helioscloud.atlantis.dto.UserRoleDTO;
+import com.helioscloud.atlantis.service.RoleMenuService;
 import com.helioscloud.atlantis.service.UserRoleService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -22,9 +24,11 @@ import java.util.List;
 @RequestMapping("/api/userRole")
 public class UserRoleController {
     private final UserRoleService userRoleService;
+    private final RoleMenuService roleMenuService;
 
-    public UserRoleController(UserRoleService userRoleService) {
+    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService) {
         this.userRoleService = userRoleService;
+        this.roleMenuService = roleMenuService;
     }
 
     /**
@@ -228,5 +232,112 @@ public class UserRoleController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {GET} /query/user/menu/{userId} 【角色权限】用户获取菜单
+     * @apiDescription 根据用户ID，取对应所有角色分配的菜单
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} userId 用户ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/userRole/query/user/menu/1005
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "children": [],
+     * "menuCode": "M001",
+     * "menuName": "费用管理",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": 0,
+     * "menuIcon": null,
+     * "menuUrl": null,
+     * "id": 1029973242290647041
+     * },
+     * {
+     * "children": [
+     * {
+     * "children": [
+     * {
+     * "children": [],
+     * "menuCode": "M91000101",
+     * "menuName": "实习生返校申请",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": 1032111883234390017,
+     * "menuIcon": "TIcon001",
+     * "menuUrl": "http://backschool.com",
+     * "id": 1032112529471778817
+     * },
+     * {
+     * "children": [],
+     * "menuCode": "M91000102",
+     * "menuName": "旅游申请",
+     * "seqNumber": 2,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": 1032111883234390017,
+     * "menuIcon": "TIcon002",
+     * "menuUrl": "http://travel.com",
+     * "id": 1032112786570031105
+     * }
+     * ],
+     * "menuCode": "M910001",
+     * "menuName": "人事相关申请",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": 1032111556967870466,
+     * "menuIcon": "TIcon",
+     * "menuUrl": null,
+     * "id": 1032111883234390017
+     * },
+     * {
+     * "children": [
+     * {
+     * "children": [],
+     * "menuCode": "M91000201",
+     * "menuName": "笔记本更换申请",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": 1032113214791692290,
+     * "menuIcon": "TIcon3",
+     * "menuUrl": "http://test3.com",
+     * "id": 1032113411911397378
+     * },
+     * {
+     * "children": [],
+     * "menuCode": "M91000202",
+     * "menuName": "笔记本购买申请",
+     * "seqNumber": 2,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": 1032113214791692290,
+     * "menuIcon": "TIcon4",
+     * "menuUrl": "http://test4.com",
+     * "id": 1032113517226176513
+     * }
+     * ],
+     * "menuCode": "M910002",
+     * "menuName": "笔记本相关申请",
+     * "seqNumber": 2,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": 1032111556967870466,
+     * "menuIcon": "TIcon2",
+     * "menuUrl": null,
+     * "id": 1032113214791692290
+     * }
+     * ],
+     * "menuCode": "M9100",
+     * "menuName": "个人申请",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": 0,
+     * "menuIcon": "NEW",
+     * "menuUrl": null,
+     * "id": 1032111556967870466
+     * }
+     * ]
+     */
+    @GetMapping("/query/user/menu/{userId}")
+    public ResponseEntity<List<MenuDTO>> getMenusByRoleIds(@PathVariable Long userId) throws URISyntaxException {
+        List<MenuDTO> list = roleMenuService.getMenusByUserId(userId);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
 
 }

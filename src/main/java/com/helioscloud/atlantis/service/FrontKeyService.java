@@ -28,7 +28,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     }
 
     /**
-     * 创建前端Title
+     * 前端Title创建
      *
      * @param frontKey
      * @return
@@ -126,7 +126,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
 
     /**
-     * 根据模块，取所有多前端Title 分页
+     * 根据模块，取所有前端Title 分页
      *
      * @param moduleId  模块Id
      * @param page
@@ -141,7 +141,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     }
 
     /**
-     * 取所有多前端Title 分页
+     * 取所有前端Title 分页
      *
      * @param page
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
@@ -154,7 +154,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     }
 
     /**
-     * 根据ID，获取对应的多前端Title信息
+     * 根据ID，获取对应的前端Title信息
      *
      * @param id
      * @return
@@ -163,6 +163,20 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         return frontKeyMapper.selectById(id);
     }
 
+    /**
+     * 根据模块和Lang，取所有前端Title 分页
+     * @param moduleId  模块Id
+     * @param page
+     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @return
+     */
+    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId,String lang, Boolean isEnabled, Page page) {
+        return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("lang", lang)
+                .eq("module_id", moduleId)
+                .orderBy("key"));
+    }
     /**
      * 提示语言同步界面Title
      * @param language

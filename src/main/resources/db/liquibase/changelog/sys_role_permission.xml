@@ -303,4 +303,11 @@
         </createIndex>
 
     </changeSet>
+    <changeSet id="2018082213270001" author="houyin.zhang">
+        <!--  添加索引 -->
+        <createIndex indexName="idx_menu_parent_seq_number" tableName="sys_menu">
+            <column name="parent_menu_id"/>
+            <column name="seq_number"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

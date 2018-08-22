@@ -263,6 +263,45 @@ public class FrontKeyController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {GET} /api/frontKey/query/module/lang 【系统框架】界面Title查询分页
+     * @apiDescription 根据模块Id，语言lang， 查询所有界面Title 分页
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {String} lang 语言 zh_CN 中文，en 英文
+     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Integer} page 页码
+     * @apiParam (请求参数) {Integer} size 每页大小
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/query/module?moduleId=1031479997352935426&lang=zh_CN&isEnabled=false&page=0&size=10
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1031506123899039746",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-20T19:39:59.053+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-20T19:39:59.053+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 1,
+     * "keyCode":"common.save",
+     * "lang":"zh_CN",
+     * "descriptions":"保存",
+     * "moduleId": "1031479997352935426"
+     * }
+     * ]
+     */
+    @GetMapping("/query/module/lang")
+    public ResponseEntity<List<FrontKey>> getFrontKeysByModuleIdAndLang(@RequestParam(required = true) Long moduleId,
+                                                                 @RequestParam(required = true) String lang,
+                                                                 @RequestParam(required = false) Boolean isEnabled,
+                                                                 Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<FrontKey> list = frontKeyService.getFrontKeysByModuleIdAndLang(moduleId,lang, isEnabled, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module/lang");
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
 
     /**
      * @api {GET} /api/frontKey/sync/{language} 【系统框架】界面Title同步
@@ -270,7 +309,7 @@ public class FrontKeyController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} language 语言代码
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/sync/en_US
+     * http://localhost:9082/api/frontKey/sync/en
      * @apiSuccessExample {json} 返回报文:
      * []
      */
@@ -279,4 +318,5 @@ public class FrontKeyController {
         frontKeyService.syncFrontKeyByLanguage(language);
         return ResponseEntity.ok().build();
     }
+
 }
