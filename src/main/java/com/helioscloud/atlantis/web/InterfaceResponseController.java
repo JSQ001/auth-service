@@ -209,7 +209,7 @@ public class InterfaceResponseController {
     }
 
     /**
-     * @api {GET} /api/interfaceResponse/query/{id} 【系统框架】接口响应查询分页
+     * @api {GET} /api/interfaceResponse/query 【系统框架】接口响应查询分页
      * @apiDescription 根据接口Id，查询接口下所有接口响应 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} interfaceId 接口ID

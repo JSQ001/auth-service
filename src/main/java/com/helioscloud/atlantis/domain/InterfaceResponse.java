@@ -24,6 +24,7 @@ public class InterfaceResponse extends VersionDomainObject {
     @TableField("key_code")
     private String keyCode; // 响应代码
 
+    @JsonSerialize(using = ToStringSerializer.class)
     @TableField("parent_id")
     private Long parentId; // 上级ID
 

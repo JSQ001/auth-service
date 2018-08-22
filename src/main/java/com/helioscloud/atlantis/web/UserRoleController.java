@@ -173,8 +173,8 @@ public class UserRoleController {
     }
 
     /**
-     * @api {GET} /api/roleMenu/query/role 【角色权限】角色菜单查询
-     * @apiDescription 查询角色关联菜单【分页】
+     * @api {GET} /api/roleMenu/query/user 【角色权限】用户关联角色查询
+     * @apiDescription 查询用户关联角色【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID
      * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
