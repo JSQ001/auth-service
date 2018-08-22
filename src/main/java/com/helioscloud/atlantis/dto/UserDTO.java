@@ -91,7 +91,7 @@ public class UserDTO {
 
     //财务角色OID
     private UUID financeRoleOID;//财务角色编号
-
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long companyId;
     @JsonSerialize(using = ToStringSerializer.class)
     private Long tenantId;
@@ -101,6 +101,7 @@ public class UserDTO {
     private String directManagerId;
 
     private String directManagerName;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long setOfBooksId;
 
     private Integer passwordAttempt = 0;

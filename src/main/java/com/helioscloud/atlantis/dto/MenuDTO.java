@@ -1,6 +1,8 @@
 package com.helioscloud.atlantis.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,9 +21,11 @@ public class MenuDTO implements Comparable<MenuDTO>,Serializable {
     private String menuName;// 菜单名称
     private Integer seqNumber=0;// 菜单序号
     private Integer menuTypeEnum;// 菜单类型 1000：功能，1001：目录，1002：组件，引用MenuTypeEnum枚举类
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long parentMenuId=0L;//父菜单ID 如果没有上线，则默认为0
     private String menuIcon;// 菜单图标
     private String menuUrl;//菜单URL
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     @JsonIgnore
     private MenuDTO parent;
