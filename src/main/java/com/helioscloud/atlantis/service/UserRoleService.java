@@ -167,7 +167,17 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         }
         return result;
     }
-
+    /**
+     * 根据用户Id，获取分配的所有角色
+     * @param userId    用户ID
+     * @return
+     */
+    public List<UserRole> getUserRolesByUserId(Long userId, Boolean isEnabled) {
+        List<UserRole> list = userRoleMapper.selectList(new EntityWrapper<UserRole>()
+                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq("user_id", userId));
+        return list;
+    }
     /**
      * 根据ID，获取对应的用户角色信息
      *

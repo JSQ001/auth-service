@@ -4,16 +4,19 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
+import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.RoleMenu;
+import com.helioscloud.atlantis.dto.MenuDTO;
 import com.helioscloud.atlantis.dto.RoleMenuDTO;
 import com.helioscloud.atlantis.persistence.RoleMenuMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
@@ -106,9 +109,6 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         if (id != null) {
             roleMenuMapper.deleteById(id);
         }
-        /*RoleMenu roleMenu = roleMenuMapper.selectById(id);
-        roleMenu.setIsDeleted(true);
-        roleMenuMapper.updateById(roleMenu);*/
     }
 
     /**
@@ -119,24 +119,12 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     public void deleteBatchRoleMenu(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
             this.deleteBatchIds(ids);
-            /*List<RoleMenu> result = null;
-            List<RoleMenu> list = roleMenuMapper.selectBatchIds(ids);
-            if (list != null && list.size() > 0) {
-                result = list.stream().map(roleMenu -> {
-                    roleMenu.setIsDeleted(true);
-                    return roleMenu;
-                }).collect(Collectors.toList());
-            }
-            if(result != null){
-                this.updateBatchById(result);
-            }*/
         }
     }
 
 
     /**
      * 根据角色Id，获取分配的所有菜单
-     *
      * @param roleId    角色ID
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
@@ -148,18 +136,6 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("role_id", roleId)
                 .orderBy("last_updated_date"));
-
-        /* if (isDeleted == null) {
-            list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
-                    .eq("is_deleted", false)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
-                    .eq("role_id", roleId));
-        } else {
-            list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
-                    .eq("is_deleted", isDeleted)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
-                    .eq("role_id", roleId));
-        }*/
         if (CollectionUtils.isNotEmpty(list)) {
             list.stream().forEach(e -> {
                 RoleMenuDTO roleMenuDto = new RoleMenuDTO();
@@ -183,4 +159,100 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         return roleMenuMapper.selectById(id);
     }
 
+    /**
+     * 根据用户ID，取对应所有角色分配的菜单
+     * @param userId
+     * @return
+     */
+    public List<MenuDTO> getMenusByUserId(Long userId) {
+        List<MenuDTO> dtos = new ArrayList<>();
+        Map<Long,MenuDTO> resultMenu = new HashMap<>();
+        if(userId != null){
+            //获取用户ID，取对应的所有去重的菜单 （已启用且未被删除的数据）
+            List<Menu> list = roleMenuMapper.getMenusByUserId(userId);
+            if(list != null && list.size() > 0 ){
+                //将list 转成 map 且以 ID 为map的key
+                Map<Long,Menu> menuMap = new HashMap<>();
+                list.stream().forEach(d -> {
+                    menuMap.put(d.getId(),d);
+                });
+                //构造菜单数据
+                list.stream().forEach(e -> {
+                    createMenuRecursive(resultMenu,menuMap,e.getId());
+                });
+            }
+        }
+        // 将结果菜单map转成List，返回到前端 只返回parent为null的数据
+        dtos = resultMenu.entrySet().stream().filter(e->e.getValue().getParent() == null).map(m-> {
+            return m.getValue();
+        }).collect(Collectors.toList());
+        return dtos;
+    }
+
+    /**
+     * 根据角色集合，取对应的菜单信息
+     * @param roleIds
+     * @return
+     */
+    public List<MenuDTO> getMenusByRolesId(List<Long> roleIds) {
+        List<MenuDTO> dtos = new ArrayList<>();
+        Map<Long,MenuDTO> resultMenu = new HashMap<>();
+        if(roleIds != null && roleIds.size() > 0 ){
+            //获取角色集合对应的所有去重的菜单 （已启用且未被删除的数据）
+            List<Menu> list = roleMenuMapper.getMenusByRoleIds(roleIds);
+            if(list != null && list.size() > 0 ){
+                //将list 转成 map 且以 ID 为map的key
+                Map<Long,Menu> menuMap = new HashMap<>();
+                list.stream().forEach(d -> {
+                    menuMap.put(d.getId(),d);
+                });
+                //构造菜单数据
+               list.stream().forEach(e -> {
+                   createMenuRecursive(resultMenu,menuMap,e.getId());
+               });
+            }
+        }
+        // 将结果菜单map转成List，返回到前端 只返回parent为null的数据
+        dtos = resultMenu.entrySet().stream().filter(e->e.getValue().getParent() == null).map(m-> {
+            return m.getValue();
+        }).collect(Collectors.toList());
+        return dtos;
+    }
+
+    /**
+     * @param resultMap 返回的菜单
+     * @param menuMap  角色对应的所有菜单
+     * @param menuId  当前菜单ID
+     * @return 功能菜单
+     */
+    private MenuDTO createMenuRecursive(Map<Long, MenuDTO> resultMap, Map<Long, Menu> menuMap, Long menuId) {
+        MenuDTO menuItem = resultMap.get(menuId);
+        if (menuItem == null) {
+            menuItem = new MenuDTO();
+            Menu menu = menuMap.get(menuId);// 根据ID从所有菜单中取菜单对象
+            if (menu == null) {
+                return null;
+            }
+            //将Domain转成DTO对象
+            BeanUtils.copyProperties(menu,menuItem);
+            // 以ID为Key，将菜单存到map中去
+            resultMap.put(menuId, menuItem);
+            Long parentId = menu.getParentMenuId();
+            //如果菜单的上级菜单不为空,且大于0（根目录的上级菜单为0）
+            if (parentId != null && parentId > 0) {
+                //递归设置上级菜单
+                MenuDTO parentMenuItem = createMenuRecursive(resultMap, menuMap, parentId);
+                if (parentMenuItem != null) {
+                    List<MenuDTO> children = parentMenuItem.getChildren();
+                    if (children == null) {
+                        children = new ArrayList<>();
+                        parentMenuItem.setChildren(children);
+                    }
+                    menuItem.setParent(parentMenuItem);
+                    children.add(menuItem);
+                }
+            }
+        }
+        return menuItem;
+    }
 }
