@@ -21,8 +21,8 @@ public class InterfaceResponse extends VersionDomainObject {
     @TableField("resp_type")
     private String respType; // 响应协议
 
-    @TableField("key")
-    private String code; // 响应代码
+    @TableField("key_code")
+    private String keyCode; // 响应代码
 
     @TableField("parent_id")
     private Long parentId; // 上级ID

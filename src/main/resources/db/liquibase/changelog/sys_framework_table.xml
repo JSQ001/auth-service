@@ -206,7 +206,7 @@
             <column name="module_id" type="bigint" remarks="模块id">
                 <constraints nullable="false"/>
             </column>
-            <column name="key" type="varchar(100)" remarks="界面Key值">
+            <column name="key_code" type="varchar(100)" remarks="界面Key值">
                 <constraints nullable="false"/>
             </column>
             <column name="lang" type="varchar(100)" remarks="语言">
@@ -241,7 +241,7 @@
             <column name="is_deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_front_key" tableName="sys_front_key">
-            <column name="key"/>
+            <column name="key_code"/>
         </createIndex>
         <createTable tableName="sys_interface_request" remarks="接口请求参数表">
             <column name="id" type="bigint" remarks="id">
@@ -261,7 +261,7 @@
             </column>
             <column name="position" type="varchar(50)" remarks="参数位置">
             </column>
-            <column name="key" type="varchar(50)" remarks="代码">
+            <column name="key_code" type="varchar(50)" remarks="代码">
             </column>
             <column name="remark" type="varchar(500)" remarks="备注说明">
             </column>
@@ -293,7 +293,7 @@
             <column name="is_deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_request_code" tableName="sys_interface_request">
-            <column name="key"/>
+            <column name="key_code"/>
         </createIndex>
 
         <createTable tableName="sys_interface_response" remarks="响应参数表">
@@ -312,7 +312,7 @@
             </column>
             <column name="resp_type" type="varchar(50)" remarks="响应类型">
             </column>
-            <column name="key" type="varchar(50)" remarks="代码">
+            <column name="key_code" type="varchar(50)" remarks="代码">
             </column>
             <column name="remark" type="varchar(500)" remarks="备注说明">
             </column>
@@ -344,7 +344,7 @@
             <column name="is_deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_code" tableName="sys_interface_response">
-            <column name="key"/>
+            <column name="key_code"/>
         </createIndex>
     </changeSet>
     <changeSet id="2018082017230002" author="houyin.zhang">
@@ -382,7 +382,7 @@
             <column name="is_enabled"/>
         </createIndex>
         <createIndex indexName="idx_language_key_enabled" tableName="sys_front_key">
-            <column name="key"/>
+            <column name="key_code"/>
             <column name="is_enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_request_enabled" tableName="sys_interface_request">
@@ -391,7 +391,7 @@
             <column name="is_enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_requestId_enabled" tableName="sys_interface_request">
-            <column name="key"/>
+            <column name="key_code"/>
             <column name="is_enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_inter_enable" tableName="sys_interface_response">
@@ -400,10 +400,10 @@
             <column name="is_enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_enabled" tableName="sys_interface_response">
-            <column name="key"/>
+            <column name="key_code"/>
             <column name="is_enabled"/>
         </createIndex>
-        <addUniqueConstraint tableName="sys_front_key" columnNames="key,lang" constraintName="udx_front_key_lang"/>
+        <addUniqueConstraint tableName="sys_front_key" columnNames="key_code,lang" constraintName="udx_front_key_lang"/>
     </changeSet>
     <changeSet id="201808210001" author="houyin.zhang">
         <createTable tableName="sys_language_enabled" remarks="语言启用记录表">

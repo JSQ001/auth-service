@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.helioscloud.atlantis.persistence.FrontKeyMapper">
+    <!-- 界面Title同步到传入的language里 -->
+    <select id="getListFrontKeysNotInLanguage" resultType="com.helioscloud.atlantis.domain.FrontKey">
+        select id,
+        module_id,
+        key_code,
+        lang,
+        descriptions,
+        version_number,
+        is_deleted,
+        is_enabled
+   from sys_front_key k
+  where k.lang = 'zh_CN'
+    and not exists (select 1
+           from sys_front_key sfk
+          where sfk.key = k.key
+            and sfk.lang = #{lanugage})
+    </select>
+</mapper>

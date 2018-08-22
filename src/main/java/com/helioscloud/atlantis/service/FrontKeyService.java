@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
@@ -38,14 +39,14 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (frontKey == null || frontKey.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
         }
-        if (frontKey.getKey() == null || "".equals(frontKey.getKey())) {
+        if (frontKey.getKeyCode() == null || "".equals(frontKey.getKeyCode())) {
             throw new BizException(RespCode.FRONT_KEY_NULL);
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
             throw new BizException(RespCode.MODULE_ID_NULL);
         }
         //检查key是否唯一
-        Integer count = getFrontKeyByKeyAndLang(frontKey.getKey(),frontKey.getLang());
+        Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(),frontKey.getLang());
         if (count != null && count > 0) {
             throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
         }
@@ -84,7 +85,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         }
         frontKey.setCreatedBy(rr.getCreatedBy());
         frontKey.setCreatedDate(rr.getCreatedDate());
-        frontKey.setKey(rr.getKey());
+        frontKey.setKeyCode(rr.getKeyCode());
         this.updateById(frontKey);
         return frontKey;
     }
@@ -160,5 +161,21 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      */
     public FrontKey getFrontKeyById(Long id) {
         return frontKeyMapper.selectById(id);
+    }
+
+    /**
+     * 提示语言同步界面Title
+     * @param language
+     */
+    public void syncFrontKeyByLanguage(String language){
+        //获取所有中文的界面Title(除了已经在 language中的)
+        List<FrontKey> list = frontKeyMapper.getListFrontKeysNotInLanguage(language);
+        List<FrontKey> newList = list.stream().map(e -> {
+            e.setLang(language);
+            e.setId(null);
+            return e;
+        }).collect(Collectors.toList());
+        //批量保存 200 提交一次
+        this.insertBatch(newList,200);
     }
 }

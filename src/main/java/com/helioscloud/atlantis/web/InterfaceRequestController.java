@@ -31,7 +31,7 @@ public class InterfaceRequestController {
      * @apiDescription 创建接口请求
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} name 请求名称
-     * @apiParam (请求参数) {String} key 请求代码
+     * @apiParam (请求参数) {String} keyCode 请求代码
      * @apiParam (请求参数) {String} reqType 请求类型
      * @apiParam (请求参数) {String} position 位置
      * @apiParam (请求参数) {Long} parentId 上级ID
@@ -42,14 +42,14 @@ public class InterfaceRequestController {
      * "name":"Query模块",
      * "reqType":"GET",
      * "position":"header",
-     * "key":"Query",
+     * "keyCode":"Query",
      * "parentId":"",
      * "remark":"测试111",
      * "interfaceId":"1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
-     * @apiSuccess (返回参数) {String} key 请求代码
+     * @apiSuccess (返回参数) {String} keyCode 请求代码
      * @apiSuccess (返回参数) {String} reqType 请求类型
      * @apiSuccess (返回参数) {String} position 位置
      * @apiSuccess (返回参数) {Long} parentId 上级ID
@@ -75,7 +75,7 @@ public class InterfaceRequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query",
+     * "keyCode": "Query",
      * "parentId": 0,
      * "remark": "测试111",
      * "interfaceId": "1031509686226259969"
@@ -92,7 +92,7 @@ public class InterfaceRequestController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 请求ID
      * @apiParam (请求参数) {String} name 请求名称
-     * @apiParam (请求参数) {String} key 请求代码
+     * @apiParam (请求参数) {String} keyCode 请求代码
      * @apiParam (请求参数) {String} reqType 请求类型
      * @apiParam (请求参数) {String} position 位置
      * @apiParam (请求参数) {Long} parentId 上级ID
@@ -110,14 +110,14 @@ public class InterfaceRequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query",
+     * "keyCode": "Query",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "interfaceId": "1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
-     * @apiSuccess (返回参数) {String} key 请求代码
+     * @apiSuccess (返回参数) {String} keyCode 请求代码
      * @apiSuccess (返回参数) {String} reqType 请求类型
      * @apiSuccess (返回参数) {String} position 位置
      * @apiSuccess (返回参数) {Long} parentId 上级ID
@@ -143,7 +143,7 @@ public class InterfaceRequestController {
      * "name": "Query模块",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query",
+     * "keyCode": "Query",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "interfaceId": "1031509686226259969"
@@ -205,7 +205,7 @@ public class InterfaceRequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query4",
+     * "keyCode": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"
@@ -240,7 +240,7 @@ public class InterfaceRequestController {
      * "name": "Query模块3",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query33",
+     * "keyCode": "Query33",
      * "parentId": 0,
      * "remark": "测试2333",
      * "interfaceId": "1031509686226259969"
@@ -257,7 +257,7 @@ public class InterfaceRequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query4",
+     * "keyCode": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"
@@ -298,7 +298,7 @@ public class InterfaceRequestController {
      * "name": "Query模块3",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query33",
+     * "keyCode": "Query33",
      * "parentId": 0,
      * "remark": "测试2333",
      * "interfaceId": "1031509686226259969"
@@ -315,7 +315,7 @@ public class InterfaceRequestController {
      * "name": "Query模块4",
      * "reqType": "GET",
      * "position": "header",
-     * "key": "Query4",
+     * "keyCode": "Query4",
      * "parentId": 0,
      * "remark": "测试444",
      * "interfaceId": "1031509686226259969"

@@ -32,7 +32,7 @@ public class InterfaceResponseController {
      * @apiDescription 创建接口响应
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} name 响应名称
-     * @apiParam (请求参数) {String} key 响应代码
+     * @apiParam (请求参数) {String} keyCode 响应代码
      * @apiParam (请求参数) {String} reqType 响应类型
      * @apiParam (请求参数) {Long} parentId 上级ID
      * @apiParam (请求参数) {String} remark 备注说明
@@ -41,14 +41,14 @@ public class InterfaceResponseController {
      * {
      * "name":"响应测试1",
      * "reqType":"GET",
-     * "key":"Query",
+     * "keyCode":"Query",
      * "parentId":"",
      * "remark":"响应测试1",
      * "interfaceId":"1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 响应名称
-     * @apiSuccess (返回参数) {String} key 响应代码
+     * @apiSuccess (返回参数) {String} keyCode 响应代码
      * @apiSuccess (返回参数) {String} reqType 响应类型
      * @apiSuccess (返回参数) {Long} parentId 上级ID
      * @apiSuccess (返回参数) {String} remark 备注说明
@@ -72,7 +72,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试1",
      * "respType": null,
-     * "key": "Query",
+     * "keyCode": "Query",
      * "parentId": 0,
      * "remark": "响应测试1",
      * "interfaceId": "1031509686226259969"
@@ -89,7 +89,7 @@ public class InterfaceResponseController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 请求ID
      * @apiParam (请求参数) {String} name 响应名称
-     * @apiParam (请求参数) {String} key 响应代码
+     * @apiParam (请求参数) {String} keyCode 响应代码
      * @apiParam (请求参数) {String} reqType 响应类型
      * @apiParam (请求参数) {Long} parentId 上级ID
      * @apiParam (请求参数) {String} remark 备注说明
@@ -105,14 +105,14 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试3213214",
      * "respType": null,
-     * "key": "Query4",
+     * "keyCode": "Query4",
      * "parentId": 0,
      * "remark": "响应测试321324",
      * "interfaceId": "1031509686226259969"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 响应名称
-     * @apiSuccess (返回参数) {String} key 响应代码
+     * @apiSuccess (返回参数) {String} keyCode 响应代码
      * @apiSuccess (返回参数) {String} reqType 响应类型
      * @apiSuccess (返回参数) {Long} parentId 上级ID
      * @apiSuccess (返回参数) {String} remark 备注说明
@@ -136,7 +136,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试3213214",
      * "respType": null,
-     * "key": "Query4",
+     * "keyCode": "Query4",
      * "parentId": 0,
      * "remark": "响应测试321324",
      * "interfaceId": "1031509686226259969"
@@ -197,7 +197,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试3",
      * "respType": null,
-     * "key": "Query3",
+     * "keyCode": "Query3",
      * "parentId": 0,
      * "remark": "响应测试3",
      * "interfaceId": "1031509686226259969"
@@ -231,7 +231,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试2",
      * "respType": null,
-     * "key": "Query2",
+     * "keyCode": "Query2",
      * "parentId": 0,
      * "remark": "响应测试2",
      * "interfaceId": "1031509686226259969"
@@ -247,7 +247,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试3",
      * "respType": null,
-     * "key": "Query3",
+     * "keyCode": "Query3",
      * "parentId": 0,
      * "remark": "响应测试3",
      * "interfaceId": "1031509686226259969"
@@ -287,7 +287,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试2",
      * "respType": null,
-     * "key": "Query2",
+     * "keyCode": "Query2",
      * "parentId": 0,
      * "remark": "响应测试2",
      * "interfaceId": "1031509686226259969"
@@ -303,7 +303,7 @@ public class InterfaceResponseController {
      * "versionNumber": 1,
      * "name": "响应测试3",
      * "respType": null,
-     * "key": "Query3",
+     * "keyCode": "Query3",
      * "parentId": 0,
      * "remark": "响应测试3",
      * "interfaceId": "1031509686226259969"

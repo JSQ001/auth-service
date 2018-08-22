@@ -30,19 +30,19 @@ public class FrontKeyController {
      * @api {POST} /api/frontKey/create 【系统框架】界面Title创建
      * @apiDescription 创建界面Title
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {String} key 界面Title代码
+     * @apiParam (请求参数) {String} keyCode 界面Title代码
      * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiParam (请求参数) {String} descriptions 描述
      * @apiParam (请求参数) {Long} moduleId 模块ID
      * @apiParamExample {json} 请求报文:
      * {
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId":"1031479997352935426"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
-     * @apiSuccess (返回参数) {String} key 界面Title代码
+     * @apiSuccess (返回参数) {String} keyCode 界面Title代码
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
@@ -63,7 +63,7 @@ public class FrontKeyController {
      * "lastUpdatedDate": "2018-08-20T19:37:59.33+08:00",
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId": "1031479997352935426"
@@ -79,7 +79,7 @@ public class FrontKeyController {
      * @apiDescription 更新界面Title
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 界面TitleID
-     * @apiParam (请求参数) {String} key 界面Title代码 不允许更新
+     * @apiParam (请求参数) {String} keyCode 界面Title代码 不允许更新
      * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiParam (请求参数) {String} descriptions 描述
      * @apiParam (请求参数) {Long} moduleId 模块ID
@@ -92,13 +92,13 @@ public class FrontKeyController {
      * "isEnabled": false,
      * "isDeleted": false,
      * "versionNumber": 1,
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId": "1031479997352935426"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
-     * @apiSuccess (返回参数) {String} key 界面Title代码
+     * @apiSuccess (返回参数) {String} keyCode 界面Title代码
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
@@ -119,7 +119,7 @@ public class FrontKeyController {
      * "lastUpdatedDate": null,
      * "lastUpdatedBy": null,
      * "versionNumber": 1,
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId": "1031479997352935426"
@@ -178,7 +178,7 @@ public class FrontKeyController {
      * "lastUpdatedDate": "2018-08-21T17:05:58.473+08:00",
      * "lastUpdatedBy": 0,
      * "versionNumber": 1,
-     * "key": "common.save",
+     * "keyCode": "common.save",
      * "lang": "zh_CN",
      * "descriptions": "保存",
      * "moduleId": "1031479997352935426"
@@ -209,7 +209,7 @@ public class FrontKeyController {
      * "lastUpdatedDate": "2018-08-20T19:40:57.212+08:00",
      * "lastUpdatedBy": 1005,
      * "versionNumber": 2,
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId": "1031479997352935426"
@@ -246,7 +246,7 @@ public class FrontKeyController {
      * "lastUpdatedDate": "2018-08-20T19:39:59.053+08:00",
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
-     * "key":"common.save",
+     * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
      * "moduleId": "1031479997352935426"
@@ -261,5 +261,22 @@ public class FrontKeyController {
         List<FrontKey> list = frontKeyService.getFrontKeysByModuleId(moduleId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
+
+
+    /**
+     * @api {GET} /api/frontKey/sync/{language} 【系统框架】界面Title同步
+     * @apiDescription 根据language，将所有中文下未同步到language的界面Title，同步到language里去。
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {String} language 语言代码
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/sync/en_US
+     * @apiSuccessExample {json} 返回报文:
+     * []
+     */
+    @GetMapping("/sync/{language}")
+    public ResponseEntity syncFrontKeyByLanguage(@PathVariable String language) {
+        frontKeyService.syncFrontKeyByLanguage(language);
+        return ResponseEntity.ok().build();
     }
 }
