@@ -1,5 +1,7 @@
 package com.helioscloud.atlantis.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.helioscloud.atlantis.domain.Menu;
 import lombok.Data;
 
@@ -8,10 +10,11 @@ import lombok.Data;
  */
 @Data
 public class RoleMenuDTO {
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
-
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long menuId;
-
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long roleId;
 
     private Menu menu;
