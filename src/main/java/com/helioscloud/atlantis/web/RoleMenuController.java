@@ -69,7 +69,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {POST} /api/roleMenu/update 【角色权限】角色菜单更新
+     * @api {PUT} /api/roleMenu/update 【角色权限】角色菜单更新
      * @apiDescription 更新角色关联菜单 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段

@@ -67,7 +67,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/update 【角色权限】角色菜单按钮更新
+     * @api {PUT} /api/roleMenuButton/update 【角色权限】角色菜单按钮更新
      * @apiDescription 更新角色关联菜单按钮 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
@@ -111,7 +111,7 @@ public class RoleMenuButtonController {
     }
 
     /**
-     * @api {POST} /api/roleMenuButton/delete 【角色权限】角色菜单按钮删除
+     * @api {DELETE} /api/roleMenuButton/delete 【角色权限】角色菜单按钮删除
      * @apiGroup Auth2Service
      * @apiDescription 删除角色关联菜单按钮[逻辑删除]
      * @apiParamExample {json} 请求报文:

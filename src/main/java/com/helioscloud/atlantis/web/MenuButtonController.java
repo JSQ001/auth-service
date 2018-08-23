@@ -72,7 +72,7 @@ public class MenuButtonController {
     }
 
     /**
-     * @api {POST} /api/menuButton/update 【角色权限】按钮更新
+     * @api {PUT} /api/menuButton/update 【角色权限】按钮更新
      * @apiDescription 更新角色关联菜单 只允许修改hide,isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段

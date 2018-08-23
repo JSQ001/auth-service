@@ -72,7 +72,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/update 【菜单权限】菜单更新
+     * @api {PUT} /api/menu/update 【菜单权限】菜单更新
      * @apiDescription 更新菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 菜单ID
@@ -123,7 +123,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/delete 【菜单权限】菜单删除
+     * @api {DELETE} /api/menu/delete 【菜单权限】菜单删除
      * @apiDescription 删除菜单
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
