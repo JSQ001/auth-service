@@ -3,6 +3,7 @@ package com.helioscloud.atlantis.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.FrontKey;
+import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.service.FrontKeyService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -273,7 +274,7 @@ public class FrontKeyController {
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/query/module?moduleId=1031479997352935426&lang=zh_CN&isEnabled=false&page=0&size=10
+     * http://localhost:9082/api/frontKey/query/module/lang?moduleId=1031479997352935426&lang=zh_CN&isEnabled=false&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -294,11 +295,11 @@ public class FrontKeyController {
      */
     @GetMapping("/query/module/lang")
     public ResponseEntity<List<FrontKey>> getFrontKeysByModuleIdAndLang(@RequestParam(required = true) Long moduleId,
-                                                                 @RequestParam(required = true) String lang,
-                                                                 @RequestParam(required = false) Boolean isEnabled,
-                                                                 Pageable pageable) throws URISyntaxException {
+                                                                        @RequestParam(required = true) String lang,
+                                                                        @RequestParam(required = false) Boolean isEnabled,
+                                                                        Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<FrontKey> list = frontKeyService.getFrontKeysByModuleIdAndLang(moduleId,lang, isEnabled, page);
+        List<FrontKey> list = frontKeyService.getFrontKeysByModuleIdAndLang(moduleId, lang, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module/lang");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -316,6 +317,57 @@ public class FrontKeyController {
     @GetMapping("/sync/{language}")
     public ResponseEntity syncFrontKeyByLanguage(@PathVariable String language) {
         frontKeyService.syncFrontKeyByLanguage(language);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @api {POST} /api/frontKey/batch/update 【系统框架】界面Title批量更新
+     * @apiDescription 批量更新界面的Title的描述信息
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} id 界面Title的ID
+     * @apiParam (请求参数) {String} descriptions 需要更新的描述
+     * @apiParamExample {json} 请求报文:
+     * [
+     * {
+     * "id":1032975640932036609,
+     * "descriptions":"保存1"
+     * },{
+     * "id":1032987141747159042,
+     * "descriptions":"编辑1"
+     * }
+     * ]
+     */
+    @PostMapping("/batch/update")
+    public ResponseEntity batchUpdateFrontKey(@RequestBody List<FrontKeyDTO> list) {
+        frontKeyService.batchUpdateFrontKey(list);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @api {POST} /api/frontKey/batch/update 【系统框架】界面Title批量保存
+     * @apiDescription 批量保存界面的Title的描述信息
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} id 界面Title的ID
+     * @apiParam (请求参数) {String} descriptions 需要更新的描述
+     * @apiParamExample {json} 请求报文:
+     * [
+     * {
+     * "keyCode":"common.create",
+     * "lang":"zh_CN",
+     * "descriptions":"创建",
+     * "moduleId":"1031479997352935426"
+     * },
+     * {
+     * "keyCode":"common.create",
+     * "lang":"en_US",
+     * "descriptions":"CREATE",
+     * "moduleId":"1031479997352935426"
+     * }
+     * ]
+     */
+    @PostMapping("/batch/create")
+    public ResponseEntity batchCreateFrontKey(@RequestBody List<FrontKey> list) {
+        frontKeyService.batchCreateFrontKey(list);
         return ResponseEntity.ok().build();
     }
 

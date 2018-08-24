@@ -55,28 +55,8 @@ public class RoleMenuController {
      * }
      * ]
      * }
-     * @apiSuccess (返回参数) {Long} id  主键id
-     * @apiSuccess (返回参数) {Long} roleId 角色ID
-     * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
-     * @apiSuccess (返回参数) {Integer} versionNumber    版本号
-     * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
-     * @apiSuccess (返回参数) {Long} createdBy    创建人ID
-     * @apiSuccess (返回参数) {ZonedDateTime} lastUpdatedDate    最后更新时间
-     * @apiSuccess (返回参数) {Long} lastUpdatedBy    更新人ID
      * @apiSuccessExample {json} 返回报文:
      * {
-     * "id": "1029987832156180482",
-     * "isEnabled": true,
-     * "isDeleted": false,
-     * "createdDate": "2018-08-16T15:06:50.094+08:00",
-     * "createdBy": 1005,
-     * "lastUpdatedDate": "2018-08-16T15:06:50.094+08:00",
-     * "lastUpdatedBy": 1005,
-     * "versionNumber": 1,
-     * "roleId": "1029919265725378561",
-     * "menuId": "1029973242290647041"
      * }
      */
     @PostMapping("/assign/menu")
