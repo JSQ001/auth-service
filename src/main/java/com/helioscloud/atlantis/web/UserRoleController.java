@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.UserRole;
 import com.helioscloud.atlantis.dto.MenuDTO;
+import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.dto.UserRoleDTO;
 import com.helioscloud.atlantis.service.RoleMenuService;
 import com.helioscloud.atlantis.service.UserRoleService;
+import com.helioscloud.atlantis.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,10 +27,12 @@ import java.util.List;
 public class UserRoleController {
     private final UserRoleService userRoleService;
     private final RoleMenuService roleMenuService;
+    private final UserService userService;
 
-    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService) {
+    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService, UserService userService) {
         this.userRoleService = userRoleService;
         this.roleMenuService = roleMenuService;
+        this.userService = userService;
     }
 
     /**
@@ -338,6 +342,136 @@ public class UserRoleController {
     public ResponseEntity<List<MenuDTO>> getMenusByRoleIds(@PathVariable Long userId) throws URISyntaxException {
         List<MenuDTO> list = roleMenuService.getMenusByUserId(userId);
         return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /query/userList 【角色权限】用户列表查询分页
+     * @apiDescription 根据租户ID，（帐套ID 或 公司 ID），取用户列表 分页
+     * 如果传了帐套ID，则取帐套下的用户
+     * 如果传了公司ID，则取公司下的用户
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} tenantId 租户ID
+     * @apiParam (请求参数) {Long} [setOfBooksId] 帐套ID
+     * @apiParam (请求参数) {Long} [companyId] 公司ID
+     * @apiParam (请求参数) {Integer} page 页码
+     * @apiParam (请求参数) {Integer} size 每页条数
+     * @apiSuccess (返回参数) {Long} id  用户ID
+     * @apiSuccess (返回参数) {String} login  登录账号
+     * @apiSuccess (返回参数) {String} fullName  姓名
+     * @apiSuccess (返回参数) {String} email  邮箱
+     * @apiSuccess (返回参数) {String} title  职务
+     * @apiSuccess (返回参数) {String} mobile  手机号
+     * @apiSuccess (返回参数) {String} employeeID  员工号
+     * @apiSuccess (返回参数) {Boolean} activated  是否激活
+     * @apiSuccess (返回参数) {Integer} status  状态 正常1001,待离职 1002，已离职 1003
+     * @apiSuccess (返回参数) {String} companyName  公司名称
+     * @apiSuccess (返回参数) {Long} companyId  公司ID
+     * @apiSuccess (返回参数) {String} tenantName  租户名称
+     * @apiSuccess (返回参数) {Long} tenantId  租户ID
+     * @apiSuccess (返回参数) {String} setOfBooksName  帐套名称
+     * @apiSuccess (返回参数) {Long} setOfBooksId  帐套ID
+     * @apiSuccess (返回参数) {Integer} lockStatus  锁定状态 未锁定 2001 ,锁定 2002
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/userRole/query/userList?tenantId=1022057230117146625&page=0&size=2
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1013",
+     * "login": "askn54095559",
+     * "userOID": null,
+     * "companyOID": null,
+     * "password": null,
+     * "fullName": "习大大",
+     * "firstName": null,
+     * "lastName": null,
+     * "email": "daidai@qq.com",
+     * "mobile": "18516008359",
+     * "employeeID": "5559",
+     * "title": null,
+     * "activated": true,
+     * "authorities": [
+     * {
+     * "name": "ROLE_USER",
+     * "authority": "ROLE_USER"
+     * }
+     * ],
+     * "departmentOID": null,
+     * "departmentName": null,
+     * "filePath": null,
+     * "avatar": null,
+     * "status": 1001,
+     * "companyName": "上海汉得融晶信息科技有限公司3",
+     * "corporationOID": null,
+     * "language": "zh_CN",
+     * "financeRoleOID": null,
+     * "companyId": "1005",
+     * "tenantId": "1022057230117146625",
+     * "directManager": null,
+     * "directManagerId": null,
+     * "directManagerName": null,
+     * "setOfBooksId": "1022057239839543298",
+     * "setOfBooksName": "默认账套",
+     * "passwordAttempt": 0,
+     * "lockStatus": 2001,
+     * "deviceVerificationStatus": null,
+     * "tenantName": "上海汉得融晶信息科技有限公司3",
+     * "senior": false,
+     * "deleted": false
+     * },
+     * {
+     * "id": "1008",
+     * "login": "askn54095555",
+     * "userOID": null,
+     * "companyOID": null,
+     * "password": null,
+     * "fullName": "孙漂亮",
+     * "firstName": null,
+     * "lastName": null,
+     * "email": "piaoliang@qq.com",
+     * "mobile": "18516008355",
+     * "employeeID": "5555",
+     * "title": null,
+     * "activated": true,
+     * "authorities": [
+     * {
+     * "name": "ROLE_USER",
+     * "authority": "ROLE_USER"
+     * }
+     * ],
+     * "departmentOID": null,
+     * "departmentName": null,
+     * "filePath": null,
+     * "avatar": null,
+     * "status": 1001,
+     * "companyName": "上海汉得融晶信息科技有限公司3",
+     * "corporationOID": null,
+     * "language": "zh_CN",
+     * "financeRoleOID": null,
+     * "companyId": "1005",
+     * "tenantId": "1022057230117146625",
+     * "directManager": null,
+     * "directManagerId": null,
+     * "directManagerName": null,
+     * "setOfBooksId": "1022057239839543298",
+     * "setOfBooksName": "默认账套",
+     * "passwordAttempt": 0,
+     * "lockStatus": 2001,
+     * "deviceVerificationStatus": null,
+     * "tenantName": "上海汉得融晶信息科技有限公司3",
+     * "senior": false,
+     * "deleted": false
+     * }
+     * ]
+     */
+    @GetMapping("/query/userList")
+    public ResponseEntity<List<UserDTO>> getUserListByTenantAndBooksId(@RequestParam(required = true) Long tenantId,
+                                                                       @RequestParam(required = false) Long setOfBooksId,
+                                                                       @RequestParam(required = false) Long companyId,
+                                                                       Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<UserDTO> list = userService.getUserListByTenantAndBooksId(tenantId, setOfBooksId, companyId, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/userRole/query/userList");
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
 }

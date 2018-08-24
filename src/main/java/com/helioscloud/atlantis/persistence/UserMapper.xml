@@ -22,9 +22,12 @@
         <result column="activated" property="activated"/>
         <result column="status" property="status"/>
         <result column="company_id" property="companyId"/>
+        <result column="company_name" property="companyName"/>
         <result column="company_oid" property="companyOID"/>
         <result column="tenant_id" property="tenantId"/>
+        <result column="tenant_name" property="tenantName"/>
         <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="set_of_books_name" property="setOfBooksName"/>
         <result column="mobile" property="mobile"/>
         <result column="language" property="language"/>
         <result column="password" property="password"/>
@@ -285,5 +288,49 @@
     </update>
     <select id="findAuthorities" resultMap="AuthorityEntityResultMap">
         select authority_name from art_user_authority where user_id =#{userId}
+    </select>
+    <select id="getUserListByTenantAndBooksId" resultMap="UserEntityResultMap">
+        SELECT
+        ac.full_name,
+        ac.email,
+        ac.employee_id,
+        ac.title,
+        au.login,
+        au.id,
+        au.is_deleted,
+        au.status,
+        au.language,
+        au.lock_status,
+        au.activated,
+        au.tenant_id,
+        aat.tenant_name,
+        au.company_id,
+        acc.name AS company_name,
+        ap.phone_number AS mobile,
+        acc.set_of_books_id,
+        aso.set_of_books_name
+        FROM
+        art_user au,
+        art_contact ac,
+        art_phone ap,
+        art_company acc,
+        art_tenant aat,
+        art_set_of_books aso
+        WHERE ac.id = au.contact_id
+        AND ap.contact_id = ac.id
+        AND ap.is_primary = 1
+        AND acc.id=au.company_id
+        AND aat.id = au.tenant_id
+        AND aso.id = acc.set_of_books_id
+        <if test="tenantId != null and tenantId > 0 ">
+            and au.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null and setOfBooksId > 0 ">
+            and acc.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="companyId != null and companyId > 0 ">
+            and au.company_id = #{companyId}
+        </if>
+        ORDER BY ac.full_name
     </select>
 </mapper>

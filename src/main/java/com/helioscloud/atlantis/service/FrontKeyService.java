@@ -5,13 +5,17 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
 import com.helioscloud.atlantis.domain.FrontKey;
+import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.persistence.FrontKeyMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +50,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             throw new BizException(RespCode.MODULE_ID_NULL);
         }
         //检查key是否唯一
-        Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(),frontKey.getLang());
+        Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(), frontKey.getLang());
         if (count != null && count > 0) {
             throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
         }
@@ -165,23 +169,26 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     /**
      * 根据模块和Lang，取所有前端Title 分页
+     *
      * @param moduleId  模块Id
      * @param page
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId,String lang, Boolean isEnabled, Page page) {
+    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean isEnabled, Page page) {
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("lang", lang)
                 .eq("module_id", moduleId)
                 .orderBy("key_code"));
     }
+
     /**
      * 提示语言同步界面Title
+     *
      * @param language
      */
-    public void syncFrontKeyByLanguage(String language){
+    public void syncFrontKeyByLanguage(String language) {
         //获取所有中文的界面Title(除了已经在 language中的)
         List<FrontKey> list = frontKeyMapper.getListFrontKeysNotInLanguage(language);
         List<FrontKey> newList = list.stream().map(e -> {
@@ -190,6 +197,40 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             return e;
         }).collect(Collectors.toList());
         //批量保存 200 提交一次
-        this.insertBatch(newList,200);
+        this.insertBatch(newList, 200);
+    }
+
+    /**
+     * 批量更新 界面Title的描述
+     * @param fontKeyDTOS
+     */
+    public void batchUpdateFrontKey(List<FrontKeyDTO> fontKeyDTOS) {
+        if(fontKeyDTOS != null && fontKeyDTOS.size() > 0){
+            List<Long> keyIdList = new ArrayList<>();
+            Map<Long,FrontKeyDTO> map = new HashMap<>();
+            fontKeyDTOS.stream().forEach(key -> {
+                keyIdList.add(key.getId());
+                map.put(key.getId(),key);
+            });
+            List<FrontKey> dbFrontKey = new ArrayList<>();
+            if(keyIdList.size() > 0){
+                //批量查询
+                dbFrontKey = frontKeyMapper.selectBatchIds(keyIdList);
+            }
+            //批量设置描述字段
+            dbFrontKey.stream().forEach(key -> {
+                key.setDescriptions(map.get(key.getId()).getDescriptions());
+            });
+            this.updateBatchById(dbFrontKey);
+        }
+    }
+    /**
+     * 批量保存 界面Title
+     * @param frontKey
+     */
+    public void batchCreateFrontKey(List<FrontKey> frontKey) {
+        if(frontKey != null && frontKey.size() > 0){
+            this.insertBatch(frontKey);
+        }
     }
 }

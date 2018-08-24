@@ -103,6 +103,7 @@ public class UserDTO {
     private String directManagerName;
     @JsonSerialize(using = ToStringSerializer.class)
     private Long setOfBooksId;
+    private String setOfBooksName;
 
     private Integer passwordAttempt = 0;
 
@@ -121,5 +122,6 @@ public class UserDTO {
     public UserDTO() {
 
     }
+    private String tenantName;
 
 }
