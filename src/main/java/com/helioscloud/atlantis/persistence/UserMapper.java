@@ -7,6 +7,7 @@ package com.helioscloud.atlantis.persistence;
 
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.helioscloud.atlantis.dto.UserDTO;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,4 +39,13 @@ public interface UserMapper extends BaseMapper<UserDTO> {
     UserDTO findOneByID(@Param("id") Long id);
 
     void updateUserLock(UserDTO userDTO);
+
+    /**
+     * 获取用户列表 分页
+     * @param tenantId    必填，取租户下的所有用户
+     * @param setOfBooksId 如果填了，取帐套下的用户
+     * @param companyId    如果填了，则取公司下的用户
+     * @return 按full_name排序
+     */
+    List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId,Page page);
 }

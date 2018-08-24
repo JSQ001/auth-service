@@ -5,7 +5,7 @@
 
 package com.helioscloud.atlantis.service;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.helioscloud.atlantis.domain.CompanySecurity;
 import com.helioscloud.atlantis.domain.PasswordHistory;
 import com.helioscloud.atlantis.domain.UserLoginBind;
@@ -16,6 +16,7 @@ import com.helioscloud.atlantis.exception.UserNotActivatedException;
 import com.helioscloud.atlantis.persistence.PasswordHistoryMapper;
 import com.helioscloud.atlantis.persistence.UserLoginBindMapper;
 import com.helioscloud.atlantis.persistence.UserMapper;
+import org.apache.ibatis.annotations.Param;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -187,5 +188,17 @@ public class UserService {
 
     public void updateUserLock(UserDTO unlockedUser) {
         userMapper.updateUserLock(unlockedUser);
+    }
+
+
+    /**
+     * 获取用户列表
+     * @param tenantId    必填，取租户下的所有用户
+     * @param setOfBooksId 如果填了，取帐套下的用户
+     * @param companyId    如果填了，则取公司下的用户
+     * @return 按full_name排序
+     */
+    public List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId, Page page){
+        return userMapper.getUserListByTenantAndBooksId(tenantId,setOfBooksId,companyId,page);
     }
 }
