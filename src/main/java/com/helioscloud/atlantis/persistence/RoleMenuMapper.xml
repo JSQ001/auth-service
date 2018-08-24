@@ -3,32 +3,42 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.helioscloud.atlantis.persistence.RoleMenuMapper">
+    <!-- 根据角色ID，菜单ID集合，删除角色与菜单ID集合的关联 -->
+    <delete id="deleteRoleMenuByRoleIdAndMenuIds">
+        delete from sys_role_menu where role_id = #{roleId}
+        <if test=" menuIds != null and menuIds.size > 0 ">
+            and menu_id in
+            <foreach collection="menuIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </delete>
     <!-- 根据角色ID集合，返回角色已分配的菜单 -->
     <select id="getMenusByRoleIds" resultType="com.helioscloud.atlantis.domain.Menu">
         select DISTINCT
-                sm.id,
-                sm.menu_code,
-                sm.menu_name,
-                sm.parent_menu_id,
-                sm.seq_number,
-                sm.menu_type as menuTypeEnum,
-                sm.menu_icon,
-                sm.menu_url,
-                sm.version_number,
-                sm.is_enabled
-              from sys_menu sm, sys_role_menu srm
-             where srm.menu_id = sm.id
-              and sm.is_deleted = 0
-              and sm.is_enabled = 1
-              and srm.is_deleted = 0
-              and srm.is_enabled = 1
-            <if test=" roleIds != null and roleIds.size > 0 ">
-                and srm.role_id in
-                <foreach collection="roleIds" index="index" item="item" open="(" close=")" separator=",">
-                    #{item}
-                </foreach>
-            </if>
-            order by sm.parent_menu_id,sm.seq_number
+        sm.id,
+        sm.menu_code,
+        sm.menu_name,
+        sm.parent_menu_id,
+        sm.seq_number,
+        sm.menu_type as menuTypeEnum,
+        sm.menu_icon,
+        sm.menu_url,
+        sm.version_number,
+        sm.is_enabled
+        from sys_menu sm, sys_role_menu srm
+        where srm.menu_id = sm.id
+        and sm.is_deleted = 0
+        and sm.is_enabled = 1
+        and srm.is_deleted = 0
+        and srm.is_enabled = 1
+        <if test=" roleIds != null and roleIds.size > 0 ">
+            and srm.role_id in
+            <foreach collection="roleIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        order by sm.parent_menu_id,sm.seq_number
     </select>
     <!-- 根据用户ID，返回用户所有角色已分配的菜单 -->
     <select id="getMenusByUserId" resultType="com.helioscloud.atlantis.domain.Menu">
@@ -50,5 +60,15 @@
         and sur.role_id = srm.role_id
         and sur.user_id = #{userId}
         order by sm.parent_menu_id,sm.seq_number
+    </select>
+    <select id="getParentMenuIdsByRoleIds" resultType="java.lang.Long" >
+        select sm.parent_menu_id
+        from sys_menu sm
+        <if test=" menuIds != null and menuIds.size > 0 ">
+            where id in
+            <foreach collection="menuIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
     </select>
 </mapper>

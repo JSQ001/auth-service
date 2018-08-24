@@ -33,16 +33,19 @@ public class ComponentController {
      * @apiParam (请求参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiParam (请求参数) {String} componentName 组件名称
      * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} menuId 菜单ID
      * @apiParamExample {json} 请求报文:
      * {
      * "componentType":1,
      * "componentName":"测试组件1",
-     * "moduleId":"1031479997352935426"
+     * "moduleId":"1031479997352935426",
+     * "menuId":1
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiSuccess (返回参数) {String} componentName 组件名称
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
+     * @apiSuccess (返回参数) {Long} menuId 菜单ID
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -62,7 +65,8 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * }
      */
     @PostMapping("/create")
@@ -78,6 +82,7 @@ public class ComponentController {
      * @apiParam (请求参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiParam (请求参数) {String} componentName 组件名称
      * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} menuId 菜单ID
      * @apiParam (请求参数) {Integer} versionNumber 版本号
      * @apiParam (请求参数) {String} isEnabled 启用标志
      * @apiParam (请求参数) {String} isDeleted 删除标志
@@ -89,12 +94,14 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "2",
      * "componentName": "测试组件4",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiSuccess (返回参数) {String} componentName 组件名称
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
+     * @apiSuccess (返回参数) {Long} menuId 菜单ID
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -114,7 +121,8 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "2",
      * "componentName": "测试组件4",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * }
      */
     @PutMapping("/update")
@@ -172,7 +180,8 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * }
      */
     @GetMapping("/query/{id}")
@@ -203,7 +212,8 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * },
      * {
      * "id": "1031480637256925185",
@@ -216,7 +226,8 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "2",
      * "componentName": "测试组件2",
-     * "moduleId": "1031479997352935426"
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1"
      * }
      * ]
      */
@@ -228,6 +239,34 @@ public class ComponentController {
         List<Component> list = componentService.getComponentsByModuleId(moduleId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/component/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/component/query/menu/{id} 【系统框架】组件查询
+     * @apiDescription 根据菜单ID,查询组件
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} menuId 菜单ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/component/query/menu/1031480144728195074
+     * @apiSuccessExample {json} 返回报文:
+     * {
+     * "id": "1031480144728195074",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-20T17:56:45.135+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-20T17:56:45.135+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 1,
+     * "componentType": "1",
+     * "componentName": "测试组件1",
+     * "moduleId": "1031479997352935426",
+     * "menuId": "1031480144728195074"
+     * }
+     */
+    @GetMapping("/query/menu/{id}")
+    public ResponseEntity<Component> getComponentByMenuId(@PathVariable Long menuId) {
+        return ResponseEntity.ok(componentService.getComponentByMenuId(menuId));
     }
 
 }

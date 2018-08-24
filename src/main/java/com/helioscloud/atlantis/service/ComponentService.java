@@ -137,4 +137,17 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
     public Component getComponentById(Long id) {
         return componentMapper.selectById(id);
     }
+
+    /**
+     * 根据MenuID，获取对应的组件信息
+     * @param menuId
+     * @return
+     */
+    public Component getComponentByMenuId(Long menuId) {
+        List<Component> list = componentMapper.selectList(new EntityWrapper<Component>().eq("menu_id",menuId));
+        if(list != null && list.size() > 0){
+            return list.get(0);
+        }
+        return null;
+    }
 }

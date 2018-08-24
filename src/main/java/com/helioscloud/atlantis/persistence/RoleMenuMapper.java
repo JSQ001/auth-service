@@ -16,4 +16,10 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
     // 根据用户ID，返回用户的所有角色已分配的菜单
     List<Menu> getMenusByUserId(@Param("userId") Long userId);
 
+    //根据角色ID，菜单ID集合，删除角色与菜单ID集合的关联
+    void deleteRoleMenuByRoleIdAndMenuIds(@Param("roleId") Long roleId, @Param("menuIds") List<Long> menuIds);
+
+    // 根据菜单ID集合，返回菜单的父菜单的集合
+    List<Long> getParentMenuIdsByRoleIds(@Param("menuIds") List<Long> menuIds);
+
 }

@@ -25,4 +25,7 @@ public class Component extends VersionDomainObject {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long moduleId;  // 模块ID
 
+    @TableField("menu_id")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long menu_id;  // 菜单ID
 }

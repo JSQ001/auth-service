@@ -310,4 +310,10 @@
             <column name="seq_number"/>
         </createIndex>
     </changeSet>
+    <changeSet id="2018082410580002" author="houyin.zhang">
+        <comment>菜单表中添加子目录字段</comment>
+        <addColumn tableName="sys_menu">
+            <column name="has_child_catalog" type="boolean" defaultValue="0" remarks="是否有子目录"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

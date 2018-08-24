@@ -99,7 +99,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     public Integer getFrontKeyByKeyAndLang(String key, String lang) {
         return frontKeyMapper.selectCount(new EntityWrapper<FrontKey>()
                 .eq("lang", lang)
-                .eq("key", key));
+                .eq("key_code", key));
     }
 
     /**
@@ -137,7 +137,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("module_id", moduleId)
-                .orderBy("key"));
+                .orderBy("key_code"));
     }
 
     /**
@@ -150,7 +150,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     public List<FrontKey> getFrontKeys(Boolean isEnabled, Page page) {
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .orderBy("key"));
+                .orderBy("key_code"));
     }
 
     /**
@@ -175,7 +175,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("lang", lang)
                 .eq("module_id", moduleId)
-                .orderBy("key"));
+                .orderBy("key_code"));
     }
     /**
      * 提示语言同步界面Title

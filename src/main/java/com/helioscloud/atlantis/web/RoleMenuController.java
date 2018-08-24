@@ -29,15 +29,31 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {POST} /api/roleMenu/create 【角色权限】角色菜单创建
-     * @apiDescription 创建角色关联菜单
+     * @api {POST} /api/roleMenu/assign/menu 【角色权限】角色分配菜单
+     * @apiDescription 角色分配菜单
+     * 角色在分配菜单时，每次都是把分配的菜单全量的传到后端保存
+     * 保存时，前端只传hasChildCatalog 为 false的数据
+     * flag：创建:1001，删除:1002
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
-     * @apiParam (请求参数) {Long} menuId 菜单ID
+     * @apiParam (请求参数) {RoleMenuList} roleMenuList 菜单集合
+     *@apiParam  (请求参数RoleMenuList的发展) {Long} menuId 菜单ID
+     * @apiParam  (请求参数RoleMenuList的发展) {String} flag  1001 表示 新增，1002 表示删除
      * @apiParamExample {json} 请求报文:
      * {
-     * "roleId":1029919265725378561,
-     * "menuId":1029973242290647041
+     * "roleId":1032110573802041345,
+     * "roleMenuList":[
+     * {
+     * "menuId":1032900906408247298,
+     * "flag":1002
+     * },{
+     * "menuId":1032900573367926786,
+     * "flag":1001
+     * },{
+     * "menuId":1032900640359350273,
+     * "flag":1001
+     * }
+     * ]
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} roleId 角色ID
@@ -63,14 +79,15 @@ public class RoleMenuController {
      * "menuId": "1029973242290647041"
      * }
      */
-    @PostMapping("/create")
-    public ResponseEntity<RoleMenu> createRoleMenu(@RequestBody RoleMenu roleMenu) {
-        return ResponseEntity.ok(roleMenuService.createRoleMenu(roleMenu));
+    @PostMapping("/assign/menu")
+    public ResponseEntity roleAssignMenu(@RequestBody RoleMenuDTO roleMenu) {
+        roleMenuService.roleAssignMenu(roleMenu);
+        return ResponseEntity.ok().build();
     }
 
     /**
      * @api {PUT} /api/roleMenu/update 【角色权限】角色菜单更新
-     * @apiDescription 更新角色关联菜单 只允许修改isEnabled和isDeleted字段
+     * @apiDescription 更新角色关联菜单 只允许修改isEnabled和isDeleted字段  已弃用
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
      * @apiParam (请求参数) {Boolean} isEnabled 启用标识
@@ -106,28 +123,29 @@ public class RoleMenuController {
      * "roleId": null,
      * "menuId": null
      * }
-     */
+     *//*
     @PutMapping("/update")
     public ResponseEntity<RoleMenu> updateRoleMenu(@RequestBody RoleMenu roleMenu) {
         return ResponseEntity.ok(roleMenuService.updateRole(roleMenu));
     }
-
-    /**
+*/
+   /* *//**
      * @api {DELETE} /api/roleMenu/delete/{id} 【角色权限】角色菜单删除
-     * @apiDescription 删除角色关联菜单[逻辑删除]
+     * @apiDescription 删除角色关联菜单[逻辑删除]  已弃用
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
      * http://localhost:9082/api/roleMenu/delete/1029987832156180482
      * @apiSuccessExample {json} 返回报文:
      * []
-     */
+     *//*
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteRoleMenu(@PathVariable Long id) {
         roleMenuService.deleteRoleMenu(id);
         return ResponseEntity.ok().build();
-    }
+    }*/
 
     /**
+     * 弃用
      * @api {POST} /api/roleMenu/batch/delete 【角色权限】角色菜单批量删除
      * @apiDescription 批量删除角色的菜单
      * @apiGroup Auth2Service
@@ -136,12 +154,13 @@ public class RoleMenuController {
      * [1029991221233504257,1029991251763843074]
      * @apiSuccessExample {json} 返回报文:
      * []
-     */
+     *//*
     @PostMapping("/batch/delete")
     public ResponseEntity deleteRoleByIds(@RequestBody List<Long> ids) {
         roleMenuService.deleteBatchRoleMenu(ids);
         return ResponseEntity.ok().build();
     }
+*/
 
     /**
      * @api {GET} /api/roleMenu/query/{id} 【角色权限】角色菜单查询
