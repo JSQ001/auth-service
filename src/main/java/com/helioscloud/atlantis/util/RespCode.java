@@ -16,6 +16,10 @@ public interface RespCode {
     String MENU_CODE_NULL = "10020";//菜单代码不允许为空
     String MENU_NAME_NULL = "10021";// 菜单名称不允许为空
     String CODE_NOT_UNION = "10022";// 菜单代码已经存在
+    String HAVING_CHILD_MENU = "10023";// 菜单代码已经存在
+    String MENU_FUNCTION_PARENT_MUST_BE_CATALOG = "10024";// 功能的上级菜单必须是目录
+    String MENU_PARENT_CATALOG_ERROR = "10025";//功能只能添加到最底级的目录
+    String ROOT_CATALOG_MUST_BE_CATALOG = "10026";//功能只能添加到最底级的目录
 
     String USER_ROLE_EXISTS = "10031"; // 用户角色组合已经存在
     String ROLE_MENU_EXISTS = "10041"; // 角色菜单组合已经存在

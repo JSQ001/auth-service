@@ -72,7 +72,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {POST} /api/userRole/update 【角色权限】用户角色更新
+     * @api {PUT} /api/userRole/update 【角色权限】用户角色更新
      * @apiDescription 更新用户关联角色 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段

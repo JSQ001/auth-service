@@ -37,6 +37,9 @@ public class Menu extends VersionDomainObject implements Comparable<Menu>{
     @TableField("menu_url")
     private String menuUrl;//菜单URL
 
+    @TableField("has_child_catalog")
+    private Boolean hasChildCatalog;//是否有子级目录
+
     @Override
     public int compareTo(Menu o) {
         //如果上级相同，则按序号排序，如果不同，则按上级排序

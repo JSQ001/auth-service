@@ -29,6 +29,9 @@ public class MenuController {
     /**
      * @api {POST} /api/menu/create 【菜单权限】菜单创建
      * @apiDescription 创建菜单
+     * 1)hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true,
+     * 2)如果上级是功能，则不允许再添加子功能
+     * 3)添加功能时，校验其上级是否有下级目录，如果有，则不允许功能，功能只能添加到最底级的目录、
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {String} menuCode 菜单代码
      * @apiParam (请求参数) {String} menuName 菜单名称
@@ -37,6 +40,22 @@ public class MenuController {
      * @apiParam (请求参数) {Long} parentMenuId 上级菜单ID,没有上级时，传0，即0为根目录
      * @apiParam (请求参数) {String} menuIcon 菜单图标
      * @apiParam (请求参数) {String} menuUrl 菜单URL
+     * @apiSuccess (返回参数) {Long} id 菜单ID
+     * @apiSuccess (返回参数) {String} menuCode 菜单代码
+     * @apiSuccess (返回参数) {String} menuName 菜单名称
+     * @apiSuccess (返回参数) {Integer} seqNumber 顺序号
+     * @apiSuccess (返回参数) {Integer} menuTypeEnum 类型 1000：功能 1001：目录，1002：组件
+     * @apiSuccess (返回参数) {Long} parentMenuId 上级菜单ID,没有上级时，传0，即0为根目录
+     * @apiSuccess (返回参数) {String} menuIcon 菜单图标
+     * @apiSuccess (返回参数) {String} menuUrl 菜单URL
+     * @apiSuccess (返回参数) {Boolean} hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
+     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Integer} versionNumber    版本号
+     * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
+     * @apiSuccess (返回参数) {Long} createdBy    创建人ID
+     * @apiSuccess (返回参数) {ZonedDateTime} lastUpdatedDate    最后更新时间
+     * @apiSuccess (返回参数) {Long} lastUpdatedBy    更新人ID
      * @apiParamExample {json} 请求报文:
      * {
      * "menuCode":"M001",
@@ -63,7 +82,8 @@ public class MenuController {
      * "menuTypeEnum": 1001,
      * "parentMenuId": 0,
      * "menuIcon": "",
-     * "menuUrl": ""
+     * "menuUrl": "",
+     * "hasChildCatalog":false
      * }
      */
     @PostMapping("/create")
@@ -72,8 +92,10 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/update 【菜单权限】菜单更新
+     * @api {PUT} /api/menu/update 【菜单权限】菜单更新
      * @apiDescription 更新菜单
+     * 1) 由目录 修改为 功能 时，判断是否还有除了当前菜单之后的目录，如果不存在，则需要修改hasChildCatalog的值为false
+     * 2) 禁用上级菜单的时候，把其所有子菜单都禁用掉，但启用的时候，只启用它自己，不递归处理子菜单
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id 菜单ID
      * @apiParam (请求参数) {String} menuCode 菜单代码 不允许修改
@@ -123,7 +145,7 @@ public class MenuController {
     }
 
     /**
-     * @api {POST} /api/menu/delete 【菜单权限】菜单删除
+     * @api {DELETE} /api/menu/delete 【菜单权限】菜单删除
      * @apiDescription 删除菜单
      * @apiGroup Auth2Service
      * @apiParamExample {json} 请求报文:
@@ -176,7 +198,8 @@ public class MenuController {
      * "menuTypeEnum": 1001,
      * "parentMenuId": 0,
      * "menuIcon": null,
-     * "menuUrl": null
+     * "menuUrl": null,
+     * "hasChildCatalog":false
      * }
      */
     @GetMapping("/query/{id}")
@@ -210,7 +233,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
-     * "menuUrl": null
+     * "menuUrl": null,
+     * "hasChildCatalog":false
      * },
      * {
      * "id": "1029973242290647041",
@@ -227,12 +251,13 @@ public class MenuController {
      * "menuTypeEnum": 1001,
      * "parentMenuId": 0,
      * "menuIcon": null,
-     * "menuUrl": null
+     * "menuUrl": null,
+     * "hasChildCatalog":false
      * }
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Menu>> getRoles( @RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Menu>> getRoles(@RequestParam(required = false) Boolean isEnabled,
                                                Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<Menu> list = menuService.getMenus(isEnabled, page);
@@ -267,7 +292,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
-     * "menuUrl": null
+     * "menuUrl": null,
+     * "hasChildCatalog":false
      * },
      * {
      * "id": "1029977215173144577",
@@ -284,7 +310,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
-     * "menuUrl": null
+     * "menuUrl": null,
+     * "hasChildCatalog":false
      * }
      * ]
      */
@@ -298,6 +325,5 @@ public class MenuController {
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query/byParentMenuId");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
-
 
 }
