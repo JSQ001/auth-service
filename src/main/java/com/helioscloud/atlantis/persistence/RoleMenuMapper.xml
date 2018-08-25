@@ -71,4 +71,9 @@
             </foreach>
         </if>
     </select>
+    <select id="getMenuIdsByRoleId" resultType="java.lang.Long" >
+        select sm.menu_id
+        from sys_role_menu sm
+        where sm.role_id = #{roleId}
+    </select>
 </mapper>
