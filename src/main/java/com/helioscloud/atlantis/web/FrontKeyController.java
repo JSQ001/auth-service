@@ -336,6 +336,8 @@ public class FrontKeyController {
      * "descriptions":"编辑1"
      * }
      * ]
+     * @apiSuccessExample {json} 返回报文:
+     * []
      */
     @PostMapping("/batch/update")
     public ResponseEntity batchUpdateFrontKey(@RequestBody List<FrontKeyDTO> list) {
@@ -344,11 +346,13 @@ public class FrontKeyController {
     }
 
     /**
-     * @api {POST} /api/frontKey/batch/update 【系统框架】界面Title批量保存
+     * @api {POST} /api/frontKey/batch/create 【系统框架】界面Title批量保存
      * @apiDescription 批量保存界面的Title的描述信息
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Long} id 界面Title的ID
-     * @apiParam (请求参数) {String} descriptions 需要更新的描述
+     * @apiParam (请求参数) {String} keyCode 界面Title代码
+     * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
+     * @apiParam (请求参数) {String} descriptions 描述
+     * @apiParam (请求参数) {Long} moduleId 模块ID
      * @apiParamExample {json} 请求报文:
      * [
      * {
@@ -364,6 +368,8 @@ public class FrontKeyController {
      * "moduleId":"1031479997352935426"
      * }
      * ]
+     * @apiSuccessExample {json} 返回报文:
+     * []
      */
     @PostMapping("/batch/create")
     public ResponseEntity batchCreateFrontKey(@RequestBody List<FrontKey> list) {
@@ -371,4 +377,53 @@ public class FrontKeyController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * @apiDescription 根据KeyCode，查询界面Title
+     * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
+     * 2) isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {String} keyCode 界面Title的keyCode代码
+     * @apiParam (请求参数) {String} [lang] 语言 zh_CN 中文，en_US 英文 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/query/keyCode?keyCode=common.create&lang=zh_CN&isEnabled=true
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1033005159668195330",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-24T22:56:37.035+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-24T22:56:37.035+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 1,
+     * "keyCode": "common.create",
+     * "lang": "zh_CN",
+     * "descriptions": "创建",
+     * "moduleId": "1031479997352935426"
+     * },
+     * {
+     * "id": "1033005159936630785",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-24T22:56:37.094+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-24T22:58:31.903+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 2,
+     * "keyCode": "common.create",
+     * "lang": "en_US",
+     * "descriptions": "CREATE",
+     * "moduleId": "1031479997352935426"
+     * }
+     * ]
+     */
+    @GetMapping("/query/keyCode")
+    public ResponseEntity<List<FrontKey>> getFrontKeyByKeyCodeAndLang(@RequestParam(required = true) String keyCode,
+                                                                      @RequestParam(required = false) String lang,
+                                                                      @RequestParam(required = false) Boolean isEnabled) {
+        List<FrontKey> list = frontKeyService.getFrontKeyByKeyCodeAndLang(keyCode, lang, isEnabled);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
 }

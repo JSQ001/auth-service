@@ -9,6 +9,7 @@ import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.persistence.FrontKeyMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -202,18 +203,19 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     /**
      * 批量更新 界面Title的描述
+     *
      * @param fontKeyDTOS
      */
     public void batchUpdateFrontKey(List<FrontKeyDTO> fontKeyDTOS) {
-        if(fontKeyDTOS != null && fontKeyDTOS.size() > 0){
+        if (fontKeyDTOS != null && fontKeyDTOS.size() > 0) {
             List<Long> keyIdList = new ArrayList<>();
-            Map<Long,FrontKeyDTO> map = new HashMap<>();
+            Map<Long, FrontKeyDTO> map = new HashMap<>();
             fontKeyDTOS.stream().forEach(key -> {
                 keyIdList.add(key.getId());
-                map.put(key.getId(),key);
+                map.put(key.getId(), key);
             });
             List<FrontKey> dbFrontKey = new ArrayList<>();
-            if(keyIdList.size() > 0){
+            if (keyIdList.size() > 0) {
                 //批量查询
                 dbFrontKey = frontKeyMapper.selectBatchIds(keyIdList);
             }
@@ -224,13 +226,29 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             this.updateBatchById(dbFrontKey);
         }
     }
+
     /**
      * 批量保存 界面Title
+     *
      * @param frontKey
      */
     public void batchCreateFrontKey(List<FrontKey> frontKey) {
-        if(frontKey != null && frontKey.size() > 0){
+        if (frontKey != null && frontKey.size() > 0) {
             this.insertBatch(frontKey);
         }
+    }
+
+    /**
+     * 根据KeyCode，查询界面Title，
+     * @param keyCode   界面Title的代码
+     * @param lang      语言，不传则不控制，传了则按传入的值进行控制
+     * @param isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
+     * @return 界面Title对象
+     */
+    public List<FrontKey> getFrontKeyByKeyCodeAndLang(String keyCode, String lang, Boolean isEnabled) {
+        return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
+                .eq("key_code", keyCode)
+                .eq(StringUtils.isNotEmpty(lang), "lang", lang)
+                .eq(isEnabled != null, "is_enabled", isEnabled));
     }
 }
