@@ -365,4 +365,13 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         }
         return menuItem;
     }
+
+    /**
+     * 根据角色ID，返回已分配的菜单ID的集合
+     * @param roleId
+     * @return
+     */
+    public List<Long> getMenuIdsByRoleId(Long roleId){
+        return roleMenuMapper.getMenuIdsByRoleId(roleId);
+    }
 }

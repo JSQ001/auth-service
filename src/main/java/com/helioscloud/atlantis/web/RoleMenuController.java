@@ -37,8 +37,8 @@ public class RoleMenuController {
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
      * @apiParam (请求参数) {RoleMenuList} roleMenuList 菜单集合
-     *@apiParam  (请求参数RoleMenuList的发展) {Long} menuId 菜单ID
-     * @apiParam  (请求参数RoleMenuList的发展) {String} flag  1001 表示 新增，1002 表示删除
+     * @apiParam (请求参数RoleMenuList的发展) {Long} menuId 菜单ID
+     * @apiParam (请求参数RoleMenuList的发展) {String} flag  1001 表示 新增，1002 表示删除
      * @apiParamExample {json} 请求报文:
      * {
      * "roleId":1032110573802041345,
@@ -238,7 +238,7 @@ public class RoleMenuController {
 
     /**
      * @api {POST} /api/roleMenu/query/roles 【角色权限】角色获取菜单
-     * @apiDescription 根据角色ID集合，取对应所有角色分配的菜单
+     * @apiDescription 根据角色ID集合，取对应所有角色分配的菜单树结构
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID集合
      * @apiParamExample {json} 请求报文
@@ -343,4 +343,23 @@ public class RoleMenuController {
         List<MenuDTO> list = roleMenuService.getMenusByRolesId(roleIds);
         return new ResponseEntity(list, HttpStatus.OK);
     }
+
+    /**
+     * @api {GET} /api/roleMenu/query/menuIds/{roleId} 【角色权限】角色菜单查询
+     * @apiDescription 根据角色ID，查询已分配的菜单的ID的集合。
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} id 角色ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/roleMenu/query/menuIds/1029987832156180482
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * 1029973242290647041,
+     * 1032111556967870466
+     * ]
+     */
+    @GetMapping("/query/menuIds/{roleId}")
+    public ResponseEntity<List<Long>> getMenuIdsByRoleId(@PathVariable Long roleId) {
+        return ResponseEntity.ok(roleMenuService.getMenuIdsByRoleId(roleId));
+    }
+
 }
