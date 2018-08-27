@@ -11,12 +11,12 @@ import java.util.List;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/21.
- * 菜单结构
+ * 菜单树结构
  */
 @Data
-public class MenuDTO implements Comparable<MenuDTO>,Serializable {
+public class MenuTreeDTO implements Comparable<MenuTreeDTO>,Serializable {
 
-    private List<MenuDTO> children = new ArrayList<>();
+    private List<MenuTreeDTO> children = new ArrayList<>();
     private String menuCode; // 菜单代码
     private String menuName;// 菜单名称
     private Integer seqNumber=0;// 菜单序号
@@ -28,10 +28,10 @@ public class MenuDTO implements Comparable<MenuDTO>,Serializable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     @JsonIgnore
-    private MenuDTO parent;
+    private MenuTreeDTO parent;
 
     @Override
-    public int compareTo(MenuDTO m) {
+    public int compareTo(MenuTreeDTO m) {
         //如果上级相同，则按序号排序，如果不同，则按上级排序
         if(this.getParentMenuId().compareTo(m.getParentMenuId()) == 0){
             return (m.seqNumber - this.seqNumber);
@@ -41,7 +41,7 @@ public class MenuDTO implements Comparable<MenuDTO>,Serializable {
     }
     @Override
     public String toString() {
-        return "MenuDTO{" +
+        return "MenuTreeDTO{" +
                 ", menuCode='" + menuCode + '\'' +
                 ", menuName='" + menuName + '\'' +
                 ", seqNumber=" + seqNumber +

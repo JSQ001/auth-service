@@ -3,7 +3,7 @@ package com.helioscloud.atlantis.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.RoleMenu;
-import com.helioscloud.atlantis.dto.MenuDTO;
+import com.helioscloud.atlantis.dto.MenuTreeDTO;
 import com.helioscloud.atlantis.dto.RoleMenuDTO;
 import com.helioscloud.atlantis.service.RoleMenuService;
 import org.springframework.data.domain.Pageable;
@@ -338,8 +338,8 @@ public class RoleMenuController {
      * ]
      */
     @PostMapping("/query/roles")
-    public ResponseEntity<List<MenuDTO>> getMenusByRoleIds(@RequestBody List<Long> roleIds) throws URISyntaxException {
-        List<MenuDTO> list = roleMenuService.getMenusByRolesId(roleIds);
+    public ResponseEntity<List<MenuTreeDTO>> getMenusByRoleIds(@RequestBody List<Long> roleIds) throws URISyntaxException {
+        List<MenuTreeDTO> list = roleMenuService.getMenuTreeByRolesId(roleIds);
         return new ResponseEntity(list, HttpStatus.OK);
     }
 

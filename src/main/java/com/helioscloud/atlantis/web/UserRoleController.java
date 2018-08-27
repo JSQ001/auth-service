@@ -1,10 +1,12 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
+import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
-import com.helioscloud.atlantis.dto.MenuDTO;
+import com.helioscloud.atlantis.dto.MenuTreeDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.dto.UserRoleDTO;
 import com.helioscloud.atlantis.service.RoleMenuService;
@@ -42,7 +44,7 @@ public class UserRoleController {
      * flag：创建:1001，删除:1002, 该删除为物理删除关联表的数据
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID
-     * @apiParam (请求参数) {UserAssignRoleDTO} assignRoleList 菜单集合
+     * @apiParam (请求参数) {UserAssignRoleDTO} assignRoleList 集合
      * @apiParam (请求参数RoleMenuList的属性) {Long} roleId 角色ID
      * @apiParam (请求参数RoleMenuList的属性) {String} flag  1001 表示 新增，1002 表示删除
      * @apiParamExample {json} 请求报文:
@@ -341,12 +343,12 @@ public class UserRoleController {
     }
 
     /**
-     * @api {GET} /query/user/menu/{userId} 【角色权限】用户获取菜单
-     * @apiDescription 根据用户ID，取对应所有角色分配的菜单
+     * @api {GET} /query/user/menuTree 【角色权限】用户获取菜单树
+     * @apiDescription 根据用户ID，取对应所有角色分配的菜单树
+     * 20180827 去掉前端传的userId参数，修改为后端取当前登录用户的菜单树
      * @apiGroup Auth2Service
-     * @apiParam (请求参数) {Long} userId 用户ID
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/userRole/query/user/menu/1005
+     * http://localhost:9082/api/userRole/query/user/menuTree
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -442,11 +444,121 @@ public class UserRoleController {
      * }
      * ]
      */
-    @GetMapping("/query/user/menu/{userId}")
-    public ResponseEntity<List<MenuDTO>> getMenusByRoleIds(@PathVariable Long userId) throws URISyntaxException {
-        List<MenuDTO> list = roleMenuService.getMenusByUserId(userId);
+    @GetMapping("/query/user/menuTree")
+    public ResponseEntity<List<MenuTreeDTO>> getMenuTreeByUserId() throws URISyntaxException {
+        //修改为取当前登录用户的菜单
+        Long userId = LoginInformationUtil.getCurrentUserID();
+        List<MenuTreeDTO> list = roleMenuService.getMenuTreeByUserId(userId);
         return new ResponseEntity(list, HttpStatus.OK);
     }
+
+    /**
+     * @api {GET} /query/user/menuList 【角色权限】用户获取菜单列表
+     * @apiDescription 根据当前登录用户，取对应所有角色分配的菜单列表
+     * @apiGroup Auth2Service
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/userRole/query/user/menuList
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1032635715402903554",
+     * "isEnabled": null,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "menuCode": "setting",
+     * "menuName": "设置",
+     * "seqNumber": 0,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": "0",
+     * "menuIcon": "setting",
+     * "menuUrl": "demo",
+     * "hasChildCatalog": null
+     * },
+     * {
+     * "id": "1032827031878868993",
+     * "isEnabled": null,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "menuCode": "1",
+     * "menuName": "1",
+     * "seqNumber": 0,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": "1032635715402903554",
+     * "menuIcon": "dot-chart",
+     * "menuUrl": "demo",
+     * "hasChildCatalog": null
+     * },
+     * {
+     * "id": "1032642040533954562",
+     * "isEnabled": null,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "menuCode": "role",
+     * "menuName": "人员管理",
+     * "seqNumber": 0,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": "1032635715402903554",
+     * "menuIcon": "user",
+     * "menuUrl": "demo",
+     * "hasChildCatalog": null
+     * },
+     * {
+     * "id": "1032826975104770050",
+     * "isEnabled": null,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "menuCode": "user",
+     * "menuName": "user",
+     * "seqNumber": 0,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": "1032642040533954562",
+     * "menuIcon": "bars",
+     * "menuUrl": "demo",
+     * "hasChildCatalog": null
+     * },
+     * {
+     * "id": "1032667046353645570",
+     * "isEnabled": null,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "menuCode": "ceshi",
+     * "menuName": "测试",
+     * "seqNumber": 0,
+     * "menuTypeEnum": 1000,
+     * "parentMenuId": "1032642040533954562",
+     * "menuIcon": "book",
+     * "menuUrl": "demo",
+     * "hasChildCatalog": null
+     * }
+     * ]
+     */
+    @GetMapping("/query/user/menuList")
+    public ResponseEntity<List<Menu>> getMenuListByUserId() throws URISyntaxException {
+        Long userId = LoginInformationUtil.getCurrentUserID();
+        List<Menu> list = roleMenuService.getMenuListByUserId(userId);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
 
     /**
      * @api {GET} /query/userList 【角色权限】用户列表查询分页
