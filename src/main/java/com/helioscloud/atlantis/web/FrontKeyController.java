@@ -305,6 +305,79 @@ public class FrontKeyController {
     }
 
     /**
+     * @api {GET} /api/frontKey/query/module/lang 【系统框架】界面Title查询所有
+     * @apiDescription 根据语言lang， 查询所有界面Title 不分页，用于切换多语言
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {String} lang 语言 zh_CN 中文，en 英文
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/query/lang?lang=en_US
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1033005159936630785",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-24T22:56:37.094+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-24T22:58:31.903+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 2,
+     * "keyCode": "common.create",
+     * "lang": "en_US",
+     * "descriptions": "CREATE",
+     * "moduleId": "1031479997352935426"
+     * },
+     * {
+     * "id": "1033276764090011650",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-25T16:55:52.575+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-27T10:45:57.769+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 6,
+     * "keyCode": "delete",
+     * "lang": "en_US",
+     * "descriptions": "delete",
+     * "moduleId": "1032887003941675010"
+     * },
+     * {
+     * "id": "1033276764161314817",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-25T16:55:52.587+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-27T10:45:57.78+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 6,
+     * "keyCode": "save",
+     * "lang": "en_US",
+     * "descriptions": "Save",
+     * "moduleId": "1032887003941675010"
+     * },
+     * {
+     * "id": "1033908447921356802",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-27T10:45:57.734+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-27T10:45:57.734+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 1,
+     * "keyCode": "test",
+     * "lang": "en_US",
+     * "descriptions": "test",
+     * "moduleId": "1032887003941675010"
+     * }
+     * ]
+     */
+    @GetMapping("/query/lang")
+    public ResponseEntity<List<FrontKey>> getFrontKeysByLang(@RequestParam(required = true) String lang) throws URISyntaxException {
+        List<FrontKey> list = frontKeyService.getFrontKeysByLang(lang);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    /**
      * @api {GET} /api/frontKey/sync/{language} 【系统框架】界面Title同步
      * @apiDescription 根据language，将所有中文下未同步到language的界面Title，同步到language里去。
      * @apiGroup SysFrameWork

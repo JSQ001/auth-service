@@ -357,7 +357,7 @@ public class RoleMenuController {
      * ]
      */
     @GetMapping("/query/menuIds/{roleId}")
-    public ResponseEntity<List<Long>> getMenuIdsByRoleId(@PathVariable Long roleId) {
+    public ResponseEntity<List<String>> getMenuIdsByRoleId(@PathVariable Long roleId) {
         return ResponseEntity.ok(roleMenuService.getMenuIdsByRoleId(roleId));
     }
 
