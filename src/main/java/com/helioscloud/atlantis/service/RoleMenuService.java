@@ -370,7 +370,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      * @param roleId
      * @return
      */
-    public List<Long> getMenuIdsByRoleId(Long roleId){
+    public List<String> getMenuIdsByRoleId(Long roleId){
         return roleMenuMapper.getMenuIdsByRoleId(roleId);
     }
 }

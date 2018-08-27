@@ -172,6 +172,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * 根据模块和Lang，取所有前端Title 分页
      *
      * @param moduleId  模块Id
+     * @param lang      语言类型
      * @param page
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
@@ -180,7 +181,19 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("lang", lang)
-                .eq("module_id", moduleId)
+                .eq(moduleId != null && moduleId > 0, "module_id", moduleId)
+                .orderBy("key_code"));
+    }
+
+    /**
+     * 根据模块和Lang，取所有前端Title 不分页
+     * @param lang      语言类型
+     * @return
+     */
+    public List<FrontKey> getFrontKeysByLang(String lang) {
+        return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
+                .eq("is_enabled", true)
+                .eq("lang", lang)
                 .orderBy("key_code"));
     }
 
@@ -244,6 +257,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     /**
      * 根据KeyCode，查询界面Title，
+     *
      * @param keyCode   界面Title的代码
      * @param lang      语言，不传则不控制，传了则按传入的值进行控制
      * @param isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制

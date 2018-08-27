@@ -71,9 +71,10 @@
             </foreach>
         </if>
     </select>
-    <select id="getMenuIdsByRoleId" resultType="java.lang.Long" >
-        select sm.menu_id
-        from sys_role_menu sm
-        where sm.role_id = #{roleId}
+    <select id="getMenuIdsByRoleId" resultType="java.lang.String" >
+        select srm.menu_id
+        from sys_role_menu srm,sys_menu sm
+        where  srm.menu_id= sm.id and sm.menu_type = 1000
+                and srm.role_id = #{roleId}
     </select>
 </mapper>
