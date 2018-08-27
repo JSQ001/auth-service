@@ -31,9 +31,8 @@ public class RoleMenuController {
     /**
      * @api {POST} /api/roleMenu/assign/menu 【角色权限】角色分配菜单
      * @apiDescription 角色分配菜单
-     * 角色在分配菜单时，每次都是把分配的菜单全量的传到后端保存
      * 保存时，前端只传hasChildCatalog 为 false的数据
-     * flag：创建:1001，删除:1002
+     * flag：创建:1001，删除:1002, 该删除为物理删除关联表的数据
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
      * @apiParam (请求参数) {RoleMenuList} roleMenuList 菜单集合
@@ -348,7 +347,7 @@ public class RoleMenuController {
      * @api {GET} /api/roleMenu/query/menuIds/{roleId} 【角色权限】角色菜单查询
      * @apiDescription 根据角色ID，查询已分配的菜单的ID的集合。
      * @apiGroup Auth2Service
-     * @apiParam (请求参数) {Long} id 角色ID
+     * @apiParam (请求参数) {Long} roleId 角色ID
      * @apiParamExample {json} 请求报文
      * http://localhost:9082/api/roleMenu/query/menuIds/1029987832156180482
      * @apiSuccessExample {json} 返回报文:

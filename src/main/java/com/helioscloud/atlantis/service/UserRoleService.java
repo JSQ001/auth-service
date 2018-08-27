@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
+import com.cloudhelios.atlantis.util.LoginInformationUtil;
+import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
+import com.helioscloud.atlantis.dto.UserAssignRoleDTO;
 import com.helioscloud.atlantis.dto.UserRoleDTO;
 import com.helioscloud.atlantis.persistence.UserRoleMapper;
 import com.helioscloud.atlantis.util.RespCode;
@@ -188,4 +191,77 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         return userRoleMapper.selectById(id);
     }
 
+    /**
+     * 用户批量分配角色
+     * @param userRole
+     * @return
+     */
+    @Transactional
+    public void userAssignRole(UserRoleDTO userRole) {
+        //校验
+        if (userRole == null || userRole.getId() != null) {
+            throw new BizException(RespCode.ID_NOT_NULL);
+        }
+        Long userId = null;
+        List<UserAssignRoleDTO> assignRole = null;
+        //需要删除的
+        List<Long> deleteRoleIds = new ArrayList<>();
+        //需要保存的
+        List<UserRole> userRoleList = new ArrayList<>();
+        List<Long> userRoleIdList = new ArrayList<>();
+        if (userRole != null) {
+            userId = userRole.getUserId();
+            assignRole = userRole.getAssignRoleList();
+        }
+        if (assignRole != null) {
+            //取所有需要删除的角色ID
+            assignRole.stream().filter(m -> "1002".equals(m.getFlag())).forEach(d -> {
+                deleteRoleIds.add(d.getRoleId());
+            });
+            // 所有需要新增的角色ID
+            Long finalUserId = userId;
+            assignRole.stream().filter(m -> "1001".equals(m.getFlag())).forEach(d -> {
+                //检查是否已经存在，已经存在的，则不更新
+                Integer exists = userRoleMapper.selectCount(new EntityWrapper<UserRole>().eq("user_id",finalUserId).eq("role_id",d.getRoleId()));
+                if(exists == null || exists == 0){
+                    userRoleIdList.add(d.getRoleId());
+                }
+            });
+            if (deleteRoleIds.size() > 0) {
+                // 删除
+                userRoleMapper.deleteUserRoleByUserIdAndRoleIds(userId, deleteRoleIds);
+            }
+            userRoleIdList.stream().forEach( roleId -> {
+                UserRole ur = new UserRole();
+                ur.setUserId(userRole.getUserId());
+                ur.setRoleId(roleId);
+                userRoleList.add(ur);
+            });
+            if (userRoleList.size() > 0) {
+                //保存角色与菜单的关联
+                this.insertBatch(userRoleList);
+            }
+        }
+    }
+
+    /**
+     * 用户分配角色查询[所有启用且未删除的]
+     * @param userId 用户ID
+     * @param roleCode 角色代码
+     * @param roleName 角色名称
+     * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下租户已分配的启用的角色
+     * @param page
+     * @return
+     */
+    public List<Role> getRolesByCond(Long userId,String roleCode,String roleName,String queryFlag,Page page){
+        List<Role> result = null;
+        if("ALL".equals(queryFlag)){
+            // 查当前租户下所有启用的角色
+            result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantID(),roleCode,roleName,page);
+        }else if ("ASSIGNED".equals(queryFlag)){
+            //查当前租房下租户已分配的启用的角色
+            result = userRoleMapper.getSelectedRolesByCond(userId,roleCode,roleName,page);
+        }
+        return result;
+    }
 }
