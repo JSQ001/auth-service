@@ -234,7 +234,11 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      */
     public void batchCreateFrontKey(List<FrontKey> frontKey) {
         if (frontKey != null && frontKey.size() > 0) {
-            this.insertBatch(frontKey);
+            //批量保存，里面需要校验keyCode不允许重复
+            frontKey.forEach(front -> {
+                this.createFrontKey(front);
+            });
+            //this.insertBatch(frontKey);
         }
     }
 

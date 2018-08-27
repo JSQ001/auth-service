@@ -2,6 +2,7 @@ package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
+import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
 import com.helioscloud.atlantis.dto.MenuDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
@@ -36,8 +37,111 @@ public class UserRoleController {
     }
 
     /**
-     * @api {POST} /api/userRole/create 【角色权限】用户角色创建
-     * @apiDescription 创建用户角色
+     * @api {POST} /api/userRole/assign/role 【角色权限】用户批量分配角色
+     * @apiDescription 用户批量分配角色
+     * flag：创建:1001，删除:1002, 该删除为物理删除关联表的数据
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} userId 用户ID
+     * @apiParam (请求参数) {UserAssignRoleDTO} assignRoleList 菜单集合
+     * @apiParam (请求参数RoleMenuList的属性) {Long} roleId 角色ID
+     * @apiParam (请求参数RoleMenuList的属性) {String} flag  1001 表示 新增，1002 表示删除
+     * @apiParamExample {json} 请求报文:
+     * {
+     * "userId":1013,
+     * "assignRoleList":[
+     * {
+     * "roleId":1029943470084898818,
+     * "flag":1001
+     * },{
+     * "roleId":1029919265725378561,
+     * "flag":1001
+     * },{
+     * "roleId":1029919290434023426,
+     * "flag":1001
+     * }
+     * ]
+     * }
+     * @apiSuccessExample {json} 返回报文:
+     * {
+     * }
+     */
+    @PostMapping("/assign/role")
+    public ResponseEntity userAssignRole(@RequestBody UserRoleDTO userRoleDTO) {
+        userRoleService.userAssignRole(userRoleDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @api {GET} /api/userRole/query/roles 【角色权限】用户分配角色查询
+     * @apiDescription 用户分配角色查询
+     * queryFlag: ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下租户已分配的启用的角色
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} userId 用户ID
+     * @apiParam (请求参数) {String} [roleCode] 角色代码 模糊查询
+     * @apiParam (请求参数) {String} [roleName] 角色名称 模糊查询
+     * @apiParam (请求参数) {String} [queryFlag] 查询范围: ALL 查所有，ASSIGNED查用户已分配的角色
+     * @apiParam (请求参数) {Integer} page 当前页码
+     * @apiParam (请求参数) {Integer} size 每页大小
+     * @apiParamExample {json} 请求报文:
+     * http://localhost:9082/api/userRole/query/roles?userId=1013&queryFlag=ASSIGNED&roleCode=R00&roleName=测试&page=0&size=20
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1029943470084898818",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "roleCode": "R001",
+     * "roleName": "测试角色null",
+     * "tenantId": "1022057230117146625"
+     * },
+     * {
+     * "id": "1029919265725378561",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "roleCode": "R002",
+     * "roleName": "测试角色2",
+     * "tenantId": "1022057230117146625"
+     * },
+     * {
+     * "id": "1029919290434023426",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "roleCode": "R003",
+     * "roleName": "测试角色3",
+     * "tenantId": "1022057230117146625"
+     * }
+     * ]
+     */
+    @GetMapping("/query/roles")
+    public ResponseEntity<List<Role>> getRolesByCond(@RequestParam(required = true) Long userId,
+                                                     @RequestParam(required = false) String roleCode,
+                                                     @RequestParam(required = false) String roleName,
+                                                     @RequestParam(required = true) String queryFlag,
+                                                     Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<Role> list = userRoleService.getRolesByCond(userId, roleCode, roleName, queryFlag, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/userRole/query/roles");
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {POST} /api/userRole/create 【角色权限】用户分配角色
+     * @apiDescription 用户分配角色
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID
      * @apiParam (请求参数) {Long} roleId 角色ID
@@ -76,7 +180,7 @@ public class UserRoleController {
     }
 
     /**
-     * @api {PUT} /api/userRole/update 【角色权限】用户角色更新
+     * @api {PUT} /api/userRole/update 【角色权限】用户分配角色更新
      * @apiDescription 更新用户关联角色 只允许修改isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
