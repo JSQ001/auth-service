@@ -451,6 +451,7 @@ public class FrontKeyController {
     }
 
     /**
+     * @api {POST} /api/frontKey/query/keyCode 【系统框架】界面Title查询所有
      * @apiDescription 根据KeyCode，查询界面Title
      * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
      * 2) isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
@@ -498,5 +499,54 @@ public class FrontKeyController {
                                                                       @RequestParam(required = false) Boolean isEnabled) {
         List<FrontKey> list = frontKeyService.getFrontKeyByKeyCodeAndLang(keyCode, lang, isEnabled);
         return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    /**
+     * @api {POST} /api/frontKey/query/keyword 【系统框架】界面Title查询分页
+     * @apiDescription 根据keyword, 去匹配key或描述, [moduleId], [lang]查询界面Title
+     * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
+     * 2) keyCode 界面Title的keyCode代码，不传则不控制，传了则按传入的值进行控制 模糊查询
+     * 3) descriptions 界面Title的描述，不传则不控制，传了则按传入的值进行控制 模糊查询
+     * 4) moduleId 模块ID，不传则不控制，传了则按传入的值进行控制
+     * 5) keyword 语言，不传则不控制，传了则匹配keyCode或descriptions字段，模糊查询
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {String} [keyCode] 界面Title的keyCode代码 模糊查询
+     * @apiParam (请求参数) {String} [descriptions] 界面Title的描述 模糊查询
+     * @apiParam (请求参数) {Long} [moduleId] 模块ID
+     * @apiParam (请求参数) {String} [keyword] 用于匹配keyCode或descriptions字段，模糊查询
+     * @apiParam (请求参数) {String} [lang] 语言 zh_CN 中文，en_US 英文 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Integer} [page] 当前页
+     * @apiParam (请求参数) {Integer} [size] 每页条数
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/query/keyword?page=0&size=5&keyword=save&moduleId=1031479997352935426&descriptions=保
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1031829753933651970",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": 1,
+     * "keyCode": "common.save",
+     * "lang": "zh_CN",
+     * "descriptions": "保存",
+     * "moduleId": "1031479997352935426"
+     * }
+     * ]
+     */
+    @GetMapping("/query/keyword")
+    public ResponseEntity<List<FrontKey>> getFrontKeysByCond(@RequestParam(required = false) String keyCode,
+                                                             @RequestParam(required = false) String descriptions,
+                                                             @RequestParam(required = false) String moduleId,
+                                                             @RequestParam(required = false) String lang,
+                                                             @RequestParam(required = false) String keyword,
+                                                             Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/keyword");
+        List<FrontKey> list = frontKeyService.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, page);
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 }

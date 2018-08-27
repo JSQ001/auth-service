@@ -10,6 +10,7 @@ import com.helioscloud.atlantis.persistence.FrontKeyMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -269,4 +270,40 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
                 .eq(StringUtils.isNotEmpty(lang), "lang", lang)
                 .eq(isEnabled != null, "is_enabled", isEnabled));
     }
+
+    /**
+     * 界面Title 模糊查询
+     * 查询启用且未删除的界面Title
+     * @param keyCode
+     * @param descriptions
+     * @param moduleId
+     * @param lang
+     * @param keyword      模糊匹配 keyCode或descriptions
+     * @return
+     */
+    public List<FrontKey> getFrontKeysByCond(@Param("keyCode") String keyCode,
+                                             @Param("descriptions") String descriptions,
+                                             @Param("moduleId") String moduleId,
+                                             @Param("lang") String lang,
+                                             @Param("keyword") String keyword,
+                                             Page page){
+        if(StringUtils.isEmpty(keyCode)){
+            keyCode = null;
+        }
+        if(StringUtils.isEmpty(descriptions)){
+            descriptions = null;
+        }
+        if(StringUtils.isEmpty(moduleId)){
+            moduleId = null;
+        }
+        if(StringUtils.isEmpty(lang)){
+            lang = null;
+        }
+        if(StringUtils.isEmpty(keyword)){
+            keyword = null;
+        }
+        return frontKeyMapper.getFrontKeysByCond(keyCode,descriptions,moduleId,lang,keyword,page);
+    }
+
+
 }
