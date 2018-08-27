@@ -3,28 +3,17 @@
  * All rights are reserved.
  */
 
-package com.cloudhelios.atlantis.payment.service.es;
+package com.helioscloud.atlantis.service.es;
 
 
 
-import com.baomidou.mybatisplus.plugins.Page;
-import com.cloudhelios.atlantis.payment.EsCashTransactionClassDTO;
-import com.cloudhelios.atlantis.payment.domain.enumeration.ElasticSearchConstants;
-import com.cloudhelios.atlantis.payment.persistence.EsCashTransactionClassMapper;
+import com.helioscloud.atlantis.domain.enumeration.ElasticSearchConstants;
+import com.helioscloud.atlantis.persistence.MenuMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 /**
  * Project Name:artemis
@@ -34,82 +23,81 @@ import java.util.concurrent.FutureTask;
  */
 @Service
 @Slf4j
-public class EsCashTransactionClassInfoSerivce {
+public class EsMenuInfoSerivce {
     private static final int INDEX_LIMIT = 10000;
     @Autowired
-    private EsCashTransactionClassMapper esCashTransactionClassMapper;
+    private MenuMapper menuMapper;
     @Autowired
     ElasticsearchService elasticsearchService;
 
     public void removeAll() throws IOException {
-        elasticsearchService.deleteIndex(ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX);
+        elasticsearchService.deleteIndex(ElasticSearchConstants.AUTH_MENU);
     }
-    //建立索引数据
+   /* //建立索引数据
     public void doIndexTransaction() {
-        elasticsearchService.createIndex(ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX,this.getSetting(),this.getMapping());
-
+        elasticsearchService.createIndex(ElasticSearchConstants.AUTH_MENU,this.getSetting(),this.getMapping());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         FutureTask<String> futureTask = new FutureTask<>(() -> {
-            this.initAllCashTransactionClass();
+            this.initAllMenu();
             return null;
         });
         executor.execute(futureTask);;
     }
 
-    public void initAllCashTransactionClass() {
+    public void initAllMenu() {
         int total = 0;
         int pageCnt = 0;
-        Page<EsCashTransactionClassDTO> page = new Page<EsCashTransactionClassDTO>();
+        Page<Menu> page = new Page<Menu>();
         page.setCurrent(pageCnt);
         page.setSize(INDEX_LIMIT);
         Long start = System.currentTimeMillis();
         log.info("执行分页查询，到第{}页", pageCnt);
-        Page<EsCashTransactionClassDTO> allCashTransactionClass = this.selectCashTransactionClassFromDB(page);
+        Page<Menu> allCashTransactionClass = this.selectCashTransactionClassFromDB(page);
         while (allCashTransactionClass.getRecords().size() > 0) {
             total = total + allCashTransactionClass.getRecords().size();
-            this.batchIndex(allCashTransactionClass.getRecords());
+           // this.batchIndex(allCashTransactionClass.getRecords());
             pageCnt++;
             page.setCurrent(pageCnt);
             allCashTransactionClass = this.selectCashTransactionClassFromDB(page);
             log.info("执行分页查询，到第{}页", pageCnt);
             if (allCashTransactionClass.getRecords().size() < INDEX_LIMIT) {
-                this.batchIndex(allCashTransactionClass.getRecords());
+             //   this.batchIndex(allCashTransactionClass.getRecords());
                 break;
             }
         }
         log.info("完成现金事务分类信息索引,耗时:{}ms", System.currentTimeMillis() - start);
     }
 
-    public Page<EsCashTransactionClassDTO> selectCashTransactionClassFromDB(Page<EsCashTransactionClassDTO> page) {
+    public Page<Menu> selectCashTransactionClassFromDB(Page<Menu> page) {
         page.setSearchCount(false);
         Long start = System.currentTimeMillis();
-        List<EsCashTransactionClassDTO> allCashTransactionClass =esCashTransactionClassMapper.selectAllCashTransactionClass(page); //
-        log.info("查询现金事务分类耗时:{}ms,一共获得:{}条数据", System.currentTimeMillis() - start, allCashTransactionClass.size());
-        page.setRecords(allCashTransactionClass);
+        //List<Menu> allCashTransactionClass =menuMapper.selectPage() //
+       // log.info("查询现金事务分类耗时:{}ms,一共获得:{}条数据", System.currentTimeMillis() - start, allCashTransactionClass.size());
+        //page.setRecords(allCashTransactionClass);
         return page;
     }
 
-    private void batchIndex(List<EsCashTransactionClassDTO> allCashTransactionClass) {
-        List<EsCashTransactionClassDTO> esCashTransactionClassDTO = new ArrayList<>();
+    private void batchIndex(List<Menu> allCashTransactionClass) {
+        List<Menu> esCashTransactionClassDTO = new ArrayList<>();
         int i = 0;
-        for (EsCashTransactionClassDTO cashTransactionClass : allCashTransactionClass) {
+        for (Menu cashTransactionClass : allCashTransactionClass) {
             esCashTransactionClassDTO.add(cashTransactionClass);
             i++;
             if (i % INDEX_LIMIT == 0) {
-                elasticsearchService.saveIndex(esCashTransactionClassDTO, ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX);
+                elasticsearchService.saveIndex(esCashTransactionClassDTO, ElasticSearchConstants.AUTH_MENU);
                 esCashTransactionClassDTO.clear();
             }
         }
         if (CollectionUtils.isNotEmpty(esCashTransactionClassDTO)) {
-            elasticsearchService.saveIndex(esCashTransactionClassDTO, ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX);
+            elasticsearchService.saveIndex(esCashTransactionClassDTO, ElasticSearchConstants.AUTH_MENU);
         }
     }
 
-    public void saveEsCashTransactionClassDTOIndex(EsCashTransactionClassDTO cashTransactionClass) {
-        elasticsearchService.saveIndex(Arrays.asList(cashTransactionClass), ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX);
+    public void saveEsCashTransactionClassDTOIndex(Menu cashTransactionClass) {
+        elasticsearchService.saveIndex(Arrays.asList(cashTransactionClass), ElasticSearchConstants.AUTH_MENU);
     }
     public void deleteEsCashTransactionClassDTOIndex(Long  id)throws Exception {
-        elasticsearchService.deleteDataIndex(Arrays.asList(id), ElasticSearchConstants.CASHTRANSACTIONCLASS_INDEX);
+        elasticsearchService.deleteDataIndex(Arrays.asList(id), ElasticSearchConstants.AUTH_MENU);
     }
     public boolean isElasticSearchEnable(){
         return elasticsearchService.isElasticSearchEnable();
@@ -155,5 +143,5 @@ public class EsCashTransactionClassInfoSerivce {
             e.printStackTrace();
         }
         return builder;
-    }
+    }*/
 }
