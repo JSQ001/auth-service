@@ -25,4 +25,31 @@
           where sfk.key = k.key
             and sfk.lang = #{lanugage})
     </select>
+    <select id="getFrontKeysByCond" resultType="com.helioscloud.atlantis.domain.FrontKey">
+             select id,
+                module_id,
+                key_code,
+                lang,
+                descriptions,
+                version_number,
+                is_deleted,
+                is_enabled
+           from sys_front_key k
+            where k.is_enabled = 1 and k.is_deleted = 0
+            <if test="keyCode != null">
+                and k.key_code like concat(concat('%',#{keyCode}),'%')
+            </if>
+            <if test="descriptions != null">
+                and k.descriptions like concat(concat('%',#{descriptions}),'%')
+            </if>
+            <if test="keyword != null">
+                and (k.descriptions like concat(concat('%',#{keyword}),'%') or k.key_code like concat(concat('%',#{keyword}),'%'))
+            </if>
+            <if test="lang != null">
+                and k.lang = #{lang}
+            </if>
+            <if test="moduleId != null">
+                and k.module_id = #{moduleId}
+            </if>
+    </select>
 </mapper>
