@@ -3,7 +3,9 @@ package com.helioscloud.atlantis.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Interface;
+import com.helioscloud.atlantis.dto.InterfaceTreeDTO;
 import com.helioscloud.atlantis.service.InterfaceService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -278,6 +280,150 @@ public class InterfaceController {
         List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interface/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/interface/queryAll 【系统框架】接口查询不分页
+     * @apiDescription 根据模块Id，查询模块下所有接口 不分页
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/interface/queryAll?moduleId=1031479997352935426
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1031509686226259969",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-20T19:54:08.383+08:00",
+     * "createdBy": 1005,
+     * "lastUpdatedDate": "2018-08-20T19:54:08.383+08:00",
+     * "lastUpdatedBy": 1005,
+     * "versionNumber": 1,
+     * "interfaceName": "查询模块",
+     * "requestProtocol": "http",
+     * "requestMethod": "GET",
+     * "requestFormat": "JSON",
+     * "reqUrl": "http://localhost:9082/api/module/query",
+     * "responseFormat": "JSON",
+     * "remark": "test",
+     * "moduleId": "1031479997352935426"
+     * },
+     * {
+     * "id": "1031548055836725249",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-20T22:26:36.416+08:00",
+     * "createdBy": 0,
+     * "lastUpdatedDate": "2018-08-20T22:26:36.417+08:00",
+     * "lastUpdatedBy": 0,
+     * "versionNumber": 1,
+     * "interfaceName": "查询模块3",
+     * "requestProtocol": "http",
+     * "requestMethod": "GET",
+     * "requestFormat": "JSON",
+     * "reqUrl": "http://localhost:9082/api/module/query",
+     * "responseFormat": "JSON",
+     * "remark": "test3",
+     * "moduleId": "1031479997352935426"
+     * }
+     * ]
+     */
+    @GetMapping("/queryAll")
+    public ResponseEntity<List<Interface>> getInterfacesAllByModuleId(@RequestParam(required = true) Long moduleId,
+                                                                      @RequestParam(required = false) Boolean isEnabled) throws URISyntaxException {
+        List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, isEnabled);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/interface/query/keyword 【系统框架】接口keyword查询不分页
+     * @apiDescription 接口查询 模糊查询所有未删除的数据 按 module_id,req_url排序，不分页
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} [moduleId] 模块ID 不传则不控，传了则按其控制
+     * @apiParam (请求参数) {String} keyword 模糊匹配 interfaceName或reqUrl字段
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/interface/query/keyword?keyword=查询
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "moduleName": "公共",
+     * "moduleId": "1032105431320297474",
+     * "listInterface": [
+     * {
+     * "id": "1034348505392799745",
+     * "isEnabled": true,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "interfaceName": "查询模块1",
+     * "requestProtocol": null,
+     * "requestMethod": null,
+     * "requestFormat": null,
+     * "reqUrl": "http://localhost:9082/api/module/query1",
+     * "responseFormat": null,
+     * "remark": "test1",
+     * "moduleId": "1032105431320297474"
+     * },
+     * {
+     * "id": "1034348544152363010",
+     * "isEnabled": true,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "interfaceName": "查询模块2",
+     * "requestProtocol": null,
+     * "requestMethod": null,
+     * "requestFormat": null,
+     * "reqUrl": "http://localhost:9082/api/module/query2",
+     * "responseFormat": null,
+     * "remark": "test2",
+     * "moduleId": "1032105431320297474"
+     * }
+     * ]
+     * },
+     * {
+     * "moduleName": "预算",
+     * "moduleId": "1032887003941675010",
+     * "listInterface": [
+     * {
+     * "id": "1034348997464350722",
+     * "isEnabled": true,
+     * "isDeleted": null,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "interfaceName": "预算查询",
+     * "requestProtocol": null,
+     * "requestMethod": null,
+     * "requestFormat": null,
+     * "reqUrl": "/api/budget/query",
+     * "responseFormat": null,
+     * "remark": "budget query",
+     * "moduleId": "1032887003941675010"
+     * }
+     * ]
+     * }
+     * ]
+     */
+    @GetMapping("/query/keyword")
+    public ResponseEntity<List<InterfaceTreeDTO>> getInterfacesByKeyword(@RequestParam(required = false) String moduleId,
+                                                                         @RequestParam(required = true) String keyword) throws URISyntaxException {
+        if (StringUtils.isEmpty(keyword)) {
+            // 当keyword为空时，不执行查询,直接返回
+            return new ResponseEntity(null, HttpStatus.OK);
+        }
+        List<InterfaceTreeDTO> list = interfaceService.getInterfacesByKeyword(moduleId, keyword);
+        return new ResponseEntity(list, HttpStatus.OK);
     }
 
 }

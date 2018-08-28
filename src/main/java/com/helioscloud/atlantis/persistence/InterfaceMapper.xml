@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.helioscloud.atlantis.persistence.InterfaceMapper">
+    <!-- 接口 模糊查询 查所有未删除的数据，按 module_id,req_url排序 -->
+    <select id="getInterfacesByKeyword" resultType="com.helioscloud.atlantis.domain.Interface">
+        select si.id,
+                si.module_id,
+                si.req_url,
+                si.interface_name,
+                si.remark,
+                si.is_enabled
+        from sys_interface si
+        where si.is_deleted = 0
+        <if test="keyword != null">
+            and (si.interface_name like concat(concat('%',#{keyword}),'%') or si.req_url like concat(concat('%',#{keyword}),'%'))
+        </if>
+        <if test="moduleId != null">
+            and si.module_id = #{moduleId}
+        </if>
+        order by module_id,req_url
+    </select>
+</mapper>

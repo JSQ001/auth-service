@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.service.MenuService;
+import com.helioscloud.atlantis.service.es.EsMenuInfoSerivce;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -21,9 +23,10 @@ import java.util.List;
 @RequestMapping("/api/menu")
 public class MenuController {
     private final MenuService menuService;
-
-    public MenuController(MenuService roleService) {
+    private final EsMenuInfoSerivce esMenuInfoSerivce;
+    public MenuController(MenuService roleService, EsMenuInfoSerivce esMenuInfoSerivce) {
         this.menuService = roleService;
+        this.esMenuInfoSerivce = esMenuInfoSerivce;
     }
 
     /**
@@ -326,4 +329,32 @@ public class MenuController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {DELETE} /api/menu/es/remove/all 【角色权限】菜单-移除索引库中全部数据
+     * @apiDescription 菜单-移除索引库中全部数据
+     * @apiGroup Auth2Service
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/menu/es/remove/all
+     * @apiSuccessExample {json} 返回报文:
+     * []
+     */
+    @RequestMapping(value = "/es/remove/all", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> removeAllMenu()  throws IOException {
+        esMenuInfoSerivce.removeAll();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @api {GET} /api/menu/es/init/all 【角色权限】菜单-初始化索引库全部数据
+     * @apiDescription 菜单-初始化索引库全部数据
+     * @apiGroup Auth2Service
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/menu/es/init/all
+     * @apiSuccessExample {json} 返回报文:
+     */
+    @RequestMapping(value = "/es/init/all", method = RequestMethod.GET)
+    public ResponseEntity<Void> initAllMenu(){
+        esMenuInfoSerivce.doIndexTransaction();
+        return ResponseEntity.ok().build();
+    }
 }

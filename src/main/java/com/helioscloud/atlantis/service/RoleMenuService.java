@@ -366,7 +366,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         return null;
     }
     /**
-     * 根据角色ID，返回已分配的菜单ID的集合
+     * 根据角色ID，返回已分配的菜单ID的集合（只取功能，不取目录）
      * @param roleId
      * @return
      */

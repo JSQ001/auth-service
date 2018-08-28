@@ -503,7 +503,7 @@ public class FrontKeyController {
 
     /**
      * @api {POST} /api/frontKey/query/keyword 【系统框架】界面Title查询分页
-     * @apiDescription 根据keyword, 去匹配key或描述, [moduleId], [lang]查询界面Title
+     * @apiDescription 模糊查询接口，只查未删除且启用状态的数据, 按key_code排序
      * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
      * 2) keyCode 界面Title的keyCode代码，不传则不控制，传了则按传入的值进行控制 模糊查询
      * 3) descriptions 界面Title的描述，不传则不控制，传了则按传入的值进行控制 模糊查询

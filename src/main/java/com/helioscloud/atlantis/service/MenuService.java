@@ -6,6 +6,7 @@ import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.persistence.MenuMapper;
+import com.helioscloud.atlantis.service.es.EsMenuInfoSerivce;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,11 @@ import java.util.List;
 public class MenuService extends BaseService<MenuMapper, Menu> {
 
     private final MenuMapper menuMapper;
+    private final EsMenuInfoSerivce esMenuInfoSerivce;
 
-    public MenuService(MenuMapper menuMapper) {
+    public MenuService(MenuMapper menuMapper, EsMenuInfoSerivce esMenuInfoSerivce) {
         this.menuMapper = menuMapper;
+        this.esMenuInfoSerivce = esMenuInfoSerivce;
     }
 
     /**
@@ -184,8 +187,14 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      * @return
      */
     public Integer getMenuCountByMenuCode(String menuCode) {
-        return menuMapper.selectCount(new EntityWrapper<Menu>()
-                .eq("menu_code", menuCode));
+        //是否启用了ES，启用了则从ES里查询
+       /* if(esMenuInfoSerivce.isElasticSearchEnable()){
+            return menuMapper.selectCount(new EntityWrapper<Menu>()
+                    .eq("menu_code", menuCode));
+        }else{*/
+            return menuMapper.selectCount(new EntityWrapper<Menu>()
+                    .eq("menu_code", menuCode));
+       // }
     }
 
     /**
