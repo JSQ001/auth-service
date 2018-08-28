@@ -22,7 +22,7 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
     // 根据菜单ID集合，返回菜单的父菜单的集合
     List<Long> getParentMenuIdsByRoleIds(@Param("menuIds") List<Long> menuIds);
 
-    // 根据角色ID，返回已分配的菜单ID的集合
+    // 根据角色ID，返回已分配的菜单ID的集合（只取功能，不取目录）
     List<String> getMenuIdsByRoleId(@Param("roleId") Long roleId);
 
 

@@ -345,7 +345,7 @@ public class RoleMenuController {
 
     /**
      * @api {GET} /api/roleMenu/query/menuIds/{roleId} 【角色权限】角色菜单查询
-     * @apiDescription 根据角色ID，查询已分配的菜单的ID的集合。
+     * @apiDescription 根据角色ID，查询已分配的菜单的ID的集合。（只取功能，不取目录）
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
      * @apiParamExample {json} 请求报文

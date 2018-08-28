@@ -51,5 +51,6 @@
             <if test="moduleId != null">
                 and k.module_id = #{moduleId}
             </if>
+          order by key_code
     </select>
 </mapper>
