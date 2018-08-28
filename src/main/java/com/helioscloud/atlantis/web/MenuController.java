@@ -24,6 +24,7 @@ import java.util.List;
 public class MenuController {
     private final MenuService menuService;
     private final EsMenuInfoSerivce esMenuInfoSerivce;
+
     public MenuController(MenuService roleService, EsMenuInfoSerivce esMenuInfoSerivce) {
         this.menuService = roleService;
         this.esMenuInfoSerivce = esMenuInfoSerivce;
@@ -157,7 +158,7 @@ public class MenuController {
      * []
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteRole(@PathVariable Long id) {
+    public ResponseEntity deleteMenu(@PathVariable Long id) throws Exception {
         menuService.deleteMenu(id);
         return ResponseEntity.ok().build();
     }
@@ -206,7 +207,7 @@ public class MenuController {
      * }
      */
     @GetMapping("/query/{id}")
-    public ResponseEntity<Menu> getRoleById(@PathVariable Long id) {
+    public ResponseEntity<Menu> getMenuById(@PathVariable Long id) {
         return ResponseEntity.ok(menuService.getMenuById(id));
     }
 
@@ -260,10 +261,10 @@ public class MenuController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Menu>> getRoles(@RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Menu>> getMenus(@RequestParam(required = false) Boolean isEnabled,
                                                Pageable pageable) throws URISyntaxException {
+        List<Menu> list = menuService.getMenus(isEnabled, pageable);
         Page page = PageUtil.getPage(pageable);
-        List<Menu> list = menuService.getMenus(isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -319,12 +320,12 @@ public class MenuController {
      * ]
      */
     @GetMapping("/query/byParentMenuId")
-    public ResponseEntity<List<Menu>> getRolesByParentId(
+    public ResponseEntity<List<Menu>> getMenusByParentId(
             @RequestParam(required = true) Long parentMenuId,
             @RequestParam(required = false) Boolean isEnabled,
             Pageable pageable) throws URISyntaxException {
+        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, isEnabled, pageable);
         Page page = PageUtil.getPage(pageable);
-        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query/byParentMenuId");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -351,6 +352,7 @@ public class MenuController {
      * @apiParamExample {json} 请求报文
      * http://localhost:9082/api/menu/es/init/all
      * @apiSuccessExample {json} 返回报文:
+     * []
      */
     @RequestMapping(value = "/es/init/all", method = RequestMethod.GET)
     public ResponseEntity<Void> initAllMenu(){

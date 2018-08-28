@@ -49,4 +49,19 @@ public class Menu extends VersionDomainObject implements Comparable<Menu>{
             return (this.getParentMenuId() - o.getParentMenuId() > 0 ? 1:-1);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Menu{" +
+                "id="+id+ '\'' +
+                "menuCode='" + menuCode + '\'' +
+                ", menuName='" + menuName + '\'' +
+                ", seqNumber=" + seqNumber +
+                ", menuTypeEnum=" + menuTypeEnum +
+                ", parentMenuId=" + parentMenuId +
+                ", menuIcon='" + menuIcon + '\'' +
+                ", menuUrl='" + menuUrl + '\'' +
+                ", hasChildCatalog=" + hasChildCatalog +
+                '}';
+    }
 }
