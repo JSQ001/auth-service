@@ -37,5 +37,7 @@ public class InterfaceRequest extends VersionDomainObject {
     @TableField("interface_id")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long interfaceId;  // 接口ID
+    @TableField("default_value")
+    private String defaultValue;//默认值
 
 }
