@@ -292,8 +292,6 @@ public class EsMenuInfoSerivce {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (isEnabled != null) {
             queryBuilder.must(QueryBuilders.termQuery("isEnabled", true));
-        } else {
-            return null;
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("seqNumber")
                 .order(SortOrder.ASC);
