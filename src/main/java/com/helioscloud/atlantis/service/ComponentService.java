@@ -189,8 +189,10 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (list != null && list.size() > 0) {
             component = list.get(0);
             //根据菜单ID，取菜果对应的所有按钮
-            List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
-            component.setButtonList(buttonList);
+            if(component.getMenuId()!= null && component.getMenuId() > 0){
+                List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
+                component.setButtonList(buttonList);
+            }
             return component;
         }
         return null;
