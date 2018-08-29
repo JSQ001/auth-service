@@ -21,6 +21,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +65,20 @@ public class ElasticsearchService {
         return pageableResult;
     }
 
+    public Long searchCount(QueryBuilder builder, String index) {
+        SearchResponse scrollResp = transportClient.prepareSearch(index).setQuery(builder).setTypes(ElasticSearchConstants.DEFAULT_INDEX_TYPE).get();
+        return scrollResp.getHits().getTotalHits();
+    }
+
+    public SearchHits searchHits(QueryBuilder builder, String index) {
+        SearchResponse scrollResp = transportClient.prepareSearch(index).setQuery(builder).setTypes(ElasticSearchConstants.DEFAULT_INDEX_TYPE).get();
+        return scrollResp.getHits();
+    }
+
+    public SearchHits searchById(QueryBuilder builder, String index) {
+        SearchResponse scrollResp = transportClient.prepareSearch(index).setQuery(builder).setTypes(ElasticSearchConstants.DEFAULT_INDEX_TYPE).get();
+        return scrollResp.getHits();
+    }
 
     public void saveIndex(Collection<?> objectList, String index) {
         if (enable) {

@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
+import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.persistence.MenuMapper;
 import com.helioscloud.atlantis.service.es.EsMenuInfoSerivce;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +62,12 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             }
         } else {
             //hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
-            Menu mm = menuMapper.selectById(menu.getParentMenuId());
+            Menu mm = null;
+            if (esMenuInfoSerivce.isElasticSearchEnable()) {
+                mm = esMenuInfoSerivce.getMenuByIdFromES(menu.getParentMenuId());
+            } else {
+                mm = menuMapper.selectById(menu.getParentMenuId());
+            }
             //如果上级是功能，则不允许再添加子功能
             if (1000 == mm.getMenuTypeEnum()) {
                 throw new BizException(RespCode.MENU_FUNCTION_PARENT_MUST_BE_CATALOG);
@@ -70,16 +77,25 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                 if (mm.getHasChildCatalog() == null || !mm.getHasChildCatalog()) {
                     mm.setHasChildCatalog(true);
                     this.updateById(mm);
+                    // 更新到ES中去
+                    esMenuInfoSerivce.saveEsMenuIndex(mm);
                 }
             } else if (1000 == menu.getMenuTypeEnum()) {
                 // 当前为功能时，校验其上级是否有下级目录，如果有，则不允许功能，功能只能添加到最底级的目录、
-                Integer childCatalogCount = menuMapper.selectCount(new EntityWrapper<Menu>().eq("parent_menu_id", mm.getId()).eq("menu_type", 1001));
+                Integer childCatalogCount = 0;
+                if (esMenuInfoSerivce.isElasticSearchEnable()) {
+                    childCatalogCount = esMenuInfoSerivce.getMenuCountByParentIdAndTypeFromES(mm.getId(), 1001).intValue();
+                } else {
+                    childCatalogCount = menuMapper.selectCount(new EntityWrapper<Menu>().eq("parent_menu_id", mm.getId()).eq("menu_type", 1001));
+                }
                 if (childCatalogCount != null && childCatalogCount > 0) {
                     throw new BizException(RespCode.MENU_PARENT_CATALOG_ERROR);
                 }
             }
         }
         menuMapper.insert(menu);
+        // 更新到ES中去
+        esMenuInfoSerivce.saveEsMenuIndex(menu);
         return menu;
     }
 
@@ -100,7 +116,12 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             throw new BizException(RespCode.MENU_CODE_NULL);
         }
         //校验ID是否在数据库中存在
-        Menu mm = menuMapper.selectById(menu.getId());
+        Menu mm = null;
+        if (esMenuInfoSerivce.isElasticSearchEnable()) {
+            mm = esMenuInfoSerivce.getMenuByIdFromES(menu.getId());
+        } else {
+            mm = menuMapper.selectById(menu.getId());
+        }
         if (mm == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
@@ -122,12 +143,18 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             }
         }
         //hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
-        Menu mmm = menuMapper.selectById(menu.getParentMenuId());
+        Menu mmm = null;
+        if (esMenuInfoSerivce.isElasticSearchEnable()) {
+            mmm = esMenuInfoSerivce.getMenuByIdFromES(menu.getParentMenuId());
+        } else {
+            mmm = menuMapper.selectById(menu.getParentMenuId());
+        }
         // 如果 当前为目录时，需要更新上级目录的hasChildCatalog字段的值
         if (1001 == menu.getMenuTypeEnum()) {
             if (mmm.getHasChildCatalog() == null || !mmm.getHasChildCatalog()) {
                 mmm.setHasChildCatalog(true);
                 this.updateById(mmm);
+                esMenuInfoSerivce.saveEsMenuIndex(mmm);
             }
         } else {
             // 由目录 修改为 功能 时，判断是否还有除了当前菜单之后的目录，如果不存在，则需要修改hasChildCatalog的值为false
@@ -139,6 +166,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                     if (mmm.getHasChildCatalog() == null || !mmm.getHasChildCatalog()) {
                         mmm.setHasChildCatalog(true);
                         this.updateById(mmm);
+                        esMenuInfoSerivce.saveEsMenuIndex(mmm);
                     }
                 }
             }
@@ -147,6 +175,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         menu.setCreatedDate(mm.getCreatedDate());
         menu.setMenuCode(mm.getMenuCode());
         this.updateById(menu);
+        esMenuInfoSerivce.saveEsMenuIndex(menu);
         //20180823 增加校验 禁用上级菜单的时候，把其所有子菜单都禁用掉，但启用的时候，只启用它自己，不递归处理子菜单
         if (!menu.getIsEnabled().booleanValue() && mm.getIsEnabled().booleanValue()) {
             updateChildrenMenu(menu);
@@ -161,10 +190,15 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      * @param menu
      */
     private void updateChildrenMenu(Menu menu) {
+        List<Menu> list = null;
         //先判断是否有 启用的子菜单
-        List<Menu> list = menuMapper.selectList(new EntityWrapper<Menu>()
-                .eq("is_enabled", true)
-                .eq("parent_menu_id", menu.getId()));
+        if (esMenuInfoSerivce.isElasticSearchEnable()) {
+            list = esMenuInfoSerivce.getMenuListByParentMenuIdFromES(menu.getId());
+        } else {
+            list = menuMapper.selectList(new EntityWrapper<Menu>()
+                    .eq("is_enabled", true)
+                    .eq("parent_menu_id", menu.getId()));
+        }
         if (list != null && list.size() > 0) {
             //则去禁用子菜单
             list.stream().forEach(e -> {
@@ -172,6 +206,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             });
             //批量保存
             this.updateBatchById(list);
+            esMenuInfoSerivce.batchIndex(list);
             //递归再查子菜单
             list.stream().forEach(e -> {
                 updateChildrenMenu(e);
@@ -188,13 +223,13 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      */
     public Integer getMenuCountByMenuCode(String menuCode) {
         //是否启用了ES，启用了则从ES里查询
-       /* if(esMenuInfoSerivce.isElasticSearchEnable()){
+        if (esMenuInfoSerivce.isElasticSearchEnable()) {
+            Long count = esMenuInfoSerivce.getMenuCountByMenuCodeFromES(menuCode);
+            return count.intValue();
+        } else {
             return menuMapper.selectCount(new EntityWrapper<Menu>()
                     .eq("menu_code", menuCode));
-        }else{*/
-            return menuMapper.selectCount(new EntityWrapper<Menu>()
-                    .eq("menu_code", menuCode));
-       // }
+        }
     }
 
     /**
@@ -202,16 +237,24 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      * @return
      */
     @Transactional
-    public void deleteMenu(Long id) {
+    public void deleteMenu(Long id) throws Exception {
         if (id != null) {
+            Integer childCount = 0;
             //如果有启用的子菜单，则不允许删除
-            Integer childCount = menuMapper.selectCount(new EntityWrapper<Menu>()
-                    .eq("is_enabled", true)
-                    .eq("parent_menu_id", id));
+            if(esMenuInfoSerivce.isElasticSearchEnable()){
+                childCount= esMenuInfoSerivce.getMenuListByParentMenuIdFromES(id).size();
+            }else{
+                childCount= menuMapper.selectCount(new EntityWrapper<Menu>()
+                        .eq("is_enabled", true)
+                        .eq("parent_menu_id", id));
+            }
             if (childCount != null && childCount > 0) {
                 throw new BizException(RespCode.HAVING_CHILD_MENU);
             }
             this.deleteById(id);
+            if(esMenuInfoSerivce.isElasticSearchEnable()){
+                esMenuInfoSerivce.deleteEsMenuIndex(id);
+            }
         }
     }
 
@@ -223,55 +266,52 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
     public void deleteBatchMenu(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
             this.deleteBatchIds(ids);
+            if(esMenuInfoSerivce.isElasticSearchEnable()){
+                ids.forEach(id -> {
+                    try {
+                        esMenuInfoSerivce.deleteEsMenuIndex(id);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
     }
 
     /**
      * 所有菜单 分页
-     *
-     * @param page
+     * @param pageable
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenus(Boolean isEnabled, Page page) {
-        return menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
-                .orderBy("seq_number")
-                .orderBy("menu_code"));
-       /* if(isDeleted == null || "".equals(isDeleted)){
-            return menuMapper.selectPage(page,new EntityWrapper<Menu>()
-                    .eq("is_deleted",false)
-                    .eq(isEnabled != null && !"".equals(isEnabled),"is_enabled",isEnabled));
+    public List<Menu> getMenus(Boolean isEnabled, Pageable pageable) {
+        if(esMenuInfoSerivce.isElasticSearchEnable()){
+            return esMenuInfoSerivce.getMenuPagesFromES(isEnabled,pageable);
         }else{
-            return menuMapper.selectPage(page,new EntityWrapper<Menu>()
-                    .eq("is_deleted",isDeleted)
-                    .eq(isEnabled != null && !"".equals(isEnabled),"is_enabled",isEnabled));
-        }*/
+            Page page = PageUtil.getPage(pageable);
+            return menuMapper.selectPage(page, new EntityWrapper<Menu>()
+                    .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                    .orderBy("seq_number")
+                    .orderBy("menu_code"));
+        }
     }
 
     /**
      * 所有子菜单 分页
-     *
-     * @param page
+     * @param pageable
      * @param parentMenuId 父菜单ID
      * @param isEnabled    如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenusByParentMenuId(Long parentMenuId, Boolean isEnabled, Page page) {
-        return menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
-                .eq("parent_menu_id", parentMenuId));
-        /*if(isDeleted == null || "".equals(isDeleted)){
-            return menuMapper.selectPage(page,new EntityWrapper<Menu>()
-                    .eq("is_deleted",false)
-                    .eq(isEnabled != null && !"".equals(isEnabled),"is_enabled",isEnabled)
-                    .eq("parent_menu_id",parentMenuId));
+    public List<Menu> getMenusByParentMenuId(Long parentMenuId, Boolean isEnabled, Pageable pageable) {
+        if(esMenuInfoSerivce.isElasticSearchEnable()){
+            return esMenuInfoSerivce.getMenuPageByParentMenuIdFromES(parentMenuId,isEnabled,pageable);
         }else{
-            return menuMapper.selectPage(page,new EntityWrapper<Menu>()
-                    .eq("is_deleted",isDeleted)
-                    .eq(isEnabled != null && !"".equals(isEnabled),"is_enabled",isEnabled)
-                    .eq("parent_menu_id",parentMenuId));
-        }*/
+            Page page = PageUtil.getPage(pageable);
+            return menuMapper.selectPage(page, new EntityWrapper<Menu>()
+                    .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                    .eq("parent_menu_id", parentMenuId));
+        }
     }
 
     /**
@@ -281,6 +321,9 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      * @return
      */
     public Menu getMenuById(Long id) {
+        if(esMenuInfoSerivce.isElasticSearchEnable()){
+            return esMenuInfoSerivce.getMenuByIdFromES(id);
+        }
         return menuMapper.selectById(id);
     }
 
