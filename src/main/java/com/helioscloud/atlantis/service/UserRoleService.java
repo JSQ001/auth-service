@@ -249,7 +249,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * @param userId 用户ID
      * @param roleCode 角色代码
      * @param roleName 角色名称
-     * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下租户已分配的启用的角色
+     * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下用户已分配的启用的角色
      * @param page
      * @return
      */
@@ -259,7 +259,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             // 查当前租户下所有启用的角色
             result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantID(),roleCode,roleName,page);
         }else if ("ASSIGNED".equals(queryFlag)){
-            //查当前租房下租户已分配的启用的角色
+            //查当前租房下用户已分配的启用的角色
             result = userRoleMapper.getSelectedRolesByCond(userId,roleCode,roleName,page);
         }
         return result;

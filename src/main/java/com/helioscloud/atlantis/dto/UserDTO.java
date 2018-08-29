@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.handchina.yunmart.artemis.domain.Authority;
+import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.enumeration.UserLockedEnum;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
@@ -18,6 +19,7 @@ import org.springframework.data.annotation.CreatedDate;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -123,5 +125,5 @@ public class UserDTO {
 
     }
     private String tenantName;
-
+    private List<Role> roleList;
 }
