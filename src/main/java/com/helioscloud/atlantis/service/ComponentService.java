@@ -33,6 +33,7 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     /**
      * 创建组件
+     *
      * @param component
      * @return
      */
@@ -61,7 +62,7 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
             resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
         }
         componentMapper.insert(component);
-        if(resultButtons != null){
+        if (resultButtons != null) {
             component.setButtonList(resultButtons);
         }
         return component;
@@ -110,11 +111,11 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
             });
             resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
         }
-        if(resultButtons != null){
+        if (resultButtons != null) {
             component.setButtonList(resultButtons);
-        }else{
+        } else {
             //根据菜单ID，取菜果对应的所有按钮
-            List<MenuButton> buttonList = menuButtonService.getMenuButtons(rr.getMenuId(),null, PageUtil.getPage(0,20));
+            List<MenuButton> buttonList = menuButtonService.getMenuButtons(rr.getMenuId(), null, PageUtil.getPage(0, 20));
             component.setButtonList(buttonList);
         }
         component.setCreatedBy(rr.getCreatedBy());
@@ -167,7 +168,13 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
      * @return
      */
     public Component getComponentById(Long id) {
-        return componentMapper.selectById(id);
+        Component component = componentMapper.selectById(id);
+        if (component != null && component.getMenuId() != null && component.getMenuId() > 0) {
+            //根据菜单ID，取菜果对应的所有按钮
+            List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
+            component.setButtonList(buttonList);
+        }
+        return component;
     }
 
     /**
@@ -178,8 +185,13 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
      */
     public Component getComponentByMenuId(Long menuId) {
         List<Component> list = componentMapper.selectList(new EntityWrapper<Component>().eq("menu_id", menuId));
+        Component component = null;
         if (list != null && list.size() > 0) {
-            return list.get(0);
+            component = list.get(0);
+            //根据菜单ID，取菜果对应的所有按钮
+            List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
+            component.setButtonList(buttonList);
+            return component;
         }
         return null;
     }

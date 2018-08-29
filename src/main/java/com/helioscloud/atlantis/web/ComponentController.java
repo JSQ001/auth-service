@@ -139,10 +139,10 @@ public class ComponentController {
 
     /**
      * @api {PUT} /api/component/update 【系统框架】组件更新
-     * @apiDescription 更新组件,当buttonList传空时，表示不更新菜单的按钮
+     * @apiDescription 更新组件, 当buttonList传空时，表示不更新菜单的按钮
      * 当buttonList不为空时，
-     *      如果集合对象中flag为 1001, 菜单按钮id 为空，则会保存，菜单按钮id不为空，则会更新
-     *      如果集合对象中flag为 1002, 将删除菜单与该菜单按钮ID的关联
+     * 如果集合对象中flag为 1001, 菜单按钮id 为空，则会保存，菜单按钮id不为空，则会更新
+     * 如果集合对象中flag为 1002, 将删除菜单与该菜单按钮ID的关联
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 组件ID
      * @apiParam (请求参数) {String} componentType 组件类型 1 为组件，2为界面
@@ -169,7 +169,6 @@ public class ComponentController {
      * "componentName": "我的合同",
      * "menuId": "1034791757754834946"
      * }
-     *
      * @apiParamExample {json} 请求报文(示例2):
      * {
      * "id": "1034846577319292929",
@@ -381,7 +380,37 @@ public class ComponentController {
      * "componentType": "1",
      * "componentName": "测试组件1",
      * "moduleId": "1031479997352935426",
-     * "menuId": "1"
+     * "menuId": "1",
+     * "buttonList": [
+     * {
+     * "id": "1034846577239601153",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T00:53:45.191+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.delete",
+     * "buttonName": "contract.delete",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1034850253505110017",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T01:08:21.681+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.update",
+     * "buttonName": "contract.update",
+     * "flag": "1001"
+     * }
+     * ]
      * }
      */
     @GetMapping("/query/{id}")
@@ -411,7 +440,37 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "menuId": "1"
+     * "menuId": "1",
+     * "buttonList": [
+     * {
+     * "id": "1034846577239601153",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T00:53:45.191+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.delete",
+     * "buttonName": "contract.delete",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1034850253505110017",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T01:08:21.681+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.update",
+     * "buttonName": "contract.update",
+     * "flag": "1001"
+     * }
+     * ]
      * },
      * {
      * "id": "1031480637256925185",
@@ -424,7 +483,37 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "2",
      * "componentName": "测试组件2",
-     * "menuId": "1"
+     * "menuId": "1",
+     * "buttonList": [
+     * {
+     * "id": "1034846577239601153",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T00:53:45.191+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.delete",
+     * "buttonName": "contract.delete",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1034850253505110017",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T01:08:21.681+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.update",
+     * "buttonName": "contract.update",
+     * "flag": "1001"
+     * }
+     * ]
      * }
      * ]
      */
@@ -457,7 +546,37 @@ public class ComponentController {
      * "componentType": "1",
      * "componentName": "测试组件1",
      * "moduleId": "1031479997352935426",
-     * "menuId": "1031480144728195074"
+     * "menuId": "1031480144728195074",
+     * "buttonList": [
+     * {
+     * "id": "1034846577239601153",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T00:53:45.191+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.delete",
+     * "buttonName": "contract.delete",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1034850253505110017",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-30T01:08:21.681+08:00",
+     * "createdBy": 1013,
+     * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
+     * "lastUpdatedBy": 1013,
+     * "versionNumber": 1,
+     * "menuId": "1034791757754834946",
+     * "buttonCode": "contract.update",
+     * "buttonName": "contract.update",
+     * "flag": "1001"
+     * }
+     * ]
      * }
      */
     @GetMapping("/query/menu/{id}")
