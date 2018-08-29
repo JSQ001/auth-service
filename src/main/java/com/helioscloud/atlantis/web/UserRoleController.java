@@ -553,7 +553,7 @@ public class UserRoleController {
      * ]
      */
     @GetMapping("/query/user/menuList")
-    public ResponseEntity<List<Menu>> getMenuListByUserId() throws URISyntaxException {
+    public ResponseEntity<List<Menu>> getMenuListByLoginUserId() throws URISyntaxException {
         Long userId = LoginInformationUtil.getCurrentUserID();
         List<Menu> list = roleMenuService.getMenuListByUserId(userId);
         return new ResponseEntity(list, HttpStatus.OK);
