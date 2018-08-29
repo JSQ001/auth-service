@@ -632,7 +632,35 @@ public class UserRoleController {
      * "deviceVerificationStatus": null,
      * "tenantName": "上海汉得融晶信息科技有限公司3",
      * "senior": false,
-     * "deleted": false
+     * "deleted": false,
+     * "roleList": [
+     * {
+     * "id": "1029943470084898818",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "roleCode": "R001",
+     * "roleName": "测试角色null",
+     * "tenantId": "1022057230117146625"
+     * },
+     * {
+     * "id": "1029919265725378561",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "roleCode": "R002",
+     * "roleName": "测试角色2",
+     * "tenantId": "1022057230117146625"
+     * }
+     * ]
      * },
      * {
      * "id": "1008",

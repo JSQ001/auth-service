@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
+import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Component;
+import com.helioscloud.atlantis.domain.MenuButton;
 import com.helioscloud.atlantis.persistence.ComponentMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
@@ -22,13 +24,15 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     private final ComponentMapper componentMapper;
 
-    public ComponentService(ComponentMapper componentMapper) {
+    private final MenuButtonService menuButtonService;
+
+    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService) {
         this.componentMapper = componentMapper;
+        this.menuButtonService = menuButtonService;
     }
 
     /**
      * 创建组件
-     *
      * @param component
      * @return
      */
@@ -47,7 +51,19 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (!"1".equals(component.getComponentType()) && !"2".equals(component.getComponentType())) {
             throw new BizException(RespCode.COMPONENT_TYPE_INVALID);
         }
+        List<MenuButton> resultButtons = null;
+        //用于保存菜单的按钮
+        if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
+            resultButtons = component.getButtonList();
+            resultButtons.forEach(e -> {
+                e.setMenuId(component.getMenuId());
+            });
+            resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
+        }
         componentMapper.insert(component);
+        if(resultButtons != null){
+            component.setButtonList(resultButtons);
+        }
         return component;
     }
 
@@ -84,9 +100,27 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (component.getIsDeleted() == null || "".equals(component.getIsDeleted())) {
             component.setIsDeleted(rr.getIsDeleted());
         }
+        List<MenuButton> resultButtons = null;
+
+        //用于保存菜单的按钮
+        if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
+            resultButtons = component.getButtonList();
+            resultButtons.forEach(e -> {
+                e.setMenuId(component.getMenuId());
+            });
+            resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
+        }
+        if(resultButtons != null){
+            component.setButtonList(resultButtons);
+        }else{
+            //根据菜单ID，取菜果对应的所有按钮
+            List<MenuButton> buttonList = menuButtonService.getMenuButtons(rr.getMenuId(),null, PageUtil.getPage(0,20));
+            component.setButtonList(buttonList);
+        }
         component.setCreatedBy(rr.getCreatedBy());
         component.setCreatedDate(rr.getCreatedDate());
         this.updateById(component);
+        component.setVersionNumber(component.getVersionNumber() + 1);
         return component;
     }
 
@@ -114,17 +148,15 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
 
     /**
-     * 模块下所有组件 分页
+     * 所有组件 分页
      *
-     * @param moduleId
      * @param page
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Component> getComponentsByModuleId(Long moduleId, Boolean isEnabled, Page page) {
+    public List<Component> getComponentsByIsEnabled(Boolean isEnabled, Page page) {
         return componentMapper.selectPage(page, new EntityWrapper<Component>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("module_id", moduleId)
                 .orderBy("id"));
     }
 
@@ -140,12 +172,13 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     /**
      * 根据MenuID，获取对应的组件信息
+     *
      * @param menuId
      * @return
      */
     public Component getComponentByMenuId(Long menuId) {
-        List<Component> list = componentMapper.selectList(new EntityWrapper<Component>().eq("menu_id",menuId));
-        if(list != null && list.size() > 0){
+        List<Component> list = componentMapper.selectList(new EntityWrapper<Component>().eq("menu_id", menuId));
+        if (list != null && list.size() > 0) {
             return list.get(0);
         }
         return null;

@@ -133,7 +133,7 @@
             <column name="button_code" type="varchar(200)" remarks="按钮代码">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_hide" type="boolean" defaultValue="${show}" remarks="是否隐藏">
+            <column name="button_name" type="varchar(200)"  remarks="按钮名称">
                 <constraints nullable="false"/>
             </column>
             <column name="version_number" type="int" remarks="版本号">
