@@ -12,7 +12,7 @@ import lombok.Data;
  * 系统接口管理
  */
 @Data
-@TableName("sys_request")
+@TableName("sys_interface_request")
 public class InterfaceRequest extends VersionDomainObject {
 
     @TableField("name")
