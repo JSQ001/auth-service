@@ -455,4 +455,10 @@
             <column name="is_enabled"/>
         </createIndex>
     </changeSet>
+    <changeSet id="2018082920330001" author="houyin.zhang">
+        <comment>接口请求中添加默认值字段</comment>
+        <addColumn tableName="sys_interface_request">
+            <column name="default_value" type="varchar(200)" remarks="默认值"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
