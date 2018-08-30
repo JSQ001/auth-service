@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
  * 系统组件
@@ -21,11 +23,15 @@ public class Component extends VersionDomainObject {
     @TableField("component_name")
     private String componentName; // 组件名称
 
-    @TableField("module_id")
+    /*@TableField("module_id")
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long moduleId;  // 模块ID
+    private Long moduleId;  // 模块ID 20180829 与前端商量去掉*/
 
     @TableField("menu_id")
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long menu_id;  // 菜单ID
+    private Long menuId;  // 菜单ID 不必填
+
+    @TableField(exist = false)
+    private List<MenuButton> buttonList;// 菜单对应的按钮集合 不存到数据库当中
+
 }

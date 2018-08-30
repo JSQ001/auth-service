@@ -26,6 +26,7 @@ public interface RespCode {
 
     String BUTTON_CODE_NULL = "10050";//按钮代码不允许为空
     String BUTTON_CODE_NOT_UNION = "10051";// 按钮代码在菜单中已经存在
+    String BUTTON_NAME_NULL = "10052";//按钮名称不允许为空
 
     String ROLE_MENU_BUTTON_EXISTS = "10061"; // 角色菜单按钮组合已经存在
 

@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,6 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
 
     /**
      * 创建菜单按钮
-     *
      * @param menuButton
      * @return
      */
@@ -41,6 +41,9 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (menuButton.getButtonCode() == null || "".equals(menuButton.getButtonCode())) {
             throw new BizException(RespCode.BUTTON_CODE_NULL);
         }
+        if (menuButton.getButtonName() == null || "".equals(menuButton.getButtonName())) {
+            throw new BizException(RespCode.BUTTON_NAME_NULL);
+        }
         //检查按钮代码在菜单里是否已经存在
         Integer count = getMenuButtonCountByButtonCode(menuButton.getMenuId(), menuButton.getButtonCode());
         if (count != null && count > 0) {
@@ -50,6 +53,43 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         return menuButton;
     }
 
+    /**
+     * 批量菜单按钮保存或更新
+     * @param buttonList
+     * @return
+     */
+    @Transactional
+    public List<MenuButton> batchSaveAndUpdateMenuButton(List<MenuButton> buttonList) {
+        //校验
+        if (buttonList == null || buttonList.size() == 0) {
+            return null;
+        }
+        //需要保存和更新
+        List<MenuButton> toSaveList = new ArrayList<>();
+        //需要删除
+        List<Long> toDeleteListIds = new ArrayList<>();
+
+        //flag;创建:1001，删除:1002
+        buttonList.stream().filter(b -> "1001".equals(b.getFlag())).forEach(button -> {
+            toSaveList.add(button);
+        });
+        buttonList.stream().filter(b -> "1002".equals(b.getFlag())).forEach(button -> {
+            toDeleteListIds.add(button.getId());
+        });
+        //批量删除
+        this.deleteBatchMenuButton(toDeleteListIds);
+        if(toSaveList.size() > 0){
+            //处理保存
+            toSaveList.forEach(button -> {
+                if(button.getId() != null && button.getId() > 0){
+                    this.updateMenuButton(button);
+                }else{
+                    this.createMenuButton(button);
+                }
+            });
+        }
+        return toSaveList;
+    }
     /**
      * 更新按钮菜单
      *
@@ -67,8 +107,11 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (mb == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (menuButton.getHide() == null || "".equals(menuButton.getHide())) {
-            menuButton.setHide(mb.getHide());
+        if (menuButton.getButtonName() == null || "".equals(menuButton.getButtonName())) {
+            menuButton.setButtonName(mb.getButtonName());
+        }
+        if (menuButton.getButtonCode() == null || "".equals(menuButton.getButtonCode())) {
+            menuButton.setButtonCode(mb.getButtonCode());
         }
         if (menuButton.getIsEnabled() == null || "".equals(menuButton.getIsEnabled())) {
             menuButton.setIsEnabled(mb.getIsEnabled());
@@ -78,7 +121,6 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         }
         menuButton.setCreatedBy(mb.getCreatedBy());
         menuButton.setCreatedDate(mb.getCreatedDate());
-        menuButton.setButtonCode(mb.getButtonCode());
         this.updateById(menuButton);
         return menuButton;
     }
@@ -105,9 +147,6 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (id != null) {
             this.deleteById(id);
         }
-       /* MenuButton menuButton = menuButtonMapper.selectById(id);
-        menuButton.setIsDeleted(true);
-        menuButtonMapper.updateById(menuButton);*/
     }
 
     /**
@@ -118,17 +157,6 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
     public void deleteBatchMenuButton(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
             this.deleteBatchIds(ids);
-            /*List<MenuButton> result = null;
-            List<MenuButton> list = menuButtonMapper.selectBatchIds(ids);
-            if (list != null && list.size() > 0) {
-                result = list.stream().map(menuButton -> {
-                    menuButton.setIsDeleted(true);
-                    return menuButton;
-                }).collect(Collectors.toList());
-            }
-            if(result != null){
-                this.updateBatchById(result);
-            }*/
         }
     }
 
