@@ -41,6 +41,13 @@ public interface UserMapper extends BaseMapper<UserDTO> {
     void updateUserLock(UserDTO userDTO);
 
     /**
+     * 用户切换语言
+     * @param userId
+     * @param language
+     */
+    void updateUserLanguage(@Param("userId")Long userId, @Param("language")String language);
+
+    /**
      * 获取用户列表 分页
      * @param tenantId    必填，取租户下的所有用户
      * @param setOfBooksId 如果填了，取帐套下的用户

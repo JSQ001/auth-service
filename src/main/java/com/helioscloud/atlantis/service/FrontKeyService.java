@@ -29,6 +29,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     private final FrontKeyMapper frontKeyMapper;
 
+
     public FrontKeyService(FrontKeyMapper moduleMapper) {
         this.frontKeyMapper = moduleMapper;
     }
@@ -192,6 +193,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return
      */
     public List<FrontKey> getFrontKeysByLang(String lang) {
+
         return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
                 .eq("is_enabled", true)
                 .eq("lang", lang)
