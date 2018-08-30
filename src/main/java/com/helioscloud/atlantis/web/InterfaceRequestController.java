@@ -38,6 +38,8 @@ public class InterfaceRequestController {
      * @apiParam (请求参数) {String} remark 备注说明
      * @apiParam (请求参数) {Long} interfaceId 接口ID
      * @apiParam (请求参数) {String} defaultValue 默认值
+     * @apiParam (请求参数) {Boolean} requiredFlag 是否必填
+     * @apiParam (请求参数) {Boolean} unionFlag 是否唯一
      * @apiParamExample {json} 请求报文:
      * {
      * "name":"Query模块",
@@ -47,7 +49,9 @@ public class InterfaceRequestController {
      * "parentId":"",
      * "remark":"测试111",
      * "interfaceId":"1031509686226259969",
-     * "defaultValue":""
+     * "defaultValue":"",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
@@ -58,6 +62,8 @@ public class InterfaceRequestController {
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
      * @apiSuccess (返回参数) {String} defaultValue 默认值
+     * @apiSuccess (返回参数) {Boolean} requiredFlag 是否必填
+     * @apiSuccess (返回参数) {Boolean} unionFlag 是否唯一
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -82,7 +88,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试111",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      */
     @PostMapping("/create")
@@ -103,6 +111,8 @@ public class InterfaceRequestController {
      * @apiParam (请求参数) {String} remark 备注说明
      * @apiParam (请求参数) {Long} interfaceId 接口ID
      * @apiParam (请求参数) {String} defaultValue 默认值
+     * @apiParam (请求参数) {Boolean} requiredFlag 是否必填
+     * @apiParam (请求参数) {Boolean} unionFlag 是否唯一
      * @apiParam (请求参数) {Integer} versionNumber 版本号
      * @apiParam (请求参数) {String} [isEnabled] 启用标志
      * @apiParam (请求参数) {String} [isDeleted] 删除标志
@@ -119,7 +129,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试1112121",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} name 请求名称
@@ -130,6 +142,8 @@ public class InterfaceRequestController {
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
      * @apiSuccess (返回参数) {String} defaultValue 默认值
+     * @apiSuccess (返回参数) {Boolean} requiredFlag 是否必填
+     * @apiSuccess (返回参数) {Boolean} unionFlag 是否唯一
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -154,7 +168,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试1112121",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      */
     @PutMapping("/update")
@@ -217,7 +233,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试444",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      */
     @GetMapping("/query/{id}")
@@ -253,7 +271,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试2333",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * },
      * {
      * "id": "1031554065301315585",
@@ -271,7 +291,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试444",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      * ]
      */
@@ -313,7 +335,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试2333",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * },
      * {
      * "id": "1031554065301315585",
@@ -331,7 +355,9 @@ public class InterfaceRequestController {
      * "parentId": 0,
      * "remark": "测试444",
      * "defaultValue":"",
-     * "interfaceId": "1031509686226259969"
+     * "interfaceId": "1031509686226259969",
+     * "requiredFlag":true,
+     * "unionFlag":false
      * }
      * ]
      */
