@@ -461,4 +461,11 @@
             <column name="default_value" type="varchar(200)" remarks="默认值"/>
         </addColumn>
     </changeSet>
+    <changeSet id="2018083020330001" author="houyin.zhang">
+        <comment>接口请求中添加必填和唯一性两个字段</comment>
+        <addColumn tableName="sys_interface_request">
+            <column name="required_flag" type="boolean" remarks="必填标识"/>
+            <column name="union_flag" type="boolean" remarks="唯一标识"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

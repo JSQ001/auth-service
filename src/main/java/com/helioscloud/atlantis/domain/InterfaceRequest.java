@@ -40,4 +40,9 @@ public class InterfaceRequest extends VersionDomainObject {
     @TableField("default_value")
     private String defaultValue;//默认值
 
+    @TableField("required_flag")
+    private Boolean requiredFlag;//是否必填
+    @TableField("union_flag")
+    private Boolean unionFlag;//是否唯一
+
 }
