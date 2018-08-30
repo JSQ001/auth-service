@@ -25,7 +25,8 @@
         sm.menu_icon,
         sm.menu_url,
         sm.version_number,
-        sm.is_enabled
+        sm.is_enabled,
+        sm.fromSource
         from sys_menu sm, sys_role_menu srm
         where srm.menu_id = sm.id
         and sm.is_deleted = 0
@@ -50,7 +51,8 @@
         sm.seq_number,
         sm.menu_type as menuTypeEnum,
         sm.menu_icon,
-        sm.menu_url
+        sm.menu_url,
+        sm.fromSource
         from sys_menu sm, sys_role_menu srm,sys_user_role sur
         where srm.menu_id = sm.id
         and sm.is_deleted = 0

@@ -52,6 +52,7 @@ public class MenuController {
      * @apiSuccess (返回参数) {Long} parentMenuId 上级菜单ID,没有上级时，传0，即0为根目录
      * @apiSuccess (返回参数) {String} menuIcon 菜单图标
      * @apiSuccess (返回参数) {String} menuUrl 菜单URL
+     * @apiSuccess (返回参数) {String} fromSource 来源 DB 表示数据库，FILE表示文件
      * @apiSuccess (返回参数) {Boolean} hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
@@ -122,7 +123,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": "",
-     * "menuUrl": ""
+     * "menuUrl": "",
+     * "fromSource":"DB"
      * }
      * @apiSuccessExample {json} 返回报文:
      * {
@@ -140,7 +142,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": "",
-     * "menuUrl": ""
+     * "menuUrl": "",
+     * "fromSource":"DB"
      * }
      */
     @PutMapping("/update")
@@ -203,7 +206,8 @@ public class MenuController {
      * "parentMenuId": 0,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      */
     @GetMapping("/query/{id}")
@@ -238,7 +242,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * },
      * {
      * "id": "1029973242290647041",
@@ -256,7 +261,8 @@ public class MenuController {
      * "parentMenuId": 0,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      * ]
      */
@@ -297,7 +303,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * },
      * {
      * "id": "1029977215173144577",
@@ -315,7 +322,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      * ]
      */

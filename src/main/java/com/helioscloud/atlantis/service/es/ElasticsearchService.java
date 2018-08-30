@@ -153,6 +153,7 @@ public class ElasticsearchService {
         }
     }
     public boolean isElasticSearchEnable() {
-        return enable;
+        return false;//临时关闭ES
+        //return enable;
     }
 }
