@@ -316,4 +316,10 @@
             <column name="has_child_catalog" type="boolean" defaultValue="0" remarks="是否有子目录"/>
         </addColumn>
     </changeSet>
+    <changeSet id="2018083010580002" author="houyin.zhang">
+        <comment>菜单表中添加来源</comment>
+        <addColumn tableName="sys_menu">
+            <column name="fromSource" type="varchar(50)" defaultValue="DB" remarks="来源 DB:数据库 FILE:文件"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

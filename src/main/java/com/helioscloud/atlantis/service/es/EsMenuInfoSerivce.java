@@ -146,6 +146,7 @@ public class EsMenuInfoSerivce {
                     .startObject("versionNumber").field("type", "keyword").endObject()
                     .startObject("isEnabled").field("type", "keyword").endObject()
                     .startObject("isDeleted").field("type", "keyword").endObject()
+                    .startObject("fromSource").field("type", "keyword").endObject()
                     .endObject()
                     .endObject();
         } catch (IOException e) {
