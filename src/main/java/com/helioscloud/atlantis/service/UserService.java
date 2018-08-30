@@ -7,6 +7,7 @@ package com.helioscloud.atlantis.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
+import com.helioscloud.atlantis.constant.CacheConstants;
 import com.helioscloud.atlantis.domain.CompanySecurity;
 import com.helioscloud.atlantis.domain.PasswordHistory;
 import com.helioscloud.atlantis.domain.Role;
@@ -21,6 +22,8 @@ import com.helioscloud.atlantis.persistence.UserMapper;
 import org.apache.ibatis.annotations.Param;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -36,6 +39,7 @@ import java.util.UUID;
  * Create By:zongyun.zhou@hand-china.com
  */
 @Service
+@CacheConfig(cacheNames = {CacheConstants.USER})
 public class UserService {
     @Autowired
     UserMapper userMapper;
@@ -194,6 +198,14 @@ public class UserService {
         userMapper.updateUserLock(unlockedUser);
     }
 
+    /**
+     * 用户切换语言
+     * @param user
+     */
+    @CacheEvict(key="#user.id.toString()")
+    public void updateUserLanguage(UserDTO user){
+        userMapper.updateUserLanguage(user.getId(),user.getLanguage());
+    }
 
     /**
      * 获取用户列表
