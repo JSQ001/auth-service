@@ -89,7 +89,6 @@ public class ArtemisTokenService extends DefaultTokenServices {
         }
     }
 
-
     private OAuth2Authentication createRefreshedAuthentication(OAuth2Authentication authentication, TokenRequest request) {
         Set scope = request.getScope();
         OAuth2Request clientAuth = authentication.getOAuth2Request().refresh(request);

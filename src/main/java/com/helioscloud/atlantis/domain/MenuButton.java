@@ -22,6 +22,7 @@ public class MenuButton extends VersionDomainObject {
     @TableField("button_code")
     private String buttonCode;
 
+    @TableField("button_name")
     private String buttonName ;// 按钮名称
 
     //不保存到数据库

@@ -6,16 +6,17 @@ import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.RoleMenu;
+import com.helioscloud.atlantis.domain.RoleMenuButton;
+import com.helioscloud.atlantis.domain.enumeration.FlagEnum;
+import com.helioscloud.atlantis.domain.enumeration.MenuTypeEnum;
 import com.helioscloud.atlantis.dto.MenuTreeDTO;
-import com.helioscloud.atlantis.dto.RoleAssignMenuDTO;
+import com.helioscloud.atlantis.dto.RoleAssignMenuButtonDTO;
+import com.helioscloud.atlantis.dto.RoleMenuButtonDTO;
 import com.helioscloud.atlantis.dto.RoleMenuDTO;
 import com.helioscloud.atlantis.persistence.RoleMenuMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,20 +31,23 @@ import java.util.stream.Collectors;
  * 用户角色Service
  */
 @Service
-@CacheConfig(cacheNames = {"USER_MENU"})
 public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
 
     private final RoleMenuMapper roleMenuMapper;
 
     private final MenuService menuService;
 
-    @Autowired
-    private RedisTemplate redisTemplateForJDK;
+    private final MenuButtonService menuButtonService;
 
-    public RoleMenuService(RoleMenuMapper roleMenuMapper, MenuService menuService) {
+    private final RoleMenuButtonService roleMenuButtonService;
+
+    public RoleMenuService(RoleMenuMapper roleMenuMapper, MenuService menuService, MenuButtonService menuButtonService, RoleMenuButtonService roleMenuButtonService) {
         this.roleMenuMapper = roleMenuMapper;
         this.menuService = menuService;
+        this.menuButtonService = menuButtonService;
+        this.roleMenuButtonService = roleMenuButtonService;
     }
+
 
     /**
      * 保存角色菜单
@@ -65,14 +69,17 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         roleMenuMapper.insert(roleMenu);
         return roleMenu;
     }
+
     /**
      * 根据菜单ID集合，返回 其所有父菜单的ID集合
+     *
      * @param menuIds
      * @return
      */
-    public List<Long> getParentMenusByIds(List<Long> menuIds){
+    public List<Long> getParentMenusByIds(List<Long> menuIds) {
         return roleMenuMapper.getParentMenuIdsByRoleIds(menuIds);
     }
+
     /**
      * 角色在分配菜单时，每次都是把分配的菜单全量的传到后端保存
      * 保存时，前端只传hasChildCatalog 为 false的数据
@@ -82,73 +89,109 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      * @return
      */
     @Transactional
-    public void roleAssignMenu(RoleMenuDTO roleMenuDTO) {
+    public void roleAssignMenu(RoleMenuButtonDTO roleMenuDTO) {
         Long roleId = null;
-        List<RoleAssignMenuDTO> assignMenus = null;
+
+        List<RoleAssignMenuButtonDTO> assignMenuButton = null;
         //需要删除的
         List<Long> deleteMenuIds = new ArrayList<>();
         //需要保存的
         List<RoleMenu> roleMenuList = new ArrayList<>();
+
         List<Long> roleMenuIdList = new ArrayList<>();
+        //菜单按钮
+        List<RoleMenuButton> buttonList = new ArrayList<RoleMenuButton>();
+        List<Long> deleteButtonIdList = new ArrayList<>();
         if (roleMenuDTO != null) {
             roleId = roleMenuDTO.getRoleId();
-            assignMenus = roleMenuDTO.getRoleMenuList();
+            assignMenuButton = roleMenuDTO.getAssignMenuButtonList();
         }
-        if (assignMenus != null) {
-            //取所有需要删除的菜单ID
-            assignMenus.stream().filter(m -> "1002".equals(m.getFlag())).forEach(d -> {
-                deleteMenuIds.add(d.getMenuId());
-            });
+        if (assignMenuButton != null) {
             // 所有需要新增的菜单ID
             Long finalRoleId = roleId;
-            assignMenus.stream().filter(m -> "1001".equals(m.getFlag())).forEach(d -> {
-                //检查是否已经存在，已经存在的，则不更新
-                Integer exists = roleMenuMapper.selectCount(new EntityWrapper<RoleMenu>().eq("role_id",finalRoleId).eq("menu_id",d.getMenuId()));
-                if(exists == null || exists == 0){
-                    roleMenuIdList.add(d.getMenuId());
+            //取所有的菜单ID
+            assignMenuButton.stream().filter(m -> MenuTypeEnum.DIRECTORY.toString().equals(m.getType())).forEach(d -> {
+                if (FlagEnum.DELETE.getID().toString().equals(d.getFlag())) {
+                    // 需要删除的菜单ID
+                    deleteMenuIds.add(d.getId());
+                } else if (FlagEnum.CREATE.getID().toString().equals(d.getFlag())) {
+                    // 需要添加的
+                    //检查是否已经存在，已经存在的，则不更新
+                    Integer exists = roleMenuMapper.selectCount(new EntityWrapper<RoleMenu>().eq("role_id", finalRoleId).eq("menu_id", d.getId()));
+                    if (exists == null || exists == 0) {
+                        roleMenuIdList.add(d.getId());
+                    }
+                }
+            });
+            // 取菜单的按钮
+            assignMenuButton.stream().filter(m -> MenuTypeEnum.BUTTON.toString().equals(m.getType())).forEach(d -> {
+                if (FlagEnum.CREATE.getID().toString().equals(d.getFlag())) {
+                    // 需要创建的按钮ID
+                    RoleMenuButton bm = new RoleMenuButton();
+                    bm.setButtonId(d.getId());
+                    bm.setRoleId(finalRoleId);
+                    buttonList.add(bm);
+                    //将按钮对应的菜单Id，加入到需要添加的菜单集合中去
+                    Long menuId = d.getParentId();
+                    if (!roleMenuIdList.contains(menuId) && menuId > 0) {
+                        roleMenuIdList.add(menuId);
+                    }
+                } else if (FlagEnum.DELETE.getID().toString().equals(d.getFlag())) {
+                    // 需要删除的按钮ID
+                    deleteButtonIdList.add(d.getId());
                 }
             });
             if (deleteMenuIds.size() > 0) {
-                // 删除
+                // 删除角色关联菜单
                 roleMenuMapper.deleteRoleMenuByRoleIdAndMenuIds(roleId, deleteMenuIds);
+                //删除角色关联按钮
+                roleMenuButtonService.deleteRoleMenuButtonByRoleIdAndMenuIds(roleId, deleteMenuIds);
             }
             //所有父菜单ID集合
             List<Long> parentMenuIds = new ArrayList<>();
             boolean flag = true;
             int i = 0;
-            List<Long> tempList =  null;
-            while (flag){
-                if(i == 0){
+            List<Long> tempList = null;
+            while (flag) {
+                if (i == 0) {
                     tempList = getParentMenusByIds(roleMenuIdList);
-                }else{
+                } else {
                     tempList = getParentMenusByIds(tempList);
                 }
-                if(tempList != null && tempList.size() > 0){
-                    if(tempList.get(0) > 0){
-                        parentMenuIds.addAll(tempList);
-                    }
-                }else{
+                if (tempList != null && tempList.size() > 0) {
+                    parentMenuIds.addAll(tempList);
+                } else {
                     flag = false;
                 }
                 i++;
             }
-            if(parentMenuIds.size() > 0){
-                //去重，并将父菜单ID 添加进去
+            if (parentMenuIds.size() > 0) {
+                //去重，并将父菜单ID 添加进去 取父菜单ID大于0的
                 parentMenuIds.stream().forEach(parentId -> {
-                    if(!roleMenuIdList.contains(parentId)){
+                    if (!roleMenuIdList.contains(parentId) && parentId > 0) {
                         roleMenuIdList.add(parentId);
                     }
                 });
             }
-            roleMenuIdList.stream().forEach( menuId -> {
-                RoleMenu rm = new RoleMenu();
-                rm.setRoleId(finalRoleId);
-                rm.setMenuId(menuId);
-                roleMenuList.add(rm);
+            roleMenuIdList.stream().forEach(menuId -> {
+                Integer count = this.getRoleMenuCountByMenuIdAndRoleId(menuId,finalRoleId);
+                if(count == null || count == 0){
+                    RoleMenu rm = new RoleMenu();
+                    rm.setRoleId(finalRoleId);
+                    rm.setMenuId(menuId);
+                    roleMenuList.add(rm);
+                }
             });
             if (roleMenuList.size() > 0) {
                 //保存角色与菜单的关联
                 this.insertBatch(roleMenuList);
+            }
+            //处理菜单的按钮
+            if (buttonList != null && buttonList.size() > 0) {
+                //删除角色与按钮的关联
+                roleMenuButtonService.deleteRoleMenuButtonByRoleIdAndButtonIds(roleId, deleteButtonIdList);
+                //保存角色关联菜单的按钮
+                roleMenuButtonService.batchSaveRoleMenuButton(buttonList);
             }
         }
     }
@@ -257,8 +300,10 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     public RoleMenu getRoleMenuById(Long id) {
         return roleMenuMapper.selectById(id);
     }
+
     /**
      * 根据角色集合，取对应的菜单树信息
+     *
      * @param roleIds
      * @return
      */
@@ -286,6 +331,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         }).collect(Collectors.toList());
         return dtos;
     }
+
     /**
      * 根据用户ID，取对应所有角色分配的菜单树
      *
@@ -316,6 +362,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         }).collect(Collectors.toList());
         return dtos;
     }
+
     /**
      * @param resultMap 返回的菜单
      * @param menuMap   角色对应的所有菜单树
@@ -354,7 +401,9 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     }
 
     /**
+     * 用于登录
      * 根据用户ID，取对应所有角色分配的菜单
+     *
      * @param userId
      * @return
      */
@@ -365,12 +414,34 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         }
         return null;
     }
+
+    /**
+     * 取所有的菜单及按钮
+     *
+     * @return
+     */
+    public List<RoleAssignMenuButtonDTO> getAllMenuAndButton() {
+        return roleMenuMapper.getAllMenuAndButton();
+    }
+
     /**
      * 根据角色ID，返回已分配的菜单ID的集合（只取功能，不取目录）
+     *
      * @param roleId
      * @return
      */
-    public List<String> getMenuIdsByRoleId(Long roleId){
-        return roleMenuMapper.getMenuIdsByRoleId(roleId);
+    public List<String> getMenuIdsAndButtonIdsByRoleId(Long roleId) {
+        return roleMenuMapper.getMenuIdsAndButtonIdsByRoleId(roleId);
     }
+
+    /**
+     * 根据角色ID，返回已分配的菜单按钮ID的集合
+     *
+     * @param roleId
+     * @return
+     */
+    public List<String> getMenuButtonIdsByRoleId(Long roleId) {
+        return roleMenuButtonService.getMenuButtonIdsByRoleId(roleId);
+    }
+
 }

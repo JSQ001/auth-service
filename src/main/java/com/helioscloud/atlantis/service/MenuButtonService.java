@@ -150,6 +150,27 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
     }
 
     /**
+     * @param menuId 删除菜单按钮（逻辑删除）
+     * @return
+     */
+    @Transactional
+    public void deleteMenuButtonByMenuId(Long menuId) {
+        if (menuId != null) {
+            menuButtonMapper.deleteMenuButtonByMenuId(menuId);
+        }
+    }
+
+    /**
+     * @param menuId 删除菜单按钮（逻辑删除）
+     * @return
+     */
+    @Transactional
+    public void deleteMenuButtonByMenuIds(List<Long> menuId) {
+        if (menuId != null) {
+            menuButtonMapper.deleteMenuButtonByMenuIds(menuId);
+        }
+    }
+    /**
      * @param ids 批量删除菜单按钮（逻辑删除）
      * @return
      */
@@ -183,6 +204,18 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
      */
     public MenuButton getMenuButtonById(Long id) {
         return menuButtonMapper.selectById(id);
+    }
+
+    /**
+     * 根据菜单，取得所有的菜单按钮 不分页
+     * @param menuId
+     * @return
+     */
+    public List<MenuButton> getMenuButtonsByMenuId(Long menuId) {
+        return menuButtonMapper.selectList(new EntityWrapper<MenuButton>()
+                .eq("is_enabled", true)
+                .eq("menu_id", menuId)
+                .orderBy("button_code"));
     }
 
 }

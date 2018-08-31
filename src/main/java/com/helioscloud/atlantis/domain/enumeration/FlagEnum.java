@@ -1,24 +1,22 @@
 package com.helioscloud.atlantis.domain.enumeration;
 
 /**
- * 菜单类型的枚举
+ * Flag类型的枚举
  */
-public enum MenuTypeEnum implements SysEnum {
-    //功能 菜单
-    FUNCTION(1000),
-    //目录
-    DIRECTORY(1001),
-    //按钮
-    BUTTON(1002);
+public enum FlagEnum implements SysEnum {
+    //创建  创建:1001，删除:1002
+    CREATE(1001),
+    //删除
+    DELETE(1002);
 
     private Integer id;
 
-    MenuTypeEnum(Integer id) {
+    FlagEnum(Integer id) {
         this.id = id;
     }
 
-    public static MenuTypeEnum parse(Integer id) {
-        for (MenuTypeEnum typeEnum : MenuTypeEnum.values()) {
+    public static FlagEnum parse(Integer id) {
+        for (FlagEnum typeEnum : FlagEnum.values()) {
             if (typeEnum.getID().equals(id)) {
                 return typeEnum;
             }
