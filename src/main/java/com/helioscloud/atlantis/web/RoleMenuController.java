@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.RoleMenu;
 import com.helioscloud.atlantis.dto.MenuTreeDTO;
+import com.helioscloud.atlantis.dto.RoleMenuButtonDTO;
 import com.helioscloud.atlantis.dto.RoleMenuDTO;
 import com.helioscloud.atlantis.service.RoleMenuService;
 import org.springframework.data.domain.Pageable;
@@ -35,21 +36,57 @@ public class RoleMenuController {
      * flag：创建:1001，删除:1002, 该删除为物理删除关联表的数据
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
-     * @apiParam (请求参数) {RoleMenuList} roleMenuList 菜单集合
-     * @apiParam (请求参数RoleMenuList的发展) {Long} menuId 菜单ID
-     * @apiParam (请求参数RoleMenuList的发展) {String} flag  1001 表示 新增，1002 表示删除
+     * @apiParam (请求参数) {RoleMenuButtonDTO} assignMenuButtonList 菜单集合
+     * @apiParam (请求参数assignMenuButtonList的属性) {String} type 类型：DIRECTORY为菜单目录，BUTTON为菜单按钮
+     * @apiParam (请求参数assignMenuButtonList的属性) {Long} id 当type为DIRECTORY时，表示菜单的ID，为BUTTON表示菜单按钮ID
+     * @apiParam (请求参数assignMenuButtonList的属性) {String} code 当type为DIRECTORY时，表示菜单的代码，为BUTTON表示菜单按钮代码
+     * @apiParam (请求参数assignMenuButtonList的属性) {String} name 当type为DIRECTORY时，表示菜单的名称，为BUTTON表示菜单按钮名称
+     * @apiParam (请求参数assignMenuButtonList的属性) {Long} parentId 当type为DIRECTORY时，表示菜单的上级菜单ID，为BUTTON表示菜单按钮对应的菜单ID
      * @apiParamExample {json} 请求报文:
      * {
-     * "roleId":1032110573802041345,
-     * "roleMenuList":[
+     * "roleId":1034792064245211137,
+     * "assignMenuButtonList":[
      * {
-     * "menuId":1032900906408247298,
-     * "flag":1002
-     * },{
-     * "menuId":1032900573367926786,
+     * "id":1035535048168132610,
+     * "code":"M1001",
+     * "name":"人事申请",
+     * "type":"DIRECTORY",
+     * "parentId":0,
      * "flag":1001
      * },{
-     * "menuId":1032900640359350273,
+     * "id":1035541525687676929,
+     * "code":"M100101",
+     * "name":"我的个人信息",
+     * "type":"DIRECTORY",
+     * "parentId":1035535048168132610,
+     * "flag":1001
+     * },{
+     * "id":1035550274938712065,
+     * "code":"M100201",
+     * "name":"笔记本购买申请",
+     * "type":"DIRECTORY",
+     * "parentId":1035550093967077377,
+     * "flag":1001
+     * },{
+     * "id":1035550277669203970,
+     * "code":"100201-query",
+     * "name":"common.query",
+     * "type":"BUTTON",
+     * "parentId":1035550274938712065,
+     * "flag":1001
+     * },{
+     * "id":1035550277824393218,
+     * "code":"100201-save",
+     * "name":"common.save",
+     * "type":"BUTTON",
+     * "parentId":1035550274938712065,
+     * "flag":1001
+     * },{
+     * "id":1035550277937639425,
+     * "code":"100201-delete",
+     * "name":"common.delete",
+     * "type":"BUTTON",
+     * "parentId":1035550274938712065,
      * "flag":1001
      * }
      * ]
@@ -59,7 +96,7 @@ public class RoleMenuController {
      * }
      */
     @PostMapping("/assign/menu")
-    public ResponseEntity roleAssignMenu(@RequestBody RoleMenuDTO roleMenu) {
+    public ResponseEntity roleAssignMenu(@RequestBody RoleMenuButtonDTO roleMenu) {
         roleMenuService.roleAssignMenu(roleMenu);
         return ResponseEntity.ok().build();
     }
@@ -344,7 +381,7 @@ public class RoleMenuController {
     }
 
     /**
-     * @api {GET} /api/roleMenu/query/menuIds/{roleId} 【角色权限】角色菜单查询
+     * @api {GET} /api/roleMenu/query/menuIds/{roleId} 【角色权限】角色已分配菜单查询
      * @apiDescription 根据角色ID，查询已分配的菜单的ID的集合。（只取功能，不取目录）
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
@@ -357,8 +394,26 @@ public class RoleMenuController {
      * ]
      */
     @GetMapping("/query/menuIds/{roleId}")
-    public ResponseEntity<List<String>> getMenuIdsByRoleId(@PathVariable Long roleId) {
-        return ResponseEntity.ok(roleMenuService.getMenuIdsByRoleId(roleId));
+    public ResponseEntity<List<String>> getMenuIdsAndButtonIdsByRoleId(@PathVariable Long roleId) {
+        return ResponseEntity.ok(roleMenuService.getMenuIdsAndButtonIdsByRoleId(roleId));
+    }
+
+    /**
+     * @api {GET} /api/roleMenu/query/buttonIds/{roleId} 【角色权限】角色已分配菜单按钮查询
+     * @apiDescription 根据角色ID，查询已分配的菜单按钮的ID的集合
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} roleId 角色ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/roleMenu/query/buttonIds/1029987832156180482
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * 1029973242290647041,
+     * 1032111556967870466
+     * ]
+     */
+    @GetMapping("/query/buttonIds/{roleId}")
+    public ResponseEntity<List<String>> getMenuButtonIdsByRoleId(@PathVariable Long roleId) {
+        return ResponseEntity.ok(roleMenuService.getMenuButtonIdsByRoleId(roleId));
     }
 
 }

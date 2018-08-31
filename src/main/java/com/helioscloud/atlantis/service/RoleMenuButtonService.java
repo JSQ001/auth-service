@@ -51,6 +51,28 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     }
 
     /**
+     * 批量保存角色菜单按钮
+     * @param menuButtonList
+     * @return
+     */
+    @Transactional
+    public void batchSaveRoleMenuButton(List<RoleMenuButton> menuButtonList) {
+        //校验
+        if (menuButtonList == null || menuButtonList.size() == 0) {
+            return ;
+        }else{
+            menuButtonList.stream().forEach(m -> {
+                //检查角色菜单按钮组合
+                Integer count = getRoleButtonCountByButtonIdAndRoleId(m.getButtonId(), m.getRoleId());
+                //不存在，则插入
+                if (count == null || count == 0) {
+                    roleMenuButtonMapper.insert(m);
+                }
+            });
+        }
+        return ;
+    }
+    /**
      * 更新角色菜单按钮
      *
      * @param roleMenuButton
@@ -166,4 +188,30 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
         return roleMenuButtonMapper.selectById(id);
     }
 
+    /**
+     * 根据角色ID，按钮ID集合，删除角色与按钮ID集合的关联 物理删除
+     * @param roleId
+     * @param buttonIds
+     */
+    public void deleteRoleMenuButtonByRoleIdAndButtonIds(Long roleId,List<Long> buttonIds){
+        roleMenuButtonMapper.deleteRoleMenuButtonByRoleIdAndButtonIds(roleId,buttonIds);
+    }
+
+    /**
+     * 根据角色ID，菜单ID集合，删除角色与按钮ID集合的关联 物理删除
+     * @param roleId
+     * @param menuIds
+     */
+    public void deleteRoleMenuButtonByRoleIdAndMenuIds(Long roleId,List<Long> menuIds){
+        roleMenuButtonMapper.deleteRoleMenuButtonByRoleIdAndMenuIds(roleId,menuIds);
+    }
+
+    /**
+     * 根据角色ID，返回已分配的菜单按钮ID的集合（只取功能，不取目录）
+     * @param roleId
+     * @return
+     */
+    public List<String> getMenuButtonIdsByRoleId(Long roleId) {
+        return roleMenuButtonMapper.getMenuButtonIdsByRoleId(roleId);
+    }
 }

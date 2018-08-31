@@ -378,6 +378,7 @@ public class FrontKeyController {
     @GetMapping("/query/lang")
     public ResponseEntity<List<FrontKey>> getFrontKeysByLang(@RequestParam(required = true) String lang) throws URISyntaxException {
         UserDTO user = userService.findByUserId(LoginInformationUtil.getCurrentUserID());
+        user.setLanguage(lang);
         //更新用户的语言环境
         userService.updateUserLanguage(user);
         List<FrontKey> list = frontKeyService.getFrontKeysByLang(lang);
