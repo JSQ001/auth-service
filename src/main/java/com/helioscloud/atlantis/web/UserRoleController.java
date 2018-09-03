@@ -91,8 +91,8 @@ public class UserRoleController {
      * [
      * {
      * "id": "1029943470084898818",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -104,8 +104,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -117,8 +117,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1029919290434023426",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -156,8 +156,8 @@ public class UserRoleController {
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} userId 用户ID
      * @apiSuccess (返回参数) {Long} roleId 角色ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -166,8 +166,8 @@ public class UserRoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029999294023069698",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T15:52:22.816+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T15:52:22.816+08:00",
@@ -184,24 +184,24 @@ public class UserRoleController {
 
     /**
      * @api {PUT} /api/userRole/update 【角色权限】用户分配角色更新
-     * @apiDescription 更新用户关联角色 只允许修改isEnabled和isDeleted字段
+     * @apiDescription 更新用户关联角色 只允许修改enabled和deleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
-     * @apiParam (请求参数) {Boolean} isEnabled 启用标识
-     * @apiParam (请求参数) {Boolean} isDeleted 删除标识
+     * @apiParam (请求参数) {Boolean} enabled 启用标识
+     * @apiParam (请求参数) {Boolean} deleted 删除标识
      * @apiParam (请求参数) {Long} versionNumber 版本号
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1029999294023069698",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} roleId 角色ID
      * @apiSuccess (返回参数) {Long} userId 用户ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -210,8 +210,8 @@ public class UserRoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029999294023069698",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -267,8 +267,8 @@ public class UserRoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029999294023069698",
-     * "isEnabled": false,
-     * "isDeleted": true,
+     * "enabled": false,
+     * "deleted": true,
      * "createdDate": "2018-08-16T15:52:22.816+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T16:07:07.617+08:00",
@@ -288,11 +288,11 @@ public class UserRoleController {
      * @apiDescription 查询用户关联角色【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} userId 用户ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/userRole/query/user?userId=1005&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/userRole/query/user?userId=1005&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -301,8 +301,8 @@ public class UserRoleController {
      * "roleId": null,
      * "role": {
      * "id": "1029943470084898818",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T12:10:33.354+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T12:44:58.15+08:00",
@@ -319,8 +319,8 @@ public class UserRoleController {
      * "roleId": null,
      * "role": {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T10:34:22.582+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T12:31:20.15+08:00",
@@ -335,10 +335,10 @@ public class UserRoleController {
      */
     @GetMapping("/query/user")
     public ResponseEntity<List<UserRoleDTO>> getUserRolesByUserId(@RequestParam(required = true) Long userId,
-                                                                  @RequestParam(required = false) Boolean isEnabled,
+                                                                  @RequestParam(required = false) Boolean enabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<UserRoleDTO> list = userRoleService.getUserRolesByUserId(userId, isEnabled, page);
+        List<UserRoleDTO> list = userRoleService.getUserRolesByUserId(userId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/userRole/query/user");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -463,8 +463,8 @@ public class UserRoleController {
      * [
      * {
      * "id": "1032635715402903554",
-     * "isEnabled": null,
-     * "isDeleted": null,
+     * "enabled": null,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -481,8 +481,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1032827031878868993",
-     * "isEnabled": null,
-     * "isDeleted": null,
+     * "enabled": null,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -499,8 +499,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1032642040533954562",
-     * "isEnabled": null,
-     * "isDeleted": null,
+     * "enabled": null,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -517,8 +517,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1032826975104770050",
-     * "isEnabled": null,
-     * "isDeleted": null,
+     * "enabled": null,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -535,8 +535,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1032667046353645570",
-     * "isEnabled": null,
-     * "isDeleted": null,
+     * "enabled": null,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -747,8 +747,8 @@ public class UserRoleController {
      * "roleList": [
      * {
      * "id": "1029943470084898818",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -760,8 +760,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -818,8 +818,8 @@ public class UserRoleController {
      * "roleList": [
      * {
      * "id": "1029943470084898818",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -831,8 +831,8 @@ public class UserRoleController {
      * },
      * {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,

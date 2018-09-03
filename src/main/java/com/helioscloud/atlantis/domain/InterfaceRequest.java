@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_interface_request")
-public class InterfaceRequest extends VersionDomainObject {
+public class InterfaceRequest extends DomainLogicEnable {
 
     @TableField("name")
     private String name; //请求名称

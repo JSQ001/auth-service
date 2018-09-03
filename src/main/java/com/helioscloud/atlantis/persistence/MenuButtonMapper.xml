@@ -5,11 +5,11 @@
 <mapper namespace="com.helioscloud.atlantis.persistence.MenuButtonMapper">
 
     <delete id="deleteMenuButtonByMenuId">
-        update sys_menu_button sm set sm.is_deleted = 1 where sm.menu_id = #{menuId}
+        update sys_menu_button sm set sm.deleted = 1 where sm.menu_id = #{menuId}
     </delete>
     <delete id="deleteMenuButtonByMenuIds">
         <!-- 根据菜单Id，批量删除菜单的按钮(逻辑删除) -->
-        update sys_menu_button sm set sm.is_deleted = 1
+        update sys_menu_button sm set sm.deleted = 1
             where sm.menu_id in
                 <foreach collection="menuIds" index="index" item="item" open="(" close=")" separator=",">
                     #{item}

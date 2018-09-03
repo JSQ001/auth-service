@@ -73,11 +73,11 @@ public class ModuleService extends BaseService<ModuleMapper, Module> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (module.getIsEnabled() == null || "".equals(module.getIsEnabled())) {
-            module.setIsEnabled(rr.getIsEnabled());
+        if (module.getEnabled() == null || "".equals(module.getEnabled())) {
+            module.setEnabled(rr.getEnabled());
         }
-        if (module.getIsDeleted() == null || "".equals(module.getIsDeleted())) {
-            module.setIsDeleted(rr.getIsDeleted());
+        if (module.getDeleted() == null || "".equals(module.getDeleted())) {
+            module.setDeleted(rr.getDeleted());
         }
         module.setCreatedBy(rr.getCreatedBy());
         module.setCreatedDate(rr.getCreatedDate());
@@ -124,12 +124,12 @@ public class ModuleService extends BaseService<ModuleMapper, Module> {
      * 所有模块 分页
      *
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Module> getModules(Boolean isEnabled, Page page) {
+    public List<Module> getModules(Boolean enabled, Page page) {
         return moduleMapper.selectPage(page, new EntityWrapper<Module>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .orderBy("module_code"));
     }
 

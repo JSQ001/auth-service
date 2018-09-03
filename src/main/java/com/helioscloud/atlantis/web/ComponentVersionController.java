@@ -43,8 +43,8 @@ public class ComponentVersionController {
      * @apiSuccess (请求参数) {Long} componentId 组件ID
      * @apiSuccess (请求参数) {String} remark 备注说明
      * @apiSuccess (请求参数) {String} contents 内容信息
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -53,8 +53,8 @@ public class ComponentVersionController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031484643240869889",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T18:14:37.663+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T18:14:37.663+08:00",
@@ -79,13 +79,13 @@ public class ComponentVersionController {
      * @apiSuccess (请求参数) {String} remark 备注说明
      * @apiSuccess (请求参数) {String} contents 内容信息
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1031484643240869889",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1,
      * "remark": "测试版本11",
      * "contents": "测试测试1",
@@ -95,8 +95,8 @@ public class ComponentVersionController {
      * @apiSuccess (返回参数) {Long} componentId 组件ID
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {String} contents 内容信息
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -105,8 +105,8 @@ public class ComponentVersionController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031484643240869889",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": "2018-08-20T18:14:37.663+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": null,
@@ -163,8 +163,8 @@ public class ComponentVersionController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031485826063958018",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T18:19:19.671+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T18:19:19.671+08:00",
@@ -185,17 +185,17 @@ public class ComponentVersionController {
      * @apiDescription 根据组件Id，查询所有组件版本 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} componentId 组件ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/componentVersion/query?componentId=1031480667845984258&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/componentVersion/query?componentId=1031480667845984258&enabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031485802370334721",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T18:19:14.022+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T18:19:14.022+08:00",
@@ -207,8 +207,8 @@ public class ComponentVersionController {
      * },
      * {
      * "id": "1031485826063958018",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T18:19:19.671+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T18:19:19.671+08:00",
@@ -222,10 +222,10 @@ public class ComponentVersionController {
      */
     @GetMapping("/query")
     public ResponseEntity<List<ComponentVersion>> getComponentVersionsByComponentId(@RequestParam Long componentId,
-                                                                           @RequestParam(required = false) Boolean isEnabled,
+                                                                           @RequestParam(required = false) Boolean enabled,
                                                                            Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<ComponentVersion> list = componentVersionService.getComponentVersionsByComponentId(componentId, isEnabled, page);
+        List<ComponentVersion> list = componentVersionService.getComponentVersionsByComponentId(componentId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/componentVersion/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

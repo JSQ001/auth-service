@@ -74,11 +74,11 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (interfaceResponse.getIsEnabled() == null || "".equals(interfaceResponse.getIsEnabled())) {
-            interfaceResponse.setIsEnabled(rr.getIsEnabled());
+        if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
+            interfaceResponse.setEnabled(rr.getEnabled());
         }
-        if (interfaceResponse.getIsDeleted() == null || "".equals(interfaceResponse.getIsDeleted())) {
-            interfaceResponse.setIsDeleted(rr.getIsDeleted());
+        if (interfaceResponse.getDeleted() == null || "".equals(interfaceResponse.getDeleted())) {
+            interfaceResponse.setDeleted(rr.getDeleted());
         }
         if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
             interfaceResponse.setInterfaceId(rr.getInterfaceId());
@@ -120,12 +120,12 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
      *
      * @param interfaceId
      * @param page
-     * @param isEnabled   如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled   如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<InterfaceResponse> getInterfaceResponsesByInterfaceId(Long interfaceId, Boolean isEnabled, Page page) {
+    public List<InterfaceResponse> getInterfaceResponsesByInterfaceId(Long interfaceId, Boolean enabled, Page page) {
         return interfaceResponseMapper.selectPage(page, new EntityWrapper<InterfaceResponse>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("interface_id", interfaceId)
                 .orderBy("id"));
     }
@@ -135,12 +135,12 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
      *
      * @param parentId
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<InterfaceResponse> getInterfaceResponsesByParentId(Long parentId, Boolean isEnabled, Page page) {
+    public List<InterfaceResponse> getInterfaceResponsesByParentId(Long parentId, Boolean enabled, Page page) {
         return interfaceResponseMapper.selectPage(page, new EntityWrapper<InterfaceResponse>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("parent_id", parentId)
                 .orderBy("id"));
     }

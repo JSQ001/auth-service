@@ -60,8 +60,8 @@ public class InterfaceController {
      * @apiSuccess (返回参数) {String} reqUrl 请求URL
      * @apiSuccess (返回参数) {String} responseFormat 响应格式
      * @apiSuccess (返回参数) {String} remark 备注
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -70,8 +70,8 @@ public class InterfaceController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031509686226259969",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:54:08.383+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:54:08.383+08:00",
@@ -106,13 +106,13 @@ public class InterfaceController {
      * @apiParam (请求参数) {String} responseFormat 响应格式
      * @apiParam (请求参数) {String} remark 备注
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} [isEnabled] 启用标志
-     * @apiParam (请求参数) {String} [isDeleted] 删除标志
+     * @apiParam (请求参数) {String} [enabled] 启用标志
+     * @apiParam (请求参数) {String} [deleted] 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1031548086757134337",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "interfaceName": "查询模块12",
      * "requestProtocol": "http",
@@ -132,8 +132,8 @@ public class InterfaceController {
      * @apiSuccess (返回参数) {String} reqUrl 请求URL
      * @apiSuccess (返回参数) {String} responseFormat 响应格式
      * @apiSuccess (返回参数) {String} remark 备注
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -142,8 +142,8 @@ public class InterfaceController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029916356543561729",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T10:22:48.987+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": null,
@@ -200,8 +200,8 @@ public class InterfaceController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031509686226259969",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:54:08.383+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:54:08.383+08:00",
@@ -227,7 +227,7 @@ public class InterfaceController {
      * @apiDescription 根据模块Id，查询模块下所有接口 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
@@ -236,8 +236,8 @@ public class InterfaceController {
      * [
      * {
      * "id": "1031509686226259969",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:54:08.383+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:54:08.383+08:00",
@@ -254,8 +254,8 @@ public class InterfaceController {
      * },
      * {
      * "id": "1031548055836725249",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T22:26:36.416+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T22:26:36.417+08:00",
@@ -274,10 +274,10 @@ public class InterfaceController {
      */
     @GetMapping("/query")
     public ResponseEntity<List<Interface>> getInterfacesByModuleId(@RequestParam(required = true) Long moduleId,
-                                                                   @RequestParam(required = false) Boolean isEnabled,
+                                                                   @RequestParam(required = false) Boolean enabled,
                                                                    Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, isEnabled, page);
+        List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interface/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -287,15 +287,15 @@ public class InterfaceController {
      * @apiDescription 根据模块Id，查询模块下所有接口 不分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParamExample {json} 请求报文
      * http://localhost:9082/api/interface/queryAll?moduleId=1031479997352935426
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031509686226259969",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:54:08.383+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:54:08.383+08:00",
@@ -312,8 +312,8 @@ public class InterfaceController {
      * },
      * {
      * "id": "1031548055836725249",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T22:26:36.416+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T22:26:36.417+08:00",
@@ -332,8 +332,8 @@ public class InterfaceController {
      */
     @GetMapping("/queryAll")
     public ResponseEntity<List<Interface>> getInterfacesAllByModuleId(@RequestParam(required = true) Long moduleId,
-                                                                      @RequestParam(required = false) Boolean isEnabled) throws URISyntaxException {
-        List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, isEnabled);
+                                                                      @RequestParam(required = false) Boolean enabled) throws URISyntaxException {
+        List<Interface> list = interfaceService.getInterfacesByModuleId(moduleId, enabled);
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
@@ -353,8 +353,8 @@ public class InterfaceController {
      * "listInterface": [
      * {
      * "id": "1034348505392799745",
-     * "isEnabled": true,
-     * "isDeleted": null,
+     * "enabled": true,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -371,8 +371,8 @@ public class InterfaceController {
      * },
      * {
      * "id": "1034348544152363010",
-     * "isEnabled": true,
-     * "isDeleted": null,
+     * "enabled": true,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -395,8 +395,8 @@ public class InterfaceController {
      * "listInterface": [
      * {
      * "id": "1034348997464350722",
-     * "isEnabled": true,
-     * "isDeleted": null,
+     * "enabled": true,
+     * "deleted": null,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,

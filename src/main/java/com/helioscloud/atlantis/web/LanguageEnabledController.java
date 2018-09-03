@@ -37,8 +37,8 @@ public class LanguageEnabledController {
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} language 语言代码
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -47,8 +47,8 @@ public class LanguageEnabledController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031820520131432450",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-21T16:29:16.959+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-21T16:29:16.959+08:00",
@@ -72,8 +72,8 @@ public class LanguageEnabledController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031820520131432450",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-21T16:29:16.959+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-21T16:29:16.959+08:00",
@@ -99,8 +99,8 @@ public class LanguageEnabledController {
      * [
      * {
      * "id": "1",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-21T16:09:32+08:00",
      * "createdBy": 1,
      * "lastUpdatedDate": "2018-08-21T16:09:32+08:00",
@@ -110,8 +110,8 @@ public class LanguageEnabledController {
      * },
      * {
      * "id": "1031820520131432450",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-21T16:29:16.959+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-21T16:29:16.959+08:00",

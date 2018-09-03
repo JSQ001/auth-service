@@ -91,8 +91,8 @@ public class EsFrontKeyInfoSerivce {
         page.setSearchCount(false);
         Long start = System.currentTimeMillis();
         List<FrontKey> frontKeys = frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
-                .eq("is_deleted", false)
-                .eq("is_enabled", true));
+                .eq("deleted", false)
+                .eq("enabled", true));
         log.info("查询界面Title耗时:{}ms,一共获得:{}条数据", System.currentTimeMillis() - start, frontKeys.size());
         page.setRecords(frontKeys);
         return page;

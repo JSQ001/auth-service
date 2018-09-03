@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_front_key")
-public class FrontKey extends VersionDomainObject {
+public class FrontKey extends DomainLogicEnable {
 
     @TableField("key_code")
     private String keyCode; //界面keyCode

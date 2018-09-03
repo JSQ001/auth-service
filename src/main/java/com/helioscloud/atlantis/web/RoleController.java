@@ -40,8 +40,8 @@ public class RoleController {
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} roleCode 角色代码
      * @apiSuccess (返回参数) {String} roleName 角色名称
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -50,8 +50,8 @@ public class RoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029545792423387138",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-15T09:50:20.074+08:00",
      * "createdBy": 1,
      * "lastUpdatedDate": "2018-08-15T09:50:20.074+08:00",
@@ -75,13 +75,13 @@ public class RoleController {
      * @apiParam (请求参数) {String} [roleCode] 角色代码不允许修改
      * @apiParam (请求参数) {String} roleName 角色名称
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1029916356543561729",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "roleCode": "R001",
      * "roleName": "测试角色2"
@@ -89,8 +89,8 @@ public class RoleController {
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} roleCode 角色代码
      * @apiSuccess (返回参数) {String} roleName 角色名称
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -99,8 +99,8 @@ public class RoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029916356543561729",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T10:22:48.987+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": null,
@@ -157,8 +157,8 @@ public class RoleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T10:34:22.582+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T10:34:22.582+08:00",
@@ -179,17 +179,17 @@ public class RoleController {
      * @apiDescription 查询租户下的所有角色 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} tenantId 租户ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/role/query/tenant?tenantId=1022057230117146625&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/role/query/tenant?tenantId=1022057230117146625&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1029919265725378561",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T10:34:22.582+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T12:31:20.15+08:00",
@@ -201,8 +201,8 @@ public class RoleController {
      * },
      * {
      * "id": "1029919290434023426",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T10:34:28.472+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T12:31:20.162+08:00",
@@ -216,10 +216,10 @@ public class RoleController {
      */
     @GetMapping("/query/tenant")
     public ResponseEntity<List<Role>> getRolesByTenantId(@RequestParam(required = true) Long tenantId,
-                                                         @RequestParam(required = false) Boolean isEnabled,
+                                                         @RequestParam(required = false) Boolean enabled,
                                                          Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Role> list = roleService.getRolesByTenantId(tenantId, isEnabled, page);
+        List<Role> list = roleService.getRolesByTenantId(tenantId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/role/query/tenant");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

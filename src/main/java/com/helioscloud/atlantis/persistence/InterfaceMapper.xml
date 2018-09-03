@@ -11,9 +11,9 @@
                 si.req_url,
                 si.interface_name,
                 si.remark,
-                si.is_enabled
+                si.enabled
         from sys_interface si
-        where si.is_deleted = 0
+        where si.deleted = 0
         <if test="keyword != null">
             and (si.interface_name like concat(concat('%',#{keyword}),'%') or si.req_url like concat(concat('%',#{keyword}),'%'))
         </if>

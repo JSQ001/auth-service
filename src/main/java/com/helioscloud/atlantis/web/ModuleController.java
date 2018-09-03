@@ -40,8 +40,8 @@ public class ModuleController {
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} moduleCode 模块代码
      * @apiSuccess (返回参数) {String} moduleName 模块名称
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -50,8 +50,8 @@ public class ModuleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031475475788365825",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:38:11.985+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:38:11.985+08:00",
@@ -74,21 +74,21 @@ public class ModuleController {
      * @apiParam (请求参数) {String} [moduleCode] 模块代码不允许修改
      * @apiParam (请求参数) {String} moduleName 模块名称
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1031475475788365825",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "moduleName": "费用管理模块111"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} moduleCode 模块代码
      * @apiSuccess (返回参数) {String} moduleName 模块名称
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -97,8 +97,8 @@ public class ModuleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031475475788365825",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:38:11.985+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": null,
@@ -154,8 +154,8 @@ public class ModuleController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031476034830368769",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:40:25.259+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:40:25.259+08:00",
@@ -174,17 +174,17 @@ public class ModuleController {
      * @api {GET} /api/module/query 【系统框架】模块查询分页
      * @apiDescription 查询所有模块 分页
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/module/query?isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/module/query?enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031476034830368769",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:40:25.259+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:40:25.259+08:00",
@@ -195,8 +195,8 @@ public class ModuleController {
      * },
      * {
      * "id": "1031476064928694273",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:40:32.435+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:40:32.435+08:00",
@@ -208,10 +208,10 @@ public class ModuleController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Module>> getModules(@RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Module>> getModules(@RequestParam(required = false) Boolean enabled,
                                                    Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Module> list = moduleService.getModules(isEnabled, page);
+        List<Module> list = moduleService.getModules(enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/module/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

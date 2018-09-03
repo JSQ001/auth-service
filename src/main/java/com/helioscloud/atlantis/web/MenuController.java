@@ -62,8 +62,8 @@ public class MenuController {
      * @apiSuccess (返回参数buttonList的属性) {String} buttonCode 按钮的代码
      * @apiSuccess (返回参数buttonList的属性) {String} buttonName 按钮的名称
      * @apiSuccess (返回参数) {Boolean} hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -97,8 +97,8 @@ public class MenuController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1035541525687676929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-31T22:55:13.817+08:00",
      * "createdBy": 1012,
      * "lastUpdatedDate": "2018-08-31T22:55:13.817+08:00",
@@ -116,8 +116,8 @@ public class MenuController {
      * "buttonList": [
      * {
      * "id": "1035541549842673665",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-31T22:55:19.573+08:00",
      * "createdBy": 1012,
      * "lastUpdatedDate": "2018-08-31T22:55:19.573+08:00",
@@ -130,8 +130,8 @@ public class MenuController {
      * },
      * {
      * "id": "1035541551004495874",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-31T22:55:19.853+08:00",
      * "createdBy": 1012,
      * "lastUpdatedDate": "2018-08-31T22:55:19.853+08:00",
@@ -144,8 +144,8 @@ public class MenuController {
      * },
      * {
      * "id": "1035541551927242753",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-31T22:55:20.069+08:00",
      * "createdBy": 1012,
      * "lastUpdatedDate": "2018-08-31T22:55:20.069+08:00",
@@ -182,8 +182,8 @@ public class MenuController {
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1029974951649882113",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "menuCode": "M00201",
      * "menuName": "我的申请单",
      * "versionNumber":2,
@@ -197,8 +197,8 @@ public class MenuController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029974951649882113",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -260,8 +260,8 @@ public class MenuController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029973242290647041",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T14:08:51.597+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:08:51.597+08:00",
@@ -287,17 +287,17 @@ public class MenuController {
      * @api {GET} /api/menu/query 【角色权限】菜单查询分页
      * @apiDescription 查询所有菜单 分页
      * @apiGroup Auth2Service
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menu/query?isEnabled=false&page=0&size=2
+     * http://localhost:9082/api/menu/query?enabled=false&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1029977144029360129",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T14:24:21.843+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:24:21.843+08:00",
@@ -315,8 +315,8 @@ public class MenuController {
      * },
      * {
      * "id": "1029973242290647041",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T14:08:51.597+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:08:51.597+08:00",
@@ -335,9 +335,9 @@ public class MenuController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Menu>> getMenus(@RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Menu>> getMenus(@RequestParam(required = false) Boolean enabled,
                                                Pageable pageable) throws URISyntaxException {
-        List<Menu> list = menuService.getMenus(isEnabled, pageable);
+        List<Menu> list = menuService.getMenus(enabled, pageable);
         Page page = PageUtil.getPage(pageable);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
@@ -348,17 +348,17 @@ public class MenuController {
      * @apiDescription 查询父菜单对应的所有子菜单 分页
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} parentMenuId 父菜单ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menu/query/byParentMenuId?parentMenuId=1029973941745364994&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/menu/query/byParentMenuId?parentMenuId=1029973941745364994&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1029977183732641793",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T14:24:31.31+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:36:56.05+08:00",
@@ -376,8 +376,8 @@ public class MenuController {
      * },
      * {
      * "id": "1029977215173144577",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T14:24:38.805+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:48:49.225+08:00",
@@ -398,9 +398,9 @@ public class MenuController {
     @GetMapping("/query/byParentMenuId")
     public ResponseEntity<List<Menu>> getMenusByParentId(
             @RequestParam(required = true) Long parentMenuId,
-            @RequestParam(required = false) Boolean isEnabled,
+            @RequestParam(required = false) Boolean enabled,
             Pageable pageable) throws URISyntaxException {
-        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, isEnabled, pageable);
+        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, enabled, pageable);
         Page page = PageUtil.getPage(pageable);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query/byParentMenuId");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);

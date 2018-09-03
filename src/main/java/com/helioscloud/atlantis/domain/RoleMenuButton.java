@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @TableName("sys_role_menu_button")
-public class RoleMenuButton  extends VersionDomainObject{
+public class RoleMenuButton  extends DomainEnable {
 
     @NotNull
     @JsonSerialize(using = ToStringSerializer.class)

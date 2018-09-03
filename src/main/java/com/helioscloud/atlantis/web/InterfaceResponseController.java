@@ -53,8 +53,8 @@ public class InterfaceResponseController {
      * @apiSuccess (返回参数) {Long} parentId 上级ID
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -63,8 +63,8 @@ public class InterfaceResponseController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031557007467147265",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:02:10.655+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:02:10.655+08:00",
@@ -95,13 +95,13 @@ public class InterfaceResponseController {
      * @apiParam (请求参数) {String} remark 备注说明
      * @apiParam (请求参数) {Long} interfaceId 接口ID
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1031557527476957185",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "name": "响应测试3213214",
      * "respType": null,
@@ -117,8 +117,8 @@ public class InterfaceResponseController {
      * @apiSuccess (返回参数) {Long} parentId 上级ID
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -127,8 +127,8 @@ public class InterfaceResponseController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031557527476957185",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:04:14.631+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": null,
@@ -188,8 +188,8 @@ public class InterfaceResponseController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031557490659356673",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:04:05.855+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:04:05.856+08:00",
@@ -213,17 +213,17 @@ public class InterfaceResponseController {
      * @apiDescription 根据接口Id，查询接口下所有接口响应 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} interfaceId 接口ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/interfaceResponse/query?interfaceId=1031509686226259969&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/interfaceResponse/query?interfaceId=1031509686226259969&enabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031557449832001537",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:03:56.117+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:03:56.118+08:00",
@@ -238,8 +238,8 @@ public class InterfaceResponseController {
      * },
      * {
      * "id": "1031557490659356673",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:04:05.855+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:04:05.856+08:00",
@@ -256,10 +256,10 @@ public class InterfaceResponseController {
      */
     @GetMapping("/query")
     public ResponseEntity<List<InterfaceResponse>> getInterfaceResponsesByInterfaceId(@RequestParam(required = true) Long interfaceId,
-                                                                             @RequestParam(required = false) Boolean isEnabled,
+                                                                             @RequestParam(required = false) Boolean enabled,
                                                                              Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<InterfaceResponse> list = interfaceResponseService.getInterfaceResponsesByInterfaceId(interfaceId, isEnabled, page);
+        List<InterfaceResponse> list = interfaceResponseService.getInterfaceResponsesByInterfaceId(interfaceId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interfaceResponse/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -269,17 +269,17 @@ public class InterfaceResponseController {
      * @apiDescription 根据parentId，查询所有子接口响应 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} parentId 上级ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/interfaceResponse/query/parent?parentId=0&isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/interfaceResponse/query/parent?parentId=0&enabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031557449832001537",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:03:56.117+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:03:56.118+08:00",
@@ -294,8 +294,8 @@ public class InterfaceResponseController {
      * },
      * {
      * "id": "1031557490659356673",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T23:04:05.855+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-20T23:04:05.856+08:00",
@@ -312,10 +312,10 @@ public class InterfaceResponseController {
      */
     @GetMapping("/query/parent")
     public ResponseEntity<List<InterfaceRequest>> getInterfaceResponsesByParentId(@RequestParam(required = true) Long parentId,
-                                                                         @RequestParam(required = false) Boolean isEnabled,
+                                                                         @RequestParam(required = false) Boolean enabled,
                                                                          Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<InterfaceResponse> list = interfaceResponseService.getInterfaceResponsesByParentId(parentId, isEnabled, page);
+        List<InterfaceResponse> list = interfaceResponseService.getInterfaceResponsesByParentId(parentId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interfaceResponse/query/parent");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

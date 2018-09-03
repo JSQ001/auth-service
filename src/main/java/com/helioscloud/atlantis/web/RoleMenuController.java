@@ -103,24 +103,24 @@ public class RoleMenuController {
 
     /**
      * @api {PUT} /api/roleMenu/update 【角色权限】角色菜单更新
-     * @apiDescription 更新角色关联菜单 只允许修改isEnabled和isDeleted字段  已弃用
+     * @apiDescription 更新角色关联菜单 只允许修改enabled和deleted字段  已弃用
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
-     * @apiParam (请求参数) {Boolean} isEnabled 启用标识
-     * @apiParam (请求参数) {Boolean} isDeleted 删除标识
+     * @apiParam (请求参数) {Boolean} enabled 启用标识
+     * @apiParam (请求参数) {Boolean} deleted 删除标识
      * @apiParam (请求参数) {Long} versionNumber 版本号
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1029987832156180482",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} roleId 角色ID
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -129,8 +129,8 @@ public class RoleMenuController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029987832156180482",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -188,8 +188,8 @@ public class RoleMenuController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1029987832156180482",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T15:06:50.094+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T15:18:46.374+08:00",
@@ -209,11 +209,11 @@ public class RoleMenuController {
      * @apiDescription 查询角色关联菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/roleMenu/query/role?roleId=1029919265725378561&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/roleMenu/query/role?roleId=1029919265725378561&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
@@ -222,8 +222,8 @@ public class RoleMenuController {
      * "roleId": 1029919265725378561,
      * "menu": {
      * "id": "1029973242290647041",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T14:08:51.597+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:08:51.597+08:00",
@@ -244,8 +244,8 @@ public class RoleMenuController {
      * "roleId": 1029919265725378561,
      * "menu": {
      * "id": "1029977215173144577",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T14:24:38.805+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-16T14:48:49.225+08:00",
@@ -264,10 +264,10 @@ public class RoleMenuController {
      */
     @GetMapping("/query/role")
     public ResponseEntity<List<RoleMenuDTO>> getRoleMenusByRoleId(@RequestParam(required = true) Long roleId,
-                                                                  @RequestParam(required = false) Boolean isEnabled,
+                                                                  @RequestParam(required = false) Boolean enabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<RoleMenuDTO> list = roleMenuService.getRoleMenusByRoleId(roleId, isEnabled, page);
+        List<RoleMenuDTO> list = roleMenuService.getRoleMenusByRoleId(roleId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/roleMenu/query/role");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

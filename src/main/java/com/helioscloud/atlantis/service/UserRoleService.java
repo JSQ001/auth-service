@@ -73,11 +73,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         if (userRole == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (userRole1.getIsEnabled() == null || "".equals(userRole1.getIsEnabled())) {
-            userRole1.setIsEnabled(userRole.getIsEnabled());
-        }
-        if (userRole1.getIsDeleted() == null || "".equals(userRole1.getIsDeleted())) {
-            userRole1.setIsDeleted(userRole.getIsDeleted());
+        if (userRole1.getEnabled() == null || "".equals(userRole1.getEnabled())) {
+            userRole1.setEnabled(userRole.getEnabled());
         }
         userRole1.setCreatedBy(userRole.getCreatedBy());
         userRole1.setCreatedDate(userRole.getCreatedDate());
@@ -107,9 +104,6 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         if (id != null) {
             this.deleteById(id);
         }
-        /*UserRole userRole = userRoleMapper.selectById(id);
-        userRole.setIsDeleted(true);
-        userRoleMapper.updateById(userRole);*/
     }
 
     /**
@@ -120,17 +114,6 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     public void deleteBatchUserRole(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
             this.deleteBatchIds(ids);
-            /*List<UserRole> result = null;
-            List<UserRole> list = userRoleMapper.selectBatchIds(ids);
-            if (list != null && list.size() > 0) {
-                result = list.stream().map(userRole -> {
-                    userRole.setIsDeleted(true);
-                    return userRole;
-                }).collect(Collectors.toList());
-            }
-            if(result != null){
-                this.updateBatchById(result);
-            }*/
         }
     }
 
@@ -139,27 +122,16 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * 根据用户Id，获取分配的所有角色
      *
      * @param userId    用户ID
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<UserRoleDTO> getUserRolesByUserId(Long userId, Boolean isEnabled, Page page) {
+    public List<UserRoleDTO> getUserRolesByUserId(Long userId, Boolean enabled, Page page) {
         List<UserRoleDTO> result = new ArrayList<UserRoleDTO>();
         List<UserRole> list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("user_id", userId)
                 .orderBy("last_updated_date"));
-       /* if (isDeleted == null) {
-            list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
-                    .eq("is_deleted", false)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
-                    .eq("user_id", userId));
-        } else {
-            list = userRoleMapper.selectPage(page, new EntityWrapper<UserRole>()
-                    .eq("is_deleted", isDeleted)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
-                    .eq("user_id", userId));
-        }*/
         if (CollectionUtils.isNotEmpty(list)) {
             list.stream().forEach(e -> {
                 UserRoleDTO userRoleDTO = new UserRoleDTO();
@@ -176,9 +148,9 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * @param userId    用户ID
      * @return
      */
-    public List<UserRole> getUserRolesByUserId(Long userId, Boolean isEnabled) {
+    public List<UserRole> getUserRolesByUserId(Long userId, Boolean enabled) {
         List<UserRole> list = userRoleMapper.selectList(new EntityWrapper<UserRole>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("user_id", userId));
         return list;
     }

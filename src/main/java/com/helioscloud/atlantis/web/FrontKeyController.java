@@ -51,8 +51,8 @@ public class FrontKeyController {
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -61,8 +61,8 @@ public class FrontKeyController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031505621731799041",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:37:59.33+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:37:59.33+08:00",
@@ -89,13 +89,13 @@ public class FrontKeyController {
      * @apiParam (请求参数) {String} descriptions 描述
      * @apiParam (请求参数) {Long} moduleId 模块ID
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1031506174008389633",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1,
      * "keyCode":"common.save",
      * "lang":"zh_CN",
@@ -107,8 +107,8 @@ public class FrontKeyController {
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
      * @apiSuccess (返回参数) {Long} moduleId 模块ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -117,8 +117,8 @@ public class FrontKeyController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031506174008389633",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:40:11+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": null,
@@ -145,7 +145,7 @@ public class FrontKeyController {
      * []
      */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteFrontKey(@PathVariable Long id) {
+    public ResponseEntity deleteFrontKey(@PathVariable Long id) throws Exception {
         frontKeyService.deleteFrontKey(id);
         return ResponseEntity.ok().build();
     }
@@ -176,8 +176,8 @@ public class FrontKeyController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031829753933651970",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-21T17:05:58.473+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-21T17:05:58.473+08:00",
@@ -198,17 +198,17 @@ public class FrontKeyController {
      * @api {GET} /api/frontKey/query 【系统框架】界面Title查询分页
      * @apiDescription 查询所有界面Title 分页
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/query?isEnabled=false&page=0&size=10
+     * http://localhost:9082/api/frontKey/query?enabled=false&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031506174008389633",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:40:11+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:40:57.212+08:00",
@@ -222,10 +222,10 @@ public class FrontKeyController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<FrontKey>> getFrontKeys(@RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<FrontKey>> getFrontKeys(@RequestParam(required = false) Boolean enabled,
                                                        Pageable pageable) throws URISyntaxException {
+        List<FrontKey> list = frontKeyService.getFrontKeys(enabled, pageable);
         Page page = PageUtil.getPage(pageable);
-        List<FrontKey> list = frontKeyService.getFrontKeys(isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -235,17 +235,17 @@ public class FrontKeyController {
      * @apiDescription 根据模块Id， 查询所有界面Title 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/query/module?moduleId=1031479997352935426&isEnabled=false&page=0&size=10
+     * http://localhost:9082/api/frontKey/query/module?moduleId=1031479997352935426&enabled=false&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031506123899039746",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:39:59.053+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:39:59.053+08:00",
@@ -260,9 +260,9 @@ public class FrontKeyController {
      */
     @GetMapping("/query/module")
     public ResponseEntity<List<FrontKey>> getFrontKeysByModuleId(@RequestParam(required = true) Long moduleId,
-                                                                 @RequestParam(required = false) Boolean isEnabled,
+                                                                 @RequestParam(required = false) Boolean enabled,
                                                                  Pageable pageable) throws URISyntaxException {
-        List<FrontKey> list = frontKeyService.getFrontKeysByModuleId(moduleId, isEnabled, pageable);
+        List<FrontKey> list = frontKeyService.getFrontKeysByModuleId(moduleId, enabled, pageable);
         Page page = PageUtil.getPage(pageable);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
@@ -274,17 +274,17 @@ public class FrontKeyController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} moduleId 模块ID
      * @apiParam (请求参数) {String} lang 语言 zh_CN 中文，en 英文
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/query/module/lang?moduleId=1031479997352935426&lang=zh_CN&isEnabled=false&page=0&size=10
+     * http://localhost:9082/api/frontKey/query/module/lang?moduleId=1031479997352935426&lang=zh_CN&enabled=false&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031506123899039746",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T19:39:59.053+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T19:39:59.053+08:00",
@@ -300,10 +300,10 @@ public class FrontKeyController {
     @GetMapping("/query/module/lang")
     public ResponseEntity<List<FrontKey>> getFrontKeysByModuleIdAndLang(@RequestParam(required = true) Long moduleId,
                                                                         @RequestParam(required = true) String lang,
-                                                                        @RequestParam(required = false) Boolean isEnabled,
+                                                                        @RequestParam(required = false) Boolean enabled,
                                                                         Pageable pageable) throws URISyntaxException {
+        List<FrontKey> list = frontKeyService.getFrontKeysByModuleIdAndLang(moduleId, lang, enabled, pageable);
         Page page = PageUtil.getPage(pageable);
-        List<FrontKey> list = frontKeyService.getFrontKeysByModuleIdAndLang(moduleId, lang, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module/lang");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -319,8 +319,8 @@ public class FrontKeyController {
      * [
      * {
      * "id": "1033005159936630785",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-24T22:56:37.094+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-24T22:58:31.903+08:00",
@@ -333,8 +333,8 @@ public class FrontKeyController {
      * },
      * {
      * "id": "1033276764090011650",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-25T16:55:52.575+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-27T10:45:57.769+08:00",
@@ -347,8 +347,8 @@ public class FrontKeyController {
      * },
      * {
      * "id": "1033276764161314817",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-25T16:55:52.587+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-27T10:45:57.78+08:00",
@@ -361,8 +361,8 @@ public class FrontKeyController {
      * },
      * {
      * "id": "1033908447921356802",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-27T10:45:57.734+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-27T10:45:57.734+08:00",
@@ -462,19 +462,19 @@ public class FrontKeyController {
      * @api {POST} /api/frontKey/query/keyCode 【系统框架】界面Title查询所有
      * @apiDescription 根据KeyCode，查询界面Title
      * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
-     * 2) isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
+     * 2) enabled 启用标识，不传则不控制，传了则按传入的值进行控制
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} keyCode 界面Title的keyCode代码
      * @apiParam (请求参数) {String} [lang] 语言 zh_CN 中文，en_US 英文 如果不传，则不控制，如果传了，则根据传的值控制
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/frontKey/query/keyCode?keyCode=common.create&lang=zh_CN&isEnabled=true
+     * http://localhost:9082/api/frontKey/query/keyCode?keyCode=common.create&lang=zh_CN&enabled=true
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1033005159668195330",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-24T22:56:37.035+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-24T22:56:37.035+08:00",
@@ -487,8 +487,8 @@ public class FrontKeyController {
      * },
      * {
      * "id": "1033005159936630785",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-24T22:56:37.094+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-24T22:58:31.903+08:00",
@@ -504,8 +504,8 @@ public class FrontKeyController {
     @GetMapping("/query/keyCode")
     public ResponseEntity<List<FrontKey>> getFrontKeyByKeyCodeAndLang(@RequestParam(required = true) String keyCode,
                                                                       @RequestParam(required = false) String lang,
-                                                                      @RequestParam(required = false) Boolean isEnabled) {
-        List<FrontKey> list = frontKeyService.getFrontKeyByKeyCodeAndLang(keyCode, lang, isEnabled);
+                                                                      @RequestParam(required = false) Boolean enabled) {
+        List<FrontKey> list = frontKeyService.getFrontKeyByKeyCodeAndLang(keyCode, lang, enabled);
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
@@ -531,8 +531,8 @@ public class FrontKeyController {
      * [
      * {
      * "id": "1031829753933651970",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -552,9 +552,9 @@ public class FrontKeyController {
                                                              @RequestParam(required = false) String lang,
                                                              @RequestParam(required = false) String keyword,
                                                              Pageable pageable) throws URISyntaxException {
+        List<FrontKey> list = frontKeyService.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, pageable);
         Page page = PageUtil.getPage(pageable);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/keyword");
-        List<FrontKey> list = frontKeyService.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, page);
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 }

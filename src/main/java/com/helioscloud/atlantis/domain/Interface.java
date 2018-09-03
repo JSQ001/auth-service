@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_interface")
-public class Interface extends VersionDomainObject {
+public class Interface extends DomainLogicEnable {
 
     @TableField("interface_name")
     private String interfaceName; //接口名称

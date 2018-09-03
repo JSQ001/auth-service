@@ -66,8 +66,8 @@ public class ComponentController {
      * @apiSuccess (返回参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiSuccess (返回参数) {String} componentName 组件名称
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -76,8 +76,8 @@ public class ComponentController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1034846577319292929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.209+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.209+08:00",
@@ -89,8 +89,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846576912445441",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.116+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.117+08:00",
@@ -103,8 +103,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034846577130549249",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.164+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.164+08:00",
@@ -117,8 +117,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.191+08:00",
@@ -149,21 +149,21 @@ public class ComponentController {
      * @apiParam (请求参数) {String} componentName 组件名称
      * @apiParam (请求参数) {Long} menuId 菜单ID
      * @apiParam (请求参数) {Integer} versionNumber 版本号
-     * @apiParam (请求参数) {String} isEnabled 启用标志
-     * @apiParam (请求参数) {String} isDeleted 删除标志
+     * @apiParam (请求参数) {String} enabled 启用标志
+     * @apiParam (请求参数) {String} deleted 删除标志
      * @apiParam (请求参数) {List} [buttonList] 菜单按钮集合List MenuButton
      * @apiParam (请求参数buttonList的属性) {String} buttonCode 菜单按钮的代码 全局唯一
      * @apiParam (请求参数buttonList的属性) {String} buttonName 菜单按钮的名称
      * @apiParam (请求参数buttonList的属性) {String} flag 标识 1001为创建，1002为删除
      * @apiParam (请求参数buttonList的属性) {Long} [id]  菜单按钮id
      * @apiParam (请求参数buttonList的属性) {Long} menuId 菜单ID
-     * @apiParam (请求参数buttonList的属性) {Boolean} isEnabled    启用标志
+     * @apiParam (请求参数buttonList的属性) {Boolean} enabled    启用标志
      * @apiParam (请求参数buttonList的属性) {Integer} versionNumber    版本号
      * @apiParamExample {json} 请求报文(示例1):
      * {
      * "id": "1034846577319292929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 2,
      * "componentType": "2",
      * "componentName": "我的合同",
@@ -172,8 +172,8 @@ public class ComponentController {
      * @apiParamExample {json} 请求报文(示例2):
      * {
      * "id": "1034846577319292929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.209+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -185,8 +185,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "menuId": "1034791757754834946",
      * "buttonCode": "contract.delete",
@@ -200,8 +200,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034846576912445441",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "versionNumber": 1,
      * "menuId": "1034791757754834946",
      * "buttonCode": "contract.save",
@@ -214,8 +214,8 @@ public class ComponentController {
      * @apiSuccess (返回参数) {String} componentType 组件类型 1 为组件，2为界面
      * @apiSuccess (返回参数) {String} componentName 组件名称
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -224,8 +224,8 @@ public class ComponentController {
      * @apiSuccessExample {json} 返回报文(示例1):
      * {
      * "id": "1034846577319292929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.209+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -237,8 +237,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.191+08:00",
@@ -251,8 +251,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034846577130549249",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.164+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.164+08:00",
@@ -265,8 +265,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034846576912445441",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.116+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T00:53:45.117+08:00",
@@ -282,8 +282,8 @@ public class ComponentController {
      * @apiSuccessExample {json} 返回报文(示例2):
      * {
      * "id": "1034846577319292929",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.209+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -295,8 +295,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -309,8 +309,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034850253505110017",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T01:08:21.681+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
@@ -370,8 +370,8 @@ public class ComponentController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031480144728195074",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:56:45.135+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:56:45.135+08:00",
@@ -384,8 +384,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -398,8 +398,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034850253505110017",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T01:08:21.681+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
@@ -422,17 +422,17 @@ public class ComponentController {
      * @api {GET} /api/component/query 【系统框架】组件查询分页
      * @apiDescription 查询所有组件 分页
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/component/query?isEnabled=true&page=0&size=10
+     * http://localhost:9082/api/component/query?enabled=true&page=0&size=10
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1031480144728195074",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:56:45.135+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:56:45.135+08:00",
@@ -444,8 +444,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -458,8 +458,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034850253505110017",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T01:08:21.681+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
@@ -474,8 +474,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1031480637256925185",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:58:42.564+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:58:42.564+08:00",
@@ -487,8 +487,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -501,8 +501,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034850253505110017",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T01:08:21.681+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
@@ -518,10 +518,10 @@ public class ComponentController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Component>> getComponentsByIsEnabledId(@RequestParam(required = false) Boolean isEnabled,
+    public ResponseEntity<List<Component>> getComponentsByenabledId(@RequestParam(required = false) Boolean enabled,
                                                                       Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Component> list = componentService.getComponentsByIsEnabled(isEnabled, page);
+        List<Component> list = componentService.getComponentsByEnabled(enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/component/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -536,8 +536,8 @@ public class ComponentController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1031480144728195074",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-20T17:56:45.135+08:00",
      * "createdBy": 1005,
      * "lastUpdatedDate": "2018-08-20T17:56:45.135+08:00",
@@ -550,8 +550,8 @@ public class ComponentController {
      * "buttonList": [
      * {
      * "id": "1034846577239601153",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T00:53:45.191+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": null,
@@ -564,8 +564,8 @@ public class ComponentController {
      * },
      * {
      * "id": "1034850253505110017",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-30T01:08:21.681+08:00",
      * "createdBy": 1013,
      * "lastUpdatedDate": "2018-08-30T01:08:21.681+08:00",
