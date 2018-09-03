@@ -4,13 +4,15 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
+import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.FrontKey;
 import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.persistence.FrontKeyMapper;
+import com.helioscloud.atlantis.service.es.EsFrontKeyInfoSerivce;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.ibatis.annotations.Param;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +31,14 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     private final FrontKeyMapper frontKeyMapper;
 
-    public FrontKeyService(FrontKeyMapper moduleMapper) {
+    private final EsFrontKeyInfoSerivce esFrontKeyInfoSerivce;
+
+    private final boolean esEnabledFlag;
+
+    public FrontKeyService(FrontKeyMapper moduleMapper, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
         this.frontKeyMapper = moduleMapper;
+        this.esFrontKeyInfoSerivce = esFrontKeyInfoSerivce;
+        this.esEnabledFlag = esFrontKeyInfoSerivce.isElasticSearchEnable();
     }
 
     /**
@@ -57,6 +65,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
         }
         frontKeyMapper.insert(frontKey);
+        esFrontKeyInfoSerivce.saveEsFrontKeyIndex(frontKey);
         return frontKey;
     }
 
@@ -93,6 +102,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         frontKey.setCreatedDate(rr.getCreatedDate());
         frontKey.setKeyCode(rr.getKeyCode());
         this.updateById(frontKey);
+        esFrontKeyInfoSerivce.saveEsFrontKeyIndex(frontKey);
         return frontKey;
     }
 
@@ -103,9 +113,18 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return
      */
     public Integer getFrontKeyByKeyAndLang(String key, String lang) {
-        return frontKeyMapper.selectCount(new EntityWrapper<FrontKey>()
-                .eq("lang", lang)
-                .eq("key_code", key));
+        //判断 是否启用了ES
+        if (esEnabledFlag) {
+            Long count = esFrontKeyInfoSerivce.getFrontKeyByKeyAndLangFrontES(key, lang);
+            if (count != null) {
+                return count.intValue();
+            }
+            return 0;
+        } else {
+            return frontKeyMapper.selectCount(new EntityWrapper<FrontKey>()
+                    .eq("lang", lang)
+                    .eq("key_code", key));
+        }
     }
 
     /**
@@ -113,9 +132,10 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return
      */
     @Transactional
-    public void deleteFrontKey(Long id) {
+    public void deleteFrontKey(Long id) throws Exception {
         if (id != null) {
             this.deleteById(id);
+            esFrontKeyInfoSerivce.deleteEsFrontKeyIndex(id);
         }
     }
 
@@ -127,6 +147,13 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     public void deleteBatchFrontKey(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
             this.deleteBatchIds(ids);
+            ids.forEach(d -> {
+                try {
+                    esFrontKeyInfoSerivce.deleteEsFrontKeyIndex(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
@@ -135,11 +162,16 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * 根据模块，取所有前端Title 分页
      *
      * @param moduleId  模块Id
-     * @param page
+     * @param pageable
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean isEnabled, Page page) {
+    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean isEnabled, Pageable pageable) {
+        //检查是否启用了ES
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdFromES(moduleId, isEnabled, pageable);
+        }
+        Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .eq("module_id", moduleId)
@@ -149,11 +181,15 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     /**
      * 取所有前端Title 分页
      *
-     * @param page
+     * @param pageable
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeys(Boolean isEnabled, Page page) {
+    public List<FrontKey> getFrontKeys(Boolean isEnabled, Pageable pageable) {
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeysFromES(isEnabled, pageable);
+        }
+        Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(isEnabled != null, "is_enabled", isEnabled)
                 .orderBy("key_code"));
@@ -166,7 +202,12 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return
      */
     public FrontKey getFrontKeyById(Long id) {
-        return frontKeyMapper.selectById(id);
+        //判断 是否启用了ES
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeyByIdFromES(id);
+        } else {
+            return frontKeyMapper.selectById(id);
+        }
     }
 
     /**
@@ -174,28 +215,40 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      *
      * @param moduleId  模块Id
      * @param lang      语言类型
-     * @param page
+     * @param pageable
      * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean isEnabled, Page page) {
-        return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
-                .eq("lang", lang)
-                .eq(moduleId != null && moduleId > 0, "module_id", moduleId)
-                .orderBy("key_code"));
+    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean isEnabled, Pageable pageable) {
+        //判断 是否启用了ES
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdAndLangFromES(moduleId, lang, isEnabled, pageable);
+        } else {
+            Page page = PageUtil.getPage(pageable);
+            return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
+                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq("lang", lang)
+                    .eq(moduleId != null && moduleId > 0, "module_id", moduleId)
+                    .orderBy("key_code"));
+        }
     }
 
     /**
      * 根据模块和Lang，取所有前端Title 不分页
-     * @param lang      语言类型
+     *
+     * @param lang 语言类型
      * @return
      */
     public List<FrontKey> getFrontKeysByLang(String lang) {
-        return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
-                .eq("is_enabled", true)
-                .eq("lang", lang)
-                .orderBy("key_code"));
+        //判断 是否启用了ES
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeysByLangFromES(lang);
+        } else {
+            return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
+                    .eq("is_enabled", true)
+                    .eq("lang", lang)
+                    .orderBy("key_code"));
+        }
     }
 
     /**
@@ -205,14 +258,24 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      */
     public void syncFrontKeyByLanguage(String language) {
         //获取所有中文的界面Title(除了已经在 language中的)
-        List<FrontKey> list = frontKeyMapper.getListFrontKeysNotInLanguage(language);
-        List<FrontKey> newList = list.stream().map(e -> {
-            e.setLang(language);
-            e.setId(null);
-            return e;
-        }).collect(Collectors.toList());
-        //批量保存 200 提交一次
-        this.insertBatch(newList, 200);
+        List<FrontKey> list = null;
+        if (esEnabledFlag) {
+            //获取所有中文的界面Title(除了已经在 language中的)
+            list = frontKeyMapper.getListFrontKeysNotInLanguage(language);
+        }
+        if (list != null) {
+            List<FrontKey> newList = list.stream().map(e -> {
+                e.setLang(language);
+                e.setId(null);
+                return e;
+            }).collect(Collectors.toList());
+            //批量保存 200 提交一次
+            this.insertBatch(newList, 200);
+            newList.forEach(e->{
+                //更新ES缓存
+                esFrontKeyInfoSerivce.saveEsFrontKeyIndex(e);
+            });
+        }
     }
 
     /**
@@ -231,13 +294,20 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             List<FrontKey> dbFrontKey = new ArrayList<>();
             if (keyIdList.size() > 0) {
                 //批量查询
-                dbFrontKey = frontKeyMapper.selectBatchIds(keyIdList);
+                if (esEnabledFlag) {
+                    dbFrontKey = esFrontKeyInfoSerivce.getFrontKeyByIdsFromES(keyIdList);
+                } else {
+                    dbFrontKey = frontKeyMapper.selectBatchIds(keyIdList);
+                }
             }
-            //批量设置描述字段
-            dbFrontKey.stream().forEach(key -> {
-                key.setDescriptions(map.get(key.getId()).getDescriptions());
-            });
-            this.updateBatchById(dbFrontKey);
+            if (dbFrontKey != null && dbFrontKey.size() > 0) {
+                //批量设置描述字段
+                dbFrontKey.stream().forEach(key -> {
+                    key.setDescriptions(map.get(key.getId()).getDescriptions());
+                    esFrontKeyInfoSerivce.saveEsFrontKeyIndex(key);
+                });
+                this.updateBatchById(dbFrontKey);
+            }
         }
     }
 
@@ -265,15 +335,20 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return 界面Title对象
      */
     public List<FrontKey> getFrontKeyByKeyCodeAndLang(String keyCode, String lang, Boolean isEnabled) {
-        return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
-                .eq("key_code", keyCode)
-                .eq(StringUtils.isNotEmpty(lang), "lang", lang)
-                .eq(isEnabled != null, "is_enabled", isEnabled));
+        if (esEnabledFlag) {
+            return esFrontKeyInfoSerivce.getFrontKeyByKeyCodeAndLangFromES(keyCode, lang, isEnabled);
+        } else {
+            return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
+                    .eq("key_code", keyCode)
+                    .eq(StringUtils.isNotEmpty(lang), "lang", lang)
+                    .eq(isEnabled != null, "is_enabled", isEnabled));
+        }
     }
 
     /**
      * 界面Title 模糊查询
      * 查询启用且未删除的界面Title
+     *
      * @param keyCode
      * @param descriptions
      * @param moduleId
@@ -281,29 +356,32 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @param keyword      模糊匹配 keyCode或descriptions
      * @return
      */
-    public List<FrontKey> getFrontKeysByCond(@Param("keyCode") String keyCode,
-                                             @Param("descriptions") String descriptions,
-                                             @Param("moduleId") String moduleId,
-                                             @Param("lang") String lang,
-                                             @Param("keyword") String keyword,
-                                             Page page){
-        if(StringUtils.isEmpty(keyCode)){
+    public List<FrontKey> getFrontKeysByCond(String keyCode,
+                                             String descriptions,
+                                             String moduleId,
+                                             String lang,
+                                             String keyword,
+                                             Pageable pageable) {
+        if (StringUtils.isEmpty(keyCode)) {
             keyCode = null;
         }
-        if(StringUtils.isEmpty(descriptions)){
+        if (StringUtils.isEmpty(descriptions)) {
             descriptions = null;
         }
-        if(StringUtils.isEmpty(moduleId)){
+        if (StringUtils.isEmpty(moduleId)) {
             moduleId = null;
         }
-        if(StringUtils.isEmpty(lang)){
+        if (StringUtils.isEmpty(lang)) {
             lang = null;
         }
-        if(StringUtils.isEmpty(keyword)){
+        if (StringUtils.isEmpty(keyword)) {
             keyword = null;
         }
-        return frontKeyMapper.getFrontKeysByCond(keyCode,descriptions,moduleId,lang,keyword,page);
+        if(esEnabledFlag){
+            return esFrontKeyInfoSerivce.getFrontKeysByCondFromES(keyCode,descriptions,moduleId,lang,keyword,pageable);
+        }else{
+            Page page = PageUtil.getPage(pageable);
+            return frontKeyMapper.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, page);
+        }
     }
-
-
 }
