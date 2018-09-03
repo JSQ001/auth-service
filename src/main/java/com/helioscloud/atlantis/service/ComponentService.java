@@ -95,11 +95,11 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (component.getIsEnabled() == null || "".equals(component.getIsEnabled())) {
-            component.setIsEnabled(rr.getIsEnabled());
+        if (component.getEnabled() == null || "".equals(component.getEnabled())) {
+            component.setEnabled(rr.getEnabled());
         }
-        if (component.getIsDeleted() == null || "".equals(component.getIsDeleted())) {
-            component.setIsDeleted(rr.getIsDeleted());
+        if (component.getDeleted() == null || "".equals(component.getDeleted())) {
+            component.setDeleted(rr.getDeleted());
         }
         List<MenuButton> resultButtons = null;
 
@@ -152,12 +152,12 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
      * 所有组件 分页
      *
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Component> getComponentsByIsEnabled(Boolean isEnabled, Page page) {
+    public List<Component> getComponentsByEnabled(Boolean enabled, Page page) {
         return componentMapper.selectPage(page, new EntityWrapper<Component>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .orderBy("id"));
     }
 

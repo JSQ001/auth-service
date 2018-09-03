@@ -28,10 +28,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -50,7 +50,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_module_code_deleted" tableName="sys_module">
             <column name="module_code"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
 
         <createTable tableName="sys_component" remarks="系统组件表">
@@ -68,10 +68,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -110,10 +110,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -161,10 +161,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -184,7 +184,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_module_deleted_id" tableName="sys_interface">
             <column name="module_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_interface_name" tableName="sys_interface">
             <column name="interface_name"/>
@@ -209,10 +209,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -231,7 +231,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_sys_front_module_id" tableName="sys_front_key">
             <column name="module_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_front_key" tableName="sys_front_key">
             <column name="key_code"/>
@@ -261,10 +261,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -283,7 +283,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_sys_request_inter_id" tableName="sys_interface_request">
             <column name="interface_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_request_code" tableName="sys_interface_request">
             <column name="key_code"/>
@@ -312,10 +312,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -334,7 +334,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_sys_response_inter_id" tableName="sys_interface_response">
             <column name="interface_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_code" tableName="sys_interface_response">
             <column name="key_code"/>
@@ -344,52 +344,52 @@
         <!-- 添加索引 -->
         <createIndex indexName="idx_code_deleted_enabled" tableName="sys_module">
             <column name="module_code"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_component_type_enabled" tableName="sys_component">
             <column name="component_type"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_component_id_enabled" tableName="sys_component_version">
             <column name="component_id"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_module_deleted_enabled_id" tableName="sys_interface">
             <column name="module_id"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_interface_name_enabled" tableName="sys_interface">
             <column name="interface_name"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_lang_module_enabled" tableName="sys_front_key">
             <column name="module_id"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_language_key_enabled" tableName="sys_front_key">
             <column name="key_code"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_request_enabled" tableName="sys_interface_request">
             <column name="interface_id"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_requestId_enabled" tableName="sys_interface_request">
             <column name="key_code"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_inter_enable" tableName="sys_interface_response">
             <column name="interface_id"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
         <createIndex indexName="idx_sys_response_enabled" tableName="sys_interface_response">
             <column name="key_code"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
         <addUniqueConstraint tableName="sys_front_key" columnNames="key_code,lang" constraintName="udx_front_key_lang"/>
     </changeSet>
@@ -405,10 +405,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -426,7 +426,7 @@
         </createTable>
         <createIndex indexName="idx_sys_language_enabled" tableName="sys_language_enabled">
             <column name="language"/>
-            <column name="is_enabled"/>
+            <column name="enabled"/>
         </createIndex>
     </changeSet>
     <changeSet id="2018082410580001" author="houyin.zhang">
@@ -439,8 +439,8 @@
         </createIndex>
         <createIndex indexName="idx_sys_component_menu_enabled" tableName="sys_component">
             <column name="menu_id"/>
-            <column name="is_deleted"/>
-            <column name="is_enabled"/>
+            <column name="deleted"/>
+            <column name="enabled"/>
         </createIndex>
     </changeSet>
     <changeSet id="2018082920330001" author="houyin.zhang">

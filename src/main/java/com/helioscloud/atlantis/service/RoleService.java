@@ -76,11 +76,11 @@ public class RoleService extends BaseService<RoleMapper, Role> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (role.getIsEnabled() == null || "".equals(role.getIsEnabled())) {
-            role.setIsEnabled(rr.getIsEnabled());
+        if (role.getEnabled() == null || "".equals(role.getEnabled())) {
+            role.setEnabled(rr.getEnabled());
         }
-        if (role.getIsDeleted() == null || "".equals(role.getIsDeleted())) {
-            role.setIsDeleted(rr.getIsDeleted());
+        if (role.getDeleted() == null || "".equals(role.getDeleted())) {
+            role.setDeleted(rr.getDeleted());
         }
         role.setCreatedBy(rr.getCreatedBy());
         role.setCreatedDate(rr.getCreatedDate());
@@ -113,7 +113,7 @@ public class RoleService extends BaseService<RoleMapper, Role> {
             this.deleteById(id);
         }
         /*Role role = roleMapper.selectById(id);
-        role.setIsDeleted(true);
+        role.setDeleted(true);
         roleMapper.updateById(role);*/
         //this.deleteById(id);
     }
@@ -130,7 +130,7 @@ public class RoleService extends BaseService<RoleMapper, Role> {
             List<Role> list = roleMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(role -> {
-                    role.setIsDeleted(true);
+                    role.setDeleted(true);
                     return role;
                 }).collect(Collectors.toList());
             }
@@ -146,24 +146,24 @@ public class RoleService extends BaseService<RoleMapper, Role> {
      *
      * @param tenantId
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Role> getRolesByTenantId(Long tenantId, Boolean isEnabled, Page page) {
+    public List<Role> getRolesByTenantId(Long tenantId, Boolean enabled, Page page) {
         return roleMapper.selectPage(page, new EntityWrapper<Role>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("tenant_id", tenantId)
                 .orderBy("role_code"));
 
         /* if (isDeleted == null || "".equals(isDeleted)) {
             return roleMapper.selectPage(page, new EntityWrapper<Role>()
-                    .eq("is_deleted", false)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq("deleted", false)
+                    .eq(enabled != null, "enabled", enabled)
                     .eq("tenant_id", tenantId));
         } else {
             return roleMapper.selectPage(page, new EntityWrapper<Role>()
-                    .eq("is_deleted", isDeleted)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq("deleted", isDeleted)
+                    .eq(enabled != null, "enabled", enabled)
                     .eq("tenant_id", tenantId));
         }*/
     }

@@ -89,8 +89,8 @@ public class EsMenuInfoSerivce {
         page.setSearchCount(false);
         Long start = System.currentTimeMillis();
         List<Menu> menuList = menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                .eq("is_deleted", false)
-                .eq("is_enabled", true));
+                .eq("deleted", false)
+                .eq("enabled", true));
         log.info("查询菜单耗时:{}ms,一共获得:{}条数据", System.currentTimeMillis() - start, menuList.size());
         page.setRecords(menuList);
         return page;
@@ -144,7 +144,7 @@ public class EsMenuInfoSerivce {
                     .startObject("menuUrl").field("type", "keyword").endObject()
                     .startObject("hasChildCatalog").field("type", "keyword").endObject()
                     .startObject("versionNumber").field("type", "keyword").endObject()
-                    .startObject("isEnabled").field("type", "keyword").endObject()
+                    .startObject("enabled").field("type", "keyword").endObject()
                     .startObject("isDeleted").field("type", "keyword").endObject()
                     .startObject("fromSource").field("type", "keyword").endObject()
                     .endObject()
@@ -244,7 +244,7 @@ public class EsMenuInfoSerivce {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (parentMenuId != null && parentMenuId > 0) {
             queryBuilder.must(QueryBuilders.termQuery("parentMenuId", parentMenuId));
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", true));
+            queryBuilder.must(QueryBuilders.termQuery("enabled", true));
         } else {
             return list;
         }
@@ -265,15 +265,15 @@ public class EsMenuInfoSerivce {
      * @param parentMenuId
      * @return
      */
-    public List<Menu> getMenuPageByParentMenuIdFromES(Long parentMenuId,Boolean isEnabled, Pageable pageable) {
-        log.info("从ES中，根据parentMenuId({})，启用标识({}),返回子菜单，分页", parentMenuId,isEnabled);
+    public List<Menu> getMenuPageByParentMenuIdFromES(Long parentMenuId,Boolean enabled, Pageable pageable) {
+        log.info("从ES中，根据parentMenuId({})，启用标识({}),返回子菜单，分页", parentMenuId,enabled);
         List<Menu> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (parentMenuId != null && parentMenuId > 0) {
             queryBuilder.must(QueryBuilders.termQuery("parentMenuId", parentMenuId));
         }
-        if(isEnabled != null){
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", isEnabled));
+        if(enabled != null){
+            queryBuilder.must(QueryBuilders.termQuery("enabled", enabled));
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("menuCode")
                 .order(SortOrder.ASC);
@@ -284,15 +284,15 @@ public class EsMenuInfoSerivce {
 
     /**
      * 所有菜单 分页
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenuPagesFromES(Boolean isEnabled, Pageable pageable) {
+    public List<Menu> getMenuPagesFromES(Boolean enabled, Pageable pageable) {
         log.info("从ES中，取所有菜单 分页");
         List<Menu> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        if (isEnabled != null) {
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", true));
+        if (enabled != null) {
+            queryBuilder.must(QueryBuilders.termQuery("enabled", true));
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("seqNumber")
                 .order(SortOrder.ASC);

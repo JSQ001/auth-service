@@ -216,11 +216,8 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         if (roleMenu1 == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (roleMenu.getIsEnabled() == null || "".equals(roleMenu.getIsEnabled())) {
-            roleMenu.setIsEnabled(roleMenu1.getIsEnabled());
-        }
-        if (roleMenu.getIsDeleted() == null || "".equals(roleMenu.getIsDeleted())) {
-            roleMenu.setIsDeleted(roleMenu1.getIsDeleted());
+        if (roleMenu.getEnabled() == null || "".equals(roleMenu.getEnabled())) {
+            roleMenu.setEnabled(roleMenu1.getEnabled());
         }
         roleMenu.setCreatedBy(roleMenu1.getCreatedBy());
         roleMenu.setCreatedDate(roleMenu1.getCreatedDate());
@@ -242,7 +239,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     }
 
     /**
-     * @param id 删除角色菜单（逻辑删除）
+     * @param id 删除角色菜单（物理删除）
      * @return
      */
     @Transactional
@@ -253,7 +250,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     }
 
     /**
-     * @param ids 批量删除角色菜单（逻辑删除）
+     * @param ids 批量删除角色菜单（物理删除）
      * @return
      */
     @Transactional
@@ -268,14 +265,14 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      * 根据角色Id，获取分配的所有菜单
      *
      * @param roleId    角色ID
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<RoleMenuDTO> getRoleMenusByRoleId(Long roleId, Boolean isEnabled, Page page) {
+    public List<RoleMenuDTO> getRoleMenusByRoleId(Long roleId, Boolean enabled, Page page) {
         List<RoleMenuDTO> result = new ArrayList<RoleMenuDTO>();
         List<RoleMenu> list = roleMenuMapper.selectPage(page, new EntityWrapper<RoleMenu>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("role_id", roleId)
                 .orderBy("last_updated_date"));
         if (CollectionUtils.isNotEmpty(list)) {

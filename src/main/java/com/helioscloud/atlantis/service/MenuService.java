@@ -139,11 +139,11 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         if (mm == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (menu.getIsEnabled() == null || "".equals(menu.getIsEnabled())) {
-            menu.setIsEnabled(mm.getIsEnabled());
+        if (menu.getEnabled() == null || "".equals(menu.getEnabled())) {
+            menu.setEnabled(mm.getEnabled());
         }
-        if (menu.getIsDeleted() == null || "".equals(menu.getIsDeleted())) {
-            menu.setIsDeleted(mm.getIsDeleted());
+        if (menu.getDeleted() == null || "".equals(menu.getDeleted())) {
+            menu.setDeleted(mm.getDeleted());
         }
         if (menu.getParentMenuId() == null || "".equals(menu.getParentMenuId())) {
             menu.setParentMenuId(mm.getParentMenuId());//如果没有上级，则默认为0
@@ -191,7 +191,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         this.updateById(menu);
         esMenuInfoSerivce.saveEsMenuIndex(menu);
         //20180823 增加校验 禁用上级菜单的时候，把其所有子菜单都禁用掉，但启用的时候，只启用它自己，不递归处理子菜单
-        if (!menu.getIsEnabled().booleanValue() && mm.getIsEnabled().booleanValue()) {
+        if (!menu.getEnabled().booleanValue() && mm.getEnabled().booleanValue()) {
             updateChildrenMenu(menu);
         }
         return menu;
@@ -210,13 +210,13 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             list = esMenuInfoSerivce.getMenuListByParentMenuIdFromES(menu.getId());
         } else {
             list = menuMapper.selectList(new EntityWrapper<Menu>()
-                    .eq("is_enabled", true)
+                    .eq("enabled", true)
                     .eq("parent_menu_id", menu.getId()));
         }
         if (list != null && list.size() > 0) {
             //则去禁用子菜单
             list.stream().forEach(e -> {
-                e.setIsEnabled(false);
+                e.setEnabled(false);
             });
             //批量保存
             this.updateBatchById(list);
@@ -259,7 +259,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                 childCount= esMenuInfoSerivce.getMenuListByParentMenuIdFromES(id).size();
             }else{
                 childCount= menuMapper.selectCount(new EntityWrapper<Menu>()
-                        .eq("is_enabled", true)
+                        .eq("enabled", true)
                         .eq("parent_menu_id", id));
             }
             if (childCount != null && childCount > 0) {
@@ -299,16 +299,16 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
     /**
      * 所有菜单 分页
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenus(Boolean isEnabled, Pageable pageable) {
+    public List<Menu> getMenus(Boolean enabled, Pageable pageable) {
         if(esMenuInfoSerivce.isElasticSearchEnable()){
-            return esMenuInfoSerivce.getMenuPagesFromES(isEnabled,pageable);
+            return esMenuInfoSerivce.getMenuPagesFromES(enabled,pageable);
         }else{
             Page page = PageUtil.getPage(pageable);
             return menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                    .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                    .eq(enabled != null && !"".equals(enabled), "enabled", enabled)
                     .orderBy("seq_number")
                     .orderBy("menu_code"));
         }
@@ -318,16 +318,16 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
      * 所有子菜单 分页
      * @param pageable
      * @param parentMenuId 父菜单ID
-     * @param isEnabled    如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled    如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenusByParentMenuId(Long parentMenuId, Boolean isEnabled, Pageable pageable) {
+    public List<Menu> getMenusByParentMenuId(Long parentMenuId, Boolean enabled, Pageable pageable) {
         if(esMenuInfoSerivce.isElasticSearchEnable()){
-            return esMenuInfoSerivce.getMenuPageByParentMenuIdFromES(parentMenuId,isEnabled,pageable);
+            return esMenuInfoSerivce.getMenuPageByParentMenuIdFromES(parentMenuId,enabled,pageable);
         }else{
             Page page = PageUtil.getPage(pageable);
             return menuMapper.selectPage(page, new EntityWrapper<Menu>()
-                    .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                    .eq(enabled != null && !"".equals(enabled), "enabled", enabled)
                     .eq("parent_menu_id", parentMenuId));
         }
     }

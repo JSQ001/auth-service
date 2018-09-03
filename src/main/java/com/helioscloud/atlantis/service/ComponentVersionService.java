@@ -59,11 +59,11 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (componentVersion.getIsEnabled() == null || "".equals(componentVersion.getIsEnabled())) {
-            componentVersion.setIsEnabled(rr.getIsEnabled());
+        if (componentVersion.getEnabled() == null || "".equals(componentVersion.getEnabled())) {
+            componentVersion.setEnabled(rr.getEnabled());
         }
-        if (componentVersion.getIsDeleted() == null || "".equals(componentVersion.getIsDeleted())) {
-            componentVersion.setIsDeleted(rr.getIsDeleted());
+        if (componentVersion.getDeleted() == null || "".equals(componentVersion.getDeleted())) {
+            componentVersion.setDeleted(rr.getDeleted());
         }
         componentVersion.setCreatedBy(rr.getCreatedBy());
         componentVersion.setCreatedDate(rr.getCreatedDate());
@@ -98,12 +98,12 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
      * 根据组件ID，获取其所有组件版本 分页
      *
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<ComponentVersion> getComponentVersionsByComponentId(Long componentId, Boolean isEnabled, Page page) {
+    public List<ComponentVersion> getComponentVersionsByComponentId(Long componentId, Boolean enabled, Page page) {
         return componentVersionMapper.selectPage(page, new EntityWrapper<ComponentVersion>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("component_id", componentId)
                 .orderBy("id"));
     }

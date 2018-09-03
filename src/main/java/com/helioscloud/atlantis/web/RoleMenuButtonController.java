@@ -40,8 +40,8 @@ public class RoleMenuButtonController {
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} roleId 角色ID
      * @apiSuccess (返回参数) {Long} buttonId 菜单按钮ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -50,8 +50,8 @@ public class RoleMenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030015747216375809",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T16:57:45.562+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T16:57:45.562+08:00",
@@ -68,24 +68,24 @@ public class RoleMenuButtonController {
 
     /**
      * @api {PUT} /api/roleMenuButton/update 【角色权限】角色菜单按钮更新
-     * @apiDescription 更新角色关联菜单按钮 只允许修改isEnabled和isDeleted字段
+     * @apiDescription 更新角色关联菜单按钮 只允许修改enabled和deleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
-     * @apiParam (请求参数) {Boolean} isEnabled 启用标识
-     * @apiParam (请求参数) {Boolean} isDeleted 删除标识
+     * @apiParam (请求参数) {Boolean} enabled 启用标识
+     * @apiParam (请求参数) {Boolean} deleted 删除标识
      * @apiParam (请求参数) {Long} versionNumber 版本号
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1030015747216375809",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {Long} roleId 角色ID
      * @apiSuccess (返回参数) {Long} buttonId 菜单按钮ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -94,8 +94,8 @@ public class RoleMenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030015747216375809",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -151,8 +151,8 @@ public class RoleMenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030015747216375809",
-     * "isEnabled": false,
-     * "isDeleted": true,
+     * "enabled": false,
+     * "deleted": true,
      * "createdDate": "2018-08-16T16:57:45.562+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T17:05:04.427+08:00",
@@ -172,17 +172,17 @@ public class RoleMenuButtonController {
      * @apiDescription 查询角色关联菜单菜单【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} roleId 角色ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/roleMenuButton/query/role?roleId=1029919265725378561&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/roleMenuButton/query/role?roleId=1029919265725378561&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1030015747216375809",
-     * "isEnabled": false,
-     * "isDeleted": true,
+     * "enabled": false,
+     * "deleted": true,
      * "createdDate": "2018-08-16T16:57:45.562+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T17:05:04.427+08:00",
@@ -193,8 +193,8 @@ public class RoleMenuButtonController {
      * },
      * {
      * "id": "1030018041836208129",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T17:06:52.644+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T17:08:40.138+08:00",
@@ -207,10 +207,10 @@ public class RoleMenuButtonController {
      */
     @GetMapping("/query/role")
     public ResponseEntity<List<RoleMenuButton>> getRoleMenuButtonByRoleId(@RequestParam(required = true) Long roleId,
-                                                                          @RequestParam(required = false) Boolean isEnabled,
+                                                                          @RequestParam(required = false) Boolean enabled,
                                                                           Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<RoleMenuButton> list = roleMenuButtonService.getRoleMenuButtonByRoleId(roleId, isEnabled, page);
+        List<RoleMenuButton> list = roleMenuButtonService.getRoleMenuButtonByRoleId(roleId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/roleMenuButton/query/role");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

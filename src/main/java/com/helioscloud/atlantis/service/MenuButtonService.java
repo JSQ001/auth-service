@@ -113,11 +113,11 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (menuButton.getButtonCode() == null || "".equals(menuButton.getButtonCode())) {
             menuButton.setButtonCode(mb.getButtonCode());
         }
-        if (menuButton.getIsEnabled() == null || "".equals(menuButton.getIsEnabled())) {
-            menuButton.setIsEnabled(mb.getIsEnabled());
+        if (menuButton.getEnabled() == null || "".equals(menuButton.getEnabled())) {
+            menuButton.setEnabled(mb.getEnabled());
         }
-        if (menuButton.getIsDeleted() == null || "".equals(menuButton.getIsDeleted())) {
-            menuButton.setIsDeleted(mb.getIsDeleted());
+        if (menuButton.getDeleted() == null || "".equals(menuButton.getDeleted())) {
+            menuButton.setDeleted(mb.getDeleted());
         }
         menuButton.setCreatedBy(mb.getCreatedBy());
         menuButton.setCreatedDate(mb.getCreatedDate());
@@ -186,12 +186,12 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
      *
      * @param menuId
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<MenuButton> getMenuButtons(Long menuId, Boolean isEnabled, Page page) {
+    public List<MenuButton> getMenuButtons(Long menuId, Boolean enabled, Page page) {
         return menuButtonMapper.selectPage(page, new EntityWrapper<MenuButton>()
-                .eq(isEnabled != null && !"".equals(isEnabled), "is_enabled", isEnabled)
+                .eq(enabled != null && !"".equals(enabled), "enabled", enabled)
                 .eq("menu_id", menuId)
                 .orderBy("button_code"));
     }
@@ -213,7 +213,7 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
      */
     public List<MenuButton> getMenuButtonsByMenuId(Long menuId) {
         return menuButtonMapper.selectList(new EntityWrapper<MenuButton>()
-                .eq("is_enabled", true)
+                .eq("enabled", true)
                 .eq("menu_id", menuId)
                 .orderBy("button_code"));
     }

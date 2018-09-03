@@ -44,8 +44,8 @@ public class MenuButtonController {
      * @apiSuccess (返回参数) {String} buttonCode 按钮代码
      * @apiSuccess (返回参数) {String} buttonName 按钮名称
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -54,8 +54,8 @@ public class MenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030012847077457921",
-     * "isEnabled": true,
-     * "isDeleted": false,
+     * "enabled": true,
+     * "deleted": false,
      * "createdDate": "2018-08-16T16:46:14.132+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T16:46:14.132+08:00",
@@ -73,17 +73,17 @@ public class MenuButtonController {
 
     /**
      * @api {PUT} /api/menuButton/update 【角色权限】按钮更新
-     * @apiDescription 更新角色关联菜单 只允许修改buttonName,isEnabled和isDeleted字段
+     * @apiDescription 更新角色关联菜单 只允许修改buttonName,enabled和deleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
-     * @apiParam (请求参数) {Boolean} isEnabled 启用标识
-     * @apiParam (请求参数) {Boolean} isDeleted 删除标识
+     * @apiParam (请求参数) {Boolean} enabled 启用标识
+     * @apiParam (请求参数) {Boolean} deleted 删除标识
      * @apiParam (请求参数) {Long} versionNumber 版本号
      * @apiParamExample {json} 请求报文:
      * {
      * "id": "1030013201496145921",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "versionNumber": 1,
      * "menuId": "1029977144029360129",
      * "buttonName":"common.save"
@@ -92,8 +92,8 @@ public class MenuButtonController {
      * @apiSuccess (返回参数) {String} buttonCode 按钮代码
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
      * @apiSuccess (返回参数) {String} buttonName    按钮名称
-     * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
-     * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
      * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
      * @apiSuccess (返回参数) {Long} createdBy    创建人ID
@@ -102,8 +102,8 @@ public class MenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030013201496145921",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": null,
      * "createdBy": null,
      * "lastUpdatedDate": null,
@@ -160,8 +160,8 @@ public class MenuButtonController {
      * @apiSuccessExample {json} 返回报文:
      * {
      * "id": "1030013201496145921",
-     * "isEnabled": false,
-     * "isDeleted": false,
+     * "enabled": false,
+     * "deleted": false,
      * "createdDate": "2018-08-16T16:47:38.618+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T16:49:05.759+08:00",
@@ -182,17 +182,17 @@ public class MenuButtonController {
      * @apiDescription 查询菜单关联按钮【分页】
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} menuId 菜单ID
-     * @apiParam (请求参数) {Boolean} [isEnabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/menuButton/query/menu?menuId=1029977144029360129&isEnabled=true&page=0&size=2
+     * http://localhost:9082/api/menuButton/query/menu?menuId=1029977144029360129&enabled=true&page=0&size=2
      * @apiSuccessExample {json} 返回报文:
      * [
      * {
      * "id": "1030012847077457921",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T16:46:14.132+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T16:50:48.029+08:00",
@@ -204,8 +204,8 @@ public class MenuButtonController {
      * },
      * {
      * "id": "1030013157661474817",
-     * "isEnabled": true,
-     * "isDeleted": true,
+     * "enabled": true,
+     * "deleted": true,
      * "createdDate": "2018-08-16T16:47:28.169+08:00",
      * "createdBy": 0,
      * "lastUpdatedDate": "2018-08-16T16:52:07.754+08:00",
@@ -219,10 +219,10 @@ public class MenuButtonController {
      */
     @GetMapping("/query/menu")
     public ResponseEntity<List<RoleMenuDTO>> getRoleMenusByRoleId(@RequestParam(required = true) Long menuId,
-                                                                  @RequestParam(required = false) Boolean isEnabled,
+                                                                  @RequestParam(required = false) Boolean enabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<MenuButton> list = menuButtonService.getMenuButtons(menuId, isEnabled, page);
+        List<MenuButton> list = menuButtonService.getMenuButtons(menuId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menuButton/query/menu");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

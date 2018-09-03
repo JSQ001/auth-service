@@ -89,11 +89,8 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
         if (roleMenu1 == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (roleMenuButton.getIsEnabled() == null || "".equals(roleMenuButton.getIsEnabled())) {
-            roleMenuButton.setIsEnabled(roleMenu1.getIsEnabled());
-        }
-        if (roleMenuButton.getIsDeleted() == null || "".equals(roleMenuButton.getIsDeleted())) {
-            roleMenuButton.setIsDeleted(roleMenu1.getIsDeleted());
+        if (roleMenuButton.getEnabled() == null || "".equals(roleMenuButton.getEnabled())) {
+            roleMenuButton.setEnabled(roleMenu1.getEnabled());
         }
         roleMenuButton.setCreatedBy(roleMenu1.getCreatedBy());
         roleMenuButton.setCreatedDate(roleMenu1.getCreatedDate());
@@ -115,7 +112,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     }
 
     /**
-     * @param id 删除角色菜单按钮（逻辑删除）
+     * @param id 删除角色菜单按钮（物理删除）
      * @return
      */
     @Transactional
@@ -124,12 +121,12 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
             this.deleteById(id);
         }
         /*RoleMenuButton roleMenuButton = roleMenuButtonMapper.selectById(id);
-        roleMenuButton.setIsDeleted(true);
+        roleMenuButton.setDeleted(true);
         roleMenuButtonMapper.updateById(roleMenuButton);*/
     }
 
     /**
-     * @param ids 批量删除角色菜单按钮（逻辑删除）
+     * @param ids 批量删除角色菜单按钮（物理删除）
      * @return
      */
     @Transactional
@@ -140,7 +137,7 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
             List<RoleMenuButton> list = roleMenuButtonMapper.selectBatchIds(ids);
             if (list != null && list.size() > 0) {
                 result = list.stream().map(menu -> {
-                    menu.setIsDeleted(true);
+                    menu.setDeleted(true);
                     return menu;
                 }).collect(Collectors.toList());
             }
@@ -155,24 +152,24 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
      * 根据角色Id，获取分配的所有菜单按钮
      *
      * @param roleId    角色ID
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
      */
-    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId, Boolean isEnabled, Page page) {
+    public List<RoleMenuButton> getRoleMenuButtonByRoleId(Long roleId, Boolean enabled, Page page) {
         List<RoleMenuButton> list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("role_id", roleId)
                 .orderBy("last_updated_date"));
         /*if (isDeleted == null) {
             list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
-                    .eq("is_deleted", false)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq("deleted", false)
+                    .eq(enabled != null, "enabled", enabled)
                     .eq("role_id", roleId));
         } else {
             list = roleMenuButtonMapper.selectPage(page, new EntityWrapper<RoleMenuButton>()
-                    .eq("is_deleted", isDeleted)
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq("deleted", isDeleted)
+                    .eq(enabled != null, "enabled", enabled)
                     .eq("role_id", roleId));
         }*/
         return list;

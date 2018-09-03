@@ -89,11 +89,11 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (frontKey.getIsEnabled() == null || "".equals(frontKey.getIsEnabled())) {
-            frontKey.setIsEnabled(rr.getIsEnabled());
+        if (frontKey.getEnabled() == null || "".equals(frontKey.getEnabled())) {
+            frontKey.setEnabled(rr.getEnabled());
         }
-        if (frontKey.getIsDeleted() == null || "".equals(frontKey.getIsDeleted())) {
-            frontKey.setIsDeleted(rr.getIsDeleted());
+        if (frontKey.getDeleted() == null || "".equals(frontKey.getDeleted())) {
+            frontKey.setDeleted(rr.getDeleted());
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
             frontKey.setModuleId(rr.getModuleId());
@@ -163,17 +163,17 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      *
      * @param moduleId  模块Id
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean isEnabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean enabled, Pageable pageable) {
         //检查是否启用了ES
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdFromES(moduleId, isEnabled, pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdFromES(moduleId, enabled, pageable);
         }
         Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("module_id", moduleId)
                 .orderBy("key_code"));
     }
@@ -182,16 +182,16 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * 取所有前端Title 分页
      *
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeys(Boolean isEnabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeys(Boolean enabled, Pageable pageable) {
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysFromES(isEnabled, pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysFromES(enabled, pageable);
         }
         Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .orderBy("key_code"));
     }
 
@@ -216,17 +216,17 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @param moduleId  模块Id
      * @param lang      语言类型
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean isEnabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean enabled, Pageable pageable) {
         //判断 是否启用了ES
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdAndLangFromES(moduleId, lang, isEnabled, pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdAndLangFromES(moduleId, lang, enabled, pageable);
         } else {
             Page page = PageUtil.getPage(pageable);
             return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
-                    .eq(isEnabled != null, "is_enabled", isEnabled)
+                    .eq(enabled != null, "enabled", enabled)
                     .eq("lang", lang)
                     .eq(moduleId != null && moduleId > 0, "module_id", moduleId)
                     .orderBy("key_code"));
@@ -245,7 +245,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             return esFrontKeyInfoSerivce.getFrontKeysByLangFromES(lang);
         } else {
             return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
-                    .eq("is_enabled", true)
+                    .eq("enabled", true)
                     .eq("lang", lang)
                     .orderBy("key_code"));
         }
@@ -331,17 +331,17 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      *
      * @param keyCode   界面Title的代码
      * @param lang      语言，不传则不控制，传了则按传入的值进行控制
-     * @param isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
+     * @param enabled 启用标识，不传则不控制，传了则按传入的值进行控制
      * @return 界面Title对象
      */
-    public List<FrontKey> getFrontKeyByKeyCodeAndLang(String keyCode, String lang, Boolean isEnabled) {
+    public List<FrontKey> getFrontKeyByKeyCodeAndLang(String keyCode, String lang, Boolean enabled) {
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeyByKeyCodeAndLangFromES(keyCode, lang, isEnabled);
+            return esFrontKeyInfoSerivce.getFrontKeyByKeyCodeAndLangFromES(keyCode, lang, enabled);
         } else {
             return frontKeyMapper.selectList(new EntityWrapper<FrontKey>()
                     .eq("key_code", keyCode)
                     .eq(StringUtils.isNotEmpty(lang), "lang", lang)
-                    .eq(isEnabled != null, "is_enabled", isEnabled));
+                    .eq(enabled != null, "enabled", enabled));
         }
     }
 

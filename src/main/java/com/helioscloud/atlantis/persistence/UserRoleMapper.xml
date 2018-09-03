@@ -18,10 +18,10 @@
             role_code,
             role_name,
             tenant_id,
-            is_deleted,
-            is_enabled
+            deleted,
+            enabled
          from sys_role sr
-        where sr.is_enabled = 1 and sr.is_deleted = 0
+        where sr.enabled = 1 and sr.deleted = 0
         and sr.tenant_id = #{tenantId}
         <if test=" roleCode != null">
             and sr.role_code like concat(concat('%',#{roleCode}),'%')
@@ -36,10 +36,10 @@
             role_code,
             role_name,
             tenant_id,
-            is_deleted,
-            is_enabled
+            deleted,
+            enabled
         from sys_role sr
-        where sr.is_enabled = 1 and sr.is_deleted = 0
+        where sr.enabled = 1 and sr.deleted = 0
         <if test=" roleCode != null">
             and sr.role_code like concat(concat('%',#{roleCode}),'%')
         </if>
@@ -49,8 +49,7 @@
         and exists (
             select 1 from sys_user_role sur
             where sur.role_id = sr.id
-                and sur.is_enabled = 1
-                and sur.is_deleted = 0
+                and sur.enabled = 1
                 and sur.user_id = #{userId}
         )
         order by role_code

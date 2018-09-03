@@ -32,10 +32,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -54,7 +54,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_tenant_id_deleted" tableName="sys_role">
             <column name="tenant_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_tenant_id" tableName="sys_role">
             <column name="tenant_id"/>
@@ -92,10 +92,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -115,7 +115,7 @@
         <!--  添加索引 -->
         <createIndex indexName="idx_parent_menu_id_deleted" tableName="sys_menu">
             <column name="parent_menu_id"/>
-            <column name="is_deleted"/>
+            <column name="deleted"/>
         </createIndex>
         <createIndex indexName="idx_parent_menu_id" tableName="sys_menu">
             <column name="parent_menu_id"/>
@@ -139,10 +139,10 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="deleted" type="boolean" remarks="是否删除">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -178,10 +178,7 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -225,10 +222,7 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
@@ -271,10 +265,7 @@
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_enabled" type="boolean" remarks="是否启用">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_deleted" type="boolean" remarks="是否删除">
+            <column name="enabled" type="boolean" remarks="是否启用">
                 <constraints nullable="false"/>
             </column>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">

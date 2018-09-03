@@ -68,11 +68,11 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
         if (rr == null) {
             throw new BizException(RespCode.DB_NOT_EXISTS);
         }
-        if (anInterface.getIsEnabled() == null || "".equals(anInterface.getIsEnabled())) {
-            anInterface.setIsEnabled(rr.getIsEnabled());
+        if (anInterface.getEnabled() == null || "".equals(anInterface.getEnabled())) {
+            anInterface.setEnabled(rr.getEnabled());
         }
-        if (anInterface.getIsDeleted() == null || "".equals(anInterface.getIsDeleted())) {
-            anInterface.setIsDeleted(rr.getIsDeleted());
+        if (anInterface.getDeleted() == null || "".equals(anInterface.getDeleted())) {
+            anInterface.setDeleted(rr.getDeleted());
         }
         anInterface.setCreatedBy(rr.getCreatedBy());
         anInterface.setCreatedDate(rr.getCreatedDate());
@@ -106,24 +106,24 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
      * 根据模块Id,取所有接口 分页
      *
      * @param page
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean isEnabled, Page page) {
+    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean enabled, Page page) {
         return interfaceMapper.selectPage(page, new EntityWrapper<Interface>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("module_id", moduleId)
                 .orderBy("id"));
     }
 
     /**
      * 根据模块Id,取所有接口 不分页
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean isEnabled) {
+    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean enabled) {
         return interfaceMapper.selectList(new EntityWrapper<Interface>()
-                .eq(isEnabled != null, "is_enabled", isEnabled)
+                .eq(enabled != null, "enabled", enabled)
                 .eq("module_id", moduleId)
                 .orderBy("id"));
     }

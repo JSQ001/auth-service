@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @TableName("sys_menu")
-public class Menu extends VersionDomainObject implements Comparable<Menu>{
+public class Menu extends DomainLogicEnable implements Comparable<Menu>{
 
     @TableField("menu_code")
     private String menuCode; // 菜单代码

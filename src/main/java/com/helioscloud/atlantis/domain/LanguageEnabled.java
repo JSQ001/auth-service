@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import lombok.Data;
 
 /**
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_language_enabled")
-public class LanguageEnabled extends VersionDomainObject {
+public class LanguageEnabled extends DomainLogicEnable {
     @TableField("language")
     private String language;// 中文 zh_CN 英文 eu
 

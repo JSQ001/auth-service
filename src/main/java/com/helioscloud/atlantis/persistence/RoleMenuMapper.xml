@@ -25,14 +25,13 @@
         sm.menu_icon,
         sm.menu_url,
         sm.version_number,
-        sm.is_enabled,
+        sm.enabled,
         sm.fromSource
         from sys_menu sm, sys_role_menu srm
         where srm.menu_id = sm.id
-        and sm.is_deleted = 0
-        and sm.is_enabled = 1
-        and srm.is_deleted = 0
-        and srm.is_enabled = 1
+        and sm.deleted = 0
+        and sm.enabled = 1
+        and srm.enabled = 1
         <if test=" roleIds != null and roleIds.size > 0 ">
             and srm.role_id in
             <foreach collection="roleIds" index="index" item="item" open="(" close=")" separator=",">
@@ -55,10 +54,9 @@
         sm.fromSource
         from sys_menu sm, sys_role_menu srm,sys_user_role sur
         where srm.menu_id = sm.id
-        and sm.is_deleted = 0
-        and sm.is_enabled = 1
-        and srm.is_deleted = 0
-        and srm.is_enabled = 1
+        and sm.deleted = 0
+        and sm.enabled = 1
+        and srm.enabled = 1
         and sur.role_id = srm.role_id
         and sur.user_id = #{userId}
         order by sm.parent_menu_id,sm.seq_number
@@ -78,15 +76,14 @@
                   from sys_role_menu srm, sys_menu sm
                  where srm.menu_id = sm.id
                    and sm.menu_type = 1001
-                   and sm.is_enabled = 1
-                   and sm.is_deleted = 0
+                   and sm.enabled = 1
                    and srm.role_id = #{roleId}
                 union all
                 select smb.id
                   from sys_role_menu_button srb, sys_menu_button smb
                  where srb.button_id = smb.id
-                   and smb.is_enabled = 1
-                   and smb.is_deleted = 0
+                   and smb.enabled = 1
+                   and smb.deleted = 0
                    and srb.role_id = #{roleId}
     </select>
     <select id="getAllMenuAndButton" resultType="com.helioscloud.atlantis.dto.RoleAssignMenuButtonDTO">
@@ -98,8 +95,8 @@
                                sm.parent_menu_id parentId
                           from sys_menu sm
                          where sm.menu_type = 1001
-                           and sm.is_enabled = 1
-                           and sm.is_deleted = 0
+                           and sm.enabled = 1
+                           and sm.deleted = 0
                         union all
                         select smb.id,
                                smb.button_code code,
@@ -107,8 +104,8 @@
                                'BUTTON' type,
                                smb.menu_id parentId
                           from sys_menu_button smb
-                         where smb.is_enabled = 1
-                           and smb.is_deleted = 0) t
+                         where smb.enabled = 1
+                           and smb.deleted = 0) t
                  order by t.type, parentId, code
     </select>
 </mapper>

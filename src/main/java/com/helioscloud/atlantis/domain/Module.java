@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.VersionDomainObject;
+import com.cloudhelios.atlantis.domain.DomainLogicEnable;
 import lombok.Data;
 
 /**
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_module")
-public class Module extends VersionDomainObject {
+public class Module extends DomainLogicEnable {
 
     @TableField("module_code")
     private String moduleCode; //模块代码
