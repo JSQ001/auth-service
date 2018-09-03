@@ -4,6 +4,7 @@ package com.helioscloud.atlantis.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.RoleMenu;
+import com.helioscloud.atlantis.dto.RoleAssignMenuButtonDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -22,8 +23,9 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
     // 根据菜单ID集合，返回菜单的父菜单的集合
     List<Long> getParentMenuIdsByRoleIds(@Param("menuIds") List<Long> menuIds);
 
-    // 根据角色ID，返回已分配的菜单ID的集合（只取功能，不取目录）
-    List<String> getMenuIdsByRoleId(@Param("roleId") Long roleId);
+    // 根据角色ID，返回已分配的菜单ID及按钮ID的集合
+    List<String> getMenuIdsAndButtonIdsByRoleId(@Param("roleId") Long roleId);
 
-
+    // 返回所有菜单和菜单按钮
+    List<RoleAssignMenuButtonDTO> getAllMenuAndButton();
 }

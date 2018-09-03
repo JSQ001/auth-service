@@ -7,6 +7,7 @@ import com.cloudhelios.atlantis.service.BaseService;
 import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
+import com.helioscloud.atlantis.domain.enumeration.FlagEnum;
 import com.helioscloud.atlantis.dto.UserAssignRoleDTO;
 import com.helioscloud.atlantis.dto.UserRoleDTO;
 import com.helioscloud.atlantis.persistence.UserRoleMapper;
@@ -215,12 +216,12 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         }
         if (assignRole != null) {
             //取所有需要删除的角色ID
-            assignRole.stream().filter(m -> "1002".equals(m.getFlag())).forEach(d -> {
+            assignRole.stream().filter(m -> FlagEnum.DELETE.getID().toString().equals(m.getFlag())).forEach(d -> {
                 deleteRoleIds.add(d.getRoleId());
             });
             // 所有需要新增的角色ID
             Long finalUserId = userId;
-            assignRole.stream().filter(m -> "1001".equals(m.getFlag())).forEach(d -> {
+            assignRole.stream().filter(m -> FlagEnum.CREATE.getID().toString().equals(m.getFlag())).forEach(d -> {
                 //检查是否已经存在，已经存在的，则不更新
                 Integer exists = userRoleMapper.selectCount(new EntityWrapper<UserRole>().eq("user_id",finalUserId).eq("role_id",d.getRoleId()));
                 if(exists == null || exists == 0){
@@ -249,7 +250,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * @param userId 用户ID
      * @param roleCode 角色代码
      * @param roleName 角色名称
-     * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下租户已分配的启用的角色
+     * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下用户已分配的启用的角色
      * @param page
      * @return
      */
@@ -259,7 +260,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             // 查当前租户下所有启用的角色
             result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantID(),roleCode,roleName,page);
         }else if ("ASSIGNED".equals(queryFlag)){
-            //查当前租房下租户已分配的启用的角色
+            //查当前租房下用户已分配的启用的角色
             result = userRoleMapper.getSelectedRolesByCond(userId,roleCode,roleName,page);
         }
         return result;

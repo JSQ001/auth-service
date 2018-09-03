@@ -44,6 +44,10 @@ public class MenuController {
      * @apiParam (请求参数) {Long} parentMenuId 上级菜单ID,没有上级时，传0，即0为根目录
      * @apiParam (请求参数) {String} menuIcon 菜单图标
      * @apiParam (请求参数) {String} menuUrl 菜单URL
+     * @apiParam (请求参数) {String} fromSource 来源 DB 为数据库，FILE为文件
+     * @apiParam (请求参数) {List} [buttonList] 按钮的List 当目录有按钮时，传该集合
+     * @apiParam (请求参数buttonList的属性) {String} buttonCode 按钮的代码
+     * @apiParam (请求参数buttonList的属性) {String} buttonName 按钮的名称
      * @apiSuccess (返回参数) {Long} id 菜单ID
      * @apiSuccess (返回参数) {String} menuCode 菜单代码
      * @apiSuccess (返回参数) {String} menuName 菜单名称
@@ -52,6 +56,11 @@ public class MenuController {
      * @apiSuccess (返回参数) {Long} parentMenuId 上级菜单ID,没有上级时，传0，即0为根目录
      * @apiSuccess (返回参数) {String} menuIcon 菜单图标
      * @apiSuccess (返回参数) {String} menuUrl 菜单URL
+     * @apiSuccess (返回参数) {String} fromSource 来源 DB 表示数据库，FILE表示文件
+     * @apiSuccess (返回参数) {List} [buttonList] 按钮的List 当目录有按钮时，传该集合
+     * @apiSuccess (返回参数buttonList的属性) {Long} id 按钮ID
+     * @apiSuccess (返回参数buttonList的属性) {String} buttonCode 按钮的代码
+     * @apiSuccess (返回参数buttonList的属性) {String} buttonName 按钮的名称
      * @apiSuccess (返回参数) {Boolean} hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
@@ -62,32 +71,92 @@ public class MenuController {
      * @apiSuccess (返回参数) {Long} lastUpdatedBy    更新人ID
      * @apiParamExample {json} 请求报文:
      * {
-     * "menuCode":"M001",
-     * "menuName":"费用管理",
-     * "seqNumber":1,
-     * "menuTypeEnum":1001,
-     * "parentMenuId":0,
-     * "menuIcon":"",
-     * "menuUrl":""
+     * "menuCode": "M100101",
+     * "menuName": "我的个人信息",
+     * "seqNumber": 1,
+     * "menuTypeEnum": 1001,
+     * "parentMenuId": 1035535048168132610,
+     * "menuIcon": "item",
+     * "menuUrl": "http://item.com",
+     * "fromSource":"DB",
+     * "buttonList":[
+     * {"buttonCode":"100101-query",
+     * "buttonName":"common.query",
+     * "flag":1001
+     * },
+     * {"buttonCode":"100101-save",
+     * "buttonName":"common.save" ,
+     * "flag":1001
+     * },
+     * {"buttonCode":"100101-delete",
+     * "buttonName":"common.delete",
+     * "flag":1001
+     * }
+     * ]
      * }
      * @apiSuccessExample {json} 返回报文:
      * {
-     * "id": "1029973242290647041",
+     * "id": "1035541525687676929",
      * "isEnabled": true,
      * "isDeleted": false,
-     * "createdDate": "2018-08-16T14:08:51.597+08:00",
-     * "createdBy": 1005,
-     * "lastUpdatedDate": "2018-08-16T14:08:51.597+08:00",
-     * "lastUpdatedBy": 1005,
+     * "createdDate": "2018-08-31T22:55:13.817+08:00",
+     * "createdBy": 1012,
+     * "lastUpdatedDate": "2018-08-31T22:55:13.817+08:00",
+     * "lastUpdatedBy": 1012,
      * "versionNumber": 1,
-     * "menuCode": "M001",
-     * "menuName": "费用管理",
+     * "menuCode": "M100101",
+     * "menuName": "我的个人信息",
      * "seqNumber": 1,
      * "menuTypeEnum": 1001,
-     * "parentMenuId": 0,
-     * "menuIcon": "",
-     * "menuUrl": "",
-     * "hasChildCatalog":false
+     * "parentMenuId": "1035535048168132610",
+     * "menuIcon": "item",
+     * "menuUrl": "http://item.com",
+     * "hasChildCatalog": null,
+     * "fromSource": "DB",
+     * "buttonList": [
+     * {
+     * "id": "1035541549842673665",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-31T22:55:19.573+08:00",
+     * "createdBy": 1012,
+     * "lastUpdatedDate": "2018-08-31T22:55:19.573+08:00",
+     * "lastUpdatedBy": 1012,
+     * "versionNumber": 1,
+     * "menuId": "1035541525687676929",
+     * "buttonCode": "100101-query",
+     * "buttonName": "common.query",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1035541551004495874",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-31T22:55:19.853+08:00",
+     * "createdBy": 1012,
+     * "lastUpdatedDate": "2018-08-31T22:55:19.853+08:00",
+     * "lastUpdatedBy": 1012,
+     * "versionNumber": 1,
+     * "menuId": "1035541525687676929",
+     * "buttonCode": "100101-save",
+     * "buttonName": "common.save",
+     * "flag": "1001"
+     * },
+     * {
+     * "id": "1035541551927242753",
+     * "isEnabled": true,
+     * "isDeleted": false,
+     * "createdDate": "2018-08-31T22:55:20.069+08:00",
+     * "createdBy": 1012,
+     * "lastUpdatedDate": "2018-08-31T22:55:20.069+08:00",
+     * "lastUpdatedBy": 1012,
+     * "versionNumber": 1,
+     * "menuId": "1035541525687676929",
+     * "buttonCode": "100101-delete",
+     * "buttonName": "common.delete",
+     * "flag": "1001"
+     * }
+     * ]
      * }
      */
     @PostMapping("/create")
@@ -122,7 +191,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": "",
-     * "menuUrl": ""
+     * "menuUrl": "",
+     * "fromSource":"DB"
      * }
      * @apiSuccessExample {json} 返回报文:
      * {
@@ -140,7 +210,8 @@ public class MenuController {
      * "menuTypeEnum": 1000,
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": "",
-     * "menuUrl": ""
+     * "menuUrl": "",
+     * "fromSource":"DB"
      * }
      */
     @PutMapping("/update")
@@ -203,7 +274,8 @@ public class MenuController {
      * "parentMenuId": 0,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      */
     @GetMapping("/query/{id}")
@@ -238,7 +310,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * },
      * {
      * "id": "1029973242290647041",
@@ -256,7 +329,8 @@ public class MenuController {
      * "parentMenuId": 0,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      * ]
      */
@@ -297,7 +371,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * },
      * {
      * "id": "1029977215173144577",
@@ -315,7 +390,8 @@ public class MenuController {
      * "parentMenuId": 1029973941745364994,
      * "menuIcon": null,
      * "menuUrl": null,
-     * "hasChildCatalog":false
+     * "hasChildCatalog":false,
+     * "fromSource":"DB"
      * }
      * ]
      */
@@ -340,7 +416,7 @@ public class MenuController {
      * []
      */
     @RequestMapping(value = "/es/remove/all", method = RequestMethod.DELETE)
-    public ResponseEntity<Void> removeAllMenu()  throws IOException {
+    public ResponseEntity<Void> removeAllMenu() throws IOException {
         esMenuInfoSerivce.removeAll();
         return ResponseEntity.ok().build();
     }
@@ -355,7 +431,7 @@ public class MenuController {
      * []
      */
     @RequestMapping(value = "/es/init/all", method = RequestMethod.GET)
-    public ResponseEntity<Void> initAllMenu(){
+    public ResponseEntity<Void> initAllMenu() {
         esMenuInfoSerivce.doIndexTransaction();
         return ResponseEntity.ok().build();
     }

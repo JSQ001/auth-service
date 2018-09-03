@@ -25,7 +25,8 @@
         sm.menu_icon,
         sm.menu_url,
         sm.version_number,
-        sm.is_enabled
+        sm.is_enabled,
+        sm.fromSource
         from sys_menu sm, sys_role_menu srm
         where srm.menu_id = sm.id
         and sm.is_deleted = 0
@@ -50,7 +51,8 @@
         sm.seq_number,
         sm.menu_type as menuTypeEnum,
         sm.menu_icon,
-        sm.menu_url
+        sm.menu_url,
+        sm.fromSource
         from sys_menu sm, sys_role_menu srm,sys_user_role sur
         where srm.menu_id = sm.id
         and sm.is_deleted = 0
@@ -61,7 +63,7 @@
         and sur.user_id = #{userId}
         order by sm.parent_menu_id,sm.seq_number
     </select>
-    <select id="getParentMenuIdsByRoleIds" resultType="java.lang.Long" >
+    <select id="getParentMenuIdsByRoleIds" resultType="java.lang.Long">
         select sm.parent_menu_id
         from sys_menu sm
         <if test=" menuIds != null and menuIds.size > 0 ">
@@ -71,10 +73,42 @@
             </foreach>
         </if>
     </select>
-    <select id="getMenuIdsByRoleId" resultType="java.lang.String" >
-        select srm.menu_id
-        from sys_role_menu srm,sys_menu sm
-        where  srm.menu_id= sm.id and sm.menu_type = 1000
-                and srm.role_id = #{roleId}
+    <select id="getMenuIdsAndButtonIdsByRoleId" resultType="java.lang.String">
+         select sm.id
+                  from sys_role_menu srm, sys_menu sm
+                 where srm.menu_id = sm.id
+                   and sm.menu_type = 1001
+                   and sm.is_enabled = 1
+                   and sm.is_deleted = 0
+                   and srm.role_id = #{roleId}
+                union all
+                select smb.id
+                  from sys_role_menu_button srb, sys_menu_button smb
+                 where srb.button_id = smb.id
+                   and smb.is_enabled = 1
+                   and smb.is_deleted = 0
+                   and srb.role_id = #{roleId}
+    </select>
+    <select id="getAllMenuAndButton" resultType="com.helioscloud.atlantis.dto.RoleAssignMenuButtonDTO">
+            select id, code, name, type, parentId
+                  from (select sm.id,
+                               sm.menu_code code,
+                               sm.menu_name name,
+                               'DIRECTORY' type,
+                               sm.parent_menu_id parentId
+                          from sys_menu sm
+                         where sm.menu_type = 1001
+                           and sm.is_enabled = 1
+                           and sm.is_deleted = 0
+                        union all
+                        select smb.id,
+                               smb.button_code code,
+                               smb.button_name name,
+                               'BUTTON' type,
+                               smb.menu_id parentId
+                          from sys_menu_button smb
+                         where smb.is_enabled = 1
+                           and smb.is_deleted = 0) t
+                 order by t.type, parentId, code
     </select>
 </mapper>

@@ -6,8 +6,11 @@
 package com.helioscloud.atlantis.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.util.PageUtil;
+import com.helioscloud.atlantis.constant.CacheConstants;
 import com.helioscloud.atlantis.domain.CompanySecurity;
 import com.helioscloud.atlantis.domain.PasswordHistory;
+import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserLoginBind;
 import com.helioscloud.atlantis.domain.enumeration.EmployeeStatusEnum;
 import com.helioscloud.atlantis.domain.enumeration.UserLockedEnum;
@@ -19,6 +22,8 @@ import com.helioscloud.atlantis.persistence.UserMapper;
 import org.apache.ibatis.annotations.Param;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,9 +39,12 @@ import java.util.UUID;
  * Create By:zongyun.zhou@hand-china.com
  */
 @Service
+@CacheConfig(cacheNames = {CacheConstants.USER})
 public class UserService {
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    private UserRoleService userRoleService;
     @Autowired
     UserLoginBindMapper userLoginBindMapper;
     @Autowired
@@ -157,20 +165,20 @@ public class UserService {
     }
 
     public List<UserLoginBind> getUserLoginBindInfo(UUID userOid) {
-       Map<String, Object> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("user_oid", userOid);
         paramMap.put("is_active", true);
         paramMap.put("is_enabled", true);
         paramMap.put("is_deleted", false);
-    //  userLoginBindMapper.selectById(1);
+        //  userLoginBindMapper.selectById(1);
       /*  List<UserLoginBind> list=    userLoginBindMapper.selectList(new EntityWrapper<UserLoginBind>()
                 .eq("user_oid",userOid)
                 .eq("is_active",true)
                 .eq("is_enabled",true)
                 .eq("is_deleted",false)
         );*/
-       // List<UserLoginBind> list=    userLoginBindMapper.findOneByUserOID(userOid);
-       List<UserLoginBind> list = userLoginBindMapper.selectByMap(paramMap);
+        // List<UserLoginBind> list=    userLoginBindMapper.findOneByUserOID(userOid);
+        List<UserLoginBind> list = userLoginBindMapper.selectByMap(paramMap);
         return list;
     }
 
@@ -190,15 +198,34 @@ public class UserService {
         userMapper.updateUserLock(unlockedUser);
     }
 
+    /**
+     * 用户切换语言
+     * @param user
+     */
+    @CacheEvict(key="#user.id.toString()")
+    public void updateUserLanguage(UserDTO user){
+        userMapper.updateUserLanguage(user.getId(),user.getLanguage());
+    }
 
     /**
      * 获取用户列表
-     * @param tenantId    必填，取租户下的所有用户
+     *
+     * @param tenantId     必填，取租户下的所有用户
      * @param setOfBooksId 如果填了，取帐套下的用户
      * @param companyId    如果填了，则取公司下的用户
      * @return 按full_name排序
+     * 20180829修改：hec-18 【角色权限重构】用户列表接口增加当前用户对应的角色的集合
      */
-    public List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId, Page page){
-        return userMapper.getUserListByTenantAndBooksId(tenantId,setOfBooksId,companyId,page);
+    public List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId, Page page) {
+        List<UserDTO> list = userMapper.getUserListByTenantAndBooksId(tenantId, setOfBooksId, companyId, page);
+        if (list != null && list.size() > 0) {
+            Page pp = PageUtil.getPage(0,1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
+            //取用户分配的角色集合
+            list.stream().forEach(user -> {
+                List<Role> listRole = userRoleService.getRolesByCond(user.getId(),null,null,"ASSIGNED",pp);
+                user.setRoleList(listRole);
+            });
+        }
+        return list;
     }
 }

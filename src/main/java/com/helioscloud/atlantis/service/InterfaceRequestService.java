@@ -47,6 +47,12 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if(interfaceRequest.getParentId() == null || "".equals(interfaceRequest.getParentId())){
             interfaceRequest.setParentId(0L);//如果没有上级，则默认为0
         }
+        if(interfaceRequest.getRequiredFlag() == null || "".equals(interfaceRequest.getRequiredFlag())){
+            interfaceRequest.setRequiredFlag(false);//必填标识 默认不必填
+        }
+        if(interfaceRequest.getUnionFlag() == null || "".equals(interfaceRequest.getUnionFlag())){
+            interfaceRequest.setUnionFlag(false);//唯一标识 默认不唯一
+        }
         interfaceRequestMapper.insert(interfaceRequest);
         return interfaceRequest;
     }
@@ -82,6 +88,12 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         }
         if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
             interfaceRequest.setInterfaceId(rr.getInterfaceId());
+        }
+        if(interfaceRequest.getRequiredFlag() == null || "".equals(interfaceRequest.getRequiredFlag())){
+            interfaceRequest.setRequiredFlag(rr.getRequiredFlag());//必填标识 默认不必填
+        }
+        if(interfaceRequest.getUnionFlag() == null || "".equals(interfaceRequest.getUnionFlag())){
+            interfaceRequest.setUnionFlag(rr.getUnionFlag());//唯一标识 默认不唯一
         }
         interfaceRequest.setCreatedBy(rr.getCreatedBy());
         interfaceRequest.setCreatedDate(rr.getCreatedDate());

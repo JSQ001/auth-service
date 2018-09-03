@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
  * 菜单
@@ -39,6 +41,12 @@ public class Menu extends VersionDomainObject implements Comparable<Menu>{
 
     @TableField("has_child_catalog")
     private Boolean hasChildCatalog;//是否有子级目录
+
+    @TableField("fromSource")
+    private String fromSource;// 来源 DB 来自数据库 或 FILE 来自文件
+
+    @TableField(exist = false)
+    private List<MenuButton> buttonList;//按钮集合
 
     @Override
     public int compareTo(Menu o) {

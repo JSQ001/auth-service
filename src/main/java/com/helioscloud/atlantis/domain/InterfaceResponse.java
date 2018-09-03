@@ -12,7 +12,7 @@ import lombok.Data;
  * 系统响应
  */
 @Data
-@TableName("sys_response")
+@TableName("sys_interface_response")
 public class InterfaceResponse extends VersionDomainObject {
 
     @TableField("name")

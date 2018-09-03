@@ -284,7 +284,12 @@
         SET u.password_attempt = #{passwordAttempt},
         u.lock_status = #{lockStatus},
         u.lock_date_deadline = #{lockDateDeadline}
-        WHERE u.id = #{id};
+        WHERE u.id = #{id}
+    </update>
+    <update id="updateUserLanguage">
+        UPDATE art_user u
+            SET u.LANGUAGE = #{language}
+            WHERE u.id = #{userId}
     </update>
     <select id="findAuthorities" resultMap="AuthorityEntityResultMap">
         select authority_name from art_user_authority where user_id =#{userId}

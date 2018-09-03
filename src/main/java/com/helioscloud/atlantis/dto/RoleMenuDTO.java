@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.helioscloud.atlantis.domain.Menu;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/15.
  */
@@ -19,6 +17,4 @@ public class RoleMenuDTO {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long roleId;
     private Menu menu;
-
-    private List<RoleAssignMenuDTO> roleMenuList;
 }

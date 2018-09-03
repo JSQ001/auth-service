@@ -32,18 +32,18 @@ public class MenuButtonController {
      * @apiDescription 给菜单创建按钮
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {String} buttonCode 按钮代码
+     * @apiParam (请求参数) {String} buttonName 按钮名称
      * @apiParam (请求参数) {Long} menuId 菜单ID
-     * @apiParam (请求参数) {Boolean} hide 是否隐藏
      * @apiParamExample {json} 请求报文:
      * {
      * "buttonCode":1001,
-     * "menuId":1029977144029360129,
-     * "hide":false
+     * "buttonName":"common.save",
+     * "menuId":1029977144029360129
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
-     * @apiSuccess (返回参数) {Long} buttonCode 按钮代码
+     * @apiSuccess (返回参数) {String} buttonCode 按钮代码
+     * @apiSuccess (返回参数) {String} buttonName 按钮名称
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} hide    是否隐藏
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -62,8 +62,8 @@ public class MenuButtonController {
      * "lastUpdatedBy": 0,
      * "versionNumber": 1,
      * "menuId": "1029977144029360129",
-     * "buttonCode": "1001",
-     * "hide": false
+     * "buttonName":"common.save",
+     * "buttonCode": "1001"
      * }
      */
     @PostMapping("/create")
@@ -73,10 +73,9 @@ public class MenuButtonController {
 
     /**
      * @api {PUT} /api/menuButton/update 【角色权限】按钮更新
-     * @apiDescription 更新角色关联菜单 只允许修改hide,isEnabled和isDeleted字段
+     * @apiDescription 更新角色关联菜单 只允许修改buttonName,isEnabled和isDeleted字段
      * @apiGroup Auth2Service
      * @apiParam (请求参数) {Long} id ID字段
-     * @apiParam (请求参数) {Boolean} hide 是否隐藏
      * @apiParam (请求参数) {Boolean} isEnabled 启用标识
      * @apiParam (请求参数) {Boolean} isDeleted 删除标识
      * @apiParam (请求参数) {Long} versionNumber 版本号
@@ -87,12 +86,12 @@ public class MenuButtonController {
      * "isDeleted": false,
      * "versionNumber": 1,
      * "menuId": "1029977144029360129",
-     * "hide": true
+     * "buttonName":"common.save"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
-     * @apiSuccess (返回参数) {Long} buttonCode 按钮代码
+     * @apiSuccess (返回参数) {String} buttonCode 按钮代码
      * @apiSuccess (返回参数) {Long} menuId 菜单ID
-     * @apiSuccess (返回参数) {Boolean} hide    是否隐藏
+     * @apiSuccess (返回参数) {String} buttonName    按钮名称
      * @apiSuccess (返回参数) {Boolean} isEnabled    启用标志
      * @apiSuccess (返回参数) {Boolean} isDeleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -112,7 +111,7 @@ public class MenuButtonController {
      * "versionNumber": 1,
      * "menuId": "1029977144029360129",
      * "buttonCode": "1004",
-     * "hide": true
+     * "buttonName": "common.save"
      * }
      */
     @PutMapping("/update")
@@ -170,7 +169,7 @@ public class MenuButtonController {
      * "versionNumber": 2,
      * "menuId": "1029977144029360129",
      * "buttonCode": "1004",
-     * "hide": true
+     * "buttonName": "common.save"
      * }
      */
     @GetMapping("/query/{id}")
@@ -201,7 +200,7 @@ public class MenuButtonController {
      * "versionNumber": 2,
      * "menuId": "1029977144029360129",
      * "buttonCode": "1001",
-     * "hide": false
+     * "buttonName": "common.save"
      * },
      * {
      * "id": "1030013157661474817",
@@ -214,7 +213,7 @@ public class MenuButtonController {
      * "versionNumber": 2,
      * "menuId": "1029977144029360129",
      * "buttonCode": "1002",
-     * "hide": false
+     * "buttonName": "common.save"
      * }
      * ]
      */
@@ -227,5 +226,6 @@ public class MenuButtonController {
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menuButton/query/menu");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
+
 
 }

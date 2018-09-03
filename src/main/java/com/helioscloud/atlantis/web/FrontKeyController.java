@@ -1,10 +1,13 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.FrontKey;
 import com.helioscloud.atlantis.dto.FrontKeyDTO;
+import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.service.FrontKeyService;
+import com.helioscloud.atlantis.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,9 +25,10 @@ import java.util.List;
 @RequestMapping("/api/frontKey")
 public class FrontKeyController {
     private final FrontKeyService frontKeyService;
-
-    public FrontKeyController(FrontKeyService frontKeyService) {
+    private final UserService userService;
+    public FrontKeyController(FrontKeyService frontKeyService, UserService userService) {
         this.frontKeyService = frontKeyService;
+        this.userService = userService;
     }
 
     /**
@@ -305,7 +309,7 @@ public class FrontKeyController {
     }
 
     /**
-     * @api {GET} /api/frontKey/query/module/lang 【系统框架】界面Title查询所有
+     * @api {GET} /api/frontKey/query/lang 【系统框架】界面Title查询所有
      * @apiDescription 根据语言lang， 查询所有界面Title 不分页，用于切换多语言
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} lang 语言 zh_CN 中文，en 英文
@@ -373,6 +377,10 @@ public class FrontKeyController {
      */
     @GetMapping("/query/lang")
     public ResponseEntity<List<FrontKey>> getFrontKeysByLang(@RequestParam(required = true) String lang) throws URISyntaxException {
+        UserDTO user = userService.findByUserId(LoginInformationUtil.getCurrentUserID());
+        user.setLanguage(lang);
+        //更新用户的语言环境
+        userService.updateUserLanguage(user);
         List<FrontKey> list = frontKeyService.getFrontKeysByLang(lang);
         return new ResponseEntity(list, HttpStatus.OK);
     }

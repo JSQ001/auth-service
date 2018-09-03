@@ -22,7 +22,13 @@ public class MenuButton extends VersionDomainObject {
     @TableField("button_code")
     private String buttonCode;
 
-    @TableField("is_hide")
-    private Boolean hide; // 是否隐藏
+    @TableField("button_name")
+    private String buttonName ;// 按钮名称
+
+    //不保存到数据库
+    @TableField(exist = false)
+    private String flag; // 创建:1001，删除:1002
+    /*@TableField("is_hide")
+    private Boolean hide; // 是否隐藏*/
 
 }
