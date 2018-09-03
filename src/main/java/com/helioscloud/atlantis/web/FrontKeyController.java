@@ -262,8 +262,8 @@ public class FrontKeyController {
     public ResponseEntity<List<FrontKey>> getFrontKeysByModuleId(@RequestParam(required = true) Long moduleId,
                                                                  @RequestParam(required = false) Boolean isEnabled,
                                                                  Pageable pageable) throws URISyntaxException {
+        List<FrontKey> list = frontKeyService.getFrontKeysByModuleId(moduleId, isEnabled, pageable);
         Page page = PageUtil.getPage(pageable);
-        List<FrontKey> list = frontKeyService.getFrontKeysByModuleId(moduleId, isEnabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/module");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
