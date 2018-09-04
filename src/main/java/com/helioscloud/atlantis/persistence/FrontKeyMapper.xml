@@ -22,7 +22,7 @@
   where k.lang = 'zh_CN'
     and not exists (select 1
            from sys_front_key sfk
-          where sfk.key = k.key
+          where sfk.key_code = k.key_code
             and sfk.lang = #{lanugage})
     </select>
     <select id="getFrontKeysByCond" resultType="com.helioscloud.atlantis.domain.FrontKey">

@@ -8,12 +8,14 @@ import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.service.FrontKeyService;
 import com.helioscloud.atlantis.service.UserService;
+import com.helioscloud.atlantis.service.es.EsFrontKeyInfoSerivce;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -26,9 +28,11 @@ import java.util.List;
 public class FrontKeyController {
     private final FrontKeyService frontKeyService;
     private final UserService userService;
-    public FrontKeyController(FrontKeyService frontKeyService, UserService userService) {
+    private final EsFrontKeyInfoSerivce esFrontKeyInfoSerivce;
+    public FrontKeyController(FrontKeyService frontKeyService, UserService userService, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
         this.frontKeyService = frontKeyService;
         this.userService = userService;
+        this.esFrontKeyInfoSerivce = esFrontKeyInfoSerivce;
     }
 
     /**
@@ -556,5 +560,35 @@ public class FrontKeyController {
         Page page = PageUtil.getPage(pageable);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/frontKey/query/keyword");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {DELETE} /api/frontKey/es/remove/all 【系统框架】界面Title-移除索引库中全部数据
+     * @apiDescription 菜单-移除索引库中全部数据
+     * @apiGroup Auth2Service
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/es/remove/all
+     * @apiSuccessExample {json} 返回报文:
+     * []
+     */
+    @RequestMapping(value = "/es/remove/all", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> removeAllMenu() throws IOException {
+        esFrontKeyInfoSerivce.removeAll();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @api {GET} /api/frontKey/es/init/all 【系统框架】界面Title-初始化索引库全部数据
+     * @apiDescription 菜单-初始化索引库全部数据
+     * @apiGroup Auth2Service
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/frontKey/es/init/all
+     * @apiSuccessExample {json} 返回报文:
+     * []
+     */
+    @RequestMapping(value = "/es/init/all", method = RequestMethod.GET)
+    public ResponseEntity<Void> initAllMenu() {
+        esFrontKeyInfoSerivce.doIndexTransaction();
+        return ResponseEntity.ok().build();
     }
 }

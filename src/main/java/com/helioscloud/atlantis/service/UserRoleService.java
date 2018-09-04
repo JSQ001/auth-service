@@ -96,7 +96,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     }
 
     /**
-     * @param id 删除用户角色（逻辑删除）
+     * @param id 删除用户角色（物理删除）
      * @return
      */
     @Transactional
@@ -107,7 +107,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     }
 
     /**
-     * @param ids 批量删除用户角色（逻辑删除）
+     * @param ids 批量删除用户角色（物理删除）
      * @return
      */
     @Transactional

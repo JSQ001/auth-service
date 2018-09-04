@@ -142,8 +142,8 @@ public class EsFrontKeyInfoSerivce {
                     .startObject("descriptions").field("type", "keyword").endObject()
                     .startObject("moduleId").field("type", "keyword").endObject()
                     .startObject("versionNumber").field("type", "keyword").endObject()
-                    .startObject("isEnabled").field("type", "keyword").endObject()
-                    .startObject("isDeleted").field("type", "keyword").endObject()
+                    .startObject("enabled").field("type", "keyword").endObject()
+                    .startObject("deleted").field("type", "keyword").endObject()
                     .endObject()
                     .endObject();
         } catch (IOException e) {
@@ -183,7 +183,9 @@ public class EsFrontKeyInfoSerivce {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         queryBuilder.must(QueryBuilders.termQuery("keyCode", key));
         queryBuilder.must(QueryBuilders.termQuery("lang", lang));
-        return elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        Long count = elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        log.info("查询结果: {}", count);
+        return count;
     }
 
     /**
@@ -191,23 +193,24 @@ public class EsFrontKeyInfoSerivce {
      *
      * @param moduleId  模块Id
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdFromES(Long moduleId, Boolean isEnabled, Pageable pageable) {
-        log.info("从ES中，根据moduleId({})，启用标识({}),返回界面Title，分页", moduleId, isEnabled);
+    public List<FrontKey> getFrontKeysByModuleIdFromES(Long moduleId, Boolean enabled, Pageable pageable) {
+        log.info("从ES中，根据moduleId({})，启用标识({}),返回界面Title，分页", moduleId, enabled);
         List<FrontKey> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (moduleId != null && moduleId > 0) {
             queryBuilder.must(QueryBuilders.termQuery("moduleId", moduleId));
         }
-        if (isEnabled != null) {
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", isEnabled));
+        if (enabled != null) {
+            queryBuilder.must(QueryBuilders.termQuery("enabled", enabled));
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("keyCode")
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_FRONT_KEY, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), FrontKey.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
 
@@ -215,20 +218,21 @@ public class EsFrontKeyInfoSerivce {
      * 取所有前端Title 分页
      *
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysFromES(Boolean isEnabled, Pageable pageable) {
-        log.info("从ES中，根据启用标识({}),返回界面Title，分页", isEnabled);
+    public List<FrontKey> getFrontKeysFromES(Boolean enabled, Pageable pageable) {
+        log.info("从ES中，根据启用标识({}),返回界面Title，分页", enabled);
         List<FrontKey> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        if (isEnabled != null) {
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", isEnabled));
+        if (enabled != null) {
+            queryBuilder.must(QueryBuilders.termQuery("enabled", enabled));
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("keyCode")
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_FRONT_KEY, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), FrontKey.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
 
@@ -248,6 +252,7 @@ public class EsFrontKeyInfoSerivce {
             return null;
         }
         SearchHits hits = elasticsearchService.searchById(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             FrontKey menu = JSON.parseObject(hits.getAt(0).getSourceAsString(), FrontKey.class);
             return menu;
@@ -264,14 +269,16 @@ public class EsFrontKeyInfoSerivce {
     public List<FrontKey> getFrontKeyByIdsFromES(List<Long> ids) {
         log.info("从ES中，根据IDs({})，取FrontKey对象信息", ids);
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        List<FrontKey> results = null;
+        List<FrontKey> results = new ArrayList<>();
         if (ids != null && ids.size() > 0) {
-            queryBuilder.must(QueryBuilders.idsQuery().addIds(ids.toString()));
-            //queryBuilder.must( QueryBuilders.termQuery("id", id));
+            ids.forEach(id ->{
+                queryBuilder.should(QueryBuilders.idsQuery().addIds(id.toString())); //should 相当于in
+            });
         } else {
             return null;
         }
         SearchHits hits = elasticsearchService.searchById(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             hits.forEach(e -> {
                 FrontKey key = JSON.parseObject(e.getSourceAsString(), FrontKey.class);
@@ -287,22 +294,23 @@ public class EsFrontKeyInfoSerivce {
      * @param moduleId  模块Id
      * @param lang      语言类型
      * @param pageable
-     * @param isEnabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdAndLangFromES(Long moduleId, String lang, Boolean isEnabled, Pageable pageable) {
-        log.info("从ES中，根据moduleId({})，lang({})，启用标识({}),返回界面Title，分页", moduleId, lang, isEnabled);
+    public List<FrontKey> getFrontKeysByModuleIdAndLangFromES(Long moduleId, String lang, Boolean enabled, Pageable pageable) {
+        log.info("从ES中，根据moduleId({})，lang({})，启用标识({}),返回界面Title，分页", moduleId, lang, enabled);
         List<FrontKey> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         queryBuilder.must(QueryBuilders.termQuery("moduleId", moduleId));
         queryBuilder.must(QueryBuilders.termQuery("lang", lang));
-        if (isEnabled != null) {
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", isEnabled));
+        if (enabled != null) {
+            queryBuilder.must(QueryBuilders.termQuery("enabled", enabled));
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("keyCode")
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_FRONT_KEY, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), FrontKey.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
 
@@ -318,6 +326,7 @@ public class EsFrontKeyInfoSerivce {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         queryBuilder.must(QueryBuilders.termQuery("lang", lang));
         SearchHits hits = elasticsearchService.searchHits(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             Arrays.stream(hits.getHits()).forEach(e -> {
                 FrontKey frontKey = JSON.parseObject(e.getSourceAsString(), FrontKey.class);
@@ -333,21 +342,22 @@ public class EsFrontKeyInfoSerivce {
      *
      * @param keyCode   界面Title的代码
      * @param lang      语言，不传则不控制，传了则按传入的值进行控制
-     * @param isEnabled 启用标识，不传则不控制，传了则按传入的值进行控制
+     * @param enabled 启用标识，不传则不控制，传了则按传入的值进行控制
      * @return 界面Title对象
      */
-    public List<FrontKey> getFrontKeyByKeyCodeAndLangFromES(String keyCode, String lang, Boolean isEnabled) {
-        log.info("从ES中，根据keyCode({}),语言({}),启用标识({})取界面Title集合", keyCode, lang, isEnabled);
+    public List<FrontKey> getFrontKeyByKeyCodeAndLangFromES(String keyCode, String lang, Boolean enabled) {
+        log.info("从ES中，根据keyCode({}),语言({}),启用标识({})取界面Title集合", keyCode, lang, enabled);
         List<FrontKey> list = new ArrayList<>();
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         queryBuilder.must(QueryBuilders.termQuery("keyCode", keyCode));
         if (StringUtils.isNotEmpty(lang)) {
             queryBuilder.must(QueryBuilders.termQuery("lang", lang));
         }
-        if (isEnabled != null) {
-            queryBuilder.must(QueryBuilders.termQuery("isEnabled", isEnabled));
+        if (enabled != null) {
+            queryBuilder.must(QueryBuilders.termQuery("enabled", enabled));
         }
         SearchHits hits = elasticsearchService.searchHits(queryBuilder, ElasticSearchConstants.AUTH_FRONT_KEY);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             Arrays.stream(hits.getHits()).forEach(e -> {
                 FrontKey frontKey = JSON.parseObject(e.getSourceAsString(), FrontKey.class);
@@ -379,11 +389,12 @@ public class EsFrontKeyInfoSerivce {
         log.info("从ES中，根据keyCode({}),descriptions({})，moduleId({}),lang({})，keyword({}),返回界面Title，分页", keyCode, descriptions,lang, moduleId,lang,keyword);
         List<FrontKey> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder keyWordDB = QueryBuilders.boolQuery();
         if(StringUtils.isNotEmpty(keyCode)){
-            queryBuilder.must(QueryBuilders.termQuery("keyCode", keyCode));
+            queryBuilder.must(QueryBuilders.wildcardQuery("keyCode", "*"+keyCode.concat("*"))).boost(10F);
         }
         if(StringUtils.isNotEmpty(descriptions)){
-            queryBuilder.must(QueryBuilders.termQuery("descriptions", descriptions));
+            queryBuilder.must(QueryBuilders.wildcardQuery("descriptions", "*"+descriptions.concat("*"))).boost(10F);
         }
         if(StringUtils.isNotEmpty(moduleId)){
             queryBuilder.must(QueryBuilders.termQuery("moduleId", moduleId));
@@ -392,12 +403,17 @@ public class EsFrontKeyInfoSerivce {
             queryBuilder.must(QueryBuilders.termQuery("lang", lang));
         }
         if(StringUtils.isNotEmpty(keyword)){
-            queryBuilder.must(QueryBuilders.termQuery("keyCode", keyword));
+            keyWordDB.should(QueryBuilders.termQuery("keyCode", keyword).boost(10f))
+                    .should(QueryBuilders.wildcardQuery("descriptions", keyword)).boost(10f)
+                    .should(QueryBuilders.wildcardQuery("descriptions", "*"+keyword.concat("*"))).boost(9f)
+                    .should(QueryBuilders.wildcardQuery("keyCode", "*"+keyword.concat("*"))).boost(8f);
+            queryBuilder.must(keyWordDB);
         }
         SortBuilder sortBuilder = SortBuilders.fieldSort("keyCode")
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_FRONT_KEY, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), FrontKey.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
 
     }

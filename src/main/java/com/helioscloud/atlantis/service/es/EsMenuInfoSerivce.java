@@ -145,7 +145,7 @@ public class EsMenuInfoSerivce {
                     .startObject("hasChildCatalog").field("type", "keyword").endObject()
                     .startObject("versionNumber").field("type", "keyword").endObject()
                     .startObject("enabled").field("type", "keyword").endObject()
-                    .startObject("isDeleted").field("type", "keyword").endObject()
+                    .startObject("deleted").field("type", "keyword").endObject()
                     .startObject("fromSource").field("type", "keyword").endObject()
                     .endObject()
                     .endObject();
@@ -188,7 +188,9 @@ public class EsMenuInfoSerivce {
         } else {
             return null;
         }
-        return elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        Long count = elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        log.info("查询结果: {}", count);
+        return count;
     }
 
     /**
@@ -207,7 +209,9 @@ public class EsMenuInfoSerivce {
         if (menuType != null && menuType > 0) {
             queryBuilder.must(QueryBuilders.termQuery("menuTypeEnum", menuType));
         }
-        return elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        Long count = elasticsearchService.searchCount(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        log.info("查询结果: {}", count);
+        return count;
     }
 
     /**
@@ -225,6 +229,7 @@ public class EsMenuInfoSerivce {
             return null;
         }
         SearchHits hits = elasticsearchService.searchById(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             Menu menu = JSON.parseObject(hits.getAt(0).getSourceAsString(), Menu.class);
             return menu;
@@ -249,6 +254,7 @@ public class EsMenuInfoSerivce {
             return list;
         }
         SearchHits hits = elasticsearchService.searchHits(queryBuilder, ElasticSearchConstants.AUTH_MENU);
+        log.info("查询结果 totalHits：{}条", hits.totalHits);
         if (hits.totalHits > 0) {
             Arrays.stream(hits.getHits()).forEach(e -> {
                 Menu menu = JSON.parseObject(e.getSourceAsString(), Menu.class);
@@ -279,6 +285,7 @@ public class EsMenuInfoSerivce {
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_MENU, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), Menu.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
 
@@ -298,6 +305,7 @@ public class EsMenuInfoSerivce {
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_MENU, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), Menu.class);
+        log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
 }

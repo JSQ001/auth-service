@@ -15,6 +15,7 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRespon
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
@@ -56,7 +57,7 @@ public class ElasticsearchService {
         if (from > MAX_ES_HITS) {
             from = MAX_ES_HITS - size;
         }
-        SearchResponse scrollResp = transportClient.prepareSearch(index).setFrom(from).setSize(size).setQuery(builder).setTypes(ElasticSearchConstants.DEFAULT_INDEX_TYPE).addSort(sortBuilder).get();
+        SearchResponse scrollResp = transportClient.prepareSearch(index).setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setFrom(from).setSize(size).setQuery(builder).setTypes(ElasticSearchConstants.DEFAULT_INDEX_TYPE).addSort(sortBuilder).get();
         List<JSONObject> result = new ArrayList<JSONObject>();
         for (SearchHit hit : scrollResp.getHits().getHits()) {
             result.add(JSONObject.parseObject(hit.getSourceAsString()));
@@ -153,7 +154,7 @@ public class ElasticsearchService {
         }
     }
     public boolean isElasticSearchEnable() {
-        return false;//临时关闭ES
-        //return enable;
+        //return false;//临时关闭ES
+        return enable;
     }
 }
