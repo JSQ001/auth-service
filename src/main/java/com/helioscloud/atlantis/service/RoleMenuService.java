@@ -152,7 +152,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
             boolean flag = true;
             int i = 0;
             List<Long> tempList = null;
-            while (flag) {
+            while (flag && roleMenuIdList.size() > 0) {
                 if (i == 0) {
                     tempList = getParentMenusByIds(roleMenuIdList);
                 } else {
@@ -182,14 +182,16 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
                     roleMenuList.add(rm);
                 }
             });
+            if(deleteButtonIdList.size() > 0){
+                //删除角色与按钮的关联
+                roleMenuButtonService.deleteRoleMenuButtonByRoleIdAndButtonIds(roleId, deleteButtonIdList);
+            }
             if (roleMenuList.size() > 0) {
                 //保存角色与菜单的关联
                 this.insertBatch(roleMenuList);
             }
             //处理菜单的按钮
             if (buttonList != null && buttonList.size() > 0) {
-                //删除角色与按钮的关联
-                roleMenuButtonService.deleteRoleMenuButtonByRoleIdAndButtonIds(roleId, deleteButtonIdList);
                 //保存角色关联菜单的按钮
                 roleMenuButtonService.batchSaveRoleMenuButton(buttonList);
             }
@@ -441,4 +443,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         return roleMenuButtonService.getMenuButtonIdsByRoleId(roleId);
     }
 
+    public List<RoleMenu> getRoleMenuListByMenuId(Long menuId){
+        return roleMenuMapper.selectList(new EntityWrapper<RoleMenu>().eq("menu_id",menuId));
+    }
 }

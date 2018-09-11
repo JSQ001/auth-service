@@ -77,7 +77,17 @@
                  where srm.menu_id = sm.id
                    and sm.menu_type = 1001
                    and sm.enabled = 1
+                   and sm.has_child_catalog = 0
                    and srm.role_id = #{roleId}
+                   and not exists (
+                            select 1
+                              from sys_role_menu_button srb, sys_menu_button smb
+                             where srb.button_id = smb.id
+                               and smb.enabled = 1
+                               and smb.deleted = 0
+                               and smb.menu_id = sm.id
+                               and srb.role_id = #{roleId}
+                   )
                 union all
                 select smb.id
                   from sys_role_menu_button srb, sys_menu_button smb

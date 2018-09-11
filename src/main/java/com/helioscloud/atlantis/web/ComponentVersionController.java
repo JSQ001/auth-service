@@ -222,12 +222,38 @@ public class ComponentVersionController {
      */
     @GetMapping("/query")
     public ResponseEntity<List<ComponentVersion>> getComponentVersionsByComponentId(@RequestParam Long componentId,
-                                                                           @RequestParam(required = false) Boolean enabled,
-                                                                           Pageable pageable) throws URISyntaxException {
+                                                                                    @RequestParam(required = false) Boolean enabled,
+                                                                                    Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<ComponentVersion> list = componentVersionService.getComponentVersionsByComponentId(componentId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/componentVersion/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {GET} /api/componentVersion/query/latest/byMenuId 【系统框架】菜单获取组件版本
+     * @apiDescription 通过菜单id 获取最新的组件版本
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} menuId 菜单ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/componentVersion/query/latest/byMenuId?menuId=1031480667845984258
+     * @apiSuccessExample {json} 返回报文:
+     * {
+     * "id": "1037345649706258435",
+     * "createdDate": "2018-09-05T22:24:10+08:00",
+     * "createdBy": null,
+     * "lastUpdatedDate": "2018-09-05T22:24:10+08:00",
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "deleted": null,
+     * "enabled": true,
+     * "remark": "新建2",
+     * "contents": "[{\"type\":\"button\",\"id\":\"3208990402\",\"props\":{\"id\":\"3208990402\",\"style\":{}},\"text\":\"btn\",\"parent\":0}]",
+     * "componentId": "1037345649253273601"
+     * }
+     */
+    @GetMapping("/query/latest/byMenuId")
+    public ComponentVersion getLatestComponentVersionByMenuId(@RequestParam Long menuId) {
+        return componentVersionService.getLatestComponentVersionByMenuId(menuId);
+    }
 }

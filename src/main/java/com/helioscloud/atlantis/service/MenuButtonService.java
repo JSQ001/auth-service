@@ -47,9 +47,11 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         //检查按钮代码在菜单里是否已经存在
         Integer count = getMenuButtonCountByButtonCode(menuButton.getMenuId(), menuButton.getButtonCode());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.BUTTON_CODE_NOT_UNION);
+            menuButton = this.menuButtonMapper.selectOne(menuButton);
+            //throw new BizException(RespCode.BUTTON_CODE_NOT_UNION);
+        }else{
+            menuButtonMapper.insert(menuButton);
         }
-        menuButtonMapper.insert(menuButton);
         return menuButton;
     }
 
@@ -82,9 +84,9 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
             //处理保存
             toSaveList.forEach(button -> {
                 if(button.getId() != null && button.getId() > 0){
-                    this.updateMenuButton(button);
+                    button = this.updateMenuButton(button);
                 }else{
-                    this.createMenuButton(button);
+                    button = this.createMenuButton(button);
                 }
             });
         }
@@ -213,9 +215,17 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
      */
     public List<MenuButton> getMenuButtonsByMenuId(Long menuId) {
         return menuButtonMapper.selectList(new EntityWrapper<MenuButton>()
-                .eq("enabled", true)
-                .eq("menu_id", menuId)
-                .orderBy("button_code"));
+                .eq("menu_id", menuId));
+    }
+
+    /**
+     * 根据菜单ID，角色ID集合，返回菜单在角色中分配的按钮 用于界面菜单的按钮显示控制
+     * @param menuId
+     * @param userId  当前登录用户的ID
+     * @return
+     */
+    public List<MenuButton> getMenuButtonsByMenuIdAndUserId(Long menuId,Long userId){
+        return menuButtonMapper.getMenuButtonsByMenuIdAndUserId(menuId,userId);
     }
 
 }

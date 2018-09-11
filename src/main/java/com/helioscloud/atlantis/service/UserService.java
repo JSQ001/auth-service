@@ -39,7 +39,6 @@ import java.util.UUID;
  * Create By:zongyun.zhou@hand-china.com
  */
 @Service
-@CacheConfig(cacheNames = {CacheConstants.USER})
 public class UserService {
     @Autowired
     UserMapper userMapper;
@@ -216,8 +215,15 @@ public class UserService {
      * @return 按full_name排序
      * 20180829修改：hec-18 【角色权限重构】用户列表接口增加当前用户对应的角色的集合
      */
-    public List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId, Page page) {
-        List<UserDTO> list = userMapper.getUserListByTenantAndBooksId(tenantId, setOfBooksId, companyId, page);
+    public List<UserDTO> getUserListByCond(Long tenantId,
+                                           Long setOfBooksId,
+                                           Long companyId,
+                                           String login,
+                                           String fullName,
+                                           String mobile,
+                                           String email,
+                                           Page page) {
+        List<UserDTO> list = userMapper.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
         if (list != null && list.size() > 0) {
             Page pp = PageUtil.getPage(0,1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
             //取用户分配的角色集合

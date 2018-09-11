@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.helioscloud.atlantis.persistence.ComponentVersionMapper">
+
+    <!-- 通过菜单id 获取组件最后一个版本的contents -->
+    <select id="getLatestComponentVersionByMenuId" resultType="com.helioscloud.atlantis.domain.ComponentVersion">
+            SELECT
+              ss.id,
+              ss.component_id,
+              ss.contents,
+              ss.remark,
+              ss.created_date,
+              ss.last_updated_date,
+              ss.enabled
+            FROM
+              sys_component_version ss
+            WHERE ss.id =
+              (SELECT
+                MAX(scv.id)
+              FROM
+                sys_component_version scv,
+                sys_component sc
+              WHERE scv.component_id = sc.id
+                AND sc.menu_id = #{menuId})
+    </select>
+</mapper>

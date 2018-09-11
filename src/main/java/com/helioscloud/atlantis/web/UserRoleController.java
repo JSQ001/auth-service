@@ -847,12 +847,16 @@ public class UserRoleController {
      * ]
      */
     @GetMapping("/query/userList")
-    public ResponseEntity<List<UserDTO>> getUserListByTenantAndBooksId(@RequestParam(required = true) Long tenantId,
+    public ResponseEntity<List<UserDTO>> getUserListByCond(@RequestParam(required = true) Long tenantId,
                                                                        @RequestParam(required = false) Long setOfBooksId,
                                                                        @RequestParam(required = false) Long companyId,
+                                                           @RequestParam(required = false) String login,
+                                                           @RequestParam(required = false) String fullName,
+                                                           @RequestParam(required = false) String mobile,
+                                                           @RequestParam(required = false) String email,
                                                                        Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<UserDTO> list = userService.getUserListByTenantAndBooksId(tenantId, setOfBooksId, companyId, page);
+        List<UserDTO> list = userService.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/userRole/query/userList");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

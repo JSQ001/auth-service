@@ -1,11 +1,9 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.FrontKey;
 import com.helioscloud.atlantis.dto.FrontKeyDTO;
-import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.service.FrontKeyService;
 import com.helioscloud.atlantis.service.UserService;
 import com.helioscloud.atlantis.service.es.EsFrontKeyInfoSerivce;
@@ -381,10 +379,6 @@ public class FrontKeyController {
      */
     @GetMapping("/query/lang")
     public ResponseEntity<List<FrontKey>> getFrontKeysByLang(@RequestParam(required = true) String lang) throws URISyntaxException {
-        UserDTO user = userService.findByUserId(LoginInformationUtil.getCurrentUserID());
-        user.setLanguage(lang);
-        //更新用户的语言环境
-        userService.updateUserLanguage(user);
         List<FrontKey> list = frontKeyService.getFrontKeysByLang(lang);
         return new ResponseEntity(list, HttpStatus.OK);
     }

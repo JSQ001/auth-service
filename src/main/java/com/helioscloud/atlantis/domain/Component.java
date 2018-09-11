@@ -2,7 +2,7 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.DomainLogicEnable;
+import com.cloudhelios.atlantis.domain.DomainEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @TableName("sys_component")
-public class Component extends DomainLogicEnable {
+public class Component extends DomainEnable {
 
     @TableField("component_type")
     private String componentType; //类型 1为组件，2为界面

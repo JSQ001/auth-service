@@ -74,18 +74,19 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                 mm = menuMapper.selectById(menu.getParentMenuId());
             }
             //如果上级是功能，则不允许再添加子功能
-            if (MenuTypeEnum.FUNCTION.getID() == mm.getMenuTypeEnum()) {
+            if (MenuTypeEnum.FUNCTION.getID().intValue() == mm.getMenuTypeEnum()) {
                 throw new BizException(RespCode.MENU_FUNCTION_PARENT_MUST_BE_CATALOG);
             }
             // 如果 当前为目录时，需要更新上级目录的hasChildCatalog字段的值
-            if (MenuTypeEnum.DIRECTORY.getID() == menu.getMenuTypeEnum()) {
-                if (mm.getHasChildCatalog() == null || !mm.getHasChildCatalog()) {
+            if (MenuTypeEnum.DIRECTORY.getID().intValue() == menu.getMenuTypeEnum() && mm != null) {
+
+                //if (mm.getHasChildCatalog() == null || !mm.getHasChildCatalog()) {
                     mm.setHasChildCatalog(true);
                     this.updateById(mm);
                     // 更新到ES中去
                     esMenuInfoSerivce.saveEsMenuIndex(mm);
-                }
-            } else if (MenuTypeEnum.FUNCTION.getID() == menu.getMenuTypeEnum()) {
+                //}
+            } else if (MenuTypeEnum.FUNCTION.getID().intValue() == menu.getMenuTypeEnum() && mm != null) {
                 // 当前为功能时，校验其上级是否有下级目录，如果有，则不允许功能，功能只能添加到最底级的目录、
                 Integer childCatalogCount = 0;
                 if (esMenuInfoSerivce.isElasticSearchEnable()) {
@@ -158,13 +159,15 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         }
         //hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
         Menu mmm = null;
-        if (esMenuInfoSerivce.isElasticSearchEnable()) {
-            mmm = esMenuInfoSerivce.getMenuByIdFromES(menu.getParentMenuId());
-        } else {
-            mmm = menuMapper.selectById(menu.getParentMenuId());
+        if(menu.getParentMenuId().intValue() > 0){
+            if (esMenuInfoSerivce.isElasticSearchEnable()) {
+                mmm = esMenuInfoSerivce.getMenuByIdFromES(menu.getParentMenuId());
+            } else {
+                mmm = menuMapper.selectById(menu.getParentMenuId());
+            }
         }
         // 如果 当前为目录时，需要更新上级目录的hasChildCatalog字段的值
-        if (MenuTypeEnum.DIRECTORY.getID() == menu.getMenuTypeEnum()) {
+        if (MenuTypeEnum.DIRECTORY.getID().intValue() == menu.getMenuTypeEnum() && mmm != null) {
             if (mmm.getHasChildCatalog() == null || !mmm.getHasChildCatalog()) {
                 mmm.setHasChildCatalog(true);
                 this.updateById(mmm);
@@ -176,7 +179,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                 List<Menu> childCatalog = menuMapper.selectList(new EntityWrapper<Menu>()
                         .eq("parent_menu_id", menu.getParentMenuId())
                         .eq("menu_type", MenuTypeEnum.DIRECTORY.getID()));
-                if (childCatalog != null && childCatalog.size() == 1) {
+                if (childCatalog != null && childCatalog.size() == 1 && mmm != null) {
                     if (mmm.getHasChildCatalog() == null || !mmm.getHasChildCatalog()) {
                         mmm.setHasChildCatalog(true);
                         this.updateById(mmm);
