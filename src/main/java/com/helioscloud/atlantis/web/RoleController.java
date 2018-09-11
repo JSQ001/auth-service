@@ -216,10 +216,12 @@ public class RoleController {
      */
     @GetMapping("/query/tenant")
     public ResponseEntity<List<Role>> getRolesByTenantId(@RequestParam(required = true) Long tenantId,
+                                                         @RequestParam(required = false) String roleCode,
+                                                         @RequestParam(required = false) String roleName,
                                                          @RequestParam(required = false) Boolean enabled,
                                                          Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Role> list = roleService.getRolesByTenantId(tenantId, enabled, page);
+        List<Role> list = roleService.getRolesByTenantIdCond(tenantId,roleCode,roleName, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/role/query/tenant");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

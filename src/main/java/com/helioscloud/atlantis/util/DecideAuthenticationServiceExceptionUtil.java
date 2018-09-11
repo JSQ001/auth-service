@@ -21,6 +21,8 @@ public class DecideAuthenticationServiceExceptionUtil {
             throw new InternalAuthenticationServiceException(repositoryProblem.getMessage());
         } else if (repositoryProblem.getMessage().equals("code.is.invalid")) {
             throw new InternalAuthenticationServiceException(repositoryProblem.getMessage());
+        } else if (repositoryProblem.getMessage().equals("user.login.expired")) {
+            throw new InternalAuthenticationServiceException(repositoryProblem.getMessage());
         } else {
             throw new AuthenticationServiceException(
                 repositoryProblem.getMessage(), repositoryProblem);

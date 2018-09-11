@@ -1,6 +1,7 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.MenuButton;
 import com.helioscloud.atlantis.dto.RoleMenuDTO;
@@ -227,5 +228,37 @@ public class MenuButtonController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {GET} /api/menuButton/query/selectedMenu 【角色权限】菜单ID取登录人分配的按钮
+     * @apiDescription 根据菜单ID，返回当前登录用户所有角色分配的菜单按钮集合， 用于界面菜单的按钮显示控制
+     * @apiGroup Auth2Service
+     * @apiParam (请求参数) {Long} menuId 菜单ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/menuButton/query/selectedButton?menuId=1029977144029360129
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1030013157661474817",
+     * "enabled": true,
+     * "menuId": "1029977144029360129",
+     * "buttonCode": "1002",
+     * "buttonName": "common.save"
+     * },
+     * {
+     * "id": "1030013157661474817",
+     * "enabled": true,
+     * "menuId": "1029977144029360129",
+     * "buttonCode": "1002",
+     * "buttonName": "common.save"
+     * }
+     * ]
+     */
+    @GetMapping("/query/selectedButton")
+    public ResponseEntity<List<MenuButton>> getMenuButtonsByMenuIdAndUserId(@RequestParam(required = true) Long menuId){
+        //获取登录用户的ID
+        Long userId = LoginInformationUtil.getCurrentUserID();
+        List<MenuButton> list =  menuButtonService.getMenuButtonsByMenuIdAndUserId(menuId,userId);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
 
 }

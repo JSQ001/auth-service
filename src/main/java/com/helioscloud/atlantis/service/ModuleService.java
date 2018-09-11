@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.service;
 
+import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
@@ -124,12 +125,15 @@ public class ModuleService extends BaseService<ModuleMapper, Module> {
      * 所有模块 分页
      *
      * @param page
-     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
-     * @return
+     * @param enabled    如果不传，则不控制，如果传了，则根据传的值控制
+     * @param moduleCode 模块代码 如果不传，则不控制，如果传了，则根据传的值模糊查询
+     * @param moduleName 模块名称 如果不传，则不控制，如果传了，则根据传的值模糊查询
      */
-    public List<Module> getModules(Boolean enabled, Page page) {
+    public List<Module> getModules(Boolean enabled, String moduleCode, String moduleName, Page page) {
         return moduleMapper.selectPage(page, new EntityWrapper<Module>()
                 .eq(enabled != null, "enabled", enabled)
+                .like(moduleCode != null, "module_code", moduleCode, SqlLike.DEFAULT)
+                .like(moduleName != null, "module_name", moduleName, SqlLike.DEFAULT)
                 .orderBy("module_code"));
     }
 

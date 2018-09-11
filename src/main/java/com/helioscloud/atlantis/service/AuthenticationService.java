@@ -98,6 +98,7 @@ public class AuthenticationService {
             return false;
         }
         authenticationCode.setUserOID(SecurityUtils.getCurrentUserOID());
+
         authenticationCode.setStatus(AuthenticationCode.LOGGED);
         long expires = redisTemplate.getExpire(uuid, TimeUnit.SECONDS);
         operations.set(uuid, authenticationCode);

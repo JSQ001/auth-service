@@ -54,5 +54,12 @@ public interface UserMapper extends BaseMapper<UserDTO> {
      * @param companyId    如果填了，则取公司下的用户
      * @return 按full_name排序
      */
-    List<UserDTO> getUserListByTenantAndBooksId(@Param("tenantId") Long tenantId, @Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId,Page page);
+    List<UserDTO> getUserListByCond(@Param("tenantId") Long tenantId,
+                                                @Param("setOfBooksId") Long setOfBooksId,
+                                                @Param("companyId") Long companyId,
+                                                @Param("login") String login,
+                                                @Param("fullName") String fullName,
+                                                @Param("mobile") String mobile,
+                                                @Param("email") String email,
+                                                Page page);
 }

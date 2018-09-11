@@ -7,6 +7,7 @@ import com.cloudhelios.atlantis.service.BaseService;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Component;
 import com.helioscloud.atlantis.domain.MenuButton;
+import com.helioscloud.atlantis.domain.RoleMenu;
 import com.helioscloud.atlantis.persistence.ComponentMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
@@ -26,9 +28,12 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     private final MenuButtonService menuButtonService;
 
-    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService) {
+    private final RoleMenuService roleMenuService;
+
+    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService, RoleMenuService roleMenuService) {
         this.componentMapper = componentMapper;
         this.menuButtonService = menuButtonService;
+        this.roleMenuService = roleMenuService;
     }
 
     /**
@@ -59,6 +64,23 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
             resultButtons.forEach(e -> {
                 e.setMenuId(component.getMenuId());
             });
+            Long menuId = component.getMenuId();
+            Component cc = this.getComponentByMenuId(menuId);
+            if(cc != null){
+                this.deleteComponent(cc.getId());
+                //删除按钮与角色的关联
+                List<RoleMenu> roleMenus = roleMenuService.getRoleMenuListByMenuId(menuId);
+                if(roleMenus != null && roleMenus.size() > 0){
+                    List<Long> roleMenusId = roleMenus.stream().map(d -> {return d.getId();}).collect(Collectors.toList());
+                    roleMenuService.deleteBatchRoleMenu(roleMenusId);
+                }
+                //删除按钮与菜单的关联
+                List<MenuButton>  menuButtons = menuButtonService.getMenuButtonsByMenuId(menuId);
+                if(menuButtons != null && menuButtons.size() > 0){
+                    List<Long> menuButtonIds = menuButtons.stream().map(d -> {return d.getId();}).collect(Collectors.toList());
+                    menuButtonService.deleteBatchMenuButton(menuButtonIds);
+                }
+            }
             resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
         }
         componentMapper.insert(component);
@@ -98,9 +120,9 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (component.getEnabled() == null || "".equals(component.getEnabled())) {
             component.setEnabled(rr.getEnabled());
         }
-        if (component.getDeleted() == null || "".equals(component.getDeleted())) {
+       /* if (component.getDeleted() == null || "".equals(component.getDeleted())) {
             component.setDeleted(rr.getDeleted());
-        }
+        }*/
         List<MenuButton> resultButtons = null;
 
         //用于保存菜单的按钮

@@ -117,4 +117,10 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
     public ComponentVersion getComponentVersionById(Long id) {
         return componentVersionMapper.selectById(id);
     }
+
+    //通过菜单id 获取组件最后一个版本的contents
+    public  ComponentVersion getLatestComponentVersionByMenuId(Long menuId){
+        return componentVersionMapper.getLatestComponentVersionByMenuId(menuId);
+    }
+
 }

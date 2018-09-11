@@ -175,6 +175,8 @@ public class ModuleController {
      * @apiDescription 查询所有模块 分页
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
+     * @apiParam (请求参数) {String} [moduleCode] 模块代码 如果不传，则不控制，如果传了，则根据传的值模糊查询
+     * @apiParam (请求参数) {String} [moduleName] 模块名称 如果不传，则不控制，如果传了，则根据传的值模糊查询
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
@@ -209,9 +211,11 @@ public class ModuleController {
      */
     @GetMapping("/query")
     public ResponseEntity<List<Module>> getModules(@RequestParam(required = false) Boolean enabled,
+                                                   @RequestParam(required = false) String moduleCode,
+                                                   @RequestParam(required = false) String moduleName,
                                                    Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<Module> list = moduleService.getModules(enabled, page);
+        List<Module> list = moduleService.getModules(enabled,moduleCode,moduleName, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/module/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

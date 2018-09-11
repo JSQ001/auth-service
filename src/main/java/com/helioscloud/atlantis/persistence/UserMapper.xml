@@ -294,7 +294,7 @@
     <select id="findAuthorities" resultMap="AuthorityEntityResultMap">
         select authority_name from art_user_authority where user_id =#{userId}
     </select>
-    <select id="getUserListByTenantAndBooksId" resultMap="UserEntityResultMap">
+    <select id="getUserListByCond" resultMap="UserEntityResultMap">
         SELECT
         ac.full_name,
         ac.email,
@@ -335,6 +335,18 @@
         </if>
         <if test="companyId != null and companyId > 0 ">
             and au.company_id = #{companyId}
+        </if>
+        <if test="login != null">
+            and au.login like concat(concat('%',#{login}),'%')
+        </if>
+        <if test="fullName != null">
+            and ac.full_name like concat(concat('%',#{fullName}),'%')
+        </if>
+        <if test="mobile != null">
+            and ap.phone_number like concat(concat('%',#{mobile}),'%')
+        </if>
+        <if test="email != null">
+            and ac.email  like concat(concat('%',#{email}),'%')
         </if>
         ORDER BY ac.full_name
     </select>

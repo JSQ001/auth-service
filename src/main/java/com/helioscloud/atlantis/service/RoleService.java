@@ -1,5 +1,6 @@
 package com.helioscloud.atlantis.service;
 
+import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
@@ -146,12 +147,16 @@ public class RoleService extends BaseService<RoleMapper, Role> {
      *
      * @param tenantId
      * @param page
-     * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
+     * @param enabled  如果不传，则不控制，如果传了，则根据传的值控制
+     * @param roleCode 角色代码 如果不传，则不控制，如果传了，则根据传的值模糊查询
+     * @param roleName 角色名称 如果不传，则不控制，如果传了，则根据传的值模糊查询
      * @return
      */
-    public List<Role> getRolesByTenantId(Long tenantId, Boolean enabled, Page page) {
+    public List<Role> getRolesByTenantIdCond(Long tenantId, String roleCode, String roleName, Boolean enabled, Page page) {
         return roleMapper.selectPage(page, new EntityWrapper<Role>()
                 .eq(enabled != null, "enabled", enabled)
+                .like(roleCode != null, "role_code", roleCode, SqlLike.DEFAULT)
+                .like(roleName != null, "role_name", roleName, SqlLike.DEFAULT)
                 .eq("tenant_id", tenantId)
                 .orderBy("role_code"));
 

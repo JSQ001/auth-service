@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ import java.util.List;
  * Authenticate a user from the database.
  */
 @Component("userDetailsService")
-public class UserDetailsServiceImplements implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(UserDetailsService.class);
     @Autowired
@@ -54,13 +55,15 @@ public class UserDetailsServiceImplements implements UserDetailsService {
         //==============如果绑定表没有数据，但是用户查询出来已经被激活==========================
         if (userDTO == null) {
             boolean isEmailLogin = false;
-//            userFromDatabase = userRepository.findOneByLogin(login);
             userDTO = userService.findOneByLogin(login);
             if (userDTO == null) {
                 userDTO = userService.findOneByMobile(login);
             }
             if (userDTO == null) {
                 userDTO = userService.findOneByContactEmail(login);
+                if (userDTO == null) {
+                    throw new UsernameNotFoundException("user.not.found");
+                }
                 isEmailLogin = true;
             }
 
