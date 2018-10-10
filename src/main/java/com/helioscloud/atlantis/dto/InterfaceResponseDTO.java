@@ -19,6 +19,7 @@ public class InterfaceResponseDTO implements Serializable {
     private Long parentId; // 上级ID
     private String remark; // 备注说明
     private Long interfaceId;  // 接口ID
+    private Boolean enabledSearch;//是否启用搜索
     private List<InterfaceResponseDTO> children = new ArrayList<>();
     @JsonIgnore
     private InterfaceResponseDTO parent;

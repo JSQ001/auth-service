@@ -212,7 +212,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             });
             if (userRoleList.size() > 0) {
                 //保存角色与菜单的关联
-                this.insertBatch(userRoleList);
+                this.insertBatch(userRoleList,50);
             }
         }
     }

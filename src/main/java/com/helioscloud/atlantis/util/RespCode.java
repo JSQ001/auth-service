@@ -20,6 +20,7 @@ public interface RespCode {
     String MENU_FUNCTION_PARENT_MUST_BE_CATALOG = "10024";// 功能的上级菜单必须是目录
     String MENU_PARENT_CATALOG_ERROR = "10025";//功能只能添加到最底级的目录
     String ROOT_CATALOG_MUST_BE_CATALOG = "10026";//功能只能添加到最底级的目录
+    String HAS_CHILD_CATALOG_CAN_NOT_BE_FUNCTION = "10027";//当前菜单存在子目录，不允许由目录变更为功能
 
     String USER_ROLE_EXISTS = "10031"; // 用户角色组合已经存在
     String ROLE_MENU_EXISTS = "10041"; // 角色菜单组合已经存在
@@ -41,10 +42,10 @@ public interface RespCode {
     String MODULE_ID_NULL = "10094";// 必须关联模块
     String FRONT_KEY_NOT_UNION = "10095";// KEY必须唯一
 
-    String REQUEST_NAME_NULL = "10110";// 请求名称不允许为空
+    String REQUEST_CODE_NULL = "10110";// 请求名称不允许为空
     String REQUEST_INTERFACE_NULL = "10111";// 请求必须关联接口
 
-    String RESPONSE_NAME_NULL = "10120";// 响应名称不允许为空
+    String RESPONSE_CODE_NULL = "10120";// 响应名称不允许为空
     String RESPONSE_INTERFACE_NULL = "10121";// 响应必须关联接口
 
     String LANGUAGE_CODE_NULL = "10131";// 语言代码不允许为空

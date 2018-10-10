@@ -8,6 +8,7 @@ package com.helioscloud.atlantis.service;
 import com.helioscloud.atlantis.domain.CompanyConfiguration;
 import com.helioscloud.atlantis.domain.CompanySecurity;
 import com.helioscloud.atlantis.persistence.CompanyConfigurationMapper;
+import com.helioscloud.atlantis.persistence.CompanyMapper;
 import com.helioscloud.atlantis.persistence.CompanySecurityMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,8 @@ import java.util.UUID;
  */
 @Service
 public class CompanyService {
-
+	@Autowired
+    CompanyMapper companyMapper;
     @Autowired
     CompanyConfigurationMapper companyConfigurationMapper;
     @Autowired
@@ -43,6 +45,8 @@ public class CompanyService {
         List<CompanySecurity>   companySecurities=companySecurityMapper.selectByMap(paramMap);
         System.out.println(companySecurities);
         return companySecurities;
-
+    }
+	public Long findTenantIdByCompanyOID(UUID companyOID) {
+        return companyMapper.findTenantIdByCompanyOID(companyOID);
     }
 }

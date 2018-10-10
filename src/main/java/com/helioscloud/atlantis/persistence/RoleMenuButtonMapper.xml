@@ -31,4 +31,5 @@
         from sys_role_menu_button srm
         where  srm.role_id = #{roleId}
     </select>
+
 </mapper>

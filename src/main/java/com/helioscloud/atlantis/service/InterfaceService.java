@@ -174,4 +174,13 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
     public Interface getInterfaceById(Long id) {
         return interfaceMapper.selectById(id);
     }
+
+    /**
+     * 查所有接口，且接模块分组进行返回
+     * 接口 模糊查询 查所有未删除的数据，按 module_id,interface排序
+     */
+    public List<InterfaceTreeDTO> getAllInterfaces(){
+        return interfaceMapper.getAllInterfaces();
+    }
+
 }

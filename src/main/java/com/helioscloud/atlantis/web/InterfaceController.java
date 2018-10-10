@@ -426,4 +426,86 @@ public class InterfaceController {
         return new ResponseEntity(list, HttpStatus.OK);
     }
 
+    /**
+     * @api {GET} /api/interface/query/all 【系统框架】按模块查询所有接口不分页
+     * @apiDescription 按模块分组查询所有接口的数据，
+     * @apiGroup SysFrameWork
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/interface/query/all
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "moduleName": "框架接口",
+     * "moduleId": "1039069151636291585",
+     * "listInterface": []
+     * },
+     * {
+     * "moduleName": "测试",
+     * "moduleId": "1039099364357242881",
+     * "listInterface": [
+     * {
+     * "id": "1039790348565528577",
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "deleted": null,
+     * "enabled": null,
+     * "interfaceName": "获取模块列表1",
+     * "requestProtocol": null,
+     * "requestMethod": null,
+     * "requestFormat": null,
+     * "reqUrl": null,
+     * "responseFormat": null,
+     * "remark": null,
+     * "moduleId": null
+     * }
+     * ]
+     * },
+     * {
+     * "moduleName": "预算",
+     * "moduleId": "1039110718048763906",
+     * "listInterface": [
+     * {
+     * "id": "1039717930052149249",
+     * "createdDate": null,
+     * "createdBy": null,
+     * "lastUpdatedDate": null,
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "deleted": null,
+     * "enabled": null,
+     * "interfaceName": "预算日记账查询",
+     * "requestProtocol": null,
+     * "requestMethod": null,
+     * "requestFormat": null,
+     * "reqUrl": null,
+     * "responseFormat": null,
+     * "remark": null,
+     * "moduleId": null
+     * }
+     * ]
+     * },
+     * {
+     * "moduleName": "支付",
+     * "moduleId": "1039112514121039874",
+     * "listInterface": []
+     * },
+     * {
+     * "moduleName": "预付款",
+     * "moduleId": "1039114320263839745",
+     * "listInterface": []
+     * },
+     * {
+     * "moduleName": "菜单",
+     * "moduleId": "1039342660359593986",
+     * "listInterface": []
+     * }
+     * ]
+     */
+    @GetMapping("/query/all")
+    public ResponseEntity<List<InterfaceTreeDTO>> getAllInterfaces() {
+        return ResponseEntity.ok(interfaceService.getAllInterfaces());
+    }
 }

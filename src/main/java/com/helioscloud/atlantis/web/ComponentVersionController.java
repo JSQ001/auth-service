@@ -3,7 +3,9 @@ package com.helioscloud.atlantis.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.ComponentVersion;
+import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.service.ComponentVersionService;
+import com.helioscloud.atlantis.service.MenuService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,10 @@ import java.util.List;
 public class ComponentVersionController {
     private final ComponentVersionService componentVersionService;
 
-    public ComponentVersionController(ComponentVersionService componentVersionService) {
+    private final MenuService menuService;
+    public ComponentVersionController(ComponentVersionService componentVersionService, MenuService menuService) {
         this.componentVersionService = componentVersionService;
+        this.menuService = menuService;
     }
 
     /**
@@ -255,5 +259,39 @@ public class ComponentVersionController {
     @GetMapping("/query/latest/byMenuId")
     public ComponentVersion getLatestComponentVersionByMenuId(@RequestParam Long menuId) {
         return componentVersionService.getLatestComponentVersionByMenuId(menuId);
+    }
+    /**
+     * @api {GET} /api/componentVersion/query/byMenuId 【系统框架】菜单获取组件版本
+     * @apiDescription 通过菜单id 获取菜单绑定的组件版本
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} menuId 菜单ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:9082/api/componentVersion/query/byMenuId?menuId=1031480667845984258
+     * @apiSuccessExample {json} 返回报文:
+     * {
+     * "id": "1037345649706258435",
+     * "createdDate": "2018-09-05T22:24:10+08:00",
+     * "createdBy": null,
+     * "lastUpdatedDate": "2018-09-05T22:24:10+08:00",
+     * "lastUpdatedBy": null,
+     * "versionNumber": null,
+     * "deleted": null,
+     * "enabled": true,
+     * "remark": "新建2",
+     * "contents": "[{\"type\":\"button\",\"id\":\"3208990402\",\"props\":{\"id\":\"3208990402\",\"style\":{}},\"text\":\"btn\",\"parent\":0}]",
+     * "componentId": "1037345649253273601"
+     * }
+     */
+    @GetMapping("/query/ByMenuId")
+    public ComponentVersion getComponentVersionByMenuId(@RequestParam Long menuId) {
+        if(menuId != null){
+            Menu menu = menuService.getMenuById(menuId);
+            if(menu != null){
+                Long componentVersionId = menu.getComponentVersionId();
+                ComponentVersion cv = componentVersionService.getComponentVersionById(componentVersionId);
+                return cv;
+            }
+        }
+        return null;
     }
 }

@@ -38,8 +38,8 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if (interfaceRequest == null || interfaceRequest.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
         }
-        if (interfaceRequest.getName() == null || "".equals(interfaceRequest.getName())) {
-            throw new BizException(RespCode.REQUEST_NAME_NULL);
+        if (interfaceRequest.getKeyCode() == null || "".equals(interfaceRequest.getKeyCode())) {
+            throw new BizException(RespCode.REQUEST_CODE_NULL);
         }
         if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
             throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
@@ -69,9 +69,6 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if (interfaceRequest == null || interfaceRequest.getId() == null) {
             throw new BizException(RespCode.ID_NULL);
         }
-        if (interfaceRequest.getName() == null || "".equals(interfaceRequest.getName())) {
-            throw new BizException(RespCode.REQUEST_NAME_NULL);
-        }
         if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
             throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
         }
@@ -95,6 +92,7 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if(interfaceRequest.getUnionFlag() == null || "".equals(interfaceRequest.getUnionFlag())){
             interfaceRequest.setUnionFlag(rr.getUnionFlag());//唯一标识 默认不唯一
         }
+        interfaceRequest.setKeyCode(rr.getKeyCode());
         interfaceRequest.setCreatedBy(rr.getCreatedBy());
         interfaceRequest.setCreatedDate(rr.getCreatedDate());
         this.updateById(interfaceRequest);

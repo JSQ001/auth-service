@@ -22,4 +22,25 @@
         </if>
         order by module_id,req_url
     </select>
+    <resultMap id="interfaceResultMap" type="com.helioscloud.atlantis.dto.InterfaceTreeDTO">
+        <result property="moduleId" column="module_id" />
+        <result property="moduleName" column="module_name" />
+        <collection property="listInterface" ofType="com.helioscloud.atlantis.domain.Interface" javaType="list">
+            <result property="id" column="id" />
+            <result property="interfaceName" column="interface_name" />
+        </collection>
+    </resultMap>
+    <select id="getAllInterfaces" resultMap="interfaceResultMap">
+        SELECT sm.id module_id,
+               sm.module_name,
+               sm.module_code,
+               si.id,
+               si.interface_name
+          FROM sys_module sm
+          LEFT JOIN sys_interface si
+            ON sm.id = si.module_id
+           and sm.enabled = 1
+           and si.enabled = 1
+           order by sm.id,si.id
+    </select>
 </mapper>

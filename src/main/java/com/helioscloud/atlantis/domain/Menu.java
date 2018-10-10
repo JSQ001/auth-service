@@ -48,6 +48,12 @@ public class Menu extends DomainLogicEnable implements Comparable<Menu>{
     @TableField(exist = false)
     private List<MenuButton> buttonList;//按钮集合
 
+    @TableField("component_version_id")
+    private Long componentVersionId; //组件版本的ID
+
+    @TableField("component_id")
+    private Long componentId;// 组件的ID
+
     @Override
     public int compareTo(Menu o) {
         //如果上级相同，则按序号排序，如果不同，则按上级排序
@@ -61,7 +67,6 @@ public class Menu extends DomainLogicEnable implements Comparable<Menu>{
     @Override
     public String toString() {
         return "Menu{" +
-                "id="+id+ '\'' +
                 "menuCode='" + menuCode + '\'' +
                 ", menuName='" + menuName + '\'' +
                 ", seqNumber=" + seqNumber +
@@ -70,6 +75,10 @@ public class Menu extends DomainLogicEnable implements Comparable<Menu>{
                 ", menuIcon='" + menuIcon + '\'' +
                 ", menuUrl='" + menuUrl + '\'' +
                 ", hasChildCatalog=" + hasChildCatalog +
+                ", fromSource='" + fromSource + '\'' +
+                ", buttonList=" + buttonList +
+                ", componentVersionId=" + componentVersionId +
+                ", componentId=" + componentId +
                 '}';
     }
 }

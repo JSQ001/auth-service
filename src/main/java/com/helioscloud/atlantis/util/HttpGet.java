@@ -1,7 +1,7 @@
 package com.helioscloud.atlantis.util;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -51,8 +51,8 @@ public class HttpGet {
                 builder.append(line);
             }
             String text = builder.toString();
-            JSONObject jsonObject = JSONObject.parseObject(text);
-            JSONArray result = JSONArray.parseArray(jsonObject.get("trans_result").toString());
+            JSONObject jsonObject = JSONObject.fromObject(text);
+            JSONArray result = JSONArray.fromObject(jsonObject.get("trans_result"));
             close(br); // 关闭数据流
             close(is); // 关闭数据流
             conn.disconnect(); // 断开连接

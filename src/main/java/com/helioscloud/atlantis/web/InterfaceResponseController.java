@@ -319,4 +319,81 @@ public class InterfaceResponseController {
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/interfaceResponse/query/parent");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
+    /**
+     * @api {POST} /api/interfaceResponse/batch/saveOrUpdate 【系统框架】接口响应批量保存和更新
+     * @apiDescription 如果ID有值，则认为是更新,没有，则认为是保存
+     * @apiGroup SysFrameWork
+     * @apiParam (请求参数) {Long} [id] 响应Id ,如果ID有值，则认为是更新
+     * @apiParam (请求参数) {String} name 响应名称
+     * @apiParam (请求参数) {String} keyCode 响应代码
+     * @apiParam (请求参数) {String} reqType 响应类型
+     * @apiParam (请求参数) {Long} parentId 上级ID
+     * @apiParam (请求参数) {String} remark 备注说明
+     * @apiParam (请求参数) {Long} interfaceId 接口ID
+     * @apiParam (请求参数) {Boolean} enabledSearch 是否启用搜索
+     * @apiParamExample {json} 请求报文
+     * [
+     * {
+     * "name":"响应测试11",
+     * "reqType":"GET",
+     * "keyCode":"Query1",
+     * "parentId":"",
+     * "remark":"响应测试1",
+     * "interfaceId":"1039725656710897665",
+     * "enabledSearch":false,
+     * "id": "1039776322100203522"
+     * },
+     * {
+     * "name":"响应测试2",
+     * "reqType":"GET",
+     * "keyCode":"Query2",
+     * "parentId":"",
+     * "remark":"响应测试1",
+     * "enabledSearch":false,
+     * "interfaceId":"1039725656710897665"
+     * }
+     * ]
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     * {
+     * "id": "1039776322100203522",
+     * "createdDate": "2018-09-12T15:22:48+08:00",
+     * "createdBy": "177605",
+     * "lastUpdatedDate": "2018-09-12T15:23:37.064+08:00",
+     * "lastUpdatedBy": "177605",
+     * "versionNumber": null,
+     * "deleted": false,
+     * "enabled": true,
+     * "name": "响应测试11",
+     * "respType": null,
+     * "keyCode": null,
+     * "parentId": "0",
+     * "remark": "响应测试1",
+     * "interfaceId": "1039725656710897665",
+     * "enabledSearch": false
+     * },
+     * {
+     * "id": "1039776528292188162",
+     * "createdDate": "2018-09-12T15:23:37.116+08:00",
+     * "createdBy": "177605",
+     * "lastUpdatedDate": "2018-09-12T15:23:37.116+08:00",
+     * "lastUpdatedBy": "177605",
+     * "versionNumber": 1,
+     * "deleted": false,
+     * "enabled": true,
+     * "name": "响应测试2",
+     * "respType": null,
+     * "keyCode": null,
+     * "parentId": "0",
+     * "remark": "响应测试1",
+     * "interfaceId": "1039725656710897665",
+     * "enabledSearch": false
+     * }
+     * ]
+     */
+    @PostMapping("/batch/saveOrUpdate")
+    public ResponseEntity<List<InterfaceResponse>> batchSaveOrUpdateInterfaceResponse(@RequestBody List<InterfaceResponse> responseList) {
+        List<InterfaceResponse> list = interfaceResponseService.batchSaveOrUpdateInterfaceResponse(responseList);
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
 }

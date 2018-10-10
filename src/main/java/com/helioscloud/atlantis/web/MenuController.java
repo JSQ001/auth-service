@@ -337,8 +337,8 @@ public class MenuController {
     @GetMapping("/query")
     public ResponseEntity<List<Menu>> getMenus(@RequestParam(required = false) Boolean enabled,
                                                Pageable pageable) throws URISyntaxException {
-        List<Menu> list = menuService.getMenus(enabled, pageable);
         Page page = PageUtil.getPage(pageable);
+        List<Menu> list = menuService.getMenus(enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
@@ -400,8 +400,8 @@ public class MenuController {
             @RequestParam(required = true) Long parentMenuId,
             @RequestParam(required = false) Boolean enabled,
             Pageable pageable) throws URISyntaxException {
-        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, enabled, pageable);
         Page page = PageUtil.getPage(pageable);
+        List<Menu> list = menuService.getMenusByParentMenuId(parentMenuId, enabled, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/menu/query/byParentMenuId");
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }

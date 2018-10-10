@@ -38,11 +38,14 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (interfaceResponse == null || interfaceResponse.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
         }
-        if (interfaceResponse.getName() == null || "".equals(interfaceResponse.getName())) {
-            throw new BizException(RespCode.RESPONSE_NAME_NULL);
+        if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
+            throw new BizException(RespCode.RESPONSE_CODE_NULL);
         }
         if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
             throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
+        }
+        if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
+            interfaceResponse.setEnabledSearch(false);
         }
         if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
             interfaceResponse.setParentId(0L);
@@ -63,8 +66,8 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (interfaceResponse == null || interfaceResponse.getId() == null) {
             throw new BizException(RespCode.ID_NULL);
         }
-        if (interfaceResponse.getName() == null || "".equals(interfaceResponse.getName())) {
-            throw new BizException(RespCode.RESPONSE_NAME_NULL);
+        if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
+            throw new BizException(RespCode.RESPONSE_CODE_NULL);
         }
         if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
             throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
@@ -86,11 +89,72 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
             interfaceResponse.setParentId(rr.getParentId());
         }
+        if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
+            interfaceResponse.setEnabledSearch(rr.getEnabledSearch());
+        }
+        interfaceResponse.setKeyCode(rr.getKeyCode());
         interfaceResponse.setCreatedBy(rr.getCreatedBy());
         interfaceResponse.setCreatedDate(rr.getCreatedDate());
         this.updateById(interfaceResponse);
         return interfaceResponse;
     }
+
+    /**
+     * 批量、保存或更新接口响应
+     * @param responseList
+     * @return
+     */
+    @Transactional
+    public List<InterfaceResponse> batchSaveOrUpdateInterfaceResponse(List<InterfaceResponse> responseList) {
+        //校验新增的
+        if(CollectionUtils.isNotEmpty(responseList)){
+            responseList.stream().forEach(interfaceResponse ->{
+                if(interfaceResponse.getId() == null){
+                    //校验新增的
+                    if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
+                        throw new BizException(RespCode.RESPONSE_CODE_NULL);
+                    }
+                    if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+                        throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
+                    }
+                    if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
+                        interfaceResponse.setEnabledSearch(false);
+                    }
+                    if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+                        interfaceResponse.setParentId(0L);
+                    }
+                }else{
+                    //校验更新的
+                    InterfaceResponse rr = interfaceResponseMapper.selectById(interfaceResponse.getId());
+                    if (rr == null) {
+                        throw new BizException(RespCode.DB_NOT_EXISTS);
+                    }
+                    if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
+                        interfaceResponse.setEnabled(rr.getEnabled());
+                    }
+                    if (interfaceResponse.getDeleted() == null || "".equals(interfaceResponse.getDeleted())) {
+                        interfaceResponse.setDeleted(rr.getDeleted());
+                    }
+                    if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+                        interfaceResponse.setInterfaceId(rr.getInterfaceId());
+                    }
+                    if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+                        interfaceResponse.setParentId(rr.getParentId());
+                    }
+                    if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
+                        interfaceResponse.setEnabledSearch(rr.getEnabledSearch());
+                    }
+                    interfaceResponse.setKeyCode(rr.getKeyCode());
+                    interfaceResponse.setCreatedBy(rr.getCreatedBy());
+                    interfaceResponse.setCreatedDate(rr.getCreatedDate());
+                }
+            });
+        }
+        this.insertOrUpdateBatch(responseList,100);
+        return responseList;
+    }
+
+
 
     /**
      * @param id 删除接口响应（逻辑删除）

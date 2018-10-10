@@ -1,10 +1,10 @@
 package com.helioscloud.atlantis.web;
 
-import com.alibaba.fastjson.JSONArray;
 import com.helioscloud.atlantis.config.BaiDuTransferConfig;
 import com.helioscloud.atlantis.dto.TransferDTO;
 import com.helioscloud.atlantis.util.HttpGet;
 import com.helioscloud.atlantis.util.TransferMd5;
+import net.sf.json.JSONArray;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
