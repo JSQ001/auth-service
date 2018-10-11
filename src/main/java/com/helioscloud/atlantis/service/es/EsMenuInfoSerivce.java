@@ -25,6 +25,7 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -147,6 +148,8 @@ public class EsMenuInfoSerivce {
                     .startObject("enabled").field("type", "keyword").endObject()
                     .startObject("deleted").field("type", "keyword").endObject()
                     .startObject("fromSource").field("type", "keyword").endObject()
+                    .startObject("componentVersionId").field("type", "keyword").endObject()
+                    .startObject("componentId").field("type", "keyword").endObject()
                     .endObject()
                     .endObject();
         } catch (IOException e) {
@@ -271,9 +274,10 @@ public class EsMenuInfoSerivce {
      * @param parentMenuId
      * @return
      */
-    public List<Menu> getMenuPageByParentMenuIdFromES(Long parentMenuId,Boolean enabled, Pageable pageable) {
+    public List<Menu> getMenuPageByParentMenuIdFromES(Long parentMenuId,Boolean enabled, Page page) {
         log.info("从ES中，根据parentMenuId({})，启用标识({}),返回子菜单，分页", parentMenuId,enabled);
         List<Menu> results = null;
+        Pageable pageable = new PageRequest(page.getCurrent()-1,page.getSize());
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (parentMenuId != null && parentMenuId > 0) {
             queryBuilder.must(QueryBuilders.termQuery("parentMenuId", parentMenuId));
@@ -285,6 +289,7 @@ public class EsMenuInfoSerivce {
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_MENU, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), Menu.class);
+        page.setTotal(result.getTotalElements());
         log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }
@@ -294,8 +299,9 @@ public class EsMenuInfoSerivce {
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Menu> getMenuPagesFromES(Boolean enabled, Pageable pageable) {
+    public List<Menu> getMenuPagesFromES(Boolean enabled, Page page) {
         log.info("从ES中，取所有菜单 分页");
+        Pageable pageable = new PageRequest(page.getCurrent()-1,page.getSize());
         List<Menu> results = null;
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         if (enabled != null) {
@@ -305,6 +311,7 @@ public class EsMenuInfoSerivce {
                 .order(SortOrder.ASC);
         org.springframework.data.domain.Page<JSONObject> result = elasticsearchService.search(queryBuilder, sortBuilder, ElasticSearchConstants.AUTH_MENU, pageable);
         results = JSON.parseArray(JSON.toJSONString(result.getContent()), Menu.class);
+        page.setTotal(result.getTotalElements());
         log.info("查询结果 totalHits：{}条", results.size());
         return results;
     }

@@ -28,4 +28,7 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
 
     // 返回所有菜单和菜单按钮
     List<RoleAssignMenuButtonDTO> getAllMenuAndButton();
+
+    //根据菜单ID,角色ID，判断是否有其子菜单分配了该角色的菜单权限，根据判断的结果，去删除没有子菜单但又分配了菜单权限的菜单
+    Integer hasAssignChildrenRoleMenu(@Param("menuId") Long menuId,@Param("roleId") Long roleId);
 }

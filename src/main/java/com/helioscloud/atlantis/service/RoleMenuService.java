@@ -112,8 +112,19 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
             //取所有的菜单ID
             assignMenuButton.stream().filter(m -> MenuTypeEnum.DIRECTORY.toString().equals(m.getType())).forEach(d -> {
                 if (FlagEnum.DELETE.getID().toString().equals(d.getFlag())) {
-                    // 需要删除的菜单ID
-                    deleteMenuIds.add(d.getId());
+                    if ("DIRECTORY".equals(d.getType())) {
+                        Menu m = menuService.getMenuById(d.getId());
+                        if (m.getHasChildCatalog() == null) {
+                            // 需要删除的菜单ID
+                            deleteMenuIds.add(d.getId());
+                        } else if (!m.getHasChildCatalog().booleanValue()) {
+                            // 需要删除的菜单ID
+                            deleteMenuIds.add(d.getId());
+                        }
+                    } else {
+                        // 需要删除的菜单ID
+                        deleteMenuIds.add(d.getId());
+                    }
                 } else if (FlagEnum.CREATE.getID().toString().equals(d.getFlag())) {
                     // 需要添加的
                     //检查是否已经存在，已经存在的，则不更新
@@ -174,26 +185,56 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
                 });
             }
             roleMenuIdList.stream().forEach(menuId -> {
-                Integer count = this.getRoleMenuCountByMenuIdAndRoleId(menuId,finalRoleId);
-                if(count == null || count == 0){
+                Integer count = this.getRoleMenuCountByMenuIdAndRoleId(menuId, finalRoleId);
+                if (count == null || count == 0) {
                     RoleMenu rm = new RoleMenu();
                     rm.setRoleId(finalRoleId);
                     rm.setMenuId(menuId);
                     roleMenuList.add(rm);
                 }
             });
-            if(deleteButtonIdList.size() > 0){
+            if (deleteButtonIdList.size() > 0) {
                 //删除角色与按钮的关联
                 roleMenuButtonService.deleteRoleMenuButtonByRoleIdAndButtonIds(roleId, deleteButtonIdList);
             }
             if (roleMenuList.size() > 0) {
                 //保存角色与菜单的关联
-                this.insertBatch(roleMenuList);
+                this.insertBatch(roleMenuList, 50);
             }
             //处理菜单的按钮
             if (buttonList != null && buttonList.size() > 0) {
                 //保存角色关联菜单的按钮
                 roleMenuButtonService.batchSaveRoleMenuButton(buttonList);
+            }
+            //删除只分配了父菜单而没有分配子菜单权限的菜单权限分配
+            deleteParentMenuId(deleteMenuIds, roleId);
+        }
+    }
+
+    public void deleteParentMenuId(List<Long> idList, Long roleId) {
+        List<Long> parentMenuIds = new ArrayList<>();
+        if (idList != null && idList.size() > 0) {
+            idList.stream().forEach(id -> {
+                Menu mm = menuService.selectById(id);
+                boolean flag = false;
+                if (mm.getParentMenuId() > 0) {
+                    flag = true;
+                }
+                Long tempId = mm.getParentMenuId();
+                while (flag) {
+                    Integer hasChildAssign = roleMenuMapper.hasAssignChildrenRoleMenu(tempId, roleId);
+                    if (hasChildAssign == 0) {
+                        parentMenuIds.add(tempId);
+                    }
+                    mm = menuService.selectById(tempId);
+                    tempId = mm.getParentMenuId();
+                    if (tempId == 0) {
+                        flag = false;
+                    }
+                }
+            });
+            if(parentMenuIds.size() > 0 ){
+                roleMenuMapper.deleteRoleMenuByRoleIdAndMenuIds(roleId, parentMenuIds);
             }
         }
     }
@@ -266,7 +307,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     /**
      * 根据角色Id，获取分配的所有菜单
      *
-     * @param roleId    角色ID
+     * @param roleId  角色ID
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
@@ -430,8 +471,20 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
      * @return
      */
     public List<String> getMenuIdsAndButtonIdsByRoleId(Long roleId) {
-        return roleMenuMapper.getMenuIdsAndButtonIdsByRoleId(roleId);
+        List<String> selectedMenuIds = roleMenuMapper.getMenuIdsAndButtonIdsByRoleId(roleId);
+        List<String> resultList = new ArrayList<>();
+        if (selectedMenuIds != null && selectedMenuIds.size() > 0) {
+            selectedMenuIds.stream().forEach(id -> {
+                Integer hasChildAssign = roleMenuMapper.hasAssignChildrenRoleMenu(Long.parseLong(id), roleId);
+                //如果有没有子菜单分配权限，则把该菜单ID返回
+                if (hasChildAssign == 0) {
+                    resultList.add(id);
+                }
+            });
+        }
+        return resultList;
     }
+
 
     /**
      * 根据角色ID，返回已分配的菜单按钮ID的集合
@@ -443,7 +496,7 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         return roleMenuButtonService.getMenuButtonIdsByRoleId(roleId);
     }
 
-    public List<RoleMenu> getRoleMenuListByMenuId(Long menuId){
-        return roleMenuMapper.selectList(new EntityWrapper<RoleMenu>().eq("menu_id",menuId));
+    public List<RoleMenu> getRoleMenuListByMenuId(Long menuId) {
+        return roleMenuMapper.selectList(new EntityWrapper<RoleMenu>().eq("menu_id", menuId));
     }
 }

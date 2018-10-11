@@ -29,15 +29,16 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
 
     /**
      * 创建菜单按钮
+     *
      * @param menuButton
      * @return
      */
     @Transactional
     public MenuButton createMenuButton(MenuButton menuButton) {
         //校验
-        if (menuButton == null || menuButton.getId() != null) {
+       /* if (menuButton == null || menuButton.getId() != null) {
             throw new BizException(RespCode.ID_NOT_NULL);
-        }
+        }*/
         if (menuButton.getButtonCode() == null || "".equals(menuButton.getButtonCode())) {
             throw new BizException(RespCode.BUTTON_CODE_NULL);
         }
@@ -49,7 +50,7 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         if (count != null && count > 0) {
             menuButton = this.menuButtonMapper.selectOne(menuButton);
             //throw new BizException(RespCode.BUTTON_CODE_NOT_UNION);
-        }else{
+        } else {
             menuButtonMapper.insert(menuButton);
         }
         return menuButton;
@@ -57,6 +58,7 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
 
     /**
      * 批量菜单按钮保存或更新
+     *
      * @param buttonList
      * @return
      */
@@ -80,18 +82,15 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
         });
         //批量删除
         this.deleteBatchMenuButton(toDeleteListIds);
-        if(toSaveList.size() > 0){
+        if (toSaveList.size() > 0) {
             //处理保存
             toSaveList.forEach(button -> {
-                if(button.getId() != null && button.getId() > 0){
-                    button = this.updateMenuButton(button);
-                }else{
-                    button = this.createMenuButton(button);
-                }
+                button = this.createMenuButton(button);
             });
         }
         return toSaveList;
     }
+
     /**
      * 更新按钮菜单
      *
@@ -172,6 +171,7 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
             menuButtonMapper.deleteMenuButtonByMenuIds(menuId);
         }
     }
+
     /**
      * @param ids 批量删除菜单按钮（逻辑删除）
      * @return
@@ -210,6 +210,7 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
 
     /**
      * 根据菜单，取得所有的菜单按钮 不分页
+     *
      * @param menuId
      * @return
      */
@@ -220,12 +221,13 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
 
     /**
      * 根据菜单ID，角色ID集合，返回菜单在角色中分配的按钮 用于界面菜单的按钮显示控制
+     *
      * @param menuId
-     * @param userId  当前登录用户的ID
+     * @param userId 当前登录用户的ID
      * @return
      */
-    public List<MenuButton> getMenuButtonsByMenuIdAndUserId(Long menuId,Long userId){
-        return menuButtonMapper.getMenuButtonsByMenuIdAndUserId(menuId,userId);
+    public List<MenuButton> getMenuButtonsByMenuIdAndUserId(Long menuId, Long userId) {
+        return menuButtonMapper.getMenuButtonsByMenuIdAndUserId(menuId, userId);
     }
 
 }

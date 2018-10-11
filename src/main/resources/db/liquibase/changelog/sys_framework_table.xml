@@ -456,4 +456,46 @@
             <column name="union_flag" type="boolean" remarks="唯一标识"/>
         </addColumn>
     </changeSet>
+    <changeSet id="2018091121530001" author="houyin.zhang">
+        <comment>接口响应中添加是否启用搜索的功能</comment>
+        <addColumn tableName="sys_interface_response">
+            <column name="enabled_search" type="boolean" remarks="启用搜索标识，默认为false" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2018092011390001" author="houyin.zhang">
+        <createTable tableName="sys_component_button" remarks="组件按钮表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_component_button_id"/>
+            </column>
+            <column name="component_id" type="bigint" remarks="组件id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="button_code" type="varchar(100)" remarks="按钮代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="button_name" type="varchar(100)" remarks="按钮名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="idx_component_id" tableName="sys_component_button">
+            <column name="component_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

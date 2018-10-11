@@ -35,4 +35,7 @@ public class InterfaceResponse extends DomainLogicEnable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long interfaceId;  // 接口ID
 
+    @TableField("enabled_search")
+    private Boolean enabledSearch;
+
 }

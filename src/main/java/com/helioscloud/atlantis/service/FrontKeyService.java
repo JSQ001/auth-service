@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
-import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.FrontKey;
 import com.helioscloud.atlantis.dto.FrontKeyDTO;
 import com.helioscloud.atlantis.persistence.FrontKeyMapper;
@@ -12,7 +11,6 @@ import com.helioscloud.atlantis.service.es.EsFrontKeyInfoSerivce;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -162,16 +160,14 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * 根据模块，取所有前端Title 分页
      *
      * @param moduleId  模块Id
-     * @param pageable
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean enabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeysByModuleId(Long moduleId, Boolean enabled, Page page) {
         //检查是否启用了ES
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdFromES(moduleId, enabled, pageable);
+             return esFrontKeyInfoSerivce.getFrontKeysByModuleIdFromES(moduleId, enabled, page);
         }
-        Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(enabled != null, "enabled", enabled)
                 .eq("module_id", moduleId)
@@ -181,15 +177,14 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     /**
      * 取所有前端Title 分页
      *
-     * @param pageable
+     * @param page
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeys(Boolean enabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeys(Boolean enabled, Page page) {
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysFromES(enabled, pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysFromES(enabled, page);
         }
-        Page page = PageUtil.getPage(pageable);
         return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                 .eq(enabled != null, "enabled", enabled)
                 .orderBy("key_code"));
@@ -215,16 +210,15 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      *
      * @param moduleId  模块Id
      * @param lang      语言类型
-     * @param pageable
+     * @param page
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean enabled, Pageable pageable) {
+    public List<FrontKey> getFrontKeysByModuleIdAndLang(Long moduleId, String lang, Boolean enabled, Page page) {
         //判断 是否启用了ES
         if (esEnabledFlag) {
-            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdAndLangFromES(moduleId, lang, enabled, pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysByModuleIdAndLangFromES(moduleId, lang, enabled, page);
         } else {
-            Page page = PageUtil.getPage(pageable);
             return frontKeyMapper.selectPage(page, new EntityWrapper<FrontKey>()
                     .eq(enabled != null, "enabled", enabled)
                     .eq("lang", lang)
@@ -269,8 +263,8 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
                 e.setId(null);
                 return e;
             }).collect(Collectors.toList());
-            //批量保存 200 提交一次
-            this.insertBatch(newList, 200);
+            //批量保存 100 提交一次
+            this.insertBatch(newList, 100);
             newList.forEach(e->{
                 //更新ES缓存
                 esFrontKeyInfoSerivce.saveEsFrontKeyIndex(e);
@@ -361,7 +355,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
                                              String moduleId,
                                              String lang,
                                              String keyword,
-                                             Pageable pageable) {
+                                             Page page) {
         if (StringUtils.isEmpty(keyCode)) {
             keyCode = null;
         }
@@ -378,9 +372,8 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
             keyword = null;
         }
         if(esEnabledFlag){
-            return esFrontKeyInfoSerivce.getFrontKeysByCondFromES(keyCode,descriptions,moduleId,lang,keyword,pageable);
+            return esFrontKeyInfoSerivce.getFrontKeysByCondFromES(keyCode,descriptions,moduleId,lang,keyword,page);
         }else{
-            Page page = PageUtil.getPage(pageable);
             return frontKeyMapper.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, page);
         }
     }

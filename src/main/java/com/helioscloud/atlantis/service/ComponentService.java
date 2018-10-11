@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
-import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.Component;
-import com.helioscloud.atlantis.domain.MenuButton;
-import com.helioscloud.atlantis.domain.RoleMenu;
+import com.helioscloud.atlantis.domain.ComponentButton;
 import com.helioscloud.atlantis.persistence.ComponentMapper;
 import com.helioscloud.atlantis.util.RespCode;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/20.
@@ -30,10 +27,13 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     private final RoleMenuService roleMenuService;
 
-    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService, RoleMenuService roleMenuService) {
+    private final ComponentButtonService componentButtonService;
+
+    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService, RoleMenuService roleMenuService, ComponentButtonService componentButtonService) {
         this.componentMapper = componentMapper;
         this.menuButtonService = menuButtonService;
         this.roleMenuService = roleMenuService;
+        this.componentButtonService = componentButtonService;
     }
 
     /**
@@ -57,9 +57,8 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (!"1".equals(component.getComponentType()) && !"2".equals(component.getComponentType())) {
             throw new BizException(RespCode.COMPONENT_TYPE_INVALID);
         }
-        List<MenuButton> resultButtons = null;
         //用于保存菜单的按钮
-        if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
+        /*if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
             resultButtons = component.getButtonList();
             resultButtons.forEach(e -> {
                 e.setMenuId(component.getMenuId());
@@ -82,10 +81,15 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
                 }
             }
             resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
-        }
+        }*/
         componentMapper.insert(component);
-        if (resultButtons != null) {
-            component.setButtonList(resultButtons);
+        //保存组件与按钮
+        List<ComponentButton> buttonList = component.getButtonList();
+        if (buttonList != null && buttonList.size() > 0) {
+            buttonList.stream().forEach(b -> {
+                b.setComponentId(component.getId());
+            });
+            componentButtonService.insertBatch(buttonList, 10);
         }
         return component;
     }
@@ -123,21 +127,21 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
        /* if (component.getDeleted() == null || "".equals(component.getDeleted())) {
             component.setDeleted(rr.getDeleted());
         }*/
-        List<MenuButton> resultButtons = null;
+        List<ComponentButton> resultButtons = null;
 
         //用于保存菜单的按钮
-        if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
+        if (component.getButtonList() != null && component.getButtonList().size() > 0) {
             resultButtons = component.getButtonList();
             resultButtons.forEach(e -> {
-                e.setMenuId(component.getMenuId());
+                e.setComponentId(component.getId());
             });
-            resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
+            resultButtons = componentButtonService.batchSaveAndUpdateMenuButton(resultButtons);
         }
         if (resultButtons != null) {
             component.setButtonList(resultButtons);
         } else {
-            //根据菜单ID，取菜果对应的所有按钮
-            List<MenuButton> buttonList = menuButtonService.getMenuButtons(rr.getMenuId(), null, PageUtil.getPage(0, 20));
+            //根据组件ID，取组件对应的所有按钮
+            List<ComponentButton> buttonList = componentButtonService.getComponentButtonsByComponentId(component.getId());
             component.setButtonList(buttonList);
         }
         component.setCreatedBy(rr.getCreatedBy());
@@ -193,7 +197,7 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         Component component = componentMapper.selectById(id);
         if (component != null && component.getMenuId() != null && component.getMenuId() > 0) {
             //根据菜单ID，取菜果对应的所有按钮
-            List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
+            List<ComponentButton> buttonList = componentButtonService.getComponentButtonsByComponentId(id);
             component.setButtonList(buttonList);
         }
         return component;
@@ -211,10 +215,8 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (list != null && list.size() > 0) {
             component = list.get(0);
             //根据菜单ID，取菜果对应的所有按钮
-            if(component.getMenuId()!= null && component.getMenuId() > 0){
-                List<MenuButton> buttonList = menuButtonService.getMenuButtons(component.getMenuId(), null, PageUtil.getPage(0, 20));
-                component.setButtonList(buttonList);
-            }
+            List<ComponentButton> buttonList = componentButtonService.getComponentButtonsByComponentId(component.getId());
+            component.setButtonList(buttonList);
             return component;
         }
         return null;

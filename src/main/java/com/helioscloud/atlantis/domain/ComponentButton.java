@@ -2,22 +2,20 @@ package com.helioscloud.atlantis.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.cloudhelios.atlantis.domain.DomainLogicEnable;
+import com.cloudhelios.atlantis.domain.Domain;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
- * Created by houyin.zhang@hand-china.com on 2018/8/13.
- * 菜单按钮
+ * Created by houyin.zhang@hand-china.com on 2018/9/20.
  */
 @Data
-@TableName("sys_menu_button")
-public class MenuButton extends DomainLogicEnable {
-
-    @TableField("menu_id")
+@TableName("sys_component_button")
+public class ComponentButton extends Domain {
+    @TableField("component_id")
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long menuId;//菜单ID
+    private Long componentId;
 
     @TableField("button_code")
     private String buttonCode;
@@ -28,9 +26,5 @@ public class MenuButton extends DomainLogicEnable {
     //不保存到数据库
     @TableField(exist = false)
     private String flag; // 创建:1001，删除:1002
-    /*@TableField("is_hide")
-    private Boolean hide; // 是否隐藏*/
-
-
 
 }

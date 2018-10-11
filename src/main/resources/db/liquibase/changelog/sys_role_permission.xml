@@ -313,4 +313,11 @@
             <column name="fromSource" type="varchar(50)" defaultValue="DB" remarks="来源 DB:数据库 FILE:文件"/>
         </addColumn>
     </changeSet>
+    <changeSet id="2018092010580002" author="houyin.zhang">
+        <comment>菜单表中添加组件版本ID字段</comment>
+        <addColumn tableName="sys_menu">
+            <column name="component_id" type="bigint" remarks="组件的ID"/>
+            <column name="component_version_id" type="bigint" remarks="组件版本的ID"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

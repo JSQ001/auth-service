@@ -10,6 +10,7 @@ import java.util.UUID;
  */
 public final class Constants {
 
+    public static final String HUI_LIAN_YI = "汉得融晶";
     // Spring profile for development, production and "fast", see http://jhipster.github.io/profiles.html
     public static final String SPRING_PROFILE_DEVELOPMENT = "dev";
 

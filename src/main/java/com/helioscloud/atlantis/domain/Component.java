@@ -32,6 +32,6 @@ public class Component extends DomainEnable {
     private Long menuId;  // 菜单ID 不必填
 
     @TableField(exist = false)
-    private List<MenuButton> buttonList;// 菜单对应的按钮集合 不存到数据库当中
+    private List<ComponentButton> buttonList;// 菜单对应的按钮集合 不存到数据库当中
 
 }
