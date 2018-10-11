@@ -1,13 +1,27 @@
 server:
   port: 9082
 spring:
-  dbType: mysql
+  liquibase:
+      change-log: classpath:db/liquibase/master.xml
+  dbType: oracle
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://115.159.108.80:3306/artemis_uat?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: oracle.jdbc.OracleDriver
+    jdbcUrl: jdbc:oracle:thin:@172.17.0.4:1521:RJFIN
     name:
-    username: standarddb #artemis
-    password: mysql112358 #MTIzNDU2TXMz
+    username: standard_artemis #artemis
+    password: handhand #MTIzNDU2TXMz
+    type: com.zaxxer.hikari.HikariDataSource
+  #  dbType: oracle
+  #  datasource:
+        #driver-class-name: com.mysql.jdbc.Driver
+        #url: jdbc:mysql://localhost:3306/artemis_multi_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
+        #url: jdbc:mysql://115.159.108.80:3306/artemis_uat?useUnicode=true&characterEncoding=utf-8&useSSL=false #jdbc:mysql://106.15.120.125:21906/artemis_dev02?useUnicode=true&characterEncoding=utf8
+        #username: root
+        #password: handhand
+   #     type: com.alibaba.druid.pool.DruidDataSource
+   #     url: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
+   #     username: standard_artemis
+   #     password: handhand
   redis:
     host: redis
     port: 6379
@@ -16,16 +30,18 @@ eureka:
     preferIpAddress: true
     leaseRenewalIntervalInSeconds: 10
     leaseExpirationDurationInSeconds: 30
-    ip-address: 115.159.108.80
+    ip-address: 192.168.11.252
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     serviceUrl:
-      defaultZone: ${EUREKA_DEFAULT_ZONE}
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://115.159.108.80:9070}
     registryFetchIntervalSeconds: 10
+    enabled: false
 mybatis:
   mapper-locations: com/helioscloud/atlantis/persistence/*Mapper.xml
   type-aliases-package: com.helioscloud.atlantis.domain
   type-handlers-package: com.helioscloud.atlantis.persistence.typehandler
+  enable-performance-interceptor: true
 auth:
   cache:
     expire-time: 30
@@ -70,4 +86,3 @@ feign:
     enabled: false
   okhttp:
     enable: true
-debug: true

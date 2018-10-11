@@ -6,7 +6,7 @@ spring:
   dbType: oracle
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    jdbcUrl: jdbc:oracle:thin:@172.17.0.4:1521:RJFIN
+    jdbcUrl: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
     name:
     username: standard_artemis #artemis
     password: handhand #MTIzNDU2TXMz
@@ -23,7 +23,7 @@ spring:
    #     username: standard_artemis
    #     password: handhand
   redis:
-    host: redis
+    host: localhost
     port: 6379
 eureka:
   instance:
