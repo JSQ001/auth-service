@@ -14,6 +14,7 @@ package com.helioscloud.atlantis;
 
 import com.cloudhelios.atlantis.annotation.I18nDomainScan;
 import com.cloudhelios.atlantis.config.CacheConfiguration;
+import com.cloudhelios.atlantis.config.OAuth2FeignConfiguration;
 import com.cloudhelios.atlantis.config.OauthConfiguration;
 import com.cloudhelios.atlantis.config.RedisConfiguration;
 import com.cloudhelios.atlantis.service.RestService;
@@ -42,7 +43,8 @@ import java.net.UnknownHostException;
 //@EnableHeliosBasedConfiguration
 @EnableConfigurationProperties({RedisProperties.class, HeliosCloudProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @EnableDiscoveryClient
-@ComponentScan(value={"com.helioscloud.atlantis","com.cloudhelios.atlantis"},excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { OauthConfiguration.class, RestService.class, CacheConfiguration.class, RedisConfiguration.class})})
+@ComponentScan(value={"com.helioscloud.atlantis","com.cloudhelios.atlantis"},excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { OauthConfiguration.class, RestService.class, CacheConfiguration.class, RedisConfiguration.class, OAuth2FeignConfiguration.class}),
+        @ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = "com.cloudhelios.atlantis.service.api.*")})
 @MapperScan("com.helioscloud.atlantis.persistence*")
 @I18nDomainScan(basePackages = {"com.cloudhelios.atlantis.domain","com.helioscloud.atlantis.domain"})
 public class AuthServiceApplication {

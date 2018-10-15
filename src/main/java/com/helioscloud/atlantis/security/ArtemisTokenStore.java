@@ -7,7 +7,6 @@ package com.helioscloud.atlantis.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.handchina.yunmart.artemis.security.PrincipalLite;
 import com.helioscloud.atlantis.constant.UserLoginLogConstant;
 import com.helioscloud.atlantis.domain.UserDevice;
 import com.helioscloud.atlantis.domain.UserLoginLog;

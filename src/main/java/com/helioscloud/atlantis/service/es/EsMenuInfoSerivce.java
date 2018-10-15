@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.cloudhelios.atlantis.service.es.base.ElasticsearchService;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.enumeration.ElasticSearchConstants;
 import com.helioscloud.atlantis.persistence.MenuMapper;
