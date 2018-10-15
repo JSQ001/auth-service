@@ -7,7 +7,7 @@ package com.helioscloud.atlantis.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.helioscloud.atlantis.security.PrincipalLite;
 import com.helioscloud.atlantis.domain.CompanyConfiguration;
 import com.helioscloud.atlantis.domain.ConfigurationDetail;
 import com.helioscloud.atlantis.dto.UserDTO;
