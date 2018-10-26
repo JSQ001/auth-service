@@ -3,10 +3,10 @@
  * All rights are reserved.
  */
 
-package com.helioscloud.atlantis.security;
+package com.handchina.yunmart.artemis.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.helioscloud.atlantis.domain.Authority;
+import com.handchina.yunmart.artemis.domain.Authority;
 import com.helioscloud.atlantis.dto.UserDTO;
 import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
