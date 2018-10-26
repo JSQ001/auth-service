@@ -3,7 +3,7 @@
  * All rights are reserved.
  */
 
-package com.helioscloud.atlantis.domain;
+package com.handchina.yunmart.artemis.domain;
 
 
 import org.springframework.security.core.GrantedAuthority;

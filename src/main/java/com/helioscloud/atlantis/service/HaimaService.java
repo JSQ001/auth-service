@@ -1,7 +1,7 @@
 package com.helioscloud.atlantis.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.helioscloud.atlantis.security.PrincipalLite;
+import com.handchina.yunmart.artemis.security.PrincipalLite;
 import com.helioscloud.atlantis.dto.HaimaUserDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;

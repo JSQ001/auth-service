@@ -36,10 +36,10 @@
         <result column="lock_date_deadline" property="lockDateDeadline"/>
         <result column="created_date" property="createdDate"/>
         <result column="device_verification_status" property="deviceVerificationStatus"/>
-        <collection property="authorities" ofType="com.helioscloud.atlantis.domain.Authority"
+        <collection property="authorities" ofType="com.handchina.yunmart.artemis.domain.Authority"
                     select="findAuthorities" column="{userId=id}"></collection>
     </resultMap>
-    <resultMap id="AuthorityEntityResultMap" type="com.helioscloud.atlantis.domain.Authority">
+    <resultMap id="AuthorityEntityResultMap" type="com.handchina.yunmart.artemis.domain.Authority">
         <result column="authority_name" property="name"/>
     </resultMap>
 
