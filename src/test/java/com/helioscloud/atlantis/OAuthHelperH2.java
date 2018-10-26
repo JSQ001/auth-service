@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis;
 
-import com.helioscloud.atlantis.security.PrincipalLite;
+import com.handchina.yunmart.artemis.security.PrincipalLite;
 import com.helioscloud.atlantis.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

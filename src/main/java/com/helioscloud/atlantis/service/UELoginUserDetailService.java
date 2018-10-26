@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis.service;
 
-import com.helioscloud.atlantis.security.PrincipalLite;
+import com.handchina.yunmart.artemis.security.PrincipalLite;
 import com.helioscloud.atlantis.dto.TrialUserDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
