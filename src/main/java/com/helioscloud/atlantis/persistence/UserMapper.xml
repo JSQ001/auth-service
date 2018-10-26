@@ -42,7 +42,6 @@
     <resultMap id="AuthorityEntityResultMap" type="com.helioscloud.atlantis.domain.Authority">
         <result column="authority_name" property="name"/>
     </resultMap>
-
     <select id="findOneByContactEmail" resultMap="UserEntityResultMap">
        SELECT
         u.id,
