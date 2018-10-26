@@ -47,8 +47,9 @@
                 sm.menu_url,
                 sm.version_number,
                 sm.enabled,
-                sm.fromSource
-        order by sm.parent_menu_id,sm.seq_number
+                sm.fromSource,
+                sm.last_updated_date
+        order by sm.seq_number asc, sm.last_updated_date desc
     </select>
     <!-- 根据用户ID，返回用户所有角色已分配的菜单 -->
     <select id="getMenusByUserId" resultType="com.helioscloud.atlantis.domain.Menu">
@@ -77,8 +78,9 @@
                   sm.menu_type,
                   sm.menu_icon,
                   sm.menu_url,
-                  sm.fromSource
-         order by sm.parent_menu_id, sm.seq_number
+                  sm.fromSource,
+                  sm.last_updated_date
+         order by sm.seq_number asc, sm.last_updated_date desc
     </select>
     <select id="getParentMenuIdsByRoleIds" resultType="java.lang.Long">
         select sm.parent_menu_id
