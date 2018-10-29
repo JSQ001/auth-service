@@ -5,8 +5,8 @@
 
 package com.helioscloud.atlantis.web;
 
-import com.handchina.yunmart.artemis.domain.Authority;
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.Authority;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import com.helioscloud.atlantis.exception.UnauthenticatedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;

@@ -1,10 +1,11 @@
 package com.helioscloud.atlantis.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import com.helioscloud.atlantis.dto.HaimaUserDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
+import com.helioscloud.atlantis.util.PrincipalBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,7 @@ public class HaimaService {
             }
         }
 
-        return new PrincipalLite(u);
+        return PrincipalBuilder.builder(u);
     }
 
     public JSONObject authenticateHaiMa(String code, String tenantId) {
