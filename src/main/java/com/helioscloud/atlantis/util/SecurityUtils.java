@@ -1,6 +1,6 @@
 package com.helioscloud.atlantis.util;
 
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;

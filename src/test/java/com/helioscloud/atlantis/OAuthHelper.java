@@ -1,7 +1,8 @@
 package com.helioscloud.atlantis;
 
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import com.helioscloud.atlantis.dto.UserDTO;
+import com.helioscloud.atlantis.util.PrincipalBuilder;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,7 +61,7 @@ public class OAuthHelper {
 			UserDTO userDTO = new UserDTO();
 			userDTO.setAvatar("123");
 			userDTO.setAuthorities(new HashSet<>());
-			user = new PrincipalLite(userDTO);
+			user = PrincipalBuilder.builder(userDTO);
 		}
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, authorities);
 		OAuth2Authentication auth = new OAuth2Authentication(oAuth2Request, authenticationToken);

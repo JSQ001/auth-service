@@ -1,8 +1,9 @@
 package com.helioscloud.atlantis.service;
 
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
+import com.helioscloud.atlantis.util.PrincipalBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,6 @@ public class SSODetailService implements UserDetailsService {
         }
         //用户状态检查
         userService.loginCommonCheck(user);
-        return new PrincipalLite(user);
+        return PrincipalBuilder.builder(user);
     }
 }

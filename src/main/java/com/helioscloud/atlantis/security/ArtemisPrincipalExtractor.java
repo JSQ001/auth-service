@@ -5,7 +5,7 @@
 
 package com.helioscloud.atlantis.security;
 
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 
 import java.util.Map;

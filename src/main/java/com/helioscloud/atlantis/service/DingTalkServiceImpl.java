@@ -6,9 +6,10 @@
 package com.helioscloud.atlantis.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.handchina.yunmart.artemis.security.PrincipalLite;
+import com.cloudhelios.atlantis.security.domain.PrincipalLite;
 import com.helioscloud.atlantis.dto.UserDTO;
 import com.helioscloud.atlantis.exception.UserNotActivatedException;
+import com.helioscloud.atlantis.util.PrincipalBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,6 @@ public class DingTalkServiceImpl {
         //公共检查2.用户离职 3，用户锁定 4.密码过期
         userService.loginCommonCheck(u);
 
-        return new PrincipalLite(u);
+        return PrincipalBuilder.builder(u);
     }
 }

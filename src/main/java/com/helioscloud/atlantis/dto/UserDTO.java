@@ -8,7 +8,7 @@ package com.helioscloud.atlantis.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.handchina.yunmart.artemis.domain.Authority;
+import com.cloudhelios.atlantis.security.domain.Authority;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.enumeration.UserLockedEnum;
 import lombok.Data;
