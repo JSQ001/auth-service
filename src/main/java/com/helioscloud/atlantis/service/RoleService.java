@@ -158,7 +158,9 @@ public class RoleService extends BaseService<RoleMapper, Role> {
                 .like(roleCode != null, "role_code", roleCode, SqlLike.DEFAULT)
                 .like(roleName != null, "role_name", roleName, SqlLike.DEFAULT)
                 .eq("tenant_id", tenantId)
-                .orderBy("role_code"));
+                .orderBy("enabled", false)
+                .orderBy("role_code")
+        );
 
         /* if (isDeleted == null || "".equals(isDeleted)) {
             return roleMapper.selectPage(page, new EntityWrapper<Role>()
