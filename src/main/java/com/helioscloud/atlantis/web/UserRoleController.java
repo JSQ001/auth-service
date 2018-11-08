@@ -1,8 +1,10 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.client.dto.UserSummaryInfoDTO;
 import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
+import com.cloudhelios.atlantis.util.PaginationUtil;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
@@ -17,10 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/14.
@@ -672,6 +678,7 @@ public class UserRoleController {
     }
 
     /**
+     * @deprecated 不调用该接口，调用下面getUserList。
      * @api {GET} /query/userList 【角色权限】用户列表查询分页
      * @apiDescription 根据租户ID，（帐套ID 或 公司 ID），取用户列表 分页
      * 如果传了帐套ID，则取帐套下的用户
@@ -848,12 +855,13 @@ public class UserRoleController {
      */
     @GetMapping("/query/userList")
     public ResponseEntity<List<UserDTO>> getUserListByCond(@RequestParam(required = true) Long tenantId,
-                                                                       @RequestParam(required = false) Long setOfBooksId,
-                                                                       @RequestParam(required = false) Long companyId,
+                                                           @RequestParam(required = false) Long setOfBooksId,
+                                                           @RequestParam(required = false) Long companyId,
                                                            @RequestParam(required = false) String login,
                                                            @RequestParam(required = false) String fullName,
                                                            @RequestParam(required = false) String mobile,
                                                            @RequestParam(required = false) String email,
+                                                           @RequestParam(required = false) List<UUID> departmentOID,
                                                                        Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<UserDTO> list = userService.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
@@ -861,4 +869,110 @@ public class UserRoleController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @api {get} /api/query/usersList 根据搜索条件进行人员查询 (员工管理)
+     * @apiDescription   原接口artemis模块 api/users/v3/search  ControlSearchUserV3 (参考)
+     * @apiGroup  Auth2Service
+     * @apiParam (请求参数){String} Long tenantID 套账id
+     * @apiParam (请求参数){String} keyword 工号/姓名/手机号/邮箱
+     * @apiParam (请求参数){Integer} status 员工状态 在职1001/待离职1002/离职1003
+     * @apiParam (请求参数){String} departmentOID 部门
+     * @apiParam (请求参数){List<UUID>} corporationOID 公司ID
+     * @apiParam (请求参数){Pageable}pageable 分页
+     * @apiSuccess (返回参数) {Long} id  用户ID
+     * @apiSuccess (返回参数) {String} login  登录账号
+     * @apiSuccess (返回参数) {String} fullName  姓名
+     * @apiSuccess (返回参数) {String} email  邮箱
+     * @apiSuccess (返回参数) {String} title  职务
+     * @apiSuccess (返回参数) {String} mobile  手机号
+     * @apiSuccess (返回参数) {String} employeeID  员工号
+     * @apiSuccess (返回参数) {Boolean} activated  是否激活
+     * @apiSuccess (返回参数) {Integer} status  状态 正常1001,待离职 1002，已离职 1003
+     * @apiSuccess (返回参数) {String} companyName  公司名称
+     * @apiSuccess (返回参数) {Long} companyId  公司ID
+     * @apiSuccess (返回参数) {String} tenantName  租户名称
+     * @apiSuccess (返回参数) {Long} tenantId  租户ID
+     * @apiSuccess (返回参数) {String} setOfBooksName  帐套名称
+     * @apiSuccess (返回参数) {Long} setOfBooksId  帐套ID
+     * @apiParamExample {json} 请求报文
+     * http://localhost:8000/auth/api/userRole/query/usersList?tenantId=1050629004792754178&sort=status&page=0
+     * &size=10&keyword=&status=all&roleType=TENANT
+     *   [
+     *       {
+     *       "id": "1065",
+     *       "login": "ikzx020610000_LEAVED_1541600409400",
+     *       "userOID": "fe3c1d51-0e33-42f2-b376-f8ef41bdac8f",
+     *       "companyOID": null,
+     *       "password": null,
+     *       "fullName": "TEST",
+     *      "firstName": null,
+     *        "lastName": null,
+     *       "email": "133210300061@qq.com_LEAVED_1541600409400",
+     *       "mobile": null,
+     *       "employeeID": "10000_LEAVED",
+     *       "title": null,
+     *       "activated": false,
+     *       "authorities": [
+     *       {
+     *       "name": "ROLE_USER",
+     *       "authority": "ROLE_USER"
+     *       }
+     *       ],
+     *       "departmentOID": null,
+     *       "departmentName": null,
+     *       "filePath": null,
+     *       "avatar": null,
+     *       "status": 1003,
+     *       "companyName": "上海清浅信息科技有限公司",
+     *       "corporationOID": null,
+     *       "language": null,
+     *       "financeRoleOID": null,
+     *       "companyId": "1053",
+     *       "tenantId": "1050629004792754178",
+     *       "directManager": null,
+     *       "directManagerId": null,
+     *       "directManagerName": null,
+     *       "setOfBooksId": "1050629005174435842",
+     *       "setOfBooksName": null,
+     *       "passwordAttempt": 0,
+     *       "lockStatus": 2001,
+     *       "deviceVerificationStatus": null,
+     *       "tenantName": null,
+     *       "roleList": [
+     *       {
+     *       "id": "1051774468940492802",
+     *       "createdDate": null,
+     *       "createdBy": null,
+     *       "lastUpdatedDate": null,
+     *       "lastUpdatedBy": null,
+     *       "versionNumber": null,
+     *       "deleted": false,
+     *       "enabled": true,
+     *       "roleCode": "admin007",
+     *       "roleName": "管理员",
+     *       "tenantId": "1050629004792754178"
+     *       }
+     *       ],
+     *   "deleted": false,
+     *  "senior": false
+     *   },
+     *   ]
+     *
+     */
+    @GetMapping("/query/usersList")
+    public ResponseEntity<List<UserDTO>> getUserList(@RequestParam(required = false) String keyword,
+                                                             @RequestParam(required = true) Long tenantId,
+                                                             @RequestParam(required = false) String status,
+                                                             @RequestParam(required = false) List<UUID> departmentOID,
+                                                             @RequestParam(required = false) List<UUID> corporationOID,
+                                                             Pageable pageable) throws URISyntaxException, UnsupportedEncodingException {
+        Page page = PageUtil.getPage(pageable);
+        List<UserDTO> list = userService.findByCondition(keyword == null ? null : keyword.trim(),tenantId,departmentOID,status,corporationOID,page);
+        String keywordValue = "";
+        if (StringUtils.hasText(keyword)) {
+            keywordValue = URLEncoder.encode(keyword.trim(), "UTF-8");
+        }
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders( page, "/api/userRole/query/usersList");
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
 }

@@ -295,6 +295,7 @@
     </select>
     <select id="getUserListByCond" resultMap="UserEntityResultMap">
         SELECT
+        AU.USER_OID,
         ac.full_name,
         ac.email,
         ac.employee_id,
@@ -349,4 +350,65 @@
         </if>
         ORDER BY ac.full_name
     </select>
+
+    <select id="findByCondition" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        c.full_name,
+        d.name  department_name,
+        u.activated,
+        t.phone_number  mobile,
+        u.status,
+        u.leaving_date,
+        c.duty,
+        c.rank,
+        c.employee_id,
+        c.email,
+        l.legal_entity_oid,
+        cc.id  company_id,
+        cc.company_code,
+        cc.tenant_id,
+        cc.set_of_books_id,
+        cc.name  company_name,
+        l.entity_name,
+        d.department_oid,
+        d.id  department_id,
+        c.gender,
+        c.birthday,
+        c.entry_date,
+        f.role_oid finance_role_oid
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone t ON (c.id=t.contact_id and t.is_primary=true)
+        LEFT JOIN art_legal_entity l ON (l.legal_entity_oid = c.corporation_oid and l.tenant_id = u.tenant_id)
+        LEFT JOIN atl_finance_role_user  fru ON fru.user_id = u.id
+        LEFT JOIN atl_finance_role  f ON f.id = fru.role_id
+        WHERE u.tenant_id = #{tenantId}
+        <if test="keyword != null and keyword != ''">
+            AND (c.full_name LIKE concat(concat('%',#{keyword}),'%') OR c.email LIKE concat(concat('%',#{keyword}),'%') OR c.employee_id LIKE concat(concat('%',#{keyword}),'%') OR t.phone_number LIKE concat(concat('%',#{keyword}),'%'))
+        </if>
+        <if test="departmentOIDs != null and departmentOIDs.size() > 0">
+            AND d.department_oid IN
+            <foreach collection="departmentOIDs" item="departmentOID" open="(" separator="," close=")">
+                #{departmentOID}
+            </foreach>
+        </if>
+        <if test="companyOIDs != null and companyOIDs.size() > 0">
+            AND cc.company_oid IN
+            <foreach collection="companyOIDs" item="companyOID" open="(" separator="," close=")">
+                #{companyOID}
+            </foreach>
+        </if>
+        <if test="status != null and status != ''">
+            AND u.status = #{status}
+        </if>
+        order by c.employee_id,u.created_date
+    </select>
+
+
 </mapper>
