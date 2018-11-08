@@ -1,8 +1,10 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.cloudhelios.atlantis.client.dto.UserSummaryInfoDTO;
 import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
+import com.cloudhelios.atlantis.util.PaginationUtil;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
@@ -17,10 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/14.
@@ -672,6 +678,7 @@ public class UserRoleController {
     }
 
     /**
+     * @deprecated 不调用该接口，调用下面getUserList。
      * @api {GET} /query/userList 【角色权限】用户列表查询分页
      * @apiDescription 根据租户ID，（帐套ID 或 公司 ID），取用户列表 分页
      * 如果传了帐套ID，则取帐套下的用户
@@ -848,12 +855,13 @@ public class UserRoleController {
      */
     @GetMapping("/query/userList")
     public ResponseEntity<List<UserDTO>> getUserListByCond(@RequestParam(required = true) Long tenantId,
-                                                                       @RequestParam(required = false) Long setOfBooksId,
-                                                                       @RequestParam(required = false) Long companyId,
+                                                           @RequestParam(required = false) Long setOfBooksId,
+                                                           @RequestParam(required = false) Long companyId,
                                                            @RequestParam(required = false) String login,
                                                            @RequestParam(required = false) String fullName,
                                                            @RequestParam(required = false) String mobile,
                                                            @RequestParam(required = false) String email,
+                                                           @RequestParam(required = false) List<UUID> departmentOID,
                                                                        Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<UserDTO> list = userService.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
@@ -861,4 +869,34 @@ public class UserRoleController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * @oldApi原接口： artemis模块中 api/users/v3/search  ControlSearchUserV3 (参考)
+     * @api {get} /api/query/usersList 根据搜索条件进行人员查询 (员工管理)
+     * @apiParam {String} Long tenantID 套账id
+     * @apiParam {String} keyword 工号/姓名/手机号/邮箱
+     * @apiParam {Integer} status 员工状态 在职1001/待离职1002/离职1003
+     * @apiParam {String} departmentOID 部门
+     * @param corporationOID 公司ID
+     * @param pageable 分页
+     * @apiParamExample http://localhost:8000/auth/api/userRole/query/usersList?tenantId=1050629004792754178&sort=status&page=0&size=10&keyword=&status=all&roleType=TENANT
+     * @return
+     * @throws URISyntaxException
+     * @throws UnsupportedEncodingException
+     */
+    @GetMapping("/query/usersList")
+    public ResponseEntity<List<UserDTO>> getUserList(@RequestParam(required = false) String keyword,
+                                                             @RequestParam(required = true) Long tenantId,
+                                                             @RequestParam(required = false) String status,
+                                                             @RequestParam(required = false) List<UUID> departmentOID,
+                                                             @RequestParam(required = false) List<UUID> corporationOID,
+                                                             Pageable pageable) throws URISyntaxException, UnsupportedEncodingException {
+        Page page = PageUtil.getPage(pageable);
+        List<UserDTO> list = userService.findByCondition(keyword == null ? null : keyword.trim(),tenantId,departmentOID,status,corporationOID,page);
+        String keywordValue = "";
+        if (StringUtils.hasText(keyword)) {
+            keywordValue = URLEncoder.encode(keyword.trim(), "UTF-8");
+        }
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders( page, "/api/userRole/query/usersList");
+        return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
+    }
 }

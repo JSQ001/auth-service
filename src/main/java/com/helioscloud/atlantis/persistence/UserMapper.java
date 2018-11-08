@@ -8,6 +8,8 @@ package com.helioscloud.atlantis.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import com.cloudhelios.atlantis.client.dto.UserSummaryInfoDTO;
 import com.helioscloud.atlantis.dto.UserDTO;
 import org.apache.ibatis.annotations.Param;
 
@@ -62,4 +64,12 @@ public interface UserMapper extends BaseMapper<UserDTO> {
                                                 @Param("mobile") String mobile,
                                                 @Param("email") String email,
                                                 Page page);
+
+    List<UserDTO> findByCondition(@Param("keyword") String keyword,
+                                  @Param("tenantId") Long tenantId,
+                                  @Param("departmentOIDs") List<UUID> departmentOIDs,
+                                  @Param("status") String status,
+                                  @Param("companyOIDs") List<UUID> companyOIDs,
+                                  Page page);
+
 }

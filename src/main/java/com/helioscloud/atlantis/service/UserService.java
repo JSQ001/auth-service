@@ -6,6 +6,8 @@
 package com.helioscloud.atlantis.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import com.cloudhelios.atlantis.client.dto.UserSummaryInfoDTO;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.constant.CacheConstants;
 import com.helioscloud.atlantis.domain.CompanySecurity;
@@ -24,6 +26,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -223,7 +226,7 @@ public class UserService {
                                            String mobile,
                                            String email,
                                            Page page) {
-        List<UserDTO> list = userMapper.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
+      List<UserDTO> list = userMapper.getUserListByCond(tenantId, setOfBooksId, companyId, login, fullName, mobile, email, page);
         if (list != null && list.size() > 0) {
             Page pp = PageUtil.getPage(0,1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
             //取用户分配的角色集合
@@ -234,4 +237,30 @@ public class UserService {
         }
         return list;
     }
+
+
+    public List<UserDTO> findByCondition(@Param("keyword") String keyword,
+                                         @Param("tenantId") Long tenantId,
+                                         @Param("departmentOIDs") List<UUID> departmentOIDs,
+                                         @Param("status") String status,
+                                         @Param("companyOIDs") List<UUID> companyOIDs,
+                                         Page page){
+//        Pagination page=new Pagination(pageable.getPageNumber(),pageable.getPageSize());
+        if(!StringUtils.isEmpty(status) && "all".equals(status)){
+            status = null;
+        }
+        List<UserDTO> list = userMapper.findByCondition(keyword,tenantId,departmentOIDs,status,companyOIDs,page);
+        if (list != null && list.size() > 0) {
+            Page pp = PageUtil.getPage(0,1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
+            //取用户分配的角色集合
+            list.stream().forEach(user -> {
+                List<Role> listRole = userRoleService.getRolesByCond(user.getId(),null,null,"ASSIGNED",pp);
+                user.setRoleList(listRole);
+            });
+        }
+        return list;
+    }
+
+
+
 }
