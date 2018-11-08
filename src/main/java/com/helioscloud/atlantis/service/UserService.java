@@ -237,8 +237,15 @@ public class UserService {
         }
         return list;
     }
-
-
+    /**
+     * 获取用户列表 分页 (员工管理)
+     * @param tenantId    必填，取租户下的所有用户
+     * @param keyword  如果填了，根据条件取帐套下的用户
+     * @param departmentOIDs    如果填了，则取部门下的用户
+     * @param status 如果填了，则根据状态取部门下的用户
+     *@param companyOIDs 如果填了，则根据公司id进行查询用户
+     * @return 按employee_id,created_date排序
+     */
     public List<UserDTO> findByCondition(@Param("keyword") String keyword,
                                          @Param("tenantId") Long tenantId,
                                          @Param("departmentOIDs") List<UUID> departmentOIDs,

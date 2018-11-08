@@ -870,18 +870,18 @@ public class UserRoleController {
     }
 
     /**
-     * @oldApi原接口： artemis模块中 api/users/v3/search  ControlSearchUserV3 (参考)
      * @api {get} /api/query/usersList 根据搜索条件进行人员查询 (员工管理)
+     * @apiDescription artemis模块 api/users/v3/search  ControlSearchUserV3 (参考)
      * @apiParam {String} Long tenantID 套账id
      * @apiParam {String} keyword 工号/姓名/手机号/邮箱
      * @apiParam {Integer} status 员工状态 在职1001/待离职1002/离职1003
      * @apiParam {String} departmentOID 部门
-     * @param corporationOID 公司ID
-     * @param pageable 分页
-     * @apiParamExample http://localhost:8000/auth/api/userRole/query/usersList?tenantId=1050629004792754178&sort=status&page=0&size=10&keyword=&status=all&roleType=TENANT
-     * @return
-     * @throws URISyntaxException
-     * @throws UnsupportedEncodingException
+     * @apiParam {List<UUID>} corporationOID 公司ID
+     * @apiParam {Pageable}pageable 分页
+     * @apiParamExample {json} 请求报文
+     * http://localhost:8000/auth/api/userRole/query/usersList?tenantId=1050629004792754178&sort=status&page=0
+     * &size=10&keyword=&status=all&roleType=TENANT
+     *
      */
     @GetMapping("/query/usersList")
     public ResponseEntity<List<UserDTO>> getUserList(@RequestParam(required = false) String keyword,

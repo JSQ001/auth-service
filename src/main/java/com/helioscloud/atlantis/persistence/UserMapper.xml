@@ -382,7 +382,7 @@
         FROM art_user u
         LEFT JOIN art_contact c ON c.id = u.contact_id
         LEFT JOIN art_company cc ON cc.id = u.company_id
-        INNER JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
         LEFT JOIN art_department d ON d.id = du.department_id
         LEFT JOIN art_phone t ON (c.id=t.contact_id and t.is_primary=true)
         LEFT JOIN art_legal_entity l ON (l.legal_entity_oid = c.corporation_oid and l.tenant_id = u.tenant_id)
@@ -407,7 +407,7 @@
         <if test="status != null and status != ''">
             AND u.status = #{status}
         </if>
-        order by u.id
+        order by c.employee_id,u.created_date
     </select>
 
 
