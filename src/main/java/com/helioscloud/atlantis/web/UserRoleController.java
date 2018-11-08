@@ -871,16 +871,91 @@ public class UserRoleController {
 
     /**
      * @api {get} /api/query/usersList 根据搜索条件进行人员查询 (员工管理)
-     * @apiDescription artemis模块 api/users/v3/search  ControlSearchUserV3 (参考)
-     * @apiParam {String} Long tenantID 套账id
-     * @apiParam {String} keyword 工号/姓名/手机号/邮箱
-     * @apiParam {Integer} status 员工状态 在职1001/待离职1002/离职1003
-     * @apiParam {String} departmentOID 部门
-     * @apiParam {List<UUID>} corporationOID 公司ID
-     * @apiParam {Pageable}pageable 分页
+     * @apiDescription   原接口artemis模块 api/users/v3/search  ControlSearchUserV3 (参考)
+     * @apiParam (请求参数){String} Long tenantID 套账id
+     * @apiParam (请求参数){String} keyword 工号/姓名/手机号/邮箱
+     * @apiParam (请求参数){Integer} status 员工状态 在职1001/待离职1002/离职1003
+     * @apiParam (请求参数){String} departmentOID 部门
+     * @apiParam (请求参数){List<UUID>} corporationOID 公司ID
+     * @apiParam (请求参数){Pageable}pageable 分页
+     * @apiSuccess (返回参数) {Long} id  用户ID
+     * @apiSuccess (返回参数) {String} login  登录账号
+     * @apiSuccess (返回参数) {String} fullName  姓名
+     * @apiSuccess (返回参数) {String} email  邮箱
+     * @apiSuccess (返回参数) {String} title  职务
+     * @apiSuccess (返回参数) {String} mobile  手机号
+     * @apiSuccess (返回参数) {String} employeeID  员工号
+     * @apiSuccess (返回参数) {Boolean} activated  是否激活
+     * @apiSuccess (返回参数) {Integer} status  状态 正常1001,待离职 1002，已离职 1003
+     * @apiSuccess (返回参数) {String} companyName  公司名称
+     * @apiSuccess (返回参数) {Long} companyId  公司ID
+     * @apiSuccess (返回参数) {String} tenantName  租户名称
+     * @apiSuccess (返回参数) {Long} tenantId  租户ID
+     * @apiSuccess (返回参数) {String} setOfBooksName  帐套名称
+     * @apiSuccess (返回参数) {Long} setOfBooksId  帐套ID
      * @apiParamExample {json} 请求报文
      * http://localhost:8000/auth/api/userRole/query/usersList?tenantId=1050629004792754178&sort=status&page=0
      * &size=10&keyword=&status=all&roleType=TENANT
+     *   [
+     *       {
+     *       "id": "1065",
+     *       "login": "ikzx020610000_LEAVED_1541600409400",
+     *       "userOID": "fe3c1d51-0e33-42f2-b376-f8ef41bdac8f",
+     *       "companyOID": null,
+     *       "password": null,
+     *       "fullName": "TEST",
+     *      "firstName": null,
+     *        "lastName": null,
+     *       "email": "133210300061@qq.com_LEAVED_1541600409400",
+     *       "mobile": null,
+     *       "employeeID": "10000_LEAVED",
+     *       "title": null,
+     *       "activated": false,
+     *       "authorities": [
+     *       {
+     *       "name": "ROLE_USER",
+     *       "authority": "ROLE_USER"
+     *       }
+     *       ],
+     *       "departmentOID": null,
+     *       "departmentName": null,
+     *       "filePath": null,
+     *       "avatar": null,
+     *       "status": 1003,
+     *       "companyName": "上海清浅信息科技有限公司",
+     *       "corporationOID": null,
+     *       "language": null,
+     *       "financeRoleOID": null,
+     *       "companyId": "1053",
+     *       "tenantId": "1050629004792754178",
+     *       "directManager": null,
+     *       "directManagerId": null,
+     *       "directManagerName": null,
+     *       "setOfBooksId": "1050629005174435842",
+     *       "setOfBooksName": null,
+     *       "passwordAttempt": 0,
+     *       "lockStatus": 2001,
+     *       "deviceVerificationStatus": null,
+     *       "tenantName": null,
+     *       "roleList": [
+     *       {
+     *       "id": "1051774468940492802",
+     *       "createdDate": null,
+     *       "createdBy": null,
+     *       "lastUpdatedDate": null,
+     *       "lastUpdatedBy": null,
+     *       "versionNumber": null,
+     *       "deleted": false,
+     *       "enabled": true,
+     *       "roleCode": "admin007",
+     *       "roleName": "管理员",
+     *       "tenantId": "1050629004792754178"
+     *       }
+     *       ],
+     *   "deleted": false,
+     *  "senior": false
+     *   },
+     *   ]
      *
      */
     @GetMapping("/query/usersList")
