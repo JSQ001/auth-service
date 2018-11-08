@@ -872,6 +872,7 @@ public class UserRoleController {
     /**
      * @api {get} /api/query/usersList 根据搜索条件进行人员查询 (员工管理)
      * @apiDescription   原接口artemis模块 api/users/v3/search  ControlSearchUserV3 (参考)
+     * @apiGroup  Auth2Service
      * @apiParam (请求参数){String} Long tenantID 套账id
      * @apiParam (请求参数){String} keyword 工号/姓名/手机号/邮箱
      * @apiParam (请求参数){Integer} status 员工状态 在职1001/待离职1002/离职1003
