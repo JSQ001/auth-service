@@ -1,6 +1,5 @@
 package com.helioscloud.atlantis.web;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.cloudhelios.atlantis.util.PageUtil;
 import com.helioscloud.atlantis.domain.DataAuthority;
@@ -439,7 +438,7 @@ public class DataAuthorityController {
      *  /api/system/data/authority/1
      *
      * @apiSuccessExample {json} 返回报文:
-     *
+     *[]
      */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteDataAuthorityById(@PathVariable(value = "id") Long id){
@@ -459,7 +458,7 @@ public class DataAuthorityController {
      *  }
      *
      * @apiSuccessExample {json} 返回报文:
-     *
+     *[]
      */
     @DeleteMapping("/batch")
     public ResponseEntity deleteDataAuthorityByIds(@RequestBody List<Long> ids){
