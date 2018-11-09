@@ -1,10 +1,8 @@
 package com.helioscloud.atlantis.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.cloudhelios.atlantis.client.dto.UserSummaryInfoDTO;
 import com.cloudhelios.atlantis.util.LoginInformationUtil;
 import com.cloudhelios.atlantis.util.PageUtil;
-import com.cloudhelios.atlantis.util.PaginationUtil;
 import com.helioscloud.atlantis.domain.Menu;
 import com.helioscloud.atlantis.domain.Role;
 import com.helioscloud.atlantis.domain.UserRole;
@@ -877,7 +875,7 @@ public class UserRoleController {
      * @apiParam (请求参数){String} keyword 工号/姓名/手机号/邮箱
      * @apiParam (请求参数){Integer} status 员工状态 在职1001/待离职1002/离职1003
      * @apiParam (请求参数){String} departmentOID 部门
-     * @apiParam (请求参数){List<UUID>} corporationOID 公司ID
+     * @apiParam (请求参数){List} corporationOID 公司ID
      * @apiParam (请求参数){Pageable}pageable 分页
      * @apiSuccess (返回参数) {Long} id  用户ID
      * @apiSuccess (返回参数) {String} login  登录账号
