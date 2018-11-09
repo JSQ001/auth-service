@@ -7,4 +7,6 @@
     <include file="classpath:db/liquibase/changelog/sys_role_permission.xml" relativeToChangelogFile="false"/>
     <!-- 20180820前端框架表-->
     <include file="classpath:db/liquibase/changelog/sys_framework_table.xml" relativeToChangelogFile="false"/>
+    <!--20181012数据权限表-->
+    <include file="classpath:db/liquibase/changelog/sys_data_authority.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
