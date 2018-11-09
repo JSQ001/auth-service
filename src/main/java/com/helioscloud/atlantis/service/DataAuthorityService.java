@@ -3,6 +3,7 @@ package com.helioscloud.atlantis.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.cloudhelios.atlantis.exception.BizException;
 import com.cloudhelios.atlantis.service.BaseService;
 import com.cloudhelios.atlantis.util.DataAuthorityUtil;
@@ -206,7 +207,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                                 List<DataAuthValuePropertyDTO> collect = dataAuthorityRuleDetails.stream().map(dataAuthorityRuleDetail -> {
                                 DataAuthValuePropertyDTO dataAuthValuePropertyDTO = new DataAuthValuePropertyDTO();
                                 dataAuthValuePropertyDTO.setDataType(dataAuthorityRuleDetail.getDataType());
-                                dataAuthValuePropertyDTO.setFiltrateMethod(dataAuthorityRuleDetail.getFiltrateMethod());
+                                dataAuthValuePropertyDTO.setFiltrateMethod(StringUtils.isNotEmpty(dataAuthorityRuleDetail.getFiltrateMethod()) ? dataAuthorityRuleDetail.getFiltrateMethod(): "INCLUDE");
                                 // 全部
                                 if ("1001".equals(dataAuthorityRuleDetail.getDataScope())) {
                                     dataAuthValuePropertyDTO.setAllFlag(true);

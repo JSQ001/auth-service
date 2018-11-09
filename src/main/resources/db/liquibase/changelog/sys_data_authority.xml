@@ -253,4 +253,8 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="201811091637001" author="kai.zhang">
+        <dropNotNullConstraint tableName="sys_data_auth_rule_detail" columnName="filtrate_method"/>
+    </changeSet>
+
 </databaseChangeLog>
