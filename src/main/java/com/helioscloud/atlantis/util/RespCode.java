@@ -51,4 +51,8 @@ public interface RespCode {
     String LANGUAGE_CODE_NULL = "10131";// 语言代码不允许为空
     String LANGUAGE_NAME_NULL = "10132";// 语言名称不允许为空
     String LANGUAGE_CODE_NOT_UNION = "10133";// 语言代码已经存在
+
+    //数据权限
+    String DATA_AUTHORITY_CITED = "auth_200001";        //该数据权限已被引用，不可删除！
+    String DATA_AUTHORITY_RULE_EXISTS = "auth_200002";  //同一权限下，规则名称不能重复！
 }
