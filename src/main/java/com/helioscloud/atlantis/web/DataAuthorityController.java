@@ -29,7 +29,7 @@ public class DataAuthorityController {
     /**
      * @api {POST} /api/system/data/authority 【数据权限】创建数据权限
      * @apiDescription 创建数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {Long} tenantId 租户ID
      * @apiParam (请求参数) {String} dataAuthorityCode 权限代码
      * @apiParam (请求参数) {String} dataAuthorityName 权限名称
@@ -197,7 +197,7 @@ public class DataAuthorityController {
     /**
      * @api {PUT} /api/system/data/authority 【数据权限】更新数据权限
      * @apiDescription 更新数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (返回参数) {Long} id  主键id
      * @apiParam (返回参数) {Long} tenantId 租户ID
      * @apiParam (返回参数) {String} dataAuthorityCode 权限代码
@@ -431,7 +431,7 @@ public class DataAuthorityController {
     /**
      * @api {DELETE} /api/system/data/authority/{id} 【数据权限】删除数据权限
      * @apiDescription 删除数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {Long} id ID
      *
      * @apiParamExample {json} 请求报文:
@@ -449,7 +449,7 @@ public class DataAuthorityController {
     /**
      * @api {DELETE} /api/system/data/authority/batch 【数据权限】删除数据权限
      * @apiDescription 删除数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {List} ids ID集合
      *
      * @apiParamExample {json} 请求报文:
@@ -469,7 +469,7 @@ public class DataAuthorityController {
     /**
      * @api {GET} /api/system/data/authority/query 【数据权限】查询数据权限
      * @apiDescription 查询数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {String} [dataAuthorityCode] 权限代码
      * @apiParam (请求参数) {String} [dataAuthorityName] 权限名称
      * @apiParam (请求参数) {Integer} [page] 页数
@@ -522,7 +522,7 @@ public class DataAuthorityController {
     /**
      * @api {GET} /api/system/data/authority/detail/{id} 【数据权限】定位数据权限
      * @apiDescription 查询指定数据权限，并获取明细配置
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {Long} id 主键ID
      *
      * @apiParamExample {json} 请求报文:
@@ -648,7 +648,7 @@ public class DataAuthorityController {
     /**
      * @api {GET} /api/system/data/authority/{id} 【数据权限】定位数据权限
      * @apiDescription 查询数据权限
-     * @apiGroup SysFrameWork
+     * @apiGroup SysDataPermission
      * @apiParam (请求参数) {Long} id ID
      *
      * @apiParamExample {json} 请求报文:

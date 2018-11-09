@@ -54,6 +54,9 @@ public class AuthServiceApplication {
     /**
      * @apiDefine SysFrameWork 系统框架
      */
+    /**
+     * @apiDefine SysDataPermission 数据权限
+     */
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);
