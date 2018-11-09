@@ -107,7 +107,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
      */
     @Transactional
     public List<DataAuthorityRule> updateDataAuthorityRuleBatch(List<DataAuthorityRule> entities){
-        entities.forEach(entity -> createDataAuthorityRule(entity));
+        entities.forEach(entity -> updateDataAuthorityRule(entity));
         return entities;
     }
 

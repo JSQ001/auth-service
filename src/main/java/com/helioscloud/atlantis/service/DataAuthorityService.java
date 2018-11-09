@@ -60,7 +60,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * @return
      */
     @Transactional
-    public DataAuthority updateDataAuthorityById(DataAuthority entity){
+    public DataAuthority updateDataAuthorityAndResetDetailById(DataAuthority entity){
         Long id = entity.getId();
         if(id ==null){
             throw new BizException(RespCode.ID_NULL);
@@ -72,6 +72,18 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
         dataAuthorityMapper.updateById(entity);
         if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
             dataAuthorityRuleService.createDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
+        }
+        return entity;
+    }
+
+    public DataAuthority updateDataAuthorityById(DataAuthority entity){
+        Long id = entity.getId();
+        if(id ==null){
+            throw new BizException(RespCode.ID_NULL);
+        }
+        dataAuthorityMapper.updateById(entity);
+        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
+            dataAuthorityRuleService.updateDataAuthorityRuleBatch(entity.getDataAuthorityRules());
         }
         return entity;
     }

@@ -55,4 +55,5 @@ public interface RespCode {
     //数据权限
     String DATA_AUTHORITY_CITED = "auth_200001";        //该数据权限已被引用，不可删除！
     String DATA_AUTHORITY_RULE_EXISTS = "auth_200002";  //同一权限下，规则名称不能重复！
+    String DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE = "auth_200003";   //数据权限为手工选择时，请至少选择一条数据！
 }

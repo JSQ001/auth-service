@@ -424,8 +424,8 @@ public class DataAuthorityController {
     }
      */
     @PutMapping
-    public ResponseEntity<DataAuthority> updateDataAuthorityById(@RequestBody DataAuthority entity){
-        return ResponseEntity.ok(dataAuthorityService.updateDataAuthorityById(entity));
+    public ResponseEntity<DataAuthority> updateDataAuthorityAndResetDetailById(@RequestBody DataAuthority entity){
+        return ResponseEntity.ok(dataAuthorityService.updateDataAuthorityAndResetDetailById(entity));
     }
 
 

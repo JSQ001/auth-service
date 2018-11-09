@@ -37,6 +37,9 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
         if(entity.getId() != null){
             throw new BizException(RespCode.ID_NOT_NULL);
         }
+        if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
+            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
+        }
         dataAuthorityRuleDetailMapper.insert(entity);
         if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRuleDetailValues())){
             dataAuthorityRuleDetailValueService.batchCreateDataAuthorityRuleDetailValue(entity.getDataAuthorityRuleDetailValues(),entity.getId(),entity.getDataAuthorityId());
@@ -81,6 +84,9 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
     public DataAuthorityRuleDetail updateDataAuthorityRuleDetail(DataAuthorityRuleDetail entity){
         if(entity.getId() ==null){
             throw new BizException(RespCode.ID_NULL);
+        }
+        if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
+            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
         }
         dataAuthorityRuleDetailMapper.updateById(entity);
         // 删除明细值
