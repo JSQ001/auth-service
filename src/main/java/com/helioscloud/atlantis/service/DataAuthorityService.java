@@ -54,6 +54,24 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     }
 
     /**
+     * 创建数据权限规则，并对数据权限进行保存
+     * @param entity
+     * @return
+     */
+    @Transactional
+    public DataAuthority saveDataAuthorityAndCreateRule(DataAuthority entity){
+        if(entity.getId() !=null){
+            dataAuthorityMapper.updateById(entity);
+        }else{
+            dataAuthorityMapper.insert(entity);
+        }
+        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
+            dataAuthorityRuleService.createDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
+        }
+        return entity;
+    }
+
+    /**
      * 更新数据权限
      * 每次更新，都需要删除原来数据，全部重新添加
      * @param entity
