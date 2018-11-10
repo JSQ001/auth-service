@@ -1,11 +1,8 @@
 image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cibase:0.5.0
 
 variables:
-    MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
-cache:
-    key: one-key-for-all
-    paths:
-        - .m2/repository/
+    MAVEN_OPTS: -Dmaven.repo.local=/cache
+
 stages:
 - build
 - dev-release
