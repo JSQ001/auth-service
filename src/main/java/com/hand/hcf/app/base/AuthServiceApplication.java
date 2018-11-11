@@ -30,7 +30,7 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @EnableConfigurationProperties({RedisProperties.class, CloudProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @EnableDiscoveryClient
-@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base"},
+@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { OauthConfiguration.class, RestService.class, CacheConfiguration.class, RedisConfiguration.class, OAuth2FeignConfiguration.class})
         //,@ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = "com.hand.hcf.core.service.api.*")
 })
