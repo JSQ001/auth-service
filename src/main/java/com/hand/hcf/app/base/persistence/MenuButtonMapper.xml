@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.persistence.MenuButtonMapper">
+
+    <delete id="deleteMenuButtonByMenuId">
+        update sys_menu_button sm set sm.deleted = 1 where sm.menu_id = #{menuId}
+    </delete>
+    <delete id="deleteMenuButtonByMenuIds">
+        <!-- 根据菜单Id，批量删除菜单的按钮(逻辑删除) -->
+        update sys_menu_button sm set sm.deleted = 1
+            where sm.menu_id in
+                <foreach collection="menuIds" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+    </delete>
+    <!-- 根据菜单ID，用户ID，返回菜单在用户已分配角色中分配的按钮 用于界面菜单的按钮显示控制 -->
+    <select id="getMenuButtonsByMenuIdAndUserId" resultType="com.hand.hcf.app.base.domain.MenuButton">
+        SELECT DISTINCT
+        sbm.button_code,
+        sbm.button_name,
+        sbm.id,
+        sbm.menu_id,
+        sbm.enabled
+        FROM
+        sys_role_menu_button s,
+        sys_menu_button sbm,
+        sys_user_role sur
+        WHERE sbm.id = s.button_id
+        AND sbm.menu_id = #{menuId}
+        AND sur.role_id = s.role_id
+        AND sur.user_id = #{userId}
+        AND sbm.enabled = 1
+    </select>
+</mapper>

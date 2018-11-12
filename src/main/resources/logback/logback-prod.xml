@@ -29,7 +29,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.helioscloud.atlantis" level="DEBUG"/>
+    <logger name="com.hand.hcf.app.base" level="DEBUG"/>
 
     <logger name="javax.activation" level="ERROR"/>
     <logger name="javax.mail" level="ERROR"/>
