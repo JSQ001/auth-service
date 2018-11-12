@@ -17,6 +17,7 @@ import com.hand.hcf.core.util.TypeConversionUtils;
 import com.hand.hcf.core.web.dto.DataAuthValuePropertyDTO;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -205,7 +206,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                                 List<DataAuthValuePropertyDTO> collect = dataAuthorityRuleDetails.stream().map(dataAuthorityRuleDetail -> {
                                 DataAuthValuePropertyDTO dataAuthValuePropertyDTO = new DataAuthValuePropertyDTO();
                                 dataAuthValuePropertyDTO.setDataType(dataAuthorityRuleDetail.getDataType());
-                                dataAuthValuePropertyDTO.setFiltrateMethod(dataAuthorityRuleDetail.getFiltrateMethod());
+                                dataAuthValuePropertyDTO.setFiltrateMethod(StringUtils.isNotEmpty(dataAuthorityRuleDetail.getFiltrateMethod()) ? dataAuthorityRuleDetail.getFiltrateMethod(): "INCLUDE");
                                 // 全部
                                 if ("1001".equals(dataAuthorityRuleDetail.getDataScope())) {
                                     dataAuthValuePropertyDTO.setAllFlag(true);

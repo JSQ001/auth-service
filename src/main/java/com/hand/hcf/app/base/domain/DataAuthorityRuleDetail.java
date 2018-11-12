@@ -54,7 +54,6 @@ public class DataAuthorityRuleDetail extends DomainLogic{
      * 数据取值方式
      * 包含 INCLUDE； 排除EXCLUDE
      */
-    @NotNull
     @TableField(value = "filtrate_method")
     private String filtrateMethod;
 
