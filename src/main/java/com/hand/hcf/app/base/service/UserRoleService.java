@@ -237,4 +237,14 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         }
         return result;
     }
+
+    /**
+     * 判断用户是否含有启用的角色
+     * @param userId
+     * @return
+     */
+    public Boolean userHasRole(Long userId) {
+
+        return retBool(userRoleMapper.userHasRole(userId));
+    }
 }
