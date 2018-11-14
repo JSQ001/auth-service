@@ -55,4 +55,11 @@
         order by role_code
     </select>
 
+    <select id="userHasRole" resultType="java.lang.Integer">
+        select count(0) from sys_user_role sur
+          where
+          sur.enabled = 1
+          and sur.user_id = #{userId}
+    </select>
+
 </mapper>

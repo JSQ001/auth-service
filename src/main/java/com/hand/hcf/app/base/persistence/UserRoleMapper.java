@@ -21,4 +21,11 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * 根据用户ID，[角色代码]，[角色名称] 获取已分配的角色 分页
      */
     List<Role> getSelectedRolesByCond(@Param("userId") Long user_id, @Param("roleCode") String roleCode, @Param("roleName") String roleName, Page page);
+
+    /**
+     * 判断用户是否含有启用的角色
+     * @param userId
+     * @return
+     */
+    Integer userHasRole(@Param("userId") Long userId);
 }
