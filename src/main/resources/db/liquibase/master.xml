@@ -9,4 +9,6 @@
     <include file="classpath:db/liquibase/changelog/sys_framework_table.xml" relativeToChangelogFile="false"/>
     <!--20181012数据权限表-->
     <include file="classpath:db/liquibase/changelog/sys_data_authority.xml" relativeToChangelogFile="false"/>
+
+    <include file="classpath:db/liquibase/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>
