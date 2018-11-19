@@ -1,10 +1,10 @@
-package com.helioscloud.atlantis.service;
+package com.hand.hcf.app.base.service;
 
+import com.hand.hcf.app.base.domain.ErrorMessage;
+import com.hand.hcf.app.base.persistence.ErrorMessageMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
-import com.helioscloud.atlantis.domain.ErrorMessage;
-import com.helioscloud.atlantis.persistence.ErrorMessageMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMessage> {
     private ErrorMessageMapper errorMessageMapper;
 
-    public ErrorMessageService (ErrorMessageMapper errorMessageMapper){
+    public ErrorMessageService(ErrorMessageMapper errorMessageMapper){
         this.errorMessageMapper = errorMessageMapper;
     }
 
@@ -28,7 +28,7 @@ public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMes
      */
     public ErrorMessage createErrorMessage(ErrorMessage errorMessage){
         //数据校验
-        if (null == errorMessage.getId()){
+        if (null != errorMessage.getId()){
             throw new BizException(RespCode.ID_NOT_NULL);
         }
         if (null == errorMessage.getModuleCode() || "".equals(errorMessage.getModuleCode())){
@@ -68,7 +68,7 @@ public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMes
         if (null == errorMessage.getErrorMessage() || "".equals(errorMessage.getErrorMessage())){
             throw new BizException(RespCode.ERROR_MESSAGE_NULL);
         }
-        errorMessageMapper.updateAllColumnById(errorMessage);
+        errorMessageMapper.updateById(errorMessage);
         return errorMessage;
     }
 }

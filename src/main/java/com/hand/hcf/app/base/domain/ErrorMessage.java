@@ -1,4 +1,4 @@
-package com.helioscloud.atlantis.domain;
+package com.hand.hcf.app.base.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
@@ -6,7 +6,6 @@ import com.hand.hcf.core.domain.Domain;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
-import java.security.PrivateKey;
 
 /**
  * @description: 报错信息

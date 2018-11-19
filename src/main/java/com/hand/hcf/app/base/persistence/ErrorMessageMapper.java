@@ -1,7 +1,7 @@
-package com.helioscloud.atlantis.persistence;
+package com.hand.hcf.app.base.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.helioscloud.atlantis.domain.ErrorMessage;
+import com.hand.hcf.app.base.domain.ErrorMessage;
 
 /**
  * @description: 报错信息mapper
