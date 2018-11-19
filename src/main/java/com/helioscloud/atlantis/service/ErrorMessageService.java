@@ -1,10 +1,10 @@
 package com.helioscloud.atlantis.service;
 
-import com.cloudhelios.atlantis.exception.BizException;
-import com.cloudhelios.atlantis.service.BaseService;
+import com.hand.hcf.app.base.util.RespCode;
+import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.service.BaseService;
 import com.helioscloud.atlantis.domain.ErrorMessage;
 import com.helioscloud.atlantis.persistence.ErrorMessageMapper;
-import com.helioscloud.atlantis.util.RespCode;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @date: 2018/10/18
  */
 @Service
-public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMessage>{
+public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMessage> {
     private ErrorMessageMapper errorMessageMapper;
 
     public ErrorMessageService (ErrorMessageMapper errorMessageMapper){

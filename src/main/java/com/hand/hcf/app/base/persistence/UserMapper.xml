@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.persistence.UserMapper">
+
+    <resultMap id="UserEntityResultMap" type="com.hand.hcf.app.base.dto.UserDTO">
+        <result column="id" property="id"/>
+        <result column="user_oid" property="userOID"/>
+        <result column="login" property="login"/>
+        <result column="full_name" property="fullName"/>
+        <result column="first_name" property="firstName"/>
+        <result column="last_name" property="lastName"/>
+        <result column="employee_id" property="employeeID"/>
+        <result column="email" property="email"/>
+        <result column="title" property="title"/>
+        <result column="activated" property="activated"/>
+        <result column="status" property="status"/>
+        <result column="company_id" property="companyId"/>
+        <result column="company_name" property="companyName"/>
+        <result column="company_oid" property="companyOID"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="tenant_name" property="tenantName"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="set_of_books_name" property="setOfBooksName"/>
+        <result column="mobile" property="mobile"/>
+        <result column="language" property="language"/>
+        <result column="password" property="password"/>
+        <result column="password_attempt" property="passwordAttempt"/>
+        <result column="lock_status" property="lockStatus"/>
+        <result column="lock_date_deadline" property="lockDateDeadline"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="device_verification_status" property="deviceVerificationStatus"/>
+        <collection property="authorities" ofType="com.hand.hcf.core.security.domain.Authority"
+                    select="findAuthorities" column="{userId=id}"></collection>
+    </resultMap>
+    <resultMap id="AuthorityEntityResultMap" type="com.hand.hcf.core.security.domain.Authority">
+        <result column="authority_name" property="name"/>
+    </resultMap>
+    <select id="findOneByContactEmail" resultMap="UserEntityResultMap">
+       SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND c.email = #{email}
+    </select>
+    <select id="findOneByMobile" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND p.PHONE_NUMBER = #{mobile}
+    </select>
+    <select id="findUserByUserBind" resultMap="UserEntityResultMap">
+        SELECT u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        inner JOIN art_user_login_bind b on b.user_oid=u.user_oid
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND b.is_enabled = true
+        and b.is_active =  true
+        AND b.is_deleted = false
+        AND b.login = #{login}
+    </select>
+
+    <select id="findOneByLogin" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND u.login = #{login}
+    </select>
+
+    <select id="findOneByUserOID" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        u.device_verification_status,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND u.user_oid = #{userOID}
+    </select>
+
+    <select id="findOneByID" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.leaving_date,
+        u.language,
+        u.password_hash password,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.corporation_oid,
+        c.direct_manager,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.company_code,
+        cc.name  company_name,
+        p.PHONE_NUMBER mobile,
+        d.name   department_name,
+        d.department_oid,
+        d.id department_id
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE 1 = 1
+        AND u.is_deleted = FALSE
+        AND u.id = #{id}
+    </select>
+
+    <update id="updateUserLock" parameterType="com.hand.hcf.app.base.dto.UserDTO">
+        UPDATE art_user u
+        SET u.password_attempt = #{passwordAttempt},
+        u.lock_status = #{lockStatus},
+        u.lock_date_deadline = #{lockDateDeadline}
+        WHERE u.id = #{id}
+    </update>
+    <update id="updateUserLanguage">
+        UPDATE art_user u
+            SET u.LANGUAGE = #{language}
+            WHERE u.id = #{userId}
+    </update>
+    <select id="findAuthorities" resultMap="AuthorityEntityResultMap">
+        select authority_name from art_user_authority where user_id =#{userId}
+    </select>
+    <select id="getUserListByCond" resultMap="UserEntityResultMap">
+        SELECT
+        AU.USER_OID,
+        ac.full_name,
+        ac.email,
+        ac.employee_id,
+        ac.title,
+        au.login,
+        au.id,
+        au.is_deleted,
+        au.status,
+        au.language,
+        au.lock_status,
+        au.activated,
+        au.tenant_id,
+        aat.tenant_name,
+        au.company_id,
+        acc.name AS company_name,
+        ap.phone_number AS mobile,
+        acc.set_of_books_id,
+        aso.set_of_books_name
+        FROM
+        art_user au,
+        art_contact ac,
+        art_phone ap,
+        art_company acc,
+        art_tenant aat,
+        art_set_of_books aso
+        WHERE ac.id = au.contact_id
+        AND ap.contact_id = ac.id
+        AND ap.is_primary = 1
+        AND acc.id=au.company_id
+        AND aat.id = au.tenant_id
+        AND aso.id = acc.set_of_books_id
+        <if test="tenantId != null and tenantId > 0 ">
+            and au.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null and setOfBooksId > 0 ">
+            and acc.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="companyId != null and companyId > 0 ">
+            and au.company_id = #{companyId}
+        </if>
+        <if test="login != null">
+            and au.login like concat(concat('%',#{login}),'%')
+        </if>
+        <if test="fullName != null">
+            and ac.full_name like concat(concat('%',#{fullName}),'%')
+        </if>
+        <if test="mobile != null">
+            and ap.phone_number like concat(concat('%',#{mobile}),'%')
+        </if>
+        <if test="email != null">
+            and ac.email  like concat(concat('%',#{email}),'%')
+        </if>
+        ORDER BY ac.full_name
+    </select>
+
+    <select id="findByCondition" resultMap="UserEntityResultMap">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        c.full_name,
+        d.name  department_name,
+        u.activated,
+        t.phone_number  mobile,
+        u.status,
+        u.leaving_date,
+        c.duty,
+        c.rank,
+        c.employee_id,
+        c.email,
+        l.legal_entity_oid,
+        cc.id  company_id,
+        cc.company_code,
+        cc.tenant_id,
+        cc.set_of_books_id,
+        cc.name  company_name,
+        l.entity_name,
+        d.department_oid,
+        d.id  department_id,
+        c.gender,
+        c.birthday,
+        c.entry_date,
+        f.role_oid finance_role_oid
+        FROM art_user u
+        LEFT JOIN art_contact c ON c.id = u.contact_id
+        LEFT JOIN art_company cc ON cc.id = u.company_id
+        LEFT JOIN art_department_user du ON du.user_id = u.id
+        LEFT JOIN art_department d ON d.id = du.department_id
+        LEFT JOIN art_phone t ON (c.id=t.contact_id and t.is_primary=true)
+        LEFT JOIN art_legal_entity l ON (l.legal_entity_oid = c.corporation_oid and l.tenant_id = u.tenant_id)
+        LEFT JOIN atl_finance_role_user  fru ON fru.user_id = u.id
+        LEFT JOIN atl_finance_role  f ON f.id = fru.role_id
+        WHERE u.tenant_id = #{tenantId}
+        <if test="keyword != null and keyword != ''">
+            AND (c.full_name LIKE concat(concat('%',#{keyword}),'%') OR c.email LIKE concat(concat('%',#{keyword}),'%') OR c.employee_id LIKE concat(concat('%',#{keyword}),'%') OR t.phone_number LIKE concat(concat('%',#{keyword}),'%'))
+        </if>
+        <if test="departmentOIDs != null and departmentOIDs.size() > 0">
+            AND d.department_oid IN
+            <foreach collection="departmentOIDs" item="departmentOID" open="(" separator="," close=")">
+                #{departmentOID}
+            </foreach>
+        </if>
+        <if test="companyOIDs != null and companyOIDs.size() > 0">
+            AND cc.company_oid IN
+            <foreach collection="companyOIDs" item="companyOID" open="(" separator="," close=")">
+                #{companyOID}
+            </foreach>
+        </if>
+        <if test="status != null and status != ''">
+            AND u.status = #{status}
+        </if>
+        order by c.employee_id,u.created_date
+    </select>
+
+
+</mapper>

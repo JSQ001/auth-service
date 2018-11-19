@@ -9,16 +9,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.helioscloud.atlantis</groupId>
     <artifactId>auth-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
 
     <parent>
-        <groupId>com.hand.hec.cloud</groupId>
-        <artifactId>hec-core-parent</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <groupId>com.hand.hcf.app</groupId>
+        <artifactId>hcf-app-parent</artifactId>
+        <version>0.8.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
@@ -29,9 +28,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.cloudhelios.atlantis</groupId>
-            <artifactId>hec-base-service</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
+            <groupId>com.hand.hcf.app</groupId>
+            <artifactId>hcf-app-base</artifactId>
+            <version>0.8.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -124,28 +123,6 @@
         </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>helios.releases</id>
-            <name>Releases</name>
-            <url>https://nexus.huilianyi.com/repository/maven-releases</url>
-        </repository>
-        <repository>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>helios.snapshots</id>
-            <name>Snapshot</name>
-            <url>https://nexus.huilianyi.com/repository/maven-snapshots</url>
-        </repository>
     <repository>
         <id>hec.snapshots</id>
         <name>183maven</name>
@@ -186,7 +163,7 @@
                         <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
                     </from>
                     <to>
-                        <image>${registry_url}/hec/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
+                        <image>${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
                         <auth>
                             <username>${registry_username}</username>
                             <password>${registry_password}</password>

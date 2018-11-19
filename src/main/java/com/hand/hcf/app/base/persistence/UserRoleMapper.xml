@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.persistence.UserRoleMapper">
+    <!-- 根据用户ID，角色ID集合，删除用户与角色ID集合的关联 -->
+    <delete id="deleteUserRoleByUserIdAndRoleIds">
+        delete from sys_user_role where user_id = #{userId}
+        <if test=" roleIds != null and roleIds.size > 0 ">
+            and role_id in
+            <foreach collection="roleIds" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </delete>
+    <select id="getAllRolesByCond" resultType="com.hand.hcf.app.base.domain.Role">
+        select id,
+            role_code,
+            role_name,
+            tenant_id,
+            deleted,
+            enabled
+         from sys_role sr
+        where sr.enabled = 1 and sr.deleted = 0
+        and sr.tenant_id = #{tenantId}
+        <if test=" roleCode != null">
+            and sr.role_code like concat(concat('%',#{roleCode}),'%')
+        </if>
+        <if test=" roleName != null">
+            and sr.role_name like concat(concat('%',#{roleName}),'%')
+        </if>
+        order by role_code
+    </select>
+    <select id="getSelectedRolesByCond" resultType="com.hand.hcf.app.base.domain.Role">
+        select id,
+            role_code,
+            role_name,
+            tenant_id,
+            deleted,
+            enabled
+        from sys_role sr
+        where sr.enabled = 1 and sr.deleted = 0
+        <if test=" roleCode != null">
+            and sr.role_code like concat(concat('%',#{roleCode}),'%')
+        </if>
+        <if test=" roleName != null">
+            and sr.role_name like concat(concat('%',#{roleName}),'%')
+        </if>
+        and exists (
+            select 1 from sys_user_role sur
+            where sur.role_id = sr.id
+                and sur.enabled = 1
+                and sur.user_id = #{userId}
+        )
+        order by role_code
+    </select>
+
+    <select id="userHasRole" resultType="java.lang.Integer">
+        select count(0) from sys_user_role sur
+          where
+          sur.enabled = 1
+          and sur.user_id = #{userId}
+    </select>
+
+</mapper>
