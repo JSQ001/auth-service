@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.base.domain.DataAuthorityRule;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -25,6 +27,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
 
     private final DataAuthorityRuleMapper dataAuthorityRuleMapper;
     private final DataAuthorityRuleDetailService dataAuthorityRuleDetailService;
+    private final BaseI18nService baseI18nService;
 
     /**
      * 添加数据权限规则
@@ -120,6 +123,8 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
         List<DataAuthorityRule> dataAuthRules = dataAuthorityRuleMapper.selectList(new EntityWrapper<DataAuthorityRule>()
                 .eq("data_authority_id", dataAuthorityId));
         dataAuthRules.forEach(dataAuthorityRule -> {
+            Map<String, List<Map<String, String>>> i18nMap = baseI18nService.getI18nMap(DataAuthorityRule.class, dataAuthorityRule.getId());
+            dataAuthorityRule.setI18n(i18nMap);
             List<DataAuthorityRuleDetail> dataAuthorityRuleDetails = dataAuthorityRuleDetailService.queryDataAuthorityRuleDetailsByRuleId(dataAuthorityRule.getId());
             dataAuthorityRule.setDataAuthorityRuleDetails(dataAuthorityRuleDetails);
         });

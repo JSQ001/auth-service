@@ -10,6 +10,7 @@ import com.hand.hcf.app.base.domain.DataAuthorityRuleDetailValue;
 import com.hand.hcf.app.base.persistence.DataAuthorityMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.DataAuthorityUtil;
 import com.hand.hcf.core.util.LoginInformationUtil;
@@ -37,6 +38,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     private final DataAuthorityRuleService dataAuthorityRuleService;
     private final DataAuthorityRuleDetailService dataAuthorityRuleDetailService;
     private final DataAuthorityRuleDetailValueService dataAuthorityRuleDetailValueService;
+    private final BaseI18nService baseI18nService;
 
     /**
      * 创建数据权限
@@ -160,7 +162,8 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * @return
      */
     public DataAuthority getDataAuthorityById(Long id){
-        DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);
+        DataAuthority dataAuthority = baseI18nService.selectOneTranslatedTableInfoWithI18n(id,DataAuthority.class);
+//        DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);
         List<DataAuthorityRule> dataAuthorityRules = dataAuthorityRuleService.queryDataAuthorityRules(id);
         dataAuthority.setDataAuthorityRules(dataAuthorityRules);
         return dataAuthority;
@@ -308,8 +311,8 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     }
 
     /**
-     * 根据公司ID获取下属公司
-     * @param unitIds    公司ID
+     * 根据部门ID获取下属部门
+     * @param unitIds    部门ID
      * @param summaryIds
      * @return
      */
