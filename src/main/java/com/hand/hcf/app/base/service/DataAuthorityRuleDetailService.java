@@ -33,14 +33,17 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
      * @return
      */
     @Transactional
-    public DataAuthorityRuleDetail createDataAuthorityRuleDetail(DataAuthorityRuleDetail entity){
-        if(entity.getId() != null){
-            throw new BizException(RespCode.ID_NOT_NULL);
-        }
+    public DataAuthorityRuleDetail saveDataAuthorityRuleDetail(DataAuthorityRuleDetail entity){
         if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
             throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
         }
-        dataAuthorityRuleDetailMapper.insert(entity);
+        if(entity.getId() != null){
+            dataAuthorityRuleDetailMapper.updateAllColumnById(entity);
+            // 删除明细值
+            dataAuthorityRuleDetailValueService.deleteDataAuthorityRuleDetailValuesByDetailId(entity.getId());
+        }else {
+            dataAuthorityRuleDetailMapper.insert(entity);
+        }
         if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRuleDetailValues())){
             dataAuthorityRuleDetailValueService.batchCreateDataAuthorityRuleDetailValue(entity.getDataAuthorityRuleDetailValues(),entity.getId(),entity.getDataAuthorityId());
         }
@@ -48,14 +51,14 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
     }
 
     @Transactional
-    public DataAuthorityRuleDetail createDataAuthorityRuleDetail(DataAuthorityRuleDetail entity,Long dataAuthRuleId,Long dataAuthorityId){
+    public DataAuthorityRuleDetail saveDataAuthorityRuleDetail(DataAuthorityRuleDetail entity,Long dataAuthRuleId,Long dataAuthorityId){
         if(entity.getDataAuthorityRuleId() == null){
             entity.setDataAuthorityRuleId(dataAuthRuleId);
         }
         if(entity.getDataAuthorityId() == null){
             entity.setDataAuthorityId(dataAuthorityId);
         }
-        return createDataAuthorityRuleDetail(entity);
+        return saveDataAuthorityRuleDetail(entity);
     }
 
     /**
@@ -64,48 +67,14 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
      * @return
      */
     @Transactional
-    public List<DataAuthorityRuleDetail> createDataAuthorityRuleDetailBatch(List<DataAuthorityRuleDetail> entities){
-        entities.forEach(entity -> createDataAuthorityRuleDetail(entity));
+    public List<DataAuthorityRuleDetail> saveDataAuthorityRuleDetailBatch(List<DataAuthorityRuleDetail> entities){
+        entities.forEach(entity -> saveDataAuthorityRuleDetail(entity));
         return entities;
     }
 
     @Transactional
-    public List<DataAuthorityRuleDetail> createDataAuthorityRuleDetailBatch(List<DataAuthorityRuleDetail> entities,Long dataAuthRuleId,Long dataAuthorityId){
-        entities.forEach(entity -> createDataAuthorityRuleDetail(entity,dataAuthRuleId,dataAuthorityId));
-        return entities;
-    }
-
-    /**
-     * 更新数据权限规则明细
-     * @param entity
-     * @return
-     */
-    @Transactional
-    public DataAuthorityRuleDetail updateDataAuthorityRuleDetail(DataAuthorityRuleDetail entity){
-        if(entity.getId() ==null){
-            throw new BizException(RespCode.ID_NULL);
-        }
-        if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
-            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
-        }
-        dataAuthorityRuleDetailMapper.updateById(entity);
-        // 删除明细值
-        dataAuthorityRuleDetailValueService.deleteDataAuthorityRuleDetailValuesByDetailId(entity.getId());
-        // 明细值不为空时，插入数据
-        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRuleDetailValues())){
-            dataAuthorityRuleDetailValueService.batchCreateDataAuthorityRuleDetailValue(entity.getDataAuthorityRuleDetailValues(),entity.getId(),entity.getDataAuthorityId());
-        }
-        return entity;
-    }
-
-    /**
-     * 批量更新数据权限规则明细
-     * @param entities
-     * @return
-     */
-    @Transactional
-    public List<DataAuthorityRuleDetail> updateDataAuthorityRuleDetailBatch(List<DataAuthorityRuleDetail> entities){
-        entities.forEach(entity -> updateDataAuthorityRuleDetail(entity));
+    public List<DataAuthorityRuleDetail> saveDataAuthorityRuleDetailBatch(List<DataAuthorityRuleDetail> entities,Long dataAuthRuleId,Long dataAuthorityId){
+        entities.forEach(entity -> saveDataAuthorityRuleDetail(entity,dataAuthRuleId,dataAuthorityId));
         return entities;
     }
 
