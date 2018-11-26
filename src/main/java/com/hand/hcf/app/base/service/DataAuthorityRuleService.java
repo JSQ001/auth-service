@@ -1,7 +1,9 @@
 package com.hand.hcf.app.base.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.hand.hcf.app.base.domain.DataAuthorityRuleDetailValue;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
@@ -10,11 +12,13 @@ import com.hand.hcf.app.base.domain.DataAuthorityRule;
 import com.hand.hcf.app.base.domain.DataAuthorityRuleDetail;
 import com.hand.hcf.app.base.persistence.DataAuthorityRuleMapper;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -27,6 +31,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
 
     private final DataAuthorityRuleMapper dataAuthorityRuleMapper;
     private final DataAuthorityRuleDetailService dataAuthorityRuleDetailService;
+    private final DataAuthorityRuleDetailValueService dataAuthorityRuleDetailValueService;
     private final BaseI18nService baseI18nService;
 
     /**
@@ -35,30 +40,32 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
      * @return
      */
     @Transactional
-    public DataAuthorityRule createDataAuthorityRule(DataAuthorityRule entity){
-        if(entity.getId() != null){
-            throw new BizException(RespCode.ID_NOT_NULL);
-        }
+    public DataAuthorityRule saveDataAuthorityRule(DataAuthorityRule entity){
         Integer count = dataAuthorityRuleMapper.selectCount(new EntityWrapper<DataAuthorityRule>()
                 .eq("data_authority_id", entity.getDataAuthorityId())
                 .eq("data_authority_rule_name", entity.getDataAuthorityRuleName())
-                .eq("deleted",false));
+                .eq("deleted",false)
+                .ne(entity.getId() != null,"id",entity.getId()));
         if(count > 0){
             throw new BizException(RespCode.DATA_AUTHORITY_RULE_EXISTS);
         }
-        dataAuthorityRuleMapper.insert(entity);
+        if(entity.getId() != null){
+            dataAuthorityRuleMapper.updateById(entity);
+        }else {
+            dataAuthorityRuleMapper.insert(entity);
+        }
         if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRuleDetails())){
-            dataAuthorityRuleDetailService.createDataAuthorityRuleDetailBatch(entity.getDataAuthorityRuleDetails(),entity.getId(),entity.getDataAuthorityId());
+            dataAuthorityRuleDetailService.saveDataAuthorityRuleDetailBatch(entity.getDataAuthorityRuleDetails(),entity.getId(),entity.getDataAuthorityId());
         }
         return entity;
     }
 
     @Transactional
-    public DataAuthorityRule createDataAuthorityRule(DataAuthorityRule entity,Long dataAuthorityId){
+    public DataAuthorityRule saveDataAuthorityRule(DataAuthorityRule entity,Long dataAuthorityId){
         if(entity.getDataAuthorityId() == null){
             entity.setDataAuthorityId(dataAuthorityId);
         }
-        return createDataAuthorityRule(entity);
+        return saveDataAuthorityRule(entity);
     }
 
     /**
@@ -67,50 +74,14 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
      * @return
      */
     @Transactional
-    public List<DataAuthorityRule> createDataAuthorityRuleBatch(List<DataAuthorityRule> entities){
-        entities.forEach(entity -> createDataAuthorityRule(entity));
+    public List<DataAuthorityRule> saveDataAuthorityRuleBatch(List<DataAuthorityRule> entities){
+        entities.forEach(entity -> saveDataAuthorityRule(entity));
         return entities;
     }
 
     @Transactional
-    public List<DataAuthorityRule> createDataAuthorityRuleBatch(List<DataAuthorityRule> entities,Long dataAuthorityId){
-        entities.forEach(entity -> createDataAuthorityRule(entity,dataAuthorityId));
-        return entities;
-    }
-
-    /**
-     * 更新数据权限规则
-     * @param entity
-     * @return
-     */
-    @Transactional
-    public DataAuthorityRule updateDataAuthorityRule(DataAuthorityRule entity){
-        if(entity.getId() == null){
-            throw new BizException(RespCode.ID_NULL);
-        }
-        Integer count = dataAuthorityRuleMapper.selectCount(new EntityWrapper<DataAuthorityRule>()
-                .eq("data_authority_id", entity.getDataAuthorityId())
-                .eq("data_authority_rule_name", entity.getDataAuthorityRuleName())
-                .ne("id",entity.getId())
-                .eq("deleted",false));
-        if(count > 0){
-            throw new BizException(RespCode.DATA_AUTHORITY_RULE_EXISTS);
-        }
-        dataAuthorityRuleMapper.updateById(entity);
-        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRuleDetails())){
-            dataAuthorityRuleDetailService.updateDataAuthorityRuleDetailBatch(entity.getDataAuthorityRuleDetails());
-        }
-        return entity;
-    }
-
-    /**
-     * 批量更新数据权限规则
-     * @param entities
-     * @return
-     */
-    @Transactional
-    public List<DataAuthorityRule> updateDataAuthorityRuleBatch(List<DataAuthorityRule> entities){
-        entities.forEach(entity -> updateDataAuthorityRule(entity));
+    public List<DataAuthorityRule> saveDataAuthorityRuleBatch(List<DataAuthorityRule> entities,Long dataAuthorityId) {
+        entities.forEach(entity -> saveDataAuthorityRule(entity, dataAuthorityId));
         return entities;
     }
 
@@ -129,5 +100,34 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             dataAuthorityRule.setDataAuthorityRuleDetails(dataAuthorityRuleDetails);
         });
         return dataAuthRules;
+    }
+
+    private void deleteDataAuthRule(DataAuthorityRule dataAuthorityRule){
+        dataAuthorityRule.setDeleted(true);
+        dataAuthorityRule.setDataAuthorityRuleName(dataAuthorityRule.getDataAuthorityRuleName() + "_DELETED_" + RandomStringUtils.randomNumeric(6));
+        dataAuthorityRuleMapper.updateById(dataAuthorityRule);
+    }
+
+    /**
+     * 根据数据权限ID删除规则
+     * @param authId
+     */
+    @Transactional
+    public void deleteDataAuthRuleByAuthId(Long authId){
+        List<DataAuthorityRule> dataAuths = dataAuthorityRuleMapper.selectList(new EntityWrapper<DataAuthorityRule>().eq("data_authority_id", authId));
+        dataAuths.stream().forEach(dataAuthorityRule -> {
+            deleteDataAuthRule(dataAuthorityRule);
+        });
+    }
+
+    @Transactional
+    public void deleteDataAuthRuleAndDetail(Long id){
+        DataAuthorityRule dataAuthorityRule = dataAuthorityRuleMapper.selectById(id);
+        deleteDataAuthRule(dataAuthorityRule);
+        List<DataAuthorityRuleDetail> ruleDetails = dataAuthorityRuleDetailService.selectList(new EntityWrapper<DataAuthorityRuleDetail>().eq("data_authority_rule_id", id));
+        if(CollectionUtils.isNotEmpty(ruleDetails)){
+            dataAuthorityRuleDetailValueService.delete(new EntityWrapper<DataAuthorityRuleDetailValue>().in("data_auth_rule_detail_id",ruleDetails.stream().map(ruleDetail -> ruleDetail.getId()).collect(Collectors.toList())));
+            dataAuthorityRuleDetailService.delete(new EntityWrapper<DataAuthorityRuleDetail>().eq("data_authority_rule_id", id));
+        }
     }
 }

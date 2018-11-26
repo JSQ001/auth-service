@@ -41,69 +41,17 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     private final BaseI18nService baseI18nService;
 
     /**
-     * 创建数据权限
+     * 保存数据权限
      */
     @Transactional
-    public DataAuthority createDataAuthority(DataAuthority entity){
+    public DataAuthority saveDataAuthority(DataAuthority entity){
         if(entity.getId() !=null){
-            throw new BizException(RespCode.ID_NOT_NULL);
-        }
-        dataAuthorityMapper.insert(entity);
-        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
-            dataAuthorityRuleService.createDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
-        }
-        return entity;
-    }
-
-    /**
-     * 创建数据权限规则，并对数据权限进行保存
-     * @param entity
-     * @return
-     */
-    @Transactional
-    public DataAuthority saveDataAuthorityAndCreateRule(DataAuthority entity){
-        if(entity.getId() !=null){
-            dataAuthorityMapper.updateById(entity);
-        }else{
+            dataAuthorityMapper.updateAllColumnById(entity);
+        }else {
             dataAuthorityMapper.insert(entity);
         }
         if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
-            dataAuthorityRuleService.createDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
-        }
-        return entity;
-    }
-
-    /**
-     * 更新数据权限
-     * 每次更新，都需要删除原来数据，全部重新添加
-     * @param entity
-     * @return
-     */
-    @Transactional
-    public DataAuthority updateDataAuthorityAndResetDetailById(DataAuthority entity){
-        Long id = entity.getId();
-        if(id ==null){
-            throw new BizException(RespCode.ID_NULL);
-        }
-        // 需要把明细数据全部清除掉，重新保存
-        dataAuthorityRuleService.delete(new EntityWrapper<DataAuthorityRule>().eq("data_authority_id",id));
-        dataAuthorityRuleDetailService.delete(new EntityWrapper<DataAuthorityRuleDetail>().eq("data_authority_id",id));
-        dataAuthorityRuleDetailValueService.delete(new EntityWrapper<DataAuthorityRuleDetailValue>().eq("data_authority_id",id));
-        dataAuthorityMapper.updateById(entity);
-        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
-            dataAuthorityRuleService.createDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
-        }
-        return entity;
-    }
-
-    public DataAuthority updateDataAuthorityById(DataAuthority entity){
-        Long id = entity.getId();
-        if(id ==null){
-            throw new BizException(RespCode.ID_NULL);
-        }
-        dataAuthorityMapper.updateById(entity);
-        if(CollectionUtils.isNotEmpty(entity.getDataAuthorityRules())){
-            dataAuthorityRuleService.updateDataAuthorityRuleBatch(entity.getDataAuthorityRules());
+            dataAuthorityRuleService.saveDataAuthorityRuleBatch(entity.getDataAuthorityRules(),entity.getId());
         }
         return entity;
     }
@@ -123,7 +71,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
         DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);
         dataAuthority.setDeleted(true);
         dataAuthority.setDataAuthorityCode(dataAuthority.getDataAuthorityCode() + "_DELETED_" + RandomStringUtils.randomNumeric(6));
-        dataAuthorityRuleService.delete(new EntityWrapper<DataAuthorityRule>().eq("data_authority_id",id));
+        dataAuthorityRuleService.deleteDataAuthRuleByAuthId(id);
         dataAuthorityRuleDetailService.delete(new EntityWrapper<DataAuthorityRuleDetail>().eq("data_authority_id",id));
         dataAuthorityRuleDetailValueService.delete(new EntityWrapper<DataAuthorityRuleDetailValue>().eq("data_authority_id",id));
         dataAuthorityMapper.updateById(dataAuthority);
@@ -335,7 +283,4 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
         }
         return summaryIds;
     }
-
-
-
 }

@@ -36,7 +36,7 @@ public class DataAuthority extends DomainI18nEnable{
     private String dataAuthorityCode;
 
     /**
-
+     * 数据权限名称
      */
     @TableField(value = "data_authority_name")
     @NotNull
