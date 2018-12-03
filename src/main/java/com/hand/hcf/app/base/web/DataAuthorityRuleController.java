@@ -42,14 +42,26 @@ public class DataAuthorityRuleController {
     }
 
     /**
-     * @api {DELETE} /api/data/authority/rule/{id} 【数据权限】删除数据权限规则
-     * @apiDescription 删除数据权限规则，并删除明细数据
+     * @api {GET} /api/data/authority/rule/detail/values 【数据权限】获取数据权限规则明细配置数据
+     * @apiDescription 根据数据权限规则配置，实时查询明细数据
      * @apiGroup SysDataPermission
-     * @apiParam (请求参数) {Long} id ID
+     * @apiParam (请求参数) {Long} ruleId 数据权限规则ID
+     * @apiParam (请求参数) {String} dataType 数据权限规则明细数据类型
+     * @apiParam (请求参数) {Integer} [page] 页数
+     * @apiParam (请求参数) {Integer} [size] 每页大小
      *
      * @apiParamExample {json} 请求报文:
-     *  /api/data/authority/rule/1
+     *  /api/data/authority/rule/detail/values?ruleId=1066705440423739393&dataType=EMPLOYEE
      *
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     *  {
+     *  "valueKey": "1059",
+     *  "valueKeyCode": "8188",
+     *  "valueKeyDesc": "小汤圆",
+     *  "filtrateMethodDesc": "包含"
+     *  }
+     *  ]
      */
     @GetMapping(value = "/detail/values")
     public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailValuesByDataType(@RequestParam(value = "ruleId") Long ruleId,
