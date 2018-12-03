@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class AuthUserService {
     @Autowired
     UserMapper userMapper;
     @Autowired
@@ -38,7 +38,7 @@ public class UserService {
     @Autowired
     PasswordHistoryMapper passwordHistoryMapper;
     @Autowired
-    CompanyService companySecurityService;
+    AuthCompanyService companySecurityService;
 
     public UserDTO findOneByContactEmail(String email) {
         return userMapper.findOneByContactEmail(email);

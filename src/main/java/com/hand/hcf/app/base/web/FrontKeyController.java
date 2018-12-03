@@ -5,7 +5,7 @@ import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.app.base.domain.FrontKey;
 import com.hand.hcf.app.base.dto.FrontKeyDTO;
 import com.hand.hcf.app.base.service.FrontKeyService;
-import com.hand.hcf.app.base.service.UserService;
+import com.hand.hcf.app.base.service.AuthUserService;
 import com.hand.hcf.app.base.service.es.EsFrontKeyInfoSerivce;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -25,9 +25,9 @@ import java.util.List;
 @RequestMapping("/api/frontKey")
 public class FrontKeyController {
     private final FrontKeyService frontKeyService;
-    private final UserService userService;
+    private final AuthUserService userService;
     private final EsFrontKeyInfoSerivce esFrontKeyInfoSerivce;
-    public FrontKeyController(FrontKeyService frontKeyService, UserService userService, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
+    public FrontKeyController(FrontKeyService frontKeyService, AuthUserService userService, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
         this.frontKeyService = frontKeyService;
         this.userService = userService;
         this.esFrontKeyInfoSerivce = esFrontKeyInfoSerivce;

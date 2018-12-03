@@ -3,7 +3,6 @@
 package com.hand.hcf.app.base.service;
 
 
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.domain.UserLoginBind;
 import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.UserDTO;
@@ -27,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(UserDetailsService.class);
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
 
     /**
      * 用户登录，只能是手机号或者邮箱，用户主键login为公司默认账户，不能登录

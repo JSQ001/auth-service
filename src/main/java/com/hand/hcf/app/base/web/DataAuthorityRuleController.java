@@ -1,11 +1,18 @@
 package com.hand.hcf.app.base.web;
 
+import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.dto.DataAuthRuleDetailValueDTO;
 import com.hand.hcf.app.base.service.DataAuthorityRuleService;
+import com.hand.hcf.core.util.PageUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -32,5 +39,37 @@ public class DataAuthorityRuleController {
     @DeleteMapping(value = "/{id}")
     public void deleteDataAuthRule(@PathVariable(value = "id") Long id){
         dataAuthorityRuleService.deleteDataAuthRuleAndDetail(id);
+    }
+
+    /**
+     * @api {GET} /api/data/authority/rule/detail/values 【数据权限】获取数据权限规则明细配置数据
+     * @apiDescription 根据数据权限规则配置，实时查询明细数据
+     * @apiGroup SysDataPermission
+     * @apiParam (请求参数) {Long} ruleId 数据权限规则ID
+     * @apiParam (请求参数) {String} dataType 数据权限规则明细数据类型
+     * @apiParam (请求参数) {Integer} [page] 页数
+     * @apiParam (请求参数) {Integer} [size] 每页大小
+     *
+     * @apiParamExample {json} 请求报文:
+     *  /api/data/authority/rule/detail/values?ruleId=1066705440423739393&dataType=EMPLOYEE
+     *
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     *  {
+     *  "valueKey": "1059",
+     *  "valueKeyCode": "8188",
+     *  "valueKeyDesc": "小汤圆",
+     *  "filtrateMethodDesc": "包含"
+     *  }
+     *  ]
+     */
+    @GetMapping(value = "/detail/values")
+    public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailValuesByDataType(@RequestParam(value = "ruleId") Long ruleId,
+                                                                                                 @RequestParam(value = "dataType") String dataType,
+                                                                                                 Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<DataAuthRuleDetailValueDTO> dataAuthRuleDetailValuesByDataType = dataAuthorityRuleService.getDataAuthRuleDetailValuesByDataType(ruleId, dataType, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/data/authority/rule/detail/values");
+        return new ResponseEntity(dataAuthRuleDetailValuesByDataType,httpHeaders, HttpStatus.OK);
     }
 }

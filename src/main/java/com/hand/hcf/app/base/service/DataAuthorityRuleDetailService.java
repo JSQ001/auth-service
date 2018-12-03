@@ -2,6 +2,9 @@ package com.hand.hcf.app.base.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
+import com.hand.hcf.app.base.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.client.org.CustomEnumerationItemDTO;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.app.base.util.RespCode;
@@ -12,7 +15,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -27,6 +33,9 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
 
     private final DataAuthorityRuleDetailValueService dataAuthorityRuleDetailValueService;
 
+    private final HcfOrganizationInterface hcfOrganizationInterface;
+
+    private final ThreadLocal<Map<String,Map<String,CustomEnumerationItemDTO>>> systemCodeCache = new ThreadLocal<>();
     /**
      * 新建数据权限规则明细
      * @param entity
@@ -86,6 +95,27 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
     public List<DataAuthorityRuleDetail> queryDataAuthorityRuleDetailsByRuleId(Long ruleId){
         List<DataAuthorityRuleDetail> ruleDetails = dataAuthorityRuleDetailMapper.selectList(new EntityWrapper<DataAuthorityRuleDetail>()
                 .eq("data_authority_rule_id", ruleId));
+        if(CollectionUtils.isNotEmpty(ruleDetails)){
+            ruleDetails.stream().forEach(ruleDetail -> {
+                if(systemCodeCache.get() == null) {
+                    systemCodeCache.set(new HashMap<>());
+                }
+                // 数据范围
+                if(! systemCodeCache.get().containsKey("3102")){
+                    systemCodeCache.get().put("3102",hcfOrganizationInterface.getSysCodeValues("3102").stream().collect(Collectors.toMap(e -> e.getValue(),e -> e)));
+                }
+                CustomEnumerationItemDTO customEnumerationItemDTO = systemCodeCache.get().get("3102").get(ruleDetail.getDataScope());
+                ruleDetail.setDataScopeDesc(customEnumerationItemDTO.getMessageKey());
+                if(StringUtils.isNotEmpty(ruleDetail.getFiltrateMethod())){
+                    // 数据取值规则
+                    if(! systemCodeCache.get().containsKey("3103")){
+                        systemCodeCache.get().put("3103",hcfOrganizationInterface.getSysCodeValues("3103").stream().collect(Collectors.toMap(e -> e.getValue(),e -> e)));
+                    }
+                    customEnumerationItemDTO = systemCodeCache.get().get("3103").get(ruleDetail.getFiltrateMethod());
+                    ruleDetail.setFiltrateMethodDesc(customEnumerationItemDTO.getMessageKey());
+                }
+            });
+        }
         ruleDetails.forEach(ruleDetail -> {
             List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(ruleDetail.getId());
             ruleDetail.setDataAuthorityRuleDetailValues(dataAuthorityRuleDetailValues);

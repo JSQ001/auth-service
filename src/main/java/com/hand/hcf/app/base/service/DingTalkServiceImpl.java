@@ -3,7 +3,6 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.exception.UserNotActivatedException;
@@ -34,7 +33,7 @@ public class DingTalkServiceImpl {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
 
 
     public JSONObject authenticate(String code, String corpId, Map<String, String> var3) {

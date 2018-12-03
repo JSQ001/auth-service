@@ -257,4 +257,10 @@
         <dropNotNullConstraint tableName="sys_data_auth_rule_detail" columnName="filtrate_method"/>
     </changeSet>
 
+    <changeSet id="201811271204001" author="kai.zhang">
+        <addColumn tableName="sys_data_authority_i18n">
+            <column name="description" type="varchar(2000)" remarks="数据权限备注"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

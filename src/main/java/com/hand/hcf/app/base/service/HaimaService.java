@@ -1,7 +1,6 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.exception.UserNotActivatedException;
 import com.hand.hcf.app.base.util.PrincipalBuilder;
@@ -33,7 +32,7 @@ public class HaimaService {
     public  String HAIMA_USERINFO_URL;
 
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
 
     private RestTemplate restTemplate = new RestTemplate();
 

@@ -11,7 +11,7 @@ import com.hand.hcf.app.base.domain.UserLoginLog;
 import com.hand.hcf.app.base.domain.enumeration.DeviceStatusEnum;
 import com.hand.hcf.app.base.domain.enumeration.DeviceVerificationStatus;
 import com.hand.hcf.app.base.persistence.UserDeviceMapper;
-import com.hand.hcf.app.base.service.UserService;
+import com.hand.hcf.app.base.service.AuthUserService;
 import com.hand.hcf.app.base.constant.UserLoginLogConstant;
 import com.hand.hcf.app.base.dto.UserDTO;
 import org.elasticsearch.action.index.IndexResponse;
@@ -48,7 +48,7 @@ public class ArtemisTokenStore extends JdbcTokenStore {
     private final JdbcTemplate jdbcTemplate;
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
     @Autowired
     private UserDeviceMapper userDeviceMapper;
     @Autowired

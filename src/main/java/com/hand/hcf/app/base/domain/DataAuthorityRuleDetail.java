@@ -51,11 +51,23 @@ public class DataAuthorityRuleDetail extends DomainLogic{
     private String dataScope;
 
     /**
+     * 数据范围描述
+     */
+    @TableField(exist = false)
+    private String dataScopeDesc;
+
+    /**
      * 数据取值方式
      * 包含 INCLUDE； 排除EXCLUDE
      */
     @TableField(value = "filtrate_method")
     private String filtrateMethod;
+
+    /**
+     * 数据取值方式描述
+     */
+    @TableField(exist = false)
+    private String filtrateMethodDesc;
 
     /**
      * 明细值

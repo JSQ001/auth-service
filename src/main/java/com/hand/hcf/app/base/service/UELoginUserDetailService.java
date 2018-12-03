@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.TrialUserDTO;
 import com.hand.hcf.app.base.dto.UserDTO;
@@ -31,10 +30,10 @@ public class UELoginUserDetailService {
     private final Logger log = LoggerFactory.getLogger(UELoginUserDetailService.class);
 
     private TrialServiceCilent trialServiceCilent;
-    private UserService userService;
+    private AuthUserService userService;
 
     public UELoginUserDetailService(TrialServiceCilent trialServiceCilent,
-                                    UserService userService) {
+                                    AuthUserService userService) {
         this.trialServiceCilent = trialServiceCilent;
         this.userService = userService;
     }

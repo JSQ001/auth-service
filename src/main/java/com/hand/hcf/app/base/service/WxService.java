@@ -4,7 +4,6 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.domain.CompanyConfiguration;
 import com.hand.hcf.app.base.domain.ConfigurationDetail;
 import com.hand.hcf.app.base.exception.UserNotActivatedException;
@@ -43,9 +42,9 @@ public class WxService {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
     @Autowired
-    private CompanyService companyService;
+    private AuthCompanyService companyService;
 
     public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
         JSONObject jsonResp = null;

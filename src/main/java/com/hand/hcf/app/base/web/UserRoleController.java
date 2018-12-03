@@ -12,7 +12,7 @@ import com.hand.hcf.app.base.dto.MenuTreeDTO;
 import com.hand.hcf.app.base.dto.RoleAssignMenuButtonDTO;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.dto.UserRoleDTO;
-import com.hand.hcf.app.base.service.UserService;
+import com.hand.hcf.app.base.service.AuthUserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -35,9 +35,9 @@ import java.util.UUID;
 public class UserRoleController {
     private final UserRoleService userRoleService;
     private final RoleMenuService roleMenuService;
-    private final UserService userService;
+    private final AuthUserService userService;
 
-    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService, UserService userService) {
+    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService, AuthUserService userService) {
         this.userRoleService = userRoleService;
         this.roleMenuService = roleMenuService;
         this.userService = userService;

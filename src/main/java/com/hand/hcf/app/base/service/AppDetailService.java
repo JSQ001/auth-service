@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.exception.UserNotActivatedException;
@@ -21,7 +20,7 @@ public class AppDetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(AppDetailService.class);
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
 
     @Transactional
     @Override
