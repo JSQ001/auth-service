@@ -28,7 +28,7 @@ public class AuthenticationService {
     @Autowired
     private RedisTemplate<String, AuthenticationCode> redisTemplate;
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
 
 
 

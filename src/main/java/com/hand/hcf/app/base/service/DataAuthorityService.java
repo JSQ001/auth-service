@@ -9,6 +9,9 @@ import com.hand.hcf.app.base.domain.DataAuthorityRuleDetail;
 import com.hand.hcf.app.base.domain.DataAuthorityRuleDetailValue;
 import com.hand.hcf.app.base.persistence.DataAuthorityMapper;
 import com.hand.hcf.app.base.util.RespCode;
+import com.hand.hcf.app.client.com.CompanyService;
+import com.hand.hcf.app.client.department.DepartmentService;
+import com.hand.hcf.app.client.sob.SobService;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
@@ -39,6 +42,8 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     private final DataAuthorityRuleDetailService dataAuthorityRuleDetailService;
     private final DataAuthorityRuleDetailValueService dataAuthorityRuleDetailValueService;
     private final BaseI18nService baseI18nService;
+    private final DepartmentService departmentService;
+    private final CompanyService companyService;
 
     /**
      * 保存数据权限
@@ -167,7 +172,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                                 // 当前 当前及下属
                                 if ("1002".equals(dataAuthorityRuleDetail.getDataScope()) || "1003".equals(dataAuthorityRuleDetail.getDataScope())) {
                                     dataAuthValuePropertyDTO.setValueKeyList(
-                                            getDataValueKeyByDataTypeAndDataScope(dataAuthorityRuleDetail.getDataType(), dataAuthorityRuleDetail.getDataScope()));
+                                            getDataValueKeyToStringByDataTypeAndDataScope(dataAuthorityRuleDetail.getDataType(), dataAuthorityRuleDetail.getDataScope()));
                                     // 手工选择
                                 } else if ("1004".equals(dataAuthorityRuleDetail.getDataScope())) {
                                     dataAuthValuePropertyDTO.setValueKeyList(dataAuthorityRuleDetail.getDataAuthorityRuleDetailValues()
@@ -185,102 +190,43 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
         return list;
     }
 
+    private List<String> getDataValueKeyToStringByDataTypeAndDataScope(String dataType,String dataScope){
+        return getDataValueKeyByDataTypeAndDataScope(dataType,dataScope).stream().map(e -> e.toString()).collect(Collectors.toList());
+    }
 
-    private List<String> getDataValueKeyByDataTypeAndDataScope(String dataType,String dataScope){
-        List<String> list = new ArrayList<>();
+    private List<Long> getDataValueKeyByDataTypeAndDataScope(String dataType,String dataScope){
+        List<Long> list = new ArrayList<>();
         // 账套
         if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
-            // 当前
-//            if("1002".equals(dataScope)) {
-                list.add(LoginInformationUtil.getCurrentSetOfBookID().toString());
-            // 当前及下属
-//            }else if("1003".equals(dataScope)){
-//                list.add(LoginInformationUtil.getCurrentSetOfBookID().toString());
-//            }
+            list.add(LoginInformationUtil.getCurrentSetOfBookID());
         // 公司
         }else if(DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)){
             Long currentCompanyID = LoginInformationUtil.getCurrentCompanyID();
             // 当前
             if("1002".equals(dataScope)) {
-                list.add(currentCompanyID.toString());
+                list.add(currentCompanyID);
             // 当前及下属
             }else if("1003".equals(dataScope)){
-                Set<Long> set = new HashSet<>();
-                set.add(currentCompanyID);
-                Set<Long> companyChildrenIdByCompanyIds = getCompanyChildrenIdByCompanyIds(set, null);
-                list.add(currentCompanyID.toString());
-                list.addAll(companyChildrenIdByCompanyIds.stream().map(id -> id.toString()).collect(Collectors.toList()));
+                Set<Long> companyChildrenIdByCompanyIds = companyService.getSonCompanyByCondAll(currentCompanyID);
+                list.add(currentCompanyID);
+                list.addAll(companyChildrenIdByCompanyIds);
             }
         // 部门
         }else if(DataAuthorityUtil.UNIT_COLUMN.equals(dataType)){
-            Long unitIdByUserId = dataAuthorityMapper.getUnitIdByUserId(LoginInformationUtil.getCurrentUserID());
+            Long unitIdByUserId = departmentService.findDepartmentByUserOid(LoginInformationUtil.getCurrentUserOID().toString()).getDepartmentId();
             // 当前
             if("1002".equals(dataScope)) {
-                list.add(unitIdByUserId.toString());
+                list.add(unitIdByUserId);
             // 当前及下属
             }else if("1003".equals(dataScope)){
-                Set<Long> set = new HashSet<>();
-                set.add(unitIdByUserId);
-                Set<Long> unitChildrenIdByUnitIds = getUnitChildrenIdByUnitIds(set, null);
-                list.add(unitIdByUserId.toString());
-                list.addAll(unitChildrenIdByUnitIds.stream().map(id -> id.toString()).collect(Collectors.toList()));
+                Set<Long> unitChildrenIdByUnitIds = departmentService.getUnitChildrenIdByUnitId(unitIdByUserId);
+                list.add(unitIdByUserId);
+                list.addAll(unitChildrenIdByUnitIds);
             }
         // 员工
         }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
-            list.add(LoginInformationUtil.getCurrentUserID().toString());
+            list.add(LoginInformationUtil.getCurrentUserID());
         }
         return list;
-    }
-
-    /**
-     * 根据公司ID获取下属公司
-     * @param companyIds    公司ID
-     * @param summaryIds
-     * @return
-     */
-    private Set<Long> getCompanyChildrenIdByCompanyIds(Set<Long> companyIds,Set<Long> summaryIds){
-        if(summaryIds == null){
-            summaryIds = new HashSet<>();
-        }
-        if(CollectionUtils.isEmpty(companyIds)){
-            return summaryIds;
-        }
-        // 获取子公司
-        Set<Long> companyChildrenIdByCompanyIds = dataAuthorityMapper.getCompanyChildrenIdByCompanyIds(companyIds);
-        // 当子公司集合不为空
-        if(CollectionUtils.isNotEmpty(companyChildrenIdByCompanyIds)){
-            // 添加本次查询的
-            boolean b = summaryIds.addAll(companyChildrenIdByCompanyIds);
-            if(b){
-                getCompanyChildrenIdByCompanyIds(companyChildrenIdByCompanyIds,summaryIds);
-            }
-        }
-        return summaryIds;
-    }
-
-    /**
-     * 根据部门ID获取下属部门
-     * @param unitIds    部门ID
-     * @param summaryIds
-     * @return
-     */
-    private Set<Long> getUnitChildrenIdByUnitIds(Set<Long> unitIds,Set<Long> summaryIds){
-        if(summaryIds == null){
-            summaryIds = new HashSet<>();
-        }
-        if(CollectionUtils.isEmpty(unitIds)){
-            return summaryIds;
-        }
-        // 获取子部门
-        Set<Long> unitChildrenIdByUnitIds = dataAuthorityMapper.getUnitChildrenIdByUnitIds(unitIds);
-        // 当子部门集合不为空
-        if(CollectionUtils.isNotEmpty(unitChildrenIdByUnitIds)){
-            // 添加本次查询的
-            boolean b = summaryIds.addAll(unitChildrenIdByUnitIds);
-            if(b){
-                getCompanyChildrenIdByCompanyIds(unitChildrenIdByUnitIds,summaryIds);
-            }
-        }
-        return summaryIds;
     }
 }

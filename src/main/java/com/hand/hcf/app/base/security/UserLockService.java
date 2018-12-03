@@ -6,7 +6,7 @@ import com.hand.hcf.app.base.domain.UserLock;
 import com.hand.hcf.app.base.domain.enumeration.UserLockedEnum;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.persistence.UserLockMapper;
-import com.hand.hcf.app.base.service.UserService;
+import com.hand.hcf.app.base.service.AuthUserService;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,7 +31,7 @@ public class UserLockService {
     @Autowired
     private UserLockMapper userLockMapper;
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

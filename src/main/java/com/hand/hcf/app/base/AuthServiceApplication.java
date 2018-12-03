@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.env.Environment;
@@ -30,12 +31,16 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @EnableConfigurationProperties({RedisProperties.class, CloudProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @EnableDiscoveryClient
-@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base"},
-        excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { OauthConfiguration.class, RestService.class, CacheConfiguration.class, RedisConfiguration.class, OAuth2FeignConfiguration.class})
+@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base",
+        "com.hand.hcf.app.client.org","com.hand.hcf.app.service.es","com.hand.hcf.app.client.com",
+        "com.hand.hcf.app.client.department","com.hand.hcf.app.client.user","com.hand.hcf.app.client.sob","com.hand.hcf.base.config"},
+        excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { RestService.class, CacheConfiguration.class, RedisConfiguration.class})
         //,@ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = "com.hand.hcf.core.service.api.*")
 })
 @MapperScan("com.hand.hcf.app.base.persistence*")
 @I18nDomainScan(basePackages = {"com.hand.hcf.core.domain","com.hand.hcf.app.base.domain"})
+@EnableFeignClients({"com.hand.hcf.app.client.org","com.hand.hcf.app.client.com",
+        "com.hand.hcf.app.client.department","com.hand.hcf.app.client.user","com.hand.hcf.app.client.sob"})
 public class AuthServiceApplication {
     /**
      * @apiDefine Auth2Service 角色权限

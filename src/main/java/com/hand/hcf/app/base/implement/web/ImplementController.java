@@ -37,7 +37,7 @@ public class ImplementController implements AuthInterface {
 
     @Override
     //@GetMapping(value = "/data/auth/table/properties/get/by/tableName")
-    public List<DataAuthTablePropertyDTO> getDataAuthTablePropertiesByTableName(@RequestParam String tableName) {
+    public List<DataAuthTablePropertyDTO> getDataAuthTablePropertiesByTableName(@RequestParam("tableName") String tableName) {
         List<DataAuthTableProperty> dataAuthTablePropertiesByTableName = dataAuthTablePropertyService.getDataAuthTablePropertiesByTableName(tableName);
         return mapper.mapAsList(dataAuthTablePropertiesByTableName, DataAuthTablePropertyDTO.class);
     }

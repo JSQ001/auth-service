@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class CompanyService {
+public class AuthCompanyService {
 	@Autowired
     CompanyMapper companyMapper;
     @Autowired

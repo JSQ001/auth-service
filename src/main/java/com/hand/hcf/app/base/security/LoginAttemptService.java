@@ -3,8 +3,8 @@ package com.hand.hcf.app.base.security;
 import com.hand.hcf.app.base.domain.CompanySecurity;
 import com.hand.hcf.app.base.domain.UserLock;
 import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.service.CompanyService;
-import com.hand.hcf.app.base.service.UserService;
+import com.hand.hcf.app.base.service.AuthCompanyService;
+import com.hand.hcf.app.base.service.AuthUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +28,11 @@ public class LoginAttemptService {
     private static final int defaultUnLockMinutes = 30;
     private static final String LOGIN_ATTEMPT_PREFIX = "LOGIN_ATTEMPT_PREFIX_";
     @Autowired
-    private UserService userService;
+    private AuthUserService userService;
     @Autowired
     private UserLockService userLockService;
     @Autowired
-    CompanyService companyService;
+    AuthCompanyService companyService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

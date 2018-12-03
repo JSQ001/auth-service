@@ -46,6 +46,8 @@ public class DataAuthority extends DomainI18nEnable{
     /**
      * 描述
      */
+    @TableField(value = "description")
+    @I18nField
     private String description;
 
     @TableField(exist = false)
