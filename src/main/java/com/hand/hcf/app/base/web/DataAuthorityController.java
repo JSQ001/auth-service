@@ -552,9 +552,10 @@ public class DataAuthorityController {
      * @apiDescription 查询指定数据权限，并获取明细配置
      * @apiGroup SysDataPermission
      * @apiParam (请求参数) {Long} id 主键ID
+     * @apiParam (请求参数) {Long} [ruleId] 规则ID
      *
      * @apiParamExample {json} 请求报文:
-     * /api/system/data/authority/detail/1
+     * /api/system/data/authority/detail/1?ruleId=1
      *
      * @apiSuccess (数据权限参数) {Long} id  主键id
      * @apiSuccess (数据权限参数) {Long} tenantId 租户ID
@@ -669,8 +670,9 @@ public class DataAuthorityController {
         }
      */
     @GetMapping("/detail/{id}")
-    public ResponseEntity<DataAuthority> getDataAuthorityDetailById(@PathVariable(value = "id") Long id){
-        return ResponseEntity.ok(dataAuthorityService.getDataAuthorityById(id));
+    public ResponseEntity<DataAuthority> getDataAuthorityDetailById(@PathVariable(value = "id") Long id,
+                                                                    @RequestParam(value = "ruleId",required = false) Long ruleId){
+        return ResponseEntity.ok(dataAuthorityService.getDataAuthorityById(id,ruleId));
     }
 
 }
