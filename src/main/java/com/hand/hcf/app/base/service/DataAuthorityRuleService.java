@@ -112,9 +112,10 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
      * @param dataAuthorityId
      * @return
      */
-    public List<DataAuthorityRule> queryDataAuthorityRules(Long dataAuthorityId){
+    public List<DataAuthorityRule> queryDataAuthorityRules(Long dataAuthorityId,Long ruleId){
         List<DataAuthorityRule> dataAuthRules = dataAuthorityRuleMapper.selectList(new EntityWrapper<DataAuthorityRule>()
-                .eq("data_authority_id", dataAuthorityId));
+                .eq("data_authority_id", dataAuthorityId)
+                .eq(ruleId != null,"id",ruleId));
         dataAuthRules.forEach(dataAuthorityRule -> {
             Map<String, List<Map<String, String>>> i18nMap = baseI18nService.getI18nMap(DataAuthorityRule.class, dataAuthorityRule.getId());
             dataAuthorityRule.setI18n(i18nMap);
