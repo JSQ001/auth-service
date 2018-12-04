@@ -325,15 +325,18 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                                                                                         String code,
                                                                                         String name,
                                                                                         Page page){
-        DataAuthorityRuleDetail dataAuthorityRuleDetail = dataAuthorityRuleDetailService.selectOne(new EntityWrapper<DataAuthorityRuleDetail>()
-                .eq("data_authority_rule_id", ruleId).eq("data_type", dataType));
+
         List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = null;
         List<Long> keyIds = null;
-        if("1004".equals(dataAuthorityRuleDetail.getDataScope())){
-            dataAuthorityRuleDetailValues =
-                    dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getDataAuthorityRuleId());
-            keyIds = dataAuthorityRuleDetailValues.stream()
-                    .map(e -> TypeConversionUtils.parseLong(e.getValueKey())).collect(Collectors.toList());
+        if(ruleId != null){
+            DataAuthorityRuleDetail dataAuthorityRuleDetail = dataAuthorityRuleDetailService.selectOne(new EntityWrapper<DataAuthorityRuleDetail>()
+                    .eq("data_authority_rule_id", ruleId).eq("data_type", dataType));
+            if("1004".equals(dataAuthorityRuleDetail.getDataScope())){
+                dataAuthorityRuleDetailValues =
+                        dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getDataAuthorityRuleId());
+                keyIds = dataAuthorityRuleDetailValues.stream()
+                        .map(e -> TypeConversionUtils.parseLong(e.getValueKey())).collect(Collectors.toList());
+            }
         }
         // 全部
         if("all".equals(scope) || "notChoose".equals(scope)){

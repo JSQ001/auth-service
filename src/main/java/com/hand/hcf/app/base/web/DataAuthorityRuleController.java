@@ -99,7 +99,7 @@ public class DataAuthorityRuleController {
      *  ]
      */
     @GetMapping(value = "/detail/values/select")
-    public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailSelectValuesByDataType(@RequestParam(value = "ruleId") Long ruleId,
+    public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailSelectValuesByDataType(@RequestParam(value = "ruleId",required = false) Long ruleId,
                                                                                                   @RequestParam(value = "dataType") String dataType,
                                                                                                   @RequestParam(value = "scope") String scope,
                                                                                                   @RequestParam(value = "code",required = false) String code,
