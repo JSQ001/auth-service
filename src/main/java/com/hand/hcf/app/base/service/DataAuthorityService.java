@@ -114,12 +114,20 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * @param id
      * @return
      */
-    public DataAuthority getDataAuthorityById(Long id){
+    public DataAuthority getDataAuthorityById(Long id,Long ruleId){
         DataAuthority dataAuthority = baseI18nService.selectOneTranslatedTableInfoWithI18n(id,DataAuthority.class);
-//        DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);
-        List<DataAuthorityRule> dataAuthorityRules = dataAuthorityRuleService.queryDataAuthorityRules(id);
+        List<DataAuthorityRule> dataAuthorityRules = dataAuthorityRuleService.queryDataAuthorityRules(id,ruleId);
         dataAuthority.setDataAuthorityRules(dataAuthorityRules);
         return dataAuthority;
+    }
+
+    /**
+     * 获取数据权限，并获取明细信息
+     * @param id
+     * @return
+     */
+    public DataAuthority getDataAuthorityById(Long id){
+        return getDataAuthorityById(id,null);
     }
 
     public List<DataAuthority> getDataAuthorityByIds(Set<Long> ids){
