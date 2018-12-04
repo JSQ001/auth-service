@@ -72,4 +72,45 @@ public class DataAuthorityRuleController {
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/data/authority/rule/detail/values");
         return new ResponseEntity(dataAuthRuleDetailValuesByDataType,httpHeaders, HttpStatus.OK);
     }
+
+    /**
+     * @api {GET} /api/data/authority/rule/detail/values/select 【数据权限】获取数据权限规则明细值选择列表
+     * @apiDescription 账套、员工选择列表
+     * @apiGroup SysDataPermission
+     * @apiParam (请求参数) {Long} ruleId 数据权限规则ID
+     * @apiParam (请求参数) {String} dataType 数据权限规则明细数据类型
+     * @apiParam (请求参数) {String} scope  数据范围：all->全部；selected->已选择；notChoose->未选择
+     * @apiParam (请求参数) {Integer} [code] 代码
+     * @apiParam (请求参数) {Integer} [name] 名称
+     * @apiParam (请求参数) {Integer} [page] 页数
+     * @apiParam (请求参数) {Integer} [size] 每页大小
+     *
+     * @apiParamExample {json} 请求报文:
+     *  /api/data/authority/rule/detail/values/select?ruleId=1066705440423739393&dataType=EMPLOYEE&scope=all
+     *
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     *  {
+     *  "valueKey": "1059",
+     *  "valueKeyCode": "8188",
+     *  "valueKeyDesc": "小汤圆",
+     *  "filtrateMethodDesc": null
+     *  }
+     *  ]
+     */
+    @GetMapping(value = "/detail/values/select")
+    public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailSelectValuesByDataType(@RequestParam(value = "ruleId") Long ruleId,
+                                                                                                  @RequestParam(value = "dataType") String dataType,
+                                                                                                  @RequestParam(value = "scope") String scope,
+                                                                                                  @RequestParam(value = "code",required = false) String code,
+                                                                                                  @RequestParam(value = "name",required = false) String name,
+                                                                                                  Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<DataAuthRuleDetailValueDTO> dataAuthRuleDetailValuesByDataType =
+                dataAuthorityRuleService.getDataAuthRuleDetailSelectValuesByDataType(ruleId, dataType, scope, code, name, page);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/data/authority/rule/detail/values/select");
+        return new ResponseEntity(dataAuthRuleDetailValuesByDataType,httpHeaders, HttpStatus.OK);
+    }
+
+
 }
