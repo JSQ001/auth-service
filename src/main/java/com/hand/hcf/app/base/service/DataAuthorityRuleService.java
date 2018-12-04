@@ -161,7 +161,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             // 全部
             case "1001" :{
                 if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
-                    Page<SetOfBooksInfoDTO> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantID(), page);
+                    Page<SetOfBooksInfoDTO> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantID(),null,null,null, page);
                     page.setTotal(setOfBooksListByTenantId.getTotal());
                     return setOfBooksToDetailValueDTO(setOfBooksListByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)){
@@ -173,7 +173,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                     page.setTotal(departmentInfoByTenantId.getTotal());
                     return departmentToDetailValueDTO(departmentInfoByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
-                    Page<UserInfoDTO> usersByTenantId = userService.getUsersByTenantId(LoginInformationUtil.getCurrentTenantID(), page);
+                    Page<UserInfoDTO> usersByTenantId = userService.getUsersByTenantId(LoginInformationUtil.getCurrentTenantID(),null,null,null, page);
                     page.setTotal(usersByTenantId.getTotal());
                     return userToDetailValueDTO(usersByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }
@@ -310,5 +310,65 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                     .valueKeyDesc(e.getFullName())
                     .filtrateMethodDesc(filtrateMethodDesc).build();
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取待选择数据
+     * @param ruleId
+     * @param dataType
+     * @param page
+     * @return
+     */
+    public List<DataAuthRuleDetailValueDTO> getDataAuthRuleDetailSelectValuesByDataType(Long ruleId,
+                                                                                        String dataType,
+                                                                                        String scope,
+                                                                                        String code,
+                                                                                        String name,
+                                                                                        Page page){
+        DataAuthorityRuleDetail dataAuthorityRuleDetail = dataAuthorityRuleDetailService.selectOne(new EntityWrapper<DataAuthorityRuleDetail>()
+                .eq("data_authority_rule_id", ruleId).eq("data_type", dataType));
+        List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = null;
+        List<Long> keyIds = null;
+        if("1004".equals(dataAuthorityRuleDetail.getDataScope())){
+            dataAuthorityRuleDetailValues =
+                    dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getDataAuthorityRuleId());
+            keyIds = dataAuthorityRuleDetailValues.stream()
+                    .map(e -> TypeConversionUtils.parseLong(e.getValueKey())).collect(Collectors.toList());
+        }
+        // 全部
+        if("all".equals(scope) || "notChoose".equals(scope)){
+            List<Long> ids = null;
+            // 未选择
+            if("notChoose".equals(scope)){
+                ids = keyIds;
+            }
+            if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
+                Page<SetOfBooksInfoDTO> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantID(), code, name, ids, page);
+                page.setTotal(setOfBooksListByTenantId.getTotal());
+                return setOfBooksToDetailValueDTO(setOfBooksListByTenantId.getRecords(),null);
+            }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
+                Page<UserInfoDTO> usersByTenantId = userService.getUsersByTenantId(LoginInformationUtil.getCurrentTenantID(), code, name, ids, page);
+                page.setTotal(usersByTenantId.getTotal());
+                return userToDetailValueDTO(usersByTenantId.getRecords(),null);
+            }
+        // 已选择
+        }else if("selected".equals(scope)){
+            if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
+                if(CollectionUtils.isNotEmpty(keyIds)){
+                    List<SetOfBooksInfoDTO> setOfBooksListByIds = sobService.getSetOfBooksListByIds(keyIds);
+                    return setOfBooksToDetailValueDTO(PageUtil.pageHandler(
+                            page, setOfBooksListByIds.stream().sorted(Comparator.comparing(e -> e.getSetOfBooksCode())).collect(Collectors.toList())),null);
+                }
+                return Arrays.asList();
+            }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
+                if(CollectionUtils.isNotEmpty(keyIds)){
+                    List<UserInfoDTO> userInfoDTOS = userService.selectUsersByUserIds(keyIds);
+                    return userToDetailValueDTO(PageUtil.pageHandler(page,
+                            userInfoDTOS.stream().sorted(Comparator.comparing(e->e.getEmployeeID())).collect(Collectors.toList())),null);
+                }
+                return Arrays.asList();
+            }
+        }
+        return Arrays.asList();
     }
 }
