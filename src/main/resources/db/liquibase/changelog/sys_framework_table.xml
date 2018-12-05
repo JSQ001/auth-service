@@ -498,4 +498,10 @@
             <column name="component_id"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="201812051521001" author="bin.xie">
+        <addColumn tableName="sys_interface_request">
+            <column name="default_flag" type="varchar(200)" remarks="默认组织架构信息"></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
