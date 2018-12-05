@@ -77,7 +77,7 @@ public class DataAuthorityRuleController {
      * @api {GET} /api/data/authority/rule/detail/values/select 【数据权限】获取数据权限规则明细值选择列表
      * @apiDescription 账套、员工选择列表
      * @apiGroup SysDataPermission
-     * @apiParam (请求参数) {Long} ruleId 数据权限规则ID
+     * @apiParam (请求参数) {Long} [ruleId] 数据权限规则ID
      * @apiParam (请求参数) {String} dataType 数据权限规则明细数据类型
      * @apiParam (请求参数) {String} scope  数据范围：all->全部；selected->已选择；notChoose->未选择
      * @apiParam (请求参数) {Integer} [code] 代码
