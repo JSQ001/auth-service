@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -39,7 +40,9 @@ public class DataAuthorityRuleDetailValueService extends BaseService<DataAuthori
     }
 
     @Transactional
-    public DataAuthorityRuleDetailValue createDataAuthorityRuleDetailValue(DataAuthorityRuleDetailValue entity,Long dataAuthRuleDetailId,Long dataAuthorityId){
+    public DataAuthorityRuleDetailValue createDataAuthorityRuleDetailValue(String valueKey,Long dataAuthRuleDetailId,Long dataAuthorityId){
+        DataAuthorityRuleDetailValue entity = new DataAuthorityRuleDetailValue();
+        entity.setValueKey(valueKey);
         if(entity.getDataAuthRuleDetailId() == null){
             entity.setDataAuthRuleDetailId(dataAuthRuleDetailId);
         }
@@ -61,11 +64,10 @@ public class DataAuthorityRuleDetailValueService extends BaseService<DataAuthori
     }
 
     @Transactional
-    public List<DataAuthorityRuleDetailValue> batchCreateDataAuthorityRuleDetailValue(List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues
+    public List<DataAuthorityRuleDetailValue> batchCreateDataAuthorityRuleDetailValue(List<String> valueKeys
             ,Long dataAuthRuleDetailId
             ,Long dataAuthorityId){
-        dataAuthorityRuleDetailValues.forEach(dataAuthorityRuleDetailValue -> createDataAuthorityRuleDetailValue(dataAuthorityRuleDetailValue,dataAuthRuleDetailId,dataAuthorityId));
-        return dataAuthorityRuleDetailValues;
+        return valueKeys.stream().map(valueKey -> createDataAuthorityRuleDetailValue(valueKey,dataAuthRuleDetailId,dataAuthorityId)).collect(Collectors.toList());
     }
 
     /**
@@ -79,23 +81,12 @@ public class DataAuthorityRuleDetailValueService extends BaseService<DataAuthori
     }
 
     /**
-     * 根据规则明细获取明细值 - 分页
-     * @param dataAuthRuleDetailId
-     * @param page
-     * @return
-     */
-    public List<DataAuthorityRuleDetailValue> queryDataAuthorityRuleDetailValues(Long dataAuthRuleDetailId, Page page){
-        return dataAuthorityRuleDetailValueMapper.selectPage(page,new EntityWrapper<DataAuthorityRuleDetailValue>()
-                .eq("data_auth_rule_detail_id",dataAuthRuleDetailId));
-    }
-
-    /**
      * 根据规则明细ID获取明细值
      * @param dataAuthRuleDetailId
      * @return
      */
-    public List<DataAuthorityRuleDetailValue> queryAllDataAuthorityRuleDetailValues(Long dataAuthRuleDetailId){
+    public List<String> queryAllDataAuthorityRuleDetailValues(Long dataAuthRuleDetailId){
         return dataAuthorityRuleDetailValueMapper.selectList(new EntityWrapper<DataAuthorityRuleDetailValue>()
-                .eq("data_auth_rule_detail_id",dataAuthRuleDetailId));
+                .eq("data_auth_rule_detail_id",dataAuthRuleDetailId)).stream().map(e -> e.getValueKey()).collect(Collectors.toList());
     }
 }

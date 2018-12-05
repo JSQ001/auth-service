@@ -217,10 +217,10 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             }
             // 手工选择
             case "1004":{
-                List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = dataAuthorityRuleDetailValueService.
+                List<String> dataAuthorityRuleDetailValues = dataAuthorityRuleDetailValueService.
                         queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getId());
                 List<Long> keyIds = dataAuthorityRuleDetailValues.stream()
-                        .map(e -> TypeConversionUtils.parseLong(e.getValueKey())).collect(Collectors.toList());
+                        .map(e -> TypeConversionUtils.parseLong(e)).collect(Collectors.toList());
                 if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
                     List<SetOfBooksInfoDTO> setOfBooksListByIds = sobService.getSetOfBooksListByIds(keyIds);
                     return setOfBooksToDetailValueDTO(PageUtil.pageHandler(
@@ -327,16 +327,14 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                                                                                         String name,
                                                                                         Page page){
 
-        List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = null;
         List<Long> keyIds = null;
         if(ruleId != null){
             DataAuthorityRuleDetail dataAuthorityRuleDetail = dataAuthorityRuleDetailService.selectOne(new EntityWrapper<DataAuthorityRuleDetail>()
                     .eq("data_authority_rule_id", ruleId).eq("data_type", dataType));
             if("1004".equals(dataAuthorityRuleDetail.getDataScope())){
-                dataAuthorityRuleDetailValues =
-                        dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getDataAuthorityRuleId());
-                keyIds = dataAuthorityRuleDetailValues.stream()
-                        .map(e -> TypeConversionUtils.parseLong(e.getValueKey())).collect(Collectors.toList());
+                keyIds =
+                        dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(dataAuthorityRuleDetail.getDataAuthorityRuleId()).stream()
+                                .map(e -> TypeConversionUtils.parseLong(e)).collect(Collectors.toList());
             }
         }
         // 全部

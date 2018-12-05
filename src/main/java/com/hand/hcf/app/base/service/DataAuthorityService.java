@@ -183,8 +183,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                                             getDataValueKeyToStringByDataTypeAndDataScope(dataAuthorityRuleDetail.getDataType(), dataAuthorityRuleDetail.getDataScope()));
                                     // 手工选择
                                 } else if ("1004".equals(dataAuthorityRuleDetail.getDataScope())) {
-                                    dataAuthValuePropertyDTO.setValueKeyList(dataAuthorityRuleDetail.getDataAuthorityRuleDetailValues()
-                                            .stream().map(dataAuthorityRuleDetailValue -> dataAuthorityRuleDetailValue.getValueKey()).collect(Collectors.toList()));
+                                    dataAuthValuePropertyDTO.setValueKeyList(dataAuthorityRuleDetail.getDataAuthorityRuleDetailValues());
                                 }
                                 return dataAuthValuePropertyDTO;
                             }).collect(Collectors.toList());
