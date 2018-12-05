@@ -504,4 +504,10 @@
             <column name="default_flag" type="varchar(200)" remarks="默认组织架构信息"></column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="201812051712001" author="bin.xie">
+        <addColumn tableName="sys_interface_response">
+            <column name="visibled" type="bit" remarks="是否显示"></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
