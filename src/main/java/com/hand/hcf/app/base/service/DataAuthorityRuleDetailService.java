@@ -46,6 +46,14 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
         if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
             throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
         }
+        Integer integer = dataAuthorityRuleDetailMapper.selectCount(new EntityWrapper<DataAuthorityRuleDetail>()
+                .eq("data_authority_rule_id", entity.getDataAuthorityRuleId())
+                .eq("data_type", entity.getDataType())
+                .eq("deleted", false)
+                .ne(entity.getId() != null,"id",entity.getId()));
+        if(integer > 0){
+            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_EXISTS);
+        }
         if(entity.getId() != null){
             dataAuthorityRuleDetailMapper.updateAllColumnById(entity);
             // 删除明细值
@@ -117,7 +125,7 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
             });
         }
         ruleDetails.forEach(ruleDetail -> {
-            List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues = dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(ruleDetail.getId());
+            List<String> dataAuthorityRuleDetailValues = dataAuthorityRuleDetailValueService.queryAllDataAuthorityRuleDetailValues(ruleDetail.getId());
             ruleDetail.setDataAuthorityRuleDetailValues(dataAuthorityRuleDetailValues);
         });
         return ruleDetails;

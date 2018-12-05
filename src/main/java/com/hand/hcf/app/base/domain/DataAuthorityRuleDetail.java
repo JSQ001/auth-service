@@ -73,5 +73,5 @@ public class DataAuthorityRuleDetail extends DomainLogic{
      * 明细值
      */
     @TableField(exist = false)
-    private List<DataAuthorityRuleDetailValue> dataAuthorityRuleDetailValues;
+    private List<String> dataAuthorityRuleDetailValues;
 }
