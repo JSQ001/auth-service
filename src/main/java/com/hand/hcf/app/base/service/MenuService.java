@@ -2,6 +2,8 @@ package com.hand.hcf.app.base.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.domain.Component;
+import com.hand.hcf.app.base.persistence.ComponentMapper;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.app.base.domain.ComponentButton;
@@ -32,11 +34,14 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
 
     private final ComponentButtonService componentButtonService;
 
-    public MenuService(MenuMapper menuMapper, EsMenuInfoSerivce esMenuInfoSerivce, MenuButtonService menuButtonService, ComponentButtonService componentButtonService) {
+    private final ComponentMapper componentMapper;
+
+    public MenuService(MenuMapper menuMapper, EsMenuInfoSerivce esMenuInfoSerivce, MenuButtonService menuButtonService, ComponentButtonService componentButtonService,ComponentMapper componentMapper) {
         this.menuMapper = menuMapper;
         this.esMenuInfoSerivce = esMenuInfoSerivce;
         this.menuButtonService = menuButtonService;
         this.componentButtonService = componentButtonService;
+        this.componentMapper = componentMapper;
     }
 
     /**
@@ -248,6 +253,9 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                 }
                 menuButtonService.batchSaveAndUpdateMenuButton(saveButtonList);
             }
+            Component component = componentMapper.selectById(menu.getComponentId());
+            component.setMenuId(menu.getId());
+            componentMapper.updateById(component);
         }
         esMenuInfoSerivce.saveEsMenuIndex(menu);
         //20180823 增加校验 禁用上级菜单的时候，把其所有子菜单都禁用掉，但启用的时候，只启用它自己，不递归处理子菜单
