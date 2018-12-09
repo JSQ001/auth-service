@@ -50,6 +50,13 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      */
     @Transactional
     public DataAuthority saveDataAuthority(DataAuthority entity){
+        Integer integer = dataAuthorityMapper.selectCount(new EntityWrapper<DataAuthority>()
+                .eq("tenant_id", entity.getTenantId())
+                .eq("data_authority_code", entity.getDataAuthorityCode())
+                .ne(entity.getId() != null, "id", entity.getId()));
+        if(integer > 0){
+            throw new BizException(RespCode.DATA_AUTHORITY_EXISTS);
+        }
         if(entity.getId() !=null){
             dataAuthorityMapper.updateAllColumnById(entity);
         }else {

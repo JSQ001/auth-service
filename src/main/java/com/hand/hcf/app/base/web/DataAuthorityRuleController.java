@@ -66,9 +66,10 @@ public class DataAuthorityRuleController {
     @GetMapping(value = "/detail/values")
     public ResponseEntity<List<DataAuthRuleDetailValueDTO>> getDataAuthRuleDetailValuesByDataType(@RequestParam(value = "ruleId") Long ruleId,
                                                                                                  @RequestParam(value = "dataType") String dataType,
+                                                                                                 @RequestParam(value = "keyWord",required = false) String keyWord,
                                                                                                  Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<DataAuthRuleDetailValueDTO> dataAuthRuleDetailValuesByDataType = dataAuthorityRuleService.getDataAuthRuleDetailValuesByDataType(ruleId, dataType, page);
+        List<DataAuthRuleDetailValueDTO> dataAuthRuleDetailValuesByDataType = dataAuthorityRuleService.getDataAuthRuleDetailValuesByDataType(ruleId, dataType, keyWord, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/data/authority/rule/detail/values");
         return new ResponseEntity(dataAuthRuleDetailValuesByDataType,httpHeaders, HttpStatus.OK);
     }
