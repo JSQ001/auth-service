@@ -154,7 +154,10 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
         }
     }
 
-    public List<DataAuthRuleDetailValueDTO> getDataAuthRuleDetailValuesByDataType(Long ruleId, String dataType,Page page){
+    public List<DataAuthRuleDetailValueDTO> getDataAuthRuleDetailValuesByDataType(Long ruleId,
+                                                                                  String dataType,
+                                                                                  String keyWord,
+                                                                                  Page page){
         DataAuthorityRuleDetail dataAuthorityRuleDetail = dataAuthorityRuleDetailService.selectOne(new EntityWrapper<DataAuthorityRuleDetail>()
                 .eq("data_authority_rule_id", ruleId).eq("data_type", dataType));
         Map<String, CustomEnumerationItemDTO> filtrateMethodMap = hcfOrganizationInterface.getSysCodeValues("3103").stream().collect(Collectors.toMap(e -> e.getValue(), e -> e));
@@ -162,19 +165,19 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             // 全部
             case "1001" :{
                 if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
-                    Page<SetOfBooksInfoDTO> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantID(),null,null,null, page);
+                    Page<SetOfBooksInfoDTO> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantIdAndKeyWord(LoginInformationUtil.getCurrentTenantID(),keyWord,null, page);
                     page.setTotal(setOfBooksListByTenantId.getTotal());
                     return setOfBooksToDetailValueDTO(setOfBooksListByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)){
-                    Page<CompanySumDTO> companiesByTenantId = companyService.getCompaniesByTenantId(LoginInformationUtil.getCurrentTenantID(), page);
+                    Page<CompanySumDTO> companiesByTenantId = companyService.getCompaniesByTenantId(LoginInformationUtil.getCurrentTenantID(), keyWord, page);
                     page.setTotal(companiesByTenantId.getTotal());
                     return companyToDetailValueDTO(companiesByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.UNIT_COLUMN.equals(dataType)){
-                    Page<DepartmentInfoDTO> departmentInfoByTenantId = departmentService.getDepartmentInfoByTenantId(LoginInformationUtil.getCurrentTenantID(), page);
+                    Page<DepartmentInfoDTO> departmentInfoByTenantId = departmentService.getDepartmentInfoByTenantId(LoginInformationUtil.getCurrentTenantID(), keyWord, page);
                     page.setTotal(departmentInfoByTenantId.getTotal());
                     return departmentToDetailValueDTO(departmentInfoByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
-                    Page<UserInfoDTO> usersByTenantId = userService.getUsersByTenantId(LoginInformationUtil.getCurrentTenantID(),null,null,null, page);
+                    Page<UserInfoDTO> usersByTenantId = userService.getUsersByTenantIdAndKeyWord(LoginInformationUtil.getCurrentTenantID(),keyWord,null, page);
                     page.setTotal(usersByTenantId.getTotal());
                     return userToDetailValueDTO(usersByTenantId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }
@@ -202,12 +205,12 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             case "1003":{
                 if(DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)){
                     Page<CompanySumDTO> sonAndOwnCompanyByCond = companyService.getSonAndOwnCompanyByCond(LoginInformationUtil.getCurrentCompanyID(),
-                            null, null, null, null, page);
+                            null, null, null, null, keyWord, page);
                     page.setTotal(sonAndOwnCompanyByCond.getTotal());
                     return companyToDetailValueDTO(sonAndOwnCompanyByCond.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.UNIT_COLUMN.equals(dataType)){
                     Long unitIdByUserId = departmentService.findDepartmentByUserOid(LoginInformationUtil.getCurrentUserOID().toString()).getDepartmentId();
-                    Page<DepartmentInfoDTO> unitChildrenAndOwnByUnitId = departmentService.getUnitChildrenAndOwnByUnitId(unitIdByUserId,page);
+                    Page<DepartmentInfoDTO> unitChildrenAndOwnByUnitId = departmentService.getUnitChildrenAndOwnByUnitId(unitIdByUserId, keyWord,page);
                     page.setTotal(unitChildrenAndOwnByUnitId.getTotal());
                     return departmentToDetailValueDTO(unitChildrenAndOwnByUnitId.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
@@ -222,26 +225,20 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                 List<Long> keyIds = dataAuthorityRuleDetailValues.stream()
                         .map(e -> TypeConversionUtils.parseLong(e)).collect(Collectors.toList());
                 if(DataAuthorityUtil.SOB_COLUMN.equals(dataType)){
-                    List<SetOfBooksInfoDTO> setOfBooksListByIds = sobService.getSetOfBooksListByIds(keyIds);
-                    return setOfBooksToDetailValueDTO(PageUtil.pageHandler(
-                            page, setOfBooksListByIds.stream().sorted(Comparator.comparing(e -> e.getSetOfBooksCode())).collect(Collectors.toList())),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
+                    Page<SetOfBooksInfoDTO> setOfBooksListByIds = sobService.getSetOfBooksListByIdsResultPage(keyIds, keyWord,page);
+                    page.setTotal(setOfBooksListByIds.getTotal());
+                    return setOfBooksToDetailValueDTO(setOfBooksListByIds.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)){
-                    List<ObjectIdsDTO> companiesByIds = companyService.getCompanysByIds(keyIds);
-                    List<DataAuthRuleDetailValueDTO> collect = companiesByIds.stream().sorted(Comparator.comparing(e -> e.getObjectCode())).map(e -> {
-                        return DataAuthRuleDetailValueDTO.builder()
-                                .valueKey(e.getObjectId().toString())
-                                .valueKeyCode(e.getObjectCode())
-                                .valueKeyDesc(e.getObjectName()).filtrateMethodDesc(getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod())).build();
-                    }).collect(Collectors.toList());
-                    return PageUtil.pageHandler(page,collect);
+                    Page<CompanySumDTO> companiesByIds = companyService.findCompanyListByIdListResultPage(keyIds, keyWord, page);
+                    page.setTotal(companiesByIds.getTotal());
+                    return companyToDetailValueDTO(companiesByIds.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.UNIT_COLUMN.equals(dataType)){
-                    List<DepartmentInfoDTO> departmentByDepartmentIds = departmentService.getDepartmentByDepartmentIds(keyIds);
-                    return departmentToDetailValueDTO(PageUtil.pageHandler(page,
-                            departmentByDepartmentIds.stream().sorted(Comparator.comparing(e->e.getDepartmentCode())).collect(Collectors.toList())),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
+                    Page<DepartmentInfoDTO> departmentInfoDTOPage = departmentService.selectDepartmentsByIdsResultPage(keyIds, keyWord, page);
+                    page.setTotal(departmentInfoDTOPage.getTotal());
+                    return departmentToDetailValueDTO(departmentInfoDTOPage.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }else if(DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)){
-                    List<UserInfoDTO> userInfoDTOS = userService.selectUsersByUserIds(keyIds);
-                    return userToDetailValueDTO(PageUtil.pageHandler(page,
-                            userInfoDTOS.stream().sorted(Comparator.comparing(e->e.getEmployeeID())).collect(Collectors.toList())),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
+                    Page<UserInfoDTO> userInfoDTOS = userService.selectUsersByUserIdsAndKeyWordResultPage(keyIds,keyWord,page);
+                    return userToDetailValueDTO(userInfoDTOS.getRecords(),getFiltrateMethodDescription(filtrateMethodMap,dataAuthorityRuleDetail.getFiltrateMethod()));
                 }
                 break;
             }

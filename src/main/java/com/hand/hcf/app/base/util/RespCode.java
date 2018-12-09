@@ -60,4 +60,5 @@ public interface RespCode {
     String DATA_AUTHORITY_RULE_EXISTS = "auth_200002";  //同一权限下，规则名称不能重复！
     String DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE = "auth_200003";   //数据权限为手工选择时，请至少选择一条数据！
     String DATA_AUTHORITY_RULE_DETAIL_EXISTS = "auth_200004";   //数据权限规则数据类型已存在，请勿重复保存！
+    String DATA_AUTHORITY_EXISTS = "auth_200005";   //数据权限已存在，请勿重复保存！
 }
