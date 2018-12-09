@@ -38,4 +38,5 @@ public class InterfaceResponse extends DomainLogicEnable {
     @TableField("enabled_search")
     private Boolean enabledSearch;
 
+    private Boolean visibled; // 是否显示
 }

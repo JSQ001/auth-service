@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.core.domain.DomainLogicEnable;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -44,5 +45,11 @@ public class InterfaceRequest extends DomainLogicEnable {
     private Boolean requiredFlag;//是否必填
     @TableField("union_flag")
     private Boolean unionFlag;//是否唯一
+
+    /**
+     * 请求时默认的组织架构信息
+     */
+    @TableField(value = "default_flag", strategy = FieldStrategy.IGNORED)
+    private String defaultFlag;
 
 }

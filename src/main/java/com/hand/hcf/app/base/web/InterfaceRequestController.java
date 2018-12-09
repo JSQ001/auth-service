@@ -50,6 +50,7 @@ public class InterfaceRequestController {
      * "remark":"测试111",
      * "interfaceId":"1031509686226259969",
      * "defaultValue":"",
+     * "defaultFlag":"",
      * "requiredFlag":true,
      * "unionFlag":false
      * }
@@ -62,6 +63,7 @@ public class InterfaceRequestController {
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
      * @apiSuccess (返回参数) {String} defaultValue 默认值
+     * @apiSuccess (返回参数) {String} defaultFlag 默认组织架构信息
      * @apiSuccess (返回参数) {Boolean} requiredFlag 是否必填
      * @apiSuccess (返回参数) {Boolean} unionFlag 是否唯一
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
@@ -83,6 +85,7 @@ public class InterfaceRequestController {
      * "versionNumber": 1,
      * "name": "Query模块",
      * "reqType": "GET",
+     * "defaultFlag":"ddd"
      * "position": "header",
      * "keyCode": "Query",
      * "parentId": 0,
@@ -126,6 +129,7 @@ public class InterfaceRequestController {
      * "reqType": "GET",
      * "position": "header",
      * "keyCode": "Query",
+     * "defaultValue":"",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "defaultValue":"",
@@ -142,6 +146,7 @@ public class InterfaceRequestController {
      * @apiSuccess (返回参数) {String} remark 备注说明
      * @apiSuccess (返回参数) {Long} interfaceId 接口ID
      * @apiSuccess (返回参数) {String} defaultValue 默认值
+     * @apiSuccess (返回参数) {String} defaultFlag 默认组织机构
      * @apiSuccess (返回参数) {Boolean} requiredFlag 是否必填
      * @apiSuccess (返回参数) {Boolean} unionFlag 是否唯一
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
@@ -165,6 +170,7 @@ public class InterfaceRequestController {
      * "reqType": "GET",
      * "position": "header",
      * "keyCode": "Query",
+     * "defaultValue":"ssss",
      * "parentId": 0,
      * "remark": "测试1112121",
      * "defaultValue":"",
