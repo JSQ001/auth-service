@@ -25,15 +25,15 @@ public class DataAuthTableProperty extends DomainEnable{
     private String tableName;
 
     /**
-     * 筛选方式
+     * 筛选方式(值列表)
      * TABLE_COLUMN 表字段，CUSTOM_SQL自定义sql
      */
     @TableField(value = "filter_method")
     @NotNull
-    private DataAuthFilterMethodEnum filterMethod;
+    private String filterMethod;
 
     /**
-     * 数据类型
+     * 数据类型(值列表)
      */
     @TableField(value = "data_type")
     @NotNull
@@ -43,7 +43,6 @@ public class DataAuthTableProperty extends DomainEnable{
      * 匹配列名称
      */
     @TableField(value = "column_name")
-    @NotNull
     private String columnName;
 
     /**
@@ -51,4 +50,16 @@ public class DataAuthTableProperty extends DomainEnable{
      */
     @TableField(value = "custom_sql")
     private String customSql;
+
+    /**
+     * 参数类型名称
+     */
+    @TableField(exist = false)
+    private String dataTypeName;
+
+    /**
+     * 筛选方式名称
+     */
+    @TableField(exist = false)
+    private String filterMethodName;
 }
