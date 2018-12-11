@@ -263,4 +263,8 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201812101110001" author="xue.han">
+        <dropNotNullConstraint tableName="sys_data_auth_table_property" columnName="column_name" columnDataType="varchar(50)" />
+    </changeSet>
+
 </databaseChangeLog>

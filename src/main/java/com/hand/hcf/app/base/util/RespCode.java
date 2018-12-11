@@ -61,4 +61,8 @@ public interface RespCode {
     String DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE = "auth_200003";   //数据权限为手工选择时，请至少选择一条数据！
     String DATA_AUTHORITY_RULE_DETAIL_EXISTS = "auth_200004";   //数据权限规则数据类型已存在，请勿重复保存！
     String DATA_AUTHORITY_EXISTS = "auth_200005";   //数据权限已存在，请勿重复保存！
+
+    //数据权限参数配置
+    String DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS = "auth_210001";//此参数类型在该表名下已经存在!
+    String DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS = "auth_210002";//此参数名称在该表名下已经存在!
 }
