@@ -28,4 +28,16 @@ public class FrontKey extends DomainLogicEnable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long moduleId;  // 模块ID
 
+    /**
+     * 模块代码
+     */
+    @TableField("module_code")
+    private String moduleCode;
+
+    /**
+     * 类型
+     */
+    @TableField("category")
+    private String category;
+
 }

@@ -519,4 +519,16 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="2018101800001" author="kai.zhang">
+        <addColumn tableName="sys_front_key">
+            <column name="category" type="varchar(50)" remarks="类型"></column>
+            <column name="module_code" type="varchar(100)" remarks="模块代码"></column>
+        </addColumn>
+        <createIndex tableName="sys_front_key" indexName="sys_front_key_n1">
+            <column name="module_code"></column>
+            <column name="key_code"></column>
+            <column name="lang"></column>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

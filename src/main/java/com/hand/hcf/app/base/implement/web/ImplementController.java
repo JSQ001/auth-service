@@ -1,13 +1,16 @@
 package com.hand.hcf.app.base.implement.web;
 
 import com.hand.hcf.app.base.domain.DataAuthTableProperty;
+import com.hand.hcf.app.base.domain.FrontKey;
 import com.hand.hcf.app.base.service.DataAuthTablePropertyService;
 import com.hand.hcf.app.base.service.DataAuthorityService;
+import com.hand.hcf.app.base.service.FrontKeyService;
 import com.hand.hcf.app.base.service.UserRoleService;
 import com.hand.hcf.app.client.auth.AuthInterface;
 import com.hand.hcf.app.client.auth.DataAuthTablePropertyDTO;
 import com.hand.hcf.core.security.AuthoritiesConstants;
 import com.hand.hcf.core.web.dto.DataAuthValuePropertyDTO;
+import com.hand.hcf.core.web.dto.MessageDTO;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +37,7 @@ public class ImplementController implements AuthInterface {
     private final DataAuthTablePropertyService dataAuthTablePropertyService;
     private final DataAuthorityService dataAuthorityService;
     private final UserRoleService userRoleService;
+    private final FrontKeyService frontKeyService;
 
     @Override
     //@GetMapping(value = "/data/auth/table/properties/get/by/tableName")
@@ -52,5 +56,24 @@ public class ImplementController implements AuthInterface {
     //@GetMapping(value = "/user/has/role")
     public Boolean userHasRole(@RequestParam("userId")Long userId) {
         return userRoleService.userHasRole(userId);
+    }
+
+    @Override
+//    @GetMapping("/front/key/byModuleAndKeyAndLang")
+    public MessageDTO getFrontKeyByModuleAndKeyAndLang(@RequestParam("moduleCode") String moduleCode,
+                                                       @RequestParam("keyCode") String keyCode,
+                                                       @RequestParam("lang") String lang) {
+        FrontKey frontKeyByModuleAndKeyAndLang = frontKeyService.getFrontKeyByModuleAndKeyAndLang(moduleCode, keyCode, lang);
+        if(frontKeyByModuleAndKeyAndLang != null){
+            return mapper.map(frontKeyByModuleAndKeyAndLang,MessageDTO.class);
+        }
+        return null;
+    }
+
+    @Override
+//    @GetMapping("/front/key/byModuleAndKey")
+    public List<MessageDTO> getFrontKeyByModuleAndKey(@RequestParam("moduleCode") String moduleCode,
+                                                      @RequestParam("keyCode") String keyCode) {
+        return mapper.mapAsList(frontKeyService.getFrontKeysByModuleAndKey(moduleCode,keyCode),MessageDTO.class);
     }
 }
