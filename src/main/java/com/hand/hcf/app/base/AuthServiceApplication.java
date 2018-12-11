@@ -33,7 +33,8 @@ import java.net.UnknownHostException;
 @EnableDiscoveryClient
 @ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base",
         "com.hand.hcf.app.client.org","com.hand.hcf.app.service.es","com.hand.hcf.app.client.com",
-        "com.hand.hcf.app.client.department","com.hand.hcf.app.client.user","com.hand.hcf.app.client.sob","com.hand.hcf.base.config"},
+        "com.hand.hcf.app.client.department","com.hand.hcf.app.client.user","com.hand.hcf.app.client.sob",
+        "com.hand.hcf.base.config","com.hand.hcf.app.client.auth"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { RestService.class, CacheConfiguration.class, RedisConfiguration.class})
         //,@ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = "com.hand.hcf.core.service.api.*")
 })

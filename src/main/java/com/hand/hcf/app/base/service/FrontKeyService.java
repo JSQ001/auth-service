@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.domain.Module;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.app.base.domain.FrontKey;
@@ -10,6 +11,7 @@ import com.hand.hcf.app.base.dto.FrontKeyDTO;
 import com.hand.hcf.app.base.persistence.FrontKeyMapper;
 import com.hand.hcf.app.base.service.es.EsFrontKeyInfoSerivce;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +31,15 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
 
     private final FrontKeyMapper frontKeyMapper;
 
+    private final ModuleService moduleService;
+
     private final EsFrontKeyInfoSerivce esFrontKeyInfoSerivce;
 
     private final boolean esEnabledFlag;
 
-    public FrontKeyService(FrontKeyMapper moduleMapper, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
+    public FrontKeyService(FrontKeyMapper moduleMapper, ModuleService moduleService, EsFrontKeyInfoSerivce esFrontKeyInfoSerivce) {
         this.frontKeyMapper = moduleMapper;
+        this.moduleService = moduleService;
         this.esFrontKeyInfoSerivce = esFrontKeyInfoSerivce;
         this.esEnabledFlag = esFrontKeyInfoSerivce.isElasticSearchEnable();
     }
@@ -61,6 +66,10 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(), frontKey.getLang());
         if (count != null && count > 0) {
             throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
+        }
+        if(StringUtils.isEmpty(frontKey.getModuleCode())){
+            Module module = moduleService.selectById(frontKey.getModuleId());
+            frontKey.setModuleCode(module.getModuleCode());
         }
         frontKeyMapper.insert(frontKey);
         esFrontKeyInfoSerivce.saveEsFrontKeyIndex(frontKey);
@@ -95,6 +104,9 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
             frontKey.setModuleId(rr.getModuleId());
+        }
+        if (frontKey.getModuleCode() == null || "".equals(frontKey.getModuleCode())) {
+            frontKey.setModuleCode(rr.getModuleCode());
         }
         frontKey.setCreatedBy(rr.getCreatedBy());
         frontKey.setCreatedDate(rr.getCreatedDate());
@@ -132,7 +144,10 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     @Transactional
     public void deleteFrontKey(Long id) throws Exception {
         if (id != null) {
-            this.deleteById(id);
+            FrontKey frontKey = selectById(id);
+            frontKey.setDeleted(true);
+            frontKey.setKeyCode(frontKey.getKeyCode() + "_DELETED_" + RandomStringUtils.random(6));
+            updateById(frontKey);
             esFrontKeyInfoSerivce.deleteEsFrontKeyIndex(id);
         }
     }
@@ -144,10 +159,9 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     @Transactional
     public void deleteBatchFrontKey(List<Long> ids) {
         if (ids != null && CollectionUtils.isNotEmpty(ids)) {
-            this.deleteBatchIds(ids);
             ids.forEach(d -> {
                 try {
-                    esFrontKeyInfoSerivce.deleteEsFrontKeyIndex(d);
+                    deleteFrontKey(d);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -376,5 +390,39 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         }else{
             return frontKeyMapper.getFrontKeysByCond(keyCode, descriptions, moduleId, lang, keyword, page);
         }
+    }
+
+    /**
+     * 根据模块代码、keyCode、语言查询多语言信息
+     * 由于该接口主要供第三方接口使用，在base中使用索引库，所以在此就不使用es了
+     * @param moduleCode
+     * @param keyCode
+     * @param lang
+     * @return
+     */
+    public FrontKey getFrontKeyByModuleAndKeyAndLang(String moduleCode,
+                                       String keyCode,
+                                       String lang){
+        FrontKey frontKey = new FrontKey();
+        frontKey.setModuleCode(moduleCode);
+        frontKey.setKeyCode(keyCode);
+        frontKey.setLang(lang);
+        frontKey.setDeleted(false);
+        return frontKeyMapper.selectOne(frontKey);
+    }
+
+    /**
+     *  根据模块代码、keyCode 查询多语言信息
+     *  由于该接口主要供第三方接口使用，在base中使用索引库，所以在此就不使用es了
+     * @param moduleCode
+     * @param keyCode
+     * @return
+     */
+    public List<FrontKey> getFrontKeysByModuleAndKey(String moduleCode,
+                                             String keyCode){
+        return selectList(new EntityWrapper<FrontKey>()
+                .eq("module_code",moduleCode)
+                .eq("key_code",keyCode)
+                .eq("deleted",false));
     }
 }
