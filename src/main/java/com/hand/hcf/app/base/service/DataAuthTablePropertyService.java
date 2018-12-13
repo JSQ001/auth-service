@@ -45,7 +45,7 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
                 .eq("table_name",dataAuthTableProperty.getTableName())
                 .eq("data_type",dataAuthTableProperty.getDataType())
         ).size() > 0 ){
-            throw new BizException(RespCode.DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS);
+            throw new BizException(RespCode.AUTH_DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS);
         }
         if (dataAuthTableProperty.getFilterMethod().equals("TABLE_COLUMN")){
             if (dataAuthTablePropertyMapper.selectList(
@@ -53,7 +53,7 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
                     .eq("table_name",dataAuthTableProperty.getTableName())
                     .eq("column_name",dataAuthTableProperty.getColumnName())
             ).size() > 0 ){
-                throw new BizException(RespCode.DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS);
+                throw new BizException(RespCode.AUTH_DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS);
             }
         }
         dataAuthTablePropertyMapper.insert(dataAuthTableProperty);
@@ -74,7 +74,7 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
                             .eq("table_name", dataAuthTableProperty.getTableName())
                             .eq("data_type", dataAuthTableProperty.getDataType())
             ).size() > 0) {
-                throw new BizException(RespCode.DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS);
+                throw new BizException(RespCode.AUTH_DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS);
             }
         }
         if (dataAuthTableProperty.getFilterMethod().equals("TABLE_COLUMN")){
@@ -83,7 +83,7 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
                             .eq("table_name",dataAuthTableProperty.getTableName())
                             .eq("column_name",dataAuthTableProperty.getColumnName())
             ).size() > 0 ){
-                throw new BizException(RespCode.DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS);
+                throw new BizException(RespCode.AUTH_DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS);
             }
         }
         dataAuthTablePropertyMapper.updateById(dataAuthTableProperty);

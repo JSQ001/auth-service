@@ -39,12 +39,12 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     public RoleMenuButton createRoleMenuButton(RoleMenuButton roleMenuButton) {
         //校验
         if (roleMenuButton == null || roleMenuButton.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         //检查角色菜单按钮组合
         Integer count = getRoleButtonCountByButtonIdAndRoleId(roleMenuButton.getButtonId(), roleMenuButton.getRoleId());
         if (count != null && count > 1) {
-            throw new BizException(RespCode.ROLE_MENU_BUTTON_EXISTS);
+            throw new BizException(RespCode.AUTH_ROLE_MENU_BUTTON_EXISTS);
         }
         roleMenuButtonMapper.insert(roleMenuButton);
         return roleMenuButton;
@@ -82,12 +82,12 @@ public class RoleMenuButtonService extends BaseService<RoleMenuButtonMapper, Rol
     public RoleMenuButton updateRoleMenuButton(RoleMenuButton roleMenuButton) {
         //校验
         if (roleMenuButton == null || roleMenuButton.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         RoleMenuButton roleMenu1 = roleMenuButtonMapper.selectById(roleMenuButton.getId());
         if (roleMenu1 == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (roleMenuButton.getEnabled() == null || "".equals(roleMenuButton.getEnabled())) {
             roleMenuButton.setEnabled(roleMenu1.getEnabled());

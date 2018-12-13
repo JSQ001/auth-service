@@ -45,7 +45,7 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
     public Interface createInterface(Interface anInterface) {
         //校验
         if (anInterface == null || anInterface.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         interfaceMapper.insert(anInterface);
         return anInterface;
@@ -61,12 +61,12 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
     public Interface updateInterface(Interface anInterface) {
         //校验
         if (anInterface == null || anInterface.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         Interface rr = interfaceMapper.selectById(anInterface.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (anInterface.getEnabled() == null || "".equals(anInterface.getEnabled())) {
             anInterface.setEnabled(rr.getEnabled());

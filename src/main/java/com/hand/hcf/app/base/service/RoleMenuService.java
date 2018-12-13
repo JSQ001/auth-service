@@ -59,12 +59,12 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     public RoleMenu createRoleMenu(RoleMenu roleMenu) {
         //校验
         if (roleMenu == null || roleMenu.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         //检查用户角色组合
         Integer count = getRoleMenuCountByMenuIdAndRoleId(roleMenu.getMenuId(), roleMenu.getRoleId());
         if (count != null && count > 1) {
-            throw new BizException(RespCode.ROLE_MENU_EXISTS);
+            throw new BizException(RespCode.AUTH_ROLE_MENU_EXISTS);
         }
         roleMenuMapper.insert(roleMenu);
         return roleMenu;
@@ -249,15 +249,15 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
     public RoleMenu updateRole(RoleMenu roleMenu) {
         //校验
         if (roleMenu == null || roleMenu.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         RoleMenu roleMenu1 = roleMenuMapper.selectById(roleMenu.getId());
         if (roleMenu1 == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (roleMenu1 == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (roleMenu.getEnabled() == null || "".equals(roleMenu.getEnabled())) {
             roleMenu.setEnabled(roleMenu1.getEnabled());

@@ -37,18 +37,18 @@ public class ModuleService extends BaseService<ModuleMapper, Module> {
     public Module createModule(Module module) {
         //校验
         if (module == null || module.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (module.getModuleCode() == null || "".equals(module.getModuleCode())) {
-            throw new BizException(RespCode.MODULE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_CODE_NULL);
         }
         if (module.getModuleName() == null || "".equals(module.getModuleName())) {
-            throw new BizException(RespCode.MODULE_NAME_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_NAME_NULL);
         }
         //检查模块代码是否唯一
         Integer count = getModuleCountByModuleCode(module.getModuleCode());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.MODULE_CODE_NOT_UNION);
+            throw new BizException(RespCode.AUTH_MODULE_CODE_NOT_UNION);
         }
         moduleMapper.insert(module);
         return module;
@@ -64,15 +64,15 @@ public class ModuleService extends BaseService<ModuleMapper, Module> {
     public Module updateModule(Module module) {
         //校验
         if (module == null || module.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (module.getModuleName() == null || "".equals(module.getModuleName())) {
-            throw new BizException(RespCode.ROLE_NAME_NULL);
+            throw new BizException(RespCode.SYS_ROLE_NAME_NULL);
         }
         //校验ID是否在数据库中存在
         Module rr = moduleMapper.selectById(module.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (module.getEnabled() == null || "".equals(module.getEnabled())) {
             module.setEnabled(rr.getEnabled());

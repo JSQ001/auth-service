@@ -29,19 +29,19 @@ public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMes
     public ErrorMessage createErrorMessage(ErrorMessage errorMessage){
         //数据校验
         if (null != errorMessage.getId()){
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (null == errorMessage.getModuleCode() || "".equals(errorMessage.getModuleCode())){
-            throw new BizException(RespCode.MODULE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_CODE_NULL);
         }
         if (null == errorMessage.getLanguage() || "".equals(errorMessage.getLanguage())){
-            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NULL);
         }
         if (null == errorMessage.getErrorCode() || "".equals(errorMessage.getErrorCode())){
-            throw new BizException(RespCode.ERROR_CODE_NULL);
+            throw new BizException(RespCode.AUTH_ERROR_CODE_NULL);
         }
         if (null == errorMessage.getErrorMessage() || "".equals(errorMessage.getErrorMessage())){
-            throw new BizException(RespCode.ERROR_MESSAGE_NULL);
+            throw new BizException(RespCode.AUTH_ERROR_MESSAGE_NULL);
         }
         errorMessageMapper.insert(errorMessage);
         return errorMessage;
@@ -54,19 +54,19 @@ public class ErrorMessageService extends BaseService<ErrorMessageMapper,ErrorMes
      */
     public ErrorMessage updateErrorMessage(ErrorMessage errorMessage){
         if (null == errorMessage.getId()){
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (null == errorMessage.getModuleCode() || "".equals(errorMessage.getModuleCode())){
-            throw new BizException(RespCode.MODULE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_CODE_NULL);
         }
         if (null == errorMessage.getLanguage() || "".equals(errorMessage.getLanguage())){
-            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NULL);
         }
         if (null == errorMessage.getErrorCode() || "".equals(errorMessage.getErrorCode())){
-            throw new BizException(RespCode.ERROR_CODE_NULL);
+            throw new BizException(RespCode.AUTH_ERROR_CODE_NULL);
         }
         if (null == errorMessage.getErrorMessage() || "".equals(errorMessage.getErrorMessage())){
-            throw new BizException(RespCode.ERROR_MESSAGE_NULL);
+            throw new BizException(RespCode.AUTH_ERROR_MESSAGE_NULL);
         }
         errorMessageMapper.updateById(errorMessage);
         return errorMessage;

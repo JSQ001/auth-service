@@ -55,23 +55,23 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
     public Menu createMenu(Menu menu) {
         //校验
         if (menu == null || menu.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (menu.getMenuCode() == null || "".equals(menu.getMenuCode())) {
-            throw new BizException(RespCode.MENU_CODE_NULL);
+            throw new BizException(RespCode.AUTH_MENU_CODE_NULL);
         }
         if (menu.getMenuName() == null || "".equals(menu.getMenuName())) {
-            throw new BizException(RespCode.MENU_NAME_NULL);
+            throw new BizException(RespCode.AUTH_MENU_NAME_NULL);
         }
         //检查菜单代码是否唯一
         Integer count = getMenuCountByMenuCode(menu.getMenuCode());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.CODE_NOT_UNION);
+            throw new BizException(RespCode.AUTH_CODE_NOT_UNION);
         }
         if (menu.getParentMenuId() == null || "".equals(menu.getParentMenuId()) || 0 == menu.getParentMenuId()) {
             menu.setParentMenuId(0L);//如果没有上级，则默认为0
             if (MenuTypeEnum.FUNCTION.getID() == menu.getMenuTypeEnum()) {
-                throw new BizException(RespCode.ROOT_CATALOG_MUST_BE_CATALOG);
+                throw new BizException(RespCode.AUTH_ROOT_CATALOG_MUST_BE_CATALOG);
             }
         } else {
             //hasChildCatalog 是否有子目录，默认为false,当添加目录时，会把上级目录的该属性设置为true
@@ -83,7 +83,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             }
             //如果上级是功能，则不允许再添加子功能
             if (MenuTypeEnum.FUNCTION.getID().intValue() == mm.getMenuTypeEnum()) {
-                throw new BizException(RespCode.MENU_FUNCTION_PARENT_MUST_BE_CATALOG);
+                throw new BizException(RespCode.AUTH_MENU_FUNCTION_PARENT_MUST_BE_CATALOG);
             }
             // 如果 当前为目录时，需要更新上级目录的hasChildCatalog字段的值
             if (MenuTypeEnum.DIRECTORY.getID().intValue() == menu.getMenuTypeEnum() && mm != null) {
@@ -102,7 +102,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                     childCatalogCount = menuMapper.selectCount(new EntityWrapper<Menu>().eq("parent_menu_id", mm.getId()).eq("menu_type", 1001));
                 }
                 if (childCatalogCount != null && childCatalogCount > 0) {
-                    throw new BizException(RespCode.MENU_PARENT_CATALOG_ERROR);
+                    throw new BizException(RespCode.AUTH_MENU_PARENT_CATALOG_ERROR);
                 }
             }
         }
@@ -146,10 +146,10 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
         boolean updateMenuType = false;
         //校验
         if (menu == null || menu.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (menu.getMenuName() == null || "".equals(menu.getMenuName())) {
-            throw new BizException(RespCode.MENU_CODE_NULL);
+            throw new BizException(RespCode.AUTH_MENU_CODE_NULL);
         }
         //校验ID是否在数据库中存在
         Menu mm = null;
@@ -159,7 +159,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
             mm = menuMapper.selectById(menu.getId());
         }
         if (mm == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (menu.getEnabled() == null || "".equals(menu.getEnabled())) {
             menu.setEnabled(mm.getEnabled());
@@ -204,7 +204,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                         .eq("menu_type", MenuTypeEnum.DIRECTORY.getID()));
                 if (childCatalog != null) {
                     if(childCatalog.size() > 0){
-                        throw new BizException(RespCode.HAS_CHILD_CATALOG_CAN_NOT_BE_FUNCTION);
+                        throw new BizException(RespCode.AUTH_HAS_CHILD_CATALOG_CAN_NOT_BE_FUNCTION);
                     }
                     mmm.setHasChildCatalog(true);
                     this.updateById(mmm);
@@ -331,7 +331,7 @@ public class MenuService extends BaseService<MenuMapper, Menu> {
                         .eq("parent_menu_id", id));
             }
             if (childCount != null && childCount > 0) {
-                throw new BizException(RespCode.HAVING_CHILD_MENU);
+                throw new BizException(RespCode.AUTH_HAVING_CHILD_MENU);
             }
             this.deleteById(id);
             //删除菜单时，将菜单对应的按钮也删除掉

@@ -38,18 +38,18 @@ public class RoleService extends BaseService<RoleMapper, Role> {
     public Role createRole(Role role) {
         //校验
         if (role == null || role.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (role.getRoleCode() == null || "".equals(role.getRoleCode())) {
-            throw new BizException(RespCode.ROLE_CODE_NULL);
+            throw new BizException(RespCode.SYS_ROLE_CODE_NULL);
         }
         if (role.getRoleName() == null || "".equals(role.getRoleName())) {
-            throw new BizException(RespCode.ROLE_NAME_NULL);
+            throw new BizException(RespCode.SYS_ROLE_NAME_NULL);
         }
         //检查租户下是否已经存在该角色代码
         Integer count = getRoleCountByTenantIdAndRoleCode(LoginInformationUtil.getCurrentTenantID(), role.getRoleCode());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.CODE_NOT_UNION_IN_TENANT);
+            throw new BizException(RespCode.SYS_CODE_NOT_UNION_IN_TENANT);
         }
         Long tenantId = LoginInformationUtil.getCurrentTenantID();
         role.setTenantId(tenantId);
@@ -67,15 +67,15 @@ public class RoleService extends BaseService<RoleMapper, Role> {
     public Role updateRole(Role role) {
         //校验
         if (role == null || role.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (role.getRoleName() == null || "".equals(role.getRoleName())) {
-            throw new BizException(RespCode.ROLE_NAME_NULL);
+            throw new BizException(RespCode.SYS_ROLE_NAME_NULL);
         }
         //校验ID是否在数据库中存在
         Role rr = roleMapper.selectById(role.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (role.getEnabled() == null || "".equals(role.getEnabled())) {
             role.setEnabled(rr.getEnabled());

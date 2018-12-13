@@ -69,7 +69,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
                 .eq("deleted",false)
                 .ne(entity.getId() != null,"id",entity.getId()));
         if(count > 0){
-            throw new BizException(RespCode.DATA_AUTHORITY_RULE_EXISTS);
+            throw new BizException(RespCode.AUTH_DATA_AUTHORITY_RULE_EXISTS);
         }
         if(entity.getId() != null){
             dataAuthorityRuleMapper.updateById(entity);

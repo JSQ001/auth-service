@@ -34,10 +34,10 @@ public class LanguageEnabledService extends BaseService<LanguageEnabledMapper, L
     public LanguageEnabled createLanguageEnabled(LanguageEnabled languageEnabled) {
         //校验
         if (languageEnabled == null || languageEnabled.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (languageEnabled.getLanguage()== null || "".equals(languageEnabled.getLanguage())) {
-            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NULL);
         }
         //检查是否已经存在启用
         Integer count = getLanguageCountByCode(languageEnabled.getLanguage());

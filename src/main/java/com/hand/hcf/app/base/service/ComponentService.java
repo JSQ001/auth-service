@@ -46,16 +46,16 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
     public Component createComponent(Component component) {
         //校验
         if (component == null || component.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (component.getComponentName() == null || "".equals(component.getComponentName())) {
-            throw new BizException(RespCode.COMPONENT_NAME_NULL);
+            throw new BizException(RespCode.AUTH_COMPONENT_NAME_NULL);
         }
         if (component.getComponentType() == null) {
             component.setComponentType("2");//默认为界面
         }
         if (!"1".equals(component.getComponentType()) && !"2".equals(component.getComponentType())) {
-            throw new BizException(RespCode.COMPONENT_TYPE_INVALID);
+            throw new BizException(RespCode.AUTH_COMPONENT_TYPE_INVALID);
         }
         //用于保存菜单的按钮
         /*if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
@@ -104,22 +104,22 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
     public Component updateComponent(Component component) {
         //校验
         if (component == null || component.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (component.getComponentName() == null || "".equals(component.getComponentName())) {
-            throw new BizException(RespCode.COMPONENT_NAME_NULL);
+            throw new BizException(RespCode.AUTH_COMPONENT_NAME_NULL);
         }
         if (component.getComponentType() == null) {
             component.setComponentType("2");//默认为界面
         }
         // 1为组件，2为界面
         if (!"1".equals(component.getComponentType()) && !"2".equals(component.getComponentType())) {
-            throw new BizException(RespCode.COMPONENT_TYPE_INVALID);
+            throw new BizException(RespCode.AUTH_COMPONENT_TYPE_INVALID);
         }
         //校验ID是否在数据库中存在
         Component rr = componentMapper.selectById(component.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (component.getEnabled() == null || "".equals(component.getEnabled())) {
             component.setEnabled(rr.getEnabled());

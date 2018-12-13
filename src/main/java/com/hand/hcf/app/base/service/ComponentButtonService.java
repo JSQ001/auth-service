@@ -36,7 +36,7 @@ public class ComponentButtonService extends BaseService<ComponentButtonMapper, C
     public ComponentButton createComponentButton(ComponentButton componentButton) {
         //校验
         if (componentButton == null || componentButton.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         componentButtonMapper.insert(componentButton);
         return componentButton;
@@ -52,12 +52,12 @@ public class ComponentButtonService extends BaseService<ComponentButtonMapper, C
     public ComponentButton updateComponentButton(ComponentButton componentButton) {
         //校验
         if (componentButton == null || componentButton.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         ComponentButton rr = componentButtonMapper.selectById(componentButton.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         componentButton.setCreatedBy(rr.getCreatedBy());
         componentButton.setCreatedDate(rr.getCreatedDate());
