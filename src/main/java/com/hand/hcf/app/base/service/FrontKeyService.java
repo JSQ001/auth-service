@@ -54,18 +54,18 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     public FrontKey createFrontKey(FrontKey frontKey) {
         //校验
         if (frontKey == null || frontKey.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (frontKey.getKeyCode() == null || "".equals(frontKey.getKeyCode())) {
-            throw new BizException(RespCode.FRONT_KEY_NULL);
+            throw new BizException(RespCode.AUTH_FRONT_KEY_NULL);
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
-            throw new BizException(RespCode.MODULE_ID_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_ID_NULL);
         }
         //检查key是否唯一
         Integer count = getFrontKeyByKeyAndLang(frontKey.getKeyCode(), frontKey.getLang());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.FRONT_KEY_NOT_UNION);
+            throw new BizException(RespCode.AUTH_FRONT_KEY_NOT_UNION);
         }
         if(StringUtils.isEmpty(frontKey.getModuleCode())){
             Module module = moduleService.selectById(frontKey.getModuleId());
@@ -86,15 +86,15 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
     public FrontKey updateFrontKey(FrontKey frontKey) {
         //校验
         if (frontKey == null || frontKey.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
-            throw new BizException(RespCode.MODULE_ID_NULL);
+            throw new BizException(RespCode.AUTH_MODULE_ID_NULL);
         }
         //校验ID是否在数据库中存在
         FrontKey rr = frontKeyMapper.selectById(frontKey.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (frontKey.getEnabled() == null || "".equals(frontKey.getEnabled())) {
             frontKey.setEnabled(rr.getEnabled());

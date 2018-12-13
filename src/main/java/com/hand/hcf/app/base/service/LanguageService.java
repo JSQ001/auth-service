@@ -35,18 +35,18 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
     public Language createLanguage(Language language) {
         //校验
         if (language == null || language.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (language.getLanguage() == null || "".equals(language.getLanguage())) {
-            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NULL);
         }
         if (language.getLanguageName() == null || "".equals(language.getLanguageName())) {
-            throw new BizException(RespCode.LANGUAGE_NAME_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_NAME_NULL);
         }
         //检查是否已经存在该语言代码
         Integer count = getLanguageByCode(language.getLanguage());
         if (count != null && count > 0) {
-            throw new BizException(RespCode.LANGUAGE_CODE_NOT_UNION);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NOT_UNION);
         }
         languageMapper.insert(language);
         return language;
@@ -61,18 +61,18 @@ public class LanguageService extends BaseService<LanguageMapper, Language> {
     public Language updateLanguage(Language language) {
         //校验
         if (language == null || language.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (language.getLanguage() == null || "".equals(language.getLanguage())) {
-            throw new BizException(RespCode.LANGUAGE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_CODE_NULL);
         }
         if (language.getLanguageName() == null || "".equals(language.getLanguageName())) {
-            throw new BizException(RespCode.LANGUAGE_NAME_NULL);
+            throw new BizException(RespCode.AUTH_LANGUAGE_NAME_NULL);
         }
         //校验ID是否在数据库中存在
         Language rr = languageMapper.selectById(language.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         this.updateById(language);
         return language;

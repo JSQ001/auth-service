@@ -44,7 +44,7 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
     @Transactional
     public DataAuthorityRuleDetail saveDataAuthorityRuleDetail(DataAuthorityRuleDetail entity){
         if("1004".equals(entity.getDataScope()) && CollectionUtils.isEmpty(entity.getDataAuthorityRuleDetailValues())){
-            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
+            throw new BizException(RespCode.AUTH_DATA_AUTHORITY_RULE_DETAIL_VALUE_NONE);
         }
         Integer integer = dataAuthorityRuleDetailMapper.selectCount(new EntityWrapper<DataAuthorityRuleDetail>()
                 .eq("data_authority_rule_id", entity.getDataAuthorityRuleId())
@@ -52,7 +52,7 @@ public class DataAuthorityRuleDetailService extends BaseService<DataAuthorityRul
                 .eq("deleted", false)
                 .ne(entity.getId() != null,"id",entity.getId()));
         if(integer > 0){
-            throw new BizException(RespCode.DATA_AUTHORITY_RULE_DETAIL_EXISTS);
+            throw new BizException(RespCode.AUTH_DATA_AUTHORITY_RULE_DETAIL_EXISTS);
         }
         if(entity.getId() != null){
             dataAuthorityRuleDetailMapper.updateAllColumnById(entity);

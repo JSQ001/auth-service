@@ -36,7 +36,7 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
     public ComponentVersion createComponentVersion(ComponentVersion componentVersion) {
         //校验
         if (componentVersion == null || componentVersion.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         componentVersionMapper.insert(componentVersion);
         return componentVersion;
@@ -52,12 +52,12 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
     public ComponentVersion updateComponentVersion(ComponentVersion componentVersion) {
         //校验
         if (componentVersion == null || componentVersion.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         ComponentVersion rr = componentVersionMapper.selectById(componentVersion.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (componentVersion.getEnabled() == null || "".equals(componentVersion.getEnabled())) {
             componentVersion.setEnabled(rr.getEnabled());

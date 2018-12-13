@@ -45,12 +45,12 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     public UserRole createUserRole(UserRole userRole) {
         //校验
         if (userRole == null || userRole.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         //检查用户角色组合
         Integer count = getUserRoleCountByUserIdAndRoleId(userRole.getUserId(), userRole.getRoleId());
         if (count != null && count > 1) {
-            throw new BizException(RespCode.USER_ROLE_EXISTS);
+            throw new BizException(RespCode.AUTH_USER_ROLE_EXISTS);
         }
         userRoleMapper.insert(userRole);
         return userRole;
@@ -66,12 +66,12 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     public UserRole updateRole(UserRole userRole1) {
         //校验
         if (userRole1 == null || userRole1.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         UserRole userRole = userRoleMapper.selectById(userRole1.getId());
         if (userRole == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (userRole1.getEnabled() == null || "".equals(userRole1.getEnabled())) {
             userRole1.setEnabled(userRole.getEnabled());
@@ -173,7 +173,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     public void userAssignRole(UserRoleDTO userRole) {
         //校验
         if (userRole == null || userRole.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         Long userId = null;
         List<UserAssignRoleDTO> assignRole = null;

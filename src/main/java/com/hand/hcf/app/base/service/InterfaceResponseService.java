@@ -36,13 +36,13 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
     public InterfaceResponse createInterfaceResponse(InterfaceResponse interfaceResponse) {
         //校验
         if (interfaceResponse == null || interfaceResponse.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
-            throw new BizException(RespCode.RESPONSE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_RESPONSE_CODE_NULL);
         }
         if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
-            throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
+            throw new BizException(RespCode.AUTH_RESPONSE_INTERFACE_NULL);
         }
         if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
             interfaceResponse.setEnabledSearch(false);
@@ -64,18 +64,18 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
     public InterfaceResponse updateInterfaceResponse(InterfaceResponse interfaceResponse) {
         //校验
         if (interfaceResponse == null || interfaceResponse.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
-            throw new BizException(RespCode.RESPONSE_CODE_NULL);
+            throw new BizException(RespCode.AUTH_RESPONSE_CODE_NULL);
         }
         if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
-            throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
+            throw new BizException(RespCode.AUTH_RESPONSE_INTERFACE_NULL);
         }
         //校验ID是否在数据库中存在
         InterfaceResponse rr = interfaceResponseMapper.selectById(interfaceResponse.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
             interfaceResponse.setEnabled(rr.getEnabled());
@@ -112,10 +112,10 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
                 if(interfaceResponse.getId() == null){
                     //校验新增的
                     if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
-                        throw new BizException(RespCode.RESPONSE_CODE_NULL);
+                        throw new BizException(RespCode.AUTH_RESPONSE_CODE_NULL);
                     }
                     if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
-                        throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
+                        throw new BizException(RespCode.AUTH_RESPONSE_INTERFACE_NULL);
                     }
                     if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
                         interfaceResponse.setEnabledSearch(false);
@@ -127,7 +127,7 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
                     //校验更新的
                     InterfaceResponse rr = interfaceResponseMapper.selectById(interfaceResponse.getId());
                     if (rr == null) {
-                        throw new BizException(RespCode.DB_NOT_EXISTS);
+                        throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
                     }
                     if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
                         interfaceResponse.setEnabled(rr.getEnabled());

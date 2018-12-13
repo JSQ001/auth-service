@@ -36,13 +36,13 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
     public InterfaceRequest createInterfaceRequest(InterfaceRequest interfaceRequest) {
         //校验
         if (interfaceRequest == null || interfaceRequest.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         if (interfaceRequest.getKeyCode() == null || "".equals(interfaceRequest.getKeyCode())) {
-            throw new BizException(RespCode.REQUEST_CODE_NULL);
+            throw new BizException(RespCode.AUTH_REQUEST_CODE_NULL);
         }
         if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
-            throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
+            throw new BizException(RespCode.AUTH_REQUEST_INTERFACE_NULL);
         }
         if(interfaceRequest.getParentId() == null || "".equals(interfaceRequest.getParentId())){
             interfaceRequest.setParentId(0L);//如果没有上级，则默认为0
@@ -67,15 +67,15 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
     public InterfaceRequest updateInterfaceRequest(InterfaceRequest interfaceRequest) {
         //校验
         if (interfaceRequest == null || interfaceRequest.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
-            throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
+            throw new BizException(RespCode.AUTH_REQUEST_INTERFACE_NULL);
         }
         //校验ID是否在数据库中存在
         InterfaceRequest rr = interfaceRequestMapper.selectById(interfaceRequest.getId());
         if (rr == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (interfaceRequest.getEnabled() == null || "".equals(interfaceRequest.getEnabled())) {
             interfaceRequest.setEnabled(rr.getEnabled());

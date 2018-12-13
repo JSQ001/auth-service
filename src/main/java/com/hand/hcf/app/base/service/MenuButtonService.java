@@ -37,19 +37,19 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
     public MenuButton createMenuButton(MenuButton menuButton) {
         //校验
        /* if (menuButton == null || menuButton.getId() != null) {
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }*/
         if (menuButton.getButtonCode() == null || "".equals(menuButton.getButtonCode())) {
-            throw new BizException(RespCode.BUTTON_CODE_NULL);
+            throw new BizException(RespCode.AUTH_BUTTON_CODE_NULL);
         }
         if (menuButton.getButtonName() == null || "".equals(menuButton.getButtonName())) {
-            throw new BizException(RespCode.BUTTON_NAME_NULL);
+            throw new BizException(RespCode.AUTH_BUTTON_NAME_NULL);
         }
         //检查按钮代码在菜单里是否已经存在
         Integer count = getMenuButtonCountByButtonCode(menuButton.getMenuId(), menuButton.getButtonCode());
         if (count != null && count > 0) {
             menuButton = this.menuButtonMapper.selectOne(menuButton);
-            //throw new BizException(RespCode.BUTTON_CODE_NOT_UNION);
+            //throw new BizException(RespCode.AUTH_BUTTON_CODE_NOT_UNION);
         } else {
             menuButtonMapper.insert(menuButton);
         }
@@ -101,12 +101,12 @@ public class MenuButtonService extends BaseService<MenuButtonMapper, MenuButton>
     public MenuButton updateMenuButton(MenuButton menuButton) {
         //校验
         if (menuButton == null || menuButton.getId() == null) {
-            throw new BizException(RespCode.ID_NULL);
+            throw new BizException(RespCode.SYS_ID_NULL);
         }
         //校验ID是否在数据库中存在
         MenuButton mb = menuButtonMapper.selectById(menuButton.getId());
         if (mb == null) {
-            throw new BizException(RespCode.DB_NOT_EXISTS);
+            throw new BizException(RespCode.SYS_DB_NOT_EXISTS);
         }
         if (menuButton.getButtonName() == null || "".equals(menuButton.getButtonName())) {
             menuButton.setButtonName(mb.getButtonName());

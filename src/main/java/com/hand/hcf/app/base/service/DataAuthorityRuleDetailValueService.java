@@ -33,7 +33,7 @@ public class DataAuthorityRuleDetailValueService extends BaseService<DataAuthori
     @Transactional
     public DataAuthorityRuleDetailValue createDataAuthorityRuleDetailValue(DataAuthorityRuleDetailValue entity){
         if(entity.getId() != null){
-            throw new BizException(RespCode.ID_NOT_NULL);
+            throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         dataAuthorityRuleDetailValueMapper.insert(entity);
         return entity;

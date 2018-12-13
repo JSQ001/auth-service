@@ -55,7 +55,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                 .eq("data_authority_code", entity.getDataAuthorityCode())
                 .ne(entity.getId() != null, "id", entity.getId()));
         if(integer > 0){
-            throw new BizException(RespCode.DATA_AUTHORITY_EXISTS);
+            throw new BizException(RespCode.AUTH_DATA_AUTHORITY_EXISTS);
         }
         if(entity.getId() !=null){
             dataAuthorityMapper.updateAllColumnById(entity);
@@ -78,7 +78,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
         boolean isCited = false;
 
         if(isCited){
-            throw new BizException(RespCode.DATA_AUTHORITY_CITED);
+            throw new BizException(RespCode.AUTH_DATA_AUTHORITY_CITED);
         }
         DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);
         dataAuthority.setDeleted(true);
