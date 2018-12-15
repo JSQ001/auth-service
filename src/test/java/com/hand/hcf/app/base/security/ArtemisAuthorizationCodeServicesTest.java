@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ArtemisAuthorizationCodeServicesTest {
 
    /* @Autowired
-    private ArtemisAuthorizationCodeServices artemisAuthorizationCodeServices;
+    private BaseAuthorizationCodeServices artemisAuthorizationCodeServices;
 
     @Autowired
     private OAuthHelperH2 helper;

@@ -2,10 +2,10 @@
 
 package com.hand.hcf.app.base.config;
 
-import com.hand.hcf.app.base.security.ArtemisAuthorizationCodeServices;
-import com.hand.hcf.app.base.security.ArtemisTokenEnhancer;
-import com.hand.hcf.app.base.security.ArtemisRedisTokenStore;
-import com.hand.hcf.app.base.security.ArtemisTokenService;
+import com.hand.hcf.app.base.security.BaseAuthorizationCodeServices;
+import com.hand.hcf.app.base.security.BaseTokenEnhancer;
+import com.hand.hcf.app.base.security.BaseRedisTokenStore;
+import com.hand.hcf.app.base.security.BaseTokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -47,7 +47,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
 
     @Bean
     public TokenStore tokenStore() {
-        return new ArtemisRedisTokenStore(dataSource);
+        return new BaseRedisTokenStore(dataSource);
     }
 
     @Bean
@@ -57,13 +57,13 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
 
     @Bean
     public TokenEnhancer tokenEnhancer() {
-        return new ArtemisTokenEnhancer();
+        return new BaseTokenEnhancer();
     }
 
     @Bean
     @Primary
     public AuthorizationServerTokenServices getTokenServices() {
-        ArtemisTokenService tokenServices = new ArtemisTokenService();
+        BaseTokenService tokenServices = new BaseTokenService();
         tokenServices.setTokenStore(tokenStore());
         tokenServices.setSupportRefreshToken(true);
         tokenServices.setReuseRefreshToken(true);
@@ -76,8 +76,8 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     }
 
     @Bean
-    public ArtemisTokenService artemisTokenService() {
-        ArtemisTokenService tokenServices = new ArtemisTokenService();
+    public BaseTokenService artemisTokenService() {
+        BaseTokenService tokenServices = new BaseTokenService();
         tokenServices.setTokenStore(tokenStore());
         tokenServices.setSupportRefreshToken(true);
         tokenServices.setReuseRefreshToken(true);
@@ -124,6 +124,6 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
 
     @Bean
     public AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) {
-        return new ArtemisAuthorizationCodeServices(dataSource);
+        return new BaseAuthorizationCodeServices(dataSource);
     }
 }

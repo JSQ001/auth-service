@@ -4,11 +4,8 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.base.domain.CompanyConfiguration;
-import com.hand.hcf.app.base.domain.ConfigurationDetail;
-import com.hand.hcf.app.base.exception.UserNotActivatedException;
-import com.hand.hcf.app.base.util.PrincipalBuilder;
-import com.hand.hcf.app.base.dto.UserDTO;
+import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +21,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,10 +37,9 @@ public class WxService {
     private String wechatUrl;//微信中间件URL
 
     private RestTemplate restTemplate = new RestTemplate();
-    @Autowired
-    private AuthUserService userService;
-    @Autowired
-    private AuthCompanyService companyService;
+    @Autowired(required = false)
+    private AuthClient authClient;
+
 
     public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
         JSONObject jsonResp = null;
@@ -83,9 +78,8 @@ public class WxService {
         JSONObject baseJson = new JSONObject();
         String secret = null;
         if (companyOID != null && !companyOID.trim().equals("")) {
-            ConfigurationDetail.WxConfiguration wxConfiguration = getCompanyConfiguration(UUID.fromString(companyOID)).getConfiguration().getWxConfiguration();
-            corpId = wxConfiguration.getCorpId();
-            secret = wxConfiguration.getSecretKey();
+            corpId ="";
+            secret ="";
         }
         baseJson.put("suiteId", suiteId == null ? "" : suiteId);
         baseJson.put("tokenType", tokenType);
@@ -95,22 +89,11 @@ public class WxService {
         return baseJson;
     }
 
-    public CompanyConfiguration getCompanyConfiguration(UUID companyOID) {
-        List<CompanyConfiguration> companyConfiguration = companyService.findOneByCompanyOID(companyOID);
-        if (!companyConfiguration.isEmpty()) {
-            return companyConfiguration.get(0);
-        } else {
-            throw new IllegalArgumentException("companyOID is wrong");
-        }
-
-    }
-
     public HttpURLConnection httpsPostJson(String https_url) {
         URL url;
         HttpURLConnection conn = null;
         try {
             url = new URL(https_url);
-//            conn = (HttpsURLConnection) url.openConnection();
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
@@ -137,9 +120,9 @@ public class WxService {
         1、保证微信通讯录中号码/邮箱的信息必须存在，可通过获取帐号调微信接口获取号码;
         2、数据库表中建立帐号与用户对应关系，由帐号确认用户身份*/
         JSONObject userInfo = authenticate(code, companyStr, suiteId, corpId, (Map) null);//员工在微信通讯录中的帐号
-        UUID userOID = null;
+        UUID userOid = null;
         if (userInfo != null && userInfo.containsKey("errcode") && userInfo.getString("errcode").equals("0") && userInfo.containsKey("userOID")) {
-            userOID = UUID.fromString(userInfo.getString("userOID"));
+            userOid = UUID.fromString(userInfo.getString("userOID"));
         } else {
             if (userInfo == null) {
                 throw new UserNotActivatedException("user.not.found");
@@ -149,20 +132,6 @@ public class WxService {
             }
         }
 
-        UserDTO u = userService.findOneByUserOID(userOID);
-
-        if (u == null) {
-            //匹配保存失败，发邮件,根据公司OID获取公司管理员邮箱，发邮件。
-//            dingTalkLoginServiceImpl.sendMatchErrorEmail(,mobile,email,dingtalkUserId,name);
-            throw new UserNotActivatedException("user.not.found");
-        }
-        //1.用户是否被激活
-        if (!u.isActivated()) {
-            throw new UserNotActivatedException("user.not.activated");
-        }
-        //公共检查2.用户离职 3，用户锁定 4.密码过期
-        userService.loginCommonCheck(u);
-
-        return PrincipalBuilder.builder(u);
+       return authClient.loadUserByUserOid(userOid);
     }
 }

@@ -1,6 +1,7 @@
 package com.hand.hcf.app.base.listener;
 
-import com.hand.hcf.app.base.security.LoginAttemptService;
+import com.hand.hcf.app.client.user.AuthClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
@@ -16,11 +17,11 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
 
     private final HttpServletRequest request;
 
-    private final LoginAttemptService loginAttemptService;
+    @Autowired(required = false)
+    private AuthClient authClient;
 
-    public AuthenticationFailureEventListener(HttpServletRequest request, LoginAttemptService loginAttemptService) {
+    public AuthenticationFailureEventListener(HttpServletRequest request) {
         this.request = request;
-        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
         Object principal = event.getAuthentication().getPrincipal();
         if (principal instanceof String) {
             String username = (String) principal;
-            loginAttemptService.loginFailed(username, request);
+            authClient.loginFailed(username, request);
         }
     }
 }

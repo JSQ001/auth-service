@@ -1,16 +1,13 @@
 server:
-  port: 9082
+  port: 9081
 spring:
-  liquibase:
-      change-log: classpath:db/liquibase/master.xml
   dbType: oracle
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    jdbcUrl: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
+    jdbcUrl: jdbc:oracle:thin:@47.101.143.73:1521/hcfuatp1
     name:
-    username: standard_artemis #artemis
-    password: handhand #MTIzNDU2TXMz
-    type: com.zaxxer.hikari.HikariDataSource
+    username: hcf_base
+    password: handhand
   #  dbType: oracle
   #  datasource:
         #driver-class-name: com.mysql.jdbc.Driver
@@ -25,6 +22,32 @@ spring:
   redis:
     host: localhost
     port: 6379
+  cloud:
+    bus:
+      enabled: false
+  cache:
+    cache-names: HCF_TOKEN
+    type: generic
+
+j2cache:
+  open-spring-cache: true
+  allow-null-values: true
+  cache-clean-mode: passive
+  serialization: com.hand.hcf.core.j2cache.support.util.KryoSerializer
+  sync_ttl_to_redis: true
+  broadcast:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisPubSubPolicy
+  L1:
+    provider: caffeine
+    region:
+      HCF_TOKEN: 3000,24h
+      default: 3000,24h
+  L2:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisProvider
+    database: 0
+    channel: j2cache
+    storage: generic
+
 eureka:
   instance:
     preferIpAddress: true
@@ -41,9 +64,7 @@ mybatis:
   type-aliases-package: com.hand.hcf.app.base.domain
   type-handlers-package: com.hand.hcf.app.base.persistence.typehandler
   enable-performance-interceptor: true
-auth:
-  cache:
-    expire-time: 30
+
 logging:
   config: classpath:logback/logback-dev.xml
 
@@ -73,17 +94,27 @@ trialService:
         host: http://apiuat.huilianyi.com
         get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
         bind_wechat_user: ${trialService.api.host}/trial/public/bind
-elasticsearch:
-  cluster-name : docker-cluster
-  host: 115.159.108.80
-  tcp-port: 9300
-  user: elastic
-  password: changeme
-  enable: true
+
+hcf:
+  application:
+    base:
+      url: http://localhost:9082
 feign:
   httpclient:
     enabled: false
   okhttp:
     enable: true
 
-
+elasticsearch:
+  cluster-name : docker-cluster
+  host: 115.159.108.80
+  tcp-port: 9300
+  user: elastic
+  password: changeme
+  enable: false
+management:
+  health:
+    rabbit:
+      enabled: false
+    elasticsearch:
+      enabled: false

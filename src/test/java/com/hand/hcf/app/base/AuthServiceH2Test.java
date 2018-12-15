@@ -4,7 +4,7 @@ package com.hand.hcf.app.base;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @SpringBootTest(classes={DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class,
-        ArtemisAuthorizationCodeServices.class, OAuthHelperH2.class,
+        BaseAuthorizationCodeServices.class, OAuthHelperH2.class,
         JdbcClientDetailsService.class, AppConfigurationTest.class})
 public abstract class AuthServiceH2Test {
 }
@@ -12,8 +12,8 @@ public abstract class AuthServiceH2Test {
 @TestConfiguration
 class AppConfigurationTest {
     @Bean
-    public ArtemisTokenService artemisTokenService(DataSource dataSource) {
-        ArtemisTokenService tokenServices = new ArtemisTokenService();
+    public BaseTokenService artemisTokenService(DataSource dataSource) {
+        BaseTokenService tokenServices = new BaseTokenService();
         tokenServices.setTokenStore(tokenStore(dataSource));
         tokenServices.setSupportRefreshToken(true);
         tokenServices.setReuseRefreshToken(true);
@@ -23,11 +23,11 @@ class AppConfigurationTest {
 
     @Bean
     public TokenStore tokenStore(DataSource dataSource) {
-        return new ArtemisRedisTokenStore(dataSource);
+        return new BaseRedisTokenStore(dataSource);
     }
 
     @Bean
     public TokenEnhancer tokenEnhancer() {
-        return new ArtemisTokenEnhancer();
+        return new BaseTokenEnhancer();
     }
 }*/

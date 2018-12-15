@@ -2,9 +2,9 @@
 
 package com.hand.hcf.app.base.web;
 
+import com.hand.hcf.core.exception.core.UnauthenticatedException;
 import com.hand.hcf.core.security.domain.Authority;
 import com.hand.hcf.core.security.domain.PrincipalLite;
-import com.hand.hcf.app.base.exception.UnauthenticatedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,6 @@ public class AccountResource {
                     System.out.println("map");
                 }
                 return (PrincipalLite) auth2Authentication.getPrincipal();
-//                return extractor.extractPrincipal((Map<String, Object>) auth2Authentication.getPrincipal());
             } else {
                 PrincipalLite principalLite = new PrincipalLite();
                 principalLite.setAuthorities(auth2Authentication.getAuthorities().stream().map(right -> new Authority(right.getAuthority())).collect(Collectors.toSet()));

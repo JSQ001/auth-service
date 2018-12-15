@@ -1,10 +1,10 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.exception.UserNotActivatedException;
-import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.HaimaUserDTO;
+import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.core.exception.core.UserNotActivatedException;
+import com.hand.hcf.core.security.domain.PrincipalLite;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +31,8 @@ public class HaimaService {
     @Value("${haima.server.userInfo:}")
     public  String HAIMA_USERINFO_URL;
 
-    @Autowired
-    private AuthUserService userService;
+    @Autowired(required = false)
+    private AuthClient authClient;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -53,22 +53,16 @@ public class HaimaService {
         if (StringUtils.isEmpty(email)) {
             throw new UserNotActivatedException("email.is.empty");
         }
-        UserDTO u = userService.findOneByContactEmail(email);
-        if (u == null) {
-            //匹配保存失败，发邮件,根据公司OID获取公司管理员邮箱，发邮件。
-//            dingTalkLoginServiceImpl.sendMatchErrorEmail(,mobile,email,dingtalkUserId,name);
-            throw new UserNotActivatedException("user.not.found");
-        }
 
-        //公共检查2.用户离职 3，用户锁定 4.密码过期
-        userService.loginCommonCheck(u);
+        UserDetails userDetails= authClient.loadUserByEmail(email);
 
         Boolean isMapping = (Boolean) userInfo.get("isMapping");
         if(!isMapping){
             //回调海马服务做artemis和haima的用户关系映射
+            PrincipalLite u=(PrincipalLite) userDetails;
             HaimaUserDTO haimaUserDTO = new HaimaUserDTO();
             haimaUserDTO.setTenantId(u.getTenantId());
-            haimaUserDTO.setUserOid(u.getUserOID().toString());
+            haimaUserDTO.setUserOid(u.getUserOid().toString());
             haimaUserDTO.setUserId(first.get("userId").toString());
             if(first.containsKey("userName")){
                 haimaUserDTO.setUserName(first.get("userName").toString());
@@ -84,7 +78,7 @@ public class HaimaService {
             }
         }
 
-        return PrincipalBuilder.builder(u);
+        return userDetails;
     }
 
     public JSONObject authenticateHaiMa(String code, String tenantId) {

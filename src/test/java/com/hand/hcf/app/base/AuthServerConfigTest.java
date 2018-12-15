@@ -1,8 +1,8 @@
 package com.hand.hcf.app.base;
 
-import com.hand.hcf.app.base.security.ArtemisProvider.ArtemisAuthenticationProvider;
-import com.hand.hcf.app.base.security.ArtemisProvider.SSOAuthenticationProvider;
-import com.hand.hcf.app.base.security.ArtemisProvider.SSODirectClientAuthenticationProvider;
+import com.hand.hcf.app.base.security.BaseProvider.BaseAuthenticationProvider;
+import com.hand.hcf.app.base.security.BaseProvider.SSOAuthenticationProvider;
+import com.hand.hcf.app.base.security.BaseProvider.SSODirectClientAuthenticationProvider;
 import com.hand.hcf.app.base.service.SSODetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,8 +39,8 @@ public class AuthServerConfigTest extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public ArtemisAuthenticationProvider wxAuthProvider() throws Exception {
-        ArtemisAuthenticationProvider provider = new ArtemisAuthenticationProvider();
+    public BaseAuthenticationProvider wxAuthProvider() throws Exception {
+        BaseAuthenticationProvider provider = new BaseAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

@@ -1,12 +1,11 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.base.util.PrincipalBuilder;
 import com.hand.hcf.app.base.dto.TrialUserDTO;
-import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.exception.UserNotActivatedException;
+import com.hand.hcf.app.client.user.AuthClient;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,12 +29,12 @@ public class UELoginUserDetailService {
     private final Logger log = LoggerFactory.getLogger(UELoginUserDetailService.class);
 
     private TrialServiceCilent trialServiceCilent;
-    private AuthUserService userService;
 
-    public UELoginUserDetailService(TrialServiceCilent trialServiceCilent,
-                                    AuthUserService userService) {
+    @Autowired(required = false)
+    private AuthClient authClient;
+
+    public UELoginUserDetailService(TrialServiceCilent trialServiceCilent) {
         this.trialServiceCilent = trialServiceCilent;
-        this.userService = userService;
     }
 
     public UserDetails loadUserByUsername(String code) {
@@ -48,18 +47,8 @@ public class UELoginUserDetailService {
                 throw new AccountExpiredException("wechat.code.expired");
             }
         }
-        UserDTO u = userService.findOneByUserOID(UUID.fromString(trialUserDTO.getUserOid()));
-        if (u == null) {
-            throw new UserNotActivatedException("user.not.found");
-        }
-        //1.用户是否被激活
-        if (!u.isActivated()) {
-            throw new UserNotActivatedException("user.not.activated");
-        }
-        //公共检查2.用户离职 3，用户锁定 4.密码过期
-        userService.loginCommonCheck(u);
 
-        return PrincipalBuilder.builder(u);
+        return authClient.loadUserByUserOid(UUID.fromString(trialUserDTO.getUserOid()));
     }
 
     @Component

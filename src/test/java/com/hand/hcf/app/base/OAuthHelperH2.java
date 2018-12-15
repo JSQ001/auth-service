@@ -1,8 +1,6 @@
 package com.hand.hcf.app.base;
 
 import com.hand.hcf.core.security.domain.PrincipalLite;
-import com.hand.hcf.app.base.util.PrincipalBuilder;
-import com.hand.hcf.app.base.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +12,10 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @AllArgsConstructor
@@ -42,10 +43,7 @@ public class OAuthHelperH2 {
 		// Create OAuth2AccessToken
 		UserDetails user = null;
 		if ("13323454321".equals(username)) {
-			UserDTO userDTO = new UserDTO();
-			userDTO.setAvatar("123");
-			userDTO.setAuthorities(new HashSet<>());
-			user = PrincipalBuilder.builder(userDTO);
+			user = PrincipalLite.builder().build();
 		}
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, authorities);
 		OAuth2Authentication auth = new OAuth2Authentication(oAuth2Request, authenticationToken);

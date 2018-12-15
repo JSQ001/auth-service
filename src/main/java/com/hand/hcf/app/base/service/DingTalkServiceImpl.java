@@ -3,9 +3,8 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.base.util.PrincipalBuilder;
-import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.exception.UserNotActivatedException;
+import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +31,8 @@ public class DingTalkServiceImpl {
     private String getDingTalkUserInfoURL;  // 获取钉钉用户信息URL
 
     private RestTemplate restTemplate = new RestTemplate();
-    @Autowired
-    private AuthUserService userService;
+    @Autowired(required = false)
+    private AuthClient authClient;
 
 
     public JSONObject authenticate(String code, String corpId, Map<String, String> var3) {
@@ -69,17 +68,6 @@ public class DingTalkServiceImpl {
         if (StringUtils.isEmpty(email)) {
             throw new UserNotActivatedException("email.is.empty");
         }
-        // 判断手机号码是否存在
-        UserDTO u = userService.findOneByContactEmail(email);
-
-        if (u == null) {
-            //匹配保存失败，发邮件,根据公司OID获取公司管理员邮箱，发邮件。
-//            dingTalkLoginServiceImpl.sendMatchErrorEmail(,mobile,email,dingtalkUserId,name);
-            throw new UserNotActivatedException("user.not.found");
-        }
-        //公共检查2.用户离职 3，用户锁定 4.密码过期
-        userService.loginCommonCheck(u);
-
-        return PrincipalBuilder.builder(u);
+        return authClient.loadUserByEmail(email);
     }
 }

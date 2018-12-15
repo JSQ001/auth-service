@@ -1,8 +1,7 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.base.util.PrincipalBuilder;
-import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.exception.UserNotActivatedException;
+import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +18,17 @@ import java.util.UUID;
 public class AppDetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(AppDetailService.class);
-    @Autowired
-    private AuthUserService userService;
+    @Autowired(required = false)
+    private AuthClient authClient;
 
     @Transactional
     @Override
-    public UserDetails loadUserByUsername(String userOID) throws UsernameNotFoundException {
-        log.info("Authenticating userOID：{} cas start ", userOID);
-        if (StringUtils.isEmpty(userOID)) {
+    public UserDetails loadUserByUsername(String userOid) throws UsernameNotFoundException {
+        log.info("Authenticating userOID：{} cas start ", userOid);
+        if (StringUtils.isEmpty(userOid)) {
             throw new UserNotActivatedException("userOID.is.empty");
         }
-        UserDTO user = userService.findOneByUserOID(UUID.fromString(userOID));
-        if(user == null) {
-            throw new UserNotActivatedException("user.not.found");
-        }
-        //用户状态检查
-        userService.loginCommonCheck(user);
-        return PrincipalBuilder.builder(user);
+
+        return  authClient.loadUserByUserOid(UUID.fromString(userOid));
     }
 }

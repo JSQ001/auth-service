@@ -3,8 +3,7 @@ package com.hand.hcf.app.base.service;
 import com.hand.hcf.app.base.config.AppCenterProperties;
 import com.hand.hcf.app.base.domain.enumeration.Function;
 import com.hand.hcf.app.base.dto.AuthenticationCode;
-import com.hand.hcf.app.base.dto.UserDTO;
-import com.hand.hcf.app.base.util.SecurityUtils;
+import com.hand.hcf.core.util.LoginInformationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +26,6 @@ public class AuthenticationService {
     private AppCenterProperties appCenterProperties;
     @Autowired
     private RedisTemplate<String, AuthenticationCode> redisTemplate;
-    @Autowired
-    private AuthUserService userService;
-
-
 
     public String getAuthentication() {
         AuthenticationCode authenticationCode = new AuthenticationCode();
@@ -80,9 +75,8 @@ public class AuthenticationService {
                 || AuthenticationCode.LOGGED.equals(authenticationCode.getStatus())) {
             return false;
         }
-        UserDTO user = userService.findOneByUserOID(SecurityUtils.getCurrentUserOID());
-        authenticationCode.setUsername(user.getFullName())
-                .setCompanyName(user.getCompanyName())
+        authenticationCode.setUsername(LoginInformationUtil.getUser().getFullName())
+                .setCompanyName(LoginInformationUtil.getUser().getCompanyName())
                 .setStatus(AuthenticationCode.WAITING)
                 .setReturnWaiting(false);
         long expires = redisTemplate.getExpire(uuid, TimeUnit.SECONDS);
@@ -97,7 +91,7 @@ public class AuthenticationService {
         if (authenticationCode == null || AuthenticationCode.LOGGED.equals(authenticationCode.getStatus())) {
             return false;
         }
-        authenticationCode.setUserOID(SecurityUtils.getCurrentUserOID());
+        authenticationCode.setUserOID(LoginInformationUtil.getCurrentUserOid());
 
         authenticationCode.setStatus(AuthenticationCode.LOGGED);
         long expires = redisTemplate.getExpire(uuid, TimeUnit.SECONDS);
