@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.listener;
 
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
@@ -17,7 +17,7 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
 
     private final HttpServletRequest request;
 
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
     public AuthenticationFailureEventListener(HttpServletRequest request) {

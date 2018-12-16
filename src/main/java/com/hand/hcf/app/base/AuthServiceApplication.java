@@ -27,19 +27,11 @@ import java.net.UnknownHostException;
 @EnableHcfCache
 @EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @EnableDiscoveryClient
-@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base"},
+@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base","com.hand.hcf.app.client.system"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { MailConfiguration.class})})
-@EnableFeignClients({"com.hand.hcf.app.client.user"})
+@EnableFeignClients({"com.hand.hcf.app.client.system"})
 public class AuthServiceApplication {
-    /**
-     * @apiDefine Auth2Service 角色权限
-     */
-    /**
-     * @apiDefine SysFrameWork 系统框架
-     */
-    /**
-     * @apiDefine SysDataPermission 数据权限
-     */
+
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);

@@ -3,7 +3,7 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class DingTalkServiceImpl {
     private String getDingTalkUserInfoURL;  // 获取钉钉用户信息URL
 
     private RestTemplate restTemplate = new RestTemplate();
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
 

@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 public class SSODetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(SSODetailService.class);
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
     @Transactional

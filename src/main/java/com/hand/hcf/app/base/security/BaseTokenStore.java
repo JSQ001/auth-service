@@ -2,12 +2,9 @@
 
 package com.hand.hcf.app.base.security;
 
-import com.hand.hcf.app.client.user.AuthClient;
 import com.hand.hcf.core.util.LoginInformationUtil;
-import org.elasticsearch.client.transport.TransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -32,11 +29,6 @@ public class BaseTokenStore extends JdbcTokenStore {
     private String selectAccessTokenAuthenticationSql = DEFAULT_ACCESS_TOKEN_AUTHENTICATION_SELECT_STATEMENT;
     private final JdbcTemplate jdbcTemplate;
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
-    @Autowired(required = false)
-    private AuthClient authClient;
-
-    @Autowired
-    private TransportClient client;
 
     public BaseTokenStore(DataSource dataSource) {
         super(dataSource);
@@ -133,7 +125,7 @@ public class BaseTokenStore extends JdbcTokenStore {
             token.getAdditionalInformation().put("email", LoginInformationUtil.getUser().getEmail());
             token.getAdditionalInformation().put("mobile", LoginInformationUtil.getUser().getMobile());
         }
-        isValidate = authClient.logLogin(param);
+       // isValidate = authClient.logLogin(param);
         token.getAdditionalInformation().put("isDeviceValidate", isValidate);
         super.storeAccessToken(token, authentication);
         //保存登录记录

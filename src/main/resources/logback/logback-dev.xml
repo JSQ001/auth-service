@@ -24,7 +24,6 @@
         </encoder>
     </appender>
     <logger name="com.hand.hcf.app.base" level="DEBUG"/>
-    <logger name="com.handchina" level="INFO"/>
     <logger name="javax.activation" level="ERROR"/>
     <logger name="javax.mail" level="ERROR"/>
     <logger name="javax.xml.bind" level="ERROR"/>
@@ -32,7 +31,7 @@
     <logger name="com.codahale.metrics" level="ERROR"/>
     <logger name="com.ryantenney" level="ERROR"/>
     <logger name="com.sun.xml.internal.bind" level="ERROR"/>
-    <logger name="com.zaxxer" level="ERROR"/>
+    <logger name="com.zaxxer" level="DEBUG"/>
     <logger name="io.undertow" level="ERROR"/>
     <logger name="org.apache" level="ERROR"/>
     <logger name="org.apache.catalina.startup.DigesterFactory" level="OFF"/>
@@ -40,11 +39,11 @@
     <logger name="org.hibernate.validator" level="ERROR"/>
     <logger name="org.hibernate" level="ERROR"/>
     <logger name="org.hibernate.ejb.HibernatePersistence" level="OFF"/>
-    <logger name="org.springframework" level="WARN"/>
-    <logger name="org.springframework.web" level="WARN"/>
-    <logger name="org.springframework.security" level="WARN"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
     <logger name="org.springframework.cache" level="WARN"/>
-    <logger name="org.springframework.security.authentication" level="INFO"/>
+    <logger name="org.springframework.security.authentication" level="DEBUG"/>
     <logger name="org.thymeleaf" level="ERROR"/>
     <logger name="org.xnio" level="ERROR"/>
     <logger name="springfox" level="ERROR"/>
@@ -56,7 +55,7 @@
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="FILE"/>
     </root>
 

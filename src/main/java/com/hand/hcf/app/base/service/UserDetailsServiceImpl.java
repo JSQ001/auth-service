@@ -3,9 +3,8 @@
 package com.hand.hcf.app.base.service;
 
 
-import com.hand.hcf.app.client.user.AuthClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hand.hcf.app.client.system.AuthClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Authenticate a user from the database.
  */
+@Slf4j
 @Component("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final Logger log = LoggerFactory.getLogger(UserDetailsService.class);
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
     /**

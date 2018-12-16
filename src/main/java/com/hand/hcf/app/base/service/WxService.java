@@ -4,7 +4,7 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class WxService {
     private String wechatUrl;//微信中间件URL
 
     private RestTemplate restTemplate = new RestTemplate();
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
 

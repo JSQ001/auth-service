@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hand.hcf.app.base.dto.HaimaUserDTO;
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +31,7 @@ public class HaimaService {
     @Value("${haima.server.userInfo:}")
     public  String HAIMA_USERINFO_URL;
 
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
     private RestTemplate restTemplate = new RestTemplate();
@@ -58,7 +58,7 @@ public class HaimaService {
 
         Boolean isMapping = (Boolean) userInfo.get("isMapping");
         if(!isMapping){
-            //回调海马服务做artemis和haima的用户关系映射
+            //回调海马服务做和haima的用户关系映射
             PrincipalLite u=(PrincipalLite) userDetails;
             HaimaUserDTO haimaUserDTO = new HaimaUserDTO();
             haimaUserDTO.setTenantId(u.getTenantId());

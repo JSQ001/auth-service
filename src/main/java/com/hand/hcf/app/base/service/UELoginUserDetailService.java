@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.service;
 
 import com.hand.hcf.app.base.dto.TrialUserDTO;
-import com.hand.hcf.app.client.user.AuthClient;
+import com.hand.hcf.app.client.system.AuthClient;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class UELoginUserDetailService {
 
     private TrialServiceCilent trialServiceCilent;
 
-    @Autowired(required = false)
+    @Autowired
     private AuthClient authClient;
 
     public UELoginUserDetailService(TrialServiceCilent trialServiceCilent) {
