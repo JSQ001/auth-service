@@ -1,6 +1,8 @@
 package com.hand.hcf.app.base.listener;
 
 import com.hand.hcf.app.client.system.AuthClient;
+import com.hand.hcf.app.client.system.UserRequestDTO;
+import com.hand.hcf.core.web.util.HttpRequestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
@@ -32,7 +34,11 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
         Object principal = event.getAuthentication().getPrincipal();
         if (principal instanceof String) {
             String username = (String) principal;
-            authClient.loginFailed(username, request);
+            UserRequestDTO requestDTO=new UserRequestDTO();
+            requestDTO.setUserName(username);
+            requestDTO.setUserAgent(request.getHeader("User-Agent"));
+            requestDTO.setIp(HttpRequestUtil.getRealRemoteAddr(request));
+            authClient.loginFailed(requestDTO);
         }
     }
 }

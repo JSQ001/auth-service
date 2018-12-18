@@ -4,10 +4,14 @@ package com.hand.hcf.app.base.service;
 
 
 import com.hand.hcf.app.client.system.AuthClient;
+import com.hand.hcf.core.util.FeignUtil;
+import com.hand.hcf.core.web.exception.ExceptionDetail;
+import com.netflix.hystrix.exception.HystrixBadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(final String login) {
         log.debug("Authenticating {}", login);
-        return authClient.loadUserByUsername(login);
+        try {
+            return authClient.loadUserByUsername(login);
+        } catch (HystrixBadRequestException e) {
+            ExceptionDetail detail= FeignUtil.getExceptionDetail(e);
+            throw new UsernameNotFoundException(detail.getBizErrorCode());
+        }
     }
 }
