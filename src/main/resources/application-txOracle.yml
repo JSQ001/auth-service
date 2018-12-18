@@ -1,5 +1,5 @@
 server:
-  port: 9081
+  port: 9082
 spring:
   dbType: oracle
   datasource:
@@ -60,7 +60,7 @@ eureka:
     serviceUrl:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8300/eureka}
     registryFetchIntervalSeconds: 10
-    enabled: true
+    enabled: false
 mybatis:
   mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml
   type-aliases-package: com.hand.hcf.app.base.domain
@@ -71,16 +71,16 @@ mybatis:
 security:
   oauth2:
     client:
-      access-token-uri: http://localhost:9081/oauth/token
+      access-token-uri: http://localhost:9082/oauth/token
       client-authentication-scheme: form
       client-id: implement-integration
       client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
       grant-type: client_credentials
     resource:
-      user-info-uri: http://localhost:9081/api/check_token
+      user-info-uri: http://localhost:9082/api/check_token
 
 logging:
-  config: classpath:logback/logback-uat.xml
+  config: classpath:logback/logback-dev.xml
 
 single-sign:
   server:
@@ -112,7 +112,7 @@ trialService:
 hcf:
   application:
     base:
-      url: http://localhost:9082
+      url: http://localhost:9083
 feign:
   httpclient:
     enabled: false
