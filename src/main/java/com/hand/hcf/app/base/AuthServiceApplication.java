@@ -5,6 +5,7 @@ import com.hand.hcf.app.base.config.AppCenterProperties;
 import com.hand.hcf.app.base.config.Constants;
 import com.hand.hcf.core.annotation.EnableHcfCache;
 import com.hand.hcf.core.config.MailConfiguration;
+import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import java.net.UnknownHostException;
 @ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base","com.hand.hcf.app.client.system"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { MailConfiguration.class})})
 @EnableFeignClients({"com.hand.hcf.app.client.system"})
+@MapperScan("com.hand.hcf.app.base.persistence*")
 public class AuthServiceApplication {
 
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
