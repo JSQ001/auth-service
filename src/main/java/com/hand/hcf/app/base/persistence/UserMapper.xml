@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.persistence.UserMapper">
+
+
+    <select id="listDtoByQO" parameterType="com.hand.hcf.app.base.dto.UserQO" resultType="com.hand.hcf.app.base.dto.UserDTO">
+        SELECT
+        u.id,
+        u.user_oid,
+        u.login,
+        u.activated,
+        u.status,
+        u.language,
+        u.password_hash password,
+        u.deleted,
+        u.company_id,
+        u.tenant_id,
+        u.lock_status,
+        u.lock_date_deadline,
+        c.full_name,
+        c.employee_id,
+        c.email,
+        p.PHONE_NUMBER mobile,
+        cc.set_of_books_id,
+        cc.company_oid,
+        cc.name company_name
+        FROM sys_user u
+        left join sys_contact c on u.contact_id=c.id
+        LEFT JOIN sys_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        LEFT JOIN sys_company cc ON cc.id = u.company_id
+        <if test="loginBind != null and loginBind!=''">
+          left JOIN sys_user_login_bind b on b.user_oid=u.user_oid
+        </if>
+        WHERE
+          1=1
+          <if test="id != null">
+            AND u.id = #{id}
+          </if>
+          <if test="userOid != null">
+            AND u.user_oid = #{userOid}
+          </if>
+          <if test="login != null and login!=''">
+            AND u.login = #{login}
+          </if>
+          <if test="loginBind != null and loginBind!=''">
+            AND b.enabled = true
+            and b.is_active =  true
+            AND b.deleted = false
+            AND b.login = #{loginBind}
+          </if>
+          <if test="mobile != null and mobile!=''">
+            AND p.PHONE_NUMBER = #{mobile}
+          </if>
+          <if test="email != null and email!=''">
+            AND c.email = #{email}
+          </if>
+    </select>
+
+    <update id="updateUserLockStatus" parameterType="com.hand.hcf.app.base.dto.UserDTO">
+        UPDATE sys_user set
+          lock_status = #{lockStatus} ,
+          lock_date_deadline = #{lockDateDeadline} ,
+          password_attempt = #{passwordAttampt},
+          last_update_date=#{lastUpdatedDate},
+          version_number=version_number+1
+        where id = #{userId}
+    </update>
+
+    <select id="countLoginBind" resultType="java.lang.Integer">
+       select count(1) from sys_user_login_bind b
+       where b.user_oid=#{userOid}
+       and b.is_active=true
+    </select>
+
+
+    <select id="getPasswordPolicy" resultType="com.hand.hcf.app.base.dto.PasswordPolicyDTO">
+        SELECT password_expire_days,password_attempt_times,auto_unlock_duration FROM sys_company_security
+        WHERE tenant_id = #{tenantId} and company_oid is null
+    </select>
+
+    <select id="listLastPasswordDate" resultType="java.time.ZonedDateTime">
+        SELECT created_date FROM sys_password_history
+        WHERE user_oid=#{userOid}
+        order by created_date desc
+    </select>
+</mapper>

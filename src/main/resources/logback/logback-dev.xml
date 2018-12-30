@@ -39,8 +39,8 @@
     <logger name="org.hibernate.validator" level="ERROR"/>
     <logger name="org.hibernate" level="ERROR"/>
     <logger name="org.hibernate.ejb.HibernatePersistence" level="OFF"/>
-    <logger name="org.springframework" level="INFO"/>
-    <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
     <logger name="org.springframework.security" level="DEBUG"/>
     <logger name="org.springframework.cache" level="WARN"/>
     <logger name="org.springframework.security.authentication" level="DEBUG"/>
@@ -52,6 +52,7 @@
     <logger name="sun.rmi.transport" level="INFO"/>
     <logger name="org.elasticsearch" level="INFO"/>
     <logger name="io.lettuce" level="WARN"/>
+    <logger name="com.baomidou" level="WARN"/>
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>

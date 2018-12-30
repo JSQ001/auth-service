@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.base.component.RedisHelper;
 import com.hand.hcf.app.base.constant.CacheConstants;
 import com.hand.hcf.app.base.dto.ClientDTO;
 import com.hand.hcf.app.base.persistence.OauthMapper;
@@ -8,6 +7,7 @@ import com.hand.hcf.app.base.security.BaseTokenService;
 import com.hand.hcf.app.base.security.BaseTokenStore;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.util.RedisHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

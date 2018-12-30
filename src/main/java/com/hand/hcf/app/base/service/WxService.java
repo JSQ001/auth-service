@@ -4,7 +4,6 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class WxService {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
 
     public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
@@ -132,6 +131,6 @@ public class WxService {
             }
         }
 
-       return authClient.loadUserByUserOid(userOid);
+       return userService.loadUserByUserOid(userOid);
     }
 }

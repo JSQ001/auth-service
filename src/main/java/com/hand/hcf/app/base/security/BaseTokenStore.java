@@ -128,7 +128,6 @@ public class BaseTokenStore extends JdbcTokenStore {
             token.getAdditionalInformation().put("email", LoginInformationUtil.getUser().getEmail());
             token.getAdditionalInformation().put("mobile", LoginInformationUtil.getUser().getMobile());
         }
-       // isValidate = authClient.logLogin(param);
         token.getAdditionalInformation().put("isDeviceValidate", isValidate);
         super.storeAccessToken(token, authentication);
         //保存登录记录

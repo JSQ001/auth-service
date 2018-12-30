@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ public class AppDetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(AppDetailService.class);
     @Autowired
-    private AuthClient authClient;
+    private UserService  userService;
 
     @Transactional
     @Override
@@ -29,6 +28,6 @@ public class AppDetailService implements UserDetailsService {
             throw new UserNotActivatedException("userOID.is.empty");
         }
 
-        return  authClient.loadUserByUserOid(UUID.fromString(userOid));
+        return  userService.loadUserByUserOid(UUID.fromString(userOid));
     }
 }
