@@ -3,7 +3,6 @@
 package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ public class DingTalkServiceImpl {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
 
     public JSONObject authenticate(String code, String corpId, Map<String, String> var3) {
@@ -68,6 +67,6 @@ public class DingTalkServiceImpl {
         if (StringUtils.isEmpty(email)) {
             throw new UserNotActivatedException("email.is.empty");
         }
-        return authClient.loadUserByEmail(email);
+        return userService.loadUserByEmail(email);
     }
 }

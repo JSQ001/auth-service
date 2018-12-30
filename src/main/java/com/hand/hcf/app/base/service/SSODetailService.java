@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.service;
 
-import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ public class SSODetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(SSODetailService.class);
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
     @Transactional
     @Override
@@ -27,6 +26,6 @@ public class SSODetailService implements UserDetailsService {
             throw new UserNotActivatedException("email.is.empty");
         }
 
-        return authClient.loadUserByEmail(email);
+        return userService.loadUserByEmail(email);
     }
 }

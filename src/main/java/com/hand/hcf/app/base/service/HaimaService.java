@@ -2,7 +2,6 @@ package com.hand.hcf.app.base.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hand.hcf.app.base.dto.HaimaUserDTO;
-import com.hand.hcf.app.client.system.AuthClient;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +31,7 @@ public class HaimaService {
     public  String HAIMA_USERINFO_URL;
 
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -54,7 +53,7 @@ public class HaimaService {
             throw new UserNotActivatedException("email.is.empty");
         }
 
-        UserDetails userDetails= authClient.loadUserByEmail(email);
+        UserDetails userDetails= userService.loadUserByEmail(email);
 
         Boolean isMapping = (Boolean) userInfo.get("isMapping");
         if(!isMapping){

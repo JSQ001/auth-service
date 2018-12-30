@@ -1,7 +1,6 @@
 package com.hand.hcf.app.base.service;
 
 import com.hand.hcf.app.base.dto.TrialUserDTO;
-import com.hand.hcf.app.client.system.AuthClient;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,7 @@ public class UELoginUserDetailService {
     private TrialServiceCilent trialServiceCilent;
 
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
     public UELoginUserDetailService(TrialServiceCilent trialServiceCilent) {
         this.trialServiceCilent = trialServiceCilent;
@@ -48,7 +47,7 @@ public class UELoginUserDetailService {
             }
         }
 
-        return authClient.loadUserByUserOid(UUID.fromString(trialUserDTO.getUserOid()));
+        return userService.loadUserByUserOid(UUID.fromString(trialUserDTO.getUserOid()));
     }
 
     @Component

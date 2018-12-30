@@ -1,8 +1,6 @@
 package com.hand.hcf.app.base.listener;
 
-import com.hand.hcf.app.client.system.AuthClient;
-import com.hand.hcf.app.client.system.UserRequestCO;
-import com.hand.hcf.core.web.util.HttpRequestUtil;
+import com.hand.hcf.app.base.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
@@ -20,7 +18,7 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
     private final HttpServletRequest request;
 
     @Autowired
-    private AuthClient authClient;
+    private UserService userService;
 
     public AuthenticationFailureEventListener(HttpServletRequest request) {
         this.request = request;
@@ -34,11 +32,7 @@ public class AuthenticationFailureEventListener implements ApplicationListener<A
         Object principal = event.getAuthentication().getPrincipal();
         if (principal instanceof String) {
             String username = (String) principal;
-            UserRequestCO requestCO=new UserRequestCO();
-            requestCO.setUserName(username);
-            requestCO.setUserAgent(request.getHeader("User-Agent"));
-            requestCO.setIp(HttpRequestUtil.getRealRemoteAddr(request));
-            authClient.loginFailed(requestCO);
+           userService.loginFailed(username,request);
         }
     }
 }
