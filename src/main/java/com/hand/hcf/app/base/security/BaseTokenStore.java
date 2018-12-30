@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
@@ -16,8 +15,6 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -146,11 +143,8 @@ public class BaseTokenStore extends JdbcTokenStore {
         OAuth2AccessToken accessToken = null;
 
         try {
-            accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql, new RowMapper<OAuth2AccessToken>() {
-                public OAuth2AccessToken mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return deserializeAccessToken(rs.getBytes(2));
-                }
-            },tokenId);
+            accessToken = jdbcTemplate.queryForObject(selectAccessTokenSql,
+                    (rs, rowNum) -> deserializeAccessToken(rs.getBytes(2)),tokenId);
         }
         catch (EmptyResultDataAccessException e) {
             if (LOG.isInfoEnabled()) {

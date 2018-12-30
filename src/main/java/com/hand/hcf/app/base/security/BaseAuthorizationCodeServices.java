@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
@@ -19,8 +18,6 @@ import org.springframework.security.oauth2.provider.token.DefaultAuthenticationK
 import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 
@@ -52,25 +49,27 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
     }
 
 
+    @Override
     public String createAuthorizationCode(OAuth2Authentication authentication) {
-        BaseAuthorizationCode hlyCode = getHLYCode(authentication);
-        if (hlyCode != null) {
-            if (hlyCode.isExpired()) {
-                deleteCode(hlyCode.getValue());
+        BaseAuthorizationCode authCode = getAuthCode(authentication);
+        if (authCode != null) {
+            if (authCode.isExpired()) {
+                deleteCode(authCode.getValue());
             } else {
-                hlyCode.setExpiration(new Date(System.currentTimeMillis() + (codeValiditySeconds * 1000L)));
-                store(hlyCode, authentication);
-                return hlyCode.getValue();
+                authCode.setExpiration(new Date(System.currentTimeMillis() + (codeValiditySeconds * 1000L)));
+                store(authCode, authentication);
+                return authCode.getValue();
             }
         }
 
         String code = generator.generate();
-        hlyCode = new BaseAuthorizationCode(code, new Date(System.currentTimeMillis() + (codeValiditySeconds * 1000L)));
-        store(hlyCode, authentication);
+        authCode = new BaseAuthorizationCode(code, new Date(System.currentTimeMillis() + (codeValiditySeconds * 1000L)));
+        store(authCode, authentication);
         return code;
     }
 
 
+    @Override
     public OAuth2Authentication consumeAuthorizationCode(String code)
         throws InvalidGrantException {
         OAuth2Authentication auth = remove(code);
@@ -90,21 +89,16 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
     }
 
     private OAuth2Authentication remove(String code) {
-        BaseAuthorizationCode hlyCode;
+        BaseAuthorizationCode authCode;
 
         try {
-            hlyCode = jdbcTemplate.queryForObject(selectAuthenticationSql,
-                new RowMapper<BaseAuthorizationCode>() {
-                    public BaseAuthorizationCode mapRow(ResultSet rs, int rowNum)
-                        throws SQLException {
-                        return SerializationUtils.deserialize(rs.getBytes("authorization_code"));
-                    }
-                }, code);
+            authCode = jdbcTemplate.queryForObject(selectAuthenticationSql,
+                    (rs, rowNum) -> SerializationUtils.deserialize(rs.getBytes("authorization_code")), code);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-        if (hlyCode.isExpired()) {
-            deleteCode(hlyCode.getValue());
+        if (authCode.isExpired()) {
+            deleteCode(authCode.getValue());
             return null;
         }
         return deleteCode(code);
@@ -115,12 +109,7 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
 
         try {
             authentication = jdbcTemplate.queryForObject(selectAuthenticationSql,
-                new RowMapper<OAuth2Authentication>() {
-                    public OAuth2Authentication mapRow(ResultSet rs, int rowNum)
-                        throws SQLException {
-                        return SerializationUtils.deserialize(rs.getBytes("authentication"));
-                    }
-                }, code);
+                    (rs, rowNum) -> SerializationUtils.deserialize(rs.getBytes("authentication")), code);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -132,23 +121,19 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
         return authentication;
     }
 
-    public BaseAuthorizationCode getHLYCode(OAuth2Authentication authentication) {
+    public BaseAuthorizationCode getAuthCode(OAuth2Authentication authentication) {
         BaseAuthorizationCode code = null;
 
         String key = authenticationKeyGenerator.extractKey(authentication);
         try {
             code = jdbcTemplate.queryForObject(selectCodeFromAuthenticationSql,
-                new RowMapper<BaseAuthorizationCode>() {
-                    public BaseAuthorizationCode mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return deserializeHLYCode(rs.getBytes(1));
-                    }
-                }, key);
+                    (rs, rowNum) -> deserializeAuthCode(rs.getBytes(1)), key);
         } catch (EmptyResultDataAccessException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Failed to find HLYCode for authentication " + authentication);
+                LOG.debug("Failed to find Code for authentication " + authentication);
             }
         } catch (IllegalArgumentException e) {
-            LOG.error("Could not extractHLYCode for authentication " + authentication, e);
+            LOG.error("Could not extract Code for authentication " + authentication, e);
         }
 
         if (code != null
@@ -166,11 +151,7 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
 
         try {
             authentication = jdbcTemplate.queryForObject(selectCodeAuthenticationSql,
-                new RowMapper<OAuth2Authentication>() {
-                    public OAuth2Authentication mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return deserializeAuthentication(rs.getBytes(1));
-                    }
-                }, code);
+                    (rs, rowNum) -> deserializeAuthentication(rs.getBytes(1)), code);
         } catch (EmptyResultDataAccessException e) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Failed to find access token for token " + code);
@@ -183,7 +164,7 @@ public class BaseAuthorizationCodeServices implements AuthorizationCodeServices 
         return authentication;
     }
 
-    protected BaseAuthorizationCode deserializeHLYCode(byte[] code) {
+    protected BaseAuthorizationCode deserializeAuthCode(byte[] code) {
         return SerializationUtils.deserialize(code);
     }
 
