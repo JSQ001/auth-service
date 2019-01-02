@@ -14,6 +14,7 @@ build:
     - tags
     - master
     - development
+    - dev-0.8.5
     - /^release-.*$/
 
 dev-release:
@@ -21,6 +22,7 @@ dev-release:
     only:
     - tags
     - development
+    - dev-0.8.5
     - /^release-.*$/
     when: manual
     script:
