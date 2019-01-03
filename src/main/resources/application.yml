@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+  liquibase:
+    change-log: classpath:db/liquibase/master.xml
+  application:
+    name: auth
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 10000
+        read-timeout: 10000
+

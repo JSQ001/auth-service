@@ -4,10 +4,9 @@ spring:
   dbType: oracle
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
-    name:
-    username: standard_artemis #artemis
-    password: handhand #MTIzNDU2TXMz
+    jdbcUrl: jdbc:oracle:thin:@47.101.143.73:1521/hcfuatp1
+    username: hcf_base
+    password: handhand
   #  dbType: oracle
   #  datasource:
         #driver-class-name: com.mysql.jdbc.Driver
@@ -19,27 +18,67 @@ spring:
    #     url: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
    #     username: standard_artemis
    #     password: handhand
+    maximum-pool-size: 10
+    pool-name: HikariPool
+    type: com.zaxxer.hikari.HikariDataSource
   redis:
-    host: redis
+    host: localhost
     port: 6379
+  cloud:
+    bus:
+      enabled: false
+  cache:
+    cache-names: HCF_TOKEN
+    type: caffeine
+
+j2cache:
+  open-spring-cache: true
+  allow-null-values: true
+  cache-clean-mode: passive
+  serialization: com.hand.hcf.core.j2cache.support.util.KryoSerializer
+  sync_ttl_to_redis: true
+  broadcast:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisPubSubPolicy
+  L1:
+    provider: caffeine
+    region:
+      HCF_TOKEN: 3000,24h
+      default: 3000,24h
+  L2:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisProvider
+    database: 0
+    channel: j2cache
+    storage: generic
+
 eureka:
   instance:
     preferIpAddress: true
     leaseRenewalIntervalInSeconds: 10
     leaseExpirationDurationInSeconds: 30
-    ip-address: 115.159.108.80
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     serviceUrl:
-      defaultZone: ${EUREKA_DEFAULT_ZONE}
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8300/eureka}
     registryFetchIntervalSeconds: 10
+    enabled: false
 mybatis:
-  mapper-locations: com/helioscloud/atlantis/persistence/*Mapper.xml
-  type-aliases-package: com.helioscloud.atlantis.domain
-  type-handlers-package: com.helioscloud.atlantis.persistence.typehandler
-auth:
-  cache:
-    expire-time: 30
+  mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml
+  type-aliases-package: com.hand.hcf.app.base.domain
+  type-handlers-package: com.hand.hcf.core.persistence.typehandler
+  enable-performance-interceptor: true
+
+#
+#security:
+#  oauth2:
+#    client:
+#      access-token-uri: http://localhost:9082/oauth/token
+#      client-authentication-scheme: form
+#      client-id: implement-integration
+#      client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+#      grant-type: client_credentials
+#    resource:
+#      user-info-uri: http://localhost:9082/api/check_token
+
 logging:
   config: classpath:logback/logback-dev.xml
 
@@ -69,16 +108,22 @@ trialService:
         host: http://apiuat.huilianyi.com
         get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
         bind_wechat_user: ${trialService.api.host}/trial/public/bind
-elasticsearch:
-  cluster-name : docker-cluster
-  host: 115.159.108.80
-  tcp-port: 9300
-  user: elastic
-  password: changeme
-  enable: true
+
+hcf:
+  application:
+    base:
+      url: http://localhost:9083
 feign:
   httpclient:
     enabled: false
   okhttp:
     enable: true
-debug: true
+
+elasticsearch:
+  enable: false
+management:
+  health:
+    rabbit:
+      enabled: false
+    elasticsearch:
+      enabled: false

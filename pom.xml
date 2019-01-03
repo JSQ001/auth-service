@@ -9,42 +9,33 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.helioscloud.atlantis</groupId>
     <artifactId>auth-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <version>0.8.5-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-       <!-- <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.4.RELEASE</version>
-        <relativePath/>  lookup parent from repository -->
+
     <parent>
-        <groupId>com.hand.hec.cloud</groupId>
-        <artifactId>hec-core-parent</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <groupId>com.hand.hcf.app</groupId>
+        <artifactId>hcf-app-parent</artifactId>
+        <version>0.8.5-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <docker.image.prefix>registry.cloud.saas.hand-china.com/hec/auth-service</docker.image.prefix>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.31</version>
+            <groupId>com.hand.hcf.app</groupId>
+            <artifactId>hcf-base-client</artifactId>
+            <version>0.8.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
+            <version>3.7</version>
         </dependency>
      <dependency>
             <groupId>com.alibaba</groupId>
@@ -52,44 +43,19 @@
             <version>1.2.47</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-       <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.1.9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aliyun.oss</groupId>
-            <artifactId>aliyun-sdk-oss</artifactId>
-            <version>2.4.1</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.7</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
         </dependency>
 
         <!--TESTING DEPENDENCIES-->
@@ -136,44 +102,11 @@
         <dependency>
             <groupId>org.unitils</groupId>
             <artifactId>unitils-core</artifactId>
-            <version>3.4.2</version>
+            <version>3.4.6</version>
             <scope>test</scope>
-        </dependency>
-        <!--elasticsearch start-->
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>5.6.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>x-pack-transport</artifactId>
-            <version>5.6.10</version>
         </dependency>
     </dependencies>
     <repositories>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>helios.releases</id>
-            <name>Releases</name>
-            <url>https://nexus.huilianyi.com/repository/maven-releases</url>
-        </repository>
-        <repository>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>helios.snapshots</id>
-            <name>Snapshot</name>
-            <url>https://nexus.huilianyi.com/repository/maven-snapshots</url>
-        </repository>
     <repository>
         <id>hec.snapshots</id>
         <name>183maven</name>
@@ -199,52 +132,32 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*Principal.*</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
             </plugin>
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
-                    <imageName>${docker.image.prefix}</imageName>
-                    <dockerDirectory>src/main/docker</dockerDirectory>
-                    <dockerHost>https://115.159.108.80:25750</dockerHost>
-                    <dockerCertPath>src/main/docker/dockerKey</dockerCertPath>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.war</include>
-                        </resource>
-                    </resources>
+                    <from>
+                        <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
+                    </from>
+                    <to>
+                        <image>${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
+                        <auth>
+                            <username>${registry_username}</username>
+                            <password>${registry_password}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <jvmFlags>
+                            <jvmFlag>-Djava.security.edg=file:/dev/./urandom</jvmFlag>
+                        </jvmFlags>
+                    </container>
                 </configuration>
             </plugin>
         </plugins>
