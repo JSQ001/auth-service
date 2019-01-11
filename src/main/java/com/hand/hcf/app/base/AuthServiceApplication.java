@@ -30,6 +30,7 @@ import java.net.UnknownHostException;
 @EnableDiscoveryClient
 @ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.base","com.hand.hcf.app.base","com.hand.hcf.app.client.system"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { MailConfiguration.class})})
+@EnableFeignClients({"com.hand.hcf.app"})
 @MapperScan("com.hand.hcf.app.base.persistence*")
 public class AuthServiceApplication {
 
