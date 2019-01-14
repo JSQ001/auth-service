@@ -36,6 +36,8 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
 
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private BaseTokenService baseTokenService;
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
 
@@ -57,8 +59,6 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
     }
 
     public void updateOauthAccessTokenCompanyByLogin(String login, Long companyId, UUID companyOid) {
-
-        BaseTokenService baseTokenService = new BaseTokenService();
         BaseTokenStore baseTokenStore = (BaseTokenStore) applicationContext.getBean("tokenStore");
         List<String> tokenIds = oauthMapper.findAuthenticationIdByLogin(login);
         if (!org.springframework.util.CollectionUtils.isEmpty(tokenIds)) {
