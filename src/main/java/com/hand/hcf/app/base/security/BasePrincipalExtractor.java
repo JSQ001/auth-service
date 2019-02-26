@@ -18,12 +18,7 @@ public class BasePrincipalExtractor implements PrincipalExtractor {
         if (map.get("userOID") != null) {
             principal.setUserOid(UUID.fromString((String) map.get("userOID")));
         }
-        principal.setCompanyId((Long) map.get("companyId"));
-        if (map.get("companyOID") != null) {
-            principal.setCompanyOid(UUID.fromString((String) map.get("companyOID")));
-        }
         principal.setTenantId((Long) map.get("tenantId"));
-        principal.setTenantId((Long) map.get("setOfBooksId"));
         return principal;
     }
 }

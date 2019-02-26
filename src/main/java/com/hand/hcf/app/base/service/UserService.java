@@ -372,12 +372,7 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
         principalLite.setStatus(user.getStatus());
         principalLite.setLanguage(user.getLanguage());
         principalLite.setTenantId(user.getTenantId());
-        principalLite.setSetOfBooksId(user.getSetOfBooksId());
-        principalLite.setCompanyId(user.getCompanyId());
-        principalLite.setCompanyName(user.getCompanyName());
-        principalLite.setCompanyOid(user.getCompanyOid());
-        principalLite.setEmployeeId(user.getEmployeeId());
-        principalLite.setFullName(user.getFullName());
+        principalLite.setUserName(user.getUserName());
         principalLite.setEmail(user.getEmail());
         principalLite.setMobile(user.getMobile());
         return principalLite;
