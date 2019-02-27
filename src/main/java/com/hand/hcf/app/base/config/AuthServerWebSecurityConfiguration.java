@@ -6,6 +6,7 @@ import com.hand.hcf.app.base.security.BaseProvider.BaseAuthenticationProvider;
 import com.hand.hcf.app.base.security.BaseProvider.SSOAuthenticationProvider;
 import com.hand.hcf.app.base.security.BaseProvider.SSODirectClientAuthenticationProvider;
 import com.hand.hcf.app.base.service.SSODetailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -47,6 +47,9 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
     @Value("${single-sign.server.access-token-uri}")
     private String accessTokenUri;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     public AuthServerWebSecurityConfiguration(UserDetailsService userDetailsService, AuthenticationManagerBuilder builder, AuthenticationEventPublisher publisher) {
         this.userDetailsService = userDetailsService;
         this.authenticationManagerBuilder = builder;
@@ -58,18 +61,18 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
         authenticationManagerBuilder
                 .authenticationEventPublisher(publisher)
                 .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder);
         authenticationManagerBuilder.authenticationProvider(wxAuthProvider());
         authenticationManagerBuilder.authenticationProvider(ssoAuthenticationProvider());
         authenticationManagerBuilder.authenticationProvider(ssoDirectClientAuthenticationProvider());
     }
 
-    @Bean
+   /* @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
       //return    new UnmappedIdPasswordEncoder();
         //  return new BCryptPasswordEncoder();
-    }
+    }*/
   /*  @Bean
     public static NoOpPasswordEncoder passwordEncoder2() {
         return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
@@ -101,7 +104,7 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
     @Bean
     public BaseAuthenticationProvider wxAuthProvider() throws Exception {
         BaseAuthenticationProvider provider = new BaseAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
