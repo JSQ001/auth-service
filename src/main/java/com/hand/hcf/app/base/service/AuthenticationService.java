@@ -75,8 +75,7 @@ public class AuthenticationService {
                 || AuthenticationCode.LOGGED.equals(authenticationCode.getStatus())) {
             return false;
         }
-        authenticationCode.setUsername(LoginInformationUtil.getUser().getFullName())
-                .setCompanyName(LoginInformationUtil.getUser().getCompanyName())
+        authenticationCode.setUsername(LoginInformationUtil.getUser().getUsername())
                 .setStatus(AuthenticationCode.WAITING)
                 .setReturnWaiting(false);
         long expires = redisTemplate.getExpire(uuid, TimeUnit.SECONDS);

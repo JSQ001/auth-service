@@ -23,6 +23,7 @@ dev-release:
     - tags
     - development
     - dev-0.8.5
+    - master
     - /^release-.*$/
     when: manual
     script:

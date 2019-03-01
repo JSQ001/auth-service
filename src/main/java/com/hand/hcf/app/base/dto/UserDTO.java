@@ -29,14 +29,10 @@ public class UserDTO {
     private String language;
     private ZonedDateTime createdDate;
     private Long tenantId;
-    private Long companyId;
-    private UUID companyOid;
-    private String companyName;
-    private Long setOfBooksId;
-    private String employeeId;
-    private String fullName;
+    private String userName;
     private String email;
     private String mobile;
+    private String remark;
 
     private Integer lockStatus = UserLockedEnum.UNLOCKED.getId();
 

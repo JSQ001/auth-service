@@ -11,4 +11,3 @@ feign:
       default:
         connect-timeout: 10000
         read-timeout: 10000
-

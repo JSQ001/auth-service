@@ -15,21 +15,14 @@
         u.language,
         u.password_hash password,
         u.deleted,
-        u.company_id,
         u.tenant_id,
         u.lock_status,
         u.lock_date_deadline,
-        c.full_name,
-        c.employee_id,
-        c.email,
-        p.PHONE_NUMBER mobile,
-        cc.set_of_books_id,
-        cc.company_oid,
-        cc.name company_name
+        u.user_name,
+        u.email,
+        u.mobile,
+        u.remark
         FROM sys_user u
-        left join sys_contact c on u.contact_id=c.id
-        LEFT JOIN sys_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
-        LEFT JOIN sys_company cc ON cc.id = u.company_id
         <if test="loginBind != null and loginBind!=''">
           left JOIN sys_user_login_bind b on b.user_oid=u.user_oid
         </if>
@@ -51,10 +44,10 @@
             AND b.login = #{loginBind}
           </if>
           <if test="mobile != null and mobile!=''">
-            AND p.PHONE_NUMBER = #{mobile}
+            AND u.mobile = #{mobile}
           </if>
           <if test="email != null and email!=''">
-            AND c.email = #{email}
+            AND u.email = #{email}
           </if>
     </select>
 
@@ -72,12 +65,6 @@
        select count(1) from sys_user_login_bind b
        where b.user_oid=#{userOid}
        and b.is_active=true
-    </select>
-
-
-    <select id="getPasswordPolicy" resultType="com.hand.hcf.app.base.dto.PasswordPolicyDTO">
-        SELECT password_expire_days,password_attempt_times,auto_unlock_duration FROM sys_company_security
-        WHERE tenant_id = #{tenantId} and company_oid is null
     </select>
 
     <select id="listLastPasswordDate" resultType="java.time.ZonedDateTime">

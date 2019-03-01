@@ -5,7 +5,6 @@ import com.hand.hcf.app.base.dto.ClientDTO;
 import com.hand.hcf.app.base.persistence.OauthMapper;
 import com.hand.hcf.app.base.security.BaseTokenService;
 import com.hand.hcf.app.base.security.BaseTokenStore;
-import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.RedisHelper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,6 +35,8 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
 
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private BaseTokenService baseTokenService;
 
     private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
 
@@ -57,8 +58,6 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
     }
 
     public void updateOauthAccessTokenCompanyByLogin(String login, Long companyId, UUID companyOid) {
-
-        BaseTokenService baseTokenService = new BaseTokenService();
         BaseTokenStore baseTokenStore = (BaseTokenStore) applicationContext.getBean("tokenStore");
         List<String> tokenIds = oauthMapper.findAuthenticationIdByLogin(login);
         if (!org.springframework.util.CollectionUtils.isEmpty(tokenIds)) {
@@ -71,9 +70,6 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
                     //token 过期，不做操作，已有删除操作
                     return;
                 }
-                PrincipalLite principal = (PrincipalLite) authentication.getPrincipal();
-                principal.setCompanyOid(companyOid);
-                principal.setCompanyId(companyId);
                 String key = authenticationKeyGenerator.extractKey(authentication);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("authentication", SerializationUtils.serialize(authentication));

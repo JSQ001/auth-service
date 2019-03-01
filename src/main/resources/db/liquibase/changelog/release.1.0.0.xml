@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="201807181107370" author="admin">
+        <createTable tableName="oauth_access_token" remarks="">
+            <column name="token_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="token" type="blob" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication_id" type="varchar(255)" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_oauth_access_token"/>
+            </column>
+            <column name="user_name" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication" type="blob" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="refresh_token" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_validated_device" type="boolean" defaultValue="1" remarks="是否通过设备验证 1:是 0：否">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="201807181107371" author="admin">
+        <createTable tableName="oauth_approvals" remarks="">
+            <column name="userId" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="clientId" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="scope" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="expiresAt" type="timestamp" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lastUpdatedAt" type="timestamp" remarks="">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201807181107372" author="admin">
+        <createTable tableName="oauth_client_details" remarks="">
+            <column name="client_id" type="varchar(255)" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_oauth_client_details"/>
+            </column>
+            <column name="resource_ids" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_secret" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="scope" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authorized_grant_types" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="web_server_redirect_uri" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authorities" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="access_token_validity" type="int" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="refresh_token_validity" type="int" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="additional_information" type="varchar(4000)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="autoapprove" type="varchar(4000)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201807181107373" author="admin">
+        <createTable tableName="oauth_client_token" remarks="">
+            <column name="token_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="token" type="blob" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_name" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201807181107376" author="admin">
+        <createTable tableName="oauth_refresh_token" remarks="">
+            <column name="token_id" type="varchar(255)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="token" type="blob" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication" type="blob" remarks="">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201807181107378" author="admin">
+        <sql>
+            INSERT INTO oauth_client_details(client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('ArtemisApp', NULL, '{noop}nLCnwdIhizWbykHyuZM6TpQDd7KwK9IXDK8LGsa7SOW', 'read,write', 'password,refresh_token', NULL, 'ROLE_ADMIN,ROLE_USER', 7200, NULL, NULL, NULL);
+            INSERT INTO oauth_client_details(client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('ArtemisWeb', NULL, '{noop}nLCnwdIhizWbykHyuZM6TpQDd7KwK9IXDK8LGsa7SOW', 'read,write', 'password,refresh_token', NULL, 'ROLE_ADMIN,ROLE_USER', 7200, NULL, NULL, NULL);
+            INSERT INTO oauth_client_details(client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('implement-integration', NULL, '{noop}K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd', 'read,write', 'client_credentials', NULL, 'ROLE_INTEGRATION_CLIENTS', 7200, NULL, NULL, NULL);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

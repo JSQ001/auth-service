@@ -1,7 +1,6 @@
 package com.hand.hcf.app.base.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.hand.hcf.app.base.dto.PasswordPolicyDTO;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.dto.UserQO;
 
@@ -14,9 +13,6 @@ public interface UserMapper extends BaseMapper<UserDTO> {
    List<UserDTO> listDtoByQO(UserQO userQO);
 
    Integer countLoginBind(UUID userOid);
-
-
-   PasswordPolicyDTO getPasswordPolicy(Long tenantId);
 
 
    List<ZonedDateTime> listLastPasswordDate(UUID userOid);
