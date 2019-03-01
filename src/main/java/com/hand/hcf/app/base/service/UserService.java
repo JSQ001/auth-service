@@ -95,7 +95,11 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
     }
 
     private PasswordPolicyDTO getPasswordPolicy(Long tenantId){
-        return baseMapper.getPasswordPolicy(tenantId);
+        PasswordPolicyDTO passwordPolicyDTO=new PasswordPolicyDTO();
+        passwordPolicyDTO.setPasswordExpireDays(0);
+        passwordPolicyDTO.setPasswordAttemptTimes(defaultMaxLoginAttempt);
+        passwordPolicyDTO.setAutoUnlockDuration(defaultUnLockMinutes);
+        return passwordPolicyDTO;
     }
 
     private Integer countLoginBind(UUID userOid){
