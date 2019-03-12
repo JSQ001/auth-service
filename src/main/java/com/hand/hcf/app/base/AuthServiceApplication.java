@@ -2,7 +2,6 @@
 package com.hand.hcf.app.base;
 
 import com.hand.hcf.app.base.config.AppCenterProperties;
-import com.hand.hcf.app.base.config.Constants;
 import com.hand.hcf.core.annotation.EnableHcfCache;
 import com.hand.hcf.core.config.MailConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
@@ -38,7 +37,6 @@ public class AuthServiceApplication {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);
         SimpleCommandLinePropertySource source = new SimpleCommandLinePropertySource(args);
-        addDefaultProfile(app, source);
         Environment env = app.run(args).getEnvironment();
         log.info("Access URLs:\n----------------------------------------------------------\n\t" +
                         "Local: \t\thttp://127.0.0.1:{}\n\t" +
@@ -47,15 +45,6 @@ public class AuthServiceApplication {
                 InetAddress.getLocalHost().getHostAddress(),
                 env.getProperty("server.port"));
     }
-    /**
-     * If no profile has been configured, set by default the "dev" profile.
-     */
-    private static void addDefaultProfile(SpringApplication app, SimpleCommandLinePropertySource source) {
-        if (!source.containsProperty("spring.profiles.active") &&
-                !System.getenv().containsKey("SPRING_PROFILES_ACTIVE")) {
 
-            app.setAdditionalProfiles(Constants.SPRING_PROFILE_DEVELOPMENT);
-        }
-    }
 }
 
