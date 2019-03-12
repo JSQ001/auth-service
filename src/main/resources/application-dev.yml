@@ -3,21 +3,14 @@ server:
 spring:
   dbType: oracle
   datasource:
-    driver-class-name: oracle.jdbc.OracleDriver
+    #driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@47.101.143.73:1521/hcfuatp1
-    username: hcf_organization
+    username: hcf_base_new
     password: handhand
+    #url: jdbc:mysql://101.132.114.170:3306/hcf_base?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    #username: hcf
+    #password: hcf@112358
   #  dbType: oracle
-  #  datasource:
-        #driver-class-name: com.mysql.jdbc.Driver
-        #url: jdbc:mysql://localhost:3306/artemis_multi_db?useUnicode=true&characterEncoding=utf-8&useSSL=false
-        #url: jdbc:mysql://115.159.108.80:3306/artemis_uat?useUnicode=true&characterEncoding=utf-8&useSSL=false #jdbc:mysql://106.15.120.125:21906/artemis_dev02?useUnicode=true&characterEncoding=utf8
-        #username: root
-        #password: handhand
-   #     type: com.alibaba.druid.pool.DruidDataSource
-   #     url: jdbc:oracle:thin:@115.159.108.80:1521:RJFIN
-   #     username: standard_artemis
-   #     password: handhand
     maximum-pool-size: 10
     pool-name: HikariPool
     type: com.zaxxer.hikari.HikariDataSource

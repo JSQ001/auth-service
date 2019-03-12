@@ -2,19 +2,21 @@ package com.hand.hcf.app.base.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.base.constant.CacheConstants;
+import com.hand.hcf.app.base.constant.Constants;
 import com.hand.hcf.app.base.domain.UserLock;
 import com.hand.hcf.app.base.dto.PasswordPolicyDTO;
 import com.hand.hcf.app.base.dto.UserDTO;
 import com.hand.hcf.app.base.dto.UserQO;
-import com.hand.hcf.app.base.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.base.enums.UserLockedEnum;
 import com.hand.hcf.app.base.persistence.UserLockMapper;
 import com.hand.hcf.app.base.persistence.UserMapper;
+import com.hand.hcf.app.client.user.enums.UserStatusEnum;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.service.MessageService;
 import com.hand.hcf.core.util.RedisHelper;
 import com.hand.hcf.core.web.util.HttpRequestUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,9 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
 
     @Autowired
     private UserLockMapper userLockMapper;
+
+    @Autowired
+    private MessageService messageService;
 
     private UserDTO getDtoByQO(UserQO userQO) {
         List<UserDTO> users = baseMapper.listDtoByQO(userQO);
@@ -126,7 +131,7 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
             if (users.size() == 1) {
                 user = users.get(0);
             } else {
-                throw new UserNotActivatedException("related.multi.user");
+                throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_LOGIN_MULTI_USER));
             }
         }
 
@@ -148,9 +153,9 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
                 Integer userLoginBinds = countLoginBind(user.getUserOid());
                 if (userLoginBinds != null && userLoginBinds > 0) {
                     if (isEmailLogin) {
-                        throw new UserNotActivatedException("email.not.bind");
+                        throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_EMAIL_NOT_BIND));
                     }
-                    throw new UserNotActivatedException("mobile.not.bind");
+                    throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_MOBILE_NOT_BIND));
                 }
 
 
@@ -162,10 +167,10 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
                     if(userQueryByPhone!=null && userQueryByPhone.getActivated()){
                         Integer userLoginBinds = countLoginBind(user.getUserOid());
                         if(userLoginBinds!=null && userLoginBinds>0){
-                            throw new UserNotActivatedException("mobile.not.bind");
+                            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_MOBILE_NOT_BIND));
                         }
                     }else if(userQueryByPhone!=null && !userQueryByPhone.getActivated()){
-                        throw new UserNotActivatedException("user.not.activated");
+                        throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
                     }
                 }
             }
@@ -173,7 +178,7 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
         }
         //用户状态检查
         if (user == null) {
-            throw new UserNotActivatedException("user.not.activated");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_ACTIVATED));
         }
         loginCommonCheck(user);
         return getPrincipal(user);
@@ -183,11 +188,11 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
     public PrincipalLite loadUserByUserOid(UUID userOid){
         UserDTO u = getDtoByUserOid(userOid);
         if (u == null) {
-            throw new UsernameNotFoundException("user.not.found");
+            throw new UsernameNotFoundException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
         }
         //1.用户是否被激活
         if (!u.getActivated()) {
-            throw new UserNotActivatedException("user.not.activated");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_ACTIVATED));
         }
         //公共检查2.用户离职 3，用户锁定 4.密码过期
         loginCommonCheck(u);
@@ -199,11 +204,11 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
         UserDTO u = getDtoByEmail(email);
 
         if (u==null) {
-            throw new UsernameNotFoundException("user.not.found");
+            throw new UsernameNotFoundException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
         }
         //1.用户是否被激活
         if (!u.getActivated()) {
-            throw new UserNotActivatedException("user.not.activated");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_ACTIVATED));
         }
         //公共检查2.用户离职 3，用户锁定 4.密码过期
         loginCommonCheck(u);
@@ -213,22 +218,22 @@ public class UserService extends BaseService<UserMapper, UserDTO> {
     private void loginCommonCheck(UserDTO user) {
         //1.用户是否被激活
         if (user == null || !user.getActivated()) {
-            throw new UserNotActivatedException("user.not.activated");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
         }
         //公共检查2.用户离职 3，用户锁定 4.密码过期
         //员工离职不允许登录
-        if (user.getStatus().intValue() == EmployeeStatusEnum.LEAVED.getId()) {
-            throw new UserNotActivatedException("user.was.leaved");
+        if (user.getStatus().intValue() == UserStatusEnum.INVALID.getId()) {
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_WAS_INVALID));
         }
 
         //check用户是否被锁定(锁定状态和锁定时间两个条件)
         if (user.getLockStatus().intValue() == UserLockedEnum.LOCKED.getId() && ZonedDateTime.now().isBefore(user.getLockDateDeadline())) {
-            throw new UserNotActivatedException("user.is.locked");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_WAS_LOCKED));
         }
 
         //check用户的密码是否过期
         if (!this.isPasswordExpire(user, user.getTenantId())) {
-            throw new UserNotActivatedException("user.password.expired");
+            throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_PASSWORD_EXPIRED));
         }
 
         //查询公司当前支持的语言

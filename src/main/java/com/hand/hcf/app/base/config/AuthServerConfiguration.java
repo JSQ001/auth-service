@@ -3,9 +3,11 @@
 package com.hand.hcf.app.base.config;
 
 import com.hand.hcf.app.base.security.BaseAuthorizationCodeServices;
-import com.hand.hcf.app.base.security.BaseTokenEnhancer;
 import com.hand.hcf.app.base.security.BaseRedisTokenStore;
+import com.hand.hcf.app.base.security.BaseTokenEnhancer;
 import com.hand.hcf.app.base.security.BaseTokenService;
+import com.hand.hcf.core.config.AuthExceptionEntryPoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -21,6 +23,7 @@ import org.springframework.security.oauth2.provider.client.JdbcClientDetailsServ
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
+import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -39,6 +42,9 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     private final AuthenticationManager authenticationManager;
 
     private DataSource dataSource;
+
+    @Autowired
+    private WebResponseExceptionTranslator extWebResponseExceptionTranslator;
 
     public AuthServerConfiguration(AuthenticationManager authenticationManager,DataSource dataSource) {
         this.authenticationManager = authenticationManager;
@@ -76,7 +82,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     }
 
     @Bean
-    public BaseTokenService artemisTokenService() {
+    public BaseTokenService baseTokenService() {
         BaseTokenService tokenServices = new BaseTokenService();
         tokenServices.setTokenStore(tokenStore());
         tokenServices.setSupportRefreshToken(true);
@@ -87,18 +93,22 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-            throws Exception {
+             {
 
         endpoints
                 .tokenStore(tokenStore())
                 .tokenServices(getTokenServices())
                 .authenticationManager(authenticationManager);
+
+        //自定义登录失败异常处理
+        endpoints.exceptionTranslator(extWebResponseExceptionTranslator);
     }
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
         oauthServer.allowFormAuthenticationForClients();
         oauthServer.checkTokenAccess("permitAll()");
+        oauthServer.authenticationEntryPoint(new AuthExceptionEntryPoint());
     }
 
     @Override
