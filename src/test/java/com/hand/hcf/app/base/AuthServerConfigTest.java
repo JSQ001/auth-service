@@ -1,9 +1,9 @@
 package com.hand.hcf.app.base;
 
-import com.hand.hcf.app.base.security.BaseProvider.BaseAuthenticationProvider;
-import com.hand.hcf.app.base.security.BaseProvider.SSOAuthenticationProvider;
-import com.hand.hcf.app.base.security.BaseProvider.SSODirectClientAuthenticationProvider;
-import com.hand.hcf.app.base.service.SSODetailService;
+import com.hand.hcf.app.auth.security.BaseProvider.BaseAuthenticationProvider;
+import com.hand.hcf.app.auth.security.BaseProvider.SSOAuthenticationProvider;
+import com.hand.hcf.app.auth.security.BaseProvider.SSODirectClientAuthenticationProvider;
+import com.hand.hcf.app.auth.service.SSODetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

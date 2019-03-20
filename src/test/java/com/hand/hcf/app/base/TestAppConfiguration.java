@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base;
 
-import com.hand.hcf.app.base.service.AuthenticationService;
+import com.hand.hcf.app.auth.service.AuthenticationService;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;

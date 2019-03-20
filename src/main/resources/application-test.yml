@@ -1,0 +1,12 @@
+hcf:
+  application:
+    base:
+      url: http://101.132.162.31:9081/base
+      name: base
+    mdata:
+      url: http://101.132.162.31:9081/mdata
+    workflow:
+      url: http://101.132.162.31:9081/workflow
+spring:
+  datasource:
+    url:  jdbc:oracle:thin:@47.101.143.73:1521/hcfuatp1
