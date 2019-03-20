@@ -43,18 +43,7 @@ j2cache:
     channel: j2cache
     storage: generic
 
-eureka:
-  instance:
-    preferIpAddress: true
-    leaseRenewalIntervalInSeconds: 10
-    leaseExpirationDurationInSeconds: 30
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-  client:
-    serviceUrl:
-      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8300/eureka}
-    registryFetchIntervalSeconds: 10
-    enabled: false
-mybatis:
+mybatis-plus:
   mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml
   type-aliases-package: com.hand.hcf.app.base.domain
   type-handlers-package: com.hand.hcf.core.persistence.typehandler
@@ -101,16 +90,6 @@ trialService:
         host: http://apiuat.huilianyi.com
         get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
         bind_wechat_user: ${trialService.api.host}/trial/public/bind
-
-hcf:
-  application:
-    base:
-      url: http://localhost:9083
-feign:
-  httpclient:
-    enabled: false
-  okhttp:
-    enable: true
 
 management:
   health:

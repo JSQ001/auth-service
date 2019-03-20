@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.auth.persistence.OauthMapper">
+
+    <resultMap id="clientMap" type="org.springframework.security.oauth2.provider.client.BaseClientDetails">
+        <result column="client_id" property="clientId"/>
+        <result column="client_secret" property="clientSecret"/>
+        <result column="additional_information" property="additionalInformation" jdbcType="VARCHAR"
+                javaType="java.util.Map"
+                typeHandler="com.hand.hcf.core.persistence.typehandler.MapTypeHandler"/>
+    </resultMap>
+
+    <select id="getClientDetailWithAddition" resultMap="clientMap">
+    select
+        client_id ,
+       additional_information
+    from oauth_client_details
+    where additional_information is not null
+    and additional_information!=''
+    </select>
+
+
+
+    <update id="updateClientTenantId">
+        update oauth_client_details set additional_information = #{additionalInformation}
+        where client_id = #{clientId}
+    </update>
+    
+    <delete id="deleteAccessToken">
+        delete from oauth_access_token where client_id = #{clientId}  and user_name is null
+    </delete>
+
+    <update id="updateOauthAccessTokenById" parameterType="java.util.Map" statementType="PREPARED">
+      update oauth_access_token set authentication=#{authentication,jdbcType=BLOB} where authentication_id=#{authenticationId}
+  </update>
+
+    <select id="findWebAuthenticationIdByLogin" resultType="java.lang.String">
+        SELECT token_id from oauth_access_token where user_name = #{login} and  client_id = 'ArtemisWeb'
+    </select>
+    <delete id="deleteWebOauthTokenByLogin">
+        DELETE FROM  oauth_access_token where user_name = #{login} and client_id = 'ArtemisWeb'
+    </delete>
+
+    <select id="findAuthenticationIdByLogin" resultType="java.lang.String">
+        SELECT token_id from oauth_access_token where user_name = #{login}
+    </select>
+
+    <select id="findRefreshByLogin" resultType="java.lang.String">
+        SELECT refresh_token from oauth_access_token where user_name = #{login}
+    </select>
+
+    <delete id="deleteOauthTokenByLogin">
+        DELETE FROM  oauth_access_token where user_name = #{login}
+    </delete>
+
+    <delete id="deleteRefreshByToken">
+        DELETE FROM oauth_refresh_token  WHERE token_id=#{tokenId}
+    </delete>
+
+
+    <select id="getCompanyClient" resultType="com.hand.hcf.app.auth.dto.ClientDTO">
+        SELECT
+        ocd.client_id,
+        ocd.client_secret
+        FROM oauth_client_details ocd
+        WHERE 1 = 1
+        AND ocd.additional_information LIKE concat('%', concat(#{companyOid}, '%'))
+    </select>
+    <select id="getTenantClient" resultType="com.hand.hcf.app.auth.dto.ClientDTO">
+        SELECT
+        ocd.client_id,
+        ocd.client_secret
+        FROM oauth_client_details ocd
+        WHERE 1 = 1
+        AND ocd.additional_information LIKE concat('%', concat(#{tenantId}, '%'))
+        And  additional_information not like '%companyOid%'
+    </select>
+
+</mapper>

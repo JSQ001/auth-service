@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-service</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
     <parent>
         <groupId>com.hand.hcf.app</groupId>
         <artifactId>hcf-app-parent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
@@ -27,11 +27,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.hand.hcf.app</groupId>
-            <artifactId>hcf-base-client</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
-        </dependency>
 
         <dependency>
             <groupId>org.liquibase</groupId>
