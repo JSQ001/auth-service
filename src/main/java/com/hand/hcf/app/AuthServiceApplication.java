@@ -1,5 +1,5 @@
 
-package com.hand.hcf.app.auth;
+package com.hand.hcf.app;
 
 import com.hand.hcf.app.auth.config.AppCenterProperties;
 import com.hand.hcf.core.annotation.EnableHcfCache;
@@ -26,7 +26,7 @@ import java.net.UnknownHostException;
 @EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class,DataSourceProperties.class, MybatisProperties.class})
 @ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.app.base"},
         excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { MailConfiguration.class})})
-@MapperScan("com.hand.hcf.app.base.persistence*")
+@MapperScan("com.hand.hcf.app.**.persistence*")
 public class AuthServiceApplication {
 
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);

@@ -75,7 +75,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib-maven-plugin.version}</version>
+                <version>1.0.1</version>
                 <configuration>
                     <from>
                         <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
