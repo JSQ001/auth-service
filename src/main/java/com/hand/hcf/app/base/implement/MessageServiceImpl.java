@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
-public class messageServiceImpl implements MessageHandler {
+public class MessageServiceImpl implements MessageHandler {
     @Override
     public MessageDTO getMessageDTO(String messageCode) {
         return null;

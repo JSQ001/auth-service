@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="current_timestamp" dbms="postgresql"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="uuid" value="UUID()" dbms="mysql"/>
+    <property name="uuid" value="get_uuid_function" dbms="oracle"/>
+    <!-- 该文件下为导入初始化数据脚本，不允许在该文件做任何与系统初始化数据无关的操作， -->
+    <changeSet id="201801111301001" author="bin.xie">
+        <comment>初始化admin角色信息</comment>
+        <sqlFile path="classpath:db/liquibase/base/init/insert_system_data.sql" encoding="UTF-8"/>
+    </changeSet>
+
+
+    <changeSet id="201801111527002" author="bin.xie">
+        <comment>初始化sys_role_menu</comment>
+        <loadData encoding="UTF-8"
+                  file="db/liquibase/base/init/sys_role_menu.csv"
+                  separator="|"
+                  tableName="sys_role_menu"/>
+    </changeSet>
+
+    <changeSet id="201801111718001" author="bin.xie">
+        <comment>初始化sys_module</comment>
+        <loadData encoding="UTF-8"
+                  file="db/liquibase/base/init/sys_module.csv"
+                  separator="|"
+                  tableName="sys_module"/>
+    </changeSet>
+
+    <changeSet id="201801111719001" author="bin.xie">
+        <comment>初始化sys_front_key</comment>
+        <loadData encoding="UTF-8"
+                  file="db/liquibase/base/init/sys_front_key.csv"
+                  separator="|"
+                  tableName="sys_front_key"/>
+    </changeSet>
+</databaseChangeLog>

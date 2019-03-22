@@ -1,0 +1,51 @@
+id,language,name
+2,en_us,Staff Type
+2,zh_cn,人员类型
+3,en_us,Job Position
+3,zh_cn,职务
+4,en_us,Ctrip Sub Account
+4,zh_cn,携程子账户
+5,en_us,Bank Name
+5,zh_cn,银行名称
+6,en_us,Nationality
+6,zh_cn,国籍
+7,en_us,Document Type
+7,zh_cn,证件类型
+8,en_us,Gender
+8,zh_cn,性别
+9,en_us,Job Level
+9,zh_cn,级别
+10,en_us,Tax Rate
+10,zh_cn,税率
+12,en_us,Invoice Type
+12,zh_cn,发票类型
+13,en_us,Additional Period
+13,zh_cn,期间附加
+14,en_us,Company Type
+14,zh_cn,公司类型
+61,en_us,Accounting for Transaction Source
+61,zh_cn,核算来源事务
+62,en_us,Accounting Scenario
+62,zh_cn,核算场景
+63,en_us,Accounting Element Value Method
+63,zh_cn,核算要素取值方式
+64,en_us,Accounting Conversion Rules
+64,zh_cn,核算要素转换规则
+65,en_us,Trading Judgement Rules
+65,zh_cn,交易判断规则
+66,en_us,Trading Account Segment Value
+66,zh_cn,交易核算段取值方式
+67,en_us,Supplier Type
+67,zh_cn,供应商行业类别
+68,en_us,Supplier Rating
+68,zh_cn,供应商评级
+69,en_us,Operating Entity
+69,zh_cn,操作实体
+1133,en_us,Data Type
+1133,zh_cn,数据类型
+1134,en_us,Data Scope
+1134,zh_cn,数据范围
+1135,en_us,Data Filtrate Method
+1135,zh_cn,数据取值方式
+100001,en_us,Types of Examination and Approval Documents
+100001,zh_cn,审批单据类型

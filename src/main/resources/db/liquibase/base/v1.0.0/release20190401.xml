@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+
+    <changeSet id="20193051700001" author="weishan">
+
+        <createTable tableName="sys_application" remarks="应用服务定义">
+            <column name="id" type="bigint" remarks="ID主键">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_application"/>
+            </column>
+            <column name="app_code" type="varchar(50)" remarks="代码"/>
+            <column name="app_name" type="varchar(200)" remarks="名称"/>
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号"/>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期"/>
+            <column name="created_by" type="bigint" remarks="创建用户ID"/>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期"/>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID"/>
+        </createTable>
+
+        <createTable tableName="sys_application_i18n" remarks="应用服务多语言表">
+            <column name="id" type="bigint" defaultValue="0" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_application_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_application_i18n"/>
+            </column>
+            <column name="app_name" type="varchar(200)" remarks="应用名称">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="20193051700002" author="weishan">
+        <addColumn tableName="sys_interface">
+            <column name="app_id" type="bigint" remarks="应用服务ID"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20193051700003" author="weishan">
+        <createTable tableName="sys_lov" remarks="lov定义">
+            <column name="id" type="bigint" remarks="ID主键">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_lov"/>
+            </column>
+            <column name="lov_code" type="varchar(50)" remarks="代码"/>
+            <column name="lov_name" type="varchar(200)" remarks="名称"/>
+            <column name="data_type" type="varchar(10)" remarks="数据类型,sql,api"/>
+            <column name="app_id" type="bigint" remarks="应用服务ID"/>
+            <column name="api_id" type="bigint" remarks="接口ID"/>
+            <column name="sql_text" type="varchar(4000)" remarks="自定义sql"/>
+            <column name="title" type="varchar(100)" remarks="标题"/>
+            <column name="prompt" type="varchar(100)" remarks="提示"/>
+            <column name="value_field" type="varchar(50)" remarks="值字段"/>
+            <column name="desc_field" type="varchar(50)" remarks="说明字段"/>
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号"/>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期"/>
+            <column name="created_by" type="bigint" remarks="创建用户ID"/>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期"/>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID"/>
+        </createTable>
+
+
+        <createTable tableName="sys_lov_i18n" remarks="lov多语言表">
+            <column name="id" type="bigint" defaultValue="0" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_lov_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_lov_i18n"/>
+            </column>
+            <column name="lov_name" type="varchar(200)" remarks="lov名称">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="sys_lov_cols" remarks="lov列定义">
+            <column name="id" type="bigint" remarks="ID主键">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_lov_cols"/>
+            </column>
+            <column name="lov_id" type="bigint" remarks="lov ID"/>
+            <column name="title" type="varchar(50)" remarks="标题"/>
+            <column name="field" type="varchar(50)" remarks="字段"/>
+            <column name="version_number" type="int" remarks="版本号"/>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期"/>
+            <column name="created_by" type="bigint" remarks="创建用户ID"/>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期"/>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID"/>
+        </createTable>
+
+    </changeSet>
+    <changeSet id="20193101700001" author="weishan">
+        <addUniqueConstraint tableName="sys_application" columnNames="app_code"
+                             constraintName="sys_application_u1"/>
+        <addUniqueConstraint tableName="sys_lov" columnNames="lov_code"
+                             constraintName="sys_lov_u1"/>
+    </changeSet>
+    <changeSet id="20193111700001" author="weishan">
+        <dropColumn tableName="sys_interface" columnName="module_id"/>
+    </changeSet>
+
+    <changeSet id="201903111646001" author="xue.han">
+        <createTable tableName="sys_front_locale" remarks="中控多语言表">
+            <column name="id" type="bigint" remarks="中控多语言表ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_front_locale"/>
+            </column>
+
+            <column name="application_id" type="bigint" remarks="应用ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_code" type="varchar(100)" remarks="应用代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_code" type="varchar(100)" remarks="界面key值">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_description" type="varchar(1000)" remarks="key描述">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language" type="varchar(100)" remarks="语言">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="tinyint" defaultValue="0" remarks="是否删除 1：删除 0：未删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="sys_front_locale" columnNames="application_code,key_code" constraintName="sys_front_locale_u1"/>
+
+        <createTable tableName="sys_serve" remarks="服务端多语言表">
+            <column name="id" type="bigint" remarks="服务端多语言表ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_serve"/>
+            </column>
+
+            <column name="application_id" type="bigint" remarks="应用ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_code" type="varchar(100)" remarks="应用代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_code" type="varchar(100)" remarks="界面key值">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_description" type="varchar(1000)" remarks="key描述">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="varchar(50)" remarks="多语言类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language" type="varchar(100)" remarks="语言">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="tinyint" defaultValue="0" remarks="是否删除 1：删除 0：未删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="application_code,key_code" tableName="sys_serve" constraintName="sys_serve_u1"/>
+    </changeSet>
+
+    <changeSet id="201903112135001" author="xue.han">
+        <renameTable oldTableName="sys_serve" newTableName="sys_serve_locale" />
+    </changeSet>
+
+    <changeSet id="20193131700001" author="weishan">
+        <addColumn tableName="sys_lov">
+            <column name="id_field" type="varchar(50)" remarks="ID字段"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903150916001" author="xue.han">
+        <dropUniqueConstraint tableName="sys_serve_locale" constraintName="sys_serve_u1" uniqueColumns="application_code,key_code" />
+        <addUniqueConstraint tableName="sys_serve_locale" columnNames="application_code,key_code,language" constraintName="sys_serve_locale_u1"/>
+    </changeSet>
+    <changeSet id="201903150918001" author="xue.han">
+        <dropUniqueConstraint tableName="sys_front_locale" constraintName="sys_front_locale_u1" uniqueColumns="application_code,key_code" />
+        <addUniqueConstraint tableName="sys_front_locale" columnNames="application_code,key_code,language" constraintName="sys_front_locale_u1"/>
+    </changeSet>
+
+    <changeSet id="201903151514001" author="xue.han">
+        <dropUniqueConstraint tableName="sys_serve_locale" uniqueColumns="application_code,key_code,language" constraintName="sys_serve_locale_u1"/>
+        <addUniqueConstraint tableName="sys_serve_locale" columnNames="language,key_code" constraintName="sys_serve_locale_u1"/>
+    </changeSet>
+    <changeSet id="201903151515001" author="xue.han">
+        <dropUniqueConstraint tableName="sys_front_locale" uniqueColumns="application_code,key_code,language" constraintName="sys_front_locale_u1"/>
+        <addUniqueConstraint tableName="sys_front_locale" columnNames="language,key_code" constraintName="sys_front_locale_u1"/>
+    </changeSet>
+
+</databaseChangeLog>

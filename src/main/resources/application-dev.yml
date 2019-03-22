@@ -1,12 +1,12 @@
 server:
   port: 9082
 spring:
-  dbType: oracle
+  dbType: mysql
   datasource:
-    #driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@47.101.143.73:1521/hcfuatp1
-    username: hcf_base_new
-    password: handhand
+    #driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://30.49.32.150:3306/ali_dev?serverTimezone=UTC
+    username: ali_dev
+    password: ali_dev
     #url: jdbc:mysql://101.132.114.170:3306/hcf_base?useUnicode=true&characterEncoding=utf-8&useSSL=false
     #username: hcf
     #password: hcf@112358
