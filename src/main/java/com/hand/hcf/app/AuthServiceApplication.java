@@ -23,13 +23,14 @@ import java.net.UnknownHostException;
 
 @SpringBootApplication
 @EnableHcfCache
-@EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class,DataSourceProperties.class, MybatisProperties.class})
-@ComponentScan(value={"com.hand.hcf.core","com.hand.hcf.app.base"},
-        excludeFilters={@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value= { MailConfiguration.class})})
+@EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class, DataSourceProperties.class, MybatisProperties.class})
+@ComponentScan(value = {"com.hand.hcf"},
+        excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {MailConfiguration.class})})
 @MapperScan("com.hand.hcf.app.**.persistence*")
 public class AuthServiceApplication {
 
     private static final Logger log = LoggerFactory.getLogger(AuthServiceApplication.class);
+
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplication(AuthServiceApplication.class);
         SimpleCommandLinePropertySource source = new SimpleCommandLinePropertySource(args);
