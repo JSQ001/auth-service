@@ -3,7 +3,6 @@ package com.hand.hcf.app;
 
 import com.hand.hcf.app.auth.config.AppCenterProperties;
 import com.hand.hcf.core.annotation.EnableHcfCache;
-import com.hand.hcf.core.config.MailConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
@@ -24,8 +22,7 @@ import java.net.UnknownHostException;
 @SpringBootApplication
 @EnableHcfCache
 @EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class, DataSourceProperties.class, MybatisProperties.class})
-@ComponentScan(value = {"com.hand.hcf"},
-        excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = {MailConfiguration.class})})
+@ComponentScan(value = {"com.hand.hcf"})
 @MapperScan("com.hand.hcf.app.**.persistence*")
 public class AuthServiceApplication {
 

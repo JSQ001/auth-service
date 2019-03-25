@@ -4,7 +4,7 @@ spring:
   dbType: mysql
   datasource:
     #driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://30.49.32.150:3306/ali_dev?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/ali_dev?serverTimezone=UTC
     username: ali_dev
     password: ali_dev
     #url: jdbc:mysql://101.132.114.170:3306/hcf_base?useUnicode=true&characterEncoding=utf-8&useSSL=false
@@ -95,3 +95,21 @@ management:
   health:
     rabbit:
       enabled: false
+
+mail:
+  password: ZhenHui2017
+  protocol: smtp
+  port: 25
+  auth: true
+  host: smtpdm.aliyun.com
+  tls: false
+  from: notice@service.huilianyi.com
+  enabled: true
+  username: notice@service.huilianyi.com
+  smtp:
+    auth: ""
+    starttls:
+      enable: false
+    transport:
+      protocol: ""
+
