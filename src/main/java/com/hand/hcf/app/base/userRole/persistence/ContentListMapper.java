@@ -10,4 +10,5 @@ import com.hand.hcf.app.base.userRole.domain.ContentList;
  * @date: 2019/1/29
  */
 public interface ContentListMapper extends BaseMapper<ContentList>{
+    void selectList(Long id);
 }

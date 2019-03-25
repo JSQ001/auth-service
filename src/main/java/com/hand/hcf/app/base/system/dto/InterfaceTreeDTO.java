@@ -12,8 +12,8 @@ import java.util.List;
  */
 @Data
 public class InterfaceTreeDTO {
-     private String moduleName;
-     private String moduleId;
+     private String appName;
+     private String appId;
      private List<Interface> listInterface = new ArrayList<Interface>();
 
 }

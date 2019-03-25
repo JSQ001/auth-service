@@ -81,8 +81,9 @@ public class SysCodeController {
      * @return
      */
     @PutMapping("/enumerations")
-    public ResponseEntity updateSysCode(@RequestBody SysCode sysCode){
-        return ResponseEntity.ok(sysCodeService.updateSysCode(sysCode));
+    public ResponseEntity updateSysCode(@RequestBody SysCode sysCode,
+                                        @RequestHeader(value = "X-Menu-Params", required = false) String systemFlag){
+        return ResponseEntity.ok(sysCodeService.updateSysCode(sysCode, systemFlag));
     }
 
     /**
@@ -91,8 +92,10 @@ public class SysCodeController {
      * @return
      */
     @PostMapping("/enumerations")
-    public ResponseEntity createSysCode(@RequestBody SysCode sysCode){
-        return ResponseEntity.ok(sysCodeService.createSysCode(sysCode));
+    public ResponseEntity createSysCode(@RequestBody SysCode sysCode,
+                                        @RequestHeader(value = "X-Menu-Params", required = false) String systemFlag){
+
+        return ResponseEntity.ok(sysCodeService.createSysCode(sysCode, systemFlag));
     }
 
     /**

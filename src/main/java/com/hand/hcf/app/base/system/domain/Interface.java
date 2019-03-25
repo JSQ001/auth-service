@@ -34,8 +34,7 @@ public class Interface extends DomainLogicEnable {
     @TableField("remark")
     private String remark; // 备注说明
 
-    @TableField("module_id")
-
-    private Long moduleId;  // 模块ID
+    @TableField("app_id")
+    private Long appId;  // 模块ID
 
 }

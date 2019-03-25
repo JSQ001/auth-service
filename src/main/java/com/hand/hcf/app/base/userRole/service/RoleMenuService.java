@@ -504,21 +504,5 @@ public class RoleMenuService extends BaseService<RoleMenuMapper, RoleMenu> {
         return roleMenuMapper.selectList(new EntityWrapper<RoleMenu>().eq("menu_id", menuId));
     }
 
-    /**
-     * 初始化租户时默认管理员的角色菜单
-     * @param role
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void initRoleMenuByTenant(Role role) {
-        // 先查询系统管理员分配的菜单
-        List<RoleMenu> roleMenus = this.selectList(new EntityWrapper<RoleMenu>().eq("role_id", 1));
-        List<RoleMenu> collect = roleMenus.stream().map(e -> {
-            e.setRoleId(role.getId());
-            e.setId(null);
-            return e;
-        }).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(collect)){
-            this.insertBatch(collect);
-        }
-    }
+
 }

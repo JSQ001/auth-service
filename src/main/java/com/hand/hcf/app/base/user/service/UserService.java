@@ -408,10 +408,9 @@ public class UserService extends BaseService<UserMapper, User> {
 
     }
 
-    public Boolean updateStatus(Long userId, UserStatusEnum status)
-    {
-        User user=getById(userId);
-        if (user == null ) {
+    public Boolean updateStatus(Long userId, UserStatusEnum status) {
+        User user = getById(userId);
+        if (user == null) {
             throw new BizException(RespCode.USER_NOT_EXIST);
         }
         if (!user.getTenantId().equals(LoginInformationUtil.getCurrentTenantId())) {
@@ -858,8 +857,8 @@ public class UserService extends BaseService<UserMapper, User> {
         return user;
     }
 
-    public UserDTO saveUserDto(UserDTO userDTO,Long currUserId,Long tenantId){
-       return userToUserDto(createOrUpdate(userDtoToUser(userDTO),currUserId,tenantId));
+    public UserDTO saveUserDto(UserDTO userDTO, Long currUserId, Long tenantId) {
+        return userToUserDto(createOrUpdate(userDtoToUser(userDTO), currUserId, tenantId));
     }
 
     public UserCO saveUserCO(UserCO user) {
@@ -1056,12 +1055,10 @@ public class UserService extends BaseService<UserMapper, User> {
         return userLoginBindList;
     }
 
-    public User changeLogin(User user, String email, String mobile, boolean clearOldMobile, Long currentUserId) {
+    public User changeLogin(User user, String email, String mobile, boolean clearOldMobile) {
 
-        String language = LoginInformationUtil.getCurrentLanguage();
-        String username = user.getUserName();
         String oldEmail = user.getEmail();
-        if (!org.springframework.util.StringUtils.isEmpty(email)) {
+        if (!StringUtils.isEmpty(email)) {
             log.info("email:{},oldemail:{}", email, oldEmail);
             if (!email.equalsIgnoreCase(oldEmail)) {
 
@@ -1096,7 +1093,6 @@ public class UserService extends BaseService<UserMapper, User> {
     @SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
     public User createOrUpdate(User user, Long currentUserId, Long tenantId) {
 
-        User newUser = null;
 
         String email = user.getEmail();
         String mobile = user.getMobile();
@@ -1104,14 +1100,15 @@ public class UserService extends BaseService<UserMapper, User> {
 
         if (user.getId() == null) {
             //insert
-            newUser.setUserOid(UUID.randomUUID());
-            newUser.setActivated(false);
-            newUser.setLanguage(LoginInformationUtil.getCurrentLanguage());
-            newUser.setTenantId(tenantId);
+            user.setUserOid(UUID.randomUUID());
+            // 默认为激活
+            user.setActivated(true);
+            user.setLanguage(LoginInformationUtil.getCurrentLanguage());
+            user.setTenantId(tenantId);
 
             if (StringUtils.isEmpty(user.getLogin())) {
                 throw new BizException(RespCode.USER_LOGIN_NOT_NULL);
-            } else if (verifyLoginExsits(user.getLogin())) {
+            } else if (verifyLoginExsits(user)) {
                 throw new BizException(RespCode.USER_LOGIN_EXISTS);
             }
 
@@ -1121,16 +1118,20 @@ public class UserService extends BaseService<UserMapper, User> {
 
             if (StringUtils.isEmpty(email)) {
                 throw new BizException(RespCode.EMAIL_IS_NULL);
-            } else if (verifyEmailExsits(email)) {
+            } else if (verifyEmailExsits(user)) {
                 throw new BizException(RespCode.USER_EMAIL_EXISTS);
             }
 
             if (!StringUtils.isEmpty(mobile)) {
-                if (verifyMobileExsits(mobile)) {
+                if (verifyMobileExsits(user)) {
                     throw new BizException(RespCode.USER_MOBILE_EXISTS);
                 }
             }
-            newUser.setPasswordHash(passwordEncoder.encode(user.getPassword()));
+            String password = user.getPassword();
+            if (StringUtils.isEmpty(password)) {
+                password = DEFAULT_PASSWORD;
+            }
+            user.setPasswordHash(passwordEncoder.encode(password));
 
         } else {
             //update
@@ -1142,54 +1143,62 @@ public class UserService extends BaseService<UserMapper, User> {
                 throw new BizException(RespCode.USER_NOT_EXIST);
             }
 
+            //设置激活日期
+            if (user.getActivated() && !oldUser.getActivated()) {
+                user.setActivatedDate(ZonedDateTime.now());
+            }
+
             //修改邮箱
             if (!StringUtils.isEmpty(email) && !email.equalsIgnoreCase(oldUser.getEmail())) {
-                if (verifyEmailExsits(email)) {
+                if (verifyEmailExsits(user)) {
                     throw new BizException(RespCode.USER_EMAIL_EXISTS);
                 }
                 userCacheableService.evictCacheUserByEmail(oldUser.getEmail());
             }
             //修改手机号
-            if (!StringUtils.isEmpty(mobile)) {
-                if (mobile == null) {
-                    if (verifyMobileExsits(mobile)) {
-                        throw new BizException(RespCode.USER_MOBILE_EXISTS);
-                    }
+            if (!StringUtils.isEmpty(mobile) && !mobile.equalsIgnoreCase(oldUser.getMobile())) {
+                if (verifyMobileExsits(user)) {
+                    throw new BizException(RespCode.USER_MOBILE_EXISTS);
                 }
             }
             //修改手机号码或者邮箱需要激活
-            this.changeLogin(newUser, email, mobile, true, currentUserId);
+            this.changeLogin(user, email, mobile, true);
         }
 
         //保存至User
-        newUser = this.saveUser(newUser);
+        user = this.saveUser(user);
 
-        return newUser;
+        return user;
     }
 
 
-
-    public Boolean verifyLoginExsits(String login) {
+    public Boolean verifyLoginExsits(User user) {
         if (selectCount(new EntityWrapper<User>()
-                .eq("login", login)) > 0) {
+                .eq("login", user.getLogin())
+                .ne("id", user.getId())
+        ) > 0) {
             return true;
         } else {
             return false;
         }
     }
 
-    public Boolean verifyEmailExsits(String email) {
+    public Boolean verifyEmailExsits(User user) {
         if (selectCount(new EntityWrapper<User>()
-                .eq("email", email)) > 0) {
+                .eq("email", user.getEmail())
+                .ne("id", user.getId())
+        ) > 0) {
             return true;
         } else {
             return false;
         }
     }
 
-    public Boolean verifyMobileExsits(String mobile) {
+    public Boolean verifyMobileExsits(User user) {
         if (selectCount(new EntityWrapper<User>()
-                .eq("mobile", mobile)) > 0) {
+                .eq("mobile", user.getMobile())
+                .ne("id", user.getId())
+        ) > 0) {
             return true;
         } else {
             return false;

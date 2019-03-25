@@ -4,10 +4,10 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.base.system.persistence.InterfaceMapper">
-    <!-- 接口 模糊查询 查所有未删除的数据，按 module_id,req_url排序 -->
+    <!-- 接口 模糊查询 查所有未删除的数据，按 app_id,req_url排序 -->
     <select id="getInterfacesByKeyword" resultType="com.hand.hcf.app.base.system.domain.Interface">
         select si.id,
-                si.module_id,
+                si.app_id,
                 si.req_url,
                 si.interface_name,
                 si.remark,
@@ -17,28 +17,28 @@
         <if test="keyword != null">
             and (si.interface_name like concat(concat('%',#{keyword}),'%') or si.req_url like concat(concat('%',#{keyword}),'%'))
         </if>
-        <if test="moduleId != null">
-            and si.module_id = #{moduleId}
+        <if test="appId != null">
+            and si.appId = #{appId}
         </if>
-        order by module_id,req_url
+        order by app_id,req_url
     </select>
     <resultMap id="interfaceResultMap" type="com.hand.hcf.app.base.system.dto.InterfaceTreeDTO">
-        <result property="moduleId" column="module_id" />
-        <result property="moduleName" column="module_name" />
+        <result property="appId" column="app_id" />
+        <result property="appName" column="app_name" />
         <collection property="listInterface" ofType="com.hand.hcf.app.base.system.domain.Interface" javaType="list">
             <result property="id" column="id" />
             <result property="interfaceName" column="interface_name" />
         </collection>
     </resultMap>
     <select id="getAllInterfaces" resultMap="interfaceResultMap">
-        SELECT sm.id module_id,
-               sm.module_name,
-               sm.module_code,
+        SELECT sm.id app_id,
+               sm.app_name,
+               sm.app_code,
                si.id,
                si.interface_name
-          FROM sys_module sm
+          FROM sys_application sm
           LEFT JOIN sys_interface si
-            ON sm.id = si.module_id
+            ON sm.id = si.app_id
            and sm.enabled = 1
            and si.enabled = 1
            order by sm.id,si.id

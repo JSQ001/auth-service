@@ -2,7 +2,10 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.userRole.domain.FunctionPageRelation;
 import com.hand.hcf.app.base.userRole.domain.PageList;
+import com.hand.hcf.app.base.userRole.dto.FunctionPageDTO;
+import com.hand.hcf.app.base.userRole.persistence.FunctionPageRelationMapper;
 import com.hand.hcf.app.base.userRole.persistence.PageListMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -11,6 +14,9 @@ import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -25,6 +31,8 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
     private final PageListMapper pageListMapper;
 
     private final BaseI18nService baseI18nService;
+
+    private final FunctionPageRelationMapper functionPageRelationMapper;
 
     /**
      * 新增 页面
@@ -44,13 +52,10 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         if (pageList.getPageRouter() == null){
             throw new BizException(RespCode.PAGE_LIST_PAGE_ROUTER_IS_NULL);
         }
-        if (pageListMapper.selectList(
-                new EntityWrapper<PageList>()
-                        .eq("page_name",pageList.getPageName())
-                        .eq("page_router",pageList.getPageRouter())
-        ).size() > 0 ){
-            throw new BizException(RespCode.PAGE_LIST_PAGE_ROUTER_REPEAT);
+        if (pageList.getPageUrl() == null){
+            throw new BizException(RespCode.PAGE_LIST_PAGE_URL_IS_NULL);
         }
+
         pageListMapper.insert(pageList);
         return pageListMapper.selectById(pageList);
     }
@@ -64,8 +69,18 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         if (pageList == null){
             throw new BizException(RespCode.PAGE_LIST_NOT_EXIST);
         }
+
+        //将功能页面关联关系中的数据物理删除
+        List<Long> functionPageRelationIdList = functionPageRelationMapper.selectList(
+                new EntityWrapper<FunctionPageRelation>()
+                        .eq("page_id",id)
+        ).stream().map(FunctionPageRelation::getId).collect(Collectors.toList());
+        if (functionPageRelationIdList.size() > 0) {
+            functionPageRelationMapper.deleteBatchIds(functionPageRelationIdList);
+        }
+
         pageList.setDeleted(true);
-        pageListMapper.updateById(pageList);
+        pageListMapper.updateAllColumnById(pageList);
     }
 
     /**
@@ -77,7 +92,7 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         if (pageList.getId() == null){
             throw new BizException(RespCode.PAGE_LIST_NOT_EXIST);
         }
-        pageListMapper.updateById(pageList);
+        pageListMapper.updateAllColumnById(pageList);
         return pageListMapper.selectById(pageList);
     }
 
@@ -113,5 +128,9 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
             result.setRecords(baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(result.getRecords(),PageList.class));
         }
         return result;
+    }
+
+    public List<FunctionPageDTO> listPageByFunctionIds(List<Long> functionIds){
+        return baseMapper.listPageByFunctionIds(functionIds);
     }
 }

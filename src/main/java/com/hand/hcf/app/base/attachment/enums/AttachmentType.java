@@ -72,10 +72,36 @@ public enum AttachmentType {
      * 表格文件
      */
     EXCEL,
-    PUBLIC_EXP_REPORT,//对公报账单
-    EXP_ADJUST,//费用调整单
-    PAYMENT,// 支付模块
-    CASH_WRITE_OFF,//核销
+    /**
+     * 对公报账单
+     */
+    PUBLIC_EXP_REPORT,
+    /**
+     * 费用调整单
+     */
+    EXP_ADJUST,
+    /**
+     * 支付模块
+     */
+    PAYMENT,
+    /**
+     * 核销
+     */
+    CASH_WRITE_OFF,
+    /**
+     * 核算工单
+     */
     GL_WORK_ORDER,
-    EXP_REVERSE//费用反冲
+    /**
+     * 费用反冲
+     */
+    EXP_REVERSE,
+    /**
+     * 资金
+     */
+    FUND,
+    /**
+     * 税务
+     */
+    TAX
 }

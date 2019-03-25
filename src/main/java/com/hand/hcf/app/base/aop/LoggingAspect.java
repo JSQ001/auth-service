@@ -1,6 +1,6 @@
 
 
-package com.hand.hcf.app.auth.aop;
+package com.hand.hcf.app.base.aop;
 
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,7 +23,7 @@ public class LoggingAspect {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 
-    @Pointcut("within(com.hand.hcf.app.base.web..*) ")
+    @Pointcut("within(com.hand.hcf.app.base..*.web..*) ")
     public void loggingPointcut() {
     }
 

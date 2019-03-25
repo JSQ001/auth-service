@@ -251,6 +251,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
                 .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
                 .like(TypeConversionUtils.isNotEmpty(dataAuthorityCode), "data_authority_code", dataAuthorityCode)
                 .like(TypeConversionUtils.isNotEmpty(dataAuthorityName), "data_authority_name", dataAuthorityName)
+                .eq("enabled",true)
                 .eq("deleted", false)
                 .orderBy("enabled desc,data_authority_code asc"));
         list.stream().map(e -> {

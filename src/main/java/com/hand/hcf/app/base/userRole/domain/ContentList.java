@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.core.annotation.I18nField;
+import com.hand.hcf.core.annotation.UniqueField;
 import com.hand.hcf.core.domain.DomainI18n;
 import lombok.Data;
 
@@ -22,11 +23,13 @@ public class ContentList extends DomainI18n {
     //目录名称
     @NotNull
     @I18nField
+    @UniqueField
     @TableField("content_name")
     private String contentName;
 
     //目录路由
     @NotNull
+    @UniqueField
     @TableField("content_router")
     private String contentRouter;
 
@@ -44,4 +47,8 @@ public class ContentList extends DomainI18n {
     @NotNull
     @TableField("sequence_number")
     private Integer sequenceNumber;
+
+    //是否有子目录
+    @TableField("has_son_content")
+    private Boolean hasSonContent;
 }

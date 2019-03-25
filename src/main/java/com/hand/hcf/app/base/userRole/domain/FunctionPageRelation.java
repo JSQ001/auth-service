@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.hand.hcf.core.domain.Domain;
 import com.hand.hcf.core.domain.DomainI18n;
 import lombok.Data;
 
@@ -17,7 +18,7 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @TableName("sys_function_page_relation")
-public class FunctionPageRelation extends DomainI18n {
+public class FunctionPageRelation extends Domain {
     //功能id
     @NotNull
     @JsonSerialize(using = ToStringSerializer.class)

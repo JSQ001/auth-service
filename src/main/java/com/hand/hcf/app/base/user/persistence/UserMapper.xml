@@ -23,10 +23,6 @@
         <if test="userOid != null">
             AND u.user_oid = #{userOid}
         </if>
-        <if test="currentUserOid != null">
-            AND u.user_oid != #{currentUserOid}
-        </if>
-
         <if test="userOids != null and userOids.size() > 0">
             AND u.user_oid IN
             <foreach collection="userOids" item="item" open="(" separator="," close=")">
@@ -44,9 +40,6 @@
             </foreach>
         </if>
 
-        <if test="status != null and status != ''">
-            AND u.status = #{status}
-        </if>
         <if test="login != null and login!='' and !fuzzy">
             AND u.login = #{login}
         </if>
@@ -65,24 +58,24 @@
             AND b.deleted = false
             AND b.login = #{userBind}
         </if>
-        <if test="phoneNumber != null and phoneNumber!='' and !fuzzy">
-            AND u.mobile = #{phoneNumber}
+        <if test="mobile != null and mobile!='' and !fuzzy">
+            AND u.mobile = #{mobile}
         </if>
 
         <if test="email != null and email!='' and !fuzzy">
             AND u.email = #{email}
         </if>
-        <if test="phoneNumber != null and fuzzy">
-            and u.mobile like concat(concat('%',#{phoneNumber}),'%')
+        <if test="mobile != null and fuzzy">
+            and u.mobile like concat(concat('%',#{mobile}),'%')
         </if>
         <if test="email != null and fuzzy">
             and u.email  like concat(concat('%',#{email}),'%')
         </if>
-        <if test="fullName != null">
-            and u.user_name like concat(concat('%',#{fullName}),'%')
+        <if test="userName != null">
+            and u.user_name like concat(concat('%',#{userName}),'%')
         </if>
         <if test="keyword != null and keyword != ''">
-            AND (u.user_name LIKE concat(concat('%',#{keyword}),'%') OR u.email LIKE concat(concat('%',#{keyword}),'%') OR u.mobile LIKE concat(concat('%',#{keyword}),'%'))
+            AND (u.login like concat(concat('%',#{keyword}),'%') OR u.user_name LIKE concat(concat('%',#{keyword}),'%') OR u.email LIKE concat(concat('%',#{keyword}),'%') OR u.mobile LIKE concat(concat('%',#{keyword}),'%'))
         </if>
 
 

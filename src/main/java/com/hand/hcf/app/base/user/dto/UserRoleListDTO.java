@@ -15,7 +15,9 @@ import java.util.UUID;
 @Data
 public class UserRoleListDTO {
 
+
     private Long id;
+
 
     private String login;
 
@@ -30,6 +32,6 @@ public class UserRoleListDTO {
 
     private String mobile;
 
-    private List<Role> roleList;
 
+    private List<Role> roleList;
 }

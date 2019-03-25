@@ -44,4 +44,7 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * 根据租户ID，[角色代码]，[角色名称] 获取所有角色 不分页
      */
     List<Role> getAllRolesByCond(@Param("tenantId") Long tenantId, @Param("roleCode") String roleCode, @Param("roleName") String roleName);
+
+    List<Long> getRoleIdByUserIdAndTime(@Param("userId") Long userId,
+                                        @Param("now") ZonedDateTime now);
 }

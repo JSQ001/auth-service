@@ -31,15 +31,15 @@ public class ModuleController {
      * @apiDescription 创建模块
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} moduleCode 模块代码
-     * @apiParam (请求参数) {String} moduleName 模块名称
+     * @apiParam (请求参数) {String} appName 模块名称
      * @apiParamExample {json} 请求报文:
      * {
      * "moduleCode":"M001",
-     * "moduleName":"费用管理模块"
+     * "appName":"费用管理模块"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} moduleCode 模块代码
-     * @apiSuccess (返回参数) {String} moduleName 模块名称
+     * @apiSuccess (返回参数) {String} appName 模块名称
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
      * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -58,7 +58,7 @@ public class ModuleController {
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
      * "moduleCode": "M001",
-     * "moduleName": "费用管理模块"
+     * "appName": "费用管理模块"
      * }
      */
     @PostMapping("/create")
@@ -72,7 +72,7 @@ public class ModuleController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Long} id 模块ID
      * @apiParam (请求参数) {String} [moduleCode] 模块代码不允许修改
-     * @apiParam (请求参数) {String} moduleName 模块名称
+     * @apiParam (请求参数) {String} appName 模块名称
      * @apiParam (请求参数) {Integer} versionNumber 版本号
      * @apiParam (请求参数) {String} enabled 启用标志
      * @apiParam (请求参数) {String} deleted 删除标志
@@ -82,11 +82,11 @@ public class ModuleController {
      * "enabled": true,
      * "deleted": false,
      * "versionNumber": 1,
-     * "moduleName": "费用管理模块111"
+     * "appName": "费用管理模块111"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} moduleCode 模块代码
-     * @apiSuccess (返回参数) {String} moduleName 模块名称
+     * @apiSuccess (返回参数) {String} appName 模块名称
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
      * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -105,7 +105,7 @@ public class ModuleController {
      * "lastUpdatedBy": null,
      * "versionNumber": 1,
      * "moduleCode": "M001",
-     * "moduleName": "费用管理模块111"
+     * "appName": "费用管理模块111"
      * }
      */
     @PutMapping("/update")
@@ -162,7 +162,7 @@ public class ModuleController {
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
      * "moduleCode": "M003",
-     * "moduleName": "费用管理模块3"
+     * "appName": "费用管理模块3"
      * }
      */
     @GetMapping("/query/{id}")
@@ -176,7 +176,7 @@ public class ModuleController {
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {String} [moduleCode] 模块代码 如果不传，则不控制，如果传了，则根据传的值模糊查询
-     * @apiParam (请求参数) {String} [moduleName] 模块名称 如果不传，则不控制，如果传了，则根据传的值模糊查询
+     * @apiParam (请求参数) {String} [appName] 模块名称 如果不传，则不控制，如果传了，则根据传的值模糊查询
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
      * @apiParamExample {json} 请求报文
@@ -193,7 +193,7 @@ public class ModuleController {
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
      * "moduleCode": "M003",
-     * "moduleName": "费用管理模块3"
+     * "appName": "费用管理模块3"
      * },
      * {
      * "id": "1031476064928694273",
@@ -205,7 +205,7 @@ public class ModuleController {
      * "lastUpdatedBy": 1005,
      * "versionNumber": 1,
      * "moduleCode": "M004",
-     * "moduleName": "费用管理模块4"
+     * "appName": "费用管理模块4"
      * }
      * ]
      */

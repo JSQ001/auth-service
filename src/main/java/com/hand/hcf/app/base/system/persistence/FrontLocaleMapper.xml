@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.system.persistence.FrontLocaleMapper">
+
+    <select id="getFrontLocaleByCond" resultType="com.hand.hcf.app.base.system.domain.FrontLocale">
+      SELECT *
+      FROM sys_front_locale sfl
+      WHERE sfl.deleted = 0
+      AND sfl.application_id = #{applicationId}
+      AND sfl.language = #{targetLanguage}
+        <if test="keyCode != null and keyCode !=''">
+            AND sfl.key_code LIKE concat(concat('%', #{keyCode}), '%')
+        </if>
+      ORDER BY sfl.key_code
+    </select>
+
+</mapper>

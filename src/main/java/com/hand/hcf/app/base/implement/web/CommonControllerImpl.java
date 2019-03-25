@@ -131,7 +131,5 @@ public class CommonControllerImpl {
         sysCodeValueCO.setValue(sysCodeValue.getValue());
         return sysCodeValueCO;
     }
-
-
 }
 

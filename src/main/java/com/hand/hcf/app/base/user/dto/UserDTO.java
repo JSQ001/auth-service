@@ -3,7 +3,7 @@
 package com.hand.hcf.app.base.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hand.hcf.app.auth.enums.UserLockedEnum;
+import com.hand.hcf.app.base.user.enums.UserLockedEnum;
 import com.hand.hcf.app.base.user.enums.UserStatusEnum;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;

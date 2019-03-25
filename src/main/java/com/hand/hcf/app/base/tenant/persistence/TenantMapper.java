@@ -12,11 +12,11 @@ public interface TenantMapper extends BaseMapper<Tenant> {
 
     List<TenantDTO> listTenantDTOsByCondition(@Param("tenantName") String tenantName,
                                               @Param("tenantCode") String tenantCode,
-                                              @Param("employeeId") String employeeId,
-                                              @Param("fullName") String fullName,
+                                              @Param("userName") String userName,
                                               @Param("mobile") String mobile,
                                               @Param("email") String email,
                                               @Param("login") String login,
+                                              @Param("remark") String remark,
                                               RowBounds rowBounds);
 
 }

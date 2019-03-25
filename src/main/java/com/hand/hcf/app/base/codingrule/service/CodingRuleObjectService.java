@@ -177,7 +177,8 @@ public class CodingRuleObjectService extends ServiceImpl<CodingRuleObjectMapper,
     public void setCodingRuleObject(CodingRuleObject u) {
         SysCodeValue sysCodeValue = sysCodeService.getValueBySysCodeAndValue(CodingRuleTypeEnum.DOCUMENT_TYPE.getId().toString(), u.getDocumentTypeCode());
         u.setDocumentTypeName(sysCodeValue == null ? "" : sysCodeValue.getName());
-
+        //todo 现在还不能查询到公司名称，公司名称暂时赋值公司code
+        u.setCompanyName(u.getCompanyCode());
     }
 
     @Transactional

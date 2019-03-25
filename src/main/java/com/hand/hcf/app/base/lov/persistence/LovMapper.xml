@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.lov.persistence.LovMapper">
+    <!-- 界面Title同步到传入的language里 -->
+    <select id="pageAll" resultType="com.hand.hcf.app.base.lov.domain.Lov">
+        select  l.*,ap.app_name,ai.interface_name api_name
+          from sys_lov l,
+               sys_application ap,
+               sys_interface ai
+        where l.app_id=ap.id
+          and l.api_id=ai.id
+        <if test="lovCode != null">
+            and l.lov_code like concat(concat('%',#{lovCode}),'%')
+        </if>
+        <if test="lovName != null">
+            and l.lov_name like concat(concat('%',#{lovName}),'%')
+        </if>
+        <if test="appId != null">
+            and l.app_id like concat(concat('%',#{appId}),'%')
+        </if>
+          order by lov_code
+    </select>
+
+</mapper>

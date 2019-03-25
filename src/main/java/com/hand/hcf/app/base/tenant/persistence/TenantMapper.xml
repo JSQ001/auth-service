@@ -7,16 +7,12 @@
 
     <select id="listTenantDTOsByCondition" resultType="com.hand.hcf.app.base.tenant.dto.TenantDTO">
         select
-        t.*,su.login,sc.employee_id,sc.full_name,sc.email,sp.phone_number mobile
+        t.*,su.login,su.email,su.mobile,su.user_name userName
         from
         sys_tenant t
         left join sys_user su
         on su.tenant_id = t.id
         and su.created_type = '1003'
-        left join sys_contact sc
-        on sc.id = su.contact_id
-        left join sys_phone sp
-        on sp.contact_id = sc.id
         where 1 = 1
         <if test="tenantName != null and tenantName !=''">
             AND t.tenant_name like concat(concat('%',#{tenantName}),'%')
@@ -24,20 +20,20 @@
         <if test="tenantCode != null and tenantCode !=''">
             AND t.tenant_code like concat(concat('%',#{tenantCode}),'%')
         </if>
-        <if test="employeeId != null and employeeId !=''">
-            AND sc.employee_id like concat(concat('%',#{employeeId}),'%')
-        </if>
-        <if test="fullName != null and fullName !=''">
-            AND sc.full_name like concat(concat('%',#{fullName}),'%')
+        <if test="userName != null and userName !=''">
+            AND su.user_name like concat(concat('%',#{userName}),'%')
         </if>
         <if test="mobile != null and mobile !=''">
-            AND sp.phone_number like concat(concat('%',#{mobile}),'%')
+            AND su.mobile like concat(concat('%',#{mobile}),'%')
         </if>
         <if test="email != null and email !=''">
-            AND sc.email like concat(concat('%',#{email}),'%')
+            AND su.email like concat(concat('%',#{email}),'%')
         </if>
         <if test="login != null and login !=''">
             AND su.login like concat(concat('%',#{login}),'%')
+        </if>
+        <if test="remark != null and remark !=''">
+            AND su.remark like concat(concat('%',#{remark}),'%')
         </if>
         order by t.tenant_code
     </select>

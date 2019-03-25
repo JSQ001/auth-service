@@ -2,9 +2,8 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.userRole.domain.FunctionList;
-import com.hand.hcf.app.base.userRole.domain.FunctionPageRelation;
-import com.hand.hcf.app.base.userRole.domain.PageList;
+import com.hand.hcf.app.base.userRole.domain.*;
+import com.hand.hcf.app.base.userRole.persistence.ContentFunctionRelationMapper;
 import com.hand.hcf.app.base.userRole.persistence.FunctionPageRelationMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -13,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +30,10 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
     private final PageListService pageListService;
 
     private final FunctionListService functionListService;
+
+    private final ContentListService contentListService;
+
+    private final ContentFunctionRelationMapper contentFunctionRelationMapper;
 
     /**
      * 批量新增 功能页面关联
@@ -55,15 +59,38 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
                 throw new BizException(RespCode.FUNCTION_PAGE_RELATION_EXIST);
             }
             //插入数据
+            //设置 功能Router
             pageList.setFunctionRouter(functionList.getFunctionRouter());
-            pageListService.updateById(pageList);
+            //设置 目录Router
+            List<ContentFunctionRelation> contentFunctionRelationList = contentFunctionRelationMapper.selectList(
+                    new EntityWrapper<ContentFunctionRelation>()
+                            .eq("function_id",functionList.getId())
+            );
+            if (contentFunctionRelationList.size() > 0){
+                ContentFunctionRelation contentFunctionRelation = contentFunctionRelationList.get(0);
+                ContentList contentList = contentListService.selectById(contentFunctionRelation.getContentId());
+                if (contentList == null){
+                    throw new BizException(RespCode.CONTENT_LIST_NOT_EXIST);
+                }
+                if (contentList.getParentId() != null){
+                    ContentList parentContentList = contentListService.selectById(contentList.getParentId());
+                    if (parentContentList == null){
+                        throw new BizException(RespCode.CONTENT_LIST_PARENT_CONTENT_NOT_EXIST);
+                    }
+                    pageList.setContentRouter(parentContentList.getContentRouter() + contentList.getContentRouter());
+                }else {
+                    pageList.setContentRouter(contentList.getContentRouter());
+                }
+            }
+
+            pageListService.updateAllColumnById(pageList);
             functionPageRelationMapper.insert(functionPageRelation);
         });
         return list;
     }
 
     /**
-     * 批量逻辑删除 功能页面关联
+     * 批量物理删除 功能页面关联
      * @param idList
      */
     @Transactional
@@ -83,30 +110,42 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
             }
             //删除数据
             pageList.setFunctionRouter(null);
-            pageListService.updateById(pageList);
-            functionPageRelation.setDeleted(true);
-            functionPageRelationMapper.updateById(functionPageRelation);
+            pageList.setContentRouter(null);
+            pageListService.updateAllColumnById(pageList);
+            //关联表里的改为物理删除
+            functionPageRelationMapper.deleteById(functionPageRelation);
         });
     }
 
     /**
-     * 条件分页查询 功能页面关联
-     * @param page
+     * 条件查询 功能页面关联
+     * @param functionId
      * @return
      */
-    public Page<FunctionPageRelation> geFunctionPageRelationByCond(Page page){
-        page = this.selectPage(page,
+    public List<FunctionPageRelation> getFunctionPageRelationByCond(Long functionId){
+        List<FunctionPageRelation> result = new ArrayList<>();
+        result = this.selectList(
                 new EntityWrapper<FunctionPageRelation>()
-                        .eq("deleted",false)
+                        .eq(functionId != null,"function_id",functionId)
                         .orderBy("last_updated_date",false)
         );
-        if (page.getRecords().size() > 0){
-            List<FunctionPageRelation> result = page.getRecords();
+        if (result.size() > 0){
             result.stream().forEach(functionPageRelation -> {
                 functionPageRelation.setFunctionName(functionListService.selectById(functionPageRelation.getFunctionId()).getFunctionName());
                 functionPageRelation.setPageName(pageListService.selectById(functionPageRelation.getPageId()).getPageName());
             });
         }
-        return page;
+        return result;
+    }
+
+    /**
+     * 过滤查询 功能页面关联
+     * @param pageName
+     * @param page
+     * @return
+     */
+    public List<PageList> filterFunctionPageRelationByCond(String pageName,Page page){
+        List<PageList> result = functionPageRelationMapper.filterFunctionPageRelationByCond( pageName, page);
+        return result;
     }
 }

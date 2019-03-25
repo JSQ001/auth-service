@@ -21,10 +21,6 @@ public class Component extends DomainLogicEnable {
     @TableField("component_name")
     private String componentName; // 组件名称
 
-    /*@TableField("module_id")
-
-    private Long moduleId;  // 模块ID 20180829 与前端商量去掉*/
-
     @TableField("menu_id")
 
     private Long menuId;  // 菜单ID 不必填

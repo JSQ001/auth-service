@@ -15,20 +15,22 @@
     </delete>
     <select id="getAllRolesByCond" resultType="com.hand.hcf.app.base.userRole.domain.Role">
         select id,
-            role_code,
-            role_name,
-            tenant_id,
-            deleted,
-            enabled
-         from sys_role sr
-        where sr.enabled = 1 and sr.deleted = 0
-        and sr.tenant_id = #{tenantId}
+        role_code,
+        role_name,
+        tenant_id,
+        deleted,
+        enabled
+        from sys_role sr
+        where
+        sr.enabled = 1 and sr.deleted = 0
         <if test=" roleCode != null">
             and sr.role_code like concat(concat('%',#{roleCode}),'%')
         </if>
         <if test=" roleName != null">
             and sr.role_name like concat(concat('%',#{roleName}),'%')
         </if>
+        and
+        ( sr.tenant_id = #{tenantId} OR sr.tenant_id = 0 )
         order by role_code
     </select>
     <select id="getSelectedRolesByCond" resultType="com.hand.hcf.app.base.userRole.domain.Role">
@@ -97,6 +99,14 @@
             and sur.valid_date_to &lt;= #{validDateTo}
         </if>
         order by role_code
+    </select>
+
+    <select id="getRoleIdByUserIdAndTime" resultType="java.lang.Long">
+        SELECT sur.role_id FROM sys_user_role sur
+        WHERE sur.user_id = #{userId}
+        AND sur.enabled = 1
+        AND (sur.valid_date_from is null or sur.valid_date_from &lt;= #{now})
+        AND (sur.valid_date_to is null or sur.valid_date_to &gt;= #{now})
     </select>
 
 </mapper>

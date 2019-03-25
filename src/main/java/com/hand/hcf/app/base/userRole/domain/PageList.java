@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.userRole.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.core.annotation.I18nField;
+import com.hand.hcf.core.domain.Domain;
 import com.hand.hcf.core.domain.DomainI18n;
 import lombok.Data;
 
@@ -40,4 +41,9 @@ public class PageList extends DomainI18n {
     //目录路由
     @TableField("content_router")
     private String contentRouter;
+
+    //页面地址
+    @NotNull
+    @TableField("page_url")
+    private String pageUrl;
 }

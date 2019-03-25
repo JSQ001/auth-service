@@ -2,14 +2,14 @@ package com.hand.hcf.app.base.system.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.system.domain.Application;
 import com.hand.hcf.app.base.system.domain.Interface;
-import com.hand.hcf.app.base.system.domain.Module;
 import com.hand.hcf.app.base.system.dto.InterfaceTreeDTO;
 import com.hand.hcf.app.base.system.persistence.InterfaceMapper;
-import com.hand.hcf.app.base.system.persistence.ModuleMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,16 +24,13 @@ import java.util.Map;
  * 接口Service
  */
 @Service
+@AllArgsConstructor
 public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
 
     private final InterfaceMapper interfaceMapper;
 
-    private final ModuleMapper moduleMapper;
+    private final ApplicationService applicationService;
 
-    public InterfaceService(InterfaceMapper moduleMapper, ModuleMapper moduleMapper1) {
-        this.interfaceMapper = moduleMapper;
-        this.moduleMapper = moduleMapper1;
-    }
 
     /**
      * 创建接口
@@ -109,10 +106,10 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean enabled, Page page) {
+    public List<Interface> pageInterfacesByAppId(Long appId, Boolean enabled, Page page) {
         return interfaceMapper.selectPage(page, new EntityWrapper<Interface>()
                 .eq(enabled != null, "enabled", enabled)
-                .eq("module_id", moduleId)
+                .eq("app_id", appId)
                 .orderBy("id"));
     }
 
@@ -121,44 +118,44 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @return
      */
-    public List<Interface> getInterfacesByModuleId(Long moduleId, Boolean enabled) {
+    public List<Interface> listInterfacesByAppId(Long appId, Boolean enabled) {
         return interfaceMapper.selectList(new EntityWrapper<Interface>()
                 .eq(enabled != null, "enabled", enabled)
-                .eq("module_id", moduleId)
+                .eq("app_id", appId)
                 .orderBy("id"));
     }
 
     /**
      * 前端查询接口 模糊查询 按 module_id,req_url排序
-     * @param moduleId 不传则不控，传了则按其控制
+     * @param appId 不传则不控，传了则按其控制
      * @param keyword 模糊匹配 interfaceName或reqUrl字段
      * @return
      */
-    public List<InterfaceTreeDTO> getInterfacesByKeyword(String moduleId,String keyword){
+    public List<InterfaceTreeDTO> getInterfacesByKeyword(String appId,String keyword){
         List<InterfaceTreeDTO> treeDTOS = new ArrayList<>();
         //查询出符合条件的数据
-        List<Interface> interfaceList = interfaceMapper.getInterfacesByKeyword(moduleId,keyword);
+        List<Interface> interfaceList = interfaceMapper.getInterfacesByKeyword(appId,keyword);
         Map<Long,List<Interface>> map = new HashMap<>();
         if(interfaceList != null && interfaceList.size() > 0){
-            //抽取重复的moduleId，并以moduleId为key,Interface的集合为value，存放map,相同的moduleId放入一个集合
+            //抽取重复的getAppId，并以getAppId为key,Interface的集合为value，存放map,相同的getAppId放入一个集合
             interfaceList.forEach(e -> {
-                if(map.get(e.getModuleId()) == null || map.get(e.getModuleId()).size() == 0){
+                if(map.get(e.getAppId()) == null || map.get(e.getAppId()).size() == 0){
                     List<Interface> tempList = new ArrayList<>();
                     tempList.add(e);
-                    map.put(e.getModuleId(),tempList);
+                    map.put(e.getAppId(),tempList);
                 }else{
-                    List<Interface> tempList = map.get(e.getModuleId());
+                    List<Interface> tempList = map.get(e.getAppId());
                     tempList.add(e);
-                    map.put(e.getModuleId(),tempList);
+                    map.put(e.getAppId(),tempList);
                 }
             });
         }
         if(map.size() > 0){
             map.forEach((k,v) -> {
-                Module module = moduleMapper.selectById(k);
+                Application module = applicationService.selectById(k);
                 InterfaceTreeDTO treeDTO = new InterfaceTreeDTO();
-                treeDTO.setModuleId(k+"");
-                treeDTO.setModuleName(module.getModuleName());
+                treeDTO.setAppId(k+"");
+                treeDTO.setAppName(module.getAppName());
                 treeDTO.getListInterface().addAll(v);
                 treeDTOS.add(treeDTO);
             });

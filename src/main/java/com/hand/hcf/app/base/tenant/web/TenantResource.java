@@ -145,7 +145,7 @@ public class TenantResource {
     }
 
     /**
-     * 租户定义条件分页查询
+     * 租户定义条件分页查询    跟员工有关的查询条件fullName,mobile,email查询无效。
      * @param tenantName
      * @param tenantCode
      * @param fullName
@@ -159,14 +159,14 @@ public class TenantResource {
     @GetMapping(value = "/query/condition", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity listByCondition(@RequestParam(value = "tenantName", required = false) String tenantName,
                                                            @RequestParam(value = "tenantCode", required = false) String tenantCode,
-                                                           @RequestParam(value = "employeeId", required = false) String employeeId,
-                                                           @RequestParam(value = "fullName", required = false) String fullName,
+                                                           @RequestParam(value = "userName", required = false) String userName,
                                                            @RequestParam(value = "mobile", required = false) String mobile,
                                                            @RequestParam(value = "email", required = false) String email,
                                                            @RequestParam(value = "login", required = false) String login,
+                                                           @RequestParam(value = "remark", required = false) String remark,
                                                            Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<TenantDTO> result =null;// tenantService.listTenantDTOsByCondition(tenantName, tenantCode, employeeId, fullName, mobile, email, login, page);
+        List<TenantDTO> result = tenantService.listTenantDTOsByCondition(tenantName, tenantCode, userName, mobile, email, login,remark,page);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/tenant/query/condition");
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }

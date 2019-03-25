@@ -9,6 +9,7 @@ import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.attachment.AttachmentCO;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.LoginInformationUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +57,12 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
         Collection<Attachment> attachmentsParam = attachmentMapper.findByAttachmentOidIn(oids);
         attachments.addAll(attachmentsParam);
         List<Long> attachmentIds = attachments.stream().map(u -> u.getId()).collect(Collectors.toList());
-        //先删除表
-        attachmentMapper.deleteBatchIds(attachmentIds);
-        //再删除文件
-        attachmentImpl.removeFile(attachments);
+        if(CollectionUtils.isNotEmpty(attachmentIds)) {
+            //先删除表
+            attachmentMapper.deleteBatchIds(attachmentIds);
+            //再删除文件
+            attachmentImpl.removeFile(attachments);
+        }
     }
 
     public void removeFile(boolean isPublic, String path){

@@ -37,19 +37,19 @@ public class FrontKeyController {
      * @apiParam (请求参数) {String} keyCode 界面Title代码
      * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiParam (请求参数) {String} descriptions 描述
-     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} appId 模块ID
      * @apiParamExample {json} 请求报文:
      * {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId":"1031479997352935426"
+     * "appId":"1031479997352935426"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} keyCode 界面Title代码
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
-     * @apiSuccess (返回参数) {Long} moduleId 模块ID
+     * @apiSuccess (返回参数) {Long} appId 模块ID
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
      * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -70,7 +70,7 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      */
     @PostMapping("/create")
@@ -86,7 +86,7 @@ public class FrontKeyController {
      * @apiParam (请求参数) {String} keyCode 界面Title代码 不允许更新
      * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiParam (请求参数) {String} descriptions 描述
-     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} appId 模块ID
      * @apiParam (请求参数) {Integer} versionNumber 版本号
      * @apiParam (请求参数) {String} enabled 启用标志
      * @apiParam (请求参数) {String} deleted 删除标志
@@ -99,13 +99,13 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * @apiSuccess (返回参数) {Long} id  主键id
      * @apiSuccess (返回参数) {String} keyCode 界面Title代码
      * @apiSuccess (返回参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiSuccess (返回参数) {String} descriptions 描述
-     * @apiSuccess (返回参数) {Long} moduleId 模块ID
+     * @apiSuccess (返回参数) {Long} appId 模块ID
      * @apiSuccess (返回参数) {Boolean} enabled    启用标志
      * @apiSuccess (返回参数) {Boolean} deleted    删除标志
      * @apiSuccess (返回参数) {Integer} versionNumber    版本号
@@ -126,7 +126,7 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      */
     @PutMapping("/update")
@@ -185,7 +185,7 @@ public class FrontKeyController {
      * "keyCode": "common.save",
      * "lang": "zh_CN",
      * "descriptions": "保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      */
     @GetMapping("/query/{id}")
@@ -216,7 +216,7 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * ]
      */
@@ -233,7 +233,7 @@ public class FrontKeyController {
      * @api {GET} /api/frontKey/query/module 【系统框架】界面Title查询分页
      * @apiDescription 根据模块Id， 查询所有界面Title 分页
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} appId 模块ID
      * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
      * @apiParam (请求参数) {Integer} size 每页大小
@@ -253,7 +253,7 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * ]
      */
@@ -271,7 +271,7 @@ public class FrontKeyController {
      * @api {GET} /api/frontKey/query/module/lang 【系统框架】界面Title查询分页
      * @apiDescription 根据模块Id，语言lang， 查询所有界面Title 分页
      * @apiGroup SysFrameWork
-     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} appId 模块ID
      * @apiParam (请求参数) {String} lang 语言 zh_CN 中文，en 英文
      * @apiParam (请求参数) {Boolean} [enabled] 启用标识 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} page 页码
@@ -292,7 +292,7 @@ public class FrontKeyController {
      * "keyCode":"common.save",
      * "lang":"zh_CN",
      * "descriptions":"保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * ]
      */
@@ -330,7 +330,7 @@ public class FrontKeyController {
      * "keyCode": "common.create",
      * "lang": "en_US",
      * "descriptions": "CREATE",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * },
      * {
      * "id": "1033276764090011650",
@@ -344,7 +344,7 @@ public class FrontKeyController {
      * "keyCode": "delete",
      * "lang": "en_US",
      * "descriptions": "delete",
-     * "moduleId": "1032887003941675010"
+     * "appId": "1032887003941675010"
      * },
      * {
      * "id": "1033276764161314817",
@@ -358,7 +358,7 @@ public class FrontKeyController {
      * "keyCode": "save",
      * "lang": "en_US",
      * "descriptions": "Save",
-     * "moduleId": "1032887003941675010"
+     * "appId": "1032887003941675010"
      * },
      * {
      * "id": "1033908447921356802",
@@ -372,7 +372,7 @@ public class FrontKeyController {
      * "keyCode": "test",
      * "lang": "en_US",
      * "descriptions": "test",
-     * "moduleId": "1032887003941675010"
+     * "appId": "1032887003941675010"
      * }
      * ]
      */
@@ -430,20 +430,20 @@ public class FrontKeyController {
      * @apiParam (请求参数) {String} keyCode 界面Title代码
      * @apiParam (请求参数) {String} lang 中文/英文 zh_CN 中文，en 英文
      * @apiParam (请求参数) {String} descriptions 描述
-     * @apiParam (请求参数) {Long} moduleId 模块ID
+     * @apiParam (请求参数) {Long} appId 模块ID
      * @apiParamExample {json} 请求报文:
      * [
      * {
      * "keyCode":"common.create",
      * "lang":"zh_CN",
      * "descriptions":"创建",
-     * "moduleId":"1031479997352935426"
+     * "appId":"1031479997352935426"
      * },
      * {
      * "keyCode":"common.create",
      * "lang":"en_US",
      * "descriptions":"CREATE",
-     * "moduleId":"1031479997352935426"
+     * "appId":"1031479997352935426"
      * }
      * ]
      * @apiSuccessExample {json} 返回报文:
@@ -480,7 +480,7 @@ public class FrontKeyController {
      * "keyCode": "common.create",
      * "lang": "zh_CN",
      * "descriptions": "创建",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * },
      * {
      * "id": "1033005159936630785",
@@ -494,7 +494,7 @@ public class FrontKeyController {
      * "keyCode": "common.create",
      * "lang": "en_US",
      * "descriptions": "CREATE",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * ]
      */
@@ -512,12 +512,12 @@ public class FrontKeyController {
      * 1) lang 语言，不传则不控制，传了则按传入的值进行控制
      * 2) keyCode 界面Title的keyCode代码，不传则不控制，传了则按传入的值进行控制 模糊查询
      * 3) descriptions 界面Title的描述，不传则不控制，传了则按传入的值进行控制 模糊查询
-     * 4) moduleId 模块ID，不传则不控制，传了则按传入的值进行控制
+     * 4) appId 模块ID，不传则不控制，传了则按传入的值进行控制
      * 5) keyword 语言，不传则不控制，传了则匹配keyCode或descriptions字段，模糊查询
      * @apiGroup SysFrameWork
      * @apiParam (请求参数) {String} [keyCode] 界面Title的keyCode代码 模糊查询
      * @apiParam (请求参数) {String} [descriptions] 界面Title的描述 模糊查询
-     * @apiParam (请求参数) {Long} [moduleId] 模块ID
+     * @apiParam (请求参数) {Long} [appId] 模块ID
      * @apiParam (请求参数) {String} [keyword] 用于匹配keyCode或descriptions字段，模糊查询
      * @apiParam (请求参数) {String} [lang] 语言 zh_CN 中文，en_US 英文 如果不传，则不控制，如果传了，则根据传的值控制
      * @apiParam (请求参数) {Integer} [page] 当前页
@@ -538,7 +538,7 @@ public class FrontKeyController {
      * "keyCode": "common.save",
      * "lang": "zh_CN",
      * "descriptions": "保存",
-     * "moduleId": "1031479997352935426"
+     * "appId": "1031479997352935426"
      * }
      * ]
      */

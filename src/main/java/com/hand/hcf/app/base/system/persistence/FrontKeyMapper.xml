@@ -48,8 +48,8 @@
             <if test="lang != null">
                 and k.lang = #{lang}
             </if>
-            <if test="moduleId != null">
-                and k.module_id = #{moduleId}
+            <if test="appId != null">
+                and k.module_id = #{appId}
             </if>
           order by key_code
     </select>

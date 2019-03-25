@@ -2,6 +2,8 @@ package com.hand.hcf.app.base.userRole.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.userRole.domain.ContentFunctionRelation;
+import com.hand.hcf.app.base.userRole.domain.FunctionList;
+import com.hand.hcf.app.base.userRole.domain.PageList;
 import com.hand.hcf.app.base.userRole.service.ContentFunctionRelationService;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +41,7 @@ public class ContentFunctionRelationController {
     }
 
     /**
-     * 批量逻辑删除 目录功能关联
+     * 批量物理删除 目录功能关联
      * @param idList
      * @return
      */
@@ -50,19 +52,33 @@ public class ContentFunctionRelationController {
     }
 
     /**
-     * 条件分页查询 目录功能关联
+     * 条件查询 目录功能关联
+     *
+     * @param contentId
+     * @return
+     */
+    @GetMapping("/query/by/cond")
+    public ResponseEntity<List<ContentFunctionRelation>> getContentFunctionRelationByCond(
+            @RequestParam("contentId") Long contentId){
+        List<ContentFunctionRelation> result = contentFunctionRelationService.getContentFunctionRelationByCond(contentId);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 过滤查询 目录功能关联
+     *
+     * @param functionName
      * @param pageable
      * @return
      * @throws URISyntaxException
      */
-    @GetMapping("/query/by/cond")
-    public ResponseEntity<List<ContentFunctionRelation>> geContentFunctionRelationByCond(
-            Pageable pageable)throws URISyntaxException{
+    @GetMapping("/filter")
+    public ResponseEntity<List<FunctionList>> filterContentFunctionRelationByCond(
+            @RequestParam(value = "functionName",required = false) String functionName,
+            Pageable pageable)throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        Page<ContentFunctionRelation> result = contentFunctionRelationService.geContentFunctionRelationByCond(page);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", "" + result.getTotal());
-        headers.add("Link", "/api/content/function/relation/query/by/cond");
-        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+        List<FunctionList> result = contentFunctionRelationService.filterContentFunctionRelationByCond(functionName,page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result,httpHeaders,HttpStatus.OK);
     }
 }

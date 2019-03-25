@@ -4,29 +4,45 @@ package com.hand.hcf.app.base.util;
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
  */
 public interface RespCode extends com.hand.hcf.core.util.RespCode {
-    String ROLE_CODE_NULL = "10010";//角色代码不允许为空
-    String ROLE_NAME_NULL = "10011";// 角色名称不允许为空
+    String ROLE_CODE_NULL = "ROLE_CODE_NULL";//角色代码不允许为空
+    String ROLE_NAME_NULL = "ROLE_NAME_NULL";// 角色名称不允许为空
     String CODE_NOT_UNION_IN_TENANT = "10012";// 当前租户已存在该角色代码
     String SYS_ID_NULL = "SYS_ID_NULL"; //id 不应该为空!
     String SYS_ID_NOT_NULL = "SYS_ID_NOT_NULL"; //ID 应该为空
     String SYS_DATASOURCE_CANNOT_FIND_OBJECT = "SYS_DATASOURCE_CANNOT_FIND_OBJECT"; //数据库不存在
     String SYS_READ_FILE_ERROR = "SYS_READ_FILE_ERROR"; // 读取文件异常 to
 
-    String MENU_CODE_NULL = "10020";//菜单代码不允许为空
-    String MENU_NAME_NULL = "10021";// 菜单名称不允许为空
+
+    String APPLICATION_CODE_NOT_BE_NULL = "APPLICATION_CODE_NOT_BE_NULL";// 应用代码不允许为空
+    String APPLICATION_NAME_NOT_BE_NULL = "APPLICATION_NAME_NOT_BE_NULL";// 应用名称不允许为空
+
+    String APPLICATION_CODE_EXISTS = "APPLICATION_CODE_EXISTS";// 应用代码已经存在
+    String APPLICATION_NAME_EXISTS = "APPLICATION_NAME_EXISTS";// 应用名称已经存在
+
+
+    String LOV_CODE_NOT_BE_NULL = "LOV_CODE_NOT_BE_NULL";// lov代码不允许为空
+    String LOV_NAME_NOT_BE_NULL = "LOV_NAME_NOT_BE_NULL";// lov名称不允许为空
+
+    String LOV_CODE_EXISTS = "LOV_CODE_EXISTS";// lov代码已经存在
+    String LOV_NAME_EXISTS = "LOV_NAME_EXISTS";// lov名称已经存在
+
+
+
+    String MENU_CODE_NULL = "MENU_CODE_NULL";//菜单代码不允许为空
+    String MENU_NAME_NULL = "MENU_NAME_NULL";// 菜单名称不允许为空
     String CODE_NOT_UNION = "10022";// 菜单代码已经存在
     String HAVING_CHILD_MENU = "10023";// 菜单代码已经存在
-    String MENU_FUNCTION_PARENT_MUST_BE_CATALOG = "10024";// 功能的上级菜单必须是目录
+    String MENU_FUNCTION_PARENT_MUST_BE_CATALOG = "MENU_FUNCTION_PARENT_MUST_BE_CATALOG";// 功能的上级菜单必须是目录
     String MENU_PARENT_CATALOG_ERROR = "10025";//功能只能添加到最底级的目录
     String ROOT_CATALOG_MUST_BE_CATALOG = "10026";//功能只能添加到最底级的目录
     String HAS_CHILD_CATALOG_CAN_NOT_BE_FUNCTION = "10027";//当前菜单存在子目录，不允许由目录变更为功能
 
-    String USER_ROLE_EXISTS = "10031"; // 用户角色组合已经存在
-    String ROLE_MENU_EXISTS = "10041"; // 角色菜单组合已经存在
+    String USER_ROLE_EXISTS = "USER_ROLE_EXISTS"; // 用户角色组合已经存在
+    String ROLE_MENU_EXISTS = "ROLE_MENU_EXISTS"; // 角色菜单组合已经存在
 
-    String BUTTON_CODE_NULL = "10050";//按钮代码不允许为空
+    String BUTTON_CODE_NULL = "BUTTON_CODE_NULL";//按钮代码不允许为空
     String BUTTON_CODE_NOT_UNION = "10051";// 按钮代码在菜单中已经存在
-    String BUTTON_NAME_NULL = "10052";//按钮名称不允许为空
+    String BUTTON_NAME_NULL = "BUTTON_NAME_NULL";//按钮名称不允许为空
 
     String ROLE_MENU_BUTTON_EXISTS = "10061"; // 角色菜单按钮组合已经存在
 
@@ -41,56 +57,43 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String AUTH_MODULE_ID_NULL = "AUTH_MODULE_ID_NULL";// 必须关联模块
     String AUTH_FRONT_KEY_NOT_UNION = "AUTH_FRONT_KEY_NOT_UNION";// KEY必须唯一
 
-    String REQUEST_CODE_NULL = "10110";// 请求名称不允许为空
-    String REQUEST_INTERFACE_NULL = "10111";// 请求必须关联接口
+    String REQUEST_CODE_NULL = "AUTH_REQUEST_CODE_NULL";// 请求名称不允许为空
+    String REQUEST_INTERFACE_NULL = "AUTH_REQUEST_INTERFACE_NULL";// 请求必须关联接口
 
     String RESPONSE_CODE_NULL = "10120";// 响应名称不允许为空
     String RESPONSE_INTERFACE_NULL = "10121";// 响应必须关联接口
 
-    String LANGUAGE_CODE_NULL = "10131";// 语言代码不允许为空
-    String LANGUAGE_NAME_NULL = "10132";// 语言名称不允许为空
-    String LANGUAGE_CODE_NOT_UNION = "10133";// 语言代码已经存在
+    String LANGUAGE_CODE_NULL = "AUTH_LANGUAGE_CODE_NULL";// 语言代码不允许为空
+    String LANGUAGE_NAME_NULL = "AUTH_LANGUAGE_NAME_NULL";// 语言名称不允许为空
+    String LANGUAGE_CODE_NOT_UNION = "AUTH_LANGUAGE_CODE_NOT_UNION";// 语言代码已经存在
 
-    String ERROR_CODE_NULL = "10141";// 报错代码不允许为空
-    String ERROR_MESSAGE_NULL = "10142";// 报错信息不允许为空
-
-    String APPROVER_MUST_LT_26="APPROVER_MUST_LESS_THAN_26";
+    String ERROR_CODE_NULL = "AUTH_ERROR_CODE_NULL";// 报错代码不允许为空
+    String ERROR_MESSAGE_NULL = "AUTH_ERROR_MESSAGE_NULL";// 报错信息不允许为空
 
     String MOBILE_VALIDATE_DUPLICATED_CODE = "220001";
     String MOBILE_VALIDATE_FORMAT_ERROR = "220002";
-    String UNKNOWN_ERROR="6047018";//其他未知错误
 
-    String CODE_CANT_CHINESE="6057001";//编码不能包含汉字
-    String CODE_CANT_ILLEGAL="6057002";//编码不能包含非法字符
-    String CODE_LENGTH_LT_36="6057003";//编码长度不能超过36位
-    String CODE_CANT_MODIFIED="6057004";//编码不允许修改
+    String CODE_CANT_CHINESE="CODE_CANT_CHINESE";//编码不能包含汉字
+    String CODE_CANT_ILLEGAL="CODE_CANT_ILLEGAL";//编码不能包含非法字符
+    String CODE_LENGTH_LT_36="CODE_LENGTH_LT_36";//编码长度不能超过36位
+    String CODE_CANT_MODIFIED="CODE_CANT_MODIFIED";//编码不允许修改
 
 
-    String TENANT_NOT_EXIST = "6017001"; //租户不存在
-    String TENANT_6017002 = "6017002"; //租户已经存在
-    String TENANT_6017003 = "6017003";
-    String TENANT_6017004 = "6017004";
-    String TENANT_NAME_NULL = "6017005"; //租户名称不能为空
-    String TENANT_6017006 = "6017006";
+    String TENANT_NOT_EXIST = "TENANT_NOT_EXIST"; //租户不存在
+    String TENANT_NAME_NULL = "TENANT_NAME_NULL"; //租户名称不能为空
     String TENANT_PROTOCOL_TITLE_TO0_LONG = "6060001";//自定义协议标题不能为空或超过50个字符
     String TENANT_PROTOCOL_CONTENT_TO0_LONG = "6060002";//自定义协议内容不能为空或超过10000个字符
     String TENANT_MULTI_PROTOCOL = "6060003"; //一个租户包含多个自定义协议
     String TENANT_ADMIN_PASSWORD_IS_ERROR = "TENANT_ADMIN_PASSWORD_IS_ERROR"; // 租户管理员两次密码输入不一致
-    String COMPANY_NOT_EXIST = "121301";  //公司不存在
 
-    String LEGAL_ENTITY_NULL = "120301";     //法人为空
-    String PARENT_LEGAL_ENTITY_NULL = "120304";    //父级法人为空
-    String LEGAL_ENTITY_NAME_NULL = "120305";   //法人名称为空
-    String TAX_PAYER_NUMBER_NULL = "120306";    //纳税人识别号为空
-    String LEGAL_ENTITY_ACCOUNT_NUMBER_EXIST = "120309";//法人实体银行卡号已存在
     /**
      * 账户操作
      */
     String USER_ACTIVATION_TOKEN_NOT_EXISTS = "6052001";
     String USER_ACTIVATION_TOKEN_EXPIRED = "6052002";
-    String USER_PASS_LENGTH_WRONG = "6052003";
-    String USER_PASS_FORMAT_WRONG = "6052004";
-    String USER_PASS_REPAT_WRONG = "6052005";
+    String USER_PASS_LENGTH_WRONG = "USER_PASS_LENGTH_WRONG";
+    String USER_PASS_FORMAT_WRONG = "USER_PASS_FORMAT_WRONG";
+    String USER_PASS_REPAT_WRONG = "USER_PASS_REPAT_WRONG";
 
     String USER_PASS_NOT_ALLOW_RESET = "USER_PASS_NOT_ALLOW_RESET";
     String ACCOUNT_6052006 = "6052006";
@@ -98,7 +101,7 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String ACCOUNT_6052008 = "6052008";
     String ACCOUNT_6052009 = "6052009";
     String ACCOUNT_6052010 = "6052010";
-    String USER_OLD_PASS_WRONG = "6052011";
+    String USER_OLD_PASS_WRONG = "USER_OLD_PASS_WRONG";
     String ACCOUNT_6052012 = "6052012";
     String ACCOUNT_6052013 = "6052013";
     String ACCOUNT_6052014 = "6052014";
@@ -108,14 +111,10 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String ACCOUNT_6052018 = "6052018";
     String ACCOUNT_6052019 = "6052019";
 
-    String AUTHORITY_6031001 = "6031001";
-    String AUTHORITY_6031002 = "6031002";
     String SYS_USER_LANG_IS_NULL="SYS_USER_LANG_IS_NULL";//用户语言不能为空
-    String USER_6037001 = "6037001";
-    String USER_NOT_EXIST = "6037002";
-    String USER_NOT_ACTIVATE = "6037003";//用户未激活
-    String USER_6037004 = "6037004";
-    String USER_ALREADY_ACTIVATED = "6037005";
+    String USER_NOT_EXIST = "USER_NOT_EXIST";
+    String USER_NOT_ACTIVATE = "USER_NOT_ACTIVATE";//用户未激活
+    String USER_ALREADY_ACTIVATED = "USER_ALREADY_ACTIVATED";
 
     String USER_LOGIN_NOT_NULL="USER_LOGIN_NOT_NULL";//用户名不能为空
     String USER_LOGIN_EXISTS="USER_LOGIN_EXISTS";//用户名已经存在
@@ -144,7 +143,7 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String SYS_CODE_VALE_CODE_IS_EXISTS = "SYS_CODE_VALE_CODE_IS_EXISTS"; // 系统代码的值代码已经存在
 
 
-    String READ_FILE_FAILED = "7005";    //读取文件失败
+    String SYS_READ_FILE_FAILED = "SYS_READ_FILE_FAILED";    //读取文件失败
 
     /**
      * 编码规则
@@ -195,20 +194,6 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String AUTH_DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS = "AUTH_DATA_AUTH_TABLE_PROPERTY_DATA_TYPE_EXISTS";//此参数类型在该表名下已经存在!
     String AUTH_DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS = "AUTH_DATA_AUTH_TABLE_PROPERTY_COLUMN_NAME_EXISTS";//此参数名称在该表名下已经存在!
 
-    //公告信息
-    String Carousel_6041001 = "6041001";
-    String Carousel_6041002 = "6041002";
-    String Carousel_6041003 = "6041003";
-    String Carousel_6041004 = "6041004"; //carouselOIDs or companyIDs,RequestParam can't be null
-
-
-    //参数定义
-    String PARAMETER_VALUES_NOT_EXIST="PARAMETER_VALUES_NOT_EXIST";//当前参数值不存在!
-    String PARAMETER_SETTING_NOT_EXIST="PARAMETER_SETTING_NOT_EXIST";//当前参数明细不存在!
-    String PARAMETER_DATA_NOT_INIT="PARAMETER_DATA_NOT_INIT";//系统参数数据未初始化!
-    String PARAMETER_NOT_EXIST="PARAMETER_NOT_EXIST";//当前参数不存在!
-
-
     //页面
     String PAGE_LIST_EXIST = "PAGE_LIST_EXIST";//当前页面已经存在!
     String PAGE_LIST_NOT_EXIST = "PAGE_LIST_NOT_EXIST";//当前页面不存在!
@@ -216,14 +201,16 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String PAGE_LIST_FILE_PATH_IS_NULL = "PAGE_LIST_FILE_PATH_IS_NULL";//页面对应本地文件的地址为空!
     String PAGE_LIST_PAGE_ROUTER_IS_NULL = "PAGE_LIST_PAGE_ROUTER_IS_NULL";//页面路由为空!
     String PAGE_LIST_PAGE_ROUTER_REPEAT = "PAGE_LIST_PAGE_ROUTER_REPEAT";//该页面路由已经存在!
+    String PAGE_LIST_PAGE_URL_IS_NULL = "PAGE_LIST_PAGE_URL_IS_NULL";//页面地址为空!
     //功能
     String FUNCTION_LIST_EXIST = "FUNCTION_LIST_EXIST";//当前功能已经存在!
     String FUNCTION_LIST_NOT_EXIST = "FUNCTION_LIST_NOT_EXIST";//当前功能不存在!
     String FUNCTION_LIST_FUNCTION_NAME_IS_NULL = "FUNCTION_LIST_FUNCTION_NAME_IS_NULL";//功能名称为空!
     String FUNCTION_LIST_FUNCTION_ROUTER_IS_NULL = "FUNCTION_LIST_FUNCTION_ROUTER_IS_NULL";//功能路由为空!
-    String FUNCTION_LIST_FUNCTION_URL_IS_NULL = "FUNCTION_LIST_FUNCTION_URL_IS_NULL";//功能地址为空!
     String FUNCTION_LIST_SEQUENCE_NUMBER_IS_NULL = "FUNCTION_LIST_SEQUENCE_NUMBER_IS_NULL";//功能优先级为空!
     String FUNCTION_LIST_FUNCTION_ROUTER_REPEAT = "FUNCTION_LIST_FUNCTION_ROUTER_REPEAT";//该功能路由已经存在!
+    String FUNCTION_LIST_APPLICATION_ID_IS_NULL = "FUNCTION_LIST_APPLICATION_ID_IS_NULL";//功能应用ID为空!
+    String FUNCTION_LIST_HAVE_BEEN_ALLOCATED_PAGES = "FUNCTION_LIST_HAVE_BEEN_ALLOCATED_PAGES";//该功能已经分配了页面，若想删除该功能，请先取消分配!
     //功能页面关联
     String FUNCTION_PAGE_RELATION_NOT_EXIST = "FUNCTION_PAGE_RELATION_NOT_EXIST";//该功能页面关系不存在!
     String FUNCTION_PAGE_RELATION_EXIST = "FUNCTION_PAGE_RELATION_EXIST";//该功能页面关系已经存在!
@@ -239,4 +226,17 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     //目录功能关联
     String CONTENT_FUNCTION_RELATION_NOT_EXIST = "CONTENT_FUNCTION_RELATION_NOT_EXIST";//该目录功能关系不存在!
     String CONTENT_FUNCTION_RELATION_EXIST = "CONTENT_FUNCTION_RELATION_EXIST";//该目录功能关系已经存在!
+
+    //角色关联功能
+    String ROLE_FUNCTION_NOT_EXIST = "ROLE_FUNCTION_NOT_EXIST";//该角色功能关系不存在!
+    String ROLE_FUNCTION_EXIST = "ROLE_FUNCTION_EXIST";//该角色功能关系已经存在!
+
+    //服务端多语言
+    String SERVE_LOCALE_NOT_EXIST = "SERVE_LOCALE_NOT_EXIST";//该服务端多语言不存在!
+    String SERVE_LOCALE_EXIST = "SERVE_LOCALE_EXIST";//该服务端多语言已经存在!
+    String SERVE_LOCALE_KEY_CODE_NOT_ALLOWED_TO_REPEAT = "SERVE_LOCALE_KEY_CODE_NOT_ALLOWED_TO_REPEAT";//服务端多语言界面key值重复!
+    //中控多语言
+    String FRONT_LOCALE_NOT_EXIST = "FRONT_LOCALE_NOT_EXIST";//该中控多语言不存在!
+    String FRONT_LOCALE_EXIST = "FRONT_LOCALE_EXIST";//该中控多语言已经存在!
+    String FRONT_LOCALE_KEY_CODE_NOT_ALLOWED_TO_REPEAT = "FRONT_LOCALE_KEY_CODE_NOT_ALLOWED_TO_REPEAT";//中控多语言界面key值重复!
 }

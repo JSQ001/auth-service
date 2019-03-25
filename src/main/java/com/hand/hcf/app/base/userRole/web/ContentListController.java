@@ -89,4 +89,14 @@ public class ContentListController {
         headers.add("Link", "/api/content/list/query/by/cond");
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
     }
+
+    /**
+     * 查询某个目录的子目录
+     * @param id
+     * @return
+     */
+    @GetMapping("/query/son/content/{id}")
+    public ResponseEntity<List<ContentList>> getSonContent (@PathVariable Long id){
+        return ResponseEntity.ok(contentListService.getSonContent(id));
+    }
 }

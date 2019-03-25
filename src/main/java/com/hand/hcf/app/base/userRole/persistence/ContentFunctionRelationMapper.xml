@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.userRole.persistence.ContentFunctionRelationMapper">
+
+    <select id="filterContentFunctionRelationByCond" resultType="com.hand.hcf.app.base.userRole.domain.FunctionList">
+        SELECT * FROM sys_function_list sfl WHERE sfl.id NOT IN (
+        SELECT scfr.function_id FROM sys_content_function_rel scfr
+        GROUP BY scfr.function_id
+        )
+        AND sfl.deleted = false
+        <if test="functionName !=null and functionName != ''">
+            AND sfl.function_name LIKE concat('%', concat(#{functionName,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY sfl.last_updated_date DESC
+    </select>
+    <select id="listContentFunctions" resultType="com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO">
+        SELECT cf.content_id,
+        c.content_name,
+        c.content_router,
+        c.icon,
+        c.parent_id,
+        c.sequence_number AS contentSequenceNumber,
+        c.has_son_content,
+        f.id as function_id,
+        f.function_name,
+        f.function_router,
+        f.param,
+        f.sequence_number as functionSequenceNumber,
+        f.page_id,
+        f.function_icon,
+        f.application_id,
+        a.app_code as applicationCode
+        FROM  sys_function_list f
+        LEFT JOIN sys_content_function_rel cf on cf.function_id = f.id
+        LEFT JOIN sys_content_list c on cf.content_id = c.id and c.deleted = 0
+        LEFT JOIN sys_application a on f.application_id = a.id
+        WHERE
+              f.deleted = 0
+        <if test="functionIds != null and functionIds.size>0">
+            AND  f.id in
+            <foreach collection="functionIds" item="functionId" separator="," open="(" close=")">
+                #{functionId}
+            </foreach>
+        </if>
+        ORDER BY c.sequence_number asc , f.sequence_number asc
+    </select>
+    <select id="listNotAssignFunction" resultType="com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO">
+
+        select
+        c.id as content_id,
+        c.content_name,
+        c.content_router,
+        c.icon,
+        c.parent_id,
+        c.sequence_number AS contentsequencenumber,
+        c.has_son_content
+        from sys_content_list c
+        where c.deleted = 0 and
+        c.id not in (select cf.content_id from sys_content_function_rel cf where
+        cf.function_id in
+        <foreach collection="functionIds" item="functionId" separator="," open="(" close=")">
+            #{functionId}
+        </foreach>
+        )
+        order by c.sequence_number asc
+    </select>
+
+</mapper>

@@ -6,8 +6,6 @@ import com.hand.hcf.app.base.user.dto.UserQO;
 import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
 import com.hand.hcf.core.util.LoginInformationUtil;
 import com.hand.hcf.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
@@ -156,7 +154,7 @@ public class UserController {
      * "manager" : false
      * }
      */
-    @RequestMapping(value = "/users/oid/{userOid}",
+    @RequestMapping(value = "/oid/{userOid}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
@@ -210,7 +208,7 @@ public class UserController {
      * }
      * ]
      */
-    @RequestMapping(value = "/users/oids",
+    @RequestMapping(value = "/oids",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
@@ -269,7 +267,7 @@ public class UserController {
      * "senior": false
      * }
      */
-    @RequestMapping(value = "/users/{login:[_'.@a-z0-9-]+}",
+    @RequestMapping(value = "/{login:[_'.@a-z0-9-]+}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
@@ -303,20 +301,28 @@ public class UserController {
      * }
      * ]
      */
-    @RequestMapping(value = "/search/users/all", method = RequestMethod.GET)
-    public ResponseEntity<List<UserDTO>> searchAllUser(@RequestParam(name = "keyword") String keyword, Pageable pageable) {
+    @RequestMapping(value = "/search/all", method = RequestMethod.GET)
+    public ResponseEntity<List<UserDTO>> searchAllUser(@RequestParam(name = "login",required = false) String login,
+                                                       @RequestParam(name = "username",required = false) String userName,
+                                                       @RequestParam(name = "email",required = false) String email,
+                                                       @RequestParam(name = "mobile",required = false) String mobile,
+                                                       @RequestParam(name = "keyword",required = false) String keyword,
+                                                       Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        List<UserDTO> users = userService.pageDTOByQO( page, UserQO.builder().keyword(keyword).build());
-        if (page == null) {
-            throw new ValidationException(new ValidationError("keyword", "keyword.must.more.than.2.characters"));
-        }
+        List<UserDTO> users = userService.pageDTOByQO( page, UserQO.builder().login(login)
+                .userName(userName)
+                .email(email)
+                .mobile(mobile)
+                .fuzzy(true)
+                .tenantId(LoginInformationUtil.getCurrentTenantId())
+                .keyword(keyword).build());
 
         return new ResponseEntity<>(users, PageUtil.getTotalHeader(page), HttpStatus.OK);
 
     }
 
 
-    @RequestMapping(value = "/users/language/{language}", method = RequestMethod.POST)
+    @RequestMapping(value = "/language/{language}", method = RequestMethod.POST)
     public ResponseEntity updateUserLanguage(@PathVariable String language) throws SQLException {
         if (!language.trim().isEmpty()) {
             boolean result = userService.updateUserLanguage(language, LoginInformationUtil.getUser().getLogin());
@@ -328,7 +334,7 @@ public class UserController {
 
 
 
-    @RequestMapping(value = "/refactor/users/invite", method = RequestMethod.POST)
+    @RequestMapping(value = "/invite", method = RequestMethod.POST)
     @Timed
     // @PreAuthorize("hasAnyRole('" + AuthoritiesConstants.COMPANY_ADMIN + "','" + AuthoritiesConstants.ADMIN + "')")
     public ResponseEntity<Void> noticeUser(@RequestBody List<UUID> userOids) {

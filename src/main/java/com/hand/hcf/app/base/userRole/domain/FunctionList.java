@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.userRole.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.core.annotation.I18nField;
+import com.hand.hcf.core.annotation.UniqueField;
 import com.hand.hcf.core.domain.DomainI18n;
 import lombok.Data;
 
@@ -20,18 +21,15 @@ public class FunctionList extends DomainI18n {
     //功能名称
     @NotNull
     @I18nField
+    @UniqueField
     @TableField("function_name")
     private String functionName;
 
     //功能路由
     @NotNull
+    @UniqueField
     @TableField("function_router")
     private String functionRouter;
-
-    //功能地址
-    @NotNull
-    @TableField("function_url")
-    private String functionUrl;
 
     //功能参数
     @TableField("param")
@@ -41,4 +39,16 @@ public class FunctionList extends DomainI18n {
     @NotNull
     @TableField("sequence_number")
     private Integer sequenceNumber;
+
+    //页面id
+    @TableField("page_id")
+    private Long pageId;
+
+    //功能图标
+    @TableField("function_icon")
+    private String functionIcon;
+
+    //应用ID
+    @TableField("application_id")
+    private Long applicationId;
 }

@@ -55,10 +55,10 @@ public class TenantDTO {
     private UUID userOid;
     private String login;
     private String password;
-    private String fullName;
+    private String userName;
     private String mobile;
     private String email;
-    private String employeeId;
+    private String remark;
     private String title;
 
     private String taxId;       //税务证件号

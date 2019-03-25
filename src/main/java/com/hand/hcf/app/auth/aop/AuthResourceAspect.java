@@ -26,8 +26,8 @@ import java.util.Arrays;
 @Component
 @Aspect
 @Order(1)
-public class ResourceAspect {
-    private static Logger log = LoggerFactory.getLogger(ResourceAspect.class);
+public class AuthResourceAspect {
+    private static Logger log = LoggerFactory.getLogger(AuthResourceAspect.class);
 
     @Around("within(com.hand.hcf.app.base.web..*)")
     protected Object aroudAdivce(ProceedingJoinPoint jp) throws Throwable {

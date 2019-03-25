@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Application constants.
+ * LovDTO constants.
  */
 public final class Constants {
 

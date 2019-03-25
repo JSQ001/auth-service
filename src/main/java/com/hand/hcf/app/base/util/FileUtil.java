@@ -35,7 +35,7 @@ public class FileUtil {
             }
             return bos.toByteArray();
         } catch (Exception e) {
-            throw new BizException(RespCode.READ_FILE_FAILED);
+            throw new BizException(RespCode.SYS_READ_FILE_FAILED);
         } finally {
             if (fis != null) {
                 try {

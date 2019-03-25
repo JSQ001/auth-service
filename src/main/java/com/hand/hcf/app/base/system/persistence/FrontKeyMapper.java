@@ -16,14 +16,14 @@ public interface FrontKeyMapper extends BaseMapper<FrontKey> {
      *
      * @param keyCode
      * @param descriptions
-     * @param moduleId
+     * @param appId
      * @param lang
      * @param keyword      模糊匹配 keyCode或descriptions
      * @return
      */
     List<FrontKey> getFrontKeysByCond(@Param("keyCode") String keyCode,
                                       @Param("descriptions") String descriptions,
-                                      @Param("moduleId") String moduleId,
+                                      @Param("appId") String appId,
                                       @Param("lang") String lang,
                                       @Param("keyword") String keyword,
                                       Page page);

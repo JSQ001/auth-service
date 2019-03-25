@@ -1,10 +1,10 @@
 package com.hand.hcf.app.base.attachment.web;
 
-import com.hand.hcf.app.base.attachment.AttachmentCO;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.util.HeaderUtil;
+import com.hand.hcf.app.base.attachment.AttachmentCO;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class AttachmentController{
     @RequestMapping(value = "/upload/attachment", method = RequestMethod.POST)
     @Timed
     public ResponseEntity<AttachmentCO> uploadPicture(@RequestParam(name = "file") MultipartFile file,
-                                                      @RequestParam(name = "attachmentType") AttachmentType attachmentType
+                                                        @RequestParam(name = "attachmentType") AttachmentType attachmentType
     ) {
         return ResponseEntity.ok(attachmentService.uploadFile(file, attachmentType));
     }

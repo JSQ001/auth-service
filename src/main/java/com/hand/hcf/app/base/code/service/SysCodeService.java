@@ -119,18 +119,28 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public SysCode updateSysCode(SysCode sysCode) {
+    public SysCode updateSysCode(SysCode sysCode, String systemFlag) {
         if (sysCode.getId() == null){
             throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
-        if (!SysCodeEnum.CUSTOM.equals(sysCode.getTypeFlag())){
-            throw new BizException(RespCode.SYS_CODE_TYPE_NOT_ALLOW_UPDATE);
-        }
         SysCode queryCode = this.selectById(sysCode.getId());
+        if ("system".equalsIgnoreCase(systemFlag)){
+            queryCode.setTypeFlag(sysCode.getTypeFlag());
+            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag())){
+                sysCode.setTenantId(-1L);
+            }else{
+                sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
+            }
+        }else{
+            if (!SysCodeEnum.CUSTOM.equals(sysCode.getTypeFlag())){
+                throw new BizException(RespCode.SYS_CODE_TYPE_NOT_ALLOW_UPDATE);
+            }
+        }
         queryCode.setName(queryCode.getName());
         if (!CollectionUtils.isEmpty(sysCode.getI18n())){
             queryCode.setI18n(sysCode.getI18n());
         }
+
         queryCode.setVersionNumber(sysCode.getVersionNumber());
         queryCode.setEnabled(sysCode.getEnabled());
         if (Boolean.FALSE.equals(sysCode.getEnabled())){
@@ -144,19 +154,30 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public SysCode createSysCode(SysCode sysCode) {
+    public SysCode createSysCode(SysCode sysCode, String systemFlag) {
         if (!StringUtils.hasText(sysCode.getCode())){
             throw new BizException(RespCode.SYS_CODE_CODE_IS_NULL);
         }
-        // 判断当前代码是否在系统级里面有没有
-        SysCode selectOne = this.selectOne(initWrapper().eq("code", sysCode.getCode()));
+        SysCode selectOne;
+        if ("system".equalsIgnoreCase(systemFlag)){
+            // 如果是系统管理员, 得看这个代码是不是存在所以的租户
+            selectOne = this.selectOne(this.getWrapper().eq("code", sysCode.getCode()));
+            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag())){
+                sysCode.setTenantId(-1L);
+            }else{
+                sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
+            }
+        }else {
+            // 判断当前代码是否在系统级里面有没有
+            selectOne = this.selectOne(initWrapper().eq("code", sysCode.getCode()));
+            sysCode.setTypeFlag(SysCodeEnum.CUSTOM);
+            sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
+        }
         if (null != selectOne){
             throw new BizException(RespCode.SYS_CODE_CODE_IS_EXISTS);
         }
         sysCode.setId(null);
         sysCode.setCodeOid(UUID.randomUUID().toString());
-        sysCode.setTypeFlag(SysCodeEnum.CUSTOM);
-        sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
         try {
             this.insert(sysCode);
         }catch (DuplicateKeyException e){

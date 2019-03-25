@@ -6,7 +6,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Application constants.
+ * LovDTO constants.
  */
 public final class Constants {
 
@@ -14,6 +14,9 @@ public final class Constants {
 
     public static final String start = "start";
     public static final String end = "end";
+
+    public static final String SERVICE_UP ="UP";
+    public static final String SERVICE_DOWN ="DOWN";
 
     public static final boolean TRUE = true;
     public static final boolean FALSE = false;

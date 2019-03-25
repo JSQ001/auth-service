@@ -379,7 +379,7 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "moduleId": "1031479997352935426",
+     * "appId": "1031479997352935426",
      * "menuId": "1",
      * "buttonList": [
      * {
@@ -545,7 +545,7 @@ public class ComponentController {
      * "versionNumber": 1,
      * "componentType": "1",
      * "componentName": "测试组件1",
-     * "moduleId": "1031479997352935426",
+     * "appId": "1031479997352935426",
      * "menuId": "1031480144728195074",
      * "buttonList": [
      * {

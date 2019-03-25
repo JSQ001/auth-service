@@ -17,7 +17,7 @@ public interface InterfaceMapper extends BaseMapper<Interface> {
      * @param keyword  模糊匹配 interfaceName或reqUrl字段
      * @return
      */
-    List<Interface> getInterfacesByKeyword(@Param("moduleId") String moduleId,
+    List<Interface> getInterfacesByKeyword(@Param("appId") String appId,
                                            @Param("keyword") String keyword);
 
     /**

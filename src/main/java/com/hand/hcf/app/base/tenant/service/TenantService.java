@@ -15,6 +15,7 @@ import com.hand.hcf.app.base.user.domain.User;
 import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
+import com.hand.hcf.app.base.userRole.service.RoleFunctionService;
 import com.hand.hcf.app.base.userRole.service.RoleMenuService;
 import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +70,7 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private RoleService roleService;
 
     @Autowired
-    private RoleMenuService roleMenuService;
+    private RoleFunctionService roleFunctionService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -278,7 +280,7 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         // 初始化角色
         Role role = roleService.initRoleByTenant(tenant);
         // 初始化角色菜单
-        roleMenuService.initRoleMenuByTenant(role);
+        roleFunctionService.initRoleFunctionByTenant(role);
         // 初始化用户角色
         initUserRole(role, user);
         // 初始化值列表
@@ -301,6 +303,11 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         if (register.getPassword() == null || !register.getPassword().equals(register.getPasswordConfirm())){
             throw new BizException(RespCode.TENANT_ADMIN_PASSWORD_IS_ERROR);
         }
+        //login唯一性校验
+        Integer exists = userService.selectCount(new EntityWrapper<User>().eq("login",register.getLogin()));
+        if (exists != null && exists > 0){
+            throw new BizException(RespCode.USER_LOGIN_EXISTS);
+        }
         String passwordHash = passwordEncoder.encode(register.getPassword());
         User user = new User();
         user.setLogin(register.getLogin());
@@ -319,4 +326,8 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         return user;
     }
 
+    public List<TenantDTO> listTenantDTOsByCondition(String tenantName, String tenantCode, String userName, String mobile, String email, String login, String remark,Page page){
+        List<TenantDTO> result = baseMapper.listTenantDTOsByCondition(tenantName,tenantCode,userName,mobile,email,login,remark,page);
+        return result;
+    }
 }
