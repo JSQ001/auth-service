@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.user.persistence.UserMapper">
+
+    <select id="listByQO" parameterType="com.hand.hcf.app.base.user.dto.UserQO" resultType="com.hand.hcf.app.base.user.domain.User">
+        SELECT
+        u.*
+        FROM sys_user u
+        WHERE 1 = 1
+        <if test="deleted != null">
+          AND u.deleted = #{deleted}
+        </if>
+        <if test="id != null">
+          AND u.id = #{id}
+        </if>
+        <if test="userOid != null">
+            AND u.user_oid = #{userOid}
+        </if>
+        <if test="currentUserOid != null">
+            AND u.user_oid != #{currentUserOid}
+        </if>
+
+        <if test="userOids != null and userOids.size() > 0">
+            AND u.user_oid IN
+            <foreach collection="userOids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="userIds != null and userIds.size() > 0">
+            AND u.id
+             <if test="inverseUser">
+                 not
+             </if>
+             IN
+            <foreach collection="userIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="status != null and status != ''">
+            AND u.status = #{status}
+        </if>
+        <if test="login != null and login!='' and !fuzzy">
+            AND u.login = #{login}
+        </if>
+        <if test="isInactiveSearch" >
+          AND u.activated = false
+        </if>
+        <if test="login != null and fuzzy">
+            and u.login like concat(concat('%',#{login}),'%')
+        </if>
+        <if test="tenantId != null ">
+            and u.tenant_id = #{tenantId}
+        </if>
+        <if test="userBind != null and userBind!=''">
+            AND b.enabled = true
+            and b.is_active =  true
+            AND b.deleted = false
+            AND b.login = #{userBind}
+        </if>
+        <if test="phoneNumber != null and phoneNumber!='' and !fuzzy">
+            AND u.mobile = #{phoneNumber}
+        </if>
+
+        <if test="email != null and email!='' and !fuzzy">
+            AND u.email = #{email}
+        </if>
+        <if test="phoneNumber != null and fuzzy">
+            and u.mobile like concat(concat('%',#{phoneNumber}),'%')
+        </if>
+        <if test="email != null and fuzzy">
+            and u.email  like concat(concat('%',#{email}),'%')
+        </if>
+        <if test="fullName != null">
+            and u.user_name like concat(concat('%',#{fullName}),'%')
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (u.user_name LIKE concat(concat('%',#{keyword}),'%') OR u.email LIKE concat(concat('%',#{keyword}),'%') OR u.mobile LIKE concat(concat('%',#{keyword}),'%'))
+        </if>
+
+
+        <if test="orderByFullName">
+          ORDER BY u.user_name
+        </if>
+    </select>
+
+
+    <select id="getCurrentTenantByUserOid" resultType="com.hand.hcf.app.base.tenant.domain.Tenant">
+    select t.*
+        FROM
+        sys_tenant t ,sys_user u
+    where
+    u.tenant_id = t.id
+    and u.user_oid = #{userOid}
+</select>
+
+
+
+
+    <select id="listAuthorities" resultType="com.hand.hcf.core.security.domain.Authority">
+        select ua.authority_name name from
+         sys_user_authority  ua,
+         sys_user u
+        where
+          ua.user_id=u.id
+          <if test="userId != null">
+            and ua.user_id =#{userId}
+          </if>
+        <if test="userOid != null">
+            and u.user_oid =#{userOid}
+        </if>
+    </select>
+
+    <update id="updateUserLockStatus">
+        UPDATE sys_user set lock_status = #{lockStatus} ,lock_date_deadline = null ,password_attempt = 0 where id = #{userId}
+    </update>
+
+</mapper>

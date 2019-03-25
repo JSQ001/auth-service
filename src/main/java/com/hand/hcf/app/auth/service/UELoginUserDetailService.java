@@ -30,7 +30,7 @@ public class UELoginUserDetailService {
     private TrialServiceCilent trialServiceCilent;
 
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
     public UELoginUserDetailService(TrialServiceCilent trialServiceCilent) {
         this.trialServiceCilent = trialServiceCilent;
@@ -47,7 +47,7 @@ public class UELoginUserDetailService {
             }
         }
 
-        return userService.loadUserByUserOid(UUID.fromString(trialUserDTO.getUserOid()));
+        return authUserService.loadUserByUserOid(UUID.fromString(trialUserDTO.getUserOid()));
     }
 
     @Component

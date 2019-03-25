@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.user.persistence.UserAuthorityMapper">
+
+    <resultMap id="UserAuthorityResultMap" type="com.hand.hcf.app.base.user.domain.UserAuthority">
+        <result column="user_id" property="userId"/>
+        <result column="authority_name" property="authorityName"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="UserAuthorityResultMap">
+        SELECT * FROM sys_user_authority WHERE user_id = #{userId}
+    </select>
+</mapper>

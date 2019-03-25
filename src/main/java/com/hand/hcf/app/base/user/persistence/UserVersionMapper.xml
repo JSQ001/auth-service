@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.user.persistence.UserVersionMapper">
+
+    <select id="searchSubVersionStatistics" resultType="com.hand.hcf.app.base.system.dto.VersionStatisticsDTO">
+        SELECT auv.platform AS platform,
+               auv.app_version AS appVersion,
+               auv.sub_app_version AS subAppVersion,
+               COUNT(1) AS counts,
+               ac.name AS companyName,
+               ate.tenant_name AS tenantName
+          FROM sys_user_version auv
+          INNER JOIN sys_user au on auv.user_oid= au.user_oid
+           AND au.deleted= 0
+          INNER JOIN sys_company ac on au.company_id= ac.id
+          INNER JOIN sys_tenant ate on au.tenant_id= ate.id
+          INNER JOIN(
+        SELECT platform, app_version, MAX(sub_app_version) AS sub_app_version_max
+          FROM sys_user_version
+         GROUP BY platform, app_version
+         ORDER BY app_version) mdt on auv.platform= mdt.platform
+           AND auv.app_version= mdt.app_version
+           AND IF(mdt.sub_app_version_max IS NULL, auv.sub_app_version IS NULL, auv.sub_app_version= mdt.sub_app_version_max)
+        <where>
+            <if test="platform != null">
+                AND auv.platform = #{platform}
+            </if>
+            <if test="appVersion != null">
+                AND auv.app_version = #{appVersion}
+            </if>
+            <if test="subAppVersion != null">
+                AND auv.sub_app_version = #{subAppVersion}
+            </if>
+        </where>
+         GROUP BY auv.platform,
+                 auv.app_version,
+                 auv.sub_app_version,
+                 ac.id
+         ORDER BY ate.id,
+                 ac.id,
+                 auv.app_version DESC,
+                 auv.sub_app_version DESC
+    </select>
+</mapper>

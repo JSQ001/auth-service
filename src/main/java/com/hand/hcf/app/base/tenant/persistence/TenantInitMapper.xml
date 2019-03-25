@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.tenant.persistence.TenantInitMapper">
+
+    <update id="updateClientTenantId">
+        update oauth_client_details set additional_information = #{additionalInformation}
+        where client_id = #{clientId}
+    </update>
+    <delete id="deleteAccessToken">
+        delete from oauth_access_token where client_id = #{clientId}  and user_name is null
+    </delete>
+
+
+</mapper>

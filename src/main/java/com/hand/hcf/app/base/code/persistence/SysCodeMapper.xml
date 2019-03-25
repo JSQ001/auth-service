@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.code.persistence.SysCodeMapper">
+
+
+    <select id="getNotExistsTenantId" resultType="java.lang.Long">
+      select t.id from sys_tenant t where not exists(select 1 from sys_code v where t.id = v.tenant_id)
+    </select>
+</mapper>
