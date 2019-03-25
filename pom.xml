@@ -43,7 +43,17 @@
             <artifactId>itextpdf</artifactId>
             <version>5.5.10</version>
         </dependency>
-
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.42</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -58,17 +68,23 @@
             <classifier>jdk15</classifier>
         </dependency>
 
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
     </dependencies>
     <repositories>
-    <repository>
-        <id>hec.snapshots</id>
-        <name>183maven</name>
-        <url>http://116.228.77.183:25296/nexus/content/groups/public</url>
-    </repository>
-    <repository>
-        <id>spring</id>
-        <url>http://repo.spring.io/plugins-release/</url>
-    </repository>
+        <repository>
+            <id>hec.snapshots</id>
+            <name>183maven</name>
+            <url>http://116.228.77.183:25296/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>spring</id>
+            <url>http://repo.spring.io/plugins-release/</url>
+        </repository>
     </repositories>
 
     <build>
@@ -100,7 +116,9 @@
                         <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
                     </from>
                     <to>
-                        <image>${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
+                        <image>
+                            ${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}
+                        </image>
                         <auth>
                             <username>${registry_username}</username>
                             <password>${registry_password}</password>

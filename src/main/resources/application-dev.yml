@@ -106,10 +106,3 @@ mail:
   from: notice@service.huilianyi.com
   enabled: true
   username: notice@service.huilianyi.com
-  smtp:
-    auth: ""
-    starttls:
-      enable: false
-    transport:
-      protocol: ""
-
