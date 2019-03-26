@@ -3,23 +3,16 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.attachment.AttachmentCO;
+import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.base.org.SysCodeValueCO;
-import com.hand.hcf.app.client.org.OrganizationClient;
-import com.hand.hcf.app.common.co.CompanyCO;
-import com.hand.hcf.app.common.co.CurrencyRateCO;
-import com.hand.hcf.app.common.co.DepartmentCO;
-import com.hand.hcf.app.common.co.UserBankAccountCO;
+import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.AttachmentClient;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.common.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.client.com.CompanyClient;
 //import com.hand.hcf.app.mdata.client.contact.*;
 import com.hand.hcf.app.mdata.client.currency.CurrencyClient;
-import com.hand.hcf.app.mdata.client.currency.CurrencyRateCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
 import com.hand.hcf.app.mdata.client.department.DepartmentClient;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
 import com.hand.hcf.app.mdata.client.sob.SobClient;
-import com.hand.hcf.app.mdata.client.workflow.WorkflowClient;
 import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalHistoryCO;
 import com.hand.hcf.app.mdata.client.workflow.dto.CommonApprovalHistoryCO;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
@@ -68,7 +61,7 @@ public class HcfOrganizationInterface {
     private AttachmentClient attachmentClient;
 
     @Autowired
-    private OrganizationClient orgClient;
+    private CommonControllerImpl orgClient;
 
     @Autowired
     private SobClient sobClient;
@@ -80,7 +73,7 @@ public class HcfOrganizationInterface {
     private MapperFacade mapper;
 
     @Autowired
-    private WorkflowClient workflowClient;
+    private WorkflowControllerImpl workflowClient;
 
 
 

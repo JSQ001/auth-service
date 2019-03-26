@@ -2,9 +2,9 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.mdata.client.supplier.SupplierClient;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorBankAccountCO;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorInfoCO;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
