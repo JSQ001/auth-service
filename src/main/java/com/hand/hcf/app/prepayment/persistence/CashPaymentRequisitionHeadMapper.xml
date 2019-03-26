@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.prepayment.persistence.CashPaymentRequisitionHeadMapper">
+
+    <select id="getAmountByHeadIdAndRefHeadId" resultType="com.hand.hcf.app.prepayment.web.dto.CurrencyDTO">
+        SELECT
+          l.currency currency,
+          SUM(l.amount) amount
+        FROM
+          csh_payment_requisition_head h,
+          csh_payment_requisition_line l
+        WHERE
+          l.ref_document_id = #{refHeadId}
+        AND
+          l.payment_requisition_header_id = h.id
+        AND
+        (h.status = 1002 OR  h.status = 1004)
+        GROUP BY
+        l.currency
+
+        <if test="headId != null">
+        UNION
+        SELECT
+        l.currency currency,
+        SUM(l.amount) amount
+        FROM
+        csh_payment_requisition_head h,
+        csh_payment_requisition_line l
+        WHERE
+        l.payment_requisition_header_id = h.id
+        AND
+        h.id = #{headId}
+        AND
+        l.ref_document_id = #{refHeadId}
+        GROUP BY
+        l.currency
+        </if>
+
+
+    </select>
+    <select id="getTotal" resultType="java.lang.Integer">
+        select count(0) from csh_payment_requisition_head
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="listHeaderAndTypName"
+            resultType="com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead">
+        select t.*, csrt.type_name as typeName from csh_payment_requisition_head t,csh_sob_pay_req_type csrt
+        where t.payment_req_type_id = csrt.id
+        ${ew.sqlSegment}
+
+    </select>
+
+
+</mapper>
