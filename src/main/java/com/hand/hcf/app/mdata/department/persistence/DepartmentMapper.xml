@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.department.persistence.DepartmentMapper">
+    <!--关联查询Map,带父部门，子部门集合-->
+    <resultMap id="DepartmentAssociationResultMap"
+               type="com.hand.hcf.app.mdata.department.domain.Department">
+        <id column="id" property="id"/>
+        <result column="department_oid" property="departmentOid"/>
+        <result column="name" property="name"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="manager_id" property="managerId"/>
+        <result column="department_code" property="departmentCode"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="data_source" property="dataSource"/>
+        <association property="parent" column="parent_id" javaType="com.hand.hcf.app.mdata.department.domain.Department"
+                     select="selectParentResult"/>
+        <collection property="children" column="id" ofType="com.hand.hcf.app.mdata.department.domain.Department"
+                    select="selectChildrenResult"/>
+
+    </resultMap>
+    <resultMap id="DepartmentInfoResultMap"
+               type="com.hand.hcf.app.mdata.department.dto.DepartmentInfo">
+        <id column="id" property="id"/>
+        <result column="department_oid" property="departmentOid"/>
+        <result column="name" property="name"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="department_code" property="departmentCode"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="data_source" property="dataSource"/>
+    </resultMap>
+    <!--//父部门对象-->
+    <select id="selectParentResult" parameterType="long" resultMap="DepartmentResultMap">
+        SELECT * from sys_department where id = #{id}
+    </select>
+    <!--//子部门集合-->
+    <select id="selectChildrenResult" parameterType="long" resultMap="DepartmentResultMap">
+        SELECT * from sys_department where parent_id = #{id}
+    </select>
+
+    <select id="listByUserOid" resultType="com.hand.hcf.app.mdata.department.domain.Department">
+        SELECT
+        a.*
+        FROM
+        sys_department a
+        LEFT JOIN sys_department_user b ON a.id = b.department_id
+        LEFT JOIN sys_contact c ON b.user_id = c.user_id
+        WHERE
+        c.user_oid = #{userOid}
+    </select>
+
+
+    <resultMap id="DepartmentResultMap"
+               type="com.hand.hcf.app.mdata.department.domain.Department">
+        <result column="department_oid" property="departmentOid"/>
+        <result column="name" property="name"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="department_code" property="departmentCode"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="department_code" property="departmentCode"/>
+    </resultMap>
+
+    <resultMap id="selectRootDepartmentResultMap" type="com.hand.hcf.app.mdata.department.dto.DepartmentDTO"
+               extends="DepartmentResultMap">
+        <result column="hasUsers" property="hasUsers"/>
+        <result column="hasChildrenDepartments" property="hasChildrenDepartments"/>
+    </resultMap>
+
+    <resultMap id="DepartmentWithParentMap" type="com.hand.hcf.app.mdata.department.domain.Department"
+               extends="DepartmentResultMap">
+        <association property="parent" column="parent_id" javaType="com.hand.hcf.app.mdata.department.domain.Department"
+                     select="selectParentResult"/>
+    </resultMap>
+
+    <resultMap id="DepartmentUserResultMap"
+               type="com.hand.hcf.app.mdata.department.dto.DepartmentUserSummaryDTO">
+        <result column="full_name" property="fullName"/>
+        <result column="user_oid" property="userOid"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,department_oid,name,path,parent_id,company_id,manager_id,last_updated_date,status,department_code,tenant_id
+    </sql>
+    <select id="selectRootDepartment" resultMap="selectRootDepartmentResultMap"
+            parameterType="com.hand.hcf.app.mdata.department.dto.DepartmentQueryDTO">
+        SELECT d.id,d.department_oid,d.name,d.path,d.tenant_id,STATUS,d.department_code,
+        case when
+        (SELECT COUNT(1) FROM sys_department dd WHERE dd.parent_id = d.id and dd.status!=103)>0 then 1 else 0 end
+        hasChildrenDepartments,
+        case when
+        (SELECT COUNT(1) FROM sys_contact u INNER JOIN sys_department_user du ON du.user_id = u.user_id
+        INNER JOIN sys_department ddd ON ddd.id = du.department_id
+        WHERE ddd.id = d.id
+        <if test="companyScope">
+            AND u.company_id = #{companyId}
+        </if>
+        )>0  then 1 else 0 end hasUsers
+        FROM sys_department d
+        WHERE d.parent_id IS NULL AND d.tenant_id=#{tenantId}
+        <if test="statusNotEquals">
+            AND d.status != #{status}
+        </if>
+        <if test="!statusNotEquals">
+            AND d.status = #{status}
+        </if>
+    </select>
+
+    <resultMap id="DepartemntTreeResultMap" type="com.hand.hcf.app.mdata.department.dto.DepartmentTreeDTO">
+        <result column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="department_oid" property="departmentOid"/>
+        <result column="name" property="name"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="parent_department_oid" property="parentDepartmentOid"/>
+        <result column="department_code" property="departmentCode"/>
+    </resultMap>
+
+    <select id="selectFinanceRoleAvailableDepartments" resultMap="DepartemntTreeResultMap">
+        SELECT
+        d.id,
+        d.parent_id,
+        CASE WHEN (di18.name IS NULL OR di18.name = '')
+        THEN d.name
+        ELSE di18.name END as name,
+        CASE WHEN (di18.path IS NULL OR di18.path = '')
+        THEN d.path
+        ELSE di18.path END as path,
+        d.department_oid,
+        d.status
+        FROM sys_department d
+        LEFT JOIN sys_contact u ON u.user_id = d.user_id
+        LEFT JOIN sys_department_i18n di18 ON di18.id = d.id and di18.language = #{language}
+        WHERE d.tenant_id = #{tenantId}
+        AND u.user_oid = #{userOid}
+        <if test="keyword != null and keyword != '' ">
+            and d.path LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+        AND d.status != 103
+    </select>
+
+    <select id="findDepartmentsByKeyword" resultMap="DepartmentWithParentMap">
+        SELECT * FROM sys_department d where d.tenant_id = #{tenantId}
+        <if test="keyword != null and keyword != '' ">
+            and (d.name like concat(concat('%',#{keyword}),'%') or d.department_code like concat(concat('%',#{keyword}),'%'))
+        </if>
+        <if test="departmentStatus != null">
+            and d.status = #{departmentStatus}
+        </if>
+        <if test="departmentStatus == null">
+            and d.status != 103
+        </if>
+    </select>
+
+    <select id="findTenantAllDepartment" resultMap="DepartemntTreeResultMap">
+        SELECT d.id,
+        d.parent_id,
+        case
+            when i18n.name is null or i18n.name = ''
+            then d.name
+            else i18n.name
+        end as name,
+        NVL(d.DEPARTMENT_CODE, 'ZZZZ9999'),
+        d.path,
+        d.department_code,
+        d.department_oid,
+        d.status,
+        dd.department_oid as parent_department_oid,
+        case when (SELECT COUNT(1) FROM sys_department cd WHERE cd.parent_id = d.id and cd.status!=103)>0 then 1 else 0 end  AS
+        hasChildrenDepartments,
+       case when  (SELECT COUNT(1) FROM sys_contact u INNER JOIN sys_department_user du ON du.user_id = u.user_id
+        INNER JOIN sys_department ddd ON ddd.id = du.department_id
+        WHERE ddd.id = d.id )>0 then 1 else 0 end AS hasUsers,
+     (SELECT COUNT(1) FROM sys_contact u INNER JOIN sys_department_user du ON du.user_id = u.user_id
+        INNER JOIN sys_department ddd ON ddd.id = du.department_id
+        WHERE ddd.id = d.id ) AS userCounts
+        from sys_department d LEFT JOIN sys_department dd on d.parent_id = dd.id
+        LEFT JOIN sys_department_i18n  i18n ON i18n.id = d.id and i18n.language = #{language}
+        where d.tenant_id = #{tenantId}
+        <if test="status != null">
+            and d.status = #{status}
+        </if>
+        <if test="status == null">
+            and d.status != 103
+        </if>
+        order by d.DEPARTMENT_CODE
+    </select>
+
+    <select id="selectByDepartmentOidAndStatus" resultMap="DepartmentAssociationResultMap">
+        SELECT * FROM sys_department where department_oid = #{departmentOid}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+    </select>
+
+    <select id="selectByDepartmentOidAndStatusNot" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department where department_oid = #{departmentOid}
+        <if test="status != null">
+            and status != #{status}
+        </if>
+    </select>
+
+    <select id="selectByDepartmentOidInAndStatusSimple" resultMap="DepartmentResultMap">
+        select * from sys_department d where d.department_oid in
+        <foreach item="item" index="index" collection="departmentOids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="selectByDepartmentOidInAndStatus" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.department_oid in
+        <foreach item="item" index="index" collection="departmentOids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="status != null">
+            and d.status = #{status}
+        </if>
+    </select>
+
+    <select id="selectByDepartmentOidInAndStatusNot" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.department_oid in
+        <foreach item="item" index="index" collection="departmentOids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <if test="status != null">
+            and d.status != #{status}
+        </if>
+    </select>
+
+    <select id="selectByTenantIdAndPathLikeAndStatus" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.tenant_id = #{tenantId} and d.path like
+        concat(concat('%',#{path}),'%') and d.status = #{status}
+    </select>
+
+    <select id="selectByPathAndTenantIdAndStatus" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.tenant_id = #{tenantId} and d.path = #{path}
+        <if test="status != null">
+            AND d.status = #{status}
+        </if>
+    </select>
+
+    <select id="selectByPathAndTenantIdAndStatusNot" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.tenant_id = #{tenantId} and d.path = #{path}
+        <if test="status != null">
+            AND d.status != #{status}
+        </if>
+    </select>
+
+    <select id="selectByParentDepartmentOidAndStatus" resultMap="DepartmentAssociationResultMap">
+        SELECT * from sys_department d,sys_department dd  where d.parent_id = dd.id and d.status = #{status}
+        and dd.department_oid = #{parentDepartmentOid}
+    </select>
+
+    <select id="selectByParentDepartmentOidAndStatusNot" resultMap="DepartmentAssociationResultMap">
+        SELECT * from sys_department d,sys_department dd  where d.parent_id = dd.id and d.status != #{status}
+        and dd.department_oid = #{parentDepartmentOid}
+    </select>
+
+    <select id="selectByTenantIdAndDepartmentCode" resultMap="DepartmentAssociationResultMap">
+        SELECT * from sys_department d where d.tenant_id = #{tenantId}
+        and d.department_code = #{departmentCode} and deleted = false
+    </select>
+
+    <select id="selectTenantDepartmentCount" resultType="java.lang.Long">
+        SELECT count(1) from sys_department d where d.tenant_id = #{tenantId} and d.status = 101 and d.deleted = false
+    </select>
+
+    <select id="selectByTenantIdAndStatusNotPage" resultMap="DepartmentAssociationResultMap">
+        SELECT * from sys_department d where d.tenant_id = #{tenantId}
+        and d.status != #{status}
+    </select>
+
+    <select id="selectByTenantIdAndStatus" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department d where d.tenant_id = #{tenantId}
+        <if test="status != null">
+            AND d.status = #{status}
+        </if>
+    </select>
+    <select id="selectByTenantIdAndStatusNot" resultMap="DepartmentAssociationResultMap">
+        SELECT * from sys_department d where d.tenant_id = #{tenantId}
+        and d.status != #{status}
+    </select>
+
+    <select id="selectOneSimpleById" resultMap="DepartmentResultMap">
+        select * from sys_department where id = #{departmentId}
+    </select>
+
+    <select id="selectDepartmentCode" resultType="com.hand.hcf.app.mdata.department.dto.DepartmentDTO">
+        select
+        d.id,
+        d.tenant_id,
+        d.department_code departmentCode,
+        d.parent_id parentDepartmentId
+        from sys_department d
+        where d.tenant_id = #{currentTenantId}
+    </select>
+
+    <update id="updateDepartmentCode">
+        update sys_department d set d.department_code = #{departmentCode}
+        where d.id = #{id}
+    </update>
+
+    <select id="findByDepartmentCodeAndTenantId" resultMap="DepartmentAssociationResultMap">
+        select * from sys_department where department_code = #{departmentCode} and tenant_id = #{tenantId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </select>
+
+    <select id="selectDepartmentByManageId" resultType="com.hand.hcf.app.mdata.department.domain.Department">
+        select * from sys_department where manager_id = #{managerId} and status = #{status}
+    </select>
+
+    <select id="getAllDepartment" resultMap="DepartmentInfoResultMap">
+        SELECT
+        a.id,
+        a.department_oid,
+        a.name,
+        a.path,
+        a.parent_id,
+        a.status,
+        a.department_code,
+        a.tenant_id,
+        a.data_source
+    FROM
+        sys_department a
+    </select>
+
+    <update id="updateChildrenDepartmentPath">
+        UPDATE sys_department
+         SET path = CONCAT(#{newPath}, substr(path, #{oldPathLength}))
+        WHERE path LIKE CONCAT(#{oldPath}, '%')
+        AND tenant_id = #{tenantId}
+    </update>
+
+    <select id="findOidByDepartmentOids" resultType="java.util.UUID">
+        SELECT a.department_oid
+         FROM sys_department a,
+            (SELECT concat(path,'%') path FROM sys_department
+            WHERE department_oid IN
+                <foreach collection="departmentOids" item="departmentOid" index="index" open="(" close=")" separator=",">
+                      #{departmentOid}
+                </foreach>
+            ) b
+        WHERE a.path LIKE b.path AND a.company_id = #{companyId}
+    </select>
+
+    <select id="getUnitChildrenIdByUnitIds" resultType="java.lang.Long">
+        select
+        ad.id
+        from sys_department ad
+        where ad.parent_id in
+        <foreach collection="unitIds" item="unitId" open="(" close=")" separator=",">
+            #{unitId}
+        </foreach>
+    </select>
+
+    <!-- 查询部门下所有员工信息 only for部门控件 -->
+    <select id="getDepartmentUsers" resultMap="DepartmentUserResultMap">
+        SELECT
+            c.full_name,
+            c.user_oid
+        FROM sys_contact c
+            INNER JOIN sys_department_user du ON du.user_id = c.user_id
+            INNER JOIN sys_department d ON d.id = du.department_id
+        WHERE c.tenant_id = #{tenantId} and  d.department_oid = #{departmentOid}
+    </select>
+</mapper>

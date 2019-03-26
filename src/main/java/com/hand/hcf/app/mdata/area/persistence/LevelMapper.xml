@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.area.persistence.LevelMapper">
+
+    <resultMap id="LevelMap" type="com.hand.hcf.app.mdata.area.domain.Level">
+    </resultMap>
+
+    <resultMap id="InternationalArea" type="com.hand.hcf.app.mdata.area.dto.InternationalAreaDTO">
+        <result column="area_code" property="code"></result>
+        <result column="type" property="type"></result>
+        <result column="country" property="country"></result>
+        <result column="state" property="state"></result>
+        <result column="city" property="city"></result>
+        <result column="district" property="district"></result>
+    </resultMap>
+
+    <select id="findOneByLevelOidAndDeletedFalse" resultMap="LevelMap">
+        SELECT
+            *
+        FROM
+            sys_level
+        WHERE
+            level_oid = # { levelOid }
+        AND deleted = 0
+    </select>
+
+    <select id="getInternationalLevel" resultMap="InternationalArea">
+        SELECT
+            al.*
+        FROM
+            sys_level l, sys_area_level al
+        WHERE
+            al.level_oid = l.level_oid
+        AND l.level_oid = #{levelOid}
+    </select>
+</mapper>

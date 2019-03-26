@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.bank.persistence.BankInfoMapper">
+
+
+    <select id="checkBankCodeIsExist" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM sys_bank_info
+        WHERE tenant_id = #{tenantId} AND bank_code = #{bankCode} AND deleted = 0
+    </select>
+
+    <select id="findByTenantIdAndBankBranchNameContaining" resultType="com.hand.hcf.app.mdata.bank.domain.BankInfo">
+        SELECT * FROM sys_bank_info
+        WHERE deleted = 0 AND (tenant_id = #{tenantId}
+            <if test="systemTenantId != null">
+                OR tenant_id = #{systemTenantId}
+            </if>
+        )
+        <if test="isAll == false and enable == null">
+            AND enabled = 1
+        </if>
+        <if test="isAll == false and enable != null">
+            AND enabled = #{enable}
+        </if>
+        <if test="null != keyword and '' != keyword">
+            AND bank_branch_name LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+        <if test="null != bankCode and '' != bankCode">
+            AND bank_code LIKE concat(concat('%',#{bankCode}),'%')
+        </if>
+        <if test="null != countryCode and '' != countryCode">
+            AND country_code = #{countryCode}
+        </if>
+        <if test="null != cityCode and '' != cityCode">
+            AND city_code = #{cityCode}
+        </if>
+        <if test="null != openAccount and '' != openAccount">
+            AND open_account LIKE concat(concat('%',#{openAccount}),'%')
+        </if>
+        <if test="null != swiftCode and '' != swiftCode">
+            AND swift_code LIKE concat(concat('%',#{swiftCode}),'%')
+        </if>
+        ORDER BY enabled DESC,bank_code
+    </select>
+
+    <select id="findAllCountryCode" resultType="java.lang.String">
+        SELECT
+            CASE
+             WHEN country_code IS NULL OR country_code = ''
+             THEN 'CHN'
+             ELSE country_code
+            END
+        FROM sys_bank_info
+        WHERE tenant_id = 0 AND deleted = 0
+        GROUP BY country_code
+    </select>
+
+    <select id="findByTenantIdAndBankBranchName" resultType="com.hand.hcf.app.mdata.bank.domain.BankInfo">
+        SELECT * FROM sys_bank_info
+        WHERE tenant_id = #{tenantId} AND bank_branch_name = #{bankBranchName} AND deleted = 0
+    </select>
+
+    <select id="findAllBankInfo" resultType="com.hand.hcf.app.mdata.bank.domain.BankInfo">
+        SELECT * FROM sys_bank_info
+        WHERE deleted = 0
+    </select>
+
+    <select id = "findByTenantIdAndBankCode" resultType="com.hand.hcf.app.mdata.bank.domain.BankInfo">
+        SELECT * FROM sys_bank_info
+        WHERE tenant_id = #{tenantId} AND bank_code = #{bankCode} AND deleted = 0
+    </select>
+</mapper>

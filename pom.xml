@@ -86,6 +86,12 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.stuxuhai</groupId>
+            <artifactId>jpinyin</artifactId>
+            <version>1.1.8</version>
+        </dependency>
+
     </dependencies>
     <repositories>
         <repository>

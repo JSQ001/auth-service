@@ -45,21 +45,22 @@ j2cache:
 
 mybatis-plus:
   mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml
-  type-aliases-package: com.hand.hcf.app.base.domain
+  type-aliases-package: com.hand.hcf.app.**.domain
   type-handlers-package: com.hand.hcf.core.persistence.typehandler
   enable-performance-interceptor: true
+  type-enums-package: com.hand.hcf.app.**.enums
 
 #
-#security:
-#  oauth2:
-#    client:
-#      access-token-uri: http://localhost:9082/oauth/token
-#      client-authentication-scheme: form
-#      client-id: implement-integration
-#      client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
-#      grant-type: client_credentials
-#    resource:
-#      user-info-uri: http://localhost:9082/api/check_token
+security:
+  oauth2:
+    client:
+      access-token-uri: http://localhost:9082/oauth/token
+      client-authentication-scheme: form
+      client-id: implement-integration
+      client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+      grant-type: client_credentials
+    resource:
+      user-info-uri: http://localhost:9082/api/check_token
 
 logging:
   config: classpath:logback/logback-dev.xml

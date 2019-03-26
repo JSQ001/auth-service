@@ -20,7 +20,7 @@ import com.hand.hcf.app.base.userRole.service.RoleMenuService;
 import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.app.base.attachment.AttachmentCO;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;

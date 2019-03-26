@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.period.persistence.PeriodStatusMapper">
+
+    <resultMap id="PeriodsMap"
+               type="com.hand.hcf.app.mdata.period.domain.PeriodStatus">
+        <result column="id" property="id"/>
+        <result column="period_id" property="periodId"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="period_name" property="periodName"/>
+        <result column="period_seq" property="periodSeq"/>
+        <result column="period_status_code" property="periodStatusCode"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>
+    <select id="findPeriodStatusByTenantIdAndPeriodSetId" resultType="com.hand.hcf.app.mdata.period.domain.PeriodStatus">
+        SELECT
+        aps.id as id,
+        aps.period_id  as periodId,
+        aps.set_of_books_id as setOfBooksId ,
+        aps.period_name as periodName ,
+        aps.period_seq as periodSeq,
+        aps.tenant_id  as tenantId,
+        aps.period_status_code as periodStatusCode,
+        aps.enabled  as enabled,
+        aps.deleted as deleted,
+        aps.created_date as createdDate,
+        aps.created_by as createdBy,
+        aps.last_updated_date as lastUpdatedDate,
+        aps.last_updated_by as lastUpdatedBy
+        FROM sys_period_status aps, sys_periods ap
+        <where>
+            aps.period_id = ap.id
+            AND aps.tenant_id = ap.tenant_id
+            AND ap.deleted=FALSE
+            AND aps.deleted=FALSE
+            <if test="periodSetId != null">
+                and ap.period_set_id = #{periodSetId}
+            </if>
+            <if test="tenantId != null">
+                and ap.tenant_id = #{tenantId}
+            </if>
+            <if test="setOfBooksId != null">
+                and aps.set_of_books_id = #{setOfBooksId}
+            </if>
+            <if test="periodSeq != null">
+                and aps.period_seq &lt; #{periodSeq}
+            </if>
+        </where>
+        order by   aps.period_seq asc
+    </select>
+</mapper>

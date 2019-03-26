@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.UserTempMapper">
+
+
+    <update id="updateEmployeeIdExists">
+        UPDATE sys_user_import_temp t
+        SET t.error_flag   = 1,
+            t.error_detail = concat(error_detail,'当前工号已存在!')
+        WHERE (EXISTS
+             (SELECT 1
+                FROM sys_contact c,
+               WHERE c.status = 1001
+                  AND c.employee_id = t.employee_id)
+              OR EXISTS
+             (SELECT 1
+                FROM sys_user_import_temp t1
+                WHERE t1.employee_id = t.employee_id
+                AND t1.batch_number = t.batch_number
+                AND t1.id != t.id))
+        AND t.batch_number = #{batchNumber}
+    </update>
+
+    <update id="updateEmailExists">
+        UPDATE sys_user_import_temp t
+        SET t.error_flag = 1,
+            t.error_detail = concat(error_detail,'当前邮箱已存在!')
+        WHERE (EXISTS
+             (SELECT 1
+                FROM sys_contact c
+               WHERE c.status = 1001
+                  AND c.email = t.email)
+              OR EXISTS
+             (SELECT 1
+                FROM sys_user_import_temp t1
+                WHERE t1.email = t.email
+                AND t1.batch_number = t.batch_number
+                AND t1.id != t.id))
+        AND t.batch_number = #{batchNumber}
+    </update>
+
+    <update id="updatePhoneExists">
+        UPDATE sys_user_import_temp t
+        SET t.error_flag   = 1,
+            t.error_detail = concat(error_detail,'当前手机已存在!')
+        WHERE (EXISTS
+             (SELECT 1
+                FROM sys_contact c,sys_phone p
+               WHERE p.contact_id = c.id
+                  AND c.status = 1001
+                  AND p.phone_number = t.mobile)
+              OR EXISTS
+             (SELECT 1
+                FROM sys_user_import_temp t1
+                WHERE t1.mobile = t.mobile
+                AND t1.batch_number = t.batch_number
+                AND t1.id != t.id))
+        AND t.batch_number = #{batchNumber}
+    </update>
+
+    <select id="queryInfo" resultMap="queryInfoMap">
+        SELECT (SELECT
+        COUNT(0) AS successEntities
+        FROM sys_user_import_temp
+        WHERE batch_number = #{transactionId}
+        AND error_flag = 0) AS successEntities,
+        (SELECT
+        COUNT(0) AS failureEntities
+        FROM sys_user_import_temp
+        WHERE batch_number = #{transactionId}
+        AND error_flag = 1) AS failureEntities,
+        #{transactionId} AS transaction_id
+        FROM dual
+
+    </select>
+    <resultMap id="queryInfoMap" type="com.hand.hcf.core.web.dto.ImportResultDTO">
+        <result column="successEntities" property="successEntities"/>
+        <result column="failureEntities" property="failureEntities"/>
+        <collection property="errorData" select="queryErrorData"
+                    column="{transactionId=transaction_id}"/>
+    </resultMap>
+
+    <select id="queryErrorData" resultMap="errorDataMap">
+        select t.row_number AS row_number,
+        t.error_detail AS error
+        FROM sys_user_import_temp t
+        WHERE t.batch_number = #{transactionId}
+        AND t.error_flag = 1
+    </select>
+    <resultMap id="errorDataMap" type="com.hand.hcf.core.web.dto.ImportErrorDTO">
+        <result column="row_number" property="index"/>
+        <result column="error" property="error"/>
+    </resultMap>
+
+    <select id="varifyBatchNumberExsits" resultType="java.lang.Boolean">
+        SELECT 1
+        FROM dual
+        WHERE EXISTS (SELECT 1
+          FROM sys_user_import_temp
+          WHERE batch_number = #{transactionId})
+    </select>
+
+    <select id="selectUserOidByEmployeeIdAndTenantId" resultType="java.util.UUID">
+        SELECT c.user_oid
+        FROM sys_contact c
+        WHERE c.status != 1003
+          AND c.employee_id = #{employeeId}
+    </select>
+
+
+</mapper>

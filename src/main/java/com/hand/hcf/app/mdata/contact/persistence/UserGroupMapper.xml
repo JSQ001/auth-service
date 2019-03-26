@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.UserGroupMapper">
+
+
+    <select id="listByQO" parameterType="com.hand.hcf.app.mdata.contact.dto.UserGroupQO" resultType="com.hand.hcf.app.mdata.contact.domain.UserGroup">
+        select g.* from sys_user_group g
+        <if test="userId != null or userOid != null ">
+          left JOIN sys_user_group_user gu on gu.user_group_id = g.id
+          left join sys_contact u on u.user_id=gu.user_id
+        </if>
+        <where>
+            <if test="userId != null">
+                and gu.user_id = #{userId}
+            </if>
+            <if test="userOid != null">
+                and u.user_oid = #{userOid}
+            </if>
+            <if test="userOids != null and userOids.size()>0">
+              and u.user_oid in
+              <foreach collection="userOids" item="userOid"  open="(" separator="," close=")">
+                #{userOid}
+              </foreach>
+            </if>
+            <if test="companyOid != null">
+                and g.company_oid= #{companyOid}
+            </if>
+            <if test="tenantId != null">
+                and g.tenant_id= #{tenantId}
+            </if>
+            <if test="enabled != null">
+                and g.enabled = #{enabled}
+            </if>
+        </where>
+    </select>
+
+    <select id="findDefaultUserGroupV2" resultType="java.util.UUID">
+        select g.user_group_oid
+        from sys_user_group g,
+        sys_user_group_user u
+        where g.id= u.user_group_id
+        <if test="tenantId != null">
+            and g.tenant_id= #{tenantId}
+        </if>
+        <if test="companyOid != null">
+          and g.company_oid= #{companyOid}
+        </if>
+        and u.user_id= #{userId}
+        and g.enabled=1
+        group by g.user_group_oid
+    </select>
+
+    <select id="listByTenantIdAndUserGroupOids" resultType="com.hand.hcf.app.mdata.contact.domain.UserGroup">
+        select g.id,
+        g.user_group_oid
+        from sys_user_group g
+        where 1=1
+        <if test="userGroupOids != null and userGroupOids.size()>0">
+            and g.user_group_oid not in
+            <foreach collection="userGroupOids" item="userGroupOid"  open="(" separator="," close=")">
+                #{userGroupOid}
+            </foreach>
+        </if>
+        and g.tenant_id= #{tenantId}
+        and g.enabled=1
+        and exists(
+        select 'x'
+        from sys_user_group_condition
+        where user_group_id= g.id)
+    </select>
+
+    <select id="getUserGroupUser" resultType="java.lang.Integer">
+        SELECT count(*) from sys_user_group_user where user_id = #{userId} and user_group_id = #{userGroupId}
+    </select>
+
+    <select id="selectTenantGroupByName" resultType="com.hand.hcf.app.mdata.contact.domain.UserGroup">
+        SELECT * FROM sys_user_group where name = #{name} and tenant_id= #{tenantId} and company_oid is NULL
+        <if test="enabled != null">
+          AND  enabled = #{enabled}
+        </if>
+    </select>
+
+    <select id="selectTenantGroupByCode" resultType="com.hand.hcf.app.mdata.contact.domain.UserGroup">
+        SELECT * FROM sys_user_group where code = #{code} and tenant_id= #{tenantId} and company_oid is NULL
+        <if test="enabled != null">
+         AND   enabled = #{enabled}
+        </if>
+    </select>
+
+
+    <select id="selectUserIdsByGroupId" resultType="java.lang.Long">
+        SELECT
+        u.user_id id
+        FROM
+        sys_user_group_user u
+        WHERE
+        u.user_group_id = #{userGroupId}
+    </select>
+
+</mapper>
+

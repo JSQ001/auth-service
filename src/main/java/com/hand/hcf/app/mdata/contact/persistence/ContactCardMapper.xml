@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.ContactCardMapper">
+    <select id="checkCardNoExist" resultType="java.lang.Integer">
+        select count(1) from sys_contact_card_info cc,
+        sys_contact u
+        where u.user_oid=cc.user_oid
+          and u.tenant_id=#{tenantId}
+          and cc.card_no=#{cardNo}
+          and cc.card_type=#{cardType}
+    </select>
+</mapper>

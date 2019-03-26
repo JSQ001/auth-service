@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2018. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.company.persistence.CompanyMapper">
+    <resultMap id="CompanyResult"
+               type="com.hand.hcf.app.mdata.company.domain.Company">
+        <result column="company_oid" property="companyOid"/>
+        <result column="name" property="name"/>
+        <result column="done_register_lead" property="doneRegisterLead"/>
+        <result column="tax_id" property="taxId"/>
+        <result column="is_init_finance" property="isInitFinance"/>
+        <result column="group_company_oid" property="groupCompanyOid"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="legal_entity_id" property="legalEntityId"/>
+        <result column="company_code" property="companyCode"/>
+        <result column="address" property="address"/>
+        <result column="company_level_id" property="companyLevelId"/>
+        <result column="parent_company_id" property="parentCompanyId"/>
+        <result column="company_type_code" property="companyTypeCode"/>
+        <result column="stsys_date_active" property="startDateActive"/>
+        <result column="end_date_active" property="endDateActive"/>
+        <result column="path" property="path"/>
+        <result column="depth" property="depth"/>
+        <result column="show_custom_logo" property="showCustomLogo"/>
+        <result column="logo_id" property="logoId"/>
+    </resultMap>
+
+    <!--常用查询条件-->
+    <select id="getByQO" parameterType="com.hand.hcf.app.mdata.company.dto.CompanyQO" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select *
+        from sys_company t
+        where 1 = 1
+        <if test="companyOid != null ">
+            and t.company_oid = #{companyOid}
+        </if>
+        <if test="tenantId != null ">
+            and t.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null">
+            and t.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="legalEntityId != null ">
+            and t.legal_entity_id = #{legalEntityId}
+        </if>
+        <if test="parentCompanyId != null ">
+            and t.parent_company_id = #{parentCompanyId}
+        </if>
+        <if test="enabled != null">
+            and t.enabled = #{enabled}
+        </if>
+        <if test="companyCode != null and companyCode != ''">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="name != '' and name != null">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        order by t.company_code
+    </select>
+
+    <select id="findAllBySetOfBooksId" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.set_of_books_id = #{setOfBooksId}
+        and t.enabled = 1
+        <if test="name != '' and name != null">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="companyCode != null and companyCode != ''">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="legalEntityId != null ">
+            and t.legal_entity_id = #{legalEntityId}
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != ''">
+            and t.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != ''">
+            and t.company_code &lt;= #{companyCodeTo}
+        </if>
+        <if test="restrictionCompanyIds != null and restrictionCompanyIds.size() > 0">
+            and t.id not in
+            <foreach collection="restrictionCompanyIds" open="(" close=")" separator="," item="id">
+                #{id}
+            </foreach>
+        </if>
+        order by t.company_code
+    </select>
+
+    <select id="getCompanyWithoutEnumeration" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.tenant_id = #{tenantId}
+        and t.enabled = 1
+        <if test="name != null and name != ''">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="companyCode != null and companyCode != ''">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="legalEntityId != null ">
+            and t.legal_entity_id = #{legalEntityId}
+        </if>
+        <if test="companyLevelId != null ">
+            and t.company_level_id = #{companyLevelId}
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != ''">
+            and t.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != ''">
+            and t.company_code &lt;= #{companyCodeTo}
+        </if>
+    </select>
+
+    <select id="getCompanyWithCarousel" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.tenant_id = #{tenantId}
+        and t.enabled = 1
+        <if test="name != null and name != ''">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="companyCode != null and companyCode != ''">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="legalEntityId != null ">
+            and t.legal_entity_id = #{legalEntityId}
+        </if>
+        <if test="companyLevelId != null ">
+            and t.company_level_id = #{companyLevelId}
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != ''">
+            and t.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != ''">
+            and t.company_code &lt;= #{companyCodeTo}
+        </if>
+        <if test="source != null">
+            and t.id not in (
+            select co.id
+            from sys_company co, sys_carousel cr
+            where co.company_oid = cr.company_oid
+            and co.tenant_id = #{tenantId}
+            and cr.source = #{source})
+        </if>
+        order by t.company_code
+    </select>
+
+    <select id="getCompanyWithoutLevels" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.tenant_id = #{tenantId}
+        and t.enabled = 1
+        <if test="name != null and name != ''">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="companyCode != null and companyCode != ''">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="legalEntityId != null ">
+            and t.legal_entity_id = #{legalEntityId}
+        </if>
+        <if test="companyLevelId != null ">
+            and t.company_level_id = #{companyLevelId}
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != ''">
+            and t.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != ''">
+            and t.company_code &lt;= #{companyCodeTo}
+        </if>
+        <if test="source != null">
+            and t.id not in (
+            select co.id from sys_company co , sys_level l
+            where co.company_oid = l.company_oid
+            and co.tenant_id = #{tenantId}
+            and l.source = #{source}
+            and l.deleted = 0)
+        </if>
+    </select>
+
+    <select id="findBySetOfBooksIdAndIsEnabledTrue" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.set_of_books_id = #{setOfBooksId}
+        and t.enabled = 1
+        <if test="filterCompanyOids != null">
+            and not exists (
+            select 1
+            from sys_company t1
+            where t1.company_oid = #{filterCompanyOids}
+            and t1.company_oid = t.company_oid
+            )
+            and not exists(
+            select 1
+            from sys_company t2
+            where t2.company_oid = t.company_oid
+            and t2.parent_company_id = (
+            select t3.id
+            from sys_company t3
+            where t3.company_oid = #{filterCompanyOids}
+            )
+            )
+        </if>
+    </select>
+
+
+    <select id="findByCompanyOidIn" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where 1 = 1
+        <if test="companyOids != null and companyOids.size() > 0">
+            and t.company_oid in
+            <foreach collection="companyOids" open="(" close=")" separator="," item="companyOid">
+                #{companyOid}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findByIdIn" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where 1 = 1
+        <if test="companyIds != null and companyIds.size() > 0">
+            and t.id not in
+            <foreach collection="companyIds" open="(" close=")" separator="," item="companyId">
+                #{companyId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findOneByuserOid" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select t.* from sys_company t
+        left join sys_contact su
+        on t.id = su.company_id
+        where su.user_oid = #{userOid}
+    </select>
+
+    <select id="selectCompanyByTenantIdAndEnabled" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        select * from sys_company t
+        where t.tenant_id = #{tenantId} and t.enabled = #{enabled}
+        <if test="name != null">
+            and t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="companyCode != null">
+            and t.company_code like concat(concat('%',#{companyCode}),'%')
+        </if>
+        <if test="setOfBooksId != null">
+            and t.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="filter != null and filter.size() > 0">
+            and t.id not in
+            <foreach collection="filter" open="(" close=")" separator="," item="id">
+                #{id}
+            </foreach>
+        </if>
+        order by t.company_code
+    </select>
+
+    <select id="getCompaniesByTenantIdAndCondition" resultType="com.hand.hcf.app.mdata.company.dto.CompanySobDTO">
+        select t.id,
+        t.set_of_books_id,
+        t.company_code,
+        t.name,
+        v.set_of_books_name
+        from sys_company t, sys_set_of_books v
+        where t.set_of_books_id = v.id
+        and t.enabled = 1
+        <if test="tenantId != null">
+            and t.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null">
+            and t.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="keyWord != null and keyWord != ''">
+            and (
+            t.name like concat(concat('%',#{keyWord}),'%')
+            or
+            t.company_code like concat(concat('%',#{keyWord}),'%')
+            )
+        </if>
+        order by
+        v.set_of_books_code ,t.company_code
+    </select>
+
+
+    <select id="countIsEnabledTrueCompanyByLegalEntityId" resultType="java.lang.Long">
+        select count(1)
+        from sys_company t
+        where t.legal_entity_id = #{legalEntityId}
+        and t.enabled = 1
+    </select>
+
+    <select id="countCompanyByTenantId" resultType="java.lang.Long">
+        select count(1)
+        from sys_company t
+        where t.tenant_id = #{tenantId}
+        and t.enabled = 1
+    </select>
+
+    <select id="findTenantIdByCompanyOid" resultType="java.lang.Long">
+        select t.tenant_id
+        from sys_company t
+        where t.company_oid = #{companyOid}
+        and enabled = 1
+    </select>
+
+    <select id="selectRootSiblingCompanyPathList" resultType="java.lang.String">
+        select t.path
+        from sys_company t
+        where t.parent_company_id is null
+        and t.id = #{companyId}
+        and t.enabled = 1
+    </select>
+
+    <select id="selectSiblingCompanyPathList" resultType="java.lang.String">
+        select t.path
+        from sys_company t
+        where t.id != #{companyId}
+        and t.parent_company_id = #{parentCompanyId}
+        and t.path is not null
+        and t.enabled = 1
+    </select>
+
+    <select id="getCompanyChildrenIdByCompanyIds" resultType="java.lang.Long">
+        select
+        ac.id
+        from sys_company ac
+        where ac.parent_company_id in
+        <foreach collection="companyIds" item="companyId" open="(" close=")" separator=",">
+            #{companyId}
+        </foreach>
+    </select>
+
+    <select id="getCompanyByCond" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        SELECT
+        c.*
+        FROM
+        sys_company c
+        WHERE
+        c.enabled = TRUE
+        and c.id in
+        <foreach collection="companyIds" item="companyId" open="(" close=")" separator=",">
+            #{companyId}
+        </foreach>
+        <if test="companyCode != null and companyCode !=''  ">
+            AND c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !='' ">
+            AND c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="keyWord != null and keyWord !='' ">
+            AND (c.name LIKE concat('%', concat(#{keyWord,jdbcType=VARCHAR}, '%')) or c.company_code LIKE concat('%', concat(#{keyWord,jdbcType=VARCHAR}, '%')))
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != '' ">
+            AND c.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != '' ">
+            AND c.company_code &lt;= #{companyCodeTo}
+        </if>
+        ORDER BY c.company_code
+    </select>
+
+    <select id="listCompanyCO" resultType="com.hand.hcf.app.mdata.client.com.CompanyCO">
+        SELECT
+            t.id,
+            t.company_oid,
+            t.name,
+            t.group_company_oid,
+            t.tenant_id,
+            t.address,
+            t.company_level_id,
+            t.set_of_books_id,
+            t.legal_entity_id,
+            t.company_code,
+            t.company_type_code,
+            t.parent_company_id
+        FROM
+            sys_company t
+        where 1 = 1
+            <if test="ew != null">
+                ${ew.sqlSegment}
+            </if>
+        order by t.company_code asc
+    </select>
+    <select id="pageCompanyByCond" resultType="com.hand.hcf.app.mdata.client.standard.BasicCO">
+        select
+          c.id as id,
+          c.company_code as code,
+          c.name as name
+        from
+          sys_company c
+        where 1=1
+        <if test="tenantId != null">
+            and c.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null">
+            and c.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="companyId != null">
+            and c.id = #{companyId}
+        </if>
+        <if test="code != null">
+            and c.company_code LIKE concat(concat('%',#{code}),'%')
+        </if>
+        <if test="name != null">
+            and c.name LIKE concat(concat('%',#{name}),'%')
+        </if>
+    </select>
+
+    <select id="listCompanyByCodeAndSecurityType" resultType="com.hand.hcf.app.mdata.client.standard.BasicCO">
+        SELECT
+        c.id id,
+        c.company_code code,
+        c.name name
+        FROM
+        sys_company c
+        WHERE
+        c.enabled = 1
+        <if test="setOfBooksId != null and setOfBooksId != ''">
+            AND
+            c.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="tenantId != null and tenantId != ''">
+            AND
+            c.tenant_id = #{tenantId}
+        </if>
+        <if test="companyId != null and companyId != ''">
+           AND
+            c.id = #{companyId}
+        </if>
+        <if test="companyCode != null and companyCode !=''">
+            AND
+            c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !=''">
+            AND
+            c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY c.company_code
+    </select>
+
+    <select id="pageCompanyBySetOfBooksIdAndCond" resultType="com.hand.hcf.app.mdata.company.domain.Company" >
+        SELECT
+        *
+        FROM sys_company c
+        WHERE
+        c.ENABLED = 1
+        AND
+        c.set_of_books_id = #{setOfBooksId}
+            <if test="keyword != '' and keyword != null ">
+                AND
+                (
+                c.COMPANY_CODE LIKE concat(concat('%',#{keyword}),'%')
+                OR
+                c.NAME LIKE concat(concat('%',#{keyword}),'%')
+                )
+            </if>
+            <if test="codeFrom != null and codeFrom != ''">
+                AND c.COMPANY_CODE &gt;= #{codeFrom}
+            </if>
+            <if test="codeTo != null and codeTo != ''">
+                AND c.COMPANY_CODE &lt;= #{codeTo}
+            </if>
+
+        ORDER BY c.COMPANY_CODE
+    </select>
+
+    <select id="listCompanyByTenantId" resultType="com.hand.hcf.app.mdata.client.com.CompanyCO">
+    SELECT
+    t.tenant_id,
+    t.id,
+    t.name,
+    t.parent_company_id,
+    t.company_oid,
+    t.company_code
+    FROM
+    sys_company t
+    WHERE
+    t.tenant_id = #{tenantId}
+    AND and t.deleted = 0
+    <if test="enabled != null">
+      AND  t.enabled = #{enabled}
+    </if>
+    </select>
+</mapper>

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.supplier.persistence.VendorInfoMapper">
+
+    <resultMap id="VendorInfoMap" type="com.hand.hcf.app.mdata.supplier.domain.VendorInfo">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="company_oid" property="companyOid"/>
+        <result column="vendor_id" property="vendorId"/>
+        <result column="vendor_name" property="vendorName"/>
+        <result column="vendor_code" property="vendorCode"/>
+        <result column="status" property="status"/>
+        <result column="source" property="source"/>
+        <result column="vendor_type_id" property="vendorTypeId"/>
+        <result column="import_code" property="importCode"/>
+        <result column="industry_id" property="industryId"/>
+        <result column="vendor_level_id" property="vendorLevelId"/>
+        <result column="legal_representative" property="legalRepresentative"/>
+        <result column="tax_id" property="taxId"/>
+        <result column="contact" property="contact"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="contact_mail" property="contactMail"/>
+        <result column="fax" property="fax"/>
+        <result column="country" property="country"/>
+        <result column="address" property="address"/>
+        <result column="remark" property="remark"/>
+        <result column="effective_date" jdbcType="TIMESTAMP" property="effectiveDate"
+                javaType="java.time.ZonedDateTime"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" javaType="java.time.ZonedDateTime"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
+                javaType="java.time.ZonedDateTime"/>
+    </resultMap>
+
+
+    <select id="selectVendorInfosByCondtions" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        WHERE 1 = 1
+        <if test="tenantId != null">
+            AND vvi.tenant_id = #{tenantId}
+        </if>
+        <if test="vendorName != null">
+            AND vvi.vendor_name = #{vendorName}
+        </if>
+        <if test="vendorCode != null">
+            AND vvi.vendor_code = #{vendorCode}
+        </if>
+        <if test="source == 'TENANT'">
+            AND vvi.source = 'TENANT'
+        </if>
+        <if test="source == 'BILL' || source == 'COMPANY'">
+            AND ((vvi.source IN ('BILL', 'COMPANY') AND vvi.company_oid = #{companyOid}) OR (vvi.source = 'TENANT'))
+        </if>
+        ORDER BY vvi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByPage" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        WHERE vvi.source = 'TENANT'
+        <if test="venderCode != null">
+            AND vvi.vendor_code LIKE concat(concat('%',#{venderCode}),'%')
+        </if>
+        <if test="venNickname != null">
+            AND vvi.vendor_name LIKE concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="venType != null">
+            AND vvi.status = #{venType}
+        </if>
+        <if test="venderTypeId != null">
+            AND vvi.vendor_type_id = #{venderTypeId}
+        </if>
+        <if test="tenantId != null">
+            AND vvi.tenant_id = #{tenantId}
+        </if>
+        <if test="bankAccount != null and bankAccount != ''">
+            and exists (select 1 from ven_vendor_bank_account vvba where vvi.id = vvba.vendor_info_id
+            AND vvba.bank_account LIKE concat(concat('%',#{bankAccount}),'%')
+            )
+        </if>
+        order by vvi.status,vvi.vendor_code
+    </select>
+
+    <select id="selectVendorInfosByCompanyOidAndlastUpdatedDate" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        INNER JOIN ven_relation_vendor_company vrvc ON vrvc.vendor_info_id = vvi.id
+        AND vrvc.company_id = #{companyId}  AND vrvc.enabled = 1
+        WHERE vvi.last_updated_date BETWEEN #{startDateTime} and #{endDateTime}
+        ORDER BY vvi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByTenantIdAndVendorName" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        WHERE vvi.tenant_id = #{tenantId}
+        AND vvi.vendor_name = #{vendorName}
+        ORDER BY vvi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByTenantIdAndVendorNameAndVendorId" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        WHERE vvi.tenant_id = #{tenantId}
+        <if test="vendorName != null">
+            AND vvi.vendor_name = #{vendorName}
+        </if>
+        <if test="vendorId != null">
+            AND vvi.vendor_code = #{vendorId}
+        </if>
+        AND vvi.source = 'TENANT'
+        ORDER BY vvi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByRelationCompanyForPage" resultMap="VendorInfoMap">
+        SELECT mdt.* FROM
+        (SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId} AND arvc.enabled = 1
+        WHERE avi.source = 'TENANT'
+        <if test="venderCode != null">
+            AND avi.vendor_code LIKE concat(concat('%',#{venderCode}),'%')
+        </if>
+        <if test="venNickname != null">
+            AND avi.vendor_name LIKE concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="venType != null">
+            AND avi.status = #{venType}
+        </if>
+        <if test="venderTypeId != null">
+            AND avi.vendor_type_id = #{venderTypeId}
+        </if>
+
+        <if test="bankAccount != null and bankAccount != ''">
+            and exists (select 1 from ven_vendor_bank_account avba where avi.id = avba.vendor_info_id
+            AND avba.bank_account LIKE concat(concat('%',#{bankAccount}),'%')
+            )
+        </if>
+        UNION
+        SELECT avin.* FROM ven_vendor_info avin
+        WHERE avin.source IN ('BILL','COMPANY')
+        <if test="venderCode != null">
+            AND avin.vendor_code  LIKE concat(concat('%',#{venderCode}),'%')
+        </if>
+        <if test="venNickname != null">
+            AND avin.vendor_name LIKE concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="venType != null">
+            AND avin.status = #{venType}
+        </if>
+        <if test="venderTypeId != null">
+            AND avin.vendor_type_id = #{venderTypeId}
+        </if>
+        AND avin.company_oid = #{companyOid}
+        <if test="bankAccount != null and bankAccount != ''">
+            and exists (select 1 from ven_vendor_bank_account avba where avin.id = avba.vendor_info_id
+            AND avba.bank_account LIKE concat(concat('%',#{bankAccount}),'%')
+            )
+        </if>
+        )
+        mdt ORDER BY mdt.status ASC, mdt.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByTenantIdAndlastUpdatedDate" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE avi.last_updated_date BETWEEN #{startDateTime} AND #{endDateTime}
+        AND avi.tenant_id = #{tenantId}
+        AND avi.source = 'TENANT'
+        ORDER BY avi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByCompanyIdAndVendorName" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId}  AND arvc.enabled = 1
+        WHERE 1 = 1
+        <if test="venNickname != null">
+            AND avi.vendor_name like #{venNickname}
+        </if>
+        ORDER BY avi.last_updated_date DESC
+    </select>
+
+
+    <select id="selectVendorInfosByCompanyIdAndVendorNameForPage" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId} AND arvc.enabled = 1
+        WHERE 1 = 1
+        <if test="venNickname != null">
+            AND avi.vendor_name like #{venNickname}
+        </if>
+        ORDER BY avi.vendor_code,avi.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorInfosByCompanyIdAndVendorNameAndCodeForPage" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId} AND arvc.enabled = 1
+        WHERE 1 = 1
+        <if test="venNickname != null and venNickname != ''">
+            AND avi.vendor_name like concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="vendorCode != null and vendorCode != ''">
+            AND avi.vendor_code like concat(concat('%',#{vendorCode}),'%')
+        </if>
+        ORDER BY avi.vendor_code
+    </select>
+
+    <select id="searchDuplicationVendorInfosByTenant" resultMap="VendorInfoMap">
+        SELECT avi.vendor_name ,aac.tenant_id FROM ven_vendor_info avi
+        INNER JOIN artemis.art_company aac on avi.company_oid = aac.company_oid
+        WHERE length(avi.vendor_name)>0
+        GROUP BY avi.vendor_name ,aac.tenant_id HAVING COUNT(1) > 1;
+    </select>
+
+    <select id="selectVendorInfosByVendorNameAndTenantId" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE  avi.vendor_name = #{vendorName} AND avi.tenant_id = #{tenantId}
+        ORDER BY avi.status, avi.id
+    </select>
+
+    <select id="selectVendorInfosByVendorNameAndTenantIdAndSource" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE  avi.vendor_name = #{vendorName} AND avi.tenant_id = #{tenantId} AND avi.source = #{source}
+    </select>
+
+    <select id="selectVendorInfosByRelationCompany" resultMap="VendorInfoMap">
+        SELECT mdt.* FROM
+        (SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId} AND arvc.enabled = 1
+        WHERE  avi.last_updated_date BETWEEN #{startDateTime} AND #{endDateTime}
+        AND avi.source = 'TENANT'
+        UNION
+        SELECT avin.* FROM ven_vendor_info avin
+        WHERE avin.source IN ('BILL','COMPANY') AND avin.company_oid = #{companyOid}
+        AND avin.last_updated_date BETWEEN #{startDateTime} AND #{endDateTime}
+        ) mdt ORDER BY mdt.last_updated_date DESC
+    </select>
+
+    <select id="searchDuplicationVendorCodesByTenant" resultMap="VendorInfoMap">
+        SELECT vin.*
+          FROM ven_vendor_info vin
+          INNER JOIN artemis.art_company aaco on vin.company_oid= aaco.company_oid
+         WHERE length(vin.vendor_id)> 0
+           AND vin.vendor_id NOT IN(
+        SELECT vi.vendor_id
+          FROM ven_vendor_info vi
+          INNER JOIN artemis.art_company aac on vi.company_oid= aac.company_oid
+         WHERE length(vi.vendor_id)> 0
+           and length(vi.vendor_name)> 0
+         GROUP BY vi.vendor_id, vi.vendor_name, aac.tenant_id
+        HAVING COUNT(1)> 1)
+         GROUP BY vin.vendor_id, aaco.tenant_id
+        HAVING COUNT(1)> 1
+    </select>
+
+    <select id="selectVendorInfosGroupByTenantId" resultMap="VendorInfoMap">
+        SELECT avi.tenant_id FROM ven_vendor_info avi
+        GROUP BY avi.tenant_id
+    </select>
+
+    <select id="selectVendorInfosByTenantId" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE  avi.tenant_id = #{tenantId}
+    </select>
+
+    <select id="selectVendorInfosByVendorCodeAndTenantId" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE avi.tenant_id = #{tenantId} AND avi.vendor_code = #{vendorCode}
+    </select>
+
+    <select id="selectVendorInfosByVendorCodeForArtemis" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE 1 = 1
+        <if test="tenantId != null">
+            AND avi.tenant_id = #{tenantId}
+        </if>
+        <if test="vendorCode != null">
+            AND avi.vendor_code = #{vendorCode}
+        </if>
+        <if test="source == 'TENANT'">
+            AND avi.source = 'TENANT'
+        </if>
+        <if test="source == 'BILL' || source == 'COMPANY'">
+            AND avi.source IN ('BILL', 'COMPANY') AND avi.company_oid = #{companyOid}
+        </if>
+        ORDER BY avi.last_updated_date DESC
+    </select>
+
+
+</mapper>
