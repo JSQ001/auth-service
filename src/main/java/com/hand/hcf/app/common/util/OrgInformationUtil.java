@@ -1,7 +1,7 @@
 package com.hand.hcf.app.common.util;
 
+import com.hand.hcf.app.common.co.OrganizationUserCO;
 import com.hand.hcf.app.mdata.client.contact.ContactClient;
-import com.hand.hcf.app.mdata.client.contact.OrganizationUserCO;
 import com.hand.hcf.core.component.ApplicationContextProvider;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.util.LoginInformationUtil;

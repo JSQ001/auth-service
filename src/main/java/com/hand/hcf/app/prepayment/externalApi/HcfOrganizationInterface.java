@@ -8,13 +8,7 @@ import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.AttachmentClient;
 import com.hand.hcf.app.common.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.com.CompanyClient;
-//import com.hand.hcf.app.mdata.client.contact.*;
-import com.hand.hcf.app.mdata.client.currency.CurrencyClient;
-import com.hand.hcf.app.mdata.client.department.DepartmentClient;
-import com.hand.hcf.app.mdata.client.sob.SobClient;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalHistoryCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.CommonApprovalHistoryCO;
+import com.hand.hcf.app.mdata.client.contact.*;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import com.hand.hcf.core.exception.BizException;
 import ma.glasnost.orika.MapperFacade;
@@ -48,10 +42,10 @@ public class HcfOrganizationInterface {
 //    private  ApplicationService applicationService;
 
     @Autowired
-    private CurrencyClient currencyClient;
+    private CurrencyControllerImpl currencyClient;
     //TODO 增加组织架构调用接口
     @Autowired
-    private CompanyClient companyClient;
+    private CompanyControllerImpl companyClient;
 
 //    @Autowired
 //    private ContactClient userClient;
@@ -64,10 +58,10 @@ public class HcfOrganizationInterface {
     private CommonControllerImpl orgClient;
 
     @Autowired
-    private SobClient sobClient;
+    private SobControllerImpl sobClient;
 
     @Autowired
-    private DepartmentClient departmentClient;
+    private DepartmentControllerImpl departmentClient;
 
     @Autowired
     private MapperFacade mapper;

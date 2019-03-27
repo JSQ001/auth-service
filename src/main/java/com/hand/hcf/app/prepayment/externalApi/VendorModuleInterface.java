@@ -4,7 +4,6 @@ package com.hand.hcf.app.prepayment.externalApi;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.common.co.VendorInfoCO;
-import com.hand.hcf.app.mdata.client.supplier.SupplierClient;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ public class VendorModuleInterface {
     private static final Logger log = LoggerFactory.getLogger(VendorModuleInterface.class);
     //TODO 供应商模块连接
     @Autowired
-    private SupplierClient supplierClient;
+    private SupplierImplementControllerImpl supplierClient;
 
 
     //根据公司oid和供应商name查询供应商银行信息

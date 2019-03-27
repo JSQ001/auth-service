@@ -11,17 +11,8 @@ import com.hand.hcf.app.apply.contract.dto.ContractDocumentRelationCO;
 import com.hand.hcf.app.apply.contract.dto.ContractHeaderCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.common.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.client.contact.ContactCO;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
-import com.hand.hcf.app.mdata.client.supplier.SupplierClient;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorBankAccountCO;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorInfoCO;
-import com.hand.hcf.app.mdata.client.workflow.WorkflowClient;
-import com.hand.hcf.app.mdata.client.workflow.WorkflowInterface;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalFormCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.CommonApprovalHistoryCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
@@ -91,15 +82,15 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     @Autowired
     private ContractClient contractService;
     @Autowired
-    private SupplierClient supplierClient;
+    private SupplierImplementControllerImpl supplierClient;
 
     @Value("${spring.application.name:}")
     private  String applicationName;
 
     @Autowired
-    private WorkflowClient workflowClient;
+    private WorkflowControllerImpl workflowClient;
     @Autowired
-    private WorkflowInterface workflowInterface;
+    private WorkflowControllerImpl workflowInterface;
 
     @Autowired
     private VendorModuleInterface vendorModuleInterface;

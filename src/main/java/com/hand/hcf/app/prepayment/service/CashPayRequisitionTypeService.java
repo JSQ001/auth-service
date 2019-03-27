@@ -3,22 +3,13 @@ package com.hand.hcf.app.prepayment.service;
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.AssignDepartmentOrUserGroupCO;
-import com.hand.hcf.app.common.co.CashTransactionClassCO;
-import com.hand.hcf.app.common.co.CompanyCO;
-import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeEmployeeEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeTypeEnum;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.authorize.AuthorizeClient;
-import com.hand.hcf.app.mdata.client.authorize.FormAuthorizeCO;
-import com.hand.hcf.app.mdata.client.authorize.FormTypeEnum;
+import com.hand.hcf.app.common.enums.FormTypeEnum;
+import com.hand.hcf.app.common.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.client.contact.ContactCO;
-import com.hand.hcf.app.mdata.client.contact.JudgeUserCO;
-import com.hand.hcf.app.mdata.client.contact.OrganizationUserCO;
-import com.hand.hcf.app.mdata.client.contact.UserGroupCO;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
 import com.hand.hcf.app.prepayment.domain.*;
 import com.hand.hcf.app.prepayment.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.prepayment.externalApi.PaymentModuleInterface;
@@ -74,7 +65,7 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
     @Autowired
     private PaymentModuleInterface paymentModuleInterface;
     @Autowired
-    private AuthorizeClient authorizeClient;
+    private AuthorizeControllerImpl authorizeClient;
     /**
      * 新增 预付款单类型定义
      *

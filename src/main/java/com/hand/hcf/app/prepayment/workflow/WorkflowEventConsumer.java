@@ -10,7 +10,6 @@ import com.hand.hcf.app.common.co.WorkflowMessageCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.common.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.client.workflow.event.WorkflowCustomRemoteEvent;
-import com.hand.hcf.app.mdata.client.workflow.event.WorkflowEventConsumerInterface;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class WorkflowEventConsumer implements WorkflowEventConsumerInterface {
+public class WorkflowEventConsumer  {
     @Value("${spring.application.name:}")
     private  String applicationName;
 
@@ -34,7 +33,7 @@ public class WorkflowEventConsumer implements WorkflowEventConsumerInterface {
      * 该监听用于 工作流的撤回，审批拒绝(驳回)，审批通过 时 修改单据的相应状态
      * @param workflowCustomRemoteEvent
      */
-    @Override
+
     @LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public void workFlowConsumer(WorkflowCustomRemoteEvent workflowCustomRemoteEvent) {

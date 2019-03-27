@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExpenseModuleInterface {
     @Autowired
-    private ExpenseApplicationClient expenseApplicationClient;
+    private ApplicationControllerImpl expenseApplicationClient;
 
     /**
      * 根据所选范围查询账套下符合条件的费用申请单类型
