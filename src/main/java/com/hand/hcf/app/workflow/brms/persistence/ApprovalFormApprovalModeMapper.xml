@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.workflow.brms.persistence.ApprovalFormApprovalModeMapper">
+
+    <select id="getCustomFormApproverMode" resultType="com.hand.hcf.app.workflow.brms.dto.ApprovalFormOidAndApprovalModeDTO">
+       select rc.value formOid , rac.approval_mode approval_mode from  sys_rule_condition rc
+            inner JOIN sys_rule_condition_relation rcr on rc.rule_condition_oid = rcr.rule_condition_oid
+            inner join sys_rule_approval_chain rac on rcr.entity_oid = rac.rule_scene_oid
+    </select>
+
+</mapper>

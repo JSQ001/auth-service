@@ -1,9 +1,11 @@
 package com.hand.hcf.app.mdata.base.util;
 
 import com.hand.hcf.app.common.co.OrganizationUserCO;
+import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.core.component.ApplicationContextProvider;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.util.LoginInformationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.UUID;
@@ -14,7 +16,6 @@ import java.util.UUID;
  * @remark
  */
 public class OrgInformationUtil extends LoginInformationUtil {
-
 
     //获取账套
     public static Long getCurrentSetOfBookId() {
@@ -47,8 +48,8 @@ public class OrgInformationUtil extends LoginInformationUtil {
     }
 
     private static OrganizationUserCO getOrganizationUserCO(Long userId){
-        /*ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
-        ContactClient bean = applicationContext.getBean(ContactClient.class);
+        ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+        ContactControllerImpl bean = applicationContext.getBean(ContactControllerImpl.class);
         OrganizationUserCO organizationUserCO = bean.getOrganizationCOByUserId(userId);
         if (organizationUserCO == null){
             // admin 无组织架构信息
@@ -56,9 +57,6 @@ public class OrgInformationUtil extends LoginInformationUtil {
             co.setUserId(userId);
             return co;
         }
-        return organizationUserCO;*/
-        //jiu.zhao TODO
-        return null;
+        return organizationUserCO;
     }
-
 }
