@@ -14,4 +14,7 @@
     <!-- 1.0.0  修改全部放到后面的版本分支上-->
     <include file="classpath:db/liquibase/base/v1.0.0/release20190401.xml" relativeToChangelogFile="false"/>
 
+    <include file="classpath:db/liquibase/mdata/version1.0.0/init.xml" relativeToChangelogFile="false"/>
+    <include file="classpath:db/liquibase/mdata/version1.0.0/release20190114.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>
