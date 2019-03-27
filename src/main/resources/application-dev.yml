@@ -107,3 +107,10 @@ mail:
   from: notice@service.huilianyi.com
   enabled: true
   username: notice@service.huilianyi.com
+
+async:
+  enable: true
+  max-pool-size: 250
+  queue-capacity: 8
+  core-pool-size: 8
+  keep-alive-seconds: 30

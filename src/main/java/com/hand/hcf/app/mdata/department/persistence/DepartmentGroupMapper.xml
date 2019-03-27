@@ -77,7 +77,7 @@
         adg.enabled=1
     </select>
 
-    <select id="selectCurrentDepartmentGroupDepartment" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectCurrentDepartmentGroupDepartment" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT
         ad.department_code departmentCode,
         ad.name NAME ,
@@ -99,7 +99,7 @@
         ORDER BY ad.department_code
     </select>
 
-    <select id="selectCurrentDepartment" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectCurrentDepartment" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT
         ad.department_code departmentCode,
         ad.name NAME ,
@@ -121,7 +121,7 @@
     </select>
 
 
-    <select id="selectDepartmentByGroupCode" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByGroupCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT d.department_code departmentCode,
         d.name NAME ,
         d.id departmentId
@@ -147,7 +147,7 @@
 
 
 
-    <select id="selectNotExit" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectNotExit" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT  d.department_code departmentCode,
         d.name NAME ,
         d.id departmentId
@@ -171,7 +171,7 @@
 
 
 
-    <select id="selectDepartmentByDepartmentGroupCode" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByDepartmentGroupCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT d.department_code departmentCode,
         d.name NAME ,
         d.id departmentId
@@ -200,7 +200,7 @@
         ORDER BY d.status ,d.department_code ASC
     </select>
 
-    <select id="selectByDepartmentId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectByDepartmentId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT
         d.department_oid departmentOid,
         d.department_code departmentCode,
@@ -215,7 +215,7 @@
         d.status=101
     </select>
 
-    <select id="selectDepartmentByCompanyIdAndTenantId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByCompanyIdAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT
         d.department_code departmentCode,
         d.name NAME ,
@@ -250,7 +250,7 @@
         d.department_code
     </select>
 
-    <select id="selectByCompanyIdAndTenantId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectByCompanyIdAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
 
         SELECT
         d.department_code departmentCode,
@@ -308,7 +308,7 @@
 
     </select>
 
-    <select id="selectDepartmentByEmpOid" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByEmpOid" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         select
          ad.department_code departmentCode,
          ad.name NAME ,
@@ -327,7 +327,7 @@
         ad.status=101
     </select>
 
-    <select id="selectByTenantId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectByTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         SELECT
         d.department_code departmentCode,
         d.name NAME ,
@@ -367,7 +367,7 @@
         ORDER BY adg.enabled DESC,adg.dept_group_code ASC
     </select>
 
-    <select id="selectByTenantAndCompanyAndDeptCode" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectByTenantAndCompanyAndDeptCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
          select
          ad.department_code departmentCode,
          ad.name NAME ,
@@ -489,7 +489,7 @@
         ORDER BY adg.dept_group_code
     </select>
 
-    <select id="selectDepartmentByTenantIdAndEnabled"  resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByTenantIdAndEnabled"  resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         select
          ad.name NAME ,
          ad.id departmentId,
@@ -538,7 +538,7 @@
         ad.department_code
     </select>
 
-    <select id="selectDepartmentByCodeAndTenantId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByCodeAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         select
          ad.department_code departmentCode,
          ad.name NAME ,
@@ -918,7 +918,7 @@
 
     </select>
 
-    <select id="selectDepartmentByEmployeeId" resultType="com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO">
+    <select id="selectDepartmentByEmployeeId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
         select
         ad.department_code departmentCode,
         ad.name NAME ,
