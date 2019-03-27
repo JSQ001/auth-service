@@ -18,7 +18,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @TableName("sys_user_import_temp")
-public class UserTempDomain extends Domain {
+public class MdataUserTempDomain extends Domain {
 
     @TableField("row_number")
     private String rowNumber;

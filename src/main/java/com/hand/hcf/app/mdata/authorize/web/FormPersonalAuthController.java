@@ -1,4 +1,3 @@
-package com.hand.hcf.app.mdata.authorize.web;/*
 package com.hand.hcf.app.mdata.authorize.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
@@ -16,27 +15,22 @@ import org.springframework.web.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-*/
 /**
  * 单据个人授权接口类
  * @author shouting.cheng
  * @date 2019/1/22
- *//*
-
+ */
 @RestController
 @RequestMapping("/api/authorize/form/personal/auth")
 public class FormPersonalAuthController {
     @Autowired
     private FormPersonalAuthService formPersonalAuthService;
 
-    */
-/**
+    /**
      * @apiDefine Authorize 代理授权
-     *//*
+     */
 
-
-    */
-/**
+    /**
      * @api {POST} /api/authorize/form/personal/auth 【单据个人授权】创建
      * @apiGroup Authorize
      * @apiParam {Object} auth  单据个人授权
@@ -71,16 +65,14 @@ public class FormPersonalAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": null
      * }
-     *//*
-
+     */
     @PostMapping
     public FormPersonalAuth createFormPersonalAuth(@RequestBody FormPersonalAuth auth){
 
         return formPersonalAuthService.createFormPersonalAuth(auth);
     }
 
-    */
-/**
+    /**
      * @api {PUT} /api/authorize/form/personal/auth 【单据个人授权】更新
      * @apiGroup Authorize
      * @apiParam {Object} auth  单据个人授权
@@ -124,28 +116,24 @@ public class FormPersonalAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": null
      * }
-     *//*
-
+     */
     @PutMapping
     public FormPersonalAuth updateFormPersonalAuth(@RequestBody FormPersonalAuth auth){
 
         return formPersonalAuthService.updateFormPersonalAuth(auth);
     }
 
-    */
-/**
+    /**
      * @api {DELETE} /api/authorize/form/personal/auth/{id} 【单据个人授权】删除
      * @apiGroup Authorize
      * @apiParam {Long} dimensionId  待删除的id
-     *//*
-
+     */
     @DeleteMapping("/{id}")
     public void deleteFormPersonalAuthById(@PathVariable(value = "id") Long id) {
         formPersonalAuthService.deleteFormPersonalAuthById(id);
     }
 
-    */
-/**
+    /**
      * @api {GET} /api/authorize/form/personal/auth/{id} 【单据个人授权】查询
      * @apiGroup Authorize
      * @apiParam {Long} id  单据个人授权id
@@ -162,15 +150,13 @@ public class FormPersonalAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": null
      * }
-     *//*
-
+     */
     @GetMapping("/{id}")
     public FormPersonalAuthDTO getFormPersonalAuthById(@PathVariable(value = "id") Long id) {
         return formPersonalAuthService.getFormPersonalAuthById(id);
     }
 
-    */
-/**
+    /**
      * @api {GET} /api/authorize/form/personal/auth/pageByCondition 【单据个人授权】条件查询
      * @apiDescription 用于单据个人授权列表界面的条件查询
      * @apiGroup Authorize
@@ -196,8 +182,7 @@ public class FormPersonalAuthController {
      *         "endDate": null
      *     }
      * ]
-     *//*
-
+     */
     @GetMapping("/pageByCondition")
     public ResponseEntity<List<FormPersonalAuthDTO>> pageFormPersonalAuthByCondition(@RequestParam(required = false) String documentCategory,
                                                                                      @RequestParam(required = false) Long formId,
@@ -214,4 +199,3 @@ public class FormPersonalAuthController {
         return new ResponseEntity<>(reportLineList, httpHeaders, HttpStatus.OK);
     }
 }
-*/

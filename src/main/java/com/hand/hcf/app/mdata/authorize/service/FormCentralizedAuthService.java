@@ -1,15 +1,14 @@
-package com.hand.hcf.app.mdata.authorize.service;/*
 package com.hand.hcf.app.mdata.authorize.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.client.org.SysCodeValueCO;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.CompanyCO;
+import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.mdata.authorize.domain.FormCentralizedAuth;
 import com.hand.hcf.app.mdata.authorize.dto.FormCentralizedAuthDTO;
 import com.hand.hcf.app.mdata.authorize.persistence.FormCentralizedAuthMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
@@ -32,13 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-*/
 /**
  * 单据集中授权服务类
  * @author shouting.cheng
  * @date 2019/1/22
- *//*
-
+ */
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthMapper, FormCentralizedAuth> {
@@ -58,13 +55,11 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
     @Autowired
     private SetOfBooksService setOfBooksService;
 
-    */
-/**
+    /**
      * 新建
      * @param auth
      * @return
-     *//*
-
+     */
     public FormCentralizedAuth createFormCentralizedAuth(FormCentralizedAuth auth) {
         if (auth.getId() != null) {
             throw new BizException(RespCode.SYS_ID_NOT_NULL);
@@ -77,13 +72,11 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         return auth;
     }
 
-    */
-/**
+    /**
      * 更新
      * @param auth
      * @return
-     *//*
-
+     */
     public FormCentralizedAuth updateFormCentralizedAuth(FormCentralizedAuth auth) {
         if (auth.getId() == null) {
             throw new BizException(RespCode.SYS_ID_NULL);
@@ -92,12 +85,10 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         return auth;
     }
 
-    */
-/**
+    /**
      * 删除
      * @param id
-     *//*
-
+     */
     public void deleteFormCentralizedAuthById(Long id) {
         if (baseMapper.selectById(id) == null) {
             throw new BizException(RespCode.VEN_AUTHORIZE_NOT_EXIST);
@@ -105,20 +96,17 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         baseMapper.deleteById(id);
     }
 
-    */
-/**
+    /**
      * 查询
      * @param id
      * @return
-     *//*
-
+     */
     public FormCentralizedAuthDTO getFormCentralizedAuthById(Long id) {
         FormCentralizedAuth auth = baseMapper.selectById(id);
         return toDTO(auth);
     }
 
-    */
-/**
+    /**
      * 条件查询
      * @param setOfBooksId
      * @param documentCategory
@@ -131,8 +119,7 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
      * @param endDate
      * @param mybatisPage
      * @return
-     *//*
-
+     */
     public List<FormCentralizedAuthDTO> pageFormCentralizedAuthByCondition(Long setOfBooksId, String documentCategory, Long formId, Long companyId, Long unitId, Long mandatorId, Long baileeId, ZonedDateTime startDate, ZonedDateTime endDate, Page mybatisPage) {
         List<FormCentralizedAuth> authList = baseMapper.selectPage(mybatisPage,
                 new EntityWrapper<FormCentralizedAuth>()
@@ -149,13 +136,11 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         return toDTOs(authList);
     }
 
-    */
-/**
+    /**
      * domainList转dtoList
      * @param domainList
      * @return
-     *//*
-
+     */
     private List<FormCentralizedAuthDTO> toDTOs(List<FormCentralizedAuth> domainList) {
         List<FormCentralizedAuthDTO> dtoList = new ArrayList<>();
 
@@ -211,13 +196,11 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         return dtoList;
     }
 
-    */
-/**
+    /**
      * domain转dto
      * @param domain
      * @return
-     *//*
-
+     */
     private FormCentralizedAuthDTO toDTO(FormCentralizedAuth domain) {
         FormCentralizedAuthDTO dto = mapperFacade.map(domain, FormCentralizedAuthDTO.class);
 
@@ -260,4 +243,3 @@ public class FormCentralizedAuthService extends BaseService<FormCentralizedAuthM
         return dto;
     }
 }
-*/

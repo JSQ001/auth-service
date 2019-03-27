@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.contact.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.hand.hcf.app.mdata.contact.domain.UserTempDomain;
+import com.hand.hcf.app.mdata.contact.domain.MdataUserTempDomain;
 import com.hand.hcf.core.web.dto.ImportErrorDTO;
 import com.hand.hcf.core.web.dto.ImportResultDTO;
 import org.apache.ibatis.annotations.Param;
@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.UUID;
 
-public interface UserTempMapper extends BaseMapper<UserTempDomain> {
+public interface MdataUserTempMapper extends BaseMapper<MdataUserTempDomain> {
 
 
     void updateEmployeeIdExists(@Param("batchNumber") String batchNumber);

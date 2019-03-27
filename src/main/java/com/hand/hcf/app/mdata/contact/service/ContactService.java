@@ -13,8 +13,8 @@ import com.hand.hcf.app.mdata.company.dto.CompanyDTO;
 import com.hand.hcf.app.mdata.company.service.CompanySecurityService;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
+import com.hand.hcf.app.mdata.contact.domain.MdataUserTempDomain;
 import com.hand.hcf.app.mdata.contact.domain.Phone;
-import com.hand.hcf.app.mdata.contact.domain.UserTempDomain;
 import com.hand.hcf.app.mdata.contact.dto.ContactDTO;
 import com.hand.hcf.app.mdata.contact.dto.ContactQO;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
@@ -1251,7 +1251,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     public UUID importUserInfo(MultipartFile file) throws Exception{
         UUID batchNumber = UUID.randomUUID();
         InputStream in = file.getInputStream();
-        ExcelImportHandler<UserTempDomain> excelImportHandler = new ExcelImportHandler<UserTempDomain>() {
+        ExcelImportHandler<MdataUserTempDomain> excelImportHandler = new ExcelImportHandler<MdataUserTempDomain>() {
             @Override
             public void clearHistoryData() {
                 userImportService.deleteHistoryData();
@@ -1259,11 +1259,11 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
 
             @Override
             public Class getEntityClass() {
-                return UserTempDomain.class;
+                return MdataUserTempDomain.class;
             }
 
             @Override
-            public List<UserTempDomain> persistence(List<UserTempDomain> list) {
+            public List<MdataUserTempDomain> persistence(List<MdataUserTempDomain> list) {
                 // 导入数据
                 userImportService.insertBatch(list);
                 // 数据唯一性校验
@@ -1272,7 +1272,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             }
 
             @Override
-            public void check(List<UserTempDomain> list) {
+            public void check(List<MdataUserTempDomain> list) {
                 checkImportData(list, batchNumber.toString());
             }
         };
@@ -1280,7 +1280,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         return batchNumber;
     }
 
-    public void checkImportData(List<UserTempDomain> list, String batchNumber){
+    public void checkImportData(List<MdataUserTempDomain> list, String batchNumber){
         list.stream().forEach(item -> item.setErrorDetail(""));
         // 必输字段非空校验
         list.stream().filter(item -> StringUtil.isNullOrEmpty(item.getEmployeeId())
@@ -1293,7 +1293,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                     item.setErrorDetail(item.getErrorDetail() + "必输字段不能为空！");
                 });
         // 数据合法性校验
-        for(UserTempDomain user : list){
+        for(MdataUserTempDomain user : list){
             //工号需唯一性校验
             //邮箱需唯一性校验
             //手机需唯一性校验
@@ -1479,8 +1479,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         if(page == null){
             page = PageUtil.getPage(0, 30);
         }
-        List<UserTempDomain> userTempDomains = userImportService.listImportMessageByTransactionID(transactionID, page);
-        List<UserCO> users = userTempDomains.stream().map(contact -> {
+        List<MdataUserTempDomain> mdataUserTempDomains = userImportService.listImportMessageByTransactionID(transactionID, page);
+        List<UserCO> users = mdataUserTempDomains.stream().map(contact -> {
             UserCO user = new UserCO();
             user.setLogin(contact.getLogin());
             user.setTenantId(OrgInformationUtil.getCurrentTenantId());
@@ -1493,7 +1493,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         }).collect(Collectors.toList());
         hcfOrganizationInterface.saveUserBatch(users);
         Map<String, UserCO> userMap = users.stream().collect(Collectors.toMap(UserCO::getLogin, e -> e));
-        userTempDomains.stream().forEach(userTemp -> {
+        mdataUserTempDomains.stream().forEach(userTemp -> {
             // 保存员工
             Contact contact = new Contact();
             UserCO user = userMap.get(userTemp.getLogin());

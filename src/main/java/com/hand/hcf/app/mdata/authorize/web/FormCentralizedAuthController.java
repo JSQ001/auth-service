@@ -1,4 +1,3 @@
-package com.hand.hcf.app.mdata.authorize.web;/*
 package com.hand.hcf.app.mdata.authorize.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
@@ -16,13 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-*/
 /**
  * 单据集中授权接口类
  * @author shouting.cheng
  * @date 2019/1/22
- *//*
-
+ */
 @RestController
 @RequestMapping("/api/authorize/form/centralized/auth")
 public class FormCentralizedAuthController {
@@ -30,8 +27,7 @@ public class FormCentralizedAuthController {
     @Autowired
     private FormCentralizedAuthService formCentralizedAuthService;
 
-    */
-/**
+    /**
      * @api {POST} /api/authorize/form/centralized/auth 【单据集中授权】创建
      * @apiGroup Authorize
      * @apiParam {Object} auth  单据集中授权
@@ -75,16 +71,14 @@ public class FormCentralizedAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": "2018-12-29T16:56:37.077+08:00"
      * }
-     *//*
-
+     */
     @PostMapping
     public FormCentralizedAuth createFormCentralizedAuth(@RequestBody FormCentralizedAuth auth){
 
         return formCentralizedAuthService.createFormCentralizedAuth(auth);
     }
 
-    */
-/**
+    /**
      * @api {PUT} /api/authorize/form/centralized/auth 【单据集中授权】更新
      * @apiGroup Authorize
      * @apiParam {Object} auth  单据集中授权
@@ -134,29 +128,25 @@ public class FormCentralizedAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": "2018-12-29T16:56:37.077+08:00"
      * }
-     *//*
-
+     */
     @PutMapping
     public FormCentralizedAuth updateFormCentralizedAuth(@RequestBody FormCentralizedAuth auth){
 
         return formCentralizedAuthService.updateFormCentralizedAuth(auth);
     }
 
-    */
-/**
+    /**
      * @api {DELETE} /api/authorize/form/centralized/auth/{id} 【单据集中授权】删除
      * @apiGroup Authorize
      * @apiParam {Long} dimensionId  待删除的id
-     *//*
-
+     */
     @DeleteMapping("/{id}")
     public void deleteFormCentralizedAuthById(@PathVariable(value = "id") Long id) {
 
         formCentralizedAuthService.deleteFormCentralizedAuthById(id);
     }
 
-    */
-/**
+    /**
      * @api {GET} /api/authorize/form/centralized/auth/{id} 【单据集中授权】查询
      * @apiGroup Authorize
      * @apiParam {Long} id  单据集中授权id
@@ -178,15 +168,13 @@ public class FormCentralizedAuthController {
      *     "startDate": "2018-12-24T16:56:37.077+08:00",
      *     "endDate": "2018-12-29T16:56:37.077+08:00"
      * }
-     *//*
-
+     */
     @GetMapping("/{id}")
     public FormCentralizedAuthDTO getFormCentralizedAuthById(@PathVariable(value = "id") Long id) {
         return formCentralizedAuthService.getFormCentralizedAuthById(id);
     }
 
-    */
-/**
+    /**
      * @api {GET} /api/authorize/form/centralized/auth/pageByCondition 【单据集中授权】条件查询
      * @apiDescription 用于单据集中授权列表界面的条件查询
      * @apiGroup Authorize
@@ -221,8 +209,7 @@ public class FormCentralizedAuthController {
      *         "endDate": "2018-12-29T16:56:37.077+08:00"
      *     }
      * ]
-     *//*
-
+     */
     @GetMapping("/pageByCondition")
     public ResponseEntity<List<FormCentralizedAuthDTO>> pageFormCentralizedAuthByCondition(@RequestParam Long setOfBooksId,
                                                                                            @RequestParam(required = false) String documentCategory,
@@ -243,4 +230,3 @@ public class FormCentralizedAuthController {
         return new ResponseEntity<>(reportLineList, httpHeaders, HttpStatus.OK);
     }
 }
-*/

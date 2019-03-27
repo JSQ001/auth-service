@@ -360,7 +360,7 @@
         ORDER BY c.company_code
     </select>
 
-    <select id="listCompanyCO" resultType="com.hand.hcf.app.mdata.client.com.CompanyCO">
+    <select id="listCompanyCO" resultType="com.hand.hcf.app.common.co.CompanyCO">
         SELECT
             t.id,
             t.company_oid,
@@ -382,7 +382,7 @@
             </if>
         order by t.company_code asc
     </select>
-    <select id="pageCompanyByCond" resultType="com.hand.hcf.app.mdata.client.standard.BasicCO">
+    <select id="pageCompanyByCond" resultType="com.hand.hcf.app.common.co.BasicCO">
         select
           c.id as id,
           c.company_code as code,
@@ -407,7 +407,7 @@
         </if>
     </select>
 
-    <select id="listCompanyByCodeAndSecurityType" resultType="com.hand.hcf.app.mdata.client.standard.BasicCO">
+    <select id="listCompanyByCodeAndSecurityType" resultType="com.hand.hcf.app.common.co.BasicCO">
         SELECT
         c.id id,
         c.company_code code,
@@ -465,7 +465,7 @@
         ORDER BY c.COMPANY_CODE
     </select>
 
-    <select id="listCompanyByTenantId" resultType="com.hand.hcf.app.mdata.client.com.CompanyCO">
+    <select id="listCompanyByTenantId" resultType="com.hand.hcf.app.common.co.CompanyCO">
     SELECT
     t.tenant_id,
     t.id,

@@ -2,11 +2,11 @@ package com.hand.hcf.app.mdata.contact.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.mdata.contact.domain.UserTempDomain;
+import com.hand.hcf.app.mdata.contact.domain.MdataUserTempDomain;
 import com.hand.hcf.app.mdata.contact.dto.ContactBankAccountImportDTO;
 import com.hand.hcf.app.mdata.contact.dto.ContactCardImportDTO;
 import com.hand.hcf.app.mdata.contact.enums.UserImportCode;
-import com.hand.hcf.app.mdata.contact.persistence.UserTempMapper;
+import com.hand.hcf.app.mdata.contact.persistence.MdataUserTempMapper;
 import com.hand.hcf.app.mdata.system.domain.BatchTransactionLog;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -35,7 +35,7 @@ import java.util.UUID;
  *
  */
 @Service
-public class UserImportService extends BaseService<UserTempMapper, UserTempDomain> {
+public class UserImportService extends BaseService<MdataUserTempMapper, MdataUserTempDomain> {
 
     public static final Map<UUID, BatchTransactionLog> transactions = new HashMap<>();
     public static final Map<UUID, List<ContactCardImportDTO>> failedContactCards = new HashMap<>();
@@ -67,8 +67,8 @@ public class UserImportService extends BaseService<UserTempMapper, UserTempDomai
     //导入失败后,导出错误信息
     public byte[] exportFailedData(String transactionID) {
 
-        List<UserTempDomain> userTempDomains = selectList(
-                new EntityWrapper<UserTempDomain>()
+        List<MdataUserTempDomain> mdataUserTempDomains = selectList(
+                new EntityWrapper<MdataUserTempDomain>()
                         .eq("batch_number", transactionID)
                         .eq("error_flag", 1));
         InputStream in = null;
@@ -81,44 +81,44 @@ public class UserImportService extends BaseService<UserTempMapper, UserTempDomai
             int startRow = UserImportCode.EXCEL_BASEROW_ERROR;
             Row row = null;
             Cell cell = null;
-            for (UserTempDomain userTempDomain : userTempDomains) {
+            for (MdataUserTempDomain mdataUserTempDomain : mdataUserTempDomains) {
                 row = sheet.createRow(startRow++);
                 //行号
                 cell = row.createCell(UserImportCode.ROW_NUMBER_ERROR);
-                cell.setCellValue(userTempDomain.getRowNumber());
+                cell.setCellValue(mdataUserTempDomain.getRowNumber());
                 //其他字段
                 cell = row.createCell(UserImportCode.EMPLOYEE_ID_ERROR);
-                cell.setCellValue(userTempDomain.getEmployeeId());
+                cell.setCellValue(mdataUserTempDomain.getEmployeeId());
                 cell = row.createCell(UserImportCode.FULL_NAME_ERROR);
-                cell.setCellValue(userTempDomain.getFullName());
+                cell.setCellValue(mdataUserTempDomain.getFullName());
                 cell = row.createCell(UserImportCode.COMPANY_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getCompanyCode());
+                cell.setCellValue(mdataUserTempDomain.getCompanyCode());
                 cell = row.createCell(UserImportCode.DEPARTMENT_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getDepartmentCode());
+                cell.setCellValue(mdataUserTempDomain.getDepartmentCode());
                 cell = row.createCell(UserImportCode.EMAIL_ERROR);
-                cell.setCellValue(userTempDomain.getEmail());
+                cell.setCellValue(mdataUserTempDomain.getEmail());
                 cell = row.createCell(UserImportCode.MOBILE_AREA_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getMobileAreaCode());
+                cell.setCellValue(mdataUserTempDomain.getMobileAreaCode());
                 cell = row.createCell(UserImportCode.MOBILE_ERROR);
-                cell.setCellValue(userTempDomain.getMobile());
+                cell.setCellValue(mdataUserTempDomain.getMobile());
                 cell = row.createCell(UserImportCode.DIRECT_MANAGER_ERROR);
-                cell.setCellValue(userTempDomain.getDirectManagerId());
+                cell.setCellValue(mdataUserTempDomain.getDirectManagerId());
                 cell = row.createCell(UserImportCode.DUTY_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getDutyCode());
+                cell.setCellValue(mdataUserTempDomain.getDutyCode());
                 cell = row.createCell(UserImportCode.TITLE_ERROR);
-                cell.setCellValue(userTempDomain.getTitle());
+                cell.setCellValue(mdataUserTempDomain.getTitle());
                 cell = row.createCell(UserImportCode.EMPLOYEE_TYPE_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getEmployeeTypeCode());
+                cell.setCellValue(mdataUserTempDomain.getEmployeeTypeCode());
                 cell = row.createCell(UserImportCode.RANK_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getRankCode());
+                cell.setCellValue(mdataUserTempDomain.getRankCode());
                 cell = row.createCell(UserImportCode.GENDER_CODE_ERROR);
-                cell.setCellValue(userTempDomain.getGenderCode());
+                cell.setCellValue(mdataUserTempDomain.getGenderCode());
                 cell = row.createCell(UserImportCode.BIRTHDAY_STR);
-                cell.setCellValue(userTempDomain.getBirthdayStr());
+                cell.setCellValue(mdataUserTempDomain.getBirthdayStr());
                 cell = row.createCell(UserImportCode.ENTRYDATE_STR);
-                cell.setCellValue(userTempDomain.getEntryDateStr());
+                cell.setCellValue(mdataUserTempDomain.getEntryDateStr());
                 cell = row.createCell(row.getLastCellNum());
-                cell.setCellValue(userTempDomain.getErrorDetail());
+                cell.setCellValue(mdataUserTempDomain.getErrorDetail());
             }
             bos = new ByteArrayOutputStream();
             workbook.write(bos);
@@ -136,7 +136,7 @@ public class UserImportService extends BaseService<UserTempMapper, UserTempDomai
      */
     @Transactional
     public void deleteHistoryData(){
-        baseMapper.delete(new EntityWrapper<UserTempDomain>().le("created_date", ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).plusDays(-2)));
+        baseMapper.delete(new EntityWrapper<MdataUserTempDomain>().le("created_date", ZonedDateTime.now().truncatedTo(ChronoUnit.DAYS).plusDays(-2)));
     }
 
     /**
@@ -154,7 +154,7 @@ public class UserImportService extends BaseService<UserTempMapper, UserTempDomai
 
     @Transactional
     public Integer deleteImportData(String transactionID) {
-        return baseMapper.delete(new EntityWrapper<UserTempDomain>().eq("batch_number", transactionID));
+        return baseMapper.delete(new EntityWrapper<MdataUserTempDomain>().eq("batch_number", transactionID));
     }
 
     public UUID getUserOidByEmployeeIdAndTenantId(String employeeId){
@@ -167,17 +167,17 @@ public class UserImportService extends BaseService<UserTempMapper, UserTempDomai
 //        baseMapper.insertToUser(transactionID,OrgInformationUtil.getCurrentUserId(),ZonedDateTime.now(),OrgInformationUtil.getCurrentTenantId());
 //        baseMapper.insertToPhone(transactionID,OrgInformationUtil.getCurrentUserId(),ZonedDateTime.now());
 //        baseMapper.insertToDepartmentUser(transactionID,OrgInformationUtil.getCurrentUserId(),ZonedDateTime.now());
-//        baseMapper.delete(new EntityWrapper<UserTempDomain>().eq("batch_number",transactionID));
+//        baseMapper.delete(new EntityWrapper<MdataUserTempDomain>().eq("batch_number",transactionID));
 //        return true;
 //    }
 
-    public List<UserTempDomain> listImportMessageByTransactionID(String transactionID,Page page){
-        return baseMapper.selectPage(page,new EntityWrapper<UserTempDomain>().eq("batch_number",transactionID).eq("error_flag",false));
+    public List<MdataUserTempDomain> listImportMessageByTransactionID(String transactionID, Page page){
+        return baseMapper.selectPage(page,new EntityWrapper<MdataUserTempDomain>().eq("batch_number",transactionID).eq("error_flag",false));
     }
 
     @Transactional
     public void deleteImportMessageByTransactionID(String transactionID){
-        baseMapper.delete(new EntityWrapper<UserTempDomain>().eq("batch_number",transactionID));
+        baseMapper.delete(new EntityWrapper<MdataUserTempDomain>().eq("batch_number",transactionID));
     }
 
     public Boolean varifyBatchNumberExsits(String transactionID){

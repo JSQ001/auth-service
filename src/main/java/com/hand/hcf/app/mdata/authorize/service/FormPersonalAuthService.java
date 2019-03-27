@@ -1,9 +1,8 @@
-package com.hand.hcf.app.mdata.authorize.service;/*
 package com.hand.hcf.app.mdata.authorize.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.client.org.SysCodeValueCO;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.mdata.authorize.domain.FormPersonalAuth;
 import com.hand.hcf.app.mdata.authorize.dto.FormPersonalAuthDTO;
 import com.hand.hcf.app.mdata.authorize.persistence.FormPersonalAuthMapper;
@@ -26,13 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-*/
 /**
  * 单据个人授权服务类
  * @author shouting.cheng
  * @date 2019/1/22
- *//*
-
+ */
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper, FormPersonalAuth> {
@@ -46,13 +43,11 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
     @Autowired
     private ContactService contactService;
 
-    */
-/**
+    /**
      * 新建
      * @param auth
      * @return
-     *//*
-
+     */
     public FormPersonalAuth createFormPersonalAuth(FormPersonalAuth auth) {
         if (auth.getId() != null) {
             throw new BizException(RespCode.SYS_ID_NOT_NULL);
@@ -64,13 +59,11 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         return auth;
     }
 
-    */
-/**
+    /**
      * 更新
      * @param auth
      * @return
-     *//*
-
+     */
     public FormPersonalAuth updateFormPersonalAuth(FormPersonalAuth auth) {
         if (auth.getId() == null) {
             throw new BizException(RespCode.SYS_ID_NULL);
@@ -79,12 +72,10 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         return auth;
     }
 
-    */
-/**
+    /**
      * 删除
      * @param id
-     *//*
-
+     */
     public void deleteFormPersonalAuthById(Long id) {
         if (baseMapper.selectById(id) == null) {
             throw new BizException(RespCode.VEN_AUTHORIZE_NOT_EXIST);
@@ -92,20 +83,17 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         baseMapper.deleteById(id);
     }
 
-    */
-/**
+    /**
      * 查询
      * @param id
      * @return
-     *//*
-
+     */
     public FormPersonalAuthDTO getFormPersonalAuthById(Long id) {
         FormPersonalAuth auth = baseMapper.selectById(id);
         return toDTO(auth);
     }
 
-    */
-/**
+    /**
      * 条件查询
      * @param documentCategory
      * @param formId
@@ -114,8 +102,7 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
      * @param endDate
      * @param mybatisPage
      * @return
-     *//*
-
+     */
     public List<FormPersonalAuthDTO> pageFormPersonalAuthByCondition(String documentCategory, Long formId, Long baileeId, ZonedDateTime startDate, ZonedDateTime endDate, Page mybatisPage) {
         List<FormPersonalAuth> authList = baseMapper.selectPage(mybatisPage,
                 new EntityWrapper<FormPersonalAuth>()
@@ -129,13 +116,11 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         return toDTOs(authList);
     }
 
-    */
-/**
+    /**
      * domainList转dtoList
      * @param domainList
      * @return
-     *//*
-
+     */
     private List<FormPersonalAuthDTO> toDTOs(List<FormPersonalAuth> domainList) {
         List<FormPersonalAuthDTO> dtoList = new ArrayList<>();
 
@@ -173,13 +158,11 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         return dtoList;
     }
 
-    */
-/**
+    /**
      * domain转dto
      * @param domain
      * @return
-     *//*
-
+     */
     private FormPersonalAuthDTO toDTO(FormPersonalAuth domain) {
         FormPersonalAuthDTO dto = mapperFacade.map(domain, FormPersonalAuthDTO.class);
 
@@ -205,4 +188,3 @@ public class FormPersonalAuthService extends BaseService<FormPersonalAuthMapper,
         return dto;
     }
 }
-*/
