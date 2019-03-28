@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    
+    <changeSet id="201901180950001" author="shaofeng.zheng">
+        <createTable tableName="sys_workflow_transfer" remarks="审批流转交表">
+            <column name="id" type="bigint" remarks="审批流转交ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_workflow_transfer"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorizer_id" type="bigint" remarks="授权人ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_category" type="varchar(30)" remarks="单据大类">
+            </column>
+            <column name="workflow_id" type="bigint" remarks="审批流">
+            </column>
+            <column name="agent_id" type="bigint" remarks="代理人ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="timestamp" remarks="有效日期从">
+            </column>
+            <column name="end_date" type="timestamp" remarks="有效日期至">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorization_notes" type="varchar(2000)" remarks="备注">
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" remarks="最后修改日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建人">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后修改人">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="bigint" remarks="版本">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <!--此语句不兼容MySQL -->
+<!--    <changeSet id="201901211707001" author="shaofeng.zheng">
+        <dropNotNullConstraint tableName="sys_workflow_transfer" columnName="end_date"/>
+        <addNotNullConstraint tableName="sys_workflow_transfer" columnName="start_date"/>
+    </changeSet>-->
+    <changeSet id="201901211707001" author="shaofeng.zheng">
+        <dropNotNullConstraint tableName="sys_workflow_transfer" columnName="end_date" columnDataType="timestamp"/>
+        <addNotNullConstraint tableName="sys_workflow_transfer" columnName="start_date" columnDataType="timestamp"/>
+    </changeSet>
+
+    <changeSet id="201902131644001" author="xue.han">
+        <createTable tableName="sys_quick_reply" remarks="快捷回复表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_quick_reply_id"/>
+            </column>
+            <column name="quick_reply_oid" type="varchar(36)" remarks="快速回复Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_oid" type="varchar(36)" remarks="用户Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="reply" type="varchar(500)" remarks="回复信息">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="int" remarks="状态">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="序号">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

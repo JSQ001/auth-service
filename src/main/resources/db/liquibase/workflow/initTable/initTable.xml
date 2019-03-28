@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+
+    <changeSet id="20180718110762" author="admin">
+        <createTable tableName="sys_approval_form" remarks="自定义表单">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_approval_form"/>
+            </column>
+            <column name="form_oid" type="varchar(36)" remarks="对外id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_name" type="varchar(100)" remarks="自定义表单名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_code" type="varchar(100)" remarks="表单编码">
+                <constraints nullable="true"/>
+            </column>
+            <column name="icon_name" type="varchar(50)" remarks="图标名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="message_key" type="varchar(100)" remarks="国际化">
+                <constraints nullable="true"/>
+            </column>
+            <column name="form_type_id" type="int" remarks="表单类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="as_system" type="bit" remarks="是否为系统基础表单">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint" remarks="父表单ID(非系统基础表单必填)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="valid" type="bit" remarks="是否可用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint"></column>
+            <column name="remark" type="varchar(255)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="reference_oid" type="char(36)" remarks="费用申请单关联报销单">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approval_mode" type="int" remarks="审批模式"></column>
+            <column name="visible_expense_type_scope" type="int" defaultValue="1001" remarks="限制可选费用范围，1001全部，1002自定义，1003和关联的申请单一致">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visible_user_scope" type="int" defaultValue="1001" remarks="限制可见人员范围，1001全部，1002自定义,1004和关联的申请单一致">
+                <constraints nullable="true"/>
+            </column>
+            <column name="expense_type_check_status" type="int" defaultValue="1000" remarks="默认1000：不做处理，1001：按总费用校验申请，1002：按费用类型校验">
+                <constraints nullable="true"/>
+            </column>
+            <column name="submit_flag" type="boolean" defaultValue="0" remarks="申请单控制报销单的提交，报销单的金额超申请是否可以继续提交,默认不能继续提交">
+                <constraints nullable="true"/>
+            </column>
+            <column name="deleted" type="boolean" defaultValue="0" remarks="删除标志">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="icon_url" type="varchar(1024)" remarks="自定义图标">
+                <constraints nullable="true"/>
+            </column>
+            <column name="from_type" type="int" defaultValue="1" remarks="归属类型:1数据公司，2数据账套">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visible_company_scope" type="int" defaultValue="1" remarks="公司分配类型:1全部公司,2部分公司">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="20180718110765" author="admin">
+        <createTable tableName="sys_approval_form_i18n" remarks="">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_name" type="varchar(100)" remarks="自定义表单名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="remark" type="varchar(255)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="language" type="varchar(20)" defaultValue="zh_cn" remarks="">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="20180718110766" author="admin">
+        <createTable tableName="sys_approval_form_property" remarks="">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_approval_form_property"/>
+            </column>
+            <column name="form_oid" type="varchar(36)" remarks="表单Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="property_name" type="varchar(100)" remarks="配置名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="property_value" type="text" remarks="配置值">
+                <constraints nullable="true"/>
+            </column>
+            <column name="property_other" type="varchar(255)" remarks="备用字段">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" remarks="最后修改日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建人">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后修改人">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="bigint" remarks="版本">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201812292151001" author="admin">
+        <createTable tableName="sys_approval_chain" remarks="">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_approval_chain"/>
+            </column>
+            <column name="entity_type" type="int" remarks="实体类型，与需要审批的实体表对应">
+                <constraints nullable="true"/>
+            </column>
+            <column name="entity_oid" type="varchar(36)" remarks="实体Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="序号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_type" type="int" remarks="会签类型 0代表必须所有人审批通过 1代表只需一人审批通过">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_rule" type="int" defaultValue="3001" remarks="工作流设置的会签规则 会签所有人3001 会签一个人3002">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approver_oid" type="varchar(36)" remarks="审批人Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="current_flag" type="bit" remarks="当前步骤标识: 0-否,1-是">
+                <constraints nullable="true"/>
+            </column>
+            <column name="finish_flag" type="boolean" defaultValue="0" remarks="是否完成:0-否,1-是">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="int" remarks="状态: 0-正常, 1-无效">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint" defaultValue="-1"></column>
+            <column name="created_date" type="timestamp" remarks="创建时间">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_by" type="bigint" defaultValue="-1"></column>
+            <column name="last_updated_date" type="timestamp" remarks="修改时间">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="bigint" defaultValue="-1"></column>
+            <column name="noticed" type="boolean" defaultValue="0" remarks="是否只通知">
+                <constraints nullable="true"/>
+            </column>
+            <column name="apportionment_flag" type="boolean" defaultValue="0" remarks="是否是分摊对应的审批">
+                <constraints nullable="true"/>
+            </column>
+            <column name="proxy_flag" type="boolean" defaultValue="0" remarks="是否与被代理人有关">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_enable" type="boolean" defaultValue="1" remarks="启用brms会签规则">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rule_approval_node_oid" type="varchar(36)" remarks="规则节点Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="invoice_allow_update_type" type="int" defaultValue="0" remarks="能否修改核定金额"></column>
+            <column name="source_approval_chain_id" type="bigint" remarks="来源的审批链id" defaultValue="0"></column>
+            <column name="all_finished" type="bit" remarks="chain是否完成" defaultValueBoolean="true"></column>
+            <column name="add_sign" type="int" remarks="是否加签人:0不是加签人,1是加签人"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201807181107201" author="admin">
+        <createTable tableName="sys_approval_history" remarks="">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_approval_history"/>
+            </column>
+            <column name="entity_type" type="int" remarks="实体类型, 与需要审批的实体表对应，枚举值">
+                <constraints nullable="true"/>
+            </column>
+            <column name="entity_oid" type="varchar(36)" remarks="实体Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operation_type" type="int" remarks="操作类型，枚举值">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operation" type="int" remarks="操作，枚举值">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_type" type="int" remarks="会签类型 0代表必须所有人审批通过 1代表只需一人审批通过">
+                <constraints nullable="true"/>
+            </column>
+            <column name="apportionment_flag" type="boolean" defaultValue="0" remarks="是否是分摊对应的审批历史">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operator_oid" type="varchar(36)" remarks="操作人Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="current_applicant_oid" type="varchar(36)" remarks="此次提交操作时的申请人">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operation_detail" type="longtext" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="step_id" type="bigint" remarks="对应的操作步骤ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="remark" type="varchar(1000)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint" defaultValue="-1"></column>
+            <column name="created_date" type="timestamp" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_updated_by" type="bigint" defaultValue="-1"></column>
+            <column name="last_updated_date" type="timestamp" remarks="修改时间">
+                <constraints nullable="true"/>
+            </column>
+            <column name="version_number" type="bigint" defaultValue="1"></column>
+            <column name="rule_approval_node_oid" type="varchar(36)" remarks="规则节点Oid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ref_approval_chain_id" type="bigint" remarks="关联的审批链id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approval_node_oid" type="varchar(36)" remarks="审批节点Oid"/>
+            <column name="approval_node_name" type="varchar(500)" remarks="审批节点名称"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="201812292155001" author="admin">
+        <createTable tableName="sys_countersign_detail" remarks="会签详情表">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_countersign_detail"/>
+            </column>
+            <column name="entity_oid" type="varchar(36)" remarks="实体oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_type" type="int" remarks="实体类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_type" type="int" remarks="会签类型 0代表必须所有人审批通过 1代表只需一人审批通过">
+                <constraints nullable="true"/>
+            </column>
+            <column name="countersign_approver_oids" type="varchar(1000)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rule_approval_node_oid" type="varchar(36)" remarks="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="operation_type" type="int" remarks="加签附加操作类型">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最近操作人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后修改时间">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="最近操作人">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2018120616180001" author="houyin.zhang">
+        <comment>单据与工作流关联表</comment>
+        <createTable tableName="sys_wfl_document_ref">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="pk_sys_wfl_document_ref"  nullable="false"/>
+            </column>
+            <column name="document_number" type="varchar(100)" remarks="单据编号"/>
+            <column name="document_oid" type="varchar(50)" remarks="单据OID"/>
+            <column name="document_category" type="int" remarks="单据大类 801001 对公报账单，801002 预算日记账 801003 预付款单 801004 合同  801005 付款申请单 801006 费用调整单 801007 费用反冲 801008 核算工单  801009 费用申请单"/>
+            <column name="document_type_id" type="bigint" remarks="单据类型ID"/>
+            <column name="form_oid" type="varchar(100)" remarks="表单OID"/>
+            <column name="currency_code" type="varchar(10)" remarks="单据币种"/>
+            <column name="amount" type="decimal(20,2)" remarks="原币金额"/>
+            <column name="function_amount" type="decimal(20,2)" remarks="本币金额"/>
+            <column name="unit_oid" type="varchar(50)" remarks="单据部门OID"/>
+            <column name="company_id" type="bigint" remarks="公司ID"/>
+            <column name="status" type="varchar(30)" remarks="单据状态"/>
+            <column name="last_approver_oid" type="varchar(50)" remarks="最后审批人OID"/>
+            <column name="user_oid" type="varchar(50)" remarks="用户OID"/>
+            <column name="applicant_oid" type="varchar(50)" remarks="申请人OID"/>
+            <column name="remark" type="varchar(2000)" remarks="备注"/>
+            <column name="filter_flag" type="boolean" remarks="根据单据驳回重新提交,金额或成本中心等是否变更 确认审批时候需要过滤"/>
+            <column name="last_reject_type" type="varchar(10)" remarks="历史驳回类型 RejectTypeEnum 驳回类型: 1000-正常, 1001-撤回, 1002-审批驳回 1003-审核驳回 1004-开票驳回"/>
+            <column name="reject_reason" type="varchar(2000)" remarks="驳回原因"/>
+            <column name="reject_type" type="varchar(10)" remarks="历史驳回类型 RejectTypeEnum 驳回类型: 1000-正常, 1001-撤回, 1002-审批驳回 1003-审核驳回 1004-开票驳回"/>
+            <column name="event_id" type="varchar(36)" remarks="事件消息ID"></column>
+            <column name="event_confirm_status"  type="boolean" defaultValue="0" remarks="消息消费确认状态 1:已消费,0:未消费"></column>
+            <column name="destination_service" type="varchar(50)" remarks="表示服务注册到Eureka中的名称(如：prepayment:预付款，contract:合同, budget:预算)，这样能保证每次只对具体的服务发布消息"/>
+            <column name="approval_node_name" type="varchar(36)" remarks="审批节点名称"></column>
+            <column name="approval_node_oid"  type="varchar(36)" remarks="审批节点OID"></column>
+            <column name="company_name" type="varchar(200)" remarks="公司名称"></column>
+            <column name="company_code"  type="varchar(50)" remarks="公司代码"></column>
+            <column name="company_oid"  type="varchar(50)" remarks="公司OID"></column>
+            <column name="unit_name" type="varchar(100)" remarks="部门名称"></column>
+            <column name="unit_code"  type="varchar(50)" remarks="部门代码"></column>
+            <column name="applicant_name" type="varchar(50)" remarks="申请人名称"></column>
+            <column name="applicant_code"  type="varchar(50)" remarks="申请人代码"></column>
+            <column name="document_type_name" type="varchar(500)" remarks="单据类型名称"></column>
+            <column name="document_type_code" type="varchar(50)" remarks="单据类型代码"></column>
+            <column name="contract_name"  type="varchar(500)" remarks="合同名称"></column>
+            <column name="submit_date"  type="timestamp" remarks="提交日期"></column>
+            <column name="applicant_date"  type="timestamp" remarks="申请日期"></column>
+            <column name="document_id"  type="bigint" remarks="单据ID"></column>
+            <column name="set_of_books_id"  type="bigint" remarks="帐套ID"></column>
+            <column name="tenant_id"  type="bigint" remarks="租户ID"></column>
+            <column name="submitted_by" type="varchar(50)" remarks="提交人OID"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="sys_wfl_document_ref" indexName="sys_wfl_document_ref_n1">
+            <column name="document_oid"></column>
+            <column name="document_category"></column>
+        </createIndex>
+        <createIndex tableName="sys_wfl_document_ref" indexName="sys_wfl_document_ref_n2">
+            <column name="event_id"></column>
+        </createIndex>
+        <createIndex tableName="sys_wfl_document_ref" indexName="sys_wfl_document_ref_n3">
+            <column name="tenant_id"></column>
+        </createIndex>
+        <createIndex tableName="sys_wfl_document_ref" indexName="sys_wfl_document_ref_n4">
+            <column name="set_of_books_id"></column>
+        </createIndex>
+        <createIndex tableName="sys_wfl_document_ref" indexName="sys_wfl_document_ref_n5">
+            <column name="document_id"></column>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="2018121216180012" author="houyin.zhang">
+        <comment>单据工作流 关联审批人表</comment>
+        <createTable tableName="sys_wfl_ref_approvers">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="pk_sys_wfl_ref_approvers_ref"  nullable="false"/>
+            </column>
+            <column name="workflow_document_ref_id" type="bigint" remarks="单据与工作流关联表ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approver_oid" type="varchar(50)" remarks="审批人OID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approve_node_oid" type="varchar(50)" remarks="审批节点OID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="sys_wfl_ref_approvers" indexName="sys_wfl_ref_approvers_n1">
+            <column name="workflow_document_ref_id"></column>
+            <column name="approve_node_oid"></column>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="2018121416180012" author="houyin.zhang">
+        <comment>单据工作流事件消息日志表</comment>
+        <createTable tableName="sys_wfl_ref_event_log">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="pk_sys_wfl_ref_event_id"  nullable="false"/>
+            </column>
+            <column name="event_id" type="varchar(50)" remarks="事件消息ID，与sys_wfl_document_ref表中的event_id唯一关联">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="event_confirm_status"  type="boolean" defaultValue="0" remarks="消息消费确认状态 1:已消费,0:未消费"></column>
+            <column name="destination_service" type="varchar(50)" remarks="表示服务注册到Eureka中的名称(如：prepayment:预付款，contract:合同, budget:预算)，这样能保证每次只对具体的服务发布消息"/>
+            <column name="document_oid" type="varchar(50)" remarks="单据OID"/>
+            <column name="document_category" type="int" remarks="单据大类 801001 对公报账单，801002 预算日记账 801003 预付款单 801004 合同  801005 付款申请单 801006 费用调整单 801007 费用反冲 801008 核算工单  801009 费用申请单"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
