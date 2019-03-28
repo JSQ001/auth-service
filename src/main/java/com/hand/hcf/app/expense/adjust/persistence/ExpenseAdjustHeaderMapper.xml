@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustHeaderMapper">
+    <delete id="deleteLinesByHeaderId" parameterType="long">
+        delete from exp_adjust_line t where t.exp_adjust_header_id = #{id}
+    </delete>
+
+
+    <select id="listHeaderWebDTOByCondition"
+            resultType="com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustHeaderWebDTO">
+        SELECT t.*,
+        v.exp_adjust_type_name AS type_name
+        FROM exp_adjust_header t, exp_adjust_type v
+        WHERE t.exp_adjust_type_id = v.id
+        <if test="expAdjustTypeId != null">
+            AND t.exp_adjust_type_id = #{expAdjustTypeId}
+        </if>
+        <if test="status != null">
+            AND t.status = #{status}
+        </if>
+        <if test="adjustTypeCategory != null and adjustTypeCategory != ''">
+            AND t.adjust_type_category = #{adjustTypeCategory}
+        </if>
+        <if test="employeeId != null">
+            AND t.employee_id = #{employeeId}
+        </if>
+        <if test="currencyCode != null and currencyCode !=''">
+            AND t.currency_code = #{currencyCode}
+        </if>
+        <if test="amountMin != null">
+            AND t.total_amount <![CDATA[ >= ]]> #{amountMin}
+        </if>
+        <if test="amountMax != null">
+            AND t.total_amount <![CDATA[ <= ]]> #{amountMax}
+        </if>
+        <if test="requisitionDateFrom != null">
+            AND t.adjust_date <![CDATA[ >= ]]> #{requisitionDateFrom}
+        </if>
+        <if test="requisitionDateTo != null">
+            AND t.adjust_date <![CDATA[ < ]]> #{requisitionDateTo}
+        </if>
+        <if test="expAdjustHeaderNumber != null and expAdjustHeaderNumber !=''">
+            AND t.document_number like concat(concat('%',#{expAdjustHeaderNumber}),'%')
+        </if>
+        <if test="description != null and description !=''">
+            AND t.description like concat(concat('%',#{description}),'%')
+        </if>
+        <if test="createdBy != null">
+            AND t.created_by = #{createdBy}
+        </if>
+        <if test="unitId != null">
+            AND t.unit_id = #{unitId}
+        </if>
+        <if test="companyId != null">
+            AND t.company_id = #{companyId}
+        </if>
+    </select>
+</mapper>

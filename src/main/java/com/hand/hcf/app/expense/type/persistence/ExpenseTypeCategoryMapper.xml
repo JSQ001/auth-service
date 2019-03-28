@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.type.persistence.ExpenseTypeCategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.hand.hcf.app.expense.type.domain.ExpenseTypeCategory">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="sequence" property="sequence" />
+        <result column="version_number" property="versionNumber" />
+        <result column="enabled" property="enabled" />
+        <result column="deleted" property="deleted" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <collection property="expenseTypes" select="com.hand.hcf.app.expense.type.persistence.ExpenseTypeMapper.listByCategoryIdAndTypeFlag"
+                    column="{categoryId=id,typeFlag=typeFlag}"/>
+    </resultMap>
+    <select id="listCategoryAndType" resultMap="BaseResultMap">
+        select t.*, #{typeFlag} as typeFlag from exp_expense_type_category t where t.set_of_books_id = #{setOfBooksId}
+        and t.deleted = 0
+        order by t.sequence asc
+
+    </select>
+
+
+</mapper>

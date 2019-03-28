@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustLineMapper">
+
+
+    <select id="listLineDTOByHeaderId"  resultMap="ExpenseAdjustLinesResultMapper">
+        SELECT
+            eal.id,
+            eal.company_id,
+            eal.unit_id,
+            eal.expense_type_id,
+            et.name expense_type_name,
+            eal.exp_adjust_header_id,
+            eal.adjust_line_category,
+            eal.dimension1_id,
+            eal.dimension2_id,
+            eal.dimension3_id,
+            eal.dimension4_id,
+            eal.dimension5_id,
+            eal.dimension6_id,
+            eal.dimension7_id,
+            eal.dimension8_id,
+            eal.dimension9_id,
+            eal.dimension10_id,
+            eal.dimension11_id,
+            eal.dimension12_id,
+            eal.dimension13_id,
+            eal.dimension14_id,
+            eal.dimension15_id,
+            eal.dimension16_id,
+            eal.dimension17_id,
+            eal.dimension18_id,
+            eal.dimension19_id,
+            eal.dimension20_id,
+            eal.amount,
+            eal.description,
+            eal.attachment_oid,
+            eal.functional_amount
+        FROM
+            exp_adjust_line eal
+
+        LEFT JOIN exp_expense_type et ON et.id = eal.expense_type_id
+        WHERE
+            eal.source_adjust_line_id is null
+          AND eal.exp_adjust_header_id = #{expAdjustHeaderId}
+        order by eal.created_date
+    </select>
+
+    <resultMap id="ExpenseAdjustLinesResultMapper"
+               type="com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustLineWebDTO">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="company_name" property="companyName"/>
+        <result column="unit_id" property="unitId"/>
+        <result column="unit_name" property="unitName"/>
+        <result column="expense_type_id" property="expenseTypeId"/>
+        <result column="expense_type_name" property="expenseTypeName"/>
+        <result column="adjust_line_category" property="adjustLineCategory"/>
+        <result column="dimension1_id" property="dimension1Id"/>
+        <result column="dimension1_name" property="dimension1Name"/>
+        <result column="dimension2_id" property="dimension2Id"/>
+        <result column="dimension2_name" property="dimension2Name"/>
+        <result column="dimension3_id" property="dimension3Id"/>
+        <result column="dimension3_name" property="dimension3Name"/>
+        <result column="dimension4_id" property="dimension4Id"/>
+        <result column="dimension4_name" property="dimension4Name"/>
+        <result column="dimension5_id" property="dimension5Id"/>
+        <result column="dimension5_name" property="dimension5Name"/>
+        <result column="dimension6_id" property="dimension6Id"/>
+        <result column="dimension6_name" property="dimension6Name"/>
+        <result column="dimension7_id" property="dimension7Id"/>
+        <result column="dimension7_name" property="dimension7Name"/>
+        <result column="dimension8_id" property="dimension8Id"/>
+        <result column="dimension8_name" property="dimension8Name"/>
+        <result column="dimension9_id" property="dimension9Id"/>
+        <result column="dimension9_name" property="dimension9Name"/>
+        <result column="dimension10_id" property="dimension10Id"/>
+        <result column="dimension10_name" property="dimension10Name"/>
+        <result column="dimension11_id" property="dimension11Id"/>
+        <result column="dimension11_name" property="dimension11Name"/>
+        <result column="dimension12_id" property="dimension12Id"/>
+        <result column="dimension12_name" property="dimension12Name"/>
+        <result column="dimension13_id" property="dimension13Id"/>
+        <result column="dimension13_name" property="dimension13Name"/>
+        <result column="dimension14_id" property="dimension14Id"/>
+        <result column="dimension14_name" property="dimension14Name"/>
+        <result column="dimension15_id" property="dimension15Id"/>
+        <result column="dimension15_name" property="dimension15Name"/>
+        <result column="dimension16_id" property="dimension16Id"/>
+        <result column="dimension16_name" property="dimension16Name"/>
+        <result column="dimension17_id" property="dimension17Id"/>
+        <result column="dimension17_name" property="dimension17Name"/>
+        <result column="dimension18_id" property="dimension18Id"/>
+        <result column="dimension18_name" property="dimension18Name"/>
+        <result column="dimension19_id" property="dimension19Id"/>
+        <result column="dimension19_name" property="dimension19Name"/>
+        <result column="dimension20_id" property="dimension20Id"/>
+        <result column="dimension20_name" property="dimension20Name"/>
+        <result column="attachment_oid" property="attachmentOid"/>
+        <result column="amount" property="amount"/>
+        <result column="functional_amount" property="functionalAmount"/>
+        <result column="description" property="description"/>
+        <collection property="linesDTOList" column="id" select="getById"/>
+    </resultMap>
+    <select id="getCompanyId" resultType="long">
+        select  t.company_id from exp_adjust_line t where t.exp_adjust_header_id= #{headerId} group by t.company_id
+    </select>
+    <select id="getUnitId" resultType="long">
+        select  t.unit_id from exp_adjust_line t where t.exp_adjust_header_id= #{headerId} group by t.unit_id
+    </select>
+    <select id="getById"  resultType="com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustLineWebDTO" >
+        SELECT
+            eal.id,
+            eal.company_id,
+            eal.unit_id,
+            eal.expense_type_id,
+            et.name expense_type_name,
+            eal.adjust_line_category,
+            eal.dimension1_id,
+            eal.dimension2_id,
+            eal.dimension3_id,
+            eal.dimension4_id,
+            eal.dimension5_id,
+            eal.dimension6_id,
+            eal.dimension7_id,
+            eal.dimension8_id,
+            eal.dimension9_id,
+            eal.dimension10_id,
+            eal.dimension11_id,
+            eal.dimension12_id,
+            eal.dimension13_id,
+            eal.dimension14_id,
+            eal.dimension15_id,
+            eal.dimension16_id,
+            eal.dimension17_id,
+            eal.dimension18_id,
+            eal.dimension19_id,
+            eal.dimension20_id,
+            eal.amount,
+            eal.description,
+            eal.functional_amount
+        FROM
+            exp_adjust_line eal
+        LEFT JOIN exp_expense_type et ON et.id = eal.expense_type_id
+        WHERE
+          eal.source_adjust_line_id = #{id}
+    </select>
+    <select id="getAmount" resultType="java.math.BigDecimal" >
+        select coalesce(sum(amount),0) from exp_adjust_line t
+        where t.exp_adjust_header_id = #{headerId}
+          <choose>
+              <when test="sourceLineId == null">
+                  AND t.source_adjust_line_id is null
+              </when>
+              <otherwise>
+                  AND t.source_adjust_line_id = #{sourceLineId}
+              </otherwise>
+          </choose>
+    </select>
+</mapper>

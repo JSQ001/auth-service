@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.type.persistence.ExpenseFieldMapper">
+
+    <select id="listFieldByTypeId" resultType="com.hand.hcf.app.expense.type.domain.ExpenseField">
+       SELECT ef.id,
+       COALESCE(i18n.name,ef.name) as name,
+       ef.mapped_column_id,
+       ef.field_oid,
+       ef.expense_type_id,
+       ef.field_type_id,
+       ef.field_data_type,
+       ef.message_key,
+       ef.sequence,
+       ef.print_hide,
+       ef.required,
+       ef.show_on_list,
+       ef.custom_enumeration_oid,
+       ef.editable,
+       ef.default_value_mode,
+       ef.default_value_key,
+       ef.is_default_value_configurable,
+       ef.is_common_field,
+       ef.report_key,
+       ef.version_number,
+       ef.enabled,
+       ef.deleted,
+       ef.created_date,
+       ef.created_by,
+       ef.last_updated_date,
+       ef.last_updated_by
+  FROM exp_expense_field ef
+  LEFT JOIN exp_expense_field_i18n i18n
+    ON ef.id = i18n.id
+ WHERE ef.expense_type_id = #{typeId}
+   AND ef.deleted = 0
+   AND lower(i18n.language) = #{language}
+ ORDER BY ef.sequence ASC
+
+    </select>
+</mapper>
