@@ -31,7 +31,7 @@ public class HaimaService {
     public  String HAIMA_USERINFO_URL;
 
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -53,7 +53,7 @@ public class HaimaService {
             throw new UserNotActivatedException("email.is.empty");
         }
 
-        UserDetails userDetails= userService.loadUserByEmail(email);
+        UserDetails userDetails= authUserService.loadUserByEmail(email);
 
         Boolean isMapping = (Boolean) userInfo.get("isMapping");
         if(!isMapping){

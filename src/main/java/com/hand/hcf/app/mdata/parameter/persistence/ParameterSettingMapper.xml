@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.parameter.persistence.ParameterSettingMapper">
+
+    <select id="pageParameterSettingByLevelAndCond" resultType="com.hand.hcf.app.mdata.parameter.dto.ParameterSettingDTO">
+        select
+        ps.id as id,
+        ps.parameter_level as parameterLevel,
+        ps.parameter_value_id as parameterValueId,
+        ps.company_id as companyId,
+        ps.VERSION_NUMBER as versionNumber,
+        com.name as companyName,
+        ps.set_of_books_id as setOfBooksId,
+        sob.set_of_books_name as setOfBooksName,
+        pm.module_code as moduleCode,
+        pm.module_name as moduleName,
+        p.id as parameterId,
+        p.parameter_code as parameterCode,
+        p.parameter_name as parameterName,
+        p.sob_parameter as sobParameter,
+        p.company_parameter as companyParameter,
+        p.parameter_value_type as parameterValueType,
+        p.api as api,
+        p.API_SOURCE_MODULE as apiSourceModule
+        FROM SYS_PARAMETER_SETTING ps
+        LEFT JOIN SYS_PARAMETER p on p.ID = ps.PARAMETER_ID
+        LEFT JOIN SYS_PARAMETER_MODULE pm on pm.MODULE_CODE = p.MODULE_CODE
+        LEFT JOIN SYS_PARA_MODULE_STATUS pms on pms.MODULE_CODE = pm.MODULE_CODE
+        LEFT JOIN sys_set_of_books sob ON sob.ID = ps.SET_OF_BOOKS_ID
+        LEFT JOIN sys_company com ON com.id = ps.COMPANY_ID
+        WHERE pms.ENABLED = 1
+        AND pms.TENANT_ID = #{tenantId}
+        AND ps.DELETED = 0
+        AND ps.TENANT_ID = #{tenantId}
+        <if test="moduleCode != null">
+            and pm.module_code = #{moduleCode}
+        </if>
+        <if test="parameterLevel != null">
+          and ps.parameter_level = #{parameterLevel}
+        </if>
+        <if test="parameterCode != null">
+          and p.parameter_code like concat('%', concat(#{parameterCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="parameterName != null">
+            and p.parameter_name like concat('%', concat(#{parameterName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="setOfBooksId != null">
+            and sob.id = #{setOfBooksId}
+        </if>
+        <if test="companyId != null">
+            and com.id = #{companyId}
+        </if>
+    </select>
+</mapper>

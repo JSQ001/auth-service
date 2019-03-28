@@ -23,7 +23,7 @@ public class LoggingAspect {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 
-    @Pointcut("within(com.hand.hcf.app.base.web..*) ")
+    @Pointcut("within(com.hand.hcf.app.base..*.web..*) ")
     public void loggingPointcut() {
     }
 

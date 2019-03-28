@@ -16,7 +16,7 @@ public class SSODetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(SSODetailService.class);
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
     @Transactional
     @Override
@@ -26,6 +26,6 @@ public class SSODetailService implements UserDetailsService {
             throw new UserNotActivatedException("email.is.empty");
         }
 
-        return userService.loadUserByEmail(email);
+        return authUserService.loadUserByEmail(email);
     }
 }

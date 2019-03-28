@@ -1,0 +1,269 @@
+id,currency_code,currency_name,language,created_by,last_updated_by
+1,CNY,人民币,zh_cn,0,0
+2,HKD,港元,zh_cn,0,0
+3,TWD,台币,zh_cn,0,0
+4,EUR,欧元,zh_cn,0,0
+5,USD,美元,zh_cn,0,0
+6,GBP,英镑,zh_cn,0,0
+7,KRW,韩元,zh_cn,0,0
+8,JPY,日元,zh_cn,0,0
+9,ALL,阿尔巴尼亚列克,zh_cn,0,0
+10,DZD,阿尔及利亚第纳尔,zh_cn,0,0
+11,ARS,阿根廷比索,zh_cn,0,0
+12,AWG,阿鲁巴岛弗罗林,zh_cn,0,0
+13,AUD,澳元,zh_cn,0,0
+14,EGP,埃及镑,zh_cn,0,0
+15,ETB,埃塞俄比亚比尔,zh_cn,0,0
+16,MOP,澳门元,zh_cn,0,0
+17,OMR,阿曼里亚尔,zh_cn,0,0
+18,AED,阿联酋迪尔汗,zh_cn,0,0
+19,BSD,巴哈马元,zh_cn,0,0
+20,BHD,巴林第纳尔,zh_cn,0,0
+21,BBD,巴巴多斯元,zh_cn,0,0
+22,BYR,白俄罗斯卢布,zh_cn,0,0
+23,BZD,伯利兹元,zh_cn,0,0
+24,BMD,百慕大元,zh_cn,0,0
+25,BTN,不丹卢比,zh_cn,0,0
+26,BOB,玻利维亚诺,zh_cn,0,0
+27,BWP,博茨瓦纳普拉,zh_cn,0,0
+28,BRL,巴西雷亚尔,zh_cn,0,0
+29,BGN,保加利亚列瓦,zh_cn,0,0
+30,BIF,布隆迪法郎,zh_cn,0,0
+31,ISK,冰岛克朗,zh_cn,0,0
+32,PKR,巴基斯坦卢比,zh_cn,0,0
+33,PAB,巴拿马巴尔博亚,zh_cn,0,0
+34,PGK,巴布亚新几内亚基那,zh_cn,0,0
+35,PYG,巴拉圭瓜拉尼,zh_cn,0,0
+36,PLN,波兰兹罗提,zh_cn,0,0
+37,KPW,朝鲜圆,zh_cn,0,0
+38,XOF,多哥非洲共同体法郎,zh_cn,0,0
+39,DKK,丹麦克朗,zh_cn,0,0
+40,DOP,多米尼加比索,zh_cn,0,0
+41,RUB,俄罗斯卢布,zh_cn,0,0
+42,CVE,佛得角埃斯库多,zh_cn,0,0
+43,FKP,福克兰群岛镑,zh_cn,0,0
+44,FJD,斐济元,zh_cn,0,0
+45,PHP,菲律宾比索,zh_cn,0,0
+46,XAF,刚果中非共同体法郎,zh_cn,0,0
+47,COP,哥伦比亚比索,zh_cn,0,0
+48,CRC,哥斯达黎加科朗,zh_cn,0,0
+49,CUP,古巴比索,zh_cn,0,0
+50,XCD,格林纳达东加勒比元,zh_cn,0,0
+51,GMD,冈比亚达拉西,zh_cn,0,0
+52,GYD,圭亚那元,zh_cn,0,0
+53,HTG,海地古德,zh_cn,0,0
+54,HNL,洪都拉斯伦皮拉,zh_cn,0,0
+55,KZT,哈萨克斯坦腾格,zh_cn,0,0
+56,KHR,柬埔寨利尔斯,zh_cn,0,0
+57,CAD,加拿大元,zh_cn,0,0
+58,CZK,捷克克朗,zh_cn,0,0
+59,DJF,吉布提法郎,zh_cn,0,0
+60,GNF,几内亚法郎,zh_cn,0,0
+61,KMF,科摩罗法郎,zh_cn,0,0
+62,HRK,克罗地亚库纳,zh_cn,0,0
+63,KES,肯尼亚先令,zh_cn,0,0
+64,KWD,科威特第纳尔,zh_cn,0,0
+65,QAR,卡塔尔利尔,zh_cn,0,0
+66,LAK,老挝基普,zh_cn,0,0
+67,LVL,拉脱维亚拉图,zh_cn,0,0
+68,LBP,黎巴嫩镑,zh_cn,0,0
+69,LSL,莱索托洛提,zh_cn,0,0
+70,LRD,利比里亚元,zh_cn,0,0
+71,LYD,利比亚第纳尔,zh_cn,0,0
+72,LTL,立陶宛里塔斯,zh_cn,0,0
+73,ANG,列斯荷兰盾,zh_cn,0,0
+74,RON,罗马尼亚新列伊,zh_cn,0,0
+75,RWF,卢旺达法郎,zh_cn,0,0
+76,BDT,孟加拉塔卡,zh_cn,0,0
+77,MKD,马其顿第纳尔,zh_cn,0,0
+78,MWK,马拉维克瓦查,zh_cn,0,0
+79,MYR,马来西亚林吉特,zh_cn,0,0
+80,MVR,马尔代夫卢非亚,zh_cn,0,0
+81,MRO,毛里塔尼亚乌吉亚,zh_cn,0,0
+82,MUR,毛里求斯卢比,zh_cn,0,0
+83,MXN,墨西哥比索,zh_cn,0,0
+84,MDL,摩尔多瓦列伊,zh_cn,0,0
+85,MNT,蒙古图格里克,zh_cn,0,0
+86,MAD,摩洛哥道拉姆,zh_cn,0,0
+87,MMK,缅甸元,zh_cn,0,0
+88,PEN,秘鲁索尔,zh_cn,0,0
+89,NAD,纳米比亚元,zh_cn,0,0
+90,NPR,尼泊尔卢比,zh_cn,0,0
+91,NIO,尼加拉瓜科多巴,zh_cn,0,0
+92,NGN,尼日利亚奈拉,zh_cn,0,0
+93,NOK,挪威克朗,zh_cn,0,0
+94,ZAR,南非兰特,zh_cn,0,0
+95,SEK,瑞典克朗,zh_cn,0,0
+96,CHF,瑞士法郎,zh_cn,0,0
+97,SVC,萨尔瓦多科朗,zh_cn,0,0
+98,WST,萨摩亚塔拉,zh_cn,0,0
+99,STD,圣多美多布拉,zh_cn,0,0
+100,SAR,沙特阿拉伯里亚尔,zh_cn,0,0
+101,SCR,塞舌尔法郎,zh_cn,0,0
+102,SLL,塞拉利昂利昂,zh_cn,0,0
+103,SBD,所罗门群岛元,zh_cn,0,0
+104,SOS,索马里先令,zh_cn,0,0
+105,LKR,斯里兰卡卢比,zh_cn,0,0
+106,SHP,圣赫勒拿群岛磅,zh_cn,0,0
+107,SZL,斯威士兰里兰吉尼,zh_cn,0,0
+108,TRY,土耳其新里拉,zh_cn,0,0
+109,XPF,太平洋法郎,zh_cn,0,0
+110,TZS,坦桑尼亚先令,zh_cn,0,0
+111,THB,泰铢,zh_cn,0,0
+112,TOP,汤加潘加,zh_cn,0,0
+113,TTD,特立尼达和多巴哥元,zh_cn,0,0
+114,TND,突尼斯第纳尔,zh_cn,0,0
+115,BND,文莱元,zh_cn,0,0
+116,GTQ,危地马拉格查尔,zh_cn,0,0
+117,UAH,乌克兰赫夫米,zh_cn,0,0
+118,UYU,乌拉圭新比索,zh_cn,0,0
+119,VUV,瓦努阿图瓦图,zh_cn,0,0
+120,VND,越南盾,zh_cn,0,0
+121,HUF,匈牙利福林,zh_cn,0,0
+122,NZD,新西兰元,zh_cn,0,0
+123,SGD,新加坡元,zh_cn,0,0
+124,SYP,叙利亚镑,zh_cn,0,0
+125,INR,印度卢比,zh_cn,0,0
+126,IDR,印度尼西亚卢比(盾),zh_cn,0,0
+127,IRR,伊朗里亚尔,zh_cn,0,0
+128,IQD,伊拉克第纳尔,zh_cn,0,0
+129,ILS,以色列镑,zh_cn,0,0
+130,JMD,牙买加元,zh_cn,0,0
+131,JOD,约旦第纳尔,zh_cn,0,0
+132,YER,也门里亚尔,zh_cn,0,0
+133,CLP,智利比索,zh_cn,0,0
+134,GIP,直布罗陀镑,zh_cn,0,0
+135,CNY,Chinese Yuan,en,0,0
+136,HKD,Hong Kong Dollar,en,0,0
+137,TWD,Taiwan Dollar,en,0,0
+138,EUR,Euro,en,0,0
+139,USD,US Dollar,en,0,0
+140,GBP,British Pound,en,0,0
+141,KRW,South-Korean Won,en,0,0
+142,JPY,Japanese Yen,en,0,0
+143,ALL,Albanian Lek,en,0,0
+144,DZD,Algerian Dinar,en,0,0
+145,ARS,Argentine Peso,en,0,0
+146,AWG,Aruba Florin,en,0,0
+147,AUD,Australian Dollar,en,0,0
+148,EGP,Egyptian Pound,en,0,0
+149,ETB,Ethiopian Birr,en,0,0
+150,MOP,Macau Pataca,en,0,0
+151,OMR,Omani Rial,en,0,0
+152,AED,UAE Dirham,en,0,0
+153,BSD,Bahamian Dollar,en,0,0
+154,BHD,Bahraini Dinar,en,0,0
+155,BBD,Barbados Dollar,en,0,0
+156,BYR,Belarus Ruble,en,0,0
+157,BZD,Belize Dollar,en,0,0
+158,BMD,Bermuda Dollar,en,0,0
+159,BTN,Bhutan Ngultrum,en,0,0
+160,BOB,Bolivian Boliviano,en,0,0
+161,BWP,Botswana Pula,en,0,0
+162,BRL,Brazilian Real,en,0,0
+163,BGN,Bulgarian Lev,en,0,0
+164,BIF,Burundi Franc,en,0,0
+165,ISK,Iceland Krona,en,0,0
+166,PKR,Pakistani Rupee,en,0,0
+167,PAB,Panama Balboa,en,0,0
+168,PGK,Papua New Guinea Kina,en,0,0
+169,PYG,Paraguayan Guarani,en,0,0
+170,PLN,Polish Zloty,en,0,0
+171,KPW,North Korean Won,en,0,0
+172,XOF,CFA Franc BCEAO,en,0,0
+173,DKK,Danish Krone,en,0,0
+174,DOP,Dominican Peso,en,0,0
+175,RUB,Russian Rouble,en,0,0
+176,CVE,Cape Verde Escudo,en,0,0
+177,FKP,Falkland Islands Pound,en,0,0
+178,FJD,Fiji Dollar,en,0,0
+179,PHP,Philippine Peso,en,0,0
+180,XAF,CFA Franc BEAC,en,0,0
+181,COP,Colombian Peso,en,0,0
+182,CRC,Costa Rica Colon,en,0,0
+183,CUP,Cuban Peso,en,0,0
+184,XCD,East Caribbean Dollar,en,0,0
+185,GMD,Gambian Dalasi,en,0,0
+186,GYD,Guyana Dollar,en,0,0
+187,HTG,Haiti Gourde,en,0,0
+188,HNL,Honduras Lempira,en,0,0
+189,KZT,Kazakhstan Tenge,en,0,0
+190,KHR,Cambodia Riel,en,0,0
+191,CAD,Canadian Dollar,en,0,0
+192,CZK,Czech Koruna,en,0,0
+193,DJF,Dijibouti Franc,en,0,0
+194,GNF,Guinea Franc,en,0,0
+195,KMF,Comoros Franc,en,0,0
+196,HRK,Croatian Kuna,en,0,0
+197,KES,Kenyan Shilling,en,0,0
+198,KWD,Kuwaiti Dinar,en,0,0
+199,QAR,Qatar Rial,en,0,0
+200,LAK,Lao Kip,en,0,0
+201,LVL,Latvian Lats,en,0,0
+202,LBP,Lebanese Pound,en,0,0
+203,LSL,Lesotho Loti,en,0,0
+204,LRD,Liberian Dollar,en,0,0
+205,LYD,Libyan Dinar,en,0,0
+206,LTL,Lithuanian Litas,en,0,0
+207,ANG,Neth Antilles Guilder,en,0,0
+208,RON,Romanian New Leu,en,0,0
+209,RWF,Rwanda Franc,en,0,0
+210,BDT,Bangladesh Taka,en,0,0
+211,MKD,Macedonian Denar,en,0,0
+212,MWK,Malawi Kwacha,en,0,0
+213,MYR,Malaysian Ringgit,en,0,0
+214,MVR,Maldives Rufiyaa,en,0,0
+215,MRO,Mauritania Ougulya,en,0,0
+216,MUR,Mauritius Rupee,en,0,0
+217,MXN,Mexican Peso,en,0,0
+218,MDL,Moldovan Leu,en,0,0
+219,MNT,Mongolian Tugrik,en,0,0
+220,MAD,Moroccan Dirham,en,0,0
+221,MMK,Myanmar Kyat,en,0,0
+222,PEN,Peruvian Nuevo Sol,en,0,0
+223,NAD,Namibian Dollar,en,0,0
+224,NPR,Nepalese Rupee,en,0,0
+225,NIO,Nicaragua Cordoba,en,0,0
+226,NGN,Nigerian Naira,en,0,0
+227,NOK,Norwegian Kroner,en,0,0
+228,ZAR,South African Rand,en,0,0
+229,SEK,Swedish Krona,en,0,0
+230,CHF,Swiss Franc,en,0,0
+231,SVC,El Salvador Colon,en,0,0
+232,WST,Samoa Tala,en,0,0
+233,STD,Sao Tome Dobra,en,0,0
+234,SAR,Saudi Arabian Riyal,en,0,0
+235,SCR,Seychelles Rupee,en,0,0
+236,SLL,Sierra Leone Leone,en,0,0
+237,SBD,Solomon Islands Dollar,en,0,0
+238,SOS,Somali Shilling,en,0,0
+239,LKR,Sri Lanka Rupee,en,0,0
+240,SHP,St Helena Pound,en,0,0
+241,SZL,Swaziland Lilageni,en,0,0
+242,TRY,New Turkish Lira,en,0,0
+243,XPF,Pacific Franc,en,0,0
+244,TZS,Tanzanian Shilling,en,0,0
+245,THB,Thai Baht,en,0,0
+246,TOP,Tonga Pa'anga,en,0,0
+247,TTD,Trinidad&Tobago Dollar,en,0,0
+248,TND,Tunisian Dinar,en,0,0
+249,BND,Brunei Dollar,en,0,0
+250,GTQ,Guatemala Quetzal,en,0,0
+251,UAH,Ukraine Hryvnia,en,0,0
+252,UYU,Uruguayan New Peso,en,0,0
+253,VUV,Vanuatu Vatu,en,0,0
+254,VND,Vietnam Dong,en,0,0
+255,HUF,Hungarian Forint,en,0,0
+256,NZD,New Zealand Dollar,en,0,0
+257,SGD,Singapore Dollar,en,0,0
+258,SYP,Syrian Pound,en,0,0
+259,INR,Indian Rupee,en,0,0
+260,IDR,Indonesian Rupiah,en,0,0
+261,IRR,Iran Rial,en,0,0
+262,IQD,Iraqi Dinar,en,0,0
+263,ILS,Israeli Shekel,en,0,0
+264,JMD,Jamaican Dollar,en,0,0
+265,JOD,Jordanian Dinar,en,0,0
+266,YER,Yemen Riyal,en,0,0
+267,CLP,Chilean Peso,en,0,0
+268,GIP,Gibraltar Pound,en,0,0

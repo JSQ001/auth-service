@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.period.persistence.PeriodsMapper">
+
+    <select id="findClosePeriodsByTenantIdAndPeriodSetId" resultType="com.hand.hcf.app.mdata.period.dto.PeriodsDTO">
+        SELECT
+        id as id,
+        period_set_id as periodSetId,
+        period_year  as periodYear,
+        period_num as periodNum ,
+        period_name as periodName,
+        period_seq as periodSeq,
+        start_date as startDate,
+        end_date as endDate,
+        quarter_num as quarterNum,
+        tenant_id as tenantId,
+        enabled as enabled ,
+        deleted  as deleted,
+        created_date as createdDate,
+        created_by as createdBy,
+        last_updated_date as lastUpdateDate,
+        last_updated_by as lastUpdateBy,
+         'N' as periodStatusCode
+        FROM
+        sys_periods ap
+        WHERE
+        NOT EXISTS (
+        SELECT
+        1
+        FROM
+        sys_period_status aps
+        WHERE
+        aps.period_id = ap.id
+        AND aps.tenant_id = ap.tenant_id
+        AND aps.set_of_books_id=#{setOfBooksId}
+        )
+        AND ap.deleted=FALSE
+            <if test="periodSetId != null">
+                and ap.period_set_id = #{periodSetId}
+            </if>
+            <if test="tenantId != null">
+                and ap.tenant_id = #{tenantId}
+            </if>
+       order by   ap.period_seq asc
+    </select>
+    <select id="findOpenPeriodsByTenantIdAndPeriodSetId" resultType="com.hand.hcf.app.mdata.period.dto.PeriodsDTO">
+        SELECT
+        ap.id as id,
+        ap.period_set_id  as periodSetId,
+        ap.period_year as periodYear ,
+        ap.period_num as periodNum ,
+        ap.period_name as periodName ,
+        ap.start_date as startDate,
+        ap.end_date as endDate,
+        ap.period_seq as periodSeq,
+        ap.quarter_num as quarterNum,
+        ap.tenant_id  as tenantId,
+        aps.period_status_code as periodStatusCode,
+        aps.enabled  as enabled,
+        aps.deleted as deleted,
+        aps.created_date as createdDate,
+        aps.created_by as createdBy,
+        aps.last_updated_date as lastUpdateDate,
+        aps.last_updated_by as lastUpdateBy
+        FROM sys_period_status aps
+        INNER JOIN sys_periods ap
+        ON aps.period_id = ap.id
+        AND aps.tenant_id = ap.tenant_id
+        AND ap.deleted=FALSE
+        <where>
+        <if test="periodSetId != null">
+            and ap.period_set_id = #{periodSetId}
+        </if>
+        <if test="tenantId != null">
+            and ap.tenant_id = #{tenantId}
+        </if>
+        <if test="setOfBooksId != null">
+            and aps.set_of_books_id = #{setOfBooksId}
+        </if>
+        </where>
+        order by   ap.period_seq asc
+    </select>
+
+    <select id="findPeriodSetCodeByYear" parameterType="Integer" resultType="com.hand.hcf.app.mdata.period.domain.PeriodSet">
+        SELECT DISTINCT ps.id AS id,
+                ps.period_set_code AS periodSetCode,
+                ps.period_set_name AS periodSetName,
+                ps.total_period_num AS totalPeriodNum,
+                ps.period_additional_flag AS periodAdditionalFlag,
+                ps.tenant_id AS tenantId,
+                ps.enabled AS enabled,
+                ps.deleted AS deleted
+        FROM   sys_period_set ps,sys_periods s
+        WHERE  ps.id = s.period_set_id
+        AND    ps.deleted = FALSE
+        AND    s.period_year = #{year}
+    </select>
+
+    <select id="getPeriodBysetOfBooksIdAndDateTime" resultType="com.hand.hcf.app.mdata.period.domain.Periods">
+        SELECT
+        ap.id as id,
+        ap.period_set_id  as periodSetId,
+        ap.period_year as periodYear ,
+        ap.period_num as periodNum ,
+        ap.period_name as periodName ,
+        ap.start_date as startDate,
+        ap.end_date as endDate,
+        ap.period_seq as periodSeq,
+        ap.quarter_num as quarterNum,
+        ap.tenant_id  as tenantId,
+        ap.enabled as enabled,
+        ap.deleted as deleted
+        from  sys_periods ap
+        WHERE ap.deleted = FALSE
+        AND   ap.period_set_id = #{periodSetId}
+        AND   ap.start_date &lt;= #{dateTime}
+        AND   #{dateTime} &lt;= ap.end_date
+    </select>
+
+    <select id="findOpenPeriodsByBookID" resultType="com.hand.hcf.app.mdata.period.domain.Periods">
+        SELECT
+        ap.id as id,
+        ap.period_set_id  as periodSetId,
+        ap.period_year as periodYear ,
+        ap.period_num as periodNum ,
+        ap.period_name as periodName ,
+        ap.start_date as startDate,
+        ap.end_date as endDate,
+        ap.period_seq as periodSeq,
+        ap.quarter_num as quarterNum,
+        ap.tenant_id  as tenantId,
+        ap.enabled as enabled,
+        ap.deleted as deleted
+        from  sys_periods ap,sys_period_status aps
+        WHERE ap.id = aps.period_id
+        AND   ap.deleted = FALSE
+        AND   aps.period_status_code = 'O'
+        AND   aps.set_of_books_id = #{setOfBooksId}
+        ORDER BY ap.period_seq
+    </select>
+
+    <select id="getPeriodYearsForPeriodSetId" resultType="java.lang.Integer">
+        select period_year from(
+        SELECT DISTINCT
+          ap.period_year
+        from  sys_periods ap
+        WHERE ap.deleted = FALSE
+         and ap.period_set_id = #{periodSetId}) temp
+         order by temp.period_year
+    </select>
+
+    <select id="findPeriodsByIdAndName" resultType="com.hand.hcf.app.mdata.period.domain.Periods">
+        SELECT p.id as id,
+        p.period_set_id as periodSetId,
+        p.period_year as periodYear,
+        p.period_num as periodNum,
+        p.period_name as periodName,
+        p.period_seq as periodSeq,
+        p.start_date as startDate,
+        p.end_date as endDate,
+        p.quarter_num as quarterNum,
+        p.tenant_id as tenantId,
+        p.deleted as deleted,
+        p.enabled as enabled
+        FROM sys_periods p,sys_period_set ps,sys_set_of_books s
+        WHERE s.period_set_code = ps.period_set_code
+        AND ps.id = p.period_set_id
+        AND s.id = #{setOfBooksId}
+        AND ps.tenant_id = #{tenantId}
+        <if test="periodName != null and periodName != '' ">
+            and p.period_name = #{periodName,jdbcType=VARCHAR}
+        </if>
+        <if test="periodYear != null">
+            and p.period_year = #{periodYear}
+        </if>
+    </select>
+
+</mapper>

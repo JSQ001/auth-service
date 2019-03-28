@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.setOfBooks.persistence.SetOfBooksMapper">
+
+    <resultMap id="SysAccountSetMapper"
+               type="com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks">
+        <id column="id" property="id"/>
+        <result column="set_of_books_code" property="setOfBooksCode"/>
+        <result column="set_of_books_name" property="setOfBooksName"/>
+        <result column="period_set_code" property="periodSetCode"/>
+        <result column="functional_currency_code" property="functionalCurrencyCode"/>
+        <result column="account_set_id" property="accountSetId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+    </resultMap>
+
+    <select id="selectOneById" parameterType="java.lang.Long" resultMap="SysAccountSetMapper">
+        SELECT * from sys_set_of_books where id = #{id}
+    </select>
+    <resultMap id="SetOfBookResult"
+               type="com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks">
+        <id column="id" property="id"/>
+        <result column="set_of_books_code" property="setOfBooksCode"/>
+        <result column="set_of_books_name" property="setOfBooksName"/>
+        <result column="period_set_code" property="periodSetCode"/>
+        <result column="functional_currency_code" property="functionalCurrencyCode"/>
+        <result column="account_set_id" property="accountSetId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="eeleted"/>
+    </resultMap>
+
+    <select id="getAllSetOfBook" resultMap="SetOfBookResult">
+        SELECT
+        id,
+        set_of_books_code,
+        set_of_books_name,
+        period_set_code,
+        functional_currency_code,
+        account_set_id,
+        tenant_id,
+        enabled,
+        deleted
+        FROM
+        sys_set_of_books
+    </select>
+</mapper>

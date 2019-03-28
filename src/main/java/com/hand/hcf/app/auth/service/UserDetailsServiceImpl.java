@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
     /**
      * 用户登录，只能是手机号或者邮箱，用户主键login为公司默认账户，不能登录
@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(final String login) {
         log.debug("Authenticating {}", login);
-            return userService.loadUserByUsername(login);
+            return authUserService.loadUserByUsername(login);
 
     }
 }

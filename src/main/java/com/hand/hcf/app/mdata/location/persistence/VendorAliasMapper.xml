@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.location.persistence.VendorAliasMapper">
+    <select id="selectEsByKey" resultType="com.hand.hcf.app.mdata.location.domain.VendorAlias">
+        SELECT
+	va.id,
+	va.code,
+	va.vendor_type AS vendorType,
+	va.alias,
+	va.language,
+	va.vendor_code AS vendorCode,
+	va.vendor_country_code AS vendorCountryCode
+FROM
+	sys_vendor_alias va,sys_location_detail ld,sys_location l
+	where va.code = ld.code
+	  and va.language = ld.language
+	    and va.code = l.code
+		and (
+		 ld.district like concat(concat('%',#{key}),'%')
+		or ld.city like concat(concat('%',#{key}),'%')
+		or va.alias like concat(concat('%',#{key}),'%')
+		)
+		${ew.sqlSegment}
+    </select>
+</mapper>

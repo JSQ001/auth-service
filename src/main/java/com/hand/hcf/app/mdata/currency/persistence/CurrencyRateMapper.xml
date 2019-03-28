@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.currency.persistence.CurrencyRateMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap"
+               type="com.hand.hcf.app.mdata.currency.domain.CurrencyRate">
+        <result column="base_currency_oid" property="baseCurrencyOid"/>
+        <result column="base_currency_code" property="baseCurrencyCode"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="rate" property="rate"/>
+        <result column="apply_date" property="applyDate"/>
+        <result column="source" property="source"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="tenant_id" property="tenantId"/>
+    </resultMap>
+    <resultMap id="CurrencyRateDTOMap"
+               type="com.hand.hcf.app.mdata.currency.dto.CurrencyRateDTO">
+        <result column="base_currency_oid" property="baseCurrencyOid"/>
+        <result column="base_currency_code" property="baseCurrencyCode"/>
+        <result column="base_currency_name" property="baseCurrencyName"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="currency_name" property="currencyName"/>
+        <result column="rate" property="rate"/>
+        <result column="apply_date" property="applyDate"/>
+        <result column="source" property="source"/>
+        <result column="enabled" property="enabled"/>
+        <result column="enable_auto_update" property="enableAutoUpdate"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="tenant_id" property="tenantId"/>
+    </resultMap>
+    <resultMap id="changeLogDTOMAP"
+               type="com.hand.hcf.app.mdata.currency.dto.CurrencyChangeLogDTO">
+        <result column="base_currency" property="baseCurrencyCode"/>
+        <result column="currency" property="currencyCode"/>
+        <result column="after_rate" property="rate"/>
+        <result column="apply_date" property="applyDate"/>
+        <result column="change_log_oid" property="changeLogOid"/>
+    </resultMap>
+
+    <select id="selectByCurrencyOid" resultMap="CurrencyRateDTOMap">
+        SELECT
+        a.currency_rate_oid,
+        a.base_currency_code,
+        a.currency_code,
+        a.rate,
+        a.apply_date,
+        a.source,
+        b.enabled,
+        b.enable_auto_update,
+        a.set_of_books_id,
+        a.tenant_id
+        FROM
+        sys_currency_rate a
+        LEFT JOIN sys_currency_status b ON a.currency_code = b.currency_code
+        WHERE a.currency_rate_oid = #{currencyOid}
+        and a.tenant_id = b.tenant_id
+       and a.set_of_books_id = b.set_of_books_id
+    </select>
+
+    <select id="selectHistoryByCurrencyCodeAndSetOfBooksIdAndTenantId" resultMap="CurrencyRateDTOMap">
+        SELECT
+        a.currency_rate_oid,
+        a.base_currency_code,
+        a.currency_code,
+        a.rate,
+        a.apply_date,
+        a.source,
+        b.enabled,
+        b.enable_auto_update,
+        a.set_of_books_id,
+        a.tenant_id,
+        a.last_updated_date
+        FROM
+        sys_currency_rate a
+        LEFT JOIN sys_currency_status b ON a.currency_code = b.currency_code
+        WHERE a.currency_code = #{currencyCode}
+        AND a.set_of_books_id = #{setOfBooksId}
+        AND a.tenant_id = #{tenantId}
+        AND a.base_currency_code = #{baseCurrencyCode}
+        AND a.currency_rate_oid != #{currencyRateOid}
+        <if test="startDate != null">
+            AND a.apply_date <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null ">
+            AND a.apply_date <![CDATA[<=]]> #{endDate}
+        </if>
+        AND a.tenant_id = b.tenant_id
+        AND a.set_of_books_id = b.set_of_books_id
+        order by a.apply_date desc ,a.last_updated_date desc
+    </select>
+
+    <select id="selectActiveBySetOfBooksIdAndTenantIdAndBaseCurrencyCode" resultMap="CurrencyRateDTOMap">
+        SELECT
+        a.currency_rate_oid,
+        a.base_currency_code,
+        a.currency_code,
+        a.rate,
+        a.apply_date,
+        a.source,
+        b.enabled,
+        b.enable_auto_update,
+        a.set_of_books_id,
+        a.tenant_id,
+        a.last_updated_date
+        FROM
+        (
+        <!---查询生效汇率-->
+        SELECT
+        e.*,
+        CASE WHEN e.currency_code = #{baseCurrencyCode} THEN '0' ELSE e.currency_code END AS order_type
+        FROM
+        (select temp1.* from sys_currency_rate temp1, (
+        SELECT
+        currency_code,
+        max(apply_date) as apply_date,
+        max(id) as id
+        FROM
+        sys_currency_rate
+        WHERE
+        base_currency_code = #{baseCurrencyCode}
+        AND tenant_id = #{tenantId}
+        AND set_of_books_id = #{setOfBooksId}
+        group by currency_code
+        ) temp2
+        where temp1.id = temp2.id) e
+        <!--查询生效汇率明细-->
+        )  a INNER JOIN sys_currency_status b ON a.currency_code = b.currency_code
+        AND b.tenant_id =  #{tenantId}
+        AND b.set_of_books_id = #{setOfBooksId}
+        <if test="enable != null and enable != ''">
+            AND b.enabled = #{enable}
+        </if>
+        ORDER BY
+        b.enabled DESC,
+        <!--本位币排首位-->
+        a.order_type ASC
+    </select>
+    <select id="selectCurrencyRates" resultMap="BaseResultMap">
+        SELECT
+        a.*
+        FROM
+        sys_currency_rate a
+        LEFT join sys_currency_status b ON a.currency_code = b.currency_code
+        WHERE
+        a.set_of_books_id = b.set_of_books_id
+        AND a.tenant_id = b.tenant_id
+        AND a.base_currency_code = #{baseCurrencyCode}
+        AND a.set_of_books_id = #{setOfBooksId}
+        AND a.tenant_id = #{tenantId}
+        AND a.currency_code = #{currencyCode}
+        <if test="enable != null and enable != ''">
+            AND b.enabled = #{enable}
+        </if>
+        ORDER BY a.apply_date DESC , a.last_updated_date DESC
+    </select>
+    <select id="selectCompanyStandardCurrencyChangeLogByTenantId" resultMap="changeLogDTOMAP">
+        SELECT
+        e.company_currency_changelog_oid as change_log_oid,
+        e.base_currency,
+        e.currency,
+        e.after_rate,
+        e.apply_date,
+        e.created_by,
+        e.last_updated_by,
+        e.created_date,
+        e.last_updated_date
+        FROM
+        sys_company_standard_currency_changelog e
+        INNER JOIN sys_company_standard_currency a ON e.company_currency_oid = a.company_currency_oid
+        WHERE
+        a.tenant_id = #{tenantId}
+        AND a.company_oid IS NULL
+    </select>
+
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.UserGroupConditionMapper">
+
+
+    <select id="selectMaxSequenceOfUserGroup" resultType="java.lang.Integer">
+        SELECT max(condition_seq) from sys_user_group_condition where user_group_id = #{userGroupId}
+    </select>
+    <select id="getConditionUserGroupSeqCountList" resultType="java.lang.Integer">
+        select condition_seq from sys_user_group_condition
+        where user_group_id = #{userGroupId} GROUP BY condition_seq  ORDER BY condition_seq
+    </select>
+
+    <select id="getEnableConditionUserGroupSeqCountList" resultType="java.lang.Integer">
+        select condition_seq from sys_user_group_condition
+        where user_group_id = #{userGroupId} and enabled = 1 GROUP BY condition_seq  ORDER BY condition_seq
+    </select>
+    </mapper>

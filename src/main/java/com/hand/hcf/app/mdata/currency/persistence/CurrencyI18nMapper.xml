@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.currency.persistence.CurrencyI18nMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap"
+               type="com.hand.hcf.app.mdata.currency.domain.CurrencyI18n">
+        <id column="id" property="id"/>
+        <result column="currency_code" property="currencyCode"/>
+        <result column="currency_name" property="currencyName"/>
+        <result column="language" property="language"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>
+    <select id="selectSefOfBooksNotCreatedCurrency" resultMap="BaseResultMap">
+        SELECT
+        a.*
+        FROM
+        sys_currency_i18n a
+        WHERE
+        a.currency_code NOT IN (
+        SELECT DISTINCT
+        (currency_code)
+        FROM
+        sys_currency_rate
+        WHERE
+        tenant_id = #{tenantId}
+        AND set_of_books_id = #{setOfBooksId}
+        AND base_currency_code = #{baseCurrencyCode}
+        )
+        AND a.currency_code != #{baseCurrencyCode}
+        AND a.language = #{language}
+    </select>
+
+    <select id="getOneOtherCurrencyByBaseCurrencyAndName" resultMap="BaseResultMap">
+        SELECT
+        *
+        FROM
+        sys_currency_i18n a
+        WHERE
+        LOWER (a.language) = LOWER (#{language})
+        <if test="otherCurrencyName!=null and otherCurrencyName !=''">
+        AND a.currency_name LIKE concat('%', concat(#{otherCurrencyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        and EXISTS(
+        SELECT
+        1
+        FROM
+        sys_currency_rate r
+        WHERE
+        r.tenant_id = #{tenantId}
+        AND a.currency_code = r.currency_code
+        AND r.base_currency_code = #{baseCurrency}
+        <if test="otherCurrency!=null and otherCurrency !=''">
+            AND r.currency_code LIKE concat('%', concat(#{otherCurrency,jdbcType=VARCHAR}, '%'))
+        </if>
+        )
+    </select>
+
+
+</mapper>

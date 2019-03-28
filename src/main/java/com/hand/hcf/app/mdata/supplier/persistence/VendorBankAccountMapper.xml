@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.supplier.persistence.VendorBankAccountMapper">
+
+    <resultMap id="VendorBankAccountMap" type="com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount">
+        <id column="id" property="id"/>
+        <result column="vendor_info_id" property="vendorInfoId"/>
+        <result column="company_oid" property="companyOid"/>
+        <result column="vendor_id" property="vendorId"/>
+        <result column="bank_account" property="bankAccount"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="ven_bank_number_name" property="venBankNumberName"/>
+        <result column="status" property="status"/>
+        <result column="opening_bank" property="openingBank"/>
+        <result column="opening_bank_city" property="openingBankCity"/>
+        <result column="opening_bank_line_num" property="openingBankLineNum"/>
+        <result column="bank_code" property="bankCode"/>
+        <result column="bank_address" property="bankAddress"/>
+        <result column="country" property="country"/>
+        <result column="swift_code" property="swiftCode"/>
+        <result column="primary_flag" property="primaryFlag"/>
+        <result column="import_code" property="importCode"/>
+        <result column="remark" property="remark"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" javaType="java.time.ZonedDateTime"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
+                javaType="java.time.ZonedDateTime"/>
+    </resultMap>
+
+
+    <select id="selectVendorBankAccountsByCompanyOidAndVendorInfoId" resultMap="VendorBankAccountMap">
+        SELECT avba.* FROM ven_vendor_bank_account avba
+        WHERE 1 = 1
+        <if test="companyOid != null">
+            AND avba.company_oid = #{companyOid}
+        </if>
+        <if test="vendorInfoId != null">
+            AND avba.vendor_info_id = #{vendorInfoId}
+        </if>
+       ORDER BY avba.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorBankAccountsByConditions" resultMap="VendorBankAccountMap">
+        SELECT avba.* FROM ven_vendor_bank_account avba
+        WHERE avba.vendor_info_id = #{vendorInfoId}
+        AND avba.primary_flag = #{primaryFlag} AND avba.status = #{status}
+        ORDER BY avba.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorBankAccountsByPages" resultMap="VendorBankAccountMap">
+        SELECT avba.* FROM ven_vendor_bank_account avba
+        WHERE avba.vendor_info_id = #{vendorInfoId}
+        <if test="status != null">
+            AND avba.status = #{status}
+        </if>
+        ORDER BY avba.bank_code ASC
+    </select>
+
+    <select id="selectVendorBankAccountsByTenantIdAndBankAccount" resultMap="VendorBankAccountMap">
+        SELECT avba.* FROM ven_vendor_bank_account avba
+        INNER JOIN ven_vendor_info avi ON avi.id = avba.vendor_info_id
+        WHERE avi.tenant_id = #{tenantId} AND avba.bank_account = #{bankAccount}
+        ORDER BY avba.last_updated_date DESC
+    </select>
+
+    <select id="selectVendorBankAccountsByBankAccountAndVendorInfoId" resultMap="VendorBankAccountMap">
+        SELECT avba.* FROM ven_vendor_bank_account avba
+        INNER JOIN ven_vendor_info avi ON avi.id = avba.vendor_info_id
+        WHERE avba.bank_account = #{bankAccount}
+        AND avba.vendor_info_id = #{vendorInfoId}
+        ORDER BY avba.last_updated_date DESC
+    </select>
+
+</mapper>

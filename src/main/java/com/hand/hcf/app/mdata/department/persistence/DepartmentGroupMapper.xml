@@ -1,0 +1,937 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.department.persistence.DepartmentGroupMapper">
+    <resultMap id="DepartmentResultMap"
+               type="com.hand.hcf.app.mdata.department.domain.Department">
+        <result column="department_oid" property="departmentOid"/>
+        <result column="name" property="name"/>
+        <result column="path" property="path"/>
+        <result column="status" property="status"/>
+        <result column="department_code" property="departmentCode"/>
+    </resultMap>
+
+    <select id="selectDepartmentGroupByDepartmentCode" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroup">
+        SELECT
+        adg.id id,
+        adg.tenant_id tenantId,
+        adg.dept_group_code deptGroupCode,
+        adg.description description,
+        adg.company_id companyId,
+        adg.enabled enabled,
+        adg.deleted deleted,
+        adg.created_date createdDate,
+        adg.created_by createdBy,
+        adg.last_updated_date lastUpdatedDate,
+        adg.last_updated_by lastUpdatedBy
+        FROM
+        sys_department ad,
+        sys_department_group adg,
+        sys_department_group_detail adgd
+        WHERE
+        ad.department_code=#{departmentCode}
+        AND
+        ad.id=adgd.department_id
+        AND
+        adgd.department_group_id=adg.id
+        AND
+        adg.tenant_id=ad.tenant_id
+        AND
+        ad.status=101
+        AND
+        adgd.deleted=0
+        AND
+        adg.deleted=0
+    </select>
+    <select id="selectDepartmentGroupByDepartmentId" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroup">
+        SELECT
+        adg.id id,
+        adg.tenant_id tenantId,
+        adg.dept_group_code deptGroupCode,
+        adg.description description,
+        adg.company_id companyId,
+        adg.enabled enabled,
+        adg.deleted deleted,
+        adg.created_date createdDate,
+        adg.created_by createdBy,
+        adg.last_updated_date lastUpdatedDate,
+        adg.last_updated_by lastUpdatedBy
+        FROM
+        sys_department ad,
+        sys_department_group adg,
+        sys_department_group_detail adgd
+        WHERE
+        ad.id=#{departmentId}
+        AND
+        ad.id=adgd.department_id
+        AND
+        adgd.department_group_id=adg.id
+        AND
+        adg.tenant_id=ad.tenant_id
+        AND
+        ad.status=101
+        AND
+        adgd.deleted=0
+        AND
+        adg.deleted=0
+        AND
+        adg.enabled=1
+    </select>
+
+    <select id="selectCurrentDepartmentGroupDepartment" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT
+        ad.department_code departmentCode,
+        ad.name NAME ,
+        ad.id departmentId,
+        adgd.id departmentDetailId
+        FROM
+        sys_department ad,
+        sys_department_group_detail adgd
+        WHERE
+        ad.id=adgd.department_id
+        AND
+        ad.tenant_id=adgd.tenant_id
+        AND
+        adgd.deleted= 0
+        AND
+        ad.status IN (101, 102)
+        AND
+        adgd.department_group_id = #{departmentGroupId}
+        ORDER BY ad.department_code
+    </select>
+
+    <select id="selectCurrentDepartment" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT
+        ad.department_code departmentCode,
+        ad.name NAME ,
+        ad.id departmentId,
+        adgd.id departmentDetailId
+        FROM
+        sys_department ad,
+        sys_department_group_detail adgd
+        WHERE
+        ad.id=adgd.department_id
+        AND
+        ad.status=101
+        AND
+        ad.tenant_id=adgd.tenant_id
+        AND
+        adgd.deleted= 0
+        AND
+        adgd.department_group_id = #{departmentGroupId}
+    </select>
+
+
+    <select id="selectDepartmentByGroupCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM sys_department d
+        WHERE EXISTS(
+        SELECT  d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM sys_department_group adg,
+        sys_department_group_detail adgd
+        WHERE adg.id = adgd.department_group_id
+        AND adgd.dept_group_code = #{deptGroupCode}
+        AND adgd.deleted = 0
+        AND
+        d.status=101
+
+        AND adgd.department_id = d.id
+        AND d.tenant_id=adg.tenant_id
+        )
+
+        AND d.tenant_id=#{tenantId}
+    </select>
+
+
+
+    <select id="selectNotExit" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT  d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM sys_department d
+        WHERE NOT EXISTS(SELECT d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId,
+        adgd.id departmentDetailId
+        FROM sys_department_group adg,
+        sys_department_group_detail adgd
+        WHERE adg.id = adgd.department_group_id
+        AND adgd.department_group_id = #{departmentGroupId}
+        AND adgd.department_id = d.id
+        AND d.tenant_id=adg.tenant_id
+        AND adgd.deleted= 0
+        )
+        AND d.tenant_id=#{tenantId}
+        AND d.status=101
+        ORDER BY d.status ,d.department_code ASC
+    </select>
+
+
+
+    <select id="selectDepartmentByDepartmentGroupCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM sys_department d
+        WHERE
+        d.tenant_id=#{tenantId}
+        <if test="deptGroupCode != null and deptGroupCode !=''">
+            and d.department_code LIKE concat('%', concat(#{deptGroupCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != null and description !=''">
+            and d.name LIKE concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+        AND NOT EXISTS
+        (
+        SELECT  d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM    sys_department_group adg,
+        sys_department_group_detail adgd
+        WHERE   adg.id = adgd.department_group_id
+        AND adgd.department_group_id =#{departmentGroupId}
+        AND adgd.department_id = d.id
+        AND d.tenant_id=adg.tenant_id
+        AND adgd.deleted= 0
+        )
+        ORDER BY d.status ,d.department_code ASC
+    </select>
+
+    <select id="selectByDepartmentId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT
+        d.department_oid departmentOid,
+        d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId,
+        d.path path
+        FROM
+        sys_department d
+        WHERE
+        d.id=#{departmentId}
+        AND
+        d.status=101
+    </select>
+
+    <select id="selectDepartmentByCompanyIdAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT
+        d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId,
+        d.status
+        FROM
+        sys_department d
+        WHERE
+        d.tenant_id=#{tenantId}
+        <if test="status!=null">
+            AND
+            d.status=#{status}
+        </if>
+        <if test="status==null">
+            AND
+            (
+            d.status = 101
+            OR
+            d.status = 102
+            )
+        </if>
+        <if test="companyId != null and companyId !=''">
+            AND d.company_id = #{companyId}
+        </if>
+        <if test="deptCode != null and deptCode !=''">
+            AND d.department_code LIKE concat('%', concat(#{deptCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="deptDescription != null and deptDescription !=''">
+            AND d.NAME LIKE concat('%', concat(#{deptDescription,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY
+        d.department_code
+    </select>
+
+    <select id="selectByCompanyIdAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+
+        SELECT
+        d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM
+        sys_department d
+        WHERE
+        d.tenant_id=#{tenantId}
+        AND
+        d.status=101
+        <if test="companyId != null and companyId !=''">
+            AND d.company_id = #{companyId}
+        </if>
+        <if test="deptCode != null and deptCode !=''">
+            AND d.department_code LIKE concat('%', concat(#{deptCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="deptDescription != null and deptDescription !=''">
+            AND d.NAME LIKE concat('%', concat(#{deptDescription,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY
+        d.department_code
+    </select>
+
+    <select id="selectCompanyByInput" resultType="java.lang.Long">
+        SELECT
+        c.id  id
+
+        FROM
+        sys_company c
+        WHERE
+        c.enabled = 1
+        <if test="setOfBooks != null">
+            AND  c.set_of_books_id = #{setOfBooks}
+        </if>
+        <if test="companyIds != null and companyIds.size()>0">
+          AND  c.id NOT IN
+            <foreach collection="companyIds" item="companyId"  open="(" separator="," close=")">
+                #{companyId,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="companyCode != null and companyCode !=''  ">
+           AND c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !='' ">
+            AND c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != '' ">
+            AND c.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != '' ">
+            AND c.company_code &lt;= #{companyCodeTo}
+        </if>
+        ORDER BY c.company_code
+
+    </select>
+
+    <select id="selectDepartmentByEmpOid" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        select
+         ad.department_code departmentCode,
+         ad.name NAME ,
+         ad.id departmentId,
+         ad.department_oid departmentOid
+        from
+         sys_department_user adu,
+         sys_department ad
+        WHERE
+         adu.user_id = (
+            SELECT user_id FROM  sys_contact WHERE user_oid = #{empOid,jdbcType=VARCHAR}
+         )
+        AND
+        adu.department_id = ad.id
+        AND
+        ad.status=101
+    </select>
+
+    <select id="selectByTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        SELECT
+        d.department_code departmentCode,
+        d.name NAME ,
+        d.id departmentId
+        FROM
+        sys_department d
+        WHERE
+        d.tenant_id=#{tenantId}
+        AND
+        d.status = 101
+    </select>
+
+    <select id="selectGroupByInput" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroup">
+
+        SELECT
+        adg.id id,
+        adg.tenant_id tenantId,
+        adg.dept_group_code deptGroupCode,
+        adg.description description,
+        adg.company_id companyId,
+        adg.enabled enabled,
+        adg.deleted deleted,
+        adg.created_date createdDate,
+        adg.created_by createdBy,
+        adg.last_updated_date lastUpdatedDate,
+        adg.last_updated_by lastUpdatedBy
+        FROM
+        sys_department_group adg
+        WHERE
+        adg.tenant_id = #{tenantId}
+        <if test="deptGroupCode !='' || deptGroupCode != null">
+           AND adg.dept_group_code LIKE concat('%', concat(#{deptGroupCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != '' || description!=null">
+            AND adg.description LIKE concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY adg.enabled DESC,adg.dept_group_code ASC
+    </select>
+
+    <select id="selectByTenantAndCompanyAndDeptCode" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+         select
+         ad.department_code departmentCode,
+         ad.name NAME ,
+         ad.id departmentId,
+         ad.department_oid departmentOid
+        from
+         sys_department ad,
+         sys_company ac,
+         sys_tenant at
+         WHERE
+         ad.tenant_id=at.id
+         AND
+         ac.tenant_id=at.id
+         AND
+         ac.id=ad.company_id
+         AND
+         ac.id=#{companyId}
+         AND
+         at.id=#{tenantId}
+         AND
+         ad.department_code = #{deptCode}
+    </select>
+
+
+    <select id="selectCostCompanyByInput" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        SELECT
+            c.id id,
+            c.company_code companyCode,
+            c.name name
+        FROM
+            sys_company c
+        WHERE
+            c.set_of_books_id = #{setOfBooksId}
+        AND
+           c.enabled = 1
+        <if test="companyCode != null and companyCode !=''">
+            AND
+            c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !=''">
+            AND
+            c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+    <select id="selectCostCompanyByIdAndCode" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        SELECT
+        c.id id,
+        c.company_code companyCode,
+        c.name name
+        FROM
+        sys_company c
+        WHERE
+        c.set_of_books_id = #{setOfBooksId}
+        AND
+        c.enabled = 1
+        <if test="companyCode != null and companyCode !=''">
+            AND
+            c.company_code = #{companyCode}
+        </if>
+    </select>
+
+    <select id="selectGroupByInputAndEnabled" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroup">
+        SELECT
+        adg.id id,
+        adg.tenant_id tenantId,
+        adg.dept_group_code deptGroupCode,
+        adg.description description,
+        adg.company_id companyId,
+        adg.enabled enabled,
+        adg.deleted deleted,
+        adg.created_date createdDate,
+        adg.created_by createdBy,
+        adg.last_updated_date lastUpdatedDate,
+        adg.last_updated_by lastUpdatedBy
+        FROM
+        sys_department_group adg
+        WHERE
+        adg.tenant_id = #{tenantId}
+        AND
+        adg.enabled = 1
+        <if test="deptGroupCode !='' || deptGroupCode != null">
+            AND adg.dept_group_code LIKE concat('%', concat(#{deptGroupCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != '' || description!=null">
+            AND adg.description LIKE concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY adg.dept_group_code
+    </select>
+
+    <select id="selectDeptGroupByInput" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroup">
+        SELECT
+        adg.id id,
+        adg.tenant_id tenantId,
+        adg.dept_group_code deptGroupCode,
+        adg.description description,
+        adg.company_id companyId,
+        adg.enabled enabled,
+        adg.deleted deleted,
+        adg.created_date createdDate,
+        adg.created_by createdBy,
+        adg.last_updated_date lastUpdatedDate,
+        adg.last_updated_by lastUpdatedBy
+        FROM
+        sys_department_group adg
+        WHERE
+        adg.tenant_id = #{tenantId}
+        <if test="enable!=null">
+            AND
+            adg.enabled = #{enable}
+        </if>
+
+        <if test="deptGroupCode !='' || deptGroupCode != null">
+            AND adg.dept_group_code LIKE concat('%', concat(#{deptGroupCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != '' || description!=null">
+            AND adg.description LIKE concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY adg.dept_group_code
+    </select>
+
+    <select id="selectDepartmentByTenantIdAndEnabled"  resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        select
+         ad.name NAME ,
+         ad.id departmentId,
+         ad.path path,
+         ad.department_code departmentCode,
+         ad.department_oid departmentOid
+        from
+         sys_department ad
+        WHERE
+         ad.tenant_id = #{tenantId}
+        AND
+        ad.status=101
+        <if test="deptCode != '' and deptCode !=null">
+            AND ad.department_code LIKE concat('%', concat(#{deptCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="name != '' and name !=null">
+            AND ad.name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="leafEnable != null and leafEnable == 1">
+            AND (SELECT COUNT(1) FROM sys_department dd WHERE dd.parent_id = ad.id and dd.status!=103) = 0
+        </if>
+        ORDER BY
+            ad.department_code
+    </select>
+
+    <select id="selectDepartmentsByTenantIdAndEnabled"  resultType="com.hand.hcf.app.mdata.department.dto.DepartmentDTO">
+        select
+        ad.department_code departmentCode,
+        ad.name NAME ,
+        ad.id id,
+        ad.path path,
+        ad.department_oid departmentOid
+        from
+        sys_department ad
+        WHERE
+        ad.tenant_id = #{tenantId}
+        AND
+        ad.status=101
+        <if test="deptCode != '' and deptCode !=null">
+            AND ad.department_code LIKE concat('%', concat(#{deptCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="name != '' and name !=null">
+            AND ad.name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY
+        ad.department_code
+    </select>
+
+    <select id="selectDepartmentByCodeAndTenantId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        select
+         ad.department_code departmentCode,
+         ad.name NAME ,
+         ad.id departmentId,
+         ad.department_oid departmentOid
+        from
+         sys_department ad
+        WHERE
+         ad.tenant_id = #{tenantId}
+        AND
+        ad.status=101
+        AND
+        ad.department_code = #{code}
+    </select>
+
+    <select id="selectUserIdsByCompanyAndDepartmentId" resultType="com.hand.hcf.app.mdata.contact.dto.UserInfoDTO">
+        SELECT
+            c.user_id userId,
+            c.user_oid userOid,
+            c.full_name userName,
+            c.employee_id userCode,
+            com.name companyName
+        FROM
+            sys_contact c,
+            sys_company com
+        WHERE
+        c.tenant_id = #{tenantId}
+        AND c.company_id = com.id
+        <if test="companyId != null">
+          AND c.company_id = #{companyId}
+        </if>
+       <if test="departmentId != null">
+           AND
+           c.user_id IN (SELECT user_id from sys_department_user WHERE  department_id = #{departmentId})
+       </if>
+        <if test="userCode!=null and userCode!=''">
+            AND c.employee_id LIKE concat('%', concat(#{userCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="userName!=null and userName!=''">
+            AND c.full_name LIKE concat('%', concat(#{userName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName!=null and companyName!=''">
+            AND com.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+
+    <select id="selectUserByCompanyAndDepartmentIdAndEmpId" resultType="com.hand.hcf.app.mdata.contact.dto.UserInfoDTO">
+        SELECT
+        c.user_id userId,
+        c.user_oid userOid,
+        c.full_name userName,
+        c.employee_id userCode
+        FROM
+        sys_contact c
+        WHERE
+        c.employee_id=#{empId}
+        <if test="companyId != null">
+            AND c.company_id = #{companyId}
+        </if>
+        <if test="departmentId != null">
+            AND
+            u.id IN (SELECT user_id from sys_department_user WHERE  department_id = #{departmentId})
+        </if>
+    </select>
+
+
+    <select id="selectContactBankAccountByUserName" parameterType="java.lang.String" resultType="com.hand.hcf.app.mdata.contact.domain.ContactBankAccount">
+        SELECT
+            a.id id,
+            a.contact_bank_account_oid contactBankAccountOid ,
+            a.user_oid userOid,
+            a.bank_account_no bankAccountNo,
+            a.bank_account_name bankAccountName,
+            a.bank_name bankName,
+            a.branch_name branchName,
+            a.account_location accountLocation,
+            a.is_primary isPrimary,
+            a.enabled,
+            a.bank_code bankCode
+        FROM
+         sys_contact_bank_account a,
+         sys_contact c
+        WHERE
+         a.user_oid = c.user_oid
+         AND
+         c.company_id = #{companyId}
+        AND
+         a.enabled= 1
+         <if test="userName != null and userName !=''">
+           AND  c.full_name LIKE concat('%', concat(#{userName,jdbcType=VARCHAR}, '%'))
+         </if>
+        ORDER BY
+        c.full_name
+
+    </select>
+
+
+
+    <select id="selectContactBankAccountDTOByUserOid" parameterType="java.lang.String" resultType="com.hand.hcf.app.mdata.contact.domain.ContactBankAccount">
+         SELECT
+            a.id id,
+            a.contact_bank_account_oid contactBankAccountOid ,
+            a.user_oid userOid,
+            a.bank_account_no bankAccountNo,
+            a.bank_account_name bankAccountName,
+            a.bank_name bankName,
+            a.branch_name branchName,
+            a.account_location accountLocation,
+            a.is_primary isPrimary,
+            a.enabled,
+            a.bank_code bankCode
+        FROM
+         sys_contact_bank_account a,
+         sys_contact c
+        WHERE
+         a.user_oid = c.user_oid
+         AND
+         a.user_oid = #{userOid}
+         AND
+         a.enabled= 1
+         ORDER BY
+         a.bank_account_no
+    </select>
+
+    <select id="selectUserByKey" resultType="java.util.UUID">
+        SELECT
+        c.user_oid
+        FROM
+        sys_contact c
+
+        WHERE
+        c.tenant_id = #{tenantId}
+
+        <if test="key!=null and key !=''">
+            AND
+            (
+            c.full_name LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+            OR
+            c.employee_id LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+            )
+        </if>
+    </select>
+
+    <select id="selectUserGroupBySetOfBooksIdAndEnableAndName" resultType="java.lang.Long">
+        SELECT
+        id
+        FROM
+        sys_user_group ug
+        WHERE
+        ug.company_oid
+        IN(
+        SELECT
+        company_oid
+        FROM
+        sys_company c
+        WHERE
+        set_of_books_id = #{setOfBooksId}
+        <if test="enable != null">
+            AND
+            c.enabled = #{enable}
+        </if>
+        )
+        <if test="name!=null and name !=''">
+            AND
+            ug.name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+        </if>
+        GROUP BY ug.id
+
+
+
+    </select>
+
+    <select id="selectUserByKeyPage" resultType="java.util.UUID">
+        SELECT
+        c.user_oid
+        FROM
+        sys_contact c
+
+        WHERE
+        c.tenant_id = #{tenantId}
+        <if test="key!=null and key !=''">
+            AND
+            (
+            c.full_name LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+             OR
+            c.employee_id LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+            )
+        </if>
+        <if test="setOfBooksId!=null and setOfBooksId!=''">
+            AND
+            c.user_id IN
+            (
+            SELECT contact.user_id from sys_contact contact WHERE contact.company_id IN (
+            SELECT companyId.id from sys_company companyId WHERE
+            companyId.set_of_books_id = #{setOfBooksId}
+            )
+            )
+        </if>
+        ORDER BY
+        c.employee_id
+    </select>
+
+
+    <select id="selectUserByKeyOrNamePage" resultType="java.util.UUID">
+        SELECT
+        c.user_oid
+        FROM
+        sys_contact c
+
+        WHERE
+        c.tenant_id = #{tenantId}
+        <if test="key!=null and key !=''">
+            AND   c.employee_id LIKE concat('%', concat(#{key ,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="name!=null and name !=''">
+            AND   c.full_name LIKE concat('%', concat(#{name ,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="setOfBooksId!=null and setOfBooksId!=''">
+            AND
+            c.user_id IN
+            (
+            SELECT users.user_id from sys_contact users WHERE users.company_id IN (
+            SELECT companyId.id from sys_company companyId WHERE
+            companyId.set_of_books_id = #{setOfBooksId}
+            )
+            )
+        </if>
+        ORDER BY
+        c.employee_id
+    </select>
+
+    <select id="selectUserGroupBySetOfBooksIdAndEnable" resultType="java.lang.Long">
+        SELECT
+        id
+        FROM
+        sys_user_group ug
+        WHERE
+        ug.company_oid
+        IN(
+        SELECT
+        company_oid
+        FROM
+        sys_company
+        WHERE
+        set_of_books_id = #{setOfBooksId}
+        <if test="enable != null">
+            AND
+            c.enabled = #{enable}
+        </if>
+        )
+        GROUP BY ug.id
+    </select>
+
+
+    <select id="selectUserByKeyAndCompanyIdPage" resultType="java.util.UUID">
+        SELECT
+        c.user_oid
+        FROM
+        sys_contact c
+
+        WHERE
+        c.tenant_id = #{tenantId}
+        <if test="key!=null and key !=''">
+            AND
+            (
+            c.full_name LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+            OR
+            c.employee_id LIKE concat('%', concat(#{key,jdbcType=VARCHAR}, '%'))
+            )
+        </if>
+        <if test="companyId != null">
+            AND
+            c.company_id = #{companyId}
+        </if>
+    </select>
+
+
+    <select id="selectContactBankAccountDTOByUserId"
+            resultType="com.hand.hcf.app.mdata.contact.domain.ContactBankAccount">
+        SELECT
+            a.id id,
+            a.contact_bank_account_oid contactBankAccountOid ,
+            a.user_oid userOid,
+            a.bank_account_no bankAccountNo,
+            a.bank_account_name bankAccountName,
+            a.bank_name bankName,
+            a.branch_name branchName,
+            a.account_location accountLocation,
+            a.primary,
+            a.enabled,
+            a.bank_code bankCode
+        FROM
+         sys_contact_bank_account a,
+         sys_contact c
+        WHERE
+         a.user_oid = c.user_oid
+         AND
+         c.user_id = #{userId}
+         AND
+         a.enabled=TRUE
+         ORDER BY
+         a.bank_account_no
+    </select>
+
+    <select id="getCompanyByCond" resultType="java.lang.Long">
+        SELECT
+        c.id  id
+
+        FROM
+        sys_company c
+        WHERE
+        c.enabled = TRUE
+        <if test="setOfBooksId != null">
+            AND  c.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="companyCode != null and companyCode !=''  ">
+            AND c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !='' ">
+            AND c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != '' ">
+            AND c.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != '' ">
+            AND c.company_code &lt;= #{companyCodeTo}
+        </if>
+        ORDER BY c.company_code
+    </select>
+    <select id="getUserInfoListByIds" resultType="com.hand.hcf.app.mdata.contact.dto.UserInfoDTO">
+           SELECT
+              c.user_id userId,
+              c.full_name userName,
+              c.employee_id userCode,
+              c.title
+            FROM
+              sys_contact c
+            WHERE 1 = 1
+            <if test="userIds != null and userIds.size > 0 ">
+                and c.user_id in
+                <foreach collection="userIds" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+    </select>
+    <select id="selectAccCompanyByInput" resultType="java.lang.Long">
+        SELECT
+        c.id  id
+
+        FROM
+        sys_company c
+        WHERE
+        c.enabled = 1
+        <if test="setOfBooks != null">
+            AND  c.set_of_books_id = #{setOfBooks}
+        </if>
+        <if test="companyIds != null and companyIds.size()>0">
+            AND  c.id IN
+            <foreach collection="companyIds" item="companyId"  open="(" separator="," close=")">
+                #{companyId,jdbcType=BIGINT}
+            </foreach>
+        </if>
+        <if test="companyCode != null and companyCode !=''  ">
+            AND c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null and companyName !='' ">
+            AND c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyCodeFrom != null and companyCodeFrom != '' ">
+            AND c.company_code &gt;= #{companyCodeFrom}
+        </if>
+        <if test="companyCodeTo != null and companyCodeTo != '' ">
+            AND c.company_code &lt;= #{companyCodeTo}
+        </if>
+        ORDER BY c.company_code
+
+    </select>
+
+    <select id="selectDepartmentByEmployeeId" resultType="com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO">
+        select
+        ad.department_code departmentCode,
+        ad.name NAME ,
+        ad.id departmentId,
+        ad.department_oid departmentOid
+        from
+        sys_department_user adu,
+        sys_department ad
+        WHERE
+        adu.user_id = #{empId}
+        AND
+        adu.department_id = ad.id
+        AND
+        ad.status=101
+    </select>
+</mapper>

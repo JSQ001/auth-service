@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+    namespace="com.hand.hcf.app.mdata.currency.persistence.CurrencyStatusMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap"
+               type="com.hand.hcf.app.mdata.currency.domain.CurrencyStatus">
+        <result column="currency_code" property="currencyCode"/>
+        <result column="enable_auto_update" property="enableAutoUpdate"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="tenant_id" property="tenantId"/>
+    </resultMap>
+
+    <select id="selectActiveSetOfBooksIds" resultType="java.lang.Long">
+        SELECT
+        DISTINCT (set_of_books_id)
+        FROM
+        sys_currency_status
+        WHERE
+        enabled = #{enable}
+        AND enable_auto_update = #{enableAutoUpdate}
+    </select>
+</mapper>

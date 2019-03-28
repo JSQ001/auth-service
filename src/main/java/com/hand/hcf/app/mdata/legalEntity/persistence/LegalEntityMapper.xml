@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.legalEntity.persistence.LegalEntityMapper">
+
+    <resultMap id="legalEntityMap"
+               type="com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="set_of_books_id" property="setOfBooksId"/>
+        <result column="legal_entity_oid" property="legalEntityOid"/>
+        <result column="parent_legal_entity_id" property="parentLegalEntityId"/>
+        <result column="entity_name" property="entityName"/>
+        <result column="address" property="address"/>
+        <result column="taxpayer_number" property="taxpayerNumber"/>
+        <result column="account_bank" property="accountBank"/>
+        <result column="telephone" property="telePhone"/>
+        <result column="account_number" property="accountNumber"/>
+        <result column="attachment_id" property="attachmentId"/>
+        <result column="main_language" property="mainLanguage"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+    </resultMap>
+
+    <resultMap id="legalEntityIdAndNameMap"
+               type="com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity">
+        <id column="id" property="id"/>
+        <result column="entity_name" property="entityName"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <select id = "findLegalEntityIdAndNameByTenantId" resultMap="legalEntityIdAndNameMap">
+        SELECT id,entity_name,enabled,deleted FROM sys_legal_entity
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+    </select>
+
+    <select id = "findLegalEntityByTenantId" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE tenant_id = #{tenantId}
+        <if test="isEnabled == true">
+            AND enabled = 1
+        </if>
+        <if test="keyword != '' and keyword != null">
+            AND entity_name LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+        <if test="isDesc == true">
+            ORDER BY enabled DESC
+        </if>
+        ORDER BY created_date
+    </select>
+
+    <select id = "findLegalEntityByLegalEntityOidInOrderByEnableDesc" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE legal_entity_oid IN
+        <foreach item="item" index="index" collection="legalEntityOids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY enabled DESC
+    </select>
+
+    <select id = "findByTenantIdAndLegalEntityOidNotOrderByEnableDesc" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE tenant_id = #{tenantId} AND legal_entity_oid != (#{legalEntityOid})
+        <if test="keyword != null and keyword != ''">
+            AND entity_name LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+        ORDER BY enabled DESC
+    </select>
+
+    <select id = "countByTenantIdAndEnable" resultType="java.lang.Long">
+        SELECT count(1) FROM sys_legal_entity
+        WHERE tenant_id = #{tenantId} AND enabled = #{enable} AND deleted = 0
+    </select>
+
+    <select id = "countSubLegalEntityByLegalEntityId" resultType="java.lang.Long">
+        SELECT count(1) FROM sys_legal_entity
+        WHERE parent_legal_entity_id = #{legalEntityId}
+    </select>
+
+    <select id = "findLegalEntityByAttachmentIdIsNull" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE attachment_id IS NULL
+    </select>
+
+    <select id = "findRootSiblingLegalEntityPathList" resultType="java.lang.String">
+        SELECT path FROM sys_legal_entity
+        WHERE id = #{legalEntityId} AND parent_legal_entity_id IS NULL
+    </select>
+
+    <select id = "findSiblingCompanyPathList" resultType="java.lang.String">
+        SELECT path FROM sys_legal_entity
+        WHERE id != #{legalEntityId} AND parent_legal_entity_id = #{parentLegalEntityId} AND path is not null
+    </select>
+
+    <select id = "findChildrenLegalEntityPath" resultType="java.lang.String">
+        SELECT path FROM sys_legal_entity
+        WHERE parent_legal_entity_id = #{parentLegalEntityId}
+    </select>
+
+    <select id = "getLegalEntityState" resultType="boolean">
+        SELECT enabled FROM sys_legal_entity
+        WHERE id = #{legalEntityId}
+    </select>
+
+    <select id = "findLegalEntityByRoleId" resultMap = "legalEntityMap">
+        SELECT entity.* FROM sys_legal_entity   entity
+        INNER JOIN sys_finance_role_corporation  role
+        ON role.corporation_id = entity.id
+        where role.role_id = #{roleId}
+    </select>
+
+    <select id="findByTenantIdAndNameAndEnabledTrue" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND entity_name LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+        order by created_date
+    </select>
+
+    <select id = "findLegalEntityBySetOfBooksId" resultMap="legalEntityMap">
+        SELECT * FROM sys_legal_entity
+        WHERE set_of_books_id = #{setOfBooksId}
+        <if test="isEnabled != null">
+            AND enabled = #{isEnabled}
+        </if>
+    </select>
+
+    <select id="pageLegalEntityByInfoResultBasic" resultType="com.hand.hcf.app.common.co.BasicCO">
+        SELECT
+        l.id id,
+        l.taxpayer_number code,
+        l.entity_name name
+        FROM
+        sys_legal_entity l
+        WHERE
+        l.tenant_id = #{tenantId}
+        AND
+        l.enabled = 1
+        AND
+        l.deleted = 0
+        <if test="code !=null and code !=''">
+            AND
+            l.taxpayer_number LIKE concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="name !=null and name != ''">
+            AND
+            l.entity_name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY l.taxpayer_number
+    </select>
+</mapper>

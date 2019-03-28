@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.parameter.persistence.ParameterValuesMapper">
+    <select id="listParameterValuesByPVType" resultType="com.hand.hcf.app.common.co.BasicCO">
+        select
+         id,
+         parameter_value_code as code,
+         parameter_value_name as name
+        from
+          sys_parameter_values
+        where
+          parameter_code = #{parameterCode}
+    </select>
+</mapper>

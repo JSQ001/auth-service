@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.location.persistence.LocationDetailMapper">
+    <select id="findByDomesticByVendorTypeAndLocationType" resultMap="ResultMapInfo">
+       select t.*,#{vendorType} as vendorType,#{locationType} as locationType,#{baseCountry} as baseCountry from sys_location_detail t
+       where exists(select 1 from sys_location d where d.code = t.code
+       and d.type = #{locationType} and d.country_code = #{baseCountry})
+    </select>
+
+    <select id="getVendorAlias" resultType="com.hand.hcf.app.mdata.location.domain.VendorAlias">
+        select va.id,va.code,
+        va.vendor_type as vendorType,va.alias,va.language,va.vendor_code as vendorCode,va.vendor_country_code as vendorCountryCode
+        from sys_vendor_alias va where va.code = #{code} and va.vendor_type = #{vendorType}
+    </select>
+
+    <resultMap id="ResultMapInfo" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code,locationType=locationType,baseCountry=baseCountry}"
+                     select="getLocationByDetailCode"/>
+        <collection property="vendorAliasList" column="{code=code,vendorType=vendorType}"
+                    ofType="ArrayList" select="getVendorAlias"/>
+    </resultMap>
+
+
+    <select id="findByStateName" resultMap="DetailMapInfo">
+        select t.*,#{locationType} as locationType,#{baseCountry} as baseCountry from sys_location_detail t
+        where exists(select 1 from sys_location d where d.code = t.code
+        and d.type = #{locationType} and d.country_code = #{baseCountry})
+            <if test="stateNames !=null and stateNames.size>0">
+                <foreach collection="stateNames" open=" and t.state in(" close=")" item="item" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+    </select>
+
+    <resultMap id="DetailMapInfo" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code,locationType=locationType,baseCountry=baseCountry}"
+                     select="getLocationByDetailCode"/>
+    </resultMap>
+
+
+    <select id="findByForeignByVendorType" resultMap="ResultMapInfoNo">
+        select t.*,#{vendorType} as vendorType,#{locationType} as locationType,#{baseCountry} as baseCountry
+        from sys_location_detail t where exists(select 1 from sys_location d where d.code = t.code
+       and d.type = #{locationType} and d.country_code <![CDATA[ <> ]]> #{baseCountry})
+    </select>
+
+    <resultMap id="ResultMapInfoNo" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code,locationType=locationType,baseCountry=baseCountry}"
+                     select="getLocationByDetailCode1"/>
+        <collection property="vendorAliasList" column="{code=code,vendorType=vendorType}"
+                    ofType="ArrayList" select="getVendorAlias"/>
+    </resultMap>
+    <select id="getLocationByDetailCode1" resultType="com.hand.hcf.app.mdata.location.domain.Location">
+        select * from sys_location l where l.code = #{code} and l.type = #{locationType} and l.country_code <![CDATA[ <> ]]> #{baseCountry}
+    </select>
+
+    <select id="findByCode" resultMap="ResultMapInfoOne">
+        select t.* from sys_location_detail t
+       where exists(select 1 from sys_location d where d.code = t.code)
+         and t.code =#{code} and t.language = #{language}
+    </select>
+    <resultMap id="ResultMapInfoOne" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code}"
+                     select="getLocationByCode"/>
+    </resultMap>
+    <select id="getLocationByCode" resultType="com.hand.hcf.app.mdata.location.domain.Location">
+        select * from sys_location l where l.code = #{code}
+    </select>
+
+    <select id="findByLocationTypeAndLanguage" resultMap="ResultMapInfoLanguage">
+        select t.*,
+        #{vendorType} as vendorType,
+        #{locationType} as locationType,
+        #{baseCountry} as baseCountry,
+        #{stateCode} as stateCode,
+        #{cityCode} as cityCode
+        from sys_location_detail t
+        where exists(select 1 from sys_location d where d.code = t.code
+        <if test="stateCode !=null and stateCode != ''">
+            and d.state_code = #{stateCode}
+        </if>
+        <if test="cityCode !=null and cityCode != ''">
+            and d.city_code = #{cityCode}
+        </if>
+        and d.type = #{locationType} and d.country_code = #{baseCountry})
+        and t.language = #{language}
+    </select>
+
+    <select id="getVendorAliasLanguage" resultType="com.hand.hcf.app.mdata.location.domain.VendorAlias">
+        select va.id,va.code,
+        va.vendor_type as vendorType,va.alias,va.language,va.vendor_code as vendorCode,va.vendor_country_code as vendorCountryCode
+        from sys_vendor_alias va where va.code = #{code} and va.vendor_type = #{vendorType} and va.language = #{language}
+    </select>
+
+    <select id="getLocationByDetailCode" resultType="com.hand.hcf.app.mdata.location.domain.Location">
+        select * from sys_location l where l.code = #{code} and l.type = #{locationType} and l.country_code = #{baseCountry}
+    </select>
+
+    <resultMap id="ResultMapInfoLanguage" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code,locationType=locationType,baseCountry=baseCountry}"
+                     select="getLocationByDetailCode"/>
+        <collection property="vendorAliasList" column="{code=code,vendorType=vendorType,language=language}"
+                    ofType="ArrayList" select="getVendorAliasLanguage"/>
+    </resultMap>
+
+
+    <select id="findByStateNameLanguage" resultMap="DetailMapInfo">
+        select t.*,#{locationType} as locationType,#{baseCountry} as baseCountry from sys_location_detail t
+        where exists(select 1 from sys_location d where d.code = t.code
+        and d.type = #{locationType} and d.country_code = #{baseCountry})
+        and t.language = #{language}
+        <if test="stateNames !=null and stateNames.size>0">
+            <foreach collection="stateNames" open=" and t.state in(" close=")" item="item" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <!-- findMunicipalities -->
+    <select id="findMunicipalities" resultMap="ResultMapFindMunicipalities">
+        select t.*,
+        #{vendorType} as vendorType,
+        #{locationType} as locationType
+        from sys_location_detail t
+        where exists(select 1 from sys_location d where d.code = t.code and d.type = #{locationType})
+        and exists(select 1 from sys_vendor_alias a where a.VENDOR_TYPE = #{vendorType} and a.code= t.code)
+        <if test="stateNames !=null and stateNames.size>0">
+            <foreach collection="stateNames" open=" and t.state in(" close=")" item="item" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="findMunicipalitiesLocation" resultType="com.hand.hcf.app.mdata.location.domain.Location">
+        select * from sys_location l where l.code = #{code} and l.type = #{locationType}
+    </select>
+
+    <select id="findMunicipalitiesVendorAlias" resultType="com.hand.hcf.app.mdata.location.domain.VendorAlias">
+        select va.id,va.code,
+        va.vendor_type as vendorType,va.alias,va.language,va.vendor_code as vendorCode,va.vendor_country_code as vendorCountryCode
+        from sys_vendor_alias va where va.code = #{code} and va.vendor_type = #{vendorType}
+    </select>
+
+    <resultMap id="ResultMapFindMunicipalities" type="com.hand.hcf.app.mdata.location.domain.LocationDetail">
+        <id property="id" column="id"/>
+        <association property="location" column="{code=code,locationType=locationType}"
+                     select="findMunicipalitiesLocation"/>
+
+        <collection property="vendorAliasList" column="{code=code,vendorType=vendorType,language=language}"
+                    ofType="ArrayList" select="findMunicipalitiesVendorAlias"/>
+    </resultMap>
+
+
+    <!-- findNameWithoutMunicipalitiesAndVendorType-->
+    <select id="findNameWithoutMunicipalitiesAndVendorType" resultMap="ResultMapFindMunicipalities">
+        select t.*,
+        #{vendorType} as vendorType,
+        #{locationType} as locationType
+        from sys_location_detail t
+        where exists(select 1 from sys_location d where d.code = t.code and d.type = #{locationType})
+        and exists(select 1 from sys_vendor_alias a where a.VENDOR_TYPE = #{vendorType} and a.code= t.code)
+        <if test="stateNames !=null and stateNames.size>0">
+            <foreach collection="stateNames" open=" and t.state not in(" close=")" item="item" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+</mapper>

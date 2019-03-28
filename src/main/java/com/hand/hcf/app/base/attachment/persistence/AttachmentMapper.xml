@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.attachment.persistence.AttachmentMapper">
+
+    <select id="findByAttachmentOid" resultType="com.hand.hcf.app.base.attachment.domain.Attachment">
+        SELECT p.* FROM sys_attachment p
+        WHERE p.attachment_oid = #{attachmentOid}
+    </select>
+
+    <select id="findByAttachmentOidIn" resultType="com.hand.hcf.app.base.attachment.domain.Attachment">
+        SELECT p.* FROM sys_attachment p
+        WHERE 1=1
+        <if test = "attachmentOids != null and attachmentOids.size > 0" >
+          AND p.attachment_oid IN
+          <foreach collection="attachmentOids" item="attachmentOid" open="(" separator="," close=")">
+              #{attachmentOid}
+          </foreach>
+        </if >
+    </select>
+
+</mapper>

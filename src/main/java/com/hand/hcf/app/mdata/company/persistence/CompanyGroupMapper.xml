@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.company.persistence.CompanyGroupMapper">
+
+    <resultMap id="companyGroupResult" type="com.hand.hcf.app.mdata.company.domain.CompanyGroup">
+        <id column="id" property="id" />
+        <result column="company_group_code" property="companyGroupCode" />
+        <result column="company_group_name" property="companyGroupName" />
+        <result column="description" property="description" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <result column="enabled" property="enabled" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <select id="findCompanyGroupByConditions" resultMap="companyGroupResult">
+            SELECT  c.id,
+                     c.company_group_code,
+                     c.company_group_name,
+                     c.description,
+                     c.set_of_books_id,
+                     c.tenant_id,
+                     c.created_date,
+                     c.last_updated_date,
+                     c.created_by,
+                     c.last_updated_by,
+                     c.enabled,
+                     c.deleted
+            FROM     sys_company_group c
+            WHERE    c.deleted = 0 AND c.tenant_id = #{tenantId}
+            <if test="setOfBooksId != null">
+                and c.set_of_books_id = #{setOfBooksId}
+            </if>
+            <if test="companyGroupCode != null and companyGroupCode != ''">
+                and c.company_group_code LIKE concat('%', concat(#{companyGroupCode,jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="companyGroupName != null and companyGroupName != ''">
+                and c.company_group_name LIKE concat('%', concat(#{companyGroupName,jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="enabled != null">
+                and c.enabled = #{enabled}
+            </if>
+            ORDER BY c.enabled DESC,c.company_group_code ASC
+    </select>
+
+    <select id="listCompanyGroup" resultType="com.hand.hcf.app.common.co.CompanyGroupCO">
+        SELECT t.id,
+               t.company_group_code,
+               t.company_group_name,
+               t.description,
+               t.tenant_id,
+               t.set_of_books_id
+        FROM sys_company_group_assign cga,
+             (SELECT cg.id,
+                     cg.company_group_code,
+                     coalesce(cgi.company_group_name, cg.company_group_name) AS company_group_name,
+                     cg.description,
+                     cg.tenant_id,
+                     cg.set_of_books_id
+              FROM sys_company_group cg
+                       LEFT JOIN sys_company_group_i18n cgi
+                                 ON cgi.id = cg.id
+                                     AND lower(cgi.language) = lower(#{language})
+              where cg.enabled = 1 and cg.deleted = 0) t
+        where t.id = cga.company_group_id
+          and cga.company_id = #{companyId}
+          and cga.enabled = 1
+          and cga.deleted = 0
+
+    </select>
+    <select id="getCompanyGroupAndCompanyIdsByCompanyGroupId"
+            resultMap="CompanyGroupCOMap">
+
+        SELECT t.id,
+               t.company_group_code,
+               t.company_group_name,
+               t.description,
+               t.tenant_id,
+               t.set_of_books_id,
+               cga.company_id
+        FROM sys_company_group_assign cga,
+             (SELECT cg.id,
+                     cg.company_group_code,
+                     coalesce(cgi.company_group_name, cg.company_group_name) AS company_group_name,
+                     cg.description,
+                     cg.tenant_id,
+                     cg.set_of_books_id
+              FROM sys_company_group cg
+                       LEFT JOIN sys_company_group_i18n cgi
+                                 ON cgi.id = cg.id
+                                     AND lower(cgi.language) = lower(#{language})
+              where  cg.deleted = 0
+                <if test="enabled != null">
+                    and cg.enabled = #{enabled}
+                </if>
+               ) t
+        where t.id = cga.company_group_id
+          and t..id = #{id}
+          <if test="enabled != null">
+              and cga.enabled = #{enabled}
+          </if>
+          and cga.deleted = 0
+    </select>
+    <select id="listAssignCompanyIds" resultType="java.lang.Long">
+        select cga.company_id from sys_company_group_assign cga
+        where cga.company_group_id = #{id}
+          and cga.deleted = 0
+          <if test="enabled != null">
+              and cga.enabled = #{enabled}
+          </if>
+
+    </select>
+
+    <resultMap id="CompanyGroupCOMap" type="com.hand.hcf.app.common.co.CompanyGroupCO">
+        <id column="id" property="id"/>
+        <result property="setOfBooksId" column="set_of_books_id"/>
+        <result property="companyGroupCode" column="company_group_code"/>
+        <result property="companyGroupName" column="company_group_name"/>
+        <result property="description" column="description"/>
+        <result property="tenantId" column="tenant_id"/>
+        <collection property="companyIds" ofType="java.lang.Long">
+            <id column="company_id"/>
+        </collection>
+    </resultMap>
+
+
+</mapper>

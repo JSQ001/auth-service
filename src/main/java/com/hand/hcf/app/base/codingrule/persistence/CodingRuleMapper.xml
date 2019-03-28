@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.base.codingrule.persistence.CodingRuleMapper">
+
+    <update id="updateDetailSynthesis" parameterType="com.hand.hcf.app.base.codingrule.domain.CodingRule">
+        UPDATE sys_coding_rule
+        SET detail_synthesis = #{codingRule.detailSynthesis}
+        WHERE id = #{codingRule.id}
+    </update>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.base.codingrule.persistence.CodingRuleValueMapper">
+
+    <resultMap id="CodingRuleValueMapper"
+               type="com.hand.hcf.app.base.codingrule.domain.CodingRuleValue">
+        <id column="id" property="id"/>
+        <result column="coding_rule_id" property="codingRuleId"/>
+        <result column="document_type_code" property="documentTypeCode"/>
+        <result column="company_code" property="companyCode"/>
+        <result column="month_current_value" property="monthCurrentValue"/>
+        <result column="year_current_value" property="yearCurrentValue"/>
+        <result column="never_current_value" property="neverCurrentValue"/>
+        <result column="period_name" property="periodName"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+    </resultMap>
+
+    <select id="getBudgetCodingRuleValueByCond" resultMap="CodingRuleValueMapper">
+        select * from sys_coding_rule_value scrv
+        where
+        scrv.document_type_code = #{documentTypeCode}
+        and scrv.coding_rule_id = #{codingRuleId}
+        <choose>
+            <when test="companyCode != null and companyCode != ''">
+                and scrv.company_code = #{companyCode}
+            </when>
+            <otherwise>
+                and scrv.company_code is null
+            </otherwise>
+        </choose>
+        for update
+    </select>
+</mapper>

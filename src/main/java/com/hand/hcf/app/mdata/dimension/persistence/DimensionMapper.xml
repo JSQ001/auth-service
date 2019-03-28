@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.dimension.persistence.DimensionMapper">
+
+    <resultMap id="DimensionResultMap" type="com.hand.hcf.app.mdata.dimension.domain.Dimension">
+
+    </resultMap>
+
+    <select id="listDimensionsByCompanyId" resultType="com.hand.hcf.app.mdata.dimension.domain.Dimension">
+        select d.*
+        from SYS_DIMENSION d
+            join SYS_DIMENSION_ITEM di on d.ID = di.DIMENSION_ID
+            join SYS_DIMENSION_ITEM_ASS_COM diac on di.ID = diac.DIMENSION_ITEM_ID
+        where d.ENABLED = 1
+            and di.ENABLED = 1
+            and d.DELETED = 0
+            and di.DELETED = 0
+            and d.SET_OF_BOOKS_ID = #{setOfBooksId}
+            and diac.COMPANY_ID = #{companyId}
+            <if test="enabled != null">
+                and diac.enabled = #{enabled}
+            </if>
+    </select>
+
+</mapper>

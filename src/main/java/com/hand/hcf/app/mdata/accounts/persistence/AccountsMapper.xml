@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.accounts.persistence.AccountsMapper">
+
+    <select id="findAccountsDTO" resultType="com.hand.hcf.app.mdata.accounts.dto.AccountsDTO">
+        SELECT
+        a.id as id,
+        a.account_set_id as accountSetId,
+        a.account_code as accountCode,
+        a.account_name as accountName,
+        a.account_desc as accountDesc,
+        a.account_type as accountType,
+        a.balance_direction as balanceDirection,
+        a.report_type as reportType,
+        a.summary_flag as summaryFlag,
+        a.enabled as enabled,
+        a.deleted as deleted
+        FROM    sys_accounts a
+        WHERE   a.deleted = FALSE
+        AND     a.account_set_id = #{accountSetId}
+        <if test="accountType != null and accountType != '' ">
+            and a.account_type = #{accountType,jdbcType=VARCHAR}
+        </if>
+        <if test="accountDesc != null and accountDesc != '' ">
+            and (a.account_desc LIKE concat('%', concat(#{accountDesc,jdbcType=VARCHAR}, '%')) or  a.account_code LIKE concat('%', concat(#{accountDesc,jdbcType=VARCHAR}, '%')))
+        </if>
+        ORDER BY enabled desc,a.account_code
+    </select>
+
+    <select id="findAccountsBySetOfBooksId" resultType="com.hand.hcf.app.mdata.accounts.domain.Accounts">
+        SELECT  a.id as id,
+        a.account_set_id as accountSetId,
+        a.account_code as accountCode,
+        a.account_name as accountName,
+        a.account_desc as accountDesc,
+        a.account_type as accountType,
+        a.balance_direction as balanceDirection,
+        a.report_type as reportType,
+        a.summary_flag as summaryFlag,
+        a.enabled as enabled,
+        a.deleted as deleted
+        FROM    sys_accounts a,sys_account_set aas,sys_set_of_books asob
+        WHERE   a.deleted = FALSE
+        AND     aas.deleted = FALSE
+        AND     asob.deleted = FALSE
+        AND     a.summary_flag = FALSE
+        AND     a.account_set_id = aas.id
+        AND     asob.account_set_id = aas.id
+        AND     asob.id = #{setOfBooksId}
+        <if test="accountCode != null and accountCode != '' ">
+            and a.account_code LIKE concat('%', concat(#{accountCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="accountName != null and accountName != '' ">
+            and a.account_name LIKE concat('%', concat(#{accountName,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY a.account_code
+    </select>
+
+
+    <select id="findAccountsCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT (0)
+        FROM    sys_accounts a
+        WHERE   a.deleted = FALSE
+        AND     a.account_set_id = #{accountSetId}
+        AND     a.enabled = TRUE
+        <if test="accountType != null and accountType != '' ">
+            and a.account_type = #{accountType,jdbcType=VARCHAR}
+        </if>
+        <if test="accountDesc != null and accountDesc != '' ">
+            and (a.account_desc LIKE concat('%', concat(#{accountDesc,jdbcType=VARCHAR}, '%')) or  a.account_code LIKE concat('%', concat(#{accountDesc,jdbcType=VARCHAR}, '%')))
+        </if>
+        ORDER BY a.account_code
+    </select>
+    <select id="listBySetOfBooksId" resultType="com.hand.hcf.app.common.co.AccountsCO">
+        SELECT
+            *
+        FROM
+            (
+                SELECT
+                    t.id,
+                    t.account_set_id,
+                    t.account_code,
+                    COALESCE(ti18.account_name,t.account_name) AS account_name,
+                    COALESCE(ti18.account_desc,t.account_desc) AS account_desc,
+                    t.account_type,
+                    t.balance_direction,
+                    t.report_type,
+                    t.summary_flag,
+                    t.tenant_id,
+                    asob.id AS set_of_books_id
+                FROM
+                    sys_accounts t
+                        LEFT JOIN
+                        sys_accounts_i18n ti18
+                        ON
+                                ti18.id = t.id
+                                AND LOWER(ti18.language) = LOWER(#{language})
+                        INNER JOIN
+                        sys_account_set sas
+                        ON
+                            t.account_set_id = sas.id
+                        INNER JOIN
+                        sys_set_of_books asob
+                        ON
+                            asob.account_set_id = sas.id
+                WHERE
+                    t.summary_flag = 0
+                  AND asob.deleted = 0
+                  AND asob.enabled = 1
+                  AND sas.deleted = 0
+                  AND sas.enabled = 1
+                  AND t.deleted = 0
+                  AND t.enabled = 1 ) temp
+             <where>
+                 ${ew.sqlSegment}
+             </where>
+
+    </select>
+
+
+</mapper>

@@ -31,7 +31,7 @@ public class DingTalkServiceImpl {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
 
     public JSONObject authenticate(String code, String corpId, Map<String, String> var3) {
@@ -67,6 +67,6 @@ public class DingTalkServiceImpl {
         if (StringUtils.isEmpty(email)) {
             throw new UserNotActivatedException("email.is.empty");
         }
-        return userService.loadUserByEmail(email);
+        return authUserService.loadUserByEmail(email);
     }
 }

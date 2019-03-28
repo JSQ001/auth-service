@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.department.persistence.DepartmentPositionMapper">
+
+    <resultMap id="DepartmentPositionMapper"
+               type="com.hand.hcf.app.mdata.department.domain.DepartmentPosition">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="position_code" property="positionCode"/>
+        <result column="position_name" property="positionName"/>
+        <result column="enabled" property="enabled"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+    </resultMap>
+
+    <select id="selectDepartmentPositionByUserAndDepartment" resultMap="DepartmentPositionMapper">
+        select p.*
+        from sys_department_position_user u
+        INNER JOIN sys_department_position p ON p.id = u.position_id
+        INNER JOIN sys_contact ac on ac.user_id=u.user_id
+        where u.department_id= #{departmentId}
+        and ac.user_oid=#{userOid}
+        and u.deleted = FALSE
+    </select>
+
+    <select id="getDepartmentPositionList" resultMap="DepartmentPositionMapper">
+        select p.*
+        from sys_department_position p
+        where p.tenant_id=#{tenantId}
+        <if test="enabled">
+            and p.enabled = #{enabled}
+        </if>
+        ORDER BY p.position_code
+    </select>
+</mapper>

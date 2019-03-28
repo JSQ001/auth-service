@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.company.persistence.CompanyGroupAssignMapper">
+
+    <select id="findCompanyGroupByCompanyId" parameterType="Long"
+            resultType="com.hand.hcf.app.mdata.company.domain.CompanyGroup">
+        SELECT  cg.id as id,
+                 cg.company_group_code as companyGroupCode,
+                 cg.company_group_name as companyGroupName,
+                 cg.description as description,
+                 cg.set_of_books_id as setOfBooksId,
+                 cg.tenant_id as tenantId,
+                 cg.deleted as isDeleted,
+                 cg.enabled as isEnabled
+        FROM     sys_company_group cg,sys_company_group_assign cgs
+        WHERE    cgs.company_group_id = cg.id
+        AND      cg.deleted = 0
+        AND      cgs.deleted =
+        AND      cgs.company_id = #{companyId}
+        ORDER BY  cg.company_group_code
+    </select>
+
+
+    <select id="findCompanyByCodeOrName" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        SELECT c.id as id,
+        c.company_code as companyCode,
+        c.name as name,
+        c.company_type_code as companyTypeCode
+        FROM sys_company c
+        WHERE c.enabled = 1
+        <if test="companyCode != null">
+            and c.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="companyName != null">
+            and c.name LIKE concat('%', concat(#{companyName,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY c.company_code ASC
+    </select>
+
+    <select id="findCompaniesByInterval" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+        SELECT  c.id as id,
+                 c.company_code as companyCode,
+                 c.name as name,
+                 c.company_type_code as companyTypeCode
+        FROM     sys_company c
+        WHERE    c.enabled = TRUE
+        AND      c.company_code &gt;= #{companyFrom}
+        AND      c.company_code &lt;= #{companyTo}
+        ORDER BY c.company_code ASC
+    </select>
+</mapper>

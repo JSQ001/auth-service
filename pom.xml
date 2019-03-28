@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-service</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
     <parent>
         <groupId>com.hand.hcf.app</groupId>
         <artifactId>hcf-app-parent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.9.1-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>
@@ -27,15 +27,21 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.hand.hcf.app</groupId>
-            <artifactId>hcf-base-client</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
-        </dependency>
 
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.10</version>
         </dependency>
         <dependency>
             <groupId>net.sf.json-lib</groupId>
@@ -43,18 +49,60 @@
             <version>2.4</version>
             <classifier>jdk15</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.42</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.codingapi.txlcn</groupId>
+            <artifactId>txlcn-tc</artifactId>
+            <version>5.0.2.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.stuxuhai</groupId>
+            <artifactId>jpinyin</artifactId>
+            <version>1.1.8</version>
+        </dependency>
 
     </dependencies>
     <repositories>
-    <repository>
-        <id>hec.snapshots</id>
-        <name>183maven</name>
-        <url>http://116.228.77.183:25296/nexus/content/groups/public</url>
-    </repository>
-    <repository>
-        <id>spring</id>
-        <url>http://repo.spring.io/plugins-release/</url>
-    </repository>
+        <repository>
+            <id>hec.snapshots</id>
+            <name>183maven</name>
+            <url>http://116.228.77.183:25296/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>spring</id>
+            <url>http://repo.spring.io/plugins-release/</url>
+        </repository>
     </repositories>
 
     <build>
@@ -80,13 +128,15 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>${jib-maven-plugin.version}</version>
+                <version>1.0.1</version>
                 <configuration>
                     <from>
                         <image>registry.cn-hangzhou.aliyuncs.com/choerodon-tools/javabase:0.5.0</image>
                     </from>
                     <to>
-                        <image>${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}</image>
+                        <image>
+                            ${registry_url}/${docker.image.prefix}/${project.artifactId}:${project.version}-${ci_pipeline_id}
+                        </image>
                         <auth>
                             <username>${registry_username}</username>
                             <password>${registry_password}</password>

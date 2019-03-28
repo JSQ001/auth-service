@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+
+
+
+    <changeSet id="2019012117500011" author="zhu.zhao">
+        <addColumn tableName="sys_menu">
+            <column name="menu_router" type="varchar(300)" remarks="菜单路由"></column>
+            <column name="menu_full_router" type="varchar(500)" remarks="菜单完整路由"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2019012217060011" author="zhu.zhao">
+        <addColumn tableName="sys_menu">
+            <column name="file_path" type="varchar(500)" remarks="文件路径"></column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="2019012515540011" author="shaofeng.zheng">
+        <addColumn tableName="sys_menu">
+            <column name="menu_parameter" type="varchar(100)" remarks="菜单参数"></column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="201901282231001" author="xue.han">
+        
+        <createTable tableName="sys_page_list" remarks="页面表">
+            <column name="id" type="bigint" remarks="页面ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_sys_page_list"/>
+            </column>
+            <column name="page_name" type="varchar(200)" remarks="页面名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_path" type="varchar(200)" remarks="页面对应本地文件的地址">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_router" type="varchar(200)" remarks="页面路由">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_router" type="varchar(200)" remarks="功能路由">
+                <constraints nullable="true"/>
+            </column>
+            <column name="content_router" type="varchar(200)" remarks="目录路由">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createTable tableName="sys_page_list_i18n" remarks="页面多语言表">
+            <column name="id" type="bigint" defaultValue="0" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_page_list_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_page_list_i18n"/>
+            </column>
+            <column name="page_name" type="varchar(200)" remarks="页面名称">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201901291427001" author="xue.han">
+        <addUniqueConstraint tableName="sys_page_list" columnNames="page_name,page_router" constraintName="sys_page_list_u1"/>
+    </changeSet>
+
+    <changeSet id="201901291548001" author="xue.han">
+        <createTable tableName="sys_function_page_relation" remarks="功能页面关联表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_sys_function_page_rel"/>
+            </column>
+            <column name="function_id" type="bigint" remarks="功能id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_id" type="bigint" remarks="页面id">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="function_id,page_id" tableName="sys_function_page_relation" constraintName="sys_function_page_rel_u1"/>
+    </changeSet>
+
+    <changeSet id="201901292121001" author="xue.han">
+        <createTable tableName="sys_function_list" remarks="功能表">
+            <column name="id" type="bigint" remarks="功能ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_sys_function_list"/>
+            </column>
+            <column name="function_name" type="varchar(200)" remarks="功能名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_router" type="varchar(200)" remarks="功能路由">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_url" type="varchar(200)" remarks="功能地址">
+                <constraints nullable="false"/>
+            </column>
+            <column name="param" type="varchar(200)" remarks="功能参数">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="优先级">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="function_name,function_router" tableName="sys_function_list" constraintName="sys_function_list_u1"/>
+
+        <createTable tableName="sys_function_list_i18n" remarks="功能多语言表">
+            <column name="id" type="bigint" defaultValue="0" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_function_list_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_function_list_i18n"/>
+            </column>
+            <column name="function_name" type="varchar(200)" remarks="功能名称">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201901291721001" author="xue.han">
+
+        <createTable tableName="sys_content_list" remarks="目录表">
+            <column name="id" type="bigint" remarks="目录ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_sys_content_list"/>
+            </column>
+            <column name="content_name" type="varchar(200)" remarks="目录名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_router" type="varchar(200)" remarks="目录路由">
+                <constraints nullable="false"/>
+            </column>
+            <column name="icon" type="varchar(200)" remarks="图标">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint" remarks="上级目录id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="优先级">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="sys_content_list" columnNames="content_name,content_router" constraintName="sys_content_list_u1"/>
+
+        <createTable tableName="sys_content_list_i18n" remarks="目录多语言表">
+            <column name="id" type="bigint" defaultValue="0" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_content_list_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_content_list_i18n"/>
+            </column>
+            <column name="content_name" type="varchar(200)" remarks="目录名称">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201901292208001" author="xue.han">
+        <createTable tableName="sys_content_function_rel" remarks="目录功能关联表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_sys_content_function_rel"/>
+            </column>
+            <column name="content_id" type="bigint" remarks="目录id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_id" type="bigint" remarks="功能id">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标识">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint columnNames="content_id,function_id" tableName="sys_content_function_rel" constraintName="sys_content_function_rel_u1"/>
+    </changeSet>
+
+    <changeSet id="201901310947001" author="bin.xie">
+        <addColumn tableName="sys_user">
+            <column name="created_type" remarks="创建方式" type="int" defaultValue="1001"/>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="201902271530001" author="xue.han">
+        <addColumn tableName="sys_function_list">
+            <column name="page_id" type="bigint" remarks="页面ID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201902271545001" author="xue.han">
+        <addColumn tableName="sys_content_list">
+            <column name="has_son_content" type="boolean" remarks="是否有子目录"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201902281411001" author="xue.han">
+        <createTable tableName="sys_role_function" remarks="角色分配功能表">
+            <column name="id" type="bigint" remarks="角色分配功能表ID">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_sys_role_function"/>
+            </column>
+            <column name="role_id" type="bigint" remarks="角色ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_id" type="bigint" remarks="功能ID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201902281741001" author="xue.han">
+        <addUniqueConstraint tableName="sys_role_function" columnNames="role_id,function_id" constraintName="sys_role_function_u1"/>
+    </changeSet>
+
+    <changeSet id="201903011927001" author="xue.han">
+        <dropColumn tableName="sys_function_list" columnName="function_url"/>
+    </changeSet>
+
+    <changeSet id="201903011928001" author="xue.han">
+        <addColumn tableName="sys_page_list">
+            <column name="page_url" type="varchar(200)" remarks="页面地址">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903051407001" author="xue.han">
+        <dropColumn tableName="sys_content_function_rel" columnName="deleted" />
+    </changeSet>
+    <changeSet id="201903051429001" author="xue.han">
+        <dropColumn tableName="sys_function_page_relation" columnName="deleted" />
+    </changeSet>
+    <changeSet id="201903051433001" author="xue.han">
+        <dropUniqueConstraint tableName="sys_page_list" constraintName="sys_page_list_u1" />
+    </changeSet>
+    
+    <changeSet id="201903112214001" author="xue.han">
+        <addColumn tableName="sys_function_list">
+            <column name="function_icon" type="varchar(200)" remarks="功能图标">
+                <constraints nullable="true"/>
+            </column>
+            <column name="application_id" type="bigint" remarks="应用ID" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

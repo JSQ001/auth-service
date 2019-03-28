@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.location.persistence.LocalizationDTOMapper">
+
+    <select id="getLocalizationCountryByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        WHERE l.type = 'COUNTRY'
+        AND ld.language = #{language}
+        <if test="countryCode != null and countryCode != ''">
+            AND  l.code LIKE concat('%', concat(#{countryCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="countryName != null and countryName != ''">
+            and ld.country LIKE concat('%', concat(#{countryName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="includeList != null and includeList != '' " >
+            and l.code IN ( #{includeList} )
+        </if>
+        ORDER BY country
+    </select>
+
+    <select id="getLocalizationStateByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        '' as state
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        WHERE l.type = 'COUNTRY'
+        AND l.country_code = SUBSTR( #{code}, 1, 3)
+        AND ld.language = #{language}
+        UNION
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        va.alias as state
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+        AND l.type IN ('STATE', 'CITY/STATE')
+        AND va.vendor_type = #{vendorType}
+        AND ld.language = #{language}
+        AND va.language = #{language}
+        <if test="includeList != null and includeList != '' " >
+            and l.code IN (#{includeList})
+        </if>
+    </select>
+
+    <select id="getLocalizationCityByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        va.alias as state,
+        '' as city
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE
+        l.country_code = SUBSTR( #{code}, 1, 3)
+        AND SUBSTR(l.code, 4, 3) = SUBSTR( #{code}, 4, 3)
+        AND l.type IN ('STATE', 'CITY/STATE')
+        AND va.vendor_type = #{vendorType}
+        AND ld.language = #{language}
+        AND va.language = #{language}
+        UNION
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        ld.state as state,
+        va.alias as city
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+        AND SUBSTR(l.code, 4, 3) = SUBSTR( #{code}, 4, 3)
+        AND l.type = 'CITY'
+        AND va.vendor_type = #{vendorType}
+        AND ld.language = #{language}
+        AND va.language = #{language}
+        <if test="includeList != null and includeList != '' " >
+            and l.code IN (#{includeList})
+        </if>
+    </select>
+
+    <select id="getLocalizationDistrictByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        ld.state as state,
+        va.alias as city,
+        '' as district
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+        AND SUBSTR(l.code, 4, 3) = SUBSTR( #{code}, 4, 3)
+        AND SUBSTR(l.code, 7, 3) = SUBSTR( #{code}, 7, 3)
+        AND l.type = 'CITY'
+        AND va.vendor_type = #{vendorType}
+        AND ld.language = #{language}
+        AND va.language = #{language}
+        UNION
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country,
+        ld.state as state,
+        ld.city as city,
+        va.alias as district
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+        AND SUBSTR(l.`code`, 4, 3) = SUBSTR( #{code}, 4, 3)
+        AND SUBSTR(l.`code`, 7, 3) = SUBSTR( #{code}, 7, 3)
+        AND va.vendor_type = #{vendorType}
+        AND l.type = 'REGION'
+        AND ld.language = #{language}
+        AND va.language = #{language}
+        <if test="includeList != null and includeList != '' " >
+            and l.code IN (#{includeList})
+        </if>
+    </select>
+    <select id="getLocalizationCityByCountry" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT l.code,l.type,ld.country,ld.state,va.alias city
+                     FROM sys_location l
+                     LEFT JOIN sys_location_detail ld ON l.code = ld.code
+                    LEFT JOIN sys_vendor_alias va ON l.code = va.code
+                     WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+                     AND l.type = 'CITY'
+                     AND va.vendor_type = #{vendorType}
+                     AND ld.language = #{language}
+                     AND va.language = #{language}
+    </select>
+    <select id="selectLocalizationDistrictByCountry" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT l.code,l.type,ld.country,ld.state,ld.city,va.alias district
+                     FROM sys_location l
+                     LEFT JOIN sys_location_detail ld ON l.code = ld.code
+                     LEFT JOIN sys_vendor_alias va ON l.code = va.code
+                     WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+                     AND va.vendor_type = #{vendorType}
+                     AND l.type = 'REGION'
+                     AND ld.language = #{language}
+                     AND va.language = #{language}
+    </select>
+    <select id="getOneLocalizationCountryByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.code as code,
+        l.type as type,
+        ld.country as country
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        WHERE l.type = 'COUNTRY'
+        AND ld.language = #{language}
+        AND l.code LIKE concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+    </select>
+</mapper>

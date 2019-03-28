@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.userRole.persistence.FunctionPageRelationMapper">
+
+    <select id="filterFunctionPageRelationByCond" resultType="com.hand.hcf.app.base.userRole.domain.PageList">
+        SELECT * FROM sys_page_list spl WHERE spl.id NOT IN (
+          SELECT sfpr.page_id FROM sys_function_page_relation sfpr
+            GROUP BY sfpr.page_id
+        )
+        AND spl.deleted = false
+        <if test="pageName !=null and pageName != ''">
+            AND spl.page_name LIKE concat('%', concat(#{pageName,jdbcType=VARCHAR}, '%'))
+        </if>
+        ORDER BY spl.last_updated_date DESC
+    </select>
+
+</mapper>

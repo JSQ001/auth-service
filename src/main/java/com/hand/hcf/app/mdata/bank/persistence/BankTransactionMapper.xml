@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.bank.persistence.BankTransactionMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap"
+               type="com.hand.hcf.app.mdata.bank.domain.BankTransaction">
+        <result column="id" property="id"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_modified_date" property="lastModifiedDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_modified_by" property="lastModifiedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="tenant_id" property="tenantID"/>
+        <result column="used" property="used"/>
+        <result column="card_type_code" property="cardTypeCode"/>
+        <result column="cor_num" property="corNum"/>
+        <result column="act_num" property="actNum"/>
+        <result column="bil_mon" property="bilMon"/>
+        <result column="bil_date" property="bilDate"/>
+        <result column="crd_num" property="crdNum"/>
+        <result column="act_chi_nam" property="actChiNam"/>
+        <result column="act_eng_nam" property="actEngNam"/>
+        <result column="emp_num" property="empNum"/>
+        <result column="trs_date" property="trsDate"/>
+        <result column="trx_tim" property="trxTim"/>
+        <result column="ori_cur_amt" property="oriCurAmt"/>
+        <result column="ori_cur_cod" property="oriCurCod"/>
+        <result column="pos_date" property="posDate"/>
+        <result column="pos_cur_amt" property="posCurAmt"/>
+        <result column="pos_cur_cod" property="posCurCod"/>
+        <result column="acp_cty_cod" property="acpCtyCod"/>
+        <result column="acp_type" property="acpType"/>
+        <result column="acp_id" property="acpId"/>
+        <result column="acp_name" property="acpName"/>
+        <result column="apr_cod" property="aprCod"/>
+        <result column="trx_ref" property="trxRef"/>
+        <result column="trs_cod" property="trsCod"/>
+        <result column="trs_vch_nbr" property="trsVchNbr"/>
+        <result column="seq_num" property="seqNum"/>
+        <result column="over_time" property="overTime"/>
+        <result column="remark" property="remark"/>
+        <result column="approved_dead_line_date" property="approvedDeadLineDate"/>
+        <!-- <association property="chnCardType" javaType="java.lang.String"
+                      select="com.handchina.yunmart.artemis.module.bankcard.bankcardtype.mapper.BankCardTypeMapper.selectDescriptionByCardTypeCode"
+                      column="card_type_code"/>-->
+    </resultMap>
+
+
+    <resultMap id="BanTranPoolDTOMap"
+               type="com.hand.hcf.app.mdata.bank.dto.BanTranPoolDTO">
+        <result column="id" property="id"/>
+        <result column="bil_mon" property="bilMon"/>
+        <result column="bil_date" property="bilDate"/>
+        <result column="crd_num" property="crdNum"/>
+        <result column="trs_date" property="trsDate"/>
+        <result column="trx_tim" property="trxTim"/>
+        <result column="ori_cur_amt" property="oriCurAmt"/>
+        <result column="ori_cur_cod" property="oriCurCod"/>
+        <result column="pos_date" property="posDate"/>
+        <result column="pos_cur_amt" property="posCurAmt"/>
+        <result column="pos_cur_cod" property="posCurCod"/>
+        <result column="acp_name" property="acpName"/>
+        <result column="trs_cod" property="trsCod"/>
+        <result column="over_time" property="overTime"/>
+        <result column="remark" property="remark"/>
+        <result column="approved_dead_line_date" property="approvedDeadLineDate"/>
+        <result column="bank_name" property="bankName"/>
+
+    </resultMap>
+
+    <select id="selectBanTranPoolDTOPageable" resultMap="BanTranPoolDTOMap">
+        SELECT
+        a.id,
+        a.bil_mon,
+        a.bil_date,
+        a.crd_num,
+        a.trs_date,
+        a.trx_tim,
+        a.ori_cur_amt,
+        a.ori_cur_cod,
+        a.pos_date,
+        a.pos_cur_amt,
+        a.pos_cur_cod,
+        a.acp_name,
+        a.trs_cod,
+        a.over_time,
+        a.approved_dead_line_date,
+        a.remark,
+        b.bank_name
+        FROM
+        sys_bank_transaction a
+        LEFT JOIN
+        sys_bank_card_type b
+        ON a.card_type_code = b.card_type_code
+        WHERE
+        a.card_type_code = #{cardTypeCode}
+        AND a.owner_oid = #{userOID}
+        AND a.used = #{used}
+        AND a.deleted = FALSE
+        <if test="currMaxID != null and currMaxID != ''">
+            AND a.id > #{currMaxID}
+        </if>
+        <if test="trsDate != null and trsDate != ''">
+            AND a.trs_date >= #{trsDate}
+        </if>
+        <!--<if test=" trxTime != null and trxTime != ''">
+            AND a.trx_tim >=  #{trxTime}
+        </if>-->
+        ORDER BY
+        trs_date DESC , trx_tim DESC ,id DESC
+    </select>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.announcement.persistence.CarouselDeployMapper">
+    <select id="selectCompanyCarousels" resultType="com.hand.hcf.app.mdata.announcement.domain.Carousel">
+        SELECT ca.* from sys_carousel ca LEFT JOIN art_carousel_deploy cd on ca.id = cd.carousel_id
+        LEFT JOIN sys_company c ON c.id = cd.company_id where c.company_oid = #{companyOid} and cd.deploy_flag = false
+        <if test="enabled != null">
+            AND cd.enabled = #{enabled}
+        </if>
+        UNION
+        SELECT * from sys_carousel where company_oid = #{companyOid}
+        <if test="enabled != null">
+            AND enabled = #{enabled}
+        </if>
+    </select>
+
+</mapper>

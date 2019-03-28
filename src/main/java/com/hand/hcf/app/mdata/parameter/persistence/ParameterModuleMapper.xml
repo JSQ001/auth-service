@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.parameter.persistence.ParameterModuleMapper">
+
+    <select id="listModuleByTenantId" resultType="com.hand.hcf.app.mdata.parameter.dto.ParameterModuleDTO">
+        select spm.module_code,spm.module_name
+          from
+            sys_parameter_module spm,
+            sys_para_module_status spms
+          where spm.module_code = spms.module_code
+            and spms.tenant_id = #{tenantId}
+            and spms.enabled = true
+    </select>
+
+</mapper>

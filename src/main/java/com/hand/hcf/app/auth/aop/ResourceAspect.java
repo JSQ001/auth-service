@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class ResourceAspect {
     private static Logger log = LoggerFactory.getLogger(ResourceAspect.class);
 
-    @Around("within(com.hand.hcf.app.base.web..*)")
+    @Around("within(com.hand.hcf.app.base..*.web..*)")
     protected Object aroudAdivce(ProceedingJoinPoint jp) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         RequestContext.clear();

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.department.persistence.DepartmentPositionUserMapper">
+
+    <resultMap id="DepartmentPositionUserMapper"
+               type="com.hand.hcf.app.mdata.department.domain.DepartmentPositionUser">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="position_id" property="positionId"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="deleted" property="deleted"/>
+        <result column="enabled" property="enabled"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>
+
+    <resultMap id="DepartmentPositionUserDTOMapper" type="com.hand.hcf.app.mdata.department.dto.DepartmentPositionUserDTO">
+        <id column="id" property="id"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="position_id" property="positionId"/>
+        <result column="path" property="path"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="deleted" property="deleted"/>
+        <result column="enabled" property="enabled"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>
+
+    <select id="selectUser" resultType="Long">
+        SELECT u.user_id
+        FROM sys_department_position_user u
+        INNER JOIN sys_department_position p ON p.id = u.position_id
+        INNER JOIN sys_contact uu on uu.user_id = u.user_id
+        WHERE u.tenant_id = #{tenantId}
+         AND u.department_id= #{departmentId}
+         AND p.position_code= #{positionCode}
+        AND p.enabled = TRUE
+        AND p.deleted = FALSE
+        AND u.enabled = TRUE
+        AND u.deleted = FALSE
+        AND uu.status=1001
+    </select>
+
+    <select id="selectUserByDepartmentOidAndPositionCode" resultType="Long">
+        SELECT u.user_id
+        FROM sys_department_position_user u
+        INNER JOIN sys_department_position p ON p.id = u.position_id
+        INNER JOIN sys_department d on d.id = u.department_id
+        INNER JOIN sys_contact uu on uu.user_id = u.user_id
+        WHERE d.department_oid= #{departmentOid}
+        AND p.position_code= #{positionCode}
+        AND p.enabled = TRUE
+        AND p.deleted = FALSE
+        AND u.enabled = TRUE
+        AND u.deleted = FALSE
+        AND uu.status=1001
+    </select>
+
+    <select id="selectByTenantIdAndDepartmentStatus" resultMap="DepartmentPositionUserDTOMapper">
+        select
+            dpu.id,dpu.tenant_id,d.path,d.id as department_id,dpu.position_id,dpu.user_id,dpu.enabled,dpu.deleted,
+            dpu.last_updated_date,dpu.last_updated_by,dpu.created_date,dpu.created_by
+        from sys_department as d
+        inner join sys_department_position_user as dpu ON dpu.department_id = d.id
+        inner join sys_department_position as p ON p.id = dpu.position_id
+        where d.tenant_id = #{tenantId} and d.status = #{departmentStatus} and p.enabled = 1 and p.deleted = 0
+    </select>
+</mapper>

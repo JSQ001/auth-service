@@ -4,4 +4,17 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="classpath:db/liquibase/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
+
+    <!-- 初始化表结构 这个不允许直接改 -->
+    <include file="classpath:db/liquibase/base/init/initDB.xml" relativeToChangelogFile="false"/>
+    <!-- 初始化系统数据  这个不允许直接改-->
+    <include file="classpath:db/liquibase/base/init/load_system_data.xml" relativeToChangelogFile="false"/>
+    <!-- 0.8.5  修改全部放到后面的版本分支上-->
+    <include file="classpath:db/liquibase/base/v0.8.5/release20190110.xml" relativeToChangelogFile="false"/>
+    <!-- 1.0.0  修改全部放到后面的版本分支上-->
+    <include file="classpath:db/liquibase/base/v1.0.0/release20190401.xml" relativeToChangelogFile="false"/>
+
+    <include file="classpath:db/liquibase/mdata/version1.0.0/init.xml" relativeToChangelogFile="false"/>
+    <include file="classpath:db/liquibase/mdata/version1.0.0/release20190114.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>

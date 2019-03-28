@@ -37,7 +37,7 @@ public class WxService {
 
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    private UserService userService;
+    private AuthUserService authUserService;
 
 
     public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
@@ -131,6 +131,6 @@ public class WxService {
             }
         }
 
-       return userService.loadUserByUserOid(userOid);
+       return authUserService.loadUserByUserOid(userOid);
     }
 }

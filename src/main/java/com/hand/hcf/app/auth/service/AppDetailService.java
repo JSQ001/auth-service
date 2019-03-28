@@ -18,7 +18,7 @@ public class AppDetailService implements UserDetailsService {
 
     private final Logger log = LoggerFactory.getLogger(AppDetailService.class);
     @Autowired
-    private UserService  userService;
+    private AuthUserService authUserService;
 
     @Transactional
     @Override
@@ -28,6 +28,6 @@ public class AppDetailService implements UserDetailsService {
             throw new UserNotActivatedException("userOID.is.empty");
         }
 
-        return  userService.loadUserByUserOid(UUID.fromString(userOid));
+        return  authUserService.loadUserByUserOid(UUID.fromString(userOid));
     }
 }

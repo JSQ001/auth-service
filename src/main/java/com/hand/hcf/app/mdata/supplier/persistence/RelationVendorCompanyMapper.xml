@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.supplier.persistence.RelationVendorCompanyMapper">
+
+    <resultMap id="RelationVendorCompanyMap" type="com.hand.hcf.app.mdata.supplier.domain.RelationVendorCompany">
+        <id column="id" property="id"/>
+        <result column="vendor_info_id" property="vendorInfoId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" javaType="java.time.ZonedDateTime"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
+                javaType="java.time.ZonedDateTime"/>
+    </resultMap>
+
+    <select id="selectRelationVendorCompanysByVendorInfoIdAndCompanyId" resultMap="RelationVendorCompanyMap">
+        SELECT arvc.* FROM ven_relation_vendor_company arvc
+        WHERE arvc.vendor_info_id = #{vendorInfoId} AND arvc.company_id = #{companyId}
+        ORDER BY arvc.last_updated_date DESC
+    </select>
+
+    <select id="selectRelationVendorCompanyByPage" resultMap="RelationVendorCompanyMap">
+        SELECT arvc.* FROM ven_relation_vendor_company arvc
+        WHERE arvc.vendor_info_id = #{infoId}
+        ORDER BY arvc.last_updated_date DESC
+    </select>
+
+    <select id="selectRelationVendorCompanysByVendorInfoId" resultMap="RelationVendorCompanyMap">
+        SELECT arvc.* FROM ven_relation_vendor_company arvc
+        WHERE arvc.vendor_info_id = #{infoId}
+        ORDER BY arvc.last_updated_date DESC
+    </select>
+
+
+</mapper>
