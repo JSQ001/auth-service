@@ -1,4 +1,4 @@
-package com.hand.hcf.app.common.dto;
+package com.hand.hcf.app.common.co;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

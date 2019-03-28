@@ -1,9 +1,9 @@
 package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.dto.RelationVendorCompanyCO;
-import com.hand.hcf.app.common.dto.VendorBankAccountCO;
-import com.hand.hcf.app.common.dto.VendorInfoCO;
+import com.hand.hcf.app.common.co.RelationVendorCompanyCO;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.service.RelationVendorCompanyService;

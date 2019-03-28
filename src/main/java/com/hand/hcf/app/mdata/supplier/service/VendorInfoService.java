@@ -2,8 +2,8 @@ package com.hand.hcf.app.mdata.supplier.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.OrderNumberCO;
-import com.hand.hcf.app.common.dto.VendorBankAccountCO;
-import com.hand.hcf.app.common.dto.VendorInfoCO;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.common.enums.SourceEnum;
 import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.ReceivablesDTO;

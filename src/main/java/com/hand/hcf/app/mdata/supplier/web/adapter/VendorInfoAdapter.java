@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.supplier.web.adapter;
 
-import com.hand.hcf.app.common.dto.VendorInfoCO;
+import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
