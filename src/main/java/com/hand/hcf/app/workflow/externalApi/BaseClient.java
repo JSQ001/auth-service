@@ -58,8 +58,8 @@ public class BaseClient {
 
 
     public List<UserApprovalDTO> listUserByUserGroupOid(UUID userGroupOid) {
-        Page page = new Page(0, 100000);
-        return ContactClient.pageByUserGroupOid(userGroupOid, page).getRecords().stream()
+        //Page page = new Page(0, 100000); jiu.zhao 三方接口修改 20190327
+        return ContactClient.pageByUserGroupOid(userGroupOid, 0, 100000).getRecords().stream()
                 .map(u -> userCOToUserApprovalDTO(u)
                 ).collect(Collectors.toList());
     }

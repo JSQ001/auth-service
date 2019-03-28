@@ -9,6 +9,8 @@ import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.app.workflow.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.workflow.domain.WorkFlowDocumentRef;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.workflow.service.ApprovalFormService;
 import com.hand.hcf.app.workflow.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.workflow.service.WorkFlowApprovalService;
