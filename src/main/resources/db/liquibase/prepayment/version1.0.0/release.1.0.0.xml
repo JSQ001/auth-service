@@ -621,5 +621,4 @@
         <renameColumn tableName="csh_sob_pay_req_type" oldColumnName="is_deleted" newColumnName="deleted" columnDataType="boolean"/>
     </changeSet>
 
-
 </databaseChangeLog>
