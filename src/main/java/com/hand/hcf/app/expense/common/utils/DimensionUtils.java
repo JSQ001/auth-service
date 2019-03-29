@@ -1,9 +1,9 @@
 package com.hand.hcf.app.expense.common.utils;
 
 
+import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
-import com.hand.hcf.app.mdata.client.dimension.DimensionItemCO;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.util.ReflectUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;

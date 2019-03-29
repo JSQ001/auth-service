@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.common.externalApi;
 
-import com.hand.hcf.app.apply.prepayment.PrepaymentClient;
-import com.hand.hcf.app.apply.prepayment.dto.CashPayRequisitionTypeCO;
-import com.hand.hcf.app.apply.prepayment.dto.CashPayRequisitionTypeSummaryCO;
+import com.hand.hcf.app.common.co.CashPayRequisitionTypeCO;
+import com.hand.hcf.app.common.co.CashPayRequisitionTypeSummaryCO;
+import com.hand.hcf.app.prepayment.implement.web.ImplementController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Service
 public class PrepaymentService {
     @Autowired
-    PrepaymentClient prepaymentClient;
+    ImplementController prepaymentClient;
 
     /**
      * 根据ID查询预付款单类型

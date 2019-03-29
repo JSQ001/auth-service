@@ -2,12 +2,11 @@ package com.hand.hcf.app.expense.adjust.web;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.ContactCO;
+import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustHeaderService;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustHeaderWebDTO;
-import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
-import com.hand.hcf.app.mdata.client.contact.ContactCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.WorkFlowDocumentRefCO;
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.handler.ExcelExportHandler;
 import com.hand.hcf.core.service.ExcelExportService;

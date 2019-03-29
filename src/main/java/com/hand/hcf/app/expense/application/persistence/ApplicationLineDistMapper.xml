@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.application.persistence.ApplicationLineDistMapper">
+
+
+    <select id="listLinesByHeaderId"
+            resultType="com.hand.hcf.app.expense.application.domain.ApplicationLineDist">
+        select * from exp_application_line t where t.header_id = #{id}
+    </select>
+
+    <select id="selectByApplicationHeaderId" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationLineAbbreviateDTO" parameterType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderAbbreviateDTO">
+        SELECT
+        m.id,
+        m.expense_type_id applicationTypeId,
+        m.currency_code currencyCode,
+        m.exchange_rate exchangeRate,
+        m.amount amount,
+        m.functional_amount functionalAmount,
+        m.tenant_id tenantId,
+        m.set_of_books_id setOfBooksId,
+        m.requisition_date expenseDate,
+        m.department_id departmentId,
+        m.company_id companyId,
+        m.responsibility_center_id responsibilityCenterId,
+        m.dimension1_id dimension1Id,
+        m.dimension2_id dimension2Id,
+        m.dimension3_id dimension3Id,
+        m.dimension4_id dimension4Id,
+        m.dimension5_id dimension5Id,
+        m.dimension6_id dimension6Id,
+        m.dimension7_id dimension7Id,
+        m.dimension8_id dimension8Id,
+        m.dimension9_id dimension9Id,
+        m.dimension10_id dimension10Id,
+        m.dimension11_id dimension11Id,
+        m.dimension12_id dimension12Id,
+        m.dimension13_id dimension13Id,
+        m.dimension14_id dimension14Id,
+        m.dimension15_id dimension15Id,
+        m.dimension16_id dimension16Id,
+        m.dimension17_id dimension17Id,
+        m.dimension18_id dimension18Id,
+        m.dimension19_id dimension19Id,
+        m.dimension20_id dimension20Id,
+        ,(SELECT
+        case when sum(err.amount) is not null then sum(err.amount) else 0 end
+        FROM
+        exp_requisition_release err
+        WHERE
+        err.source_doc_category = #{sourceDocumentCategory}
+        AND err.source_doc_dist_id = m.id) usedAmount
+        FROM
+        exp_application_line_dist m
+        WHERE
+        m.header_id = #{id}
+        AND m.currency_code = #{currencyCode}
+        and m.expense_type_id = #{expenseTypeId}
+        <!-- 分摊行金额 > 已报销金额 -->
+        AND m.amount > (
+        (SELECT
+        case when sum(err.amount) is not null then sum(err.amount) else 0 end
+        FROM
+        exp_requisition_release err
+        WHERE
+        err.source_doc_category = #{sourceDocumentCategory}
+        AND err.source_doc_dist_id = m.id)
+        )
+    </select>
+</mapper>

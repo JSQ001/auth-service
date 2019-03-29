@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.invoice.persistence.InvoiceLineExpenceMapper">
+    <select id="getInvoiceLineExpenceById" resultType="com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence">
+         select *
+           FROM invoice_line_expence ile
+          inner join invoice_line_dist ild
+             ON ild.id = ile.invoice_dist_id
+          inner join invoice_line il
+             on il.id = ild.invoice_line_id
+          where il.id = #{invoiceLineId}
+            and ile.expense_book_id = #{expenseBookId}
+
+    </select>
+</mapper>

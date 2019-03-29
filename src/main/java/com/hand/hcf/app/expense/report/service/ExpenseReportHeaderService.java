@@ -4,15 +4,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
-import com.hand.hcf.app.apply.accounting.AccountingClient;
-import com.hand.hcf.app.apply.accounting.dto.expense.*;
-import com.hand.hcf.app.apply.budget.dto.BudgetCheckMessageCO;
-import com.hand.hcf.app.apply.budget.dto.BudgetReportRequisitionReleaseCO;
-import com.hand.hcf.app.apply.budget.dto.BudgetReserveCO;
-import com.hand.hcf.app.apply.budget.dto.BudgetReverseRollbackCO;
-import com.hand.hcf.app.apply.contract.dto.ContractHeaderCO;
-import com.hand.hcf.app.apply.payment.dto.CashTransactionDataCreateCO;
-import com.hand.hcf.app.apply.workbench.BusinessDataCO;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.expense.application.domain.ExpenseRequisitionRelease;
 import com.hand.hcf.app.expense.application.service.ExpenseRequisitionReleaseService;
 import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
@@ -55,6 +48,9 @@ import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalFormCO;
 import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.mdata.client.workflow.dto.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.mdata.client.workflow.enums.DocumentOperationEnum;
+import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.redisLock.annotations.LockedObject;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
@@ -128,7 +124,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     private PaymentService paymentService;
 
     @Autowired
-    private WorkflowClient workflowClient;
+    private WorkflowControllerImpl workflowClient;
 
     @Value("${spring.application.name:}")
     private String applicationName;
@@ -148,8 +144,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     @Autowired
     private MapperFacade mapperFacade;
 
-    @Autowired
-    private AccountingClient accountingClient;
+    //jiu.zhao 核算
+    /*@Autowired
+    private AccountingClient accountingClient;*/
 
     /**
      * 保存费用类型
@@ -328,12 +325,13 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             expenseReportHeaderDTO.setCreatedName(userById.getFullName());
         }
         // 合同信息
-        if(expenseReportHeaderDTO.getContractHeaderId() != null){
+        //jiu.zhao 合同
+        /*if(expenseReportHeaderDTO.getContractHeaderId() != null){
             List<ContractHeaderCO> contractHeaderCOS = contractService.listContractHeadersByIds(Arrays.asList(expenseReportHeaderDTO.getContractHeaderId()));
             if(CollectionUtils.isNotEmpty(contractHeaderCOS)){
                 expenseReportHeaderDTO.setContractNumber(contractHeaderCOS.get(0).getContractNumber());
-            }
-        }
+
+        }*/
         // 收款方信息
         if(expenseReportHeaderDTO.getPayeeCategory() != null ) {
             if (expenseReportHeaderDTO.getPayeeCategory().equals("EMPLOYEE")) {

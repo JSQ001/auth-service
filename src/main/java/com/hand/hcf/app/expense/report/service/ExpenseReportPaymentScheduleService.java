@@ -8,6 +8,8 @@ import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.apply.contract.dto.ContractHeaderLineCO;
 import com.hand.hcf.app.apply.payment.dto.*;
 import com.hand.hcf.app.client.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.ContractService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
@@ -71,7 +73,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
     @Transactional(rollbackFor = Exception.class)
     @LcnTransaction
     public boolean deleteExpenseReportPaymentScheduleByHeaderId(Long headerId){
-        paymentService.deleteWriteOffForDocumentMessage(DocumentTypeEnum.PUBLIC_REPORT.name(),headerId,null);
+        //jiu.zhao 支付
+        //paymentService.deleteWriteOffForDocumentMessage(DocumentTypeEnum.PUBLIC_REPORT.name(),headerId,null);
         return delete(new EntityWrapper<ExpenseReportPaymentSchedule>().eq("exp_report_header_id",headerId));
     }
 
@@ -92,7 +95,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                 || expenseReportHeader.getStatus().equals(DocumentOperationEnum.CANCEL.getId()))){
             throw new BizException(RespCode.EXPENSE_REPORT_CANNOT_DELETED,new String[]{expenseReportHeader.getRequisitionNumber()});
         }
-        paymentService.deleteWriteOffForDocumentMessage(DocumentTypeEnum.PUBLIC_REPORT.name(),expenseReportPaymentSchedule.getExpReportHeaderId(),id);
+        //jiu.zhao 支付
+        //paymentService.deleteWriteOffForDocumentMessage(DocumentTypeEnum.PUBLIC_REPORT.name(),expenseReportPaymentSchedule.getExpReportHeaderId(),id);
         return deleteById(id);
     }
 
@@ -255,10 +259,11 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
             throw new BizException(RespCode.EXPENSE_REPORT_PAYMENT_SCHEDULE_IS_NULL);
         }
         ExpenseReportHeader expenseReportHeader = getExpenseReportHeaderById(expensePaymentSchedule.getExpReportHeaderId());
-        Map<Long, BigDecimal> writeOffInfo = paymentService.listDocumentWriteOffAmount(DocumentTypeEnum.PUBLIC_REPORT.name(), expensePaymentSchedule.getExpReportHeaderId(), null);
+        //jiu.zhao 支付
+        //Map<Long, BigDecimal> writeOffInfo = paymentService.listDocumentWriteOffAmount(DocumentTypeEnum.PUBLIC_REPORT.name(), expensePaymentSchedule.getExpReportHeaderId(), null);
         ExpenseReportPaymentScheduleDTO expensePaymentScheduleDTO = toResource(expenseReportHeader,expensePaymentSchedule);
-        BigDecimal writeOffAmount = writeOffInfo.get(expensePaymentScheduleDTO.getId());
-        expensePaymentScheduleDTO.setWriteOffAmount(writeOffAmount == null ? BigDecimal.ZERO : writeOffAmount);
+        //BigDecimal writeOffAmount = writeOffInfo.get(expensePaymentScheduleDTO.getId());
+        //expensePaymentScheduleDTO.setWriteOffAmount(writeOffAmount == null ? BigDecimal.ZERO : writeOffAmount);
         return expensePaymentScheduleDTO;
     }
 
@@ -346,10 +351,11 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         paymentScheduleDTO.setPayeeCode(payCode);
         paymentScheduleDTO.setPayeeName(payeeName);
         //合同编号
-        if(expensePaymentSchedule.getConPaymentScheduleLineId() != null){
+        //jiu.zhao 合同
+        /*if(expensePaymentSchedule.getConPaymentScheduleLineId() != null){
             ContractHeaderLineCO contractLine = contractService.getContractLine(expenseReportHeader.getContractHeaderId(), expensePaymentSchedule.getConPaymentScheduleLineId());
             paymentScheduleDTO.setContractHeaderLineMessage(contractLine);
-        }
+        }*/
         paymentScheduleDTO.setPaymentMethodName(paymentMethodSysCode == null ? null : paymentMethodSysCode.getValue());
         paymentScheduleDTO.setPayeeCategoryName(payeeSysCode == null ? null : payeeSysCode.getValue());
         return paymentScheduleDTO;

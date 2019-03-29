@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.hand.hcf.app.client.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.common.enums.FormTypeEnum;
 import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
@@ -20,22 +21,7 @@ import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.authorize.AuthorizeClient;
-import com.hand.hcf.app.mdata.client.authorize.FormAuthorizeCO;
-import com.hand.hcf.app.mdata.client.authorize.FormTypeEnum;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.contact.ContactCO;
-import com.hand.hcf.app.mdata.client.contact.JudgeUserCO;
-import com.hand.hcf.app.mdata.client.contact.OrganizationUserCO;
-import com.hand.hcf.app.mdata.client.contact.UserGroupCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
-import com.hand.hcf.app.mdata.client.dimension.DimensionCO;
-import com.hand.hcf.app.mdata.client.dimension.DimensionItemCO;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterCO;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
-import com.hand.hcf.app.apply.payment.dto.CashTransactionClassCO;
-import com.hand.hcf.app.apply.payment.dto.CashTransactionClassForOtherCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalFormCO;
+import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import com.hand.hcf.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
@@ -108,7 +94,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
     private ExpenseReportTypeCompanyService expenseReportTypeCompanyService;
 
     @Autowired
-    private AuthorizeClient authorizeClient;
+    private AuthorizeControllerImpl authorizeClient;
 
     /**
      * 新增 报账单类型
@@ -467,8 +453,9 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
         }
 
+        //jiu.zhao 支付
         //全部：all、已选：selected、未选：notChoose
-        if (forOtherCO.getRange().equals("selected")){
+        /*if (forOtherCO.getRange().equals("selected")){
             list = paymentService.listCashTransactionClassByRange(forOtherCO,page);
             if (list.size() > 0){
                 list.stream().forEach(cashTransactionClassDTO -> cashTransactionClassDTO.setAssigned(true));
@@ -492,7 +479,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
                     }
                 }
             }
-        }
+        }*/
 
 
         page.setRecords(list);
@@ -667,7 +654,9 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         }else{
             cashTransactionClassForOtherCO.setRange("all");
         }
-        return paymentService.listCashTransactionClassByRange(cashTransactionClassForOtherCO,page);
+        //jiu.zhao 支付
+        //return paymentService.listCashTransactionClassByRange(cashTransactionClassForOtherCO,page);
+        return null;
     }
 
     /**

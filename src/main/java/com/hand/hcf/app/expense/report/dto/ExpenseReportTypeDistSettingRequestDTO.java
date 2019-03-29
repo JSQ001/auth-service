@@ -1,9 +1,9 @@
 package com.hand.hcf.app.expense.report.dto;
 
+import com.hand.hcf.app.common.co.CompanyCO;
+import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistSetting;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterCO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

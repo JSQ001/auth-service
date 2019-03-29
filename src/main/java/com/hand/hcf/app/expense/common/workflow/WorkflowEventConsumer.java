@@ -11,16 +11,14 @@ import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationHeaderService;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalNotificationCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalResultCO;
-import com.hand.hcf.app.mdata.client.workflow.event.AbstractWorkflowEventConsumerInterface;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class WorkflowEventConsumer extends AbstractWorkflowEventConsumerInterface {
+public class WorkflowEventConsumer {
     @Autowired
     private ApplicationHeaderService applicationHeaderService;
 
@@ -35,7 +33,6 @@ public class WorkflowEventConsumer extends AbstractWorkflowEventConsumerInterfac
 
     @LcnTransaction
     @Transactional(rollbackFor = Exception.class)
-    @Override
     public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
         Long documentId = approvalNoticeCO.getDocumentId();
         Integer documentCategory = approvalNoticeCO.getDocumentCategory();
@@ -62,6 +59,4 @@ public class WorkflowEventConsumer extends AbstractWorkflowEventConsumerInterfac
         approvalResultCO.setError(null);
         return approvalResultCO;
     }
-
-
 }

@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.report.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.app.client.attachment.AttachmentCO;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.core.domain.Domain;
 import lombok.Data;
 

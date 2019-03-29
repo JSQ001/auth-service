@@ -4,45 +4,22 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.base.org.OrderNumberCO;
+import com.hand.hcf.app.base.org.OrderNumberCO.Message;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.com.CompanyClient;
-import com.hand.hcf.app.mdata.client.com.CompanyLevelCO;
-import com.hand.hcf.app.mdata.client.contact.*;
-import com.hand.hcf.app.mdata.client.currency.CurrencyClient;
-import com.hand.hcf.app.mdata.client.currency.CurrencyRateCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentClient;
-import com.hand.hcf.app.mdata.client.dimension.DimensionCO;
-import com.hand.hcf.app.mdata.client.dimension.DimensionClient;
-import com.hand.hcf.app.mdata.client.dimension.DimensionDetailCO;
-import com.hand.hcf.app.mdata.client.dimension.DimensionItemCO;
-import com.hand.hcf.app.mdata.client.location.LocationInterface;
-import com.hand.hcf.app.mdata.client.location.dto.LocationDTO;
-import com.hand.hcf.app.mdata.client.parameter.ParameterClient;
-import com.hand.hcf.app.mdata.client.period.PeriodCO;
-import com.hand.hcf.app.mdata.client.period.PeriodClient;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterCO;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterClient;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
-import com.hand.hcf.app.mdata.client.sob.SobClient;
-import com.hand.hcf.app.mdata.client.supplier.SupplierClient;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorBankAccountCO;
-import com.hand.hcf.app.mdata.client.supplier.dto.VendorInfoCO;
-import com.hand.hcf.app.mdata.client.workflow.WorkflowClient;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalFormCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalHistoryCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.CommonApprovalHistoryCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.mdata.implement.web.*;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
+import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>
@@ -112,7 +89,9 @@ public class OrganizationService {
     }
 
     public Map<Long, DepartmentCO> getDepartmentMapByDepartmentIds(List<Long> ids){
-        List<DepartmentCO> departmentCOS = departmentClient.listDepartmentsByIds(ids);
+        //jiu.zhao 修改三方接口 20190329
+        //List<DepartmentCO> departmentCOS = departmentClient.listDepartmentsByIds(ids);
+        List<DepartmentCO> departmentCOS = departmentClient.listDepartmentsByIds(ids, (String)null);
         if (CollectionUtils.isEmpty(departmentCOS)) {
             return new HashMap<>(16);
         }
@@ -188,7 +167,9 @@ public class OrganizationService {
 
     public List<DepartmentCO> listDepartmentsByTenantId(){
         Page<DepartmentCO> page = new Page<>(1,100000);
-        Page<DepartmentCO> departmentInfoByTenantId = departmentClient.pageDepartmentInfoByTenantId( null, page);
+        //jiu.zhao 修改三方接口 20190329
+        //Page<DepartmentCO> departmentInfoByTenantId = departmentClient.pageDepartmentInfoByTenantId( null, page);
+        Page<DepartmentCO> departmentInfoByTenantId = departmentClient.pageDepartmentInfoByTenantId( null, page.getCurrent() - 1, page.getSize());
         if (page.getRecords() == null){
             return new ArrayList<>();
         }
@@ -206,7 +187,9 @@ public class OrganizationService {
                                              String companyCodeTo,
                                              List<Long> ignoreIds,
                                              Page page) {
-        return companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBooksId, companyCode, companyCodeFrom, companyCodeTo, companyName,true, page, ignoreIds);
+        //jiu.zhao 修改三方接口 20190329
+        //return companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBooksId, companyCode, companyCodeFrom, companyCodeTo, companyName,true, page, ignoreIds);
+        return companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBooksId, companyCode, companyCodeFrom, companyCodeTo, companyName,true, page.getCurrent() - 1, page.getSize(), ignoreIds);
     }
 
     public DepartmentCO getDepartementCOByUserOid(String userOid){
@@ -238,7 +221,17 @@ public class OrganizationService {
     }
 
     public String getOrderNumber(String documentType, String companyCode, String now) {
-        return organizationClient.getOrderNumber(documentType, companyCode, now);
+        //jiu.zhao 修改三方接口 20190329
+        //return organizationClient.getOrderNumber(documentType, companyCode, now);
+        String language = LoginInformationUtil.getCurrentLanguage();
+        OrderNumberCO orderNumberCO = (OrderNumberCO)this.organizationClient.getOrderNumber(documentType, companyCode, now).getBody();
+        if (StringUtils.isEmpty(orderNumberCO.getOrderNumber())) {
+            throw new BizException(orderNumberCO.getCode(), (String)orderNumberCO.getMessage().stream().filter((u) -> {
+                return u.getLanguage().equalsIgnoreCase(language);
+            }).findFirst().map(Message::getContent).get());
+        } else {
+            return orderNumberCO.getOrderNumber().toString();
+        }
     }
 
     public List<UserGroupCO> listUserGroupsByIds(List<Long> ids) {
@@ -275,7 +268,9 @@ public class OrganizationService {
     }
 
     public List<DimensionDetailCO> listDimensionsBySetOfBooksIdAndIds(Long setOfBooksId, List<Long> ids){
-        return dimensionClient.listDimensionsBySetOfBooksIdAndIdsAndEnabled(setOfBooksId, ids, null);
+        //jiu.zhao 修改三方接口 20190329
+        //return dimensionClient.listDimensionsBySetOfBooksIdAndIdsAndEnabled(setOfBooksId, ids, null);
+        return dimensionClient.listDimensionsBySetOfBooksIdAndIdsAndEnabled(setOfBooksId,null, ids);
     }
 
     public ApprovalFormCO getApprovalFormByOid(String formOid){

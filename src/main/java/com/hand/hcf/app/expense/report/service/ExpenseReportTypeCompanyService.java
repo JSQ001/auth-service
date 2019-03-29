@@ -2,12 +2,12 @@ package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeCompany;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeCompanyMapper;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.invoice.persistence.InvoiceLineMapper">
+
+    <select id="selectInvoiceByExpenseLineId" resultType="com.hand.hcf.app.expense.invoice.domain.InvoiceLine">
+        select * from invoice_line l
+          where exists(select 1 from
+            invoice_line_dist d,
+            invoice_line_expence e
+            where l.id = d.invoice_line_id
+              and d.id = e.invoice_dist_id
+              and e.exp_expense_line_id = #{expExpenseLineId})
+    </select>
+
+</mapper>

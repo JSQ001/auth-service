@@ -280,4 +280,15 @@ public class DimensionControllerImpl {
                                                                      @RequestParam(value = "companyId",required = false) Long companyId) {
         return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId);
     }
+
+    //jiu.zhao 修改三方接口 20190329
+    public List<DimensionDetailCO> listDimensionsByIdsAndEnabled(List<Long> ids, Boolean enabled) {
+        List<DimensionDetailCO> dimensionDetailCOS = this.listDimensionsBySetOfBooksIdAndIdsAndEnabled((Long)null, enabled, ids);
+        return (List)(dimensionDetailCOS == null ? new ArrayList() : dimensionDetailCOS);
+    }
+
+    public List<DimensionCO> listDimensionBySetOfBooksIdAndEnabled(Long setOfBooksId, Boolean enabled) {
+        List<DimensionCO> dimensionCOList = this.listDimensionsBySetOfBooksIdAndEnabled(setOfBooksId, enabled);
+        return (List)(dimensionCOList == null ? new ArrayList() : dimensionCOList);
+    }
 }

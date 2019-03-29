@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.report.dto;
 
-import com.hand.hcf.app.apply.contract.dto.ContractHeaderLineCO;
-import com.hand.hcf.app.apply.payment.dto.CashWriteOffCO;
-import com.hand.hcf.app.apply.payment.dto.PublicReportLineAmountCO;
+import com.hand.hcf.app.common.co.CashWriteOffCO;
+import com.hand.hcf.app.common.co.ContractHeaderLineCO;
+import com.hand.hcf.app.common.co.PublicReportLineAmountCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportPaymentSchedule;
 import lombok.Data;
 
