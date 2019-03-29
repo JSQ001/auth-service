@@ -7,15 +7,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.hand.hcf.app.apply.contract.dto.ContractHeaderLineCO;
 import com.hand.hcf.app.common.co.CashPaymentRequisitionLineCO;
-import com.hand.hcf.app.common.co.CashTransactionClassCO;
+import com.hand.hcf.app.common.co.SetOfBooksInfoCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.sob.SetOfBooksInfoCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
-import com.hand.hcf.app.prepayment.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
 import com.hand.hcf.app.prepayment.externalApi.PaymentModuleInterface;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeService;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
@@ -50,7 +48,7 @@ public class CashPaymentRequisitionLineAdapter {
     private  CashPaymentRequisitionHeadService cashPaymentRequisitionHeadService;
 
     @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
+    private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
     @Autowired
     private PaymentModuleInterface paymentModuleInterface;
 
@@ -80,14 +78,14 @@ public class CashPaymentRequisitionLineAdapter {
         CashPaymentRequisitionLineCO dto = new CashPaymentRequisitionLineCO();
         BeanUtils.copyProperties(line,dto);
         try {
-            dto.setCompanyName(hcfOrganizationInterface.getCompanyById(line.getCompanyId()).getName());
+            dto.setCompanyName(prepaymentHcfOrganizationInterface.getCompanyById(line.getCompanyId()).getName());
 
         }catch (Exception e){
             e.printStackTrace();
             throw new BizException(RespCode.SYS_COMPANY_INFO_NOT_EXISTS);
         }
         try{
-            dto.setPaymentMethodName(hcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
+            dto.setPaymentMethodName(prepaymentHcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
                     line.getPaymentMethodCategory(), RespCode.SYS_CODE_TYPE_NOT_EXIT).get(line.getPaymentMethodCategory()));
         }catch (Exception e){
             e.printStackTrace();
@@ -97,13 +95,14 @@ public class CashPaymentRequisitionLineAdapter {
         if(dto.getContractId()!=null){
             //根据合同行id查询合同头行信息
             try{
-                ContractHeaderLineCO headerLineDTO = ContractModuleInterface.getContractInfoById(dto.getContractId(), dto.getContractLineId());
+                //jiu.zhao 合同
+                /*ContractHeaderLineCO headerLineDTO = ContractModuleInterface.getContractInfoById(dto.getContractId(), dto.getContractLineId());
                 dto.setContractId(headerLineDTO.getHeaderId());
                 dto.setContractNumber(headerLineDTO.getContractNumber());
                 dto.setContractName(headerLineDTO.getContractName());
                 dto.setContractLineId(headerLineDTO.getLineId());
                 dto.setContractLineNumber(headerLineDTO.getLineNumber().toString());
-                dto.setDueDate(headerLineDTO.getDueDate());
+                dto.setDueDate(headerLineDTO.getDueDate());*/
             }catch (Exception e){
                 e.printStackTrace();
                 throw new BizException(RespCode.PREPAY_CONTRACT_INFO_ERROR);
@@ -129,8 +128,9 @@ public class CashPaymentRequisitionLineAdapter {
 
         if(dto.getCshTransactionClassId()!=null){
             try{
-                CashTransactionClassCO cashTransactionClassDTO = paymentModuleInterface.selectCashTransactionClassById(dto.getCshTransactionClassId());
-                dto.setCshTransactionClassName(cashTransactionClassDTO.getDescription());
+                //jiu.zhao 支付
+                /*CashTransactionClassCO cashTransactionClassDTO = paymentModuleInterface.selectCashTransactionClassById(dto.getCshTransactionClassId());
+                dto.setCshTransactionClassName(cashTransactionClassDTO.getDescription());*/
             }catch (Exception e){
                 throw new BizException(RespCode.PREPAY_CLASS_NAME_ERROR);
             }
@@ -155,11 +155,11 @@ public class CashPaymentRequisitionLineAdapter {
     public  CashPaymentRequisitionLine toDomain(CashPaymentRequisitionLineCO co){
         String baseCurrencyCode = "";
         CashPaymentRequisitionLine line = new CashPaymentRequisitionLine();
-        SetOfBooksInfoCO setOfBooksInfoCO = hcfOrganizationInterface.getSetOfBookById(OrgInformationUtil.getCurrentSetOfBookId());
+        SetOfBooksInfoCO setOfBooksInfoCO = prepaymentHcfOrganizationInterface.getSetOfBookById(OrgInformationUtil.getCurrentSetOfBookId());
         if(setOfBooksInfoCO != null){
             baseCurrencyCode = setOfBooksInfoCO.getFunctionalCurrencyCode();
         }
-        Double rate = hcfOrganizationInterface.selectCurrencyByOtherCurrency(baseCurrencyCode,co.getCurrency()).getRate();
+        Double rate = prepaymentHcfOrganizationInterface.selectCurrencyByOtherCurrency(baseCurrencyCode,co.getCurrency()).getRate();
 //        Map otherCurrenry = new HashMap<>();
 //        Double rate = 0D;
 //        String currencyName;

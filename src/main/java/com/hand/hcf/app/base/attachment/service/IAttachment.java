@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.attachment.service;
 
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
-import com.hand.hcf.app.base.attachment.AttachmentCO;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

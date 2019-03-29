@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignCompany;
-import com.hand.hcf.app.prepayment.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
 import com.hand.hcf.app.prepayment.persistence.CashPayRequisitionTypeAssignCompanyMapper;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -26,7 +26,7 @@ public class CashPayRequisitionTypeAssignCompanyService extends BaseService<Cash
     @Autowired
     private CashPayRequisitionTypeService cashPayRequisitionTypeService;
     @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
+    private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
 
 
     /**
@@ -89,7 +89,7 @@ public class CashPayRequisitionTypeAssignCompanyService extends BaseService<Cash
                         .orderBy("company_code")
         );
         list.stream().forEach(cashPayRequisitionTypeAssignCompany -> {
-            CompanyCO company = hcfOrganizationInterface.getCompanyById(cashPayRequisitionTypeAssignCompany.getCompanyId());
+            CompanyCO company = prepaymentHcfOrganizationInterface.getCompanyById(cashPayRequisitionTypeAssignCompany.getCompanyId());
             if (company != null){
                 cashPayRequisitionTypeAssignCompany.setCompanyName(company.getName());
                 cashPayRequisitionTypeAssignCompany.setCompanyType(company.getCompanyTypeName());
@@ -116,7 +116,7 @@ public class CashPayRequisitionTypeAssignCompanyService extends BaseService<Cash
         CashPayRequisitionType cashPayRequisitionType = cashPayRequisitionTypeService.selectById(sobPayReqTypeId);
 
         if (cashPayRequisitionType != null){
-            Page<CompanyCO> companyByCond = hcfOrganizationInterface.pageBySetOfBooksIdConditionByIgnoreIds(cashPayRequisitionType.getSetOfBookId(), companyCode, companyName,
+            Page<CompanyCO> companyByCond = prepaymentHcfOrganizationInterface.pageBySetOfBooksIdConditionByIgnoreIds(cashPayRequisitionType.getSetOfBookId(), companyCode, companyName,
                     companyCodeFrom, companyCodeTo, collect, page);
             return companyByCond;
         }

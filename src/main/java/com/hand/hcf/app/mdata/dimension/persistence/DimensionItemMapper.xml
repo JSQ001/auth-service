@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.dimension.persistence.DimensionItemMapper">
+
+    <resultMap id="DimensionItemResultMap" type="com.hand.hcf.app.mdata.dimension.domain.DimensionItem">
+
+    </resultMap>
+
+    <select id="pageDimensionItemsByDimensionIdEnabledCompanyId" resultType="com.hand.hcf.app.mdata.dimension.domain.DimensionItem">
+        select *
+        from SYS_DIMENSION_ITEM d
+        where d.DIMENSION_ID = #{dimensionId}
+        and d.ENABLED = #{enabled}
+        and d.DELETED = 0
+        and exists (select 1
+          from SYS_DIMENSION_ITEM_ASS_COM dac
+          where dac.COMPANY_ID = #{companyId}
+          and dac.DIMENSION_ITEM_ID = d.id)
+    </select>
+
+</mapper>

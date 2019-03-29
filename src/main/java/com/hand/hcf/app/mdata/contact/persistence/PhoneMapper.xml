@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.PhoneMapper">
+    <select id="selectCountryCodeByMobile" resultType="java.lang.String">
+        select (case when mv.country_code is null
+          then (select country_code
+                from sys_mobile_validate
+                where short_name = 'CN')
+               else mv.country_code end) country_code
+        from sys_phone p
+          LEFT JOIN sys_mobile_validate mv on mv.short_name = p.country_code and mv.deleted = 0 and mv.enabled = 1
+        where p.phone_number = #{mobile} and p.is_primary = 1
+    </select>
+
+    <select id="verifyPhoneExsits" resultType="java.lang.String">
+        select p.phone_number
+        from sys_contact c,sys_phone p
+        where c.id = p.contact_id
+          and c.status = 1001
+          and p.phone_number = #{mobile}
+    </select>
+</mapper>

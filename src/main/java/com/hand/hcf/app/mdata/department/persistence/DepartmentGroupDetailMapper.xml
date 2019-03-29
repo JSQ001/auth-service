@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.department.persistence.DepartmentGroupDetailMapper">
+    <select id="selectByInput" resultType="com.hand.hcf.app.mdata.department.domain.DepartmentGroupDetail">
+        SELECT
+            adgd.id id,
+            adgd.department_group_id departmentGroupId,
+            adgd.department_id departmentId,
+            adgd.tenant_id tenantId,
+            adgd.enabled enabled,
+            adgd.deleted deleted,
+            adgd.created_date createdDate,
+            adgd.created_by createdBy,
+            adgd.last_updated_date lastUpdatedDate,
+            adgd.last_updated_by lastUpdatedBy
+        FROM
+            sys_department_group_detail adgd,
+            sys_department_group adg
+        WHERE
+            adg.id=adgd.department_group_id
+        AND
+            adg.id = #{departmentGroupId}
+        AND
+            adgd.deleted = false
+        AND
+            adgd.tenant_id =#{tenantId}
+
+        <if test="departmentGroupCode != null">
+            and adg.dept_group_code LIKE concat('%', concat(#{departmentGroupCode,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="departmentGroupDescription != null">
+            and adg.description LIKE  concat('%', concat(#{departmentGroupDescription,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+</mapper>

@@ -1,9 +1,7 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
-
-import com.hand.hcf.app.apply.contract.ContractClient;
-import com.hand.hcf.app.apply.contract.dto.ContractDocumentRelationCO;
-import com.hand.hcf.app.apply.contract.dto.ContractHeaderLineCO;
+import com.hand.hcf.app.common.co.ContractDocumentRelationCO;
+import com.hand.hcf.app.common.co.ContractHeaderLineCO;
 import com.hand.hcf.app.prepayment.utils.ContractOperationType;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -22,12 +20,12 @@ public class ContractModuleInterface {
 
     private static final Logger log = LoggerFactory.getLogger(ContractModuleInterface.class);
 
+    //jiu.zhao 合同
+    //private static ContractClient contractService;
 
-    private static ContractClient contractService;
-
-    public ContractModuleInterface(ContractClient contractService) {
+    /*public ContractModuleInterface(ContractClient contractService) {
         this.contractService = contractService;
-    }
+    }*/
 
 
 
@@ -72,7 +70,8 @@ public class ContractModuleInterface {
 
         Boolean aBoolean = null;
 
-        switch (type) {
+        //jiu.zhao 合同
+        /*switch (type) {
             case ContractOperationType.CREATE:
                 aBoolean = contractService.saveOrUpdateContractDocumentRelationBatch(list);
                 break;
@@ -82,7 +81,7 @@ public class ContractModuleInterface {
             case ContractOperationType.LOGICAL_DELETE:
                 aBoolean = contractService.deleteContractDocumentRelationBatch(list);
                 break;
-        }
+        }*/
         if (!isWorkflow) {//如果是本模块调用，则直接抛出具体异常
             if(!aBoolean){
                 throw new BizException(RespCode.PREPAY_ERROR_REST_FOR_CONTRACT_MODULE);
@@ -105,7 +104,9 @@ public class ContractModuleInterface {
      */
     public static ContractHeaderLineCO getContractInfoById(Long contractHeaderId, Long contractLineId) {
 
-        return contractService.getContractLine(contractHeaderId, contractLineId);
+        //return contractService.getContractLine(contractHeaderId, contractLineId);
+        //jiu.zhao 合同
+        return null;
 //        String mappingURL = GET_CONTRACT_HEADER_LINE_INFO_BY_ID + "?headerId=" + contractHeaderId;
 //        if (contractLineId != null) {
 //            mappingURL = mappingURL + "&lineId=" + contractLineId;

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.workflow.brms.persistence.DroolsRuleDetailMapper">
+
+    <resultMap id="DroolsRuleDetailMap" type="com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetail">
+        <!-- added by mh.z 20190227 关联查询规则条件 -->
+        <association property="ruleCondition" column="rule_condition_oid" select="getRuleConditionByOid">
+        </association>
+    </resultMap>
+
+    <!-- added by mh.z 20190227 关联查询规则条件 -->
+    <select id="getRuleConditionByOid" parameterType="String" resultType="com.hand.hcf.app.workflow.brms.domain.RuleCondition">
+        select * from sys_rule_condition where rule_condition_oid = #{rule_condition_oid}
+    </select>
+
+    <select id="getDroolsRuleDetailByOid" resultMap="DroolsRuleDetailMap">
+        select d.* from sys_drools_rule_detail d where d.drools_rule_detail_oid = #{droolsRuleDetailOid}
+    </select>
+
+    <select id="findByRuleConditionAndApprover" resultMap="DroolsRuleDetailMap">
+        select d.* from sys_drools_rule_detail d
+         where d.rule_condition_oid = #{ruleConditionOid} and d.rule_condition_approver_oid = #{ruleConditionApproverOid}
+    </select>
+
+    <select id="findByApprover" resultMap="DroolsRuleDetailMap">
+        select d.* from sys_drools_rule_detail d, sys_rule_condition rc
+         where d.rule_condition_oid = rc.rule_condition_oid
+           and d.rule_condition_approver_oid = #{ruleConditionApproverOid}
+           and rc.status = 1
+    </select>
+
+    <select id="findByRuleConditionOid" resultMap="DroolsRuleDetailMap">
+        select drd.* from sys_drools_rule_detail drd where drd.rule_condition_oid = #{ruleConditionOid}
+    </select>
+
+    <select id="findByDroolsRuleDetailOid" resultMap="DroolsRuleDetailMap">
+        select drd.* from sys_drools_rule_detail drd where drd.drools_rule_detail_oid = #{droolsRuleDetailOid}
+    </select>
+
+    <select id="findByDroolsRuleDetailOidIn" resultMap="DroolsRuleDetailMap">
+        select drd.* from sys_drools_rule_detail drd where drd.drools_rule_detail_oid in
+        <foreach collection="droolsRuleDetailOids" item="droolsRuleDetailOid" index="index" open="(" close=")" separator=",">
+            #{droolsRuleDetailOid}
+        </foreach>
+    </select>
+
+</mapper>

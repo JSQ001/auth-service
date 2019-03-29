@@ -1,9 +1,9 @@
 package com.hand.hcf.app.prepayment.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.mdata.client.contact.ContactCO;
+import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.prepayment.domain.PrePaymentLog;
-import com.hand.hcf.app.prepayment.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
 import com.hand.hcf.app.prepayment.persistence.PrepaymentLogMapper;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.app.prepayment.web.dto.PrePaymentLogDTO;
@@ -24,7 +24,7 @@ import java.util.List;
 public class PrepaymentLogService {
     private final PrepaymentLogMapper prepaymentLogMapper;
     @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
+    private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
 
     public void insertLog( PrePaymentLog prepaymentLog){
         prepaymentLogMapper.insert(prepaymentLog);
@@ -45,13 +45,13 @@ public class PrepaymentLogService {
                     dto.setLastUpdatedDate(prePaymentLog.getOperationTime());
                     dto.setOperationType(1000);
                     try{
-                        dto.setOperationTypeName(hcfOrganizationInterface.getSysCodeValue("2028", String.valueOf(dto.getOperation()),
+                        dto.setOperationTypeName(prepaymentHcfOrganizationInterface.getSysCodeValue("2028", String.valueOf(dto.getOperation()),
                                 RespCode.SYS_CODE_TYPE_NOT_EXIT).get(dto.getOperation()));
                     }catch (Exception e){
                         throw new BizException(RespCode.PREPAY_HEAD_STATUS_ERROR);
                     }
                     try{
-                        ContactCO userInfoCO = hcfOrganizationInterface.getUserById(dto.getUserId());
+                        ContactCO userInfoCO = prepaymentHcfOrganizationInterface.getUserById(dto.getUserId());
                         dto.setEmployeeId(userInfoCO.getEmployeeCode());
                         dto.setEmployeeName(userInfoCO.getFullName());
                     }catch (Exception e){

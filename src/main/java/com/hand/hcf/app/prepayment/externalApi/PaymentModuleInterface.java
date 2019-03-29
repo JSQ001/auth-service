@@ -20,10 +20,11 @@ import java.util.Map;
  */
 @Service
 public class PaymentModuleInterface {
-    private static final Logger log = LoggerFactory.getLogger(PaymentModuleInterface.class);
+    //jiu.zhao 支付
+    /*private static final Logger log = LoggerFactory.getLogger(PaymentModuleInterface.class);
 
-//    @Autowired
-//    private  PaymentClient paymentClient;
+    @Autowired
+    private  PaymentClient paymentClient;
     @Autowired
     private MapperFacade mapper;
 
@@ -54,7 +55,7 @@ public class PaymentModuleInterface {
         prepaymentDocumentIdsDTO.setLineIds(prepaymentLineIds);
         return paymentClient.listReportWriteOffCO(prepaymentDocumentIdsDTO);
 
-    }
+    }*/
 
 
     public  boolean setPushPrepaymentToPayment(List<CashTransactionDataCreateCO> dataCOS) {

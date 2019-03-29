@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.announcement.persistence.CarouselTemplateMapper">
+    
+    <select id="selectByType" resultType="com.hand.hcf.app.mdata.announcement.domain.CarouselTemplate">
+        SELECT act.* FROM sys_carousel_template act
+        WHERE act.enabled = 1 AND act.deleted = 0
+        <if test="type != null">
+            AND act.type = #{type}
+        </if>
+        ORDER BY act.type, act.last_updated_date DESC
+    </select>
+
+    <select id="selectByTypeAndAttachmentIds" resultType="com.hand.hcf.app.mdata.announcement.domain.CarouselTemplate">
+        SELECT act.* FROM sys_carousel_template act
+        <where>
+            <if test="attachmentIds != null and attachmentIds.size() > 0">
+                AND act.attachment_id IN
+                <foreach collection="attachmentIds" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="type != null">
+                AND act.type = #{type}
+            </if>
+        </where>
+    </select>
+
+</mapper>

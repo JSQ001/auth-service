@@ -2,9 +2,9 @@ package com.hand.hcf.app.common.co;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.app.prepayment.enums.CashPayRequisitionTypeBasisEnum;
-import com.hand.hcf.app.prepayment.enums.CashPayRequisitionTypeEmployeeEnum;
-import com.hand.hcf.app.prepayment.enums.CashPayRequisitionTypeTypeEnum;
+import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
+import com.hand.hcf.app.common.enums.CashPayRequisitionTypeEmployeeEnum;
+import com.hand.hcf.app.common.enums.CashPayRequisitionTypeTypeEnum;
 import com.hand.hcf.core.web.dto.DomainObjectDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

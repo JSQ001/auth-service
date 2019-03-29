@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.ContactMapper">
+
+    <select id="listDtoByQO" parameterType="com.hand.hcf.app.mdata.contact.dto.ContactQO"
+            resultType="com.hand.hcf.app.mdata.contact.dto.ContactDTO">
+        SELECT
+        c.id,
+        c.user_oid,
+        c.user_id,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.duty,
+        c.rank,
+        c.email,
+        c.gender,
+        c.entry_date,
+        c.birthday,
+        c.corporation_oid,
+        c.direct_manager,
+        c.company_id,
+        c.tenant_id,
+        c.status,
+        c.leaving_date,
+        p.PHONE_NUMBER mobile
+        <if test="hasCompany">
+            ,
+            cc.company_oid,
+            cc.set_of_books_id,
+            cc.company_code,
+            cc.name company_name
+        </if>
+        <if test="hasLegal">
+            ,l.entity_name legal_entity_name
+        </if>
+        <if test="hasDepartment">
+            ,
+            d.name department_name,
+            d.path department_path,
+            d.department_oid,
+            d.id department_id
+        </if>
+        <if test="setOfBooksId != null and setOfBooksId > 0 ">
+            ,aso.set_of_books_name
+        </if>
+        FROM sys_contact c
+            LEFT JOIN sys_phone p ON (c.id = p.contact_id AND p.is_primary = 1)
+        <if test="hasCompany or companyId != null or (companyOids != null and companyOids.size() > 0)">
+            LEFT JOIN sys_company cc ON cc.id = c.company_id
+        </if>
+        <if test="hasLegal">
+            LEFT JOIN sys_legal_entity l ON (l.legal_entity_oid = c.corporation_oid and l.tenant_id = c.tenant_id)
+        </if>
+        <if test="hasDepartment or departmentOid != null or departmentId != null or (departmentOids != null and departmentOids.size() > 0)">
+            LEFT JOIN sys_department_user du ON du.user_id = c.user_id
+            LEFT JOIN sys_department d ON d.id = du.department_id
+        </if>
+        <if test="setOfBooksId != null and setOfBooksId > 0 ">
+            inner join sys_set_of_books aso on aso.id = cc.set_of_books_id
+        </if>
+        <if test="userGroupId != null or userGroupOid != null">
+            LEFT JOIN sys_user_group_user ugu ON ugu.user_id = c.user_id
+            LEFT JOIN sys_user_group ug on ug.id=ugu.user_group_id
+        </if>
+        WHERE 1 = 1
+        <if test="id != null">
+            AND c.id = #{id}
+        </if>
+        <if test="userId != null">
+            AND c.user_id = #{userId}
+        </if>
+        <if test="userOid != null">
+            AND c.user_oid = #{userOid}
+        </if>
+        <if test="currentUserOid != null">
+            AND c.user_oid != #{currentUserOid}
+        </if>
+        <if test="statusAvailable">
+            and c.status in (1001,1002)
+        </if>
+        <if test="currentContactId != null">
+            AND c.id != #{currentContactId}
+        </if>
+
+        <if test="userOids != null and userOids.size() > 0">
+            AND c.user_oid
+            <if test="inverseUser">
+                not
+            </if>
+            IN
+            <foreach collection="userOids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="userIds != null and userIds.size() > 0">
+            AND c.user_id
+            <if test="inverseUser">
+                not
+            </if>
+            IN
+            <foreach collection="userIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="contactIds != null and contactIds.size() > 0">
+            AND c.id
+            <if test="inverseContact">
+                not
+            </if>
+            IN
+            <foreach collection="contactIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="tenantId != null ">
+            and c.tenant_id = #{tenantId}
+        </if>
+        <if test="companyId != null and companyId > 0 ">
+            and c.company_id = #{companyId}
+        </if>
+        <if test="companyOids != null and companyOids.size() > 0">
+            AND cc.company_oid IN
+            <foreach collection="companyOids" item="companyOid" open="(" separator="," close=")">
+                #{companyOid}
+            </foreach>
+        </if>
+        <if test="departmentOid != null  ">
+            and d.department_oid = #{departmentOid}
+        </if>
+        <if test="departmentId != null and departmentId > 0 ">
+            and du.department_id = #{departmentId}
+        </if>
+
+        <if test="departmentOids != null and departmentOids.size() > 0">
+            AND d.department_oid IN
+            <foreach collection="departmentOids" item="departmentOid" open="(" separator="," close=")">
+                #{departmentOid}
+            </foreach>
+        </if>
+        <if test="setOfBooksId != null and setOfBooksId > 0 ">
+            and cc.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="phoneNumber != null and phoneNumber!='' and !fuzzy">
+            AND p.PHONE_NUMBER = #{phoneNumber}
+        </if>
+
+        <if test="email != null and email!='' and !fuzzy">
+            AND c.email = #{email}
+        </if>
+        <if test="phoneNumber != null and fuzzy">
+            and p.phone_number like concat(concat('%',#{phoneNumber}),'%')
+        </if>
+        <if test="email != null and fuzzy">
+            and c.email like concat(concat('%',#{email}),'%')
+        </if>
+        <if test="exLeaved">
+            and c.status!=1003
+        </if>
+        <if test="employeeId != null and employeeId != ''">
+            and c.employee_id like concat(concat('%',#{employeeId}),'%')
+        </if>
+        <if test="fullName != null">
+            and c.full_name like concat(concat('%',#{fullName}),'%')
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (c.full_name LIKE concat(concat('%',#{keyword}),'%') OR c.email LIKE concat(concat('%',#{keyword}),'%')
+            OR c.employee_id LIKE concat(concat('%',#{keyword}),'%') OR p.phone_number LIKE
+            concat(concat('%',#{keyword}),'%'))
+        </if>
+        <if test="keyContact!=null and keyContact !=''">
+            AND
+            (
+            c.full_name LIKE concat('%', concat(#{keyContact}, '%'))
+            OR
+            c.employee_id LIKE concat('%', concat(#{keyContact}, '%'))
+            )
+        </if>
+        <if test="userGroupId != null">
+            and ugu.user_group_id = #{userGroupId}
+        </if>
+        <if test="userGroupOid != null ">
+            and ug.user_group_oid = #{userGroupOid}
+        </if>
+        <if test="orderByEmployeeId">
+            order by c.employee_id,c.created_date
+        </if>
+        <if test="orderByFullName">
+            ORDER BY c.full_name
+        </if>
+    </select>
+
+    <select id="listByQO" parameterType="com.hand.hcf.app.mdata.contact.dto.ContactQO"
+            resultType="com.hand.hcf.app.mdata.contact.domain.Contact">
+        SELECT c.* FROM sys_contact c
+        LEFT JOIN sys_phone p ON c.id = p.contact_id
+        <if test="companyOid != null or companyId!= null or (companyIds != null and companyIds.size()>0) or (companyOids != null and companyOids.size()>0)">
+            left join sys_company sc on sc.id=c.company_id
+        </if>
+        <if test="departmentOid != null or departmentId!= null or (departmentOids != null and departmentOids.size()>0)">
+            INNER JOIN sys_department_user du ON du.user_id = c.user_id
+            INNER JOIN sys_department d ON d.id = du.department_id
+        </if>
+        <if test="userGroupId != null or userGroupOid != null">
+            LEFT JOIN sys_user_group_user ugu ON ugu.user_id = c.user_id
+            LEFT JOIN sys_user_group ug on ug.id=ugu.user_group_id
+        </if>
+        <where>
+            1 = 1
+            <if test="id != null">
+                and c.id = #{id}
+            </if>
+            <if test="userId != null">
+                AND c.user_id = #{userId}
+            </if>
+            <if test="userOid != null">
+                and c.user_oid = #{userOid}
+            </if>
+            <if test="userOids != null and userOids.size()>0 ">
+                and c.user_oid
+                <if test="inverseUser">
+                    not
+                </if>
+                in
+                <foreach collection="userOids" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="userIds != null and userIds.size() > 0">
+                AND c.user_id
+                <if test="inverseUser">
+                    not
+                </if>
+                IN
+                <foreach collection="userIds" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="contactIds != null and contactIds.size() > 0">
+                AND c.id
+                <if test="inverseContact">
+                    not
+                </if>
+                IN
+                <foreach collection="contactIds" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="tenantId != null">
+                and c.tenant_id = #{tenantId}
+            </if>
+            <if test="status != null">
+                and c.status = #{status}
+            </if>
+            <if test="statusAvailable">
+                and c.status in (1001,1002)
+            </if>
+            <if test="exLeaved">
+                and c.status!=1003
+            </if>
+            <if test="companyId != null">
+                and c.company_id = #{companyId}
+            </if>
+            <if test="companyIds != null and companyIds.size()>0">
+                and c.company_id IN
+                <foreach collection="companyIds" item="companyId" index="index"
+                         open="(" close=")" separator=",">#{companyId}
+                </foreach>
+            </if>
+            <if test="companyOid != null">
+                and sc.company_oid=#{companyOid}
+            </if>
+            <if test="companyOids != null and companyOids.size()>0">
+                and sc.company_oid IN
+                <foreach collection="companyOids" item="companyOid" index="index"
+                         open="(" close=")" separator=",">#{companyOid}
+                </foreach>
+            </if>
+            <if test="corporationOid != null">
+                and c.corporationOid=#{corporationOid}
+            </if>
+            <if test="departmentId != null">
+                and du.department_id = #{departmentId}
+            </if>
+            <if test="departmentOid != null">
+                and d.department_oid=#{departmentOid}
+            </if>
+            <if test="departmentOids != null and departmentOids.size()>0">
+                and d.department_oid IN
+                <foreach collection="departmentOids" item="departmentOid" index="index"
+                         open="(" close=")" separator=",">#{departmentOid}
+                </foreach>
+            </if>
+            <if test="email != null">
+                and c.email = #{email} AND c.status != 1003
+            </if>
+            <if test="phoneNumber != null">
+                AND p.phone_number = #{phoneNumber} AND p.is_primary = #{isPrimaryPhone}
+            </if>
+            <if test="title != null">
+                and c.title = #{title}
+            </if>
+            <if test="employeeIds != null and employeeIds.size() > 0">
+                AND c.employee_id IN
+                <foreach collection="employeeIds" item="employeeId" open="(" separator="," close=")">
+                    #{employeeId}
+                </foreach>
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (c.full_name LIKE concat(concat('%',#{keyword}),'%') OR c.email LIKE concat(concat('%',#{keyword}),'%')
+                OR c.employee_id LIKE concat(concat('%',#{keyword}),'%') OR p.phone_number LIKE
+                concat(concat('%',#{keyword}),'%'))
+            </if>
+            <if test="keyContact!=null and keyContact !=''">
+                AND
+                (
+                c.full_name LIKE concat('%', concat(#{keyContact}, '%'))
+                OR
+                c.employee_id LIKE concat('%', concat(#{keyContact}, '%'))
+                )
+            </if>
+            <if test="fullName != null and fullName !=''">
+                and c.full_name like concat(concat('%',#{fullName}),'%')
+            </if>
+            <if test="employeeId != null and employeeId !=''">
+                and c.employee_id like concat(concat('%',#{employeeId}),'%')
+            </if>
+            <if test="leaving">
+                and DATE_FORMAT(c.leaving_date,'%Y-%m-%d') &lt; DATE_FORMAT(#{now},'%Y-%m-%d')
+            </if>
+            <if test="leaved">
+                and DATE_FORMAT(c.leaving_date,'%Y-%m-%d') &lt; DATE_FORMAT(#{leavedDate},'%Y-%m-%d')
+            </if>
+            <if test="userGroupId != null">
+                and ugu.user_group_id = #{userGroupId}
+            </if>
+            <if test="userGroupOid != null ">
+                and ug.user_group_oid = #{userGroupOid}
+            </if>
+        </where>
+        <if test="orderByFullName">
+            order by c.full_name
+        </if>
+        <if test="orderByEmployeeId">
+            order by c.employee_id
+        </if>
+
+    </select>
+
+    <select id="listUserByNameAndCode" resultType="com.hand.hcf.app.mdata.contact.dto.ContactDTO">
+        select
+        c.id as id,
+        c.user_id as userId,
+        c.user_oid as userOid,
+        c.employee_id as employeeId,
+        c.full_name as fullName,
+        c.title as title,
+        d.name as departmentName
+        from sys_contact c
+        left join sys_department_user du on du.user_id = c.user_id
+        left join sys_department d on d.id = du.department_id
+        <where>
+            c.tenant_id = #{tenantId}
+            <if test="name != null and name != ''">
+                and c.full_name like concat(concat('%',#{name}),'%')
+            </if>
+            <if test="code != null and code != ''">
+                and c.employee_id like concat(concat('%',#{code}),'%')
+            </if>
+        </where>
+        ORDER BY c.employee_id
+
+    </select>
+
+    <select id="listUsersByKeyword" resultType="com.hand.hcf.app.mdata.contact.dto.UserDTO">
+        SELECT
+        c.user_id id,
+        c.id contact_id,
+        c.user_oid,
+        c.status,
+        c.leaving_date,
+        c.full_name,
+        c.employee_id,
+        c.title,
+        c.email,
+        c.duty,
+        c.rank,
+        c.gender,
+        c.entry_date,
+        c.birthday,
+        c.direct_manager,
+        c.corporation_oid,
+        cc.id company_id,
+        cc.company_oid,
+        cc.set_of_books_id,
+        cc.tenant_id,
+        cc.name company_name,
+        cc.company_code,
+        d.id department_id,
+        d.department_oid department_oid,
+        d.name department_name,
+        p.phone_number mobile
+        FROM sys_contact c
+        LEFT JOIN sys_company cc ON cc.id = c.company_id
+        LEFT JOIN sys_department_user du ON du.user_id = c.user_id
+        LEFT JOIN sys_department d ON d.id = du.department_id
+        LEFT JOIN sys_phone p on (c.id = p.contact_id AND p.is_primary = 1)
+        WHERE c.tenant_id = #{tenantId} and c.full_name LIKE concat(concat('%',#{keyword}),'%')
+        <if test="needEmployeeId">
+            AND c.employeeId LIKE concat(concat('%',#{keyword}),'%')
+        </if>
+    </select>
+
+    <select id="varifyEmailExsits" resultType="java.lang.String">
+        select c.email
+        from sys_contact c
+        where c.status = 1001
+        and c.email = #{email}
+    </select>
+
+    <select id="listByKeywordAndCond" parameterType="com.hand.hcf.app.mdata.contact.dto.ContactQO"
+            resultType="com.hand.hcf.app.mdata.contact.dto.UserDTO">
+        SELECT
+        t2.id contact_id,
+        t2.user_id id,
+        t2.user_oid,
+        p.phone_number mobile,
+        t2.leaving_date,
+        t2.status,
+        t2.employee_id,
+        t2.full_name,
+        t2.email,
+        t2.title,
+        t2.corporation_oid,
+        t2.head_portrait avatar_oid,
+        t2.gender,
+        t2.gender_code,
+        t2.direct_manager,
+        t2.birthday,
+        t2.duty,
+        t2.duty_code,
+        t2.rank,
+        t2.rank_code,
+        t2.employee_type,
+        t2.employee_type_code,
+        t2.entry_date,
+        t4.name AS department_name,
+        t4.path AS department_path,
+        t4.manager_id,
+        le.entity_name AS legal_entity_name
+        FROM sys_contact t2
+        INNER JOIN sys_department_user t3
+        ON t2.user_id = t3.user_id
+        INNER JOIN sys_department t4
+        ON t3.department_id = t4.id
+        INNER JOIN sys_company t5
+        ON t2.company_id = t5.id
+        LEFT JOIN sys_phone p
+        ON p.contact_id=t2.id AND p.is_primary = 1
+        LEFT JOIN sys_legal_entity le ON le.legal_entity_oid = t2.corporation_oid
+        WHERE t2.status != 1003
+        <if test="tenantId != null">
+            and t2.tenant_id = #{tenantId}
+        </if>
+        <if test="companyOid != null">
+            and t5.company_oid = #{companyOid}
+        </if>
+
+        <if test="keyword != null and keyword != ''">
+            and (t2.full_name like concat(concat('%',#{keyword}),'%')
+            or t2.employee_id like concat(concat('%',#{keyword}),'%')
+            or t2.email like concat(concat('%',#{keyword}),'%')
+            or p.phone_number like concat(concat('%',#{keyword}),'%') )
+        </if>
+        <if test="status != null and status != ''">
+            and t2.status = #{status}
+        </if>
+        <if test="departmentOids != null and departmentOids.size() > 0">
+            and t4.department_oid in
+            <foreach collection="departmentOids" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="legalEntityOids != null and legalEntityOids.size() > 0">
+            and le.legal_entity_oid IN
+            <foreach collection="legalEntityOids" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        order by t2.status ,t2.employee_id
+    </select>
+
+    <select id="listCOByCondition" resultType="com.hand.hcf.app.common.co.ContactCO">
+        SELECT
+        user_id as id,
+        user_oid AS userOid,
+        full_name,
+        title,
+        employee_id AS employeeCode,
+        company_id
+        FROM
+        sys_contact
+        WHERE 1 = 1
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+
+    </select>
+
+    <resultMap type="com.hand.hcf.app.common.co.OrganizationUserCO" id="OrganizationUserCOMap">
+        <result column="set_of_books_id" property="setOfBookId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_oid" property="userOid"/>
+        <result column="department_oid" property="departmentOid"/>
+        <result column="company_oid" property="companyOid"/>
+        <collection property="userGroupIds" javaType="ArrayList" ofType="Long">
+            <result column="user_group_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="getOrganizationCOByUserId" resultMap="OrganizationUserCOMap">
+        select
+        temp.set_of_books_id,
+        temp.company_id,
+        temp.department_id,
+        temp.user_id,
+        temp.user_oid,
+        temp.department_oid,
+        temp.company_oid,
+        augu.user_group_id
+        from
+        (select
+        ac.set_of_books_id,
+        ac.id company_id,
+        ac.company_oid company_oid,
+        ad.id department_id,
+        ad.department_oid department_oid,
+        au.user_id user_id,
+        au.user_oid user_oid
+        from
+        sys_contact au
+        LEFT JOIN sys_company ac on au.company_id = ac.id
+        LEFT JOIN sys_department_user adu on au.user_id = adu.user_id
+        LEFT JOIN sys_department ad on adu.department_id = ad.id
+        where
+        au.user_id = #{userId}) temp
+        left join
+        sys_user_group_user augu ON temp.user_id = augu.user_id
+    </select>
+
+    <select id="listByEmployeeCodeConditionCompanyIdAndDepartId"
+            resultType="com.hand.hcf.app.common.co.ContactCO">
+        SELECT
+        c.user_id id,
+        c.user_oid AS userOid,
+        c.full_name,
+        c.title,
+        c.employee_id AS employeeCode,
+        c.company_id
+        FROM
+        sys_contact c
+        WHERE
+        c.employee_id=#{employeeCode}
+        <if test="companyId != null">
+            AND c.company_id = #{companyId}
+        </if>
+        <if test="departmentId != null">
+            AND
+            c.user_id IN (SELECT user_id from sys_department_user WHERE department_id = #{departmentId})
+        </if>
+
+    </select>
+
+    <select id="listUserByTenantId"
+            resultType="com.hand.hcf.app.common.co.ContactCO">
+        select t3.tenant_id,
+        t3.user_id id,
+        t3.user_oid,
+        t3.full_name,
+        t3.employee_id employee_code,
+        t3.title,
+        t3.gender,
+        t3.company_id,
+        t2.phone_number,
+        t3.email,
+        t3.status
+        from sys_phone t2, sys_contact t3
+        where 1 = 1
+        and t2.contact_id = t3.id
+        and t3.employee_id is not null
+        and t3.status != 1003
+        and t3.tenant_id = #{tenantId}
+    </select>
+    <select id="listUserByNameAndCodeAndCompanyAndUnit"
+            resultType="com.hand.hcf.app.mdata.contact.dto.UserSimpleInfoDTO">
+        SELECT sct.user_id userId,
+               sct.employee_id employeeCode,
+               sct.full_name userName,
+               scp.id companyId,
+               scp.company_code companyCode,
+               scp.name companyName,
+               sd.id departmentId,
+               sd.department_code departmentCode,
+               sd.name departmentName
+          FROM sys_contact         sct,
+               sys_department_user sdu,
+               sys_company         scp,
+               sys_department      sd
+         WHERE sct.user_id = sdu.user_id
+           AND sct.company_id = scp.id
+           AND sdu.department_id = sd.id
+        <if test="name != null and name != ''">
+            AND sct.full_name LIKE concat(concat('%',#{name}),'%')
+        </if>
+        <if test="code != null and code != ''">
+            AND sct.employee_id LIKE concat(concat('%',#{code}),'%')
+        </if>
+        <if test="companyId != null">
+            AND scp.id = #{companyId}
+        </if>
+        <if test="unitId != null">
+            AND sd.id = #{unitId}
+        </if>
+        <if test="ids != null and ids.size() >0">
+            AND sct.user_id NOT IN
+            <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        AND sct.tenant_id = #{tenantId}
+        order by sct.employee_id asc
+    </select>
+
+</mapper>

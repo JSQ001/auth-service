@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+    <changeSet id="201710241422001" author="xue.han">
+        <createTable tableName="csh_sob_pay_req_type" remarks="预付款单类型定义表">
+            <column name="id" type="bigint" remarks="预付款单类型定义表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_csh_sob_pay_req_type_id"/>
+            </column>
+            <column name="set_of_book_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_code" type="varchar(50)" remarks="预付款单类型代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_name" type="varchar(200)" remarks="预付款单类型名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method_category" type="varchar(30)" remarks="付款方式类型"/>
+            <column name="auto_approve_flag" type="boolean" remarks="自审批标志"/>
+            <column name="req_required_flag" type="boolean" remarks="必须关联申请标志"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_sob_pay_req_type" columnNames="set_of_book_id,type_code" constraintName="idx_unq_csh_type_code"/>
+    </changeSet>
+    <changeSet id="201710251052001" author="xue.han">
+        <createTable tableName="csh_sob_pay_req_t_ass_tra_cla" remarks="预付款单类型关联的现金事务分类表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_csh_ass_tra_class_id"/>
+            </column>
+            <column name="sob_pay_req_type_id" type="bigint" remarks="预付款单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_class_id" type="bigint" remarks="现金事务分类ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_sob_pay_req_t_ass_tra_cla" columnNames="sob_pay_req_type_id,transaction_class_id"/>
+    </changeSet>
+    <changeSet id="201710251615001" author="xue.han">
+        <createTable tableName="csh_sob_pay_req_t_ass_company" remarks="预付款单类型关联的公司表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_csh_pay_req_ass_company_id"/>
+            </column>
+            <column name="sob_pay_req_type_id" type="bigint" remarks="预付款单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_sob_pay_req_t_ass_company" columnNames="sob_pay_req_type_id,company_id"/>
+    </changeSet>
+    <changeSet id="201710261719001" author="baochao.chen">
+        <validCheckSum>7:c3dc2b89ed529d9737f3b421798975a6</validCheckSum>
+        <createTable tableName="csh_payment_requisition_head" remarks="预付款单头表">
+            <column name="id" type="bigint" remarks="id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_csh_payment_req_head_id"/> <!-- oracle报超长了 -->
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id" type="bigint" remarks="员工id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_number" type="varchar(30)" remarks="申请编号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_date" type="timestamp" remarks="申请日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_req_type_id" type="bigint" remarks="预付款单类型id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(2000)" remarks="说明">
+                <constraints nullable="false"/>
+            </column>
+            <column name="advance_payment_amount" type="double" remarks="预付款金额"></column>
+            <column name="attachment_num" type="bigint" remarks="附件数"></column>
+            <column name="status" type="varchar(30)" remarks="审批状态"></column>
+            <column name="approval_date" type="timestamp" remarks="审批日期"></column>
+            <column name="approved_by" type="varchar(30)" remarks="审批人id"></column>
+            <column name="audit_flag" type="varchar(30)" remarks="审核标志"/>
+            <column name="audit_date" type="varchar(30)" remarks="审核日期"/>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="csh_payment_requisition_line" remarks="预付款单行表">
+            <column name="id" type="bigint" remarks="行id">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_csh_payment_req_line_id"/> <!-- oracle报超长了 -->
+            </column>
+            <column name="payment_requisition_header_id" type="bigint" remarks="预付单头id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ref_document_id" type="bigint" remarks="关联申请头id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_category" type="varchar(30)" remarks="收款方类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="partner_id" type="bigint" remarks="收款方id"/>
+            <column name="partner_code" type="varchar(30)" remarks="收款方代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_number" type="varchar(100)" remarks="合同编号"></column>
+            <column name="contract_line_number" type="varchar(100)" remarks="资金计划行号"/>
+            <column name="account_name" type="varchar(2000)" remarks="银行户名">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_number" type="varchar(30)" remarks="银行账号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_branch_code" type="varchar(30)" remarks="收款方分行代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_branch_name" type="varchar(200)" remarks="收款方分行名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_payment_date" type="timestamp" remarks="计划付款日期"/>
+            <column name="payment_method_category" type="varchar(30)" remarks="付款方式类型"/>
+            <column name="csh_transaction_class_code" type="varchar(30)" remarks="现金事务分类id"/>
+            <column name="cash_flow_id" type="bigint" remarks="现金流量项id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cash_flow_code" type="varchar(30)" remarks="现金流量项代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="double" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="double" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="double" remarks="本位币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(2000)" remarks="描述">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="是否删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201711291411001" author="xue.han">
+        <dropColumn tableName="csh_sob_pay_req_type" columnName="currency_code"/>
+        <dropColumn tableName="csh_sob_pay_req_type" columnName="auto_approve_flag"/>
+    </changeSet>
+
+    <changeSet id="201712051405001" author="xue.han">
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="form_id" type="bigint" remarks="关联表单ID"></column>
+        </addColumn>
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="application_form_basis" type="int" remarks="关联申请单依据"></column>
+        </addColumn>
+
+        <renameColumn tableName="csh_sob_pay_req_type" oldColumnName="req_required_flag" newColumnName="need_apply" columnDataType="boolean" remarks="是否需要申请"/>
+    </changeSet>
+
+    <changeSet id="201712051058001" author="xue.han">
+        <createTable tableName="csh_pay_req_type_a_req_type" remarks="预付款单类型关联申请单类型">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_csh_pay_req_t_a_req_type"/>
+            </column>
+            <column name="pay_requisition_type_id" type="bigint" remarks="预付款单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_type_id" type="bigint" remarks="申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_pay_req_type_a_req_type" columnNames="pay_requisition_type_id,requisition_type_id"/>
+    </changeSet>
+
+    <changeSet id="201712131456001" author="xue.han">
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="version_number"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="is_enabled"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="is_deleted"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="created_date"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="created_by"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="last_updated_date"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_tra_cla" columnName="last_updated_by"/>
+
+
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="version_number"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="is_enabled"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="is_deleted"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="created_date"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="created_by"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="last_updated_date"/>
+        <dropColumn tableName="csh_pay_req_type_a_req_type" columnName="last_updated_by"/>
+    </changeSet>
+    <changeSet id="201711201012001" author="liang.liu">
+        <createTable tableName="prepayment_attachment">
+            <column name="id" type="bigint" remarks="id">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="attachment_oid" type="varchar(36)" remarks="附件oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(100)" remarks="附件名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_url" type="varchar(500)" remarks="附件路径"/>
+            <column name="link" type="varchar(500)" remarks="附件链接"/>
+            <column name="size" type="bigint" remarks="附件大小"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201712181105001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="attachment_oid" type="varchar(2000)" remarks="附件oid"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201801051001001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="application_oid" type="varchar(36)" remarks="申请人oid"/>
+            <column name="form_oid" type="varchar(36)" remarks="表单oid"/>
+            <column name="unit_oid" type="varchar(36)" remarks="部门oid"/>
+            <column name="emp_oid" type="varchar(36)" remarks="员工oid"/>
+            <column name="document_oid" type="varchar(36)" remarks="单据oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_type" type="int" remarks="单据类型(801003)" defaultValue="801003">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201712271054001" author="xue.han">
+        <addColumn tableName="csh_sob_pay_req_t_ass_company">
+            <column name="company_code" type="varchar(50)" remarks="公司代码"/>
+        </addColumn>
+
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="all_type" type="boolean" remarks="是否全部申请单类型"/>
+            <column name="all_class" type="boolean" remarks="是否全部现金事务分类"/>
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="201712280930001" author="xue.han">
+        <modifyDataType tableName="csh_sob_pay_req_type" columnName="all_type" newDataType="int"/>
+    </changeSet>
+
+    <changeSet id="201712281649001" author="xue.han">
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="apply_employee" type="int" remarks="适用人员"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201712281703001" author="xue.han">
+        <createTable tableName="csh_pay_req_type_a_department" remarks="预付款单类型关联部门">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_csh_pay_req_t_a_department"/>
+            </column>
+            <column name="pay_requisition_type_id" type="bigint" remarks="预付款单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_pay_req_type_a_department" columnNames="pay_requisition_type_id,department_id"/>
+
+        <createTable tableName="csh_pay_req_type_a_user_group" remarks="预付款单类型关联人员组">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_csh_pay_req_t_a_user_group"/>
+            </column>
+            <column name="pay_requisition_type_id" type="bigint" remarks="预付款单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_group_id" type="bigint" remarks="人员组ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="csh_pay_req_type_a_user_group" columnNames="pay_requisition_type_id,user_group_id"/>
+    </changeSet>
+
+    <changeSet id="201801081650001" author="xue.han">
+        <dropColumn tableName="csh_sob_pay_req_type" columnName="form_id"/>
+
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="form_oid" type="varchar(200)" remarks="关联表单oid"/>
+        </addColumn>
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="form_name" type="varchar(200)" remarks="关联表单名称"/>
+        </addColumn>
+        <addColumn tableName="csh_sob_pay_req_type">
+            <column name="form_type" type="bigint" remarks="关联表单类型"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801091001001" author="liang.liu">
+        <dropNotNullConstraint tableName="csh_payment_requisition_head" columnName="document_oid" columnDataType="varchar(36)" />
+    </changeSet>
+    <changeSet id="201801091001002" author="liang.liu">
+        <dropNotNullConstraint tableName="csh_payment_requisition_line" columnName="cash_flow_code" columnDataType="varchar(30)"/>
+        <dropNotNullConstraint tableName="csh_payment_requisition_line" columnName="cash_flow_id" columnDataType="bigint"/>
+    </changeSet>
+    <changeSet id="20180109001003" author="liang.liu">
+        <modifyDataType tableName="csh_payment_requisition_line" columnName="ref_document_id" newDataType="varchar(36)"/>
+    </changeSet>
+    <changeSet id="20180109004" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="ref_document_code" type="varchar(100)" remarks="关联申请单编号"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801101255001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="contract_id" type="bigint" remarks="合同头id"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801101957001" author="liang.liu">
+        <dropColumn tableName="csh_payment_requisition_line" columnName="csh_transaction_class_code"/>
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="csh_transaction_class_id" type="bigint" remarks="现金事务分类id"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801112120001" author="liang.liu">
+        <dropDefaultValue tableName="csh_payment_requisition_head" columnName="requisition_date"/>
+        <dropNotNullConstraint tableName="csh_payment_requisition_head" columnName="requisition_date" columnDataType="timestamp"/>
+    </changeSet>
+    <changeSet id="20180112001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="ref_document_name" type="varchar(100)" remarks="关联申请单名称"/>
+            <column name="partner_name" type="varchar(500)" remarks="收款方name"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801260946001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="approval_remark" type="varchar(500)" remarks="审批备注"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801261103001" author="liang.liu">
+        <createTable tableName="pre_prepayment_log" remarks="预付款日志表">
+            <column name="id" type="bigint" remarks="预付款日志表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_con_contract_log_id"/>
+            </column>
+            <column name="header_id" type="bigint" remarks="预付款头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operation_message" type="varchar(255)" remarks="操作意见"/>
+            <column name="operation_type" type="varchar(50)" remarks="操作类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operation_time" type="timestamp" remarks="操作时间">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint" remarks="操作用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201801271758001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="if_workflow" type="boolean" remarks="单据是否走工作流">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201801292020001" author="liang.liu">
+        <modifyDataType tableName="csh_payment_requisition_head" columnName="approved_by" newDataType="bigint"/>
+        <modifyDataType tableName="csh_payment_requisition_head" columnName="audit_flag" newDataType="boolean"/>
+        <modifyDataType tableName="csh_payment_requisition_head" columnName="audit_date" newDataType="timestamp"/>
+    </changeSet>
+   <!--<changeSet id="201801292108002" author="liang.liu">
+        <dropNotNullConstraint tableName="csh_payment_requisition_head" columnName="audit_date" columnDataType="timestamp"/>
+    </changeSet>-->
+    <changeSet id="201801310934001" author="liang.liu">
+        <modifyDataType tableName="csh_payment_requisition_head" columnName="status" newDataType="int"/>
+        <modifyDataType tableName="pre_prepayment_log" columnName="operation_type" newDataType="int"/>
+    </changeSet>
+    <changeSet id="201801311521001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="submit_date" type="timestamp" remarks="提交日期"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201802011733001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="contract_line_id" type="bigint" remarks="合同行id"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201802011733002" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="due_date" type="timestamp" remarks="合同计划付款日期"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201803051143001" author="liang.liu">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="check_by" type="bigint" remarks="复核人"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201803281456001" author="liang.liu">
+        <modifyDataType tableName="csh_payment_requisition_line" columnName="ref_document_id" newDataType="bigint"/>
+    </changeSet>
+    <changeSet id="201806111006001" author="liang.liu">
+        <dropColumn tableName="csh_payment_requisition_line" columnName="ref_document_id"/>
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="ref_document_id" type="bigint" remarks="关联申请单id"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201806111028001" author="liang.liu">
+        <dropColumn tableName="csh_payment_requisition_line" columnName="bank_branch_code"/>
+        <dropColumn tableName="csh_payment_requisition_line" columnName="bank_branch_name"/>
+        <dropColumn tableName="csh_payment_requisition_line" columnName="description"/>
+        <addColumn tableName="csh_payment_requisition_line">
+            <column name="bank_branch_code" type="varchar(30)"/>
+            <column name="bank_branch_name" type="varchar(30)"/>
+            <column name="description" type="varchar(30)"/>
+        </addColumn>
+    </changeSet>
+   <changeSet id="201806111526001" author="liang.liu">
+       <modifyDataType tableName="csh_payment_requisition_line" columnName="description" newDataType="varchar(500)"/>
+   </changeSet>
+    
+    <changeSet id="201807241245001" author="bin.xie">
+        <modifyDataType tableName="csh_payment_requisition_line" columnName="amount" newDataType="${amount}"/>
+        <modifyDataType tableName="csh_payment_requisition_line" columnName="function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="csh_payment_requisition_head" columnName="advance_payment_amount" newDataType="${amount}"/>
+    </changeSet>
+
+    <changeSet id="201808211819001" author="bin.xie">
+        <dropNotNullConstraint tableName="csh_payment_requisition_line" columnName="partner_code" columnDataType="varchar(30)"/>
+    </changeSet>
+
+    <changeSet id="201809041006001" author="bin.xie">
+        <comment>删除is_enabled和is_deleted字段</comment>
+        <dropColumn tableName="csh_payment_requisition_head" columnName="is_enabled"/>
+        <dropColumn tableName="csh_payment_requisition_head" columnName="is_deleted"/>
+        <dropColumn tableName="csh_payment_requisition_line" columnName="is_enabled"/>
+        <dropColumn tableName="csh_payment_requisition_line" columnName="is_deleted"/>
+        <dropColumn tableName="prepayment_attachment" columnName="is_enabled"/>
+        <dropColumn tableName="prepayment_attachment" columnName="is_deleted"/>
+        <dropColumn tableName="csh_sob_pay_req_t_ass_company" columnName="is_deleted"/>
+        <renameColumn tableName="csh_sob_pay_req_t_ass_company" oldColumnName="is_enabled" newColumnName="enabled" columnDataType="boolean"/>
+        <renameColumn tableName="csh_sob_pay_req_type" oldColumnName="is_enabled" newColumnName="enabled" columnDataType="boolean"/>
+        <renameColumn tableName="csh_sob_pay_req_type" oldColumnName="is_deleted" newColumnName="deleted" columnDataType="boolean"/>
+    </changeSet>
+
+</databaseChangeLog>

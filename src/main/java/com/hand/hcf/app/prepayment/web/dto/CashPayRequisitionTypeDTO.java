@@ -1,7 +1,7 @@
 package com.hand.hcf.app.prepayment.web.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.hand.hcf.app.apply.prepayment.dto.AssignDepartmentOrUserGroupCO;
+import com.hand.hcf.app.common.co.AssignDepartmentOrUserGroupCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.core.serializer.CollectionToStringSerializer;
 import lombok.Data;

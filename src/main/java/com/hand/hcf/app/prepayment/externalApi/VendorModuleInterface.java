@@ -4,6 +4,7 @@ package com.hand.hcf.app.prepayment.externalApi;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.common.co.VendorInfoCO;
+import com.hand.hcf.app.mdata.implement.web.SupplierImplementControllerImpl;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,10 @@ public class VendorModuleInterface {
 
     //新接口
     public  Page<VendorInfoCO> getBankInfoByCompanyId(Long companyId, String vendorName, Page page) {
-        Page<VendorInfoCO> list = supplierClient.pageVendorInfosByConditions(companyId, vendorName,page);
-        return list;
+        /*Page<VendorInfoCO> list = supplierClient.pageVendorInfosByConditions(companyId, vendorName,page);
+        return list;*/
+        //jiu.zhao 修改三方接口
+        return this.supplierClient.pageVendorInfosByConditions(companyId, vendorName, page.getCurrent() - 1, page.getSize());
     }
 
 
@@ -46,8 +49,10 @@ public class VendorModuleInterface {
      * @param page
      */
     public  Page<VendorInfoCO> getBankInfoByCompanyAndVendorInfo(Long companyId, String vendorName,String vendorCode,Page page) {
-        Page<VendorInfoCO> list = supplierClient.pageVendorInfosByConditions(companyId, vendorName,vendorCode,page);
-        return list;
+        /*Page<VendorInfoCO> list = supplierClient.pageVendorInfosByConditions(companyId, vendorName,vendorCode,page);
+        return list;*/
+        //jiu.zhao 修改三方接口
+        return this.supplierClient.pageVendorInfosByConditions(companyId, vendorName, vendorCode, page.getCurrent() - 1, page.getSize());
     }
 
     public PartnerBankInfo getVenerCompanyBankByCode(String companyBankNumber){

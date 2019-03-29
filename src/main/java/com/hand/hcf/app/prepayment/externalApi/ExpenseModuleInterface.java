@@ -1,7 +1,6 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.apply.expense.ExpenseApplicationClient;
 import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.common.co.ApplicationTypeForOtherCO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ExpenseModuleInterface {
-    @Autowired
-    private ApplicationControllerImpl expenseApplicationClient;
+    //jiu.zhao TODO
+    /*@Autowired
+    private ApplicationControllerImpl expenseApplicationClient;*/
 
     /**
      * 根据所选范围查询账套下符合条件的费用申请单类型
@@ -26,9 +26,10 @@ public class ExpenseModuleInterface {
      */
     public Page<ApplicationTypeCO> queryApplicationTypeByCond(ApplicationTypeForOtherCO applicationTypeForOtherCO, Page page){
         Page<ApplicationTypeCO> applicationTypeCOList = new Page<>();
-        Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page);
+        //jiu.zhao TODO
+        /*Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page);
         applicationTypeCOList.setRecords(result.getRecords());
-        applicationTypeCOList.setTotal(result.getTotal());
+        applicationTypeCOList.setTotal(result.getTotal());*/
         return applicationTypeCOList;
     }
 }

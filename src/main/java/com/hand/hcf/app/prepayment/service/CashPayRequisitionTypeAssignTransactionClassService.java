@@ -101,7 +101,8 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
         );
 
         List<Long> cashTransactionClassIdList = list.stream().map(cashPayRequisitionTypeAssignTransactionClass -> cashPayRequisitionTypeAssignTransactionClass.getTransactionClassId()).collect(toList());
-        if (cashTransactionClassIdList != null){
+        //jiu.zhao 支付
+        /*if (cashTransactionClassIdList != null){
             List<CashTransactionClassCO> cashTransactionClassDTOList = paymentModuleInterface.listCashTransactionClassByIdList(cashTransactionClassIdList);
 
             list.stream().forEach(c1 -> {
@@ -112,7 +113,7 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
                     }
                 });
             });
-        }
+        }*/
 
         return list;
     }
@@ -130,7 +131,8 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
         );
 
         List<Long> cashTransactionClassIdList = list.stream().map(cashPayRequisitionTypeAssignTransactionClass -> cashPayRequisitionTypeAssignTransactionClass.getTransactionClassId()).collect(toList());
-        if (cashTransactionClassIdList != null){
+        //jiu.zhao 支付
+        /*if (cashTransactionClassIdList != null){
             List<CashTransactionClassCO> cashTransactionClassDTOList = paymentModuleInterface.listCashTransactionClassByIdList(cashTransactionClassIdList);
 
             list.stream().forEach(c1 -> {
@@ -141,7 +143,7 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
                     }
                 });
             });
-        }
+        }*/
 
         return list;
     }
@@ -153,8 +155,10 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
      * @return
      */
     public List<CashTransactionClassCO> getCashTransactionClassBySetOfBookId(Long setOfBookId){
-        List<CashTransactionClassCO> cashTransactionClassCOList = paymentModuleInterface.listCashTransactionClassBySetOfBookId(setOfBookId);
-        return cashTransactionClassCOList;
+        /*List<CashTransactionClassCO> cashTransactionClassCOList = paymentModuleInterface.listCashTransactionClassBySetOfBookId(setOfBookId);
+        return cashTransactionClassCOList;*/
+        //jiu.zhao 支付
+        return null;
     }
 
     /**
@@ -181,7 +185,8 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
         }
 
         //全部：all、已选：selected、未选：notChoose
-        if (forOtherCO.getRange().equals("selected")){
+        //jiu.zhao 支付
+        /*if (forOtherCO.getRange().equals("selected")){
             list = paymentModuleInterface.listTransactionClassByRange(forOtherCO,page);
             list.stream().forEach(cashTransactionClassDTO -> cashTransactionClassDTO.setAssigned(true));
         }else if (forOtherCO.getRange().equals("notChoose")){
@@ -199,7 +204,7 @@ public class CashPayRequisitionTypeAssignTransactionClassService extends BaseSer
                         list.add(transactionClassDTOList.get(i));
                 }
             }
-        }
+        }*/
 
         if(list != null){
             page.setRecords(list);

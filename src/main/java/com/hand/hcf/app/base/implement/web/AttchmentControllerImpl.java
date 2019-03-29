@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.implement.web;
 
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
-import com.hand.hcf.app.base.attachment.AttachmentCO;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

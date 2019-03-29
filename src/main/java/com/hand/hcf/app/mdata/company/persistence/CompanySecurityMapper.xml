@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.company.persistence.CompanySecurityMapper">
+
+    <resultMap id="CompanySecurityResultMap"
+               type="com.hand.hcf.app.mdata.company.domain.CompanySecurity">
+        <id column="id" property="id"/>
+        <result column="company_oid" property="companyOid"/>
+        <result column="account_code" property="accountCode"/>
+        <result column="notice_type" property="noticeType"/>
+        <result column="dimission_delay_days" property="dimissionDelayDays"/>
+        <result column="password_expire_days" property="passwordExpireDays"/>
+        <result column="password_rule" property="passwordRule"/>
+        <result column="password_length_min" property="passwordLengthMin"/>
+        <result column="password_length_max" property="passwordLengthMax"/>
+        <result column="password_repeat_times" property="passwordRepeatTimes"/>
+        <result column="password_attempt_times" property="passwordAttemptTimes"/>
+        <result column="auto_unlock_duration" property="autoUnlockDuration"/>
+        <result column="create_data_type" property="createDataType"/>
+        <result column="tenant_id" property="tenantId"/>
+    </resultMap>
+    <select id="findTenantCompanySecurity" resultMap="CompanySecurityResultMap">
+        SELECT  * FROM sys_company_security
+        WHERE tenant_id = #{tenantId} and company_oid is null
+    </select>
+
+    <select id="findRepeatCodeCompanySecurity" resultMap="CompanySecurityResultMap">
+        SELECT cc.*
+        FROM sys_company_security cc
+        WHERE cc.account_code IN (
+            SELECT c.account_code FROM sys_company_security c GROUP BY account_code HAVING COUNT(1)>1)
+        AND cc.company_oid IS NOT NULL
+    </select>
+
+    <select id="findTenantHisCompanySecurity" resultMap="CompanySecurityResultMap">
+          select s.*
+          from sys_company_security s,
+               sys_tenant_company_his h,
+               sys_company c
+          where s.company_oid= c. company_oid
+          and c.id= h.company_id
+    </select>
+</mapper>

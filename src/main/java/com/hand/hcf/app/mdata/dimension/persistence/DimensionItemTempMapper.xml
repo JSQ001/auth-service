@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.dimension.persistence.DimensionItemTempMapper">
+
+    <insert id="confirmImport">
+        INSERT INTO sys_dimension_item
+                      (id,
+                       dimension_id,
+                       dimension_item_code,
+                       dimension_item_name,
+                       enabled,
+                       version_number,
+                       created_date,
+                       last_updated_date,
+                       created_by,
+                       last_updated_by)
+                      SELECT t.id,
+                             t.dimension_id,
+                             t.dimension_item_code,
+                             t.dimension_item_name,
+                             enabled,
+                             1,
+                             #{currentDate},
+                             #{currentDate},
+                             #{userId},
+                             #{userId}
+                        FROM sys_dimension_item_temp t
+                       WHERE t.batch_number = #{transactionID}
+                         AND t.error_flag = 0
+    </insert>
+
+    <update id="updateExists">
+         UPDATE sys_dimension_item_temp t
+            SET t.error_flag   = 1,
+                t.error_detail = concat(error_detail,
+                                        '  维度代码已经存在，不允许重复导入！')
+          WHERE 1 &lt; (SELECT 1
+                    FROM sys_dimension_item_temp temp
+                   WHERE temp.dimension_id = t.dimension_id
+                    AND temp.batch_number = #{batchNumber}
+                    AND temp.dimension_item_code = t.dimension_item_code)
+            AND t.batch_number = #{batchNumber}
+    </update>
+
+    <select id="queryInfo" resultMap="queryInfoMap">
+        select (select
+            count(0) as successEntities
+        from sys_dimension_item_temp
+        where batch_number = #{transactionID}
+        and error_flag = 0) as successEntities,
+        (select
+            count(0) as failureEntities
+        from sys_dimension_item_temp
+        where batch_number = #{transactionID}
+        and error_flag = 1) as failureEntities,
+        #{transactionID} as transaction_id
+        from dual
+
+    </select>
+
+    <resultMap id="queryInfoMap" type="com.hand.hcf.core.web.dto.ImportResultDTO">
+        <result column="successEntities" property="successEntities"/>
+        <result column="failureEntities" property="failureEntities"/>
+        <collection property="errorData" select="queryErrorData"
+                    column="{transactionID=transaction_id}"/>
+    </resultMap>
+    <select id="queryErrorData" resultMap="errorDataMap">
+           select t.row_number AS row_number,
+                   t.error_detail AS error
+              FROM sys_dimension_item_temp t
+
+             WHERE t.batch_number = #{transactionID}
+               and t.error_flag = 1
+    </select>
+    <resultMap id="errorDataMap" type="com.hand.hcf.core.web.dto.ImportErrorDTO">
+        <result column="row_number" property="index"/>
+        <result column="error" property="error"/>
+    </resultMap>
+
+</mapper>

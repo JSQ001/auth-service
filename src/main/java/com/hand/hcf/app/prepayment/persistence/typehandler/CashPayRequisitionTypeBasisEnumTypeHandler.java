@@ -1,6 +1,6 @@
 package com.hand.hcf.app.prepayment.persistence.typehandler;
 
-import com.hand.hcf.app.prepayment.enums.CashPayRequisitionTypeBasisEnum;
+import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;

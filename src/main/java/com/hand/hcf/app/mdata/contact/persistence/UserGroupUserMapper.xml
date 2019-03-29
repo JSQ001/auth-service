@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2017. Shanghai Zhenhui Information Technology Co,. ltd.
+  ~ All rights are reserved.
+  -->
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.contact.persistence.UserGroupUserMapper">
+
+    <insert id="associateUsersToGroup">
+      INSERT INTO sys_user_group_user
+            SELECT #{id}, u.user_id,g.id
+              FROM sys_contact u,
+                   sys_user_group g
+            WHERE NOT EXISTS
+            (SELECT * FROM sys_user_group_user ugu
+              WHERE u.user_id = ugu.user_id
+                and ugu.user_group_id=g.id
+             )
+        <if test="userGroupId !=null">
+            AND g.id = #{userGroupId}
+        </if>
+        <if test="userGroupOid !=null">
+            AND g.user_group_oid = #{userGroupOid}
+        </if>
+        <if test="userOid !=null">
+            AND u.user_oid = #{userOid}
+        </if>
+    </insert>
+
+    <delete id="deleteUsersFromGroup">
+        DELETE FROM sys_user_group_user gu WHERE exists
+            (SELECT u.id FROM sys_contact u
+                WHERE gu.user_id=u.user_id
+                 and u.user_oid in
+                <foreach collection="userOids" item="userOid"  open="(" separator="," close=")">
+                    #{userOid}
+                </foreach>
+            )
+        <if test="userGroupId !=null">
+            AND gu.user_group_id = #{userGroupId}
+        </if>
+        <if test="userGroupOid !=null">
+            AND exists (select g.id from sys_user_group g
+              where g.id=gu.user_group_id
+              and g.user_group_oid = #{userGroupOid}
+            )
+        </if>
+    </delete>
+
+    <select id="findUserGroupUsers" resultType="com.hand.hcf.app.mdata.contact.domain.UserGroupUser">
+        SELECT ugu.user_id,ugu.user_group_id, u.user_oid ,ug.user_group_oid
+            FROM sys_user_group ug
+            INNER JOIN sys_user_group_user ugu ON ugu.user_group_id = ug.id
+            INNER JOIN sys_contact u on u.user_id = ugu.user_id
+            WHERE u.user_oid IN
+                <foreach collection="userOids" item="userOid"  open="(" separator="," close=")">
+                  #{userOid}
+                </foreach>
+              and ug.enabled = true
+    </select>
+</mapper>
