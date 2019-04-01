@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.supplier.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.dto.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.mdata.supplier.service.VendorBankAccountService;
 import com.hand.hcf.app.mdata.supplier.web.dto.VendorAccountDTO;
 import com.hand.hcf.core.util.PageUtil;

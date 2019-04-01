@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.policy.persistence.ExpensePolicyDynamicFieldMapper">
+
+
+    <select id="selectExpensePolicyDynamicFieldByPolicyId" resultType="com.hand.hcf.app.expense.policy.domain.ExpensePolicyDynamicField">
+        select
+          df.id,
+          df.TENANT_ID,
+          df.SET_OF_BOOKS_ID,
+          df.EXP_EXPENSE_POLICY_ID,
+          df.FIELD_ID,
+          df.FIELD_TYPE,
+          df.VALUE,
+          df.DELETED,
+          df.VERSION_NUMBER,
+          df.CREATED_DATE,
+          df.CREATED_BY,
+          df.LAST_UPDATED_DATE,
+          df.LAST_UPDATED_BY,
+          fp.id as "expensePolicyFieldProperty.id",
+          fp.LOCATION_LEVEL_ID as "expensePolicyFieldProperty.LOCATION_LEVEL_ID",
+          fp.DUTY_TYPE as "expensePolicyFieldProperty.DUTY_TYPE",
+          fp.STAFF_LEVEL as "expensePolicyFieldProperty.STAFF_LEVEL",
+          fp.DEPARTMENT_ID as "expensePolicyFieldProperty.DEPARTMENT_ID",
+          fp.DELETED as "expensePolicyFieldProperty.DELETED",
+          fp.VERSION_NUMBER as "expensePolicyFieldProperty.VERSION_NUMBER",
+          fp.CREATED_DATE as "expensePolicyFieldProperty.CREATED_DATE",
+          fp.CREATED_BY as "expensePolicyFieldProperty.CREATED_BY",
+          fp.LAST_UPDATED_DATE as "expensePolicyFieldProperty.LAST_UPDATED_DATE",
+          fp.LAST_UPDATED_BY as "expensePolicyFieldProperty.LAST_UPDATED_BY",
+          fp.DATE_TIME1 as "expensePolicyFieldProperty.DATE_TIME1",
+          fp.DATE_TIME2 as "expensePolicyFieldProperty.DATE_TIME2"
+        from EXP_POLICY_DYNAMIC_FIELD df
+        left join EXP_POLICY_FIELD_PROPERTY fp on df.id = fp.id
+        where df.EXP_EXPENSE_POLICY_ID = #{policyId}
+        and df.DELETED = 0
+    </select>
+
+</mapper>

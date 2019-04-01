@@ -28,7 +28,6 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
@@ -131,6 +130,7 @@
             <artifactId>kie-spring</artifactId>
             <version>${drools.version}</version>
         </dependency>
+
     </dependencies>
     <repositories>
         <repository>

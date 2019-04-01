@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @RestController
@@ -39,6 +41,15 @@ public class ContactControllerImpl {
     public List<ContactCO> listByUserIdsConditionByKeyWord(@RequestBody List<Long> ids,
                                                            @RequestParam(value = "keyWord",required = false) String keyWord){
         return contactService.listByUserIdsConditionByKeyWord(ids, keyWord);
+    }
+
+    //jiu.zhao 修改三方接口 20190329
+    public List<ContactCO> listByUserIds(List<Long> ids) {
+        return (List)(CollectionUtils.isEmpty(ids) ? new ArrayList() : this.contactService.listByUserIdsConditionByKeyWord(ids, (String)null));
+    }
+
+    public List<UserGroupCO> listUserGroupByUserGroupIds(List<Long> userGroupIds) {
+        return (List)(CollectionUtils.isEmpty(userGroupIds) ? new ArrayList() : this.userGroupService.listUserGroupByIds(userGroupIds));
     }
 
     /**

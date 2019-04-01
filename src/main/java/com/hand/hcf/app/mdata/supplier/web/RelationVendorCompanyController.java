@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.supplier.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.CompanyCO;
-import com.hand.hcf.app.common.dto.RelationVendorCompanyCO;
+import com.hand.hcf.app.common.co.RelationVendorCompanyCO;
 import com.hand.hcf.app.mdata.supplier.service.RelationVendorCompanyService;
 import com.hand.hcf.app.mdata.supplier.web.dto.CompanyDTO;
 import com.hand.hcf.core.util.PageUtil;

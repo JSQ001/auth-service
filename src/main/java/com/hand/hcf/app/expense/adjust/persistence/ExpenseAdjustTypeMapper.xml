@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustTypeMapper">
+
+
+    <select id="selectByUser" resultType="com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeDTO">
+
+        SELECT
+            t.id ,
+            t.exp_adjust_type_code as code,
+            t.exp_adjust_type_name as name
+        FROM
+            exp_adjust_type t
+        WHERE
+                t.id IN ( SELECT a.exp_adjust_type_id
+                          FROM exp_adjust_type_assign_com a
+                          WHERE a.company_id = #{companyId}
+                            AND a.enabled = 1 )
+          AND t.set_of_books_id = #{setOfBooksId}
+          AND t.enabled = TRUE
+          AND (
+                t.apply_employee = 1001
+                OR (
+                        t.apply_employee = 1002
+                        AND id IN
+                            ( SELECT b.exp_adjust_type_id
+                              FROM exp_adjust_type_assign_dep b
+                              WHERE b.department_id  = #{departmentId}
+                            )
+                    )
+            )
+        ORDER by t.exp_adjust_type_code desc
+    </select>
+    <select id="selectByUserGroup" resultMap="ResultByUserGroup">
+
+        SELECT
+            t.id ,
+            t.exp_adjust_type_code as code,
+            t.exp_adjust_type_name as name,
+               b.user_group_id as userGroupId
+        FROM
+            exp_adjust_type t, exp_adjust_type_assign_u_g b
+        WHERE
+                t.id IN ( SELECT a.exp_adjust_type_id FROM exp_adjust_type_assign_com a WHERE a.company_id = #{companyId}
+                                                                                          AND a.enabled = 1 )
+          AND t.set_of_books_id = #{setOfBooksId}
+          and t.id = b.exp_adjust_type_id
+          AND t.enabled = 1
+          AND t.apply_employee = 1003
+    </select>
+
+    <select id="listAssignExpenseType" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+        select t.* from exp_expense_type t
+        where t.type_flag = 1
+          and t.set_of_books_id = #{setOfBooksId}
+          and t.enabled = 1
+          and t.deleted = 0
+        <choose>
+            <when test="allFlag">
+                AND 1 = 1
+            </when>
+            <otherwise>
+                AND exists (select 1 from exp_adjust_type_assign_e_t a where a.exp_expense_id = t.id and a.exp_adjust_type_id =  #{typeId})
+            </otherwise>
+        </choose>
+        <if test="name != null and name !=''">
+            AND t.name like concat(concat('%',#{name}),'%')
+        </if>
+        <if test="code != null and code !=''">
+            AND t.code like concat(concat('%',#{code}),'%')
+        </if>
+    </select>
+
+    <resultMap id="ResultByUserGroup" type="com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeDTO">
+        <id column="id" property="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <collection property="userGroupIdList" ofType="java.lang.Long">
+            <id column="userGroupId"/>
+        </collection>
+    </resultMap>
+</mapper>

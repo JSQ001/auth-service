@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.supplier.web.adapter;
 
-import com.hand.hcf.app.common.dto.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
 import org.springframework.beans.BeanUtils;
 

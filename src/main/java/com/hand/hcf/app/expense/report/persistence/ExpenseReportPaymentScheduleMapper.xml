@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.report.persistence.ExpenseReportPaymentScheduleMapper">
+
+    <select id="getExpenseReportPaymentScheduleAmountMax" resultType="com.hand.hcf.app.expense.report.domain.ExpenseReportPaymentSchedule">
+		select * from exp_report_payment_schedule t
+		  where t.function_amount = (
+		  	select max(s.function_amount) from exp_report_payment_schedule s where t.exp_report_header_id = s.exp_report_header_id)
+		  	and t.exp_report_header_id = #{expReportHeaderId}
+	</select>
+</mapper>

@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.supplier.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.dto.VendorBankAccountCO;
+import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.common.enums.SourceEnum;
 import com.hand.hcf.app.mdata.bank.dto.BankAccountDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.type.persistence.ExpenseTypeMapper">
+
+    <select id="listByCategoryIdAndTypeFlag" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+
+        select * from exp_expense_type et
+        where et.type_category_id = #{categoryId}
+        and et.type_flag = #{typeFlag, jdbcType=INTEGER}
+        AND et.deleted = 0
+        order by et.sequence asc
+    </select>
+
+    <select id="queryByCondition" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+        select et.*, eetc.name as typeCategoryName from exp_expense_type et ,exp_expense_type_category eetc
+        where et.type_category_id = eetc.id
+          and et.deleted = 0
+        ${ew.sqlSegment}
+    </select>
+
+    <select id="getTypeById" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+         select et.*, eetc.name as typeCategoryName from exp_expense_type et ,exp_expense_type_category eetc
+        where et.type_category_id = eetc.id
+          and et.id = #{id}
+          and et.deleted = 0
+          order by et.sequence asc
+    </select>
+
+
+    <select id="queryLovByDocumentTypeAssign" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+        SELECT t.*
+        FROM exp_expense_type t
+        WHERE t.type_flag = #{typeFlag}
+          AND t.set_of_books_id = #{setOfBooksId}
+          AND t.enabled = 1
+          AND t.deleted = 0
+        <if test="code != null and code !=''">
+          AND t.code LIKE concat(concat('%', #{code}), '%')
+        </if>
+        <if test="name != null and name !=''">
+          AND t.name LIKE concat(concat('%', #{name}), '%')
+        </if>
+        <if test="typeCategoryId != null ">
+            AND t.type_category_id = #{typeCategoryId}
+        </if>
+        <choose>
+            <when test="range == 'all'">
+              <!-- 全选 -->
+              AND 1 = 1
+            </when>
+            <when test="range == 'selected'">
+                <if test="documentType == 801006">
+                  <!-- 费用调整单类型  选择的-->
+                  AND EXISTS (select 1 from exp_adjust_type_assign_e_t a where a.exp_adjust_type_id = #{documentTypeId} and a.exp_expense_id = t.id)
+
+                </if>
+                <if test="documentType == 801001">
+                    <!-- 报账单类型  已选的费用类型-->
+                    AND EXISTS (select 1 from exp_report_type_expense_type ertet where ertet.report_type_id = #{documentTypeId} and ertet.expense_type_id = t.id)
+
+                </if>
+            </when>
+            <otherwise>
+                <if test="documentType == 801006">
+                  <!-- 费用调整单类型 未选的-->
+                    AND NOT EXISTS (select 1 from exp_adjust_type_assign_e_t a where a.exp_adjust_type_id = #{documentTypeId} and a.exp_expense_id = t.id)
+                </if>
+                <if test="documentType == 801001">
+                    <!-- 报账单类型  未选的费用类型-->
+                    AND NOT EXISTS (select 1 from exp_report_type_expense_type ertet where ertet.report_type_id = #{documentTypeId} and ertet.expense_type_id = t.id)
+
+                </if>
+            </otherwise>
+        </choose>
+    </select>
+    
+    
+    <select id="listByExpenseTypesAndCond" resultType="com.hand.hcf.app.common.co.BasicCO">
+        SELECT * FROM (
+        SELECT t.*
+        FROM exp_expense_type t
+        WHERE
+         t.type_flag = 1
+        <if test="setOfBooksId !=null ">
+            AND t.set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="tenantId != null ">
+            AND t.tenant_id = #{tenantId}
+        </if>
+        ) et
+        <where>
+            <if test="enabled != null">
+                AND et.enabled = #{enabled}
+            </if>
+            <if test="code != '' and code !=null">
+                AND et.code LIKE concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+            </if>
+            <if test="name != '' and name !=null">
+                AND et.name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+            </if>
+        </where>
+        order by et.code asc
+
+
+    </select>
+</mapper>

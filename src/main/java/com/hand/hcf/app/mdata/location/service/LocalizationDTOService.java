@@ -3,6 +3,8 @@ package com.hand.hcf.app.mdata.location.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.dto.LocalizationDTO;
+import com.hand.hcf.app.common.dto.LocationDTO;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.dto.AddressDTO;
 import com.hand.hcf.app.mdata.location.persistence.LocalizationDTOMapper;
 import com.hand.hcf.core.util.PageUtil;
@@ -35,11 +37,11 @@ public class LocalizationDTOService {
      * @param page 分页对象
      * @return
      */
-    public Page<LocalizationDTO> getLocalizationCountryByCode( String countryCode,
-                                                               String countryName,
-                                                               String language,
-                                                               List<String> includeList,
-                                                               Page<LocalizationDTO> page) {
+    public Page<LocalizationDTO> getLocalizationCountryByCode(String countryCode,
+                                                              String countryName,
+                                                              String language,
+                                                              List<String> includeList,
+                                                              Page<LocalizationDTO> page) {
         //  Code代码拼接
         String includeCode = "";
         //  准备拼接
@@ -153,7 +155,7 @@ public class LocalizationDTOService {
         Page<LocalizationDTO> page = this.getLocalizationStateByCode(code,vendorType,language,null,pg);
         List<LocalizationDTO> stateList = page.getRecords();
         //  查询城市
-        List<LocalizationDTO> cityList = this.getLocalizationCityByCountry(code,vendorType,language);
+        List<LocalizationDTO> cityList = this.getLocalizationCityByCountry(code,null,vendorType,language);
         //  查询地区
         List<LocalizationDTO> districtList = this.getLocalizationDistrictByCountry(code,vendorType,language);
         //  遍历省
@@ -195,15 +197,15 @@ public class LocalizationDTOService {
     }
 
     //  新查询城市
-    public List<LocalizationDTO> getLocalizationCityByCountry(String code,String vendorType,String language) {
-        List<LocalizationDTO> list = localizationDTOMapper.getLocalizationCityByCountry(code,vendorType,language);
+    public List<LocalizationDTO> getLocalizationCityByCountry(String code,String city, String vendorType,String language) {
+        List<LocalizationDTO> list = localizationDTOMapper.getLocalizationCityByCountry(code,city,vendorType,language);
 
 
         return list.stream().map(u-> {u.setVendorType(vendorType);return u;}).collect(Collectors.toList());
     }
 
     //  新查询地区
-    public List<LocalizationDTO> getLocalizationDistrictByCountry(String code, String vendorType, String language) {
+    public List<LocalizationDTO> getLocalizationDistrictByCountry(String code,String vendorType,String language) {
         List<LocalizationDTO> list = localizationDTOMapper.selectLocalizationDistrictByCountry(code, vendorType, language);
 
 
@@ -214,4 +216,11 @@ public class LocalizationDTOService {
         return localizationDTO;
     }
 
+    public List<LocationDTO> listCityByIds(List<Long> cityIds, String vendorType) {
+        String language= OrgInformationUtil.getCurrentLanguage();
+        if(org.apache.commons.collections.CollectionUtils.isEmpty(cityIds)){
+            return  null;
+        }
+        return localizationDTOMapper.listCityByIds("CHN000000000",vendorType,language,cityIds);
+    }
 }

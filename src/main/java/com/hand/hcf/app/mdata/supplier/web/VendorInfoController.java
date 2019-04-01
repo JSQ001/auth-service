@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.supplier.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.dto.VendorInfoCO;
+import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.supplier.service.VendorInfoService;
 import com.hand.hcf.core.util.PaginationUtil;

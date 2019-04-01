@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.supplier.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.dto.VendorTypeCO;
+import com.hand.hcf.app.common.co.VendorTypeCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.domain.VendorType;

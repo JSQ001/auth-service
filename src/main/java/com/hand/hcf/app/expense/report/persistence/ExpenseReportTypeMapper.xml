@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper">
+
+    <select id="getCurrentUserExpenseReportType" resultType="com.hand.hcf.app.expense.report.domain.ExpenseReportType">
+        select
+			*
+		from
+			exp_report_type et
+		where
+			exists (
+				select
+					1
+				from
+					exp_report_type_company ec
+				where
+					et.id = ec.report_type_id
+				and ec.company_id = #{companyId}
+				and ec.enabled = 1
+			)
+		and et.set_of_books_id = #{setOfBooksId}
+		and et.deleted = false
+		and et.enabled = true
+		and (
+			et.apply_employee = '1001'
+			or (
+				et.apply_employee = '1002'
+				and exists (
+					select
+						1
+					from
+						exp_report_type_department ed
+					where
+						ed.report_type_id = et.id
+						and ed.department_id = #{departmentId}
+				)
+			)
+			or et.apply_employee = '1003'
+		)
+    </select>
+
+
+	<select id="getExpenseReportTypeByFormTypes" resultType="com.hand.hcf.app.expense.report.domain.ExpenseReportType">
+		select
+			*
+		from
+			exp_report_type et
+		where
+			1=1
+		  <if test="ew!=null">
+			  ${ew.sqlSegment}
+		  </if>
+	</select>
+</mapper>
