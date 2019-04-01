@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.workflow.brms.persistence.DroolsRuleDetailResultMapper">
+
+    <resultMap id="DroolsRuleDetailResultMap" type="com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetailResult">
+    </resultMap>
+
+    <select id="findDroolResultDetailResult" resultMap="DroolsRuleDetailResultMap">
+        select a.* from sys_drools_rule_detail_res drdr left join sys_drools_rule_detail_res a
+          on drdr.id = a.id and drdr.drools_rule_detail_oid = #{droolsRuleDetailOid}
+    </select>
+
+    <select id="findByDroolsRuleDetailResultOid" resultMap="DroolsRuleDetailResultMap">
+        select drdr.* from sys_drools_rule_detail_res drdr
+         where drdr.drools_rule_detail_result_oid = #{doorlsRuleDetailResultOids}
+    </select>
+
+</mapper>
