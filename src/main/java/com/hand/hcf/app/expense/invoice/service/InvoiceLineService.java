@@ -129,8 +129,8 @@ public class InvoiceLineService extends BaseService<InvoiceLineMapper,InvoiceLin
      * @param expenseLineId
      * @return
      */
-    public List<InvoiceLine> selectInvoiceByExpenseLineId(Long expenseLineId){
-        return baseMapper.selectInvoiceByExpenseLineId(expenseLineId);
+    public List<InvoiceLine> selectInvoiceByExpenseLineId(Long expenseLineId,String deductionFlag){
+        return baseMapper.selectInvoiceByExpenseLineId(expenseLineId, deductionFlag);
     }
 
     /**
@@ -149,5 +149,14 @@ public class InvoiceLineService extends BaseService<InvoiceLineMapper,InvoiceLin
         if(invoiceHeadCount == 0){
             invoiceHeadMapper.deleteById(invoiceLine.getInvoiceHeadId());
         }
+    }
+
+    /**
+     * 获取未被关联的发票行
+     * @param invoiceHeadId
+     * @return
+     */
+    public List<InvoiceLine> listNotAssignInvoiceLinesByInvoiceHeadId(Long invoiceHeadId) {
+        return baseMapper.listNotAssignInvoiceLinesByInvoiceHeadId(invoiceHeadId);
     }
 }

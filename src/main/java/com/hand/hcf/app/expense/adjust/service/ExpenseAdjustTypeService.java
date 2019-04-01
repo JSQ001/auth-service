@@ -13,7 +13,7 @@ import com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeRequestDTO;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustTypeAssignCompanyMapper;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustTypeMapper;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustTypeWebDTO;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
@@ -437,7 +437,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         for (int i = 1; i <= centers.size() ; i++) {
             ExpenseDimension dimension = new ExpenseDimension();
             DimensionCO costCenterDTO = centers.get(i - 1);
-            dimension.setDocumentType(DocumentTypeEnum.EXPENSE_ADJUST.getKey());
+            dimension.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
             dimension.setHeaderFlag(true);
             dimension.setDimensionField("dimension" + i + "Id");
             dimension.setSequence(i);

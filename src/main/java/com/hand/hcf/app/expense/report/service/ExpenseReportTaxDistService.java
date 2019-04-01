@@ -46,4 +46,13 @@ public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDis
         return delete(new EntityWrapper<ExpenseReportTaxDist>().in("exp_report_dist_id",distIds));
     }
 
+    /**
+     * 根据报账单ID获取税金分摊行信息
+     * @param headerId
+     * @return
+     */
+    public List<ExpenseReportTaxDist> getExpenseReportTaxDistByHeaderId(Long headerId){
+        return selectList(new EntityWrapper<ExpenseReportTaxDist>().eq("exp_report_header_id",headerId));
+    }
+
 }

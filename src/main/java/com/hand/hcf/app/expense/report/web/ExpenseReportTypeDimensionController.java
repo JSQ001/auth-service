@@ -1,9 +1,9 @@
 package com.hand.hcf.app.expense.report.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.DimensionCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDimension;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeDimensionService;
-import com.hand.hcf.app.mdata.client.dimension.DimensionCO;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

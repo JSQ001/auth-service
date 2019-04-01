@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @Author: bin.xie
  * @Date: 2018/12/5Document
  */
-public enum DocumentTypeEnum implements IEnum {
+public enum ExpenseDocumentTypeEnum implements IEnum {
     /* 单据类型枚举*/
     PUBLIC_REPORT(801001, "PUBLIC_REPORT","报账单") ,
     EXPENSE_ADJUST(801006, "ADJUST_TYPE","费用调整单"),
@@ -33,16 +33,16 @@ public enum DocumentTypeEnum implements IEnum {
      */
     private final String desc;
 
-    DocumentTypeEnum(final Integer key,final String category, final String desc) {
+    ExpenseDocumentTypeEnum(final Integer key, final String category, final String desc) {
         this.key = key;
         this.desc = desc;
         this.category = category;
     }
 
 
-    public static DocumentTypeEnum getType(Integer key) {
-        DocumentTypeEnum[] its = DocumentTypeEnum.values();
-        for (DocumentTypeEnum it : its) {
+    public static ExpenseDocumentTypeEnum getType(Integer key) {
+        ExpenseDocumentTypeEnum[] its = ExpenseDocumentTypeEnum.values();
+        for (ExpenseDocumentTypeEnum it : its) {
             if (it.getKey().equals(key)) {
                 return it;
             }

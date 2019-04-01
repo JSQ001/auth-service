@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.type.domain.enums.FieldDataTypeEnum;
 import com.hand.hcf.app.expense.type.domain.enums.FieldType;
 import com.hand.hcf.core.domain.Domain;
@@ -34,7 +34,7 @@ public class ExpenseDocumentField  extends Domain {
     private Long headerId;
     @JsonSerialize(using = ToStringSerializer.class)
     private Long lineId;
-    private DocumentTypeEnum documentType;
+    private ExpenseDocumentTypeEnum documentType;
     @TableField(value = "value", strategy = FieldStrategy.IGNORED)
     private String value;
     /**

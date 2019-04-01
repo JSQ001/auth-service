@@ -3,24 +3,12 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
-import com.hand.hcf.app.apply.budget.BudgetClient;
-import com.hand.hcf.app.apply.budget.dto.BudgetCheckMessageCO;
-import com.hand.hcf.app.apply.budget.dto.BudgetReserveCO;
-import com.hand.hcf.app.apply.budget.dto.BudgetReverseRollbackCO;
-import com.hand.hcf.app.apply.contract.dto.ContractHeaderCO;
-import com.hand.hcf.app.apply.expense.dto.ApplicationHeaderCO;
-import com.hand.hcf.app.apply.expense.dto.DocumentQueryParamCO;
-import com.hand.hcf.app.apply.expense.dto.OperateDocumentCO;
-import com.hand.hcf.app.apply.expense.dto.*;
-import com.hand.hcf.app.apply.prepayment.dto.CashPayRequisitionTypeCO;
-import com.hand.hcf.app.apply.prepayment.dto.CashPayRequisitionTypeSummaryCO;
-import com.hand.hcf.app.client.attachment.AttachmentCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.application.domain.*;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.application.persistence.ApplicationHeaderMapper;
 import com.hand.hcf.app.expense.application.web.dto.*;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.dto.DimensionDTO;
 import com.hand.hcf.app.expense.common.dto.DocumentLineDTO;
@@ -46,26 +34,12 @@ import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.contact.ContactCO;
-import com.hand.hcf.app.mdata.client.currency.CurrencyRateCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
-import com.hand.hcf.app.mdata.client.dimension.DimensionCO;
-import com.hand.hcf.app.mdata.client.period.PeriodCO;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterCO;
-import com.hand.hcf.app.mdata.client.workflow.WorkflowClient;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.ApprovalResultCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.CommonApprovalHistoryCO;
-import com.hand.hcf.app.mdata.client.workflow.dto.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.handler.ExcelExportHandler;
-import com.hand.hcf.core.lock.LockType;
-import com.hand.hcf.core.lock.annotation.Lock;
 import com.hand.hcf.core.redisLock.annotations.LockedObject;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.core.service.BaseService;
@@ -338,7 +312,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         dto.setEmployeeId(dto.getEmployeeId() != null ? dto.getEmployeeId() : OrgInformationUtil.getCurrentUserId());
         // 设置单据一些信息
         dto.setStatus(DocumentOperationEnum.GENERATE.getId());
-        dto.setDocumentType(DocumentTypeEnum.EXP_REQUISITION.getKey());
+        dto.setDocumentType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());
         dto.setFormOid(applicationTypeDimensionDTO.getFormOid());
         dto.setDocumentOid(UUID.randomUUID().toString());
         dto.setDocumentNumber(commonService.getCoding("EXPENSE_APPLICATION", dto.getCompanyId(), null));
@@ -350,7 +324,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             dimensions.stream().forEach(e -> {
                 e.setHeaderId(applicationHeader.getId());
                 e.setId(null);
-                e.setDocumentType(DocumentTypeEnum.EXP_REQUISITION.getKey());
+                e.setDocumentType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());
             });
             dimensionService.insertBatch(dimensions);
         }
@@ -452,12 +426,13 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         commonService.setDimensionValueNameAndOptions(applicationHeaderWebDTO.getDimensions(), applicationHeaderWebDTO.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(applicationHeaderWebDTO), true);
         setAttachments(applicationHeaderWebDTO);
-        if (applicationHeaderWebDTO.getContractHeaderId() != null) {
+        //jiu.zhao 合同
+        /*if (applicationHeaderWebDTO.getContractHeaderId() != null) {
             List<ContractHeaderCO> contractHeaderList = contractClient.listContractHeadersByIds(Collections.singletonList(applicationHeaderWebDTO.getContractHeaderId()));
             if (!CollectionUtils.isEmpty(contractHeaderList)) {
                 applicationHeaderWebDTO.setContractNumber(contractHeaderList.get(0).getContractNumber());
             }
-        }
+        }*/
         return applicationHeaderWebDTO;
     }
 
@@ -783,7 +758,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     }
 
     public List<DimensionDTO> queryDimensionColumn(Long id) {
-        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(id, DocumentTypeEnum.EXP_REQUISITION.getKey(), null);
+        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(id, ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey(), null);
         if (CollectionUtils.isEmpty(dimensions)) {
             return new ArrayList<>();
         }else{
@@ -817,12 +792,13 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         dto.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
         commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(dto), true);
-        if (dto.getContractHeaderId() != null) {
+        //jiu.zhao 合同
+        /*if (dto.getContractHeaderId() != null) {
             List<ContractHeaderCO> contractHeaderList = contractClient.listContractHeadersByIds(Collections.singletonList(dto.getContractHeaderId()));
             if (!CollectionUtils.isEmpty(contractHeaderList)) {
                 dto.setContractNumber(contractHeaderList.get(0).getContractNumber());
             }
-        }
+        }*/
         setAttachments(dto);
         return dto;
     }
@@ -1095,7 +1071,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      * @param closedDTO 关闭的申请单Id集合和意见
      */
     @Transactional(rollbackFor = Exception.class)
-    @Lock(name = SyncLockPrefix.EXP_APPLICATION, lockType = LockType.TRY_LOCK_LIST, listKey = "#closedDTO.headerIds")
     public boolean closedHeader(ClosedDTO closedDTO) {
         if (CollectionUtils.isEmpty(closedDTO.getHeaderIds())) {
             return true;
@@ -1120,7 +1095,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             List<CommonApprovalHistoryCO> collect = applicationHeaders.stream().map(e -> {
                 CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
                 historyCO.setEntityOid(UUID.fromString(e.getDocumentOid()));
-                historyCO.setEntityType(DocumentTypeEnum.EXP_REQUISITION.getKey());
+                historyCO.setEntityType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());
                 historyCO.setOperatorOid(OrgInformationUtil.getCurrentUserOid());
                 historyCO.setOperation(7001);
                 historyCO.setOperationDetail(closedDTO.getMessages());
@@ -1196,7 +1171,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         if (period == null) {
             throw new BizException(RespCode.EXPENSE_PERIODS_ERROR);
         }
-        budgetClient.closeRequisition(period, "EXP_REQUISITION", header.getId(), lineDistId);
+        //jiu.zhao 预算
+        //budgetClient.closeRequisition(period, "EXP_REQUISITION", header.getId(), lineDistId);
     }
 
     /**
@@ -1475,7 +1451,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
 
     @Transactional(rollbackFor = Exception.class)
-    @Lock(name = SyncLockPrefix.EXP_APPLICATION, keys = "#headerId")
     public boolean closedLine(Long id, String message, Long headerId) {
         ApplicationLine line = lineService.selectById(id);
         if (null == line || ClosedTypeEnum.CLOSED.equals(line.getClosedFlag())){
@@ -1523,7 +1498,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
         historyCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
-        historyCO.setEntityType(DocumentTypeEnum.EXP_REQUISITION.getKey());
+        historyCO.setEntityType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());
         historyCO.setOperatorOid(OrgInformationUtil.getCurrentUserOid());
         historyCO.setOperation(7001);
         historyCO.setOperationDetail(message);
@@ -1544,7 +1519,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         boolean needApply = prepaymentType.getNeedApply();
         Integer allType = prepaymentType.getAllType().getId();
         Integer formBasis = prepaymentType.getApplicationFormBasis().getId();
-        String sourceDocumentCategory = DocumentTypeEnum.EXP_REQUISITION.name(); //单据大类
+        String sourceDocumentCategory = ExpenseDocumentTypeEnum.EXP_REQUISITION.name(); //单据大类
         Integer status = DocumentOperationEnum.APPROVAL_PASS.getId(); //单据状态 通过
         List<Long> typeIdList = null;
 
@@ -1656,10 +1631,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         dto.setCurrencyCode(currencyCode);
 
         //只涉及报账单关联
-        dto.setRelatedDocumentCategory(DocumentTypeEnum.PUBLIC_REPORT.getCategory());
+        dto.setRelatedDocumentCategory(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory());
         dto.setExpReportHeaderId(expReportHeaderId);
 
-        dto.setSourceDocumentCategory(DocumentTypeEnum.EXP_REQUISITION.getCategory());
+        dto.setSourceDocumentCategory(ExpenseDocumentTypeEnum.EXP_REQUISITION.getCategory());
         // 审批通过
         dto.setStatus(DocumentOperationEnum.APPROVAL_PASS.getId());
         List<ApplicationHeaderAbbreviateDTO> applicationHeaderDtos = baseMapper.selectRelateExpenseReportApplications(page, dto);
@@ -1726,7 +1701,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      */
     public List<PrepaymentRequisitionReleaseCO> getPrepaymentByDocumentNumber(String documentNumber){
         List<PrepaymentRequisitionReleaseCO>  result = baseMapper.getPrepaymentBydocumentNumber(documentNumber,new EntityWrapper<ExpenseRequisitionReqRelease>()
-                .eq("err.source_doc_category",DocumentTypeEnum.EXP_REQUISITION.name()));
+                .eq("err.source_doc_category", ExpenseDocumentTypeEnum.EXP_REQUISITION.name()));
         return result ;
     }
 

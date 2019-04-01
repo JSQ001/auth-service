@@ -3,6 +3,8 @@ package com.hand.hcf.app.expense.report.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
+import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
+import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportDist;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportLine;
@@ -828,6 +830,25 @@ public class ExpenseReportController {
     }
 
     /**
+     * 根据账本自动生成费用行
+     * @param headerId
+     * @param expenseBookIds
+     */
+    /**
+     * @api {POST} /api/expense/report/line/create/from/book 【报账单】导入费用
+     * @apiDescription 根据账本信息自动生成费用相关信息
+     * @apiGroup ExpenseReport
+     *
+     * @apiParam (请求参数){Long} headerId 报账单ID
+     * @apiParam (请求body){List(Long)} expenseBookIds 账本ID集合
+     */
+    @PostMapping("/line/create/from/book")
+    public void saveExpenseReportLineFromBook(@RequestParam Long headerId,
+                                              @RequestBody List<Long> expenseBookIds){
+        expenseReportLineService.saveExpenseReportLineFromBook(headerId,expenseBookIds);
+    }
+
+    /**
      * @api {GET} /api/expense/report/line/query/by/headerId 【报账单】查询报账单下的费用行信息
      * @apiDescription 查询报账单下的费用行信息
      * @apiGroup ExpenseReport
@@ -1354,13 +1375,21 @@ public class ExpenseReportController {
     }
 
     /**
-     * {GET} /api/expense/report/create/voucher
+     * {GET} /api/expense/report/create/accounting
      * @param reportHeaderId
      * @return
      */
-    @RequestMapping(value = "/create/voucher", method = RequestMethod.GET)
-    public ResponseEntity saveInitializeExpReportGeneralLedgerJournalLine(@RequestParam("reportHeaderId") Long reportHeaderId){
-        String reuslt = expenseReportHeaderService.saveInitializeExpReportGeneralLedgerJournalLine(reportHeaderId);
+    /**
+     * @api {POST} /api/expense/report/create/accounting 【报账单】创建凭证
+     * @apiDescription 创建凭证
+     * @apiGroup ExpenseReport
+     * @apiParam {Long} reportHeaderId 报账单头ID
+     * @apiParam {String} accountingDate 财务日期
+     */
+    @PostMapping(value = "/create/accounting")
+    public ResponseEntity saveInitializeExpReportGeneralLedgerJournalLine(@RequestParam("reportHeaderId") Long reportHeaderId,
+                                                                          @RequestParam("accountingDate") String accountingDate){
+        String reuslt = expenseReportHeaderService.saveInitializeExpReportGeneralLedgerJournalLine(reportHeaderId,accountingDate);
         return ResponseEntity.ok(reuslt);
     }
 

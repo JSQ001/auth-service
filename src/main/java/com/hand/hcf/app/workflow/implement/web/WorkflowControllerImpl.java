@@ -253,4 +253,9 @@ public class WorkflowControllerImpl {
 
         return documentOidList;
     }
+
+    public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> formIds) {
+        List<ApprovalFormCO> approvalFormCOList = this.listApprovalFormByIds(formIds);
+        return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
+    }
 }

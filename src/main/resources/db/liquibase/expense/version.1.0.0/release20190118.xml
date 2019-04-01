@@ -1,0 +1,2337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+    <changeSet id="201901161141001" author="xue.han">
+        <createTable tableName="invoice_head" remarks="发票头表">
+            <column name="id" type="bigint" remarks="发票头ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_invoice_head"/>
+            </column>
+            <column name="invoice_type_id" type="bigint" remarks="发票类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_date" type="timestamp" remarks="开票日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="invoice_no" type="varchar(30)" remarks="发票号码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_code" type="varchar(30)" remarks="发票代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="machine_no" type="varchar(30)" remarks="设备编号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="check_code" type="varchar(30)" remarks="校验码(后6位)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total_amount" type="${amount}" remarks="价税合计">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_amount" type="${amount}" remarks="金额合计">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tax_total_amount" type="${amount}" remarks="税额合计">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchacge_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remark" type="varchar(1000)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="buyer_name" type="varchar(1000)" remarks="购方名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="buyer_tax_no" type="varchar(1000)" remarks="购方纳税人识别号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="buyer_add_ph" type="varchar(1000)" remarks="购方地址/电话">
+                <constraints nullable="true"/>
+            </column>
+            <column name="buyer_account" type="varchar(1000)" remarks="购方开户行/账号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="saler_name" type="varchar(1000)" remarks="销方名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="saler_tax_no" type="varchar(1000)" remarks="销方纳税人识别号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="saler_add_ph" type="varchar(1000)" remarks="销方地址/电话">
+                <constraints nullable="true"/>
+            </column>
+            <column name="saler_account" type="varchar(1000)" remarks="销方开户行/账号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="cancel_flag" type="boolean" defaultValue="0" remarks="作废标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="red_invoice_flag" type="boolean" defaultValue="0" remarks="红票标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_method" type="varchar(50)" remarks="创建方式">
+                <constraints nullable="false"/>
+            </column>
+            <column name="check_result" type="boolean" defaultValue="0" remarks="验真状态">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="invoice_line" remarks="发票行表">
+            <column name="id" type="bigint" remarks="发票行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_invoice_line"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_head_id" type="bigint" remarks="发票头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_line_num" type="int" remarks="发票行序号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="goods_name" type="varchar(1000)" remarks="货物或应税劳务、服务名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="specification_model" type="varchar(1000)" remarks="规格型号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="unit" type="varchar(30)" remarks="单位">
+                <constraints nullable="true"/>
+            </column>
+            <column name="num" type="bigint" remarks="数量">
+                <constraints nullable="true"/>
+            </column>
+            <column name="unit_price" type="decimal(27,9)" remarks="单价">
+                <constraints nullable="true"/>
+            </column>
+            <column name="detail_amount" type="${amount}" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_rate" type="varchar(30)" remarks="税率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_amount" type="${amount}" remarks="税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="invoice_line_dist" remarks="发票分配行表">
+            <column name="id" type="bigint" remarks="发票分配行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_invoice_line_dist"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_line_id" type="bigint" remarks="关联发票行ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_no" type="varchar(30)" remarks="发票号码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_code" type="varchar(30)" remarks="发票代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="goods_name" type="varchar(1000)" remarks="货物或应税劳务、服务名称">
+                <constraints nullable="true"/>
+            </column>
+            <column name="specification_model" type="varchar(1000)" remarks="规格型号">
+                <constraints nullable="true"/>
+            </column>
+            <column name="unit" type="varchar(30)" remarks="单位">
+                <constraints nullable="true"/>
+            </column>
+            <column name="num" type="bigint" remarks="数量">
+                <constraints nullable="true"/>
+            </column>
+            <column name="unit_price" type="decimal(27,9)" remarks="单价">
+                <constraints nullable="true"/>
+            </column>
+            <column name="detail_amount" type="${amount}" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_rate" type="varchar(30)" remarks="税率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_amount" type="${amount}" remarks="税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="invoice_line_expence" remarks="发票行报销记录表">
+            <column name="id" type="bigint" remarks="发票行报销记录ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_invoice_line_expence"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_dist_id" type="bigint" remarks="发票分配行ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_no" type="varchar(30)" remarks="发票号码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_code" type="varchar(30)" remarks="发票代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="detail_amount" type="${amount}" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_rate" type="varchar(30)" remarks="税率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_amount" type="${amount}" remarks="税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_expense_head_id" type="bigint" remarks="关联报账单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_expense_line_id" type="bigint" remarks="关联报账单行ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(30)" remarks="状态">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201901231556001" author="xue.han">
+        <addNotNullConstraint tableName="invoice_head" columnName="invoice_date" columnDataType="timestamp"/>
+    </changeSet>
+    <changeSet id="201901240056001" author="xue.han">
+        <renameColumn tableName="invoice_head" oldColumnName="exchacge_rate" newColumnName="exchange_rate" columnDataType="${amount}"/>
+    </changeSet>
+
+    <changeSet id="201902201635001" author="xue.han">
+        <dropNotNullConstraint tableName="invoice_head" columnName="total_amount" columnDataType="${amount}"/>
+    </changeSet>
+
+    <changeSet id="201902210928001" author="shaofeng.zheng">
+        <addColumn tableName="exp_application_line">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id"></column>
+        </addColumn>
+        <addColumn tableName="exp_application_line_dist">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201902211103001" author="shaofeng.zheng">
+        <createTable tableName="exp_expense_book" remarks="账本明细表">
+            <column name="id" type="bigint" remarks="账本费用ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_expense_book"/>
+            </column>
+            <column name="expense_type_id" type="bigint" remarks="费用类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_date" type="timestamp" remarks="发生日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="${amount}" remarks="金额">
+                <constraints nullable="true"/>
+            </column>
+            <column name="functional_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="varchar(200)" remarks="数量">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="${amount}" remarks="单价">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_unit" type="varchar(200)" remarks="单位"></column>
+            <column name="remarks" type="varchar(2000)" remarks="备注"></column>
+            <column name="attachment_oid" type="varchar(2000)" remarks="附件oid"></column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201902211645001" author="shaofeng.zheng">
+        <addColumn tableName="invoice_line_expence">
+            <column name="expense_book_id" type="bigint" remarks="账单id"></column>
+        </addColumn>
+        <dropNotNullConstraint tableName="invoice_line_expence" columnName="exp_expense_head_id" columnDataType="bigint"></dropNotNullConstraint>
+        <dropNotNullConstraint tableName="invoice_line_expence" columnName="exp_expense_line_id" columnDataType="bigint"></dropNotNullConstraint>
+    </changeSet>
+
+    <changeSet id="201902211704001" author="xue.han">
+        <createTable tableName="exp_report_type" remarks="报账单类型表">
+            <column name="id" type="bigint" remarks="报账单类型ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_type"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="report_type_code" type="varchar(50)" remarks="报账单类型代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="report_type_name" type="varchar(100)" remarks="报账单类型名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_id" type="bigint" remarks="关联表单ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_type" type="int" remarks="关联表单类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="all_expense_flag" type="boolean" remarks="是否关联全部费用类型标志(全部类型:1;部分类型:0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="budget_flag" type="boolean" remarks="预算管控标志(启用:Y;不启用:N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_form_basis" type="varchar(50)" remarks="关联申请单依据">
+                <constraints nullable="false"/>
+            </column>
+            <column name="associate_contract" type="boolean" remarks="关联合同标志(可关联:Y;不可关联:N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_required" type="boolean" remarks="合同必输标志(必输:Y;非必输:N)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="multi_payee" type="boolean" remarks="多收款方标志(多收款方:Y;单一收款方:N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payee_type" type="varchar(50)" remarks="收款方属性">
+                <constraints nullable="false"/>
+            </column>
+            <column name="all_cash_transaction_class" type="boolean" remarks="是否全部付款用途标志(全部类型:1;部分类型:0)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="varchar(50)" remarks="付款方式类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_off_application" type="boolean" remarks="核销依据:是否关联相同申请单(是:Y;否:N)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="write_off_contract" type="boolean" remarks="核销依据:是否关联相同合同(是:Y;否:N)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="apply_employee" type="varchar(50)" remarks="适用人员">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted" type="boolean" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_report_type" columnNames="set_of_books_id,report_type_code" constraintName="exp_report_type_u1"/>
+
+        <createTable tableName="exp_report_type_i18n" remarks="报账单类型多语言表">
+            <column name="id" type="bigint" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_report_type_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_report_type_i18n"/>
+            </column>
+            <column name="report_type_name" type="varchar(100)" remarks="报账单类型名称">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_expense_type" remarks="报账单类型关联费用类型表">
+            <column name="id" type="bigint" remarks="报账单类型关联费用类型表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_report_type_expense_type"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_type_id" type="bigint" remarks="费用类型ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_tran_class" remarks="报账单类型关联付款用途表">
+            <column name="id" type="bigint" remarks="报账单类型关联付款用途表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_report_type_tran_class"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_class_id" type="bigint" remarks="付款用途ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_department" remarks="报账单类型关联部门表">
+            <column name="id" type="bigint" remarks="报账单类型关联部门表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_report_type_department"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_user_group" remarks="报账单类型关联人员组表">
+            <column name="id" type="bigint" remarks="报账单类型关联人员组表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_report_type_user_group"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_group_id" type="bigint" remarks="人员组ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_company" remarks="报账单类型关联公司表">
+            <column name="id" type="bigint" remarks="报账单类型关联公司表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_type_company"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_code" type="varchar(100)" remarks="公司代码">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="enabled" type="boolean" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+
+
+    <changeSet id="201902260912001" author="bin.xie">
+        <dropColumn tableName="exp_application_header" columnName="closed_flag"/>
+        <dropColumn tableName="exp_application_line" columnName="closed_flag"/>
+        <addColumn tableName="exp_application_header">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+            <column name="closed_amount" type="${amount}" remarks="已关闭金额"/>
+        </addColumn>
+        <addColumn tableName="exp_application_line">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+            <column name="closed_amount" type="${amount}" remarks="已关闭金额(原币)"/>
+            <column name="closed_functional_amount" type="${amount}" remarks="已关闭金额(本位币)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201902271151001" author="bin.xie">
+        <addColumn tableName="exp_application_header">
+            <column name="closed_functional_amount" type="${amount}" remarks="已关闭金额(本位币)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201902280856001" author="bin.xie">
+        <dropColumn tableName="exp_application_line_dist" columnName="closed_flag"/>
+        <addColumn tableName="exp_application_line_dist">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201902281025001" author="shilin.mao">
+        <validCheckSum>8:179a143753cf6e9f644d6f56e8917398</validCheckSum>
+        <createTable tableName="exp_input_tax_header" remarks="进项税业务单头表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_header"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_number" type="varchar(50)" remarks="单据编号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id" type="varchar(50)" remarks="申请人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transfer_date" type="timestamp" remarks="业务日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transfer_type" type="varchar(50)" remarks="业务大类">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transfer_proportion" type="bigint" remarks="计算比例">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use_type" type="varchar(50)" remarks="用途类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="bigint" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_amount" type="bigint" remarks="基数金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_function_amount" type="bigint" remarks="基数本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="bigint" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(200)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(30)" remarks="状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_status" type="varchar(30)" remarks="审核状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reverse_flag" type="varchar(30)" remarks="反冲状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attachment_oid" type="varchar(4000)" remarks="附件OID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="varchar(36)" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(36)" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201902281025002" author="shilin.mao">
+        <validCheckSum>8:d9a8a34e8eb4d9586e89b7cc74050cb8</validCheckSum>
+        <createTable tableName="exp_input_tax_line" remarks="进项税业务单行表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_line"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="input_tax_header_id" type="bigint" remarks="单据头id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_report_line_id" type="bigint" remarks="报账单行id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use_type" type="varchar(50)" remarks="用途类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transfer_proportion" type="bigint" remarks="计算比例">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="bigint" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_amount" type="bigint" remarks="基数金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_function_amount" type="bigint" remarks="基数本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="bigint" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(200)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(30)" remarks="状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_status" type="varchar(30)" remarks="审核状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reverse_flag" type="varchar(30)" remarks="反冲状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="varchar(36)" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(36)" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201902281025003" author="shilin.mao">
+        <validCheckSum>8:5478ffcb491bf65198bc2d7caf4ae8b0</validCheckSum>
+        <createTable tableName="exp_input_tax_dist" remarks="进项税业务分摊行行表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_dist"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="input_tax_line_id" type="bigint" remarks="单据行id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_report_dist_id" type="bigint" remarks="分摊行id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use_type" type="varchar(50)" remarks="用途类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transfer_proportion" type="bigint" remarks="计算比例">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resiponsibility_center_id" type="bigint" remarks="责任中心id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension2_id" type="bigint" remarks="维度2">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension3_id" type="bigint" remarks="维度3">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension4_id" type="bigint" remarks="维度4">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension5_id" type="bigint" remarks="维度5">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension6_id" type="bigint" remarks="维度6">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension7_id" type="bigint" remarks="维度7">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension8_id" type="bigint" remarks="维度8">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension9_id" type="bigint" remarks="维度9">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension10_id" type="bigint" remarks="维度10">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension11_id" type="bigint" remarks="维度11">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension12_id" type="bigint" remarks="维度12">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension13_id" type="bigint" remarks="维度13">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension14_id" type="bigint" remarks="维度14">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension15_id" type="bigint" remarks="维度15">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension16_id" type="bigint" remarks="维度16">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension17_id" type="bigint" remarks="维度17">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension18_id" type="bigint" remarks="维度18">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension19_id" type="bigint" remarks="维度19">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension20_id" type="bigint" remarks="维度20">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate" type="bigint" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_amount" type="bigint" remarks="基数金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_function_amount" type="bigint" remarks="基数本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="bigint" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(30)" remarks="状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_status" type="varchar(30)" remarks="审核状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reverse_flag" type="varchar(30)" remarks="反冲状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="varchar(36)" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="varchar(36)" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201902282221001" author="shaofeng.zheng">
+        <comment>初始化发票类型</comment>
+        <sqlFile path="classpath:db/liquibase/expense/sql/insert_invoice_type.sql" encoding="UTF-8"/>
+    </changeSet>
+
+
+    <changeSet id="201903011319001" author="shaofeng.zheng">
+        <addColumn tableName="invoice_line_expence">
+            <column name="expense_book_invoice_method" type="varchar(50)" remarks="账本发票行录入方式：（BY_HAND手工录入、FROM_INVOICE票夹导入）"></column>
+            <column name="report_line_invoice_method" type="varchar(50)" remarks="费用行发票录入方式：（BY_HAND手工录入、FROM_INVOICE票夹导入）"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903010855001" author="bin.xie">
+        <addColumn tableName="exp_application_type_dimension">
+            <column name="required_flag" remarks="是否必输" type="tinyint" defaultValue="1"/>
+        </addColumn>
+        <addColumn tableName="exp_dimension">
+            <column name="required_flag" remarks="是否必输" type="tinyint" defaultValue="1"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903011117001" author="xue.han">
+        <createTable tableName="exp_report_type_dimension" remarks="报账单类型关联维度表">
+            <column name="id" type="bigint" remarks="报账单类型关联维度表ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_report_type_dimension"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension_id" type="bigint" remarks="维度ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="must_enter" type="boolean" remarks="是否必输">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default_value_id" type="bigint" remarks="默认维值ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="position" type="varchar(50)" remarks="布局位置">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence_number" type="int" remarks="优先级">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_report_type_dimension" columnNames="report_type_id,dimension_id" constraintName="exp_report_type_dimension_u1"/>
+        <addUniqueConstraint tableName="exp_report_type_dimension" columnNames="position,sequence_number" constraintName="exp_report_type_dimension_u2"/>
+
+        <createTable tableName="exp_report_type_dist_setting" remarks="报账单类型分摊设置表">
+            <column name="id" type="bigint" remarks="报账单类型分摊设置表ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_report_type_dist_setting"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_dist_flag" type="boolean" remarks="公司参与分摊标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_dist_range" type="varchar(100)" remarks="公司分摊范围">
+                <constraints nullable="true"/>
+            </column>
+            <column name="company_default_id" type="bigint" remarks="默认分摊公司ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="company_visible" type="varchar(100)" remarks="公司可见设置">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="department_dist_flag" type="boolean" remarks="部门参与分摊标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_dist_range" type="varchar(100)" remarks="部门分摊范围">
+                <constraints nullable="true"/>
+            </column>
+            <column name="department_default_id" type="bigint" remarks="默认分摊部门ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="department_visible" type="varchar(100)" remarks="部门可见设置">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="res_center_dist_flag" type="boolean" remarks="责任中心参与分摊标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="res_dist_range" type="varchar(100)" remarks="责任中心分摊范围">
+                <constraints nullable="true"/>
+            </column>
+            <column name="res_default_id" type="bigint" remarks="默认分摊责任中心ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="res_visible" type="varchar(100)" remarks="责任中心可见设置">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="exp_report_type_dist_range" remarks="报账单类型分摊范围表">
+            <column name="id" type="bigint" remarks="报账单类型分摊范围表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_report_type_dist_range"/>
+            </column>
+            <column name="report_type_id" type="bigint" remarks="报账单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dist_dimension" type="varchar(100)" remarks="分摊项">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value_id" type="bigint" remarks="分摊项ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="201903041814001" author="shaofeng.zheng">
+        <addColumn tableName="invoice_head" >
+            <column name="from_book" type="boolean" remarks="是否来源账本" defaultValue="0">
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903041724001" author="bin.xie">
+        <dropColumn tableName="exp_dimension" columnName="name"/>
+    </changeSet>
+
+    <changeSet id="201903041739001" author="bin.xie">
+        <dropColumn tableName="exp_expense_field" columnName="json_string"/>
+    </changeSet>
+
+    <changeSet id="201903051013001" author="shilin.mao">
+        <renameColumn tableName="exp_input_tax_dist" oldColumnName="resiponsibility_center_id" newColumnName="responsibility_center_id" columnDataType="bigint"/>
+    </changeSet>
+    <changeSet id="201903051134002" author="shilin.mao">
+       <dropColumn tableName="exp_input_tax_header" columnName="employee_id"/>
+        <addColumn tableName="exp_input_tax_header">
+            <column name="applicant_id" type="bigint" remarks="申请人id">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903041132001" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type" remarks="差旅申请单类型定义表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="varchar(50)" remarks="类型代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)" remarks="类型名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_id" type="bigint" remarks="关联表单ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="budget_flag" type="tinyint" defaultValue="0" remarks="预算管控标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="all_type_flag" type="tinyint" defaultValue="1" remarks="可用申请类型（true全部，false部分）">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route" type="tinyint" defaultValue="1" remarks="行程填写（1审批前，0审批后）">
+                <constraints nullable="false"/>
+            </column>
+            <column name="visible_user_scope" type="int" defaultValue="1001" remarks="可见人员范围">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="tinyint" defaultValue="1" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="tinyint" defaultValue="0" remarks="是否删除 1：删除 0：未删除">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type" columnNames="set_of_books_id, code" constraintName="exp_travel_app_type_u1"/>
+    </changeSet>
+    <changeSet id="201903041132002" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_i18n" remarks="差旅申请单类型多语言表">
+            <column name="id" type="bigint" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_travel_app_type_i18n"/>
+            </column>
+            <column name="language" type="varchar(20)" remarks="语言">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_travel_app_type_i18n"/>
+            </column>
+            <column name="name" type="varchar(100)" remarks="差旅申请单类型名称">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903041132003" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_ass_com" remarks="差旅申请单类型关联公司表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type_ass_com"/>
+            </column>
+            <column name="type_id" type="bigint" remarks="差旅申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="tinyint" defaultValue="1" remarks="是否启用">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_com" columnNames="type_id, company_id" constraintName="exp_travel_app_type_ass_com_u1"/>
+    </changeSet>
+    <changeSet id="201903041132004" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_ass_dep" remarks="差旅申请单类型关联部门表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type_ass_dep"/>
+            </column>
+            <column name="type_id" type="bigint" remarks="差旅申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_dep" columnNames="type_id, department_id" constraintName="exp_travel_app_type_ass_dep_u1"/>
+    </changeSet>
+    <changeSet id="201903041132005" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_ass_ug" remarks="差旅申请单类型关联人员组表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type_ass_ug"/>
+            </column>
+            <column name="type_id" type="bigint" remarks="差旅申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_group_id" type="bigint" remarks="人员组ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_ug" columnNames="type_id, user_group_id" constraintName="exp_travel_app_type_ass_ug_u1"/>
+    </changeSet>
+    <changeSet id="201903041132006" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_ass_typ" remarks="差旅申请单类型关联申请类型表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type_ass_typ"/>
+            </column>
+            <column name="type_id" type="bigint" remarks="差旅申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_type_id" type="bigint" remarks="申请类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_typ" columnNames="type_id, requisition_type_id" constraintName="exp_travel_app_type_ass_typ_u1"/>
+    </changeSet>
+    <changeSet id="201903041132007" author="shouting.cheng">
+        <createTable tableName="exp_travel_app_type_ass_dim" remarks="差旅申请单类型关联维度表">
+            <column name="id" type="bigint" remarks="">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_type_ass_dim"/>
+            </column>
+            <column name="type_id" type="bigint" remarks="差旅申请单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension_id" type="bigint" remarks="维度ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defaultValue" type="bigint" remarks="默认维值ID"/>
+            <column name="required_flag" type="tinyint" defaultValue="1" remarks="是否必输">
+                <constraints nullable="false"/>
+            </column>
+            <column name="header_flag" type="tinyint" defaultValue="1" remarks="布局位置（true单据头，false申请行）">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="int" remarks="优先级">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_dim" columnNames="type_id, dimension_id" constraintName="exp_travel_app_type_ass_dim_u1"/>
+        <addUniqueConstraint tableName="exp_travel_app_type_ass_dim" columnNames="type_id, header_flag, sequence" constraintName="exp_travel_app_type_ass_dim_u2"/>
+    </changeSet>
+    <changeSet id="201903071948001" author="shouting.cheng">
+        <renameColumn tableName="exp_travel_app_type_ass_dim" oldColumnName="defaultValue" newColumnName="default_value" columnDataType="bigint"/>
+    </changeSet>
+    <changeSet id="201903080922001" author="shilin.mao">
+        <dropNotNullConstraint tableName="exp_input_tax_header" columnName="attachment_oid" columnDataType="varchar(2000)"/>
+    </changeSet>
+
+    <changeSet id="201903041411001" author="kai.zhang">
+        <createTable tableName="exp_report_header" remarks="报账单头表">
+            <column name="id" type="bigint" remarks="报账单头ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_header"/>
+            </column>
+            <column name="requisition_number" type="varchar(100)" remarks="单据编号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="applicant_id" type="bigint" remarks="申请人ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(20)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_amount" type="${amount}" remarks="总金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)" remarks="备注"/>
+            <column name="document_type_id" type="bigint" remarks="单据类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="int" remarks="状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_flag" type="int" remarks="审核状态">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_date" type="timestamp" remarks="审核日期"/>
+            <column name="payee_category" type="varchar(30)" remarks="收款方类型(员工:EMPLOYEE;供应商:VENDER)"/>
+            <column name="payee_id" type="bigint" remarks="收款方ID"/>
+            <column name="account_number" type="varchar(200)" remarks="收款方账户"/>
+            <column name="account_name" type="varchar(200)" remarks="收款方户名"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903041411002" author="kai.zhang">
+        <createTable tableName="exp_report_line" remarks="报账单行表">
+            <column name="id" type="bigint" remarks="报账单行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_line"/>
+            </column>
+            <column name="exp_report_header_id" type="bigint" remarks="报账单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_type_id" type="bigint" remarks="费用类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_date" type="timestamp" remarks="发生日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int" remarks="数量"/>
+            <column name="price" type="${amount}" remarks="单价"/>
+            <column name="uom" type="varchar(50)" remarks="单位"/>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(20)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="${amount}" remarks="报账金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_amount" type="${amount}" remarks="费用金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_function_amount" type="${amount}" remarks="费用本位币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_amount" type="${amount}" remarks="税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_function_amount" type="${amount}" remarks="本币税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="installment_deduction_flag" type="varchar(1)" remarks="分期抵扣标志(是：Y；否：N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="as_sale_flag" type="varchar(1)" remarks="视同销售标志(是：Y；否：N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)" remarks="备注"/>
+            <column name="reverse_flag" type="varchar(1)" remarks="反冲标志(未反冲：N；反冲提交未审批：P；已反冲：Y)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use_type" type="varchar(50)" remarks="用途类型"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903041411003" author="kai.zhang">
+        <createTable tableName="exp_report_dist" remarks="报账单分摊行表">
+            <column name="id" type="bigint" remarks="报账单分摊行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_dist"/>
+            </column>
+            <column name="exp_report_header_id" type="bigint" remarks="报账单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_report_line_id" type="bigint" remarks="报账单行ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_type_id" type="bigint" remarks="费用类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_header_id" type="bigint" remarks="关联申请单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心ID"/>
+            <column name="amount" type="${amount}" remarks="分摊金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(20)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_dist_amount" type="${amount}" remarks="税分摊额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_dist_function_amount" type="${amount}" remarks="税本位币分摊金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1"/>
+            <column name="dimension2_id" type="bigint" remarks="维度2"/>
+            <column name="dimension3_id" type="bigint" remarks="维度3"/>
+            <column name="dimension4_id" type="bigint" remarks="维度4"/>
+            <column name="dimension5_id" type="bigint" remarks="维度5"/>
+            <column name="dimension6_id" type="bigint" remarks="维度6"/>
+            <column name="dimension7_id" type="bigint" remarks="维度7"/>
+            <column name="dimension8_id" type="bigint" remarks="维度8"/>
+            <column name="dimension9_id" type="bigint" remarks="维度9"/>
+            <column name="dimension10_id" type="bigint" remarks="维度10"/>
+            <column name="dimension11_id" type="bigint" remarks="维度11"/>
+            <column name="dimension12_id" type="bigint" remarks="维度12"/>
+            <column name="dimension13_id" type="bigint" remarks="维度13"/>
+            <column name="dimension14_id" type="bigint" remarks="维度14"/>
+            <column name="dimension15_id" type="bigint" remarks="维度15"/>
+            <column name="dimension16_id" type="bigint" remarks="维度16"/>
+            <column name="dimension17_id" type="bigint" remarks="维度17"/>
+            <column name="dimension18_id" type="bigint" remarks="维度18"/>
+            <column name="dimension19_id" type="bigint" remarks="维度19"/>
+            <column name="dimension20_id" type="bigint" remarks="维度20"/>
+            <column name="reverse_flag" type="varchar(1)" remarks="反冲标志(未反冲：N；反冲提交未审批：P；已反冲：Y)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903041411004" author="kai.zhang">
+        <createTable tableName="exp_report_tax_dist" remarks="报账单税金分摊行表">
+            <column name="id" type="bigint" remarks="报账单税金分摊行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_tax_dist"/>
+            </column>
+            <column name="exp_report_header_id" type="bigint" remarks="报账单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_report_dist_id" type="bigint" remarks="报账单分摊行ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expense_type_id" type="bigint" remarks="费用类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心ID"/>
+            <column name="tax_amount" type="${amount}" remarks="分摊税额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(20)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_rate" type="varchar(30)" remarks="税率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1"/>
+            <column name="dimension2_id" type="bigint" remarks="维度2"/>
+            <column name="dimension3_id" type="bigint" remarks="维度3"/>
+            <column name="dimension4_id" type="bigint" remarks="维度4"/>
+            <column name="dimension5_id" type="bigint" remarks="维度5"/>
+            <column name="dimension6_id" type="bigint" remarks="维度6"/>
+            <column name="dimension7_id" type="bigint" remarks="维度7"/>
+            <column name="dimension8_id" type="bigint" remarks="维度8"/>
+            <column name="dimension9_id" type="bigint" remarks="维度9"/>
+            <column name="dimension10_id" type="bigint" remarks="维度10"/>
+            <column name="dimension11_id" type="bigint" remarks="维度11"/>
+            <column name="dimension12_id" type="bigint" remarks="维度12"/>
+            <column name="dimension13_id" type="bigint" remarks="维度13"/>
+            <column name="dimension14_id" type="bigint" remarks="维度14"/>
+            <column name="dimension15_id" type="bigint" remarks="维度15"/>
+            <column name="dimension16_id" type="bigint" remarks="维度16"/>
+            <column name="dimension17_id" type="bigint" remarks="维度17"/>
+            <column name="dimension18_id" type="bigint" remarks="维度18"/>
+            <column name="dimension19_id" type="bigint" remarks="维度19"/>
+            <column name="dimension20_id" type="bigint" remarks="维度20"/>
+            <column name="reverse_flag" type="varchar(1)" remarks="反冲标志(未反冲：N；反冲提交未审批：P；已反冲：Y)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903041411005" author="kai.zhang">
+        <createTable tableName="exp_report_payment_schedule" remarks="报账单计划付款行表">
+            <column name="id" type="bigint" remarks="报账单计划付款行ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_report_pay_schedule"/>
+            </column>
+            <column name="exp_report_header_id" type="bigint" remarks="报账单头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="applicant_id" type="bigint" remarks="申请人ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(20)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="${amount}" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="function_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)" remarks="备注"/>
+            <column name="payment_method" type="varchar(30)" remarks="付款方式类型（线上：ONLINE_PAYMENT；线下：OFFLINE_PAYMENT；落地文件：EBANK_PAYMENT）">
+                <constraints nullable="false"/>
+            </column>
+            <column name="csh_transaction_class_id" type="bigint" remarks="付款用途ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cash_flow_item_id" type="bigint" remarks="现金流ID"/>
+            <column name="payment_schedule_date" type="timestamp" remarks="计划付款日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="con_payment_schedule_line_id" type="bigint" remarks="关联合同资金计划ID"/>
+            <column name="payee_category" type="varchar(30)" remarks="收款方类型(员工：EMPLOYEE；供应商：VENDER)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payee_id" type="bigint" remarks="收款方ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_number" type="varchar(100)" remarks="收款方账户"/>
+            <column name="account_name" type="varchar(200)" remarks="收款方户名"/>
+            <column name="frozen_flag" type="varchar(1)" remarks="冻结状态(Y/N)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903051011001" author="kai.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="requisition_date" type="timestamp" remarks="申请日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_header_id" type="bigint" remarks="关联合同头ID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903051011002" author="kai.zhang">
+        <dropColumn tableName="exp_report_dist" columnName="application_header_id"/>
+    </changeSet>
+
+    <changeSet id="201903091211001" author="kai.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="document_oid" type="varchar(36)" remarks="单据OID"></column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="201903131238001" author="shilin.mao">
+        <addColumn tableName="exp_input_tax_header">
+            <column name="document_oid" type="varchar(36)"  remarks="单据OID"> </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903131428001" author="xue.han">
+        <createTable tableName="exp_prepayment_req_release" remarks="预付款申请释放表">
+            <column name="id" type="bigint" remarks="预付款申请释放表ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_prepayment_req_release"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_doc_category" type="varchar(30)" remarks="来源单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_id" type="bigint" remarks="来源单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_category" type="varchar(30)" remarks="关联单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_id" type="bigint" remarks="关联单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_line_id" type="bigint" remarks="关联单据行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="double" remarks="汇率">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="decimal(20,2)" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_amount" type="decimal(20,2)" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(1)" remarks="状态(N:未生效;Y:已生效)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="201903111053001" author="zhu.zhao">
+        <createTable tableName="exp_travel_app_header" remarks="差旅申请单头表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_header"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="帐套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisition_number" type="varchar(100)" remarks="单据编号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_id" type="bigint" remarks="部门id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="employee_id" type="bigint" remarks="申请人id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="timestamp" remarks="开始日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="timestamp" remarks="结束日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_mode" type="varchar(1)" remarks="订票模式(1代表统一订，2代表分开订)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orderer" type="bigint" remarks="订票人id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)" remarks="事由">
+                <constraints nullable="true"/>
+            </column>
+            <column name="document_type_id" type="bigint" remarks="单据类型id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency_code" type="varchar(10)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="${amount}" remarks="汇率">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total_amount" type="${amount}" remarks="总金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_amount" type="${amount}" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="int" remarks="状态">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1"/>
+            <column name="dimension2_id" type="bigint" remarks="维度2"/>
+            <column name="dimension3_id" type="bigint" remarks="维度3"/>
+            <column name="dimension4_id" type="bigint" remarks="维度4"/>
+            <column name="dimension5_id" type="bigint" remarks="维度5"/>
+            <column name="dimension6_id" type="bigint" remarks="维度6"/>
+            <column name="dimension7_id" type="bigint" remarks="维度7"/>
+            <column name="dimension8_id" type="bigint" remarks="维度8"/>
+            <column name="dimension9_id" type="bigint" remarks="维度9"/>
+            <column name="dimension10_id" type="bigint" remarks="维度10"/>
+            <column name="dimension11_id" type="bigint" remarks="维度11"/>
+            <column name="dimension12_id" type="bigint" remarks="维度12"/>
+            <column name="dimension13_id" type="bigint" remarks="维度13"/>
+            <column name="dimension14_id" type="bigint" remarks="维度14"/>
+            <column name="dimension15_id" type="bigint" remarks="维度15"/>
+            <column name="dimension16_id" type="bigint" remarks="维度16"/>
+            <column name="dimension17_id" type="bigint" remarks="维度17"/>
+            <column name="dimension18_id" type="bigint" remarks="维度18"/>
+            <column name="dimension19_id" type="bigint" remarks="维度19"/>
+            <column name="dimension20_id" type="bigint" remarks="维度20"/>
+            <column name="requisition_date" type="timestamp" remarks="申请日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="closed_flag" type="bit" remarks="申请单行关闭标志（Y/N）默认N" defaultValue="0"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903111053002" author="zhu.zhao">
+        <createTable tableName="exp_travel_h_asso_place" remarks="差旅申请单头关联地点表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_h_asso_place"/>
+            </column>
+            <column name="requisition_header_id" type="bigint" remarks="单据头表主键id"/>
+            <column name="place_id" type="bigint" remarks="地点id"/>
+            <column name="place_type" type="varchar(1)" remarks="地点类型(F代表出发地，T代表目的地)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903111053003" author="zhu.zhao">
+        <createTable tableName="exp_travel_asso_people" remarks="差旅申请单关联人员表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_asso_people"/>
+            </column>
+            <column name="asso_pk_id" type="bigint" remarks="单据头/行表主键id"/>
+            <column name="com_people_id" type="bigint" remarks="人员id"/>
+            <column name="asso_type" type="varchar(1)" remarks="关联类型(H代表差旅申请单头关联出行人表，L代表行程行关联人员表)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903111053004 " author="zhu.zhao">
+        <createTable tableName="exp_travel_app_line" remarks="差旅申请单行表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_line"/>
+            </column>
+            <column name="requisition_header_id" type="bigint" remarks="单据头id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="帐套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requisiton_type_id" type="bigint" remarks="申请类型id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR2(1000)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="requisition_date" type="timestamp" remarks="申请日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1"/>
+            <column name="dimension2_id" type="bigint" remarks="维度2"/>
+            <column name="dimension3_id" type="bigint" remarks="维度3"/>
+            <column name="dimension4_id" type="bigint" remarks="维度4"/>
+            <column name="dimension5_id" type="bigint" remarks="维度5"/>
+            <column name="dimension6_id" type="bigint" remarks="维度6"/>
+            <column name="dimension7_id" type="bigint" remarks="维度7"/>
+            <column name="dimension8_id" type="bigint" remarks="维度8"/>
+            <column name="dimension9_id" type="bigint" remarks="维度9"/>
+            <column name="dimension10_id" type="bigint" remarks="维度10"/>
+            <column name="dimension11_id" type="bigint" remarks="维度11"/>
+            <column name="dimension12_id" type="bigint" remarks="维度12"/>
+            <column name="dimension13_id" type="bigint" remarks="维度13"/>
+            <column name="dimension14_id" type="bigint" remarks="维度14"/>
+            <column name="dimension15_id" type="bigint" remarks="维度15"/>
+            <column name="dimension16_id" type="bigint" remarks="维度16"/>
+            <column name="dimension17_id" type="bigint" remarks="维度17"/>
+            <column name="dimension18_id" type="bigint" remarks="维度18"/>
+            <column name="dimension19_id" type="bigint" remarks="维度19"/>
+            <column name="dimension20_id" type="bigint" remarks="维度20"/>
+            <column name="closed_flag" type="bit" remarks="申请单行关闭标志（Y/N）默认N" defaultValue="0"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903111053005 " author="zhu.zhao">
+        <createTable tableName="exp_travel_app_line_d" remarks="差旅申请单明细行表">
+            <column name="id" type="bigint" remarks="主键ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_exp_travel_app_line_d"/>
+            </column>
+            <column name="requisition_line_id" type="bigint" remarks="单据行id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="帐套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_id" type="bigint" remarks="部门id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="com_people_id" type="bigint" remarks="人员id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="booker_id" type="bigint" remarks="订票人id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR2(1000)" remarks="备注">
+                <constraints nullable="true"/>
+            </column>
+            <column name="use_flag" type="VARCHAR2(1)" remarks="使用状态（y表示预订票；n表示未订票;p表示中间状态）">
+                <constraints nullable="true"/>
+            </column>
+            <column name="requisition_date" type="timestamp" remarks="申请日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="dimension1_id" type="bigint" remarks="维度1"/>
+            <column name="dimension2_id" type="bigint" remarks="维度2"/>
+            <column name="dimension3_id" type="bigint" remarks="维度3"/>
+            <column name="dimension4_id" type="bigint" remarks="维度4"/>
+            <column name="dimension5_id" type="bigint" remarks="维度5"/>
+            <column name="dimension6_id" type="bigint" remarks="维度6"/>
+            <column name="dimension7_id" type="bigint" remarks="维度7"/>
+            <column name="dimension8_id" type="bigint" remarks="维度8"/>
+            <column name="dimension9_id" type="bigint" remarks="维度9"/>
+            <column name="dimension10_id" type="bigint" remarks="维度10"/>
+            <column name="dimension11_id" type="bigint" remarks="维度11"/>
+            <column name="dimension12_id" type="bigint" remarks="维度12"/>
+            <column name="dimension13_id" type="bigint" remarks="维度13"/>
+            <column name="dimension14_id" type="bigint" remarks="维度14"/>
+            <column name="dimension15_id" type="bigint" remarks="维度15"/>
+            <column name="dimension16_id" type="bigint" remarks="维度16"/>
+            <column name="dimension17_id" type="bigint" remarks="维度17"/>
+            <column name="dimension18_id" type="bigint" remarks="维度18"/>
+            <column name="dimension19_id" type="bigint" remarks="维度19"/>
+            <column name="dimension20_id" type="bigint" remarks="维度20"/>
+            <column name="closed_flag" type="bit" remarks="申请单行关闭标志（Y/N）默认N" defaultValue="0"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201903121138001" author="zhu.zhao">
+        <addColumn tableName="exp_travel_app_header">
+            <column name="attachment_oid" type="varchar(4000)" remarks="附件OID"/>
+            <column name="document_type" type="int" remarks="单据类型"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903102020001" author="kai.zhang">
+        <renameColumn tableName="exp_report_line" oldColumnName="as_sale_flag" newColumnName="sale_flag" columnDataType="varchar(1)"/>
+        <addColumn tableName="exp_report_line">
+            <column name="attachment_oid" type="varchar(4000)" remarks="附件OID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903102020002" author="kai.zhang">
+        <createTable tableName="exp_requisition_release" remarks="申请释放表">
+            <column name="id" type="bigint" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_requisition_release"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_doc_category" type="varchar(30)" remarks="来源单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_id" type="bigint" remarks="来源单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_line_id" type="bigint" remarks="来源单据行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_dist_id" type="bigint" remarks="来源单据分摊行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_category" type="varchar(30)" remarks="关联单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_id" type="bigint" remarks="关联单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_line_id" type="bigint" remarks="关联单据行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_dist_id" type="bigint" remarks="关联单据分摊行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="double" remarks="汇率">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="decimal(20,2)" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_amount" type="decimal(20,2)" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_by" type="bigint" remarks="最后更新用户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903141514001" author="zhu.zhao">
+        <dropColumn tableName="exp_travel_app_header" columnName="closed_flag"/>
+        <addColumn tableName="exp_travel_app_header">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903141514002" author="zhu.zhao">
+        <dropColumn tableName="exp_travel_app_line" columnName="closed_flag"/>
+        <addColumn tableName="exp_travel_app_line">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903141514003" author="zhu.zhao">
+        <dropColumn tableName="exp_travel_app_line_d" columnName="closed_flag"/>
+        <addColumn tableName="exp_travel_app_line_d">
+            <column name="closed_flag" type="int" defaultValue="1001" remarks="关闭状态 1001-未关闭 1002-部分关闭 1003-已关闭"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903141514004" author="zhu.zhao">
+        <dropNotNullConstraint tableName="exp_travel_app_header" columnName="orderer" columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="201903142020001" author="kai.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="budget_check_result" type="varchar(50)" remarks="预算校验返回结果"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903142020002" author="kai.zhang">
+        <modifyDataType tableName="exp_report_header" columnName="audit_flag" newDataType="varchar(1)"/>
+    </changeSet>
+
+    <changeSet id="201903151151001" author="xue.han">
+        <dropUniqueConstraint tableName="exp_report_type_dimension" constraintName="exp_report_type_dimension_u2" uniqueColumns="position,sequence_number" />
+        <addUniqueConstraint tableName="exp_report_type_dimension" columnNames="report_type_id,position,sequence_number" constraintName="exp_report_type_dimension_u2"/>
+    </changeSet>
+
+    <changeSet id="201903172020001" author="kai.zhang">
+        <addColumn tableName="exp_report_dist">
+            <column name="source_document_category" type="varchar(50)" remarks="来源单据类型"/>
+            <column name="source_document_id" type="bigint" remarks="来源单据id"/>
+            <column name="source_document_dist_id" type="bigint" remarks="来源单据分摊行id"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903172020002" author="kai.zhang">
+        <addColumn tableName="exp_report_line">
+            <column name="expense_book_id" type="bigint" remarks="账本ID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2019003191600001" author="kai.zhang">
+        <dropNotNullConstraint tableName="exp_report_payment_schedule" columnName="csh_transaction_class_id" columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="201903191516001" author="shouting.cheng">
+        <addColumn tableName="exp_travel_app_header">
+            <column name="document_oid" type="varchar(36)"  remarks="单据OID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903191516002" author="shouting.cheng">
+        <addColumn tableName="exp_travel_app_line">
+            <column name="booker_id" type="bigint" remarks="订票人id">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903191516003" author="shouting.cheng">
+        <addColumn tableName="exp_travel_app_line_d">
+            <column name="requisiton_type_id" type="bigint" remarks="申请类型id">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903191516004" author="shouting.cheng">
+        <dropNotNullConstraint tableName="exp_travel_app_line" columnName="booker_id" columnDataType="bigint"/>
+    </changeSet>
+    <changeSet id="2019003191600002" author="kai.zhang">
+        <addColumn tableName="exp_report_payment_schedule">
+            <column name="write_off_amount" type="${amount}" remarks="核销金额"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903191516005" author="shouting.cheng">
+        <dropNotNullConstraint tableName="exp_travel_app_line" columnName="company_id" columnDataType="bigint"/>
+        <dropNotNullConstraint tableName="exp_travel_app_line" columnName="unit_id" columnDataType="bigint"/>
+        <addColumn tableName="exp_travel_app_line">
+            <column name="use_flag" type="VARCHAR2(1)" remarks="使用状态（y表示预订票；n表示未订票;p表示中间状态）">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903222020001" author="kai.zhang">
+        <dropNotNullConstraint tableName="exp_report_line" columnName="sale_flag" columnDataType="varchar(1)"/>
+        <renameColumn tableName="exp_report_line" oldColumnName="sale_flag" newColumnName="input_tax_flag" columnDataType="varchar(30)" remarks="视同销售与进项转出标志（视同销售：FOR_SALE;全额转出：ALL_TRANSFER；部分转出：PART_ TRANSFER）"/>
+    </changeSet>
+    <changeSet id="201903222020002" author="kai.zhang">
+        <addColumn tableName="exp_report_dist">
+            <column name="input_tax_flag" type="varchar(30)" remarks="视同销售与进项转出标志（视同销售：FOR_SALE;全额转出：ALL_TRANSFER；部分转出：PART_ TRANSFER）"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201903221801001" author="shouting.cheng">
+        <addColumn tableName="exp_expense_type_category">
+            <column name="travel_type_flag" type="tinyint" defaultValue="0" remarks="差旅类标识（1差旅类，0非差旅类）"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903251709001" author="shaofeng.zheng">
+        <modifyDataType tableName="invoice_type" columnName="invoice_type_name" newDataType="varchar(300)"></modifyDataType>
+    </changeSet>
+    <changeSet id="201903251814001" author="shouting.cheng">
+        <addColumn tableName="exp_expense_type">
+            <column name="travel_type_code" type="varchar(30)" remarks="差旅类型代码"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2019003272300001" author="kai.zhang">
+        <addColumn tableName="exp_report_tax_dist">
+            <column name="invoice_dist_id" type="bigint" remarks="发票分配行ID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2019003272300002" author="kai.zhang">
+        <addColumn tableName="exp_report_dist">
+            <column name="no_tax_dist_amount" type="${amount}" remarks="分摊不含税金额">
+            </column>
+            <column name="no_tax_dist_function_amount" type="${amount}" remarks="分摊不含税本币金额">
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903291400001" author="kai.zhang">
+        <modifyDataType tableName="exp_expense_book" columnName="quantity" newDataType="int"/>
+    </changeSet>
+
+    <changeSet id="201903291020001" author="zhu.zhao">
+        <addColumn tableName="exp_input_tax_header">
+            <column name="audit_date" type="timestamp" remarks="审核日期">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -12,7 +12,7 @@ import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustDimensionDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustDimensionItemDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustHeaderWebDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustTypeWebDTO;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
@@ -115,7 +115,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         submitData.setDocumentOid(documentOid); // 单据oid
         submitData.setDocumentNumber(head.getDocumentNumber()); // 单据编号
         submitData.setDocumentName(null); // 单据名称
-        submitData.setDocumentCategory(DocumentTypeEnum.EXPENSE_ADJUST.getKey()); // 单据类别
+        submitData.setDocumentCategory(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey()); // 单据类别
         submitData.setDocumentTypeId(workFlowDocumentRef.getDocumentTypeId()); // 单据类型id
         submitData.setDocumentTypeCode(type.getExpAdjustTypeCode()); // 单据类型代码
         submitData.setDocumentTypeName(type.getExpAdjustTypeName()); // 单据类型名称
@@ -244,7 +244,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         expenseAdjustHeader.setFunctionalAmount(BigDecimal.ZERO);
         expenseAdjustHeader.setAdjustDate(ZonedDateTime.now());
         expenseAdjustHeader.setStatus(DocumentOperationEnum.GENERATE.getId());
-        expenseAdjustHeader.setDocumentNumber(commonService.getCoding(DocumentTypeEnum.EXPENSE_ADJUST.getCategory(), dto.getCompanyId(), null));
+        expenseAdjustHeader.setDocumentNumber(commonService.getCoding(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getCategory(), dto.getCompanyId(), null));
         expenseAdjustHeader.setId(null);
         this.insert(expenseAdjustHeader);
         // 保存单据关联维度信息
@@ -397,7 +397,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         if (null == expenseAdjustHeader){
             throw new BizException(RespCode.SYS_OBJECT_IS_EMPTY);
         }
-        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(headerId, DocumentTypeEnum.EXPENSE_ADJUST.getKey(), true);
+        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(headerId, ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), true);
         if (!CollectionUtils.isEmpty(dimensions)){
 
             List<ExpenseAdjustDimensionDTO> dimensionDTOList = new ArrayList<>();
@@ -537,7 +537,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         // 删除维度信息
         ExpenseDimension dimension = new ExpenseDimension();
         dimension.setHeaderId(id);
-        dimension.setDocumentType(DocumentTypeEnum.EXPENSE_ADJUST.getKey());
+        dimension.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
         dimensionService.delete(new EntityWrapper<>(dimension));
         return true;
     }
@@ -568,7 +568,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         // 当前用户就是审批人
         String approverOidStr = OrgInformationUtil.getCurrentUserOid().toString();
         // 获取未审批/已审批的单据
-        List<String> documentOidStrList = workflowInterface.listApprovalDocument(DocumentTypeEnum.EXPENSE_ADJUST.getKey(),
+        List<String> documentOidStrList = workflowInterface.listApprovalDocument(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(),
                 approverOidStr, finished, beginDate, endDate);
         // 若没有满足条件的单据则不继续执行代码
         if (documentOidStrList.isEmpty()) {
@@ -602,7 +602,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
                     result.setEmployeeName(user.getFullName());
                 }
                 result.setTypeName(type.getExpAdjustTypeName());
-                result.setEntityType(DocumentTypeEnum.EXPENSE_ADJUST.getKey());
+                result.setEntityType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
                 results.add(result);
             });
         }

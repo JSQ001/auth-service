@@ -6,9 +6,10 @@ package com.hand.hcf.app.expense.common.workflow;
  */
 
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustHeaderService;
 import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationHeaderService;
 import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class WorkflowEventConsumer {
+public class ExpenseWorkflowEventConsumer {
     @Autowired
     private ApplicationHeaderService applicationHeaderService;
 
@@ -39,16 +40,16 @@ public class WorkflowEventConsumer {
         Integer approvalStatus = approvalNoticeCO.getDocumentStatus();
 
         //更新单据的状态为审批通过/撤回/驳回
-        if (DocumentTypeEnum.EXPENSE_ADJUST.getKey().equals(documentCategory)) {
+        if (ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey().equals(documentCategory)) {
             // 费用调整单
             adjustHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
-        } else if (DocumentTypeEnum.EXP_REQUISITION.getKey().equals(documentCategory)) {
+        } else if (ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey().equals(documentCategory)) {
             // 费用申请单
             applicationHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
-        } else if (DocumentTypeEnum.TRAVEL_APPLICATION.getKey().equals(documentCategory)) {
+        } else if (ExpenseDocumentTypeEnum.TRAVEL_APPLICATION.getKey().equals(documentCategory)) {
             // 差旅申请单
             travelApplicationHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
-        } else if (DocumentTypeEnum.PUBLIC_REPORT.getKey().equals(documentCategory)) {
+        } else if (ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey().equals(documentCategory)) {
             // 报账单
             expenseReportHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
         }

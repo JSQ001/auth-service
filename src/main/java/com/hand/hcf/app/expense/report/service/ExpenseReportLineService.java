@@ -4,21 +4,21 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.client.attachment.AttachmentCO;
-import com.hand.hcf.app.client.org.SysCodeValueCO;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.AttachmentCO;
+import com.hand.hcf.app.common.co.DimensionCO;
+import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.expense.book.domain.ExpenseBook;
 import com.hand.hcf.app.expense.book.service.ExpenseBookService;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.*;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.service.*;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportDist;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportLine;
+import com.hand.hcf.app.expense.report.domain.*;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportDistDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportLineDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportLineMapper;
@@ -29,19 +29,17 @@ import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
-import com.hand.hcf.app.mdata.client.workflow.enums.DocumentOperationEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.OperationUtil;
 import com.hand.hcf.core.util.PageUtil;
-import com.hand.hcf.core.util.TypeConversionUtils;
+import com.hand.hcf.core.util.ReflectUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,6 +93,12 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
 
     @Autowired
     private ExpenseBookService expenseBookService;
+
+    @Autowired
+    private ExpenseReportTypeDistSettingService expenseReportTypeDistSettingService;
+
+    @Autowired
+    private ExpenseReportTypeDimensionService expenseReportTypeDimensionService;
 
 
     /**
@@ -178,14 +182,14 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         }
         //后续其他数据需要使用费用行ID，所以需要最先保存
         insertOrUpdate(line);
-        // 更新费用金额
+        // 保存发票信息
+        saveInvoiceMessage(dto,line);
+        // 更新费用金额 (必须先保存发票数据，)
         setExpenseAmount(line);
         // 保存控件field
         saveExpenseDocumentFields(line.getId(),line.getExpReportHeaderId(),dto.getFields(),expenseType.getId(),isNew);
-        // 保存发票信息
-        saveInvoiceMessage(dto,line);
         // 保存分摊行信息
-        saveReportDistMessage(dto,line);
+        saveReportDistMessage(dto,line, expenseType,expenseReportHeader);
         // 更新头金额
         updateReportHeaderAmount(expenseReportHeader);
         // 创建获取修改默认计划付款行
@@ -202,20 +206,10 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
     private void setExpenseAmount(ExpenseReportLine line){
         // 费用金额
         BigDecimal expenseAmount = line.getAmount();
-        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(line.getId());
+        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(line.getId(),"Y");
         if(CollectionUtils.isNotEmpty(invoiceLines)){
-            Map<Long, List<InvoiceLine>> collect = invoiceLines.stream().collect(Collectors.groupingBy(InvoiceLine::getInvoiceHeadId));
-            List<InvoiceHead> invoiceHeads = invoiceHeadService.selectBatchIds(collect.keySet());
-            // 计算费用金额
-            for(InvoiceHead invoiceHead : invoiceHeads){
-                InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
-                // 抵扣类
-                if("Y".equals(invoiceType.getDeductionFlag())){
-                    List<InvoiceLine> invoiceLinesDedution = collect.get(invoiceHead.getId());
-                    BigDecimal reduce = invoiceLinesDedution.stream().map(InvoiceLine::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-                    expenseAmount = expenseAmount.subtract(reduce);
-                }
-            }
+            BigDecimal reduce = invoiceLines.stream().map(InvoiceLine::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            expenseAmount = expenseAmount.subtract(reduce);
             // 后端计算金额，前端计算不准确时，已后端为主
             if(! line.getExpenseAmount().equals(expenseAmount)){
                 line.setExpenseAmount(expenseAmount);
@@ -253,7 +247,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @return
      */
     private List<InvoiceHead> getInvoiceByExpenseLineId(Long expenseLineId){
-        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(expenseLineId);
+        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(expenseLineId,null);
         if(CollectionUtils.isNotEmpty(invoiceLines)){
             Map<Long, List<InvoiceLine>> invoiceMap = invoiceLines.stream().collect(Collectors.groupingBy(InvoiceLine::getInvoiceHeadId));
             //发票头
@@ -292,7 +286,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                 new EntityWrapper<ExpenseDocumentField>()
                         .eq("header_id", expenseReportLine.getExpReportHeaderId())
                         .eq("line_id", expenseReportLine.getId())
-                        .eq("document_type", DocumentTypeEnum.PUBLIC_REPORT)
+                        .eq("document_type", ExpenseDocumentTypeEnum.PUBLIC_REPORT)
                         .orderBy("sequence", true));
         return adaptExpenseDocumentField(expenseDocumentFields);
     }
@@ -376,7 +370,12 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param reportLine
      */
     private void setExpenseReportLineField(ExpenseReportLine reportLine){
-        reportLine.setExpenseTypeName(expenseTypeService.selectById(reportLine.getExpenseTypeId()).getName());
+        ExpenseType expenseType = expenseTypeService.selectById(reportLine.getExpenseTypeId());
+        reportLine.setExpenseTypeName(expenseType.getName());
+        reportLine.setApplicationModel(expenseType.getApplicationModel());
+        reportLine.setContrastSign(expenseType.getContrastSign());
+        reportLine.setContrastAmount(expenseType.getAmount());
+        reportLine.setEntryMode(expenseType.getEntryMode());
         if(com.baomidou.mybatisplus.toolkit.StringUtils.isNotEmpty(reportLine.getAttachmentOid())){
             List<String> strings = Arrays.asList(reportLine.getAttachmentOid().split(","));
             reportLine.setAttachmentOidList(strings);
@@ -416,9 +415,9 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                 .eq("exp_report_header_id", expenseReportHeader.getId()).groupBy("exp_report_header_id");
         wrapper.setSqlSelect("sum(amount) amount,sum(function_amount) functionAmount");
         ExpenseReportLine expenseReportLine = selectOne(wrapper);
-        expenseReportHeader.setTotalAmount(expenseReportLine.getAmount());
+        expenseReportHeader.setTotalAmount(expenseReportLine == null ? BigDecimal.ZERO : expenseReportLine.getAmount());
         // 单据头本币金额由行汇总
-        expenseReportHeader.setFunctionalAmount(expenseReportLine.getFunctionAmount());
+        expenseReportHeader.setFunctionalAmount(expenseReportLine == null ? BigDecimal.ZERO : expenseReportLine.getFunctionAmount());
         expenseReportHeaderService.updateById(expenseReportHeader);
     }
 
@@ -427,18 +426,54 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param dto
      * @param line
      */
-    private void saveReportDistMessage(ExpenseReportLineDTO dto, ExpenseReportLine line){
+    private void saveReportDistMessage(ExpenseReportLineDTO dto,
+                                       ExpenseReportLine line,
+                                       ExpenseType expenseType,
+                                       ExpenseReportHeader expenseReportHeader){
         List<ExpenseReportDistDTO> expenseReportDistList = dto.getExpenseReportDistList();
-        List<ExpenseReportDist> collect = expenseReportDistList.stream().map(e -> {
-            ExpenseReportDist expenseReportDist = new ExpenseReportDist();
-            BeanUtils.copyProperties(e, expenseReportDist);
-            return expenseReportDist;
-        }).collect(Collectors.toList());
+        //税金分摊方式
+        String expTaxDist = organizationService.getParameterValue(line.getCompanyId(),
+                line.getSetOfBooksId(), ParameterConstant.EXP_TAX_DIST);
         if(CollectionUtils.isNotEmpty(expenseReportDistList)){
-            //税金分摊方式
-            String expTaxDist = organizationService.getParameterValue(line.getCompanyId(),
-                    line.getSetOfBooksId(), ParameterConstant.EXP_TAX_DIST);
+            List<ExpenseReportDist> collect = expenseReportDistList.stream().map(e -> {
+                ExpenseReportDist expenseReportDist = new ExpenseReportDist();
+                BeanUtils.copyProperties(e, expenseReportDist);
+                return expenseReportDist;
+            }).collect(Collectors.toList());
             expenseReportDistService.saveExpenseReportDistBatch(collect,line,expTaxDist);
+            //处理尾差
+            expenseReportDistService.handleTailDifference(line,expTaxDist);
+        // 当分摊行为空时，根据费用类型配置，校验是否为必须关联申请，如无需关联，自动生成分摊行
+        }else{
+            String applicationModel = expenseType.getApplicationModel();
+            // 当费用类型必须关联申请时，需要处理判断条件，判断是否能自动生成分摊行
+            if("MUST".equals(applicationModel)){
+                String contrastSign = expenseType.getContrastSign();
+                BigDecimal contrastAmount = expenseType.getAmount();
+                BigDecimal lineAmount = BigDecimal.valueOf(-1L);
+                //按含税金额分摊，获取费用行报账金额
+                if(ParameterConstant.TAX_IN.equals(expTaxDist)){
+                    lineAmount = line.getAmount();
+                    // 按不含税金额分摊，获取费用行费用金额
+                }else if(ParameterConstant.TAX_OFF.equals(expTaxDist)){
+                    lineAmount = line.getExpenseAmount();
+                }
+                // 当满足条件时，表示分摊行只能从申请单创建，不能自动创建分摊行
+                // 大于
+                if("01".equals(contrastSign)){
+                    if(lineAmount.compareTo(contrastAmount) > 0){
+                        return;
+                    }
+                //大于等于
+                } else if("05".equals(contrastSign)){
+                    if(lineAmount.compareTo(contrastAmount) >= 0){
+                        return;
+                    }
+                }
+            }
+            ExpenseReportDist expenseReportDistFromLine = getExpenseReportDistFromLine(line, expenseReportHeader);
+            // 自动分摊行就一个分摊行，所以不用处理尾差
+            expenseReportDistService.saveExpenseReportDist(expenseReportDistFromLine,line,expTaxDist);
         }
     }
 
@@ -555,7 +590,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             documentFieldService.delete(new EntityWrapper<ExpenseDocumentField>()
                     .eq("header_id",headerId)
                     .eq("line_id", lineId)
-                    .eq("document_type", DocumentTypeEnum.PUBLIC_REPORT));
+                    .eq("document_type", ExpenseDocumentTypeEnum.PUBLIC_REPORT));
 
         }
         if(CollectionUtils.isEmpty(fields)){
@@ -579,7 +614,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                         .defaultValueConfigurable(e.getDefaultValueConfigurable())
                         .defaultValueKey(e.getDefaultValueKey())
                         .defaultValueMode(e.getDefaultValueMode())
-                        .documentType(DocumentTypeEnum.PUBLIC_REPORT)
+                        .documentType(ExpenseDocumentTypeEnum.PUBLIC_REPORT)
                         .editable(e.getEditable())
                         .expenseTypeId(expenseTypeId)
                         .headerId(headerId)
@@ -652,4 +687,122 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         return reportLineList;
     }
 
+    /**
+     * 根据账本信息自动生成费用行
+     * @param headerId
+     * @param expenseBookIds
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveExpenseReportLineFromBook(Long headerId, List<Long> expenseBookIds){
+        List<ExpenseBook> expenseBooks = expenseBookService.selectExpenseBookByIds(expenseBookIds);
+        ExpenseReportHeader expenseReportHeader = expenseReportHeaderService.selectById(headerId);
+        List<ExpenseReportLineDTO> collect = expenseBooks.stream().map(expenseBook -> {
+            return getExpenseReportLineFromBook(expenseBook, expenseReportHeader);
+        }).collect(Collectors.toList());
+        collect.stream().forEach(e -> {
+            saveExpenseReportLine(e);
+        });
+    }
+
+    /**
+     * 根据账本信息生成
+     * @param expenseBook
+     * @param expenseReportHeader
+     * @return
+     */
+    private ExpenseReportLineDTO getExpenseReportLineFromBook(ExpenseBook expenseBook, ExpenseReportHeader expenseReportHeader){
+        ExpenseReportLineDTO expenseReportLine = new ExpenseReportLineDTO();
+        expenseReportLine.setExpReportHeaderId(expenseReportHeader.getId());
+        expenseReportLine.setTenantId(expenseBook.getTenantId());
+        expenseReportLine.setSetOfBooksId(expenseBook.getSetOfBooksId());
+        expenseReportLine.setCompanyId(expenseReportHeader.getCompanyId());
+        expenseReportLine.setExpenseTypeId(expenseBook.getExpenseTypeId());
+        expenseReportLine.setExpenseDate(expenseBook.getExpenseDate());
+        expenseReportLine.setQuantity(expenseBook.getQuantity());
+        expenseReportLine.setPrice(expenseBook.getPrice());
+        expenseReportLine.setUom(expenseBook.getPriceUnit());
+        expenseReportLine.setExchangeRate(expenseBook.getExchangeRate());
+        expenseReportLine.setCurrencyCode(expenseBook.getCurrencyCode());
+        expenseReportLine.setAmount(expenseBook.getAmount());
+        expenseReportLine.setFunctionAmount(expenseBook.getFunctionalAmount());
+        expenseReportLine.setExpenseAmount(expenseBook.getAmount());
+        expenseReportLine.setExpenseFunctionAmount(expenseBook.getFunctionalAmount());
+        expenseReportLine.setTaxAmount(BigDecimal.ZERO);
+        expenseReportLine.setTaxFunctionAmount(BigDecimal.ZERO);
+        expenseReportLine.setDescription(expenseBook.getRemarks());
+        expenseReportLine.setReverseFlag("N");
+        expenseReportLine.setAttachmentOid(expenseBook.getAttachmentOid());
+        expenseReportLine.setExpenseBookId(expenseBook.getId());
+        expenseReportLine.setFields(expenseBook.getFields());
+        expenseReportLine.setInvoiceHeads(expenseBook.getInvoiceHead());
+        return expenseReportLine;
+    }
+
+
+    /**
+     * 根据费用行自动创建分摊行
+     * @param expenseReportLine
+     * @param expenseReportHeader
+     * @return
+     */
+    private ExpenseReportDist getExpenseReportDistFromLine(ExpenseReportLine expenseReportLine,
+                                                           ExpenseReportHeader expenseReportHeader){
+        ExpenseReportTypeDistSetting reportTypeDistSetting =
+                expenseReportTypeDistSettingService.selectOne(new EntityWrapper<ExpenseReportTypeDistSetting>().eq("report_type_id", expenseReportHeader.getDocumentTypeId()));
+        ExpenseReportDist expenseReportDist = new ExpenseReportDist();
+        expenseReportDist.setExpReportHeaderId(expenseReportHeader.getId());
+        expenseReportDist.setExpReportLineId(expenseReportLine.getId());
+        // 公司
+        if(reportTypeDistSetting.getCompanyDistFlag()){
+            expenseReportDist.setCompanyId(reportTypeDistSetting.getCompanyDefaultId());
+        }
+        if(expenseReportDist.getCompanyId() == null){
+            expenseReportDist.setCompanyId(expenseReportHeader.getCompanyId());
+        }
+        expenseReportDist.setSetOfBooksId(expenseReportLine.getSetOfBooksId());
+        expenseReportDist.setTenantId(expenseReportLine.getTenantId());
+        expenseReportDist.setCurrencyCode(expenseReportLine.getCurrencyCode());
+        // 部门
+        if(reportTypeDistSetting.getDepartmentDistFlag()){
+            expenseReportDist.setDepartmentId(reportTypeDistSetting.getDepartmentDefaultId());
+        }
+        if(expenseReportDist.getDepartmentId() == null){
+            expenseReportDist.setDepartmentId(expenseReportHeader.getDepartmentId());
+        }
+        // 责任中心
+        if(reportTypeDistSetting.getResCenterDistFlag()){
+            if("DEP_RES_CENTER".equals(reportTypeDistSetting.getResDistRange())){
+                ResponsibilityCenterCO defaultResponsibilityCenter = organizationService.getDefaultResponsibilityCenter(expenseReportDist.getCompanyId(), expenseReportDist.getDepartmentId());
+                if(defaultResponsibilityCenter != null){
+                    expenseReportDist.setResponsibilityCenterId(defaultResponsibilityCenter.getId());
+                }
+            }else{
+                expenseReportDist.setResponsibilityCenterId(reportTypeDistSetting.getResDefaultId());
+            }
+        }
+        expenseReportDist.setExchangeRate(expenseReportLine.getExchangeRate());
+        expenseReportDist.setExpenseTypeId(expenseReportLine.getExpenseTypeId());
+        expenseReportDist.setReverseFlag("N");
+        // 金额相关
+        expenseReportDist.setAmount(expenseReportLine.getAmount());
+        expenseReportDist.setFunctionAmount(expenseReportLine.getFunctionAmount());
+        expenseReportDist.setNoTaxDistAmount(expenseReportLine.getExpenseAmount());
+        expenseReportDist.setNoTaxDistFunctionAmount(expenseReportLine.getExpenseFunctionAmount());
+        expenseReportDist.setTaxDistAmount(expenseReportLine.getTaxAmount());
+        expenseReportDist.setTaxDistFunctionAmount(expenseReportLine.getTaxFunctionAmount());
+
+        List<ExpenseReportTypeDimension> expenseReportTypeDimensions = expenseReportTypeDimensionService.selectList(new EntityWrapper<ExpenseReportTypeDimension>()
+                .eq("report_type_id", expenseReportHeader.getDocumentTypeId()));
+        expenseReportTypeDimensions.stream().forEach(expenseReportTypeDimension -> {
+            if(expenseReportTypeDimension.getDefaultValueId() != null){
+                DimensionCO dimensionById = organizationService.getDimensionById(expenseReportTypeDimension.getDimensionId());
+                String idFieldName = "dimension" + dimensionById.getDimensionSequence() + "Id";
+                ReflectUtil.executeFieldSetter(expenseReportDist,
+                        idFieldName,
+                        expenseReportTypeDimension.getDefaultValueId(),
+                        false,null,null);
+            }
+        });
+        return expenseReportDist;
+    }
 }

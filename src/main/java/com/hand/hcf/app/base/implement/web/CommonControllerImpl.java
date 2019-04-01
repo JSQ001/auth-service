@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 @RestController
 public class CommonControllerImpl {
@@ -130,6 +131,11 @@ public class CommonControllerImpl {
         sysCodeValueCO.setName(sysCodeValue.getName());
         sysCodeValueCO.setValue(sysCodeValue.getValue());
         return sysCodeValueCO;
+    }
+
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCodeOid(UUID codeOid) {
+        List<SysCodeValueCO> sysCodeValueCOS = this.listSysValueByCodeOidConditionByEnabled(codeOid.toString(), true);
+        return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
     }
 }
 

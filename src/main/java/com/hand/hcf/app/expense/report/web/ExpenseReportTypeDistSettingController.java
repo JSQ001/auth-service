@@ -1,12 +1,12 @@
 package com.hand.hcf.app.expense.report.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.CompanyCO;
+import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistSetting;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDistSettingRequestDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeDistSettingService;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
-import com.hand.hcf.app.mdata.client.department.DepartmentCO;
-import com.hand.hcf.app.mdata.client.rescenter.ResponsibilityCenterCO;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

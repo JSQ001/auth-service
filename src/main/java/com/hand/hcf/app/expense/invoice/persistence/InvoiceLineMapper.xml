@@ -12,6 +12,25 @@
             where l.id = d.invoice_line_id
               and d.id = e.invoice_dist_id
               and e.exp_expense_line_id = #{expExpenseLineId})
+          <if test="deductionFlag != null">
+              and exists(select 1 from
+              invoice_head ih,
+              invoice_type it
+              where ih.id = l.invoice_head_id
+              and ih.invoice_type_id = it.id
+              and it.deduction_flag = #{deductionFlag}
+              )
+          </if>
+    </select>
+    <select id="listNotAssignInvoiceLinesByInvoiceHeadId" resultType="com.hand.hcf.app.expense.invoice.domain.InvoiceLine">
+        select * from invoice_line l
+          where not exists(select 1 from
+            invoice_line_dist d,
+            invoice_line_expence e
+            where l.id = d.invoice_line_id
+              and d.id = e.invoice_dist_id
+              and e.exp_expense_line_id is not null)
+          and l.invoice_head_id = #{invoiceHeadId}
     </select>
 
 </mapper>

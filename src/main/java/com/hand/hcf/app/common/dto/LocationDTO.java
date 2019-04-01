@@ -36,6 +36,8 @@ import java.io.Serializable;
 @Builder
 public  class LocationDTO implements Serializable {
 
+    private Long id;
+
     private String code;
 
     private String language;

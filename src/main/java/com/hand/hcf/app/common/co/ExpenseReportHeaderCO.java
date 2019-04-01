@@ -1,8 +1,8 @@
 package com.hand.hcf.app.common.co;
 
-import com.hand.hcf.app.apply.accounting.annotation.InterfaceFieldAttribute;
-import com.hand.hcf.app.apply.accounting.enums.SceneElementFieldType;
-import com.hand.hcf.app.apply.accounting.message.ModuleMessageCode;
+import com.hand.hcf.app.common.annotation.InterfaceFieldAttribute;
+import com.hand.hcf.app.common.enums.SceneElementFieldType;
+import com.hand.hcf.app.common.message.ModuleMessageCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

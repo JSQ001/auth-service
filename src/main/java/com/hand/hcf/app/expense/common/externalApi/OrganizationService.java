@@ -59,7 +59,7 @@ public class OrganizationService {
     @Autowired
     private WorkflowControllerImpl workflowClient;
     @Autowired
-    private ParameterClient parameterClient;
+    private ParameterControllerImpl parameterClient;
     @Autowired
     private ResponsibilityCenterControllerImpl responsibilityCenterClient;
 
@@ -209,7 +209,9 @@ public class OrganizationService {
     }
 
     public List<DepartmentCO> listDepartmentsByIds(List<Long> ids){
-        return departmentClient.listDepartmentsByIds(ids);
+        //jiu.zhao 修改三方接口 20190401
+        //return departmentClient.listDepartmentsByIds(ids);
+        return departmentClient.listDepartmentsByIds(ids, (String)null);
     }
 
     public List<ContactCO> listUsersByIds(List<Long> ids) {
@@ -372,7 +374,9 @@ public class OrganizationService {
         if(ParameterConstant.EXP_TAX_DIST.equals(parameterCode)){
             return "TAX_IN";
         }
-        return parameterClient.getParameterValueByParameterCode(parameterCode, sobId, companyId);
+        //jiu.zhao 修改三方接口 20190401
+        //return parameterClient.getParameterValueByParameterCode(parameterCode, sobId, companyId);
+        return parameterClient.getParameterValueByParameterCode(parameterCode, LoginInformationUtil.getCurrentTenantId(), sobId, companyId);
     }
 
 
@@ -386,7 +390,9 @@ public class OrganizationService {
     public List<DimensionDetailCO> listDetailCOByDimensionIdsAndCompany(Long companyId,
                                                                         Boolean enabled,
                                                                         List<Long> dimensionIds){
-        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, enabled);
+        //jiu.zhao 修改三方接口 20190401
+        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, enabled);
+        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, enabled, companyId);
     }
 
 
@@ -420,14 +426,16 @@ public class OrganizationService {
                                                             String companyName,
                                                             String keyWord,
                                                             Page page) {
-        Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId,
+        //jiu.zhao 修改三方接口 20190401
+        /*Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId,
                 ignoreOwn,
                 companyCode,
                 companyCodeFrom,
                 companyCodeTo,
                 companyName,
                 keyWord,
-                page);
+                page);*/
+        Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, page.getCurrent() - 1, page.getSize());
         return companyCOPage;
     }
 
@@ -441,7 +449,9 @@ public class OrganizationService {
     }
 
     public Page<DepartmentCO> pageDepartmentByTenantId(String deptCode,String deptName,String deptCodeFrom, String deptCodeTo,Page page){
-        return departmentClient.pageDepartmentByTenantId(deptCode, deptName,deptCodeFrom,deptCodeTo,page);
+        //jiu.zhao 修改三方接口 20190401
+        //return departmentClient.pageDepartmentByTenantId(deptCode, deptName,deptCodeFrom,deptCodeTo,page);
+        return departmentClient.pageDepartmentByTenantId(deptCode, deptName, deptCodeFrom, deptCodeTo, page.getCurrent() - 1, page.getSize());
     }
 
     /**
@@ -491,7 +501,9 @@ public class OrganizationService {
     }
 
     public Page<ContactCO> pageConditionNameAndIds(String employeeCode, String fullName, String keyWord, List<Long> ids, Page page){
-        return userClient.pageConditionNameAndIds(employeeCode,fullName, keyWord,ids, page);
+        //jiu.zhao 修改三方接口 20190401
+        //return userClient.pageConditionNameAndIds(employeeCode,fullName, keyWord,ids, page);
+        return userClient.pageConditionNameAndIds(employeeCode, fullName, keyWord, (List)(ids == null ? new ArrayList() : ids), page.getCurrent() - 1, page.getSize());
     }
 
     /**
@@ -506,7 +518,9 @@ public class OrganizationService {
      * @return
      */
     public Page<CompanyCO> pageBySetOfBooksIdConditionByIds(Long setOfBooksId, String companyCode, String companyCodeFrom, String companyCodeTo, String companyName, Page page, List<Long> existsCompanyIds){
-        return companyClient.pageBySetOfBooksIdConditionByIds(setOfBooksId,companyCode,companyCodeFrom,companyCodeTo,companyName,page,existsCompanyIds);
+        //jiu.zhao 修改三方接口 20190401
+        //return companyClient.pageBySetOfBooksIdConditionByIds(setOfBooksId,companyCode,companyCodeFrom,companyCodeTo,companyName,page,existsCompanyIds);
+        return companyClient.pageBySetOfBooksIdConditionByIds(setOfBooksId, companyCode, companyCodeFrom, companyCodeTo, companyName, page.getCurrent() - 1, page.getSize(), (List)(existsCompanyIds == null ? new ArrayList() : existsCompanyIds));
     }
 
     /**
@@ -531,7 +545,9 @@ public class OrganizationService {
                                                  Boolean enabled,
                                                  List<Long> ids,
                                                  Page page){
-        return responsibilityCenterClient.pageByResponsibilityCenterByCond(setOfBooksId,code,codeFrom,codeTo,name,keyWord,enabled,ids,page);
+        //jiu.zhao 修改三方接口 20190401
+        //return responsibilityCenterClient.pageByResponsibilityCenterByCond(setOfBooksId,code,codeFrom,codeTo,name,keyWord,enabled,ids,page);
+        return responsibilityCenterClient.pageByResponsibilityCenterByCond(setOfBooksId, code, codeFrom, codeTo, name, keyWord, (List)ids, enabled, page.getCurrent() - 1, page.getSize());
     }
 
 
@@ -553,7 +569,9 @@ public class OrganizationService {
                                                     List<Long> ids,
                                                     String keyWord,
                                                     Page page) {
-        return departmentClient.pageDepartmentsByCond(departmentCode,codeFrom,codeTo,name,ids,keyWord,page);
+        //jiu.zhao 修改三方接口 20190401
+        //return departmentClient.pageDepartmentsByCond(departmentCode,codeFrom,codeTo,name,ids,keyWord,page);
+        return departmentClient.pageDepartmentsByCond(departmentCode, codeFrom, codeTo, name, (List)ids, keyWord, page.getCurrent() - 1, page.getSize());
     }
 
     /**
@@ -574,8 +592,11 @@ public class OrganizationService {
                                                                               String codeTo,
                                                                               Boolean enabled,
                                                                               Page page){
-        return responsibilityCenterClient.pageDepartmentSobResponsibilityByCond(companyId,departmentId,info,codeFrom,codeTo,enabled,page);
+        //jiu.zhao 修改三方接口 20190401
+        //return responsibilityCenterClient.pageDepartmentSobResponsibilityByCond(companyId,departmentId,info,codeFrom,codeTo,enabled,page);
+        return responsibilityCenterClient.pageDepartmentSobResponsibilityByCond(companyId, departmentId, info, codeFrom, codeTo, enabled, page.getCurrent() - 1, page.getSize());
     }
+
 
     /**
      * 根据公司部门获取默认的成本中心

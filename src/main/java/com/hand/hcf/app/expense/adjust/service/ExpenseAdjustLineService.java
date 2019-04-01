@@ -9,7 +9,7 @@ import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustLineTemp;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustLineMapper;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustLineWebDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustLinesBean;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.common.utils.RespCode;
@@ -169,7 +169,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
                 throw new BizException(RespCode.EXPENSE_ADJUST_LINE_AMOUNT_IS_ZERO);
             }
         }
-        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(header.getId(), DocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
+        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(header.getId(), ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
         //  判断新增还是更新
         if (linesBean.getId() == null){ //  新增
             //  设置汇率 取单据头上的汇率
@@ -325,7 +325,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
         if (expenseAdjustHeader == null){
             throw new BizException(RespCode.SYS_OBJECT_IS_EMPTY);
         }
-        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(expenseAdjustHeaderId, DocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
+        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(expenseAdjustHeaderId, ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
 
         return createExcelTemplate(expenseAdjustHeader, dimensions, external, false, null);
     }
@@ -342,7 +342,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
             adjustLineCategory = "1002";
         }
         // 查询所有的维度
-        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(expenseAdjustHeaderId, DocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
+        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(expenseAdjustHeaderId, ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
 
         String finalAdjustLineCategory = adjustLineCategory;
         // 实现导入的接口
@@ -582,7 +582,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
         if (expenseAdjustHeader == null){
             throw new BizException(RespCode.SYS_OBJECT_IS_EMPTY);
         }
-        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(headerId, DocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
+        List<ExpenseDimension> dimensions = expenseDimensionService.listDimensionByHeaderIdAndType(headerId, ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
 
         return createExcelTemplate(expenseAdjustHeader, dimensions, external, true, expenseAdjustLinesTemps);
     }

@@ -1,8 +1,7 @@
 package com.hand.hcf.app.expense.type.implement;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.apply.expense.ExpenseTypeInterface;
-import com.hand.hcf.app.apply.expense.dto.ExpenseTypeCO;
+import com.hand.hcf.app.common.co.ExpenseTypeCO;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,23 +24,20 @@ import java.util.stream.Collectors;
  * @Date: 2018/12/19
  */
 @RestController
-public class ExpenseTypeControllerImpl implements ExpenseTypeInterface {
+public class ExpenseTypeControllerImpl {
     @Autowired
     private ExpenseTypeService expenseTypeService;
 
-    @Override
     public ExpenseTypeCO getById(@PathVariable("id") Long id){
         ExpenseType expenseType = expenseTypeService.selectById(id);
         return expenseType2ExpenseTypeCO(expenseType);
     }
 
-    @Override
     public List<ExpenseTypeCO> listByIds(@RequestBody List<Long> ids){
         List<ExpenseType> list = expenseTypeService.selectBatchIds(ids);
         return expenseType2ExpenseTypeCO(list);
     }
 
-    @Override
     public ExpenseTypeCO getByCodeAndTypeFlagAndSetOfBooksId(@RequestParam("setOfBooksId") Long setOfBooksId,
                                                              @RequestParam("typeFlag") Integer typeFlag,
                                                              @RequestParam("code") String code,
@@ -54,7 +50,6 @@ public class ExpenseTypeControllerImpl implements ExpenseTypeInterface {
         return expenseType2ExpenseTypeCO(expenseType);
     }
 
-    @Override
     public List<ExpenseTypeCO> listBySetOfBooksIdConditionByEnabled(@RequestParam("setOfBooksId") Long setOfBooksId,
                                                                     @RequestParam(value = "enabled",required = false) Boolean enabled){
         List<ExpenseType> list = expenseTypeService.selectList(new EntityWrapper<ExpenseType>()

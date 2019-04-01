@@ -1,8 +1,8 @@
 package com.hand.hcf.app.common.co;
 
-import com.hand.hcf.app.apply.accounting.annotation.InterfaceFieldAttribute;
-import com.hand.hcf.app.apply.accounting.enums.SceneElementFieldType;
-import com.hand.hcf.app.apply.accounting.message.ModuleMessageCode;
+import com.hand.hcf.app.common.annotation.InterfaceFieldAttribute;
+import com.hand.hcf.app.common.enums.SceneElementFieldType;
+import com.hand.hcf.app.common.message.ModuleMessageCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +10,11 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
+
 
 /**
- * Created by kai.zhang on 2017-12-25.
+ * @Auther: chenzhipeng
+ * @Date: 2019/3/26 17:25
  * 报销单分配行(分摊行)
  */
 @Data
@@ -21,51 +22,40 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExpenseReportDistCO {
-
     @NotNull
-    @InterfaceFieldAttribute(sequence = 10, msgCode = ModuleMessageCode.EXP_REPORT_DIST_ID, elementFiled = SceneElementFieldType.TRANSACTION_DIST_ID)
-    private Long id;
+    @InterfaceFieldAttribute(sequence = 0, msgCode = ModuleMessageCode.EXP_REPORT_DIST_ID, elementFiled = SceneElementFieldType.TRANSACTION_DIST_ID)
+    private Long id;            //分摊行id
     @NotNull
-    @InterfaceFieldAttribute(sequence = 15, elementFiled = SceneElementFieldType.TRANSACTION_LINE_ID)
-    private Long lineId;         //费用行ID
+    @InterfaceFieldAttribute(sequence = 10,display = false, elementFiled = SceneElementFieldType.TRANSACTION_LINE_ID)
+    private Long lineId;         //报账单行id
     @NotNull
     private Long headerId;             //报账单头ID
     @NotNull
-    @InterfaceFieldAttribute(sequence = 20, msgCode = ModuleMessageCode.EXP_REPORT_DIST_TENANT_ID)
-    private Long tenantId;             //租户id
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 30, msgCode = ModuleMessageCode.EXP_REPORT_DIST_SET_OF_BOOKS_ID)
-    private Long setOfBooksId;           //账套id
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 40, msgCode = ModuleMessageCode.EXP_REPORT_DIST_COMPANY_ID)
+    @InterfaceFieldAttribute(sequence = 20, msgCode = ModuleMessageCode.EXP_REPORT_DIST_COMPANY_ID)
     private Long companyId;             //公司id
-    @InterfaceFieldAttribute(sequence = 50, msgCode = ModuleMessageCode.EXP_REPORT_DIST_UNIT_ID)
+    @NotNull
+    @InterfaceFieldAttribute(sequence = 30, msgCode = ModuleMessageCode.EXP_REPORT_DIST_UNIT_ID)
     private Long unitId;                //部门id
-    @InterfaceFieldAttribute(sequence = 55, msgCode = ModuleMessageCode.EXP_REPORT_DIST_RES_CENTER_ID)
+    @InterfaceFieldAttribute(sequence = 40, msgCode = ModuleMessageCode.EXP_REPORT_DIST_RES_CENTER_ID)
     private Long resCenterId;                //责任中心id
-    @InterfaceFieldAttribute(sequence = 60, msgCode = ModuleMessageCode.EXP_REPORT_DIST_EMPLOYEE_ID)
-    private Long employeeId;                 //员工id
-    @InterfaceFieldAttribute(sequence = 70, msgCode = ModuleMessageCode.EXP_REPORT_DIST_DESCRIPTION)
-    private String description;                //描述
-    @InterfaceFieldAttribute(sequence = 80, msgCode = ModuleMessageCode.EXP_REPORT_DIST_EXPENSE_TYPE_ID)
+    @NotNull
+    @InterfaceFieldAttribute(sequence = 60, msgCode = ModuleMessageCode.EXP_REPORT_DIST_EXPENSE_TYPE_ID)
     private Long expenseTypeId;                 //费用类型id
     @NotNull
-    @InterfaceFieldAttribute(sequence = 90, msgCode = ModuleMessageCode.EXP_REPORT_DIST_CURRENCY_CODE, elementFiled = SceneElementFieldType.CURRENCY_CODE)
+    @InterfaceFieldAttribute(sequence = 70, msgCode = ModuleMessageCode.EXP_REPORT_DIST_CURRENCY_CODE, elementFiled = SceneElementFieldType.CURRENCY_CODE)
     private String currencyCode;                //币种
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 100, msgCode = ModuleMessageCode.EXP_REPORT_DIST_RATE)
-    private Double rate;                 //汇率
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 110, msgCode = ModuleMessageCode.EXP_REPORT_DIST_AMOUNT)
-    private BigDecimal amount;               //金额
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 120, msgCode = ModuleMessageCode.EXP_REPORT_DIST_FUNCTIONAL_AMOUNT)
-    private BigDecimal functionalAmount;         //本位币金额
-    @NotNull
-    @InterfaceFieldAttribute(sequence = 130, msgCode = ModuleMessageCode.EXP_REPORT_DIST_DATE)
-    private ZonedDateTime date;              //分摊日期
-    private Boolean auditFlag;              //审核标志
-    private ZonedDateTime auditDate;               //审核日期
+    @InterfaceFieldAttribute(sequence = 80)
+    private BigDecimal amount;                          //分摊含税金额
+    @InterfaceFieldAttribute(sequence = 90)
+    private BigDecimal functionAmount;                          //本币含税金额
+    @InterfaceFieldAttribute(sequence = 100)
+    private BigDecimal noTaxAmount;                          //分摊不含税金额
+    @InterfaceFieldAttribute(sequence = 110)
+    private BigDecimal noTaxFunctionAmount;                          //分摊不含税本币金额
+    @InterfaceFieldAttribute(sequence = 120)
+    private BigDecimal taxAmount;                          //税额分摊额
+    @InterfaceFieldAttribute(sequence = 130)
+    private BigDecimal taxFunctionAmount;                          //税本币分摊金额
     @InterfaceFieldAttribute(sequence = 140, dimension = true)
     private Long dimension1Id;                  //维度相关
     @InterfaceFieldAttribute(sequence = 150, dimension = true)

@@ -1,9 +1,9 @@
 package com.hand.hcf.app.expense.report.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeCompany;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeCompanyService;
-import com.hand.hcf.app.mdata.client.com.CompanyCO;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -258,11 +258,11 @@ public class ExpenseReportTypeCompanyController {
      */
     @GetMapping("/filter")
     public ResponseEntity<List<CompanyCO>> assignCompanyQuery(@RequestParam Long reportTypeId,
-                                             @RequestParam(required = false) String companyCode,
-                                             @RequestParam(required = false) String companyName,
-                                             @RequestParam(required = false) String companyCodeFrom,
-                                             @RequestParam(required = false) String companyCodeTo,
-                                             Pageable pageable) throws URISyntaxException {
+                                                              @RequestParam(required = false) String companyCode,
+                                                              @RequestParam(required = false) String companyName,
+                                                              @RequestParam(required = false) String companyCodeFrom,
+                                                              @RequestParam(required = false) String companyCodeTo,
+                                                              Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<CompanyCO> result = expenseReportTypeCompanyService.assignCompanyQuery(reportTypeId, companyCode, companyName, companyCodeFrom, companyCodeTo, page);
         HttpHeaders headers = PageUtil.getTotalHeader(result);

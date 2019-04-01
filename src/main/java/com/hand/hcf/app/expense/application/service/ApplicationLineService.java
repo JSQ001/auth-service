@@ -3,12 +3,13 @@ package com.hand.hcf.app.expense.application.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.expense.application.domain.ApplicationHeader;
 import com.hand.hcf.app.expense.application.domain.ApplicationLine;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.application.persistence.ApplicationLineMapper;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationLineWebDTO;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.dto.CurrencyAmountDTO;
 import com.hand.hcf.app.expense.common.dto.DocumentLineDTO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
@@ -167,7 +168,7 @@ public class ApplicationLineService extends BaseService<ApplicationLineMapper, A
             documentFieldService.delete(new EntityWrapper<ExpenseDocumentField>()
                     .eq("header_id",header.getId())
                     .eq("line_id", line.getId())
-                    .eq("document_type", DocumentTypeEnum.EXP_REQUISITION));
+                    .eq("document_type", ExpenseDocumentTypeEnum.EXP_REQUISITION));
 
         }
         List<ExpenseDocumentField> documentFields = adaptExpenseFields(fields, line, header, expenseType);
@@ -187,7 +188,7 @@ public class ApplicationLineService extends BaseService<ApplicationLineMapper, A
                     .defaultValueConfigurable(e.getDefaultValueConfigurable())
                     .defaultValueKey(e.getDefaultValueKey())
                     .defaultValueMode(e.getDefaultValueMode())
-                    .documentType(DocumentTypeEnum.EXP_REQUISITION)
+                    .documentType(ExpenseDocumentTypeEnum.EXP_REQUISITION)
                     .editable(e.getEditable())
                     .expenseTypeId(expenseType.getId())
                     .headerId(header.getId())
@@ -299,7 +300,7 @@ public class ApplicationLineService extends BaseService<ApplicationLineMapper, A
                 new EntityWrapper<ExpenseDocumentField>()
                         .eq("header_id", line.getHeaderId())
                         .eq("line_id", line.getId())
-                        .eq("document_type", DocumentTypeEnum.EXP_REQUISITION)
+                        .eq("document_type", ExpenseDocumentTypeEnum.EXP_REQUISITION)
                         .orderBy("sequence", true));
         return adaptExpenseDocumentField(expenseDocumentFields);
     }

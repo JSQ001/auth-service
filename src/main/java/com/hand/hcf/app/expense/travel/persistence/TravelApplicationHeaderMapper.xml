@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.travel.persistence.TravelApplicationHeaderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hand.hcf.app.expense.travel.domain.TravelApplicationHeader">
+        <id column="id" property="id" />
+        <result column="requisition_number" property="requisitionNumber" />
+        <result column="document_type_id" property="documentTypeId" />
+        <result column="requisition_date" property="requisitionDate" />
+        <result column="employee_id" property="employeeId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="total_amount" property="totalAmount" />
+        <result column="functional_amount" property="functionalAmount" />
+        <result column="description" property="description" />
+        <result column="status" property="status" />
+        <result column="company_id" property="companyId" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="unit_id" property="unitId" />
+        <result column="exchange_rate" property="exchangeRate" />
+        <result column="closed_flag" property="closedFlag" />
+        <result column="version_number" property="versionNumber" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+    </resultMap>
+
+    <resultMap id="WebDTOResult" type="com.hand.hcf.app.expense.travel.web.dto.TravelApplicationHeaderWebDTO">
+        <id column="id" property="id" />
+        <result column="requisition_number" property="requisitionNumber" />
+        <result column="document_type_id" property="documentTypeId" />
+        <result column="requisition_date" property="requisitionDate" />
+        <result column="employee_id" property="employeeId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="total_amount" property="totalAmount" />
+        <result column="functional_amount" property="functionalAmount" />
+        <result column="description" property="description" />
+        <result column="status" property="status" />
+        <result column="company_id" property="companyId" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="unit_id" property="unitId" />
+        <result column="exchange_rate" property="exchangeRate" />
+        <result column="closed_flag" property="closedFlag" />
+        <result column="version_number" property="versionNumber" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <collection property="dimensions" column="{headerFlag=header_flag, headerId=id,documentType=document_type}"
+                    select="com.hand.hcf.app.expense.type.persistence.ExpenseDimensionMapper.listDimensionByHeaderIdAndType"/>
+    </resultMap>
+
+    <select id="getHeaderWebDTOById" resultMap="WebDTOResult">
+        select t.*, #{headerFlag} as header_flag from exp_travel_app_header t where t.id = #{id}
+
+    </select>
+
+    <select id="listByCondition" resultType="com.hand.hcf.app.expense.travel.web.dto.TravelApplicationHeaderWebDTO">
+        select t.*, eat.name typeName from exp_travel_app_header t, exp_travel_app_type eat
+        where t.document_type_id = eat.id
+        and exists (
+          select 1
+          from exp_travel_app_header header
+          where t.id = header.id and (
+            header.created_by = #{currentUserId}
+            or (header.order_mode = '1' and header.orderer = #{currentUserId})
+            or exists (
+              select 1
+              from exp_travel_asso_people people
+              where header.id = people.asso_pk_id
+              and people.com_people_id = #{currentUserId}
+              and people.asso_type = 'H'
+            )
+          )
+        )
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+    </select>
+
+</mapper>

@@ -19,5 +19,8 @@ public interface InvoiceLineMapper extends BaseMapper<InvoiceLine>{
      * @param expExpenseLineId
      * @return
      */
-    List<InvoiceLine> selectInvoiceByExpenseLineId(@Param(value = "expExpenseLineId") Long expExpenseLineId);
+    List<InvoiceLine> selectInvoiceByExpenseLineId(@Param(value = "expExpenseLineId") Long expExpenseLineId,
+                                                   @Param(value = "deductionFlag") String deductionFlag);
+
+    List<InvoiceLine> listNotAssignInvoiceLinesByInvoiceHeadId(@Param(value = "invoiceHeadId") Long invoiceHeadId);
 }

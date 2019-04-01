@@ -190,4 +190,26 @@ public class ExpenseReportLine extends Domain{
     @TableField(exist = false)
     private Integer index;
 
+    /**
+     * 关联申请模式
+     */
+    @TableField(exist = false)
+    private String applicationModel;
+    /**
+     * 对比符号
+     */
+    @TableField(exist = false)
+    private String contrastSign;
+    /**
+     * 金额条件
+     */
+    @TableField(exist = false)
+    private BigDecimal contrastAmount;
+
+    /**
+     * 金额录入模式 false-总金额 true-单价*数量
+     */
+    @TableField(exist = false)
+    private Boolean entryMode;
+
 }

@@ -10,6 +10,7 @@ import com.hand.hcf.core.serializer.CollectionToStringSerializer;
 import lombok.Data;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,7 +29,6 @@ public class ExpenseReportLineDTO extends ExpenseReportLine{
     /**
      * 关联发票信息(发票头ID为空时表示手工录入信息)
      */
-    @Valid
     private List<InvoiceHead> invoiceHeads;
 
     /**

@@ -5,8 +5,9 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
@@ -17,7 +18,6 @@ import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeRequestDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
-import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -26,8 +26,6 @@ import com.hand.hcf.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.util.PageUtil;
-import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -682,7 +680,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         }else{
             return expenseTypeService.queryLovByDocumentTypeAssign(expenseReportType.getSetOfBooksId(),
                     "all",
-                    DocumentTypeEnum.PUBLIC_REPORT.getKey(),
+                    ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(),
                     expenseReportType.getId(),
                     code,
                     name,
@@ -713,7 +711,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         }else{
             return expenseTypeService.queryLovByDocumentTypeAssign(expenseReportType.getSetOfBooksId(),
                     "all",
-                    DocumentTypeEnum.PUBLIC_REPORT.getKey(),
+                    ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(),
                     expenseReportType.getId(),
                     code,
                     name,
@@ -748,7 +746,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
     private List<ExpenseDimension> queryTypeDimensionByIdWhenCreated(Long headerId) {
         //获取对公报账维度布局
         List<ExpenseDimension> expenseDimensions =
-                expenseDimensionService.listDimensionByHeaderIdAndType(headerId, DocumentTypeEnum.PUBLIC_REPORT.getKey(), null);
+                expenseDimensionService.listDimensionByHeaderIdAndType(headerId, ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(), null);
         // 根据维度ID查询相关维度信息
         if (!CollectionUtils.isEmpty(expenseDimensions)){
             expenseDimensions.stream().sorted(Comparator.comparing(ExpenseDimension::getSequence)).forEach(expenseDimension -> {

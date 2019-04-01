@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
-import com.hand.hcf.app.expense.common.domain.enums.DocumentTypeEnum;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
@@ -117,7 +117,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
      * @param line
      * @param expTaxDist
      */
-    private void handleTailDifference(ExpenseReportLine line, String expTaxDist){
+    public void handleTailDifference(ExpenseReportLine line, String expTaxDist){
         //分摊行尾差处理
         ExpenseReportDist expenseReportDist = checkAmount(line,expTaxDist);
         BigDecimal amountSub = OperationUtil.subtract(line.getAmount(), expenseReportDist.getAmount());
@@ -259,7 +259,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                                            String expTaxDist){
         // 每次把税金分摊行删除之后重新创建
         expenseReportTaxDistService.deleteExpenseReportTaxDistByDistId(expenseReportDist.getId());
-        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(line.getId());
+        List<InvoiceLine> invoiceLines = invoiceLineService.selectInvoiceByExpenseLineId(line.getId(),"Y");
         if(CollectionUtils.isNotEmpty(invoiceLines)){
             List<Long> collect = invoiceLines.stream().map(InvoiceLine::getId).collect(Collectors.toList());
             List<InvoiceLineDist> invoiceDists = invoiceLineDistService.selectList(new EntityWrapper<InvoiceLineDist>().in("invoice_line_id", collect).orderBy("tax_amount"));
@@ -275,6 +275,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                 expenseReportTaxDist.setTenantId(expenseReportDist.getTenantId());
                 expenseReportTaxDist.setSetOfBooksId(expenseReportDist.getSetOfBooksId());
                 expenseReportTaxDist.setCompanyId(expenseReportDist.getCompanyId());
+                expenseReportTaxDist.setDepartmentId(expenseReportDist.getDepartmentId());
                 expenseReportTaxDist.setExpenseTypeId(expenseReportDist.getExpenseTypeId());
                 expenseReportTaxDist.setResponsibilityCenterId(expenseReportDist.getResponsibilityCenterId());
                 // 按含税金额分摊
@@ -284,15 +285,25 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                     expenseReportTaxDist.setTaxAmount(OperationUtil.safeDivide(OperationUtil.safeMultiply(expenseReportDist.getNoTaxDistAmount(), invoiceLineDist.getTaxAmount(), 8), line.getExpenseAmount()));
                 }
                 expenseReportTaxDist.setFunctionAmount(OperationUtil.safeMultiply(expenseReportTaxDist.getTaxAmount(), invoiceLineDist.getExchangeRate()));
-                expenseReportTaxDist.setExchangeRate(invoiceLineDist.getExchangeRate());
-                expenseReportTaxDist.setCurrencyCode(invoiceLineDist.getCurrencyCode());
+                expenseReportTaxDist.setExchangeRate(expenseReportDist.getExchangeRate());
+                expenseReportTaxDist.setCurrencyCode(expenseReportDist.getCurrencyCode());
+                expenseReportTaxDist.setTaxRate(invoiceLineDist.getTaxRate());
                 expenseReportTaxDist.setReverseFlag("N");
-                taxAmountSum.add(expenseReportTaxDist.getTaxAmount());
-                taxAmountFunctionSum.add(expenseReportTaxDist.getFunctionAmount());
+                taxAmountSum = taxAmountSum.add(expenseReportTaxDist.getTaxAmount());
+                taxAmountFunctionSum = taxAmountFunctionSum.add(expenseReportTaxDist.getFunctionAmount());
+                // 金额最大的处理尾差
+                if(i == invoiceDists.size() - 1){
+                    if(! expenseReportDist.getTaxDistAmount().equals(taxAmountSum)){
+                        BigDecimal taxSub = expenseReportDist.getTaxDistAmount().subtract(taxAmountSum);
+                        BigDecimal funTaxSub = expenseReportDist.getTaxDistFunctionAmount().subtract(taxAmountFunctionSum);
+                        expenseReportTaxDist.setTaxAmount(expenseReportTaxDist.getTaxAmount().add(taxSub));
+                        expenseReportTaxDist.setFunctionAmount(expenseReportTaxDist.getFunctionAmount().add(funTaxSub));
+                    }
+                }
+
                 taxDists.add(expenseReportTaxDist);
             }
             expenseReportTaxDistService.insertBatch(taxDists);
-//            invoiceDists.stream().max(InvoiceLineDist::getTaxAmount)
         }
     }
 
@@ -360,17 +371,33 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         Wrapper<ExpenseReportDist> wrapper = new EntityWrapper<ExpenseReportDist>()
                     .eq(companyId!=null,"ed.company_id",companyId)
                     .eq(unitId!=null,"ed.department_id",unitId)
-                    .eq("ed.source_document_category", DocumentTypeEnum.EXP_REQUISITION.name());
+                    .eq("ed.source_document_category", ExpenseDocumentTypeEnum.EXP_REQUISITION.name());
         List<ExpenseReportDistDTO>reportDistDTOList =baseMapper.queryExpenseReportDistFromApplication(page,wrapper,documentNumber,reportDocumentNumber);
         return  reportDistDTOList;
     }
-    //根据报账单id获取分摊行
+
+    /**
+     * 根据报账单id获取分摊行
+     */
     public List<ExpenseReportDist> getExpenseReportDistByLineId(Long lineId) {
         return baseMapper.selectList(new EntityWrapper<ExpenseReportDist>()
                 .eq("exp_report_line_id", lineId));
     }
-    //根据分摊行id获取报账单行id
+
+    /**
+     * 根据分摊行id获取报账单行id
+     * @param distId
+     * @return
+     */
     public Long getExpenseReportLineByDistId(Long distId){
         return this.selectById(distId).getExpReportLineId();
+    }
+
+    /**
+     * 根据报账单id获取分摊行
+     */
+    public List<ExpenseReportDist> getExpenseReportDistByHeaderId(Long headerId) {
+        return baseMapper.selectList(new EntityWrapper<ExpenseReportDist>()
+                .eq("exp_report_header_id", headerId));
     }
 }
