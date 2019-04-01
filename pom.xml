@@ -28,14 +28,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.hand.hcf.core</groupId>
-            <artifactId>hcf-stater-disk-lock</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
