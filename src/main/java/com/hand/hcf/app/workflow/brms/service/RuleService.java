@@ -4,26 +4,40 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.brms.domain.*;
-import com.hand.hcf.app.workflow.brms.dto.*;
+import com.hand.hcf.app.workflow.brms.domain.RuleApprovalChain;
+import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
+import com.hand.hcf.app.workflow.brms.domain.RuleApprover;
+import com.hand.hcf.app.workflow.brms.domain.RuleCondition;
+import com.hand.hcf.app.workflow.brms.domain.RuleConditionRelation;
+import com.hand.hcf.app.workflow.brms.domain.RuleScene;
+import com.hand.hcf.app.workflow.brms.dto.CustomFormApprovalModeDTO;
+import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
+import com.hand.hcf.app.workflow.brms.dto.NotifyInfo;
+import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleApproverDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleApproverUserOidsDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleConditionDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleEnumDTO;
+import com.hand.hcf.app.workflow.brms.dto.RuleNextApproverResult;
 import com.hand.hcf.app.workflow.brms.enums.OperationEntityTypeEnum;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.ApprovalFormApprovalModeMapper;
 import com.hand.hcf.app.workflow.brms.util.cache.CacheNames;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
+import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
+import com.hand.hcf.app.workflow.dto.ApprovalFormQO;
+import com.hand.hcf.app.workflow.dto.FormFieldDTO;
+import com.hand.hcf.app.workflow.enums.ApprovalFormEnum;
+import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.enums.FieldType;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
+import com.hand.hcf.app.workflow.service.ApprovalFormPropertyService;
+import com.hand.hcf.app.workflow.service.ApprovalFormService;
 import com.hand.hcf.app.workflow.util.RespCode;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalFormDTO;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalFormQO;
-import com.hand.hcf.app.workflow.workflow.dto.FormFieldDTO;
-import com.hand.hcf.app.workflow.workflow.enums.ApprovalFormEnum;
-import com.hand.hcf.app.workflow.workflow.enums.ApprovalMode;
-import com.hand.hcf.app.workflow.workflow.enums.FieldType;
-import com.hand.hcf.app.workflow.workflow.service.ApprovalFormPropertyService;
-import com.hand.hcf.app.workflow.workflow.service.ApprovalFormService;
-import com.hand.hcf.app.workflow.workflow.service.WorkFlowApprovalService;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.util.LoginInformationUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,7 +52,14 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,7 +94,7 @@ public class RuleService {
     private ApprovalFormApprovalModeMapper approvalFormApprovalModeMapper;
 
     @Autowired
-    private WorkFlowApprovalService workFlowApprovalService;
+    private com.hand.hcf.app.workflow.service.WorkFlowApprovalService workFlowApprovalService;
     @Autowired
     private MapperFacade mapper;
 
@@ -81,7 +102,7 @@ public class RuleService {
     /**
      * 审批链相关接口 ***********************
      */
-    public RuleApprovalChainDTO createRuleApprovalChain(RuleApprovalChainDTO ruleApprovalChainDTO, UUID userOid, UUID companyOid) {
+    public RuleApprovalChainDTO createRuleApprovalChain(RuleApprovalChainDTO ruleApprovalChainDTO) {
 
         if (ruleApprovalChainDTO.getFormOid() == null) {
             throw new BizException("approvalRule.createRuleApprovalChain", "formOid is null");
@@ -89,17 +110,14 @@ public class RuleService {
         if (ruleApprovalChainDTO.getApprovalMode() == null) {
             throw new BizException("approvalRule.createRuleApprovalChain", "aprovalMode is null");
         }
-        if (companyOid == null) {
-            companyOid = OrgInformationUtil.getCurrentCompanyOid();
-        }
+
 
         if (ruleApprovalChainDTO.getCheckData() == null || ruleApprovalChainDTO.getCheckData()) {
             //check customForm
             ApprovalFormDTO formDTO = approvalFormService.getCustomFormDetailForRule(ruleApprovalChainDTO.getFormOid());
             if (formDTO == null) {
                 throw new BizException("approvalRule.createRuleApprovalChain", "form not exist , formOid: " + ruleApprovalChainDTO.getFormOid());
-            } else if (!formDTO.getCompanyOid().equals(companyOid)) {
-                throw new BizException("approvalRule.createRuleApprovalChain", "form companyId error , formOid: " + ruleApprovalChainDTO.getFormOid());
+
             }
         }
         RuleCondition existRuleCondition = ruleConditionService.getFormRuleCondition(ruleApprovalChainDTO.getFormOid());
@@ -111,7 +129,6 @@ public class RuleService {
         //创建场景
         RuleScene ruleScene = ruleSceneService.save(
                 RuleScene.builder()
-                        .companyOid(companyOid)
                         .sequenceNumber(RuleConstants.RULE_SEQUENCE_DEFAULT)
                         .build()
         );
@@ -119,14 +136,12 @@ public class RuleService {
         //创建审批链
         RuleApprovalChain ruleApprovalChain = mapper.map(ruleApprovalChainDTO, RuleApprovalChain.class);
         ruleApprovalChain.setRuleApprovalChainOid(null);
-        ruleApprovalChain.setCompanyOid(companyOid);
         ruleApprovalChain.setRuleSceneOid(ruleScene.getRuleSceneOid());
         ruleApprovalChain = ruleApprovalChainService.save(ruleApprovalChain);
 
         //创建条件
         RuleCondition ruleCondition = ruleConditionService.save(
                 RuleCondition.builder()
-                        .companyOid(companyOid)
                         .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                         .typeNumber(RuleConstants.CONDITION_TYPE_FORM)
                         .symbol(RuleConstants.SYMBOL_EQ)
@@ -239,18 +254,12 @@ public class RuleService {
         if (targetFormOid == null) {
             throw new BizException("approvalRule.copyApprovalChain", "targetFormOid is null");
         }
-        UUID companyOid = OrgInformationUtil.getCurrentCompanyOid();
         //check customForm
         ApprovalFormDTO formDTO = approvalFormService.getDTOByQO(ApprovalFormQO.builder().formOid(targetFormOid).build());
         if (formDTO == null) {
             throw new BizException("approvalRule.copyApprovalChain", "targetForm not exist , formOid: " + targetFormOid);
         }
-        /**
-         *  2018/1/5  取消公司隔离 换租户隔离
-         */
-        /*else if (!formDTO.getCompanyOid().equals(companyOid)) {
-            throw new ValidationException(new ValidationError("approvalRule.copyApprovalChain", "targetForm companyId error , formOid: " + targetFormOid));
-        }*/
+
         RuleApprovalChainDTO targetRuleApprovalChainDTO = getApprovalChainByFormOid(targetFormOid, userOid, true, true, true);
 
         RuleApprovalChain targetRuleApprovalChain = mapper.map(targetRuleApprovalChainDTO, RuleApprovalChain.class);
@@ -261,20 +270,17 @@ public class RuleService {
             //创建场景
             RuleScene ruleScene = ruleSceneService.save(
                     RuleScene.builder()
-                            .companyOid(companyOid)
                             .sequenceNumber(RuleConstants.RULE_SEQUENCE_DEFAULT)
                             .build()
             );
             //创建审批链
             RuleApprovalChain ruleApprovalChain = mapper.map(sourceRuleApprovalChainDTO, RuleApprovalChain.class);
             ruleApprovalChain.setRuleApprovalChainOid(null);
-            ruleApprovalChain.setCompanyOid(companyOid);
             ruleApprovalChain.setRuleSceneOid(ruleScene.getRuleSceneOid());
             targetRuleApprovalChain = ruleApprovalChainService.save(ruleApprovalChain);
             //创建条件
             RuleCondition ruleCondition = ruleConditionService.save(
                     RuleCondition.builder()
-                            .companyOid(companyOid)
                             .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                             //.field(RuleApprovalEnum.CONDITION_TYPE_FORM.getId().toString())
                             .typeNumber(RuleConstants.CONDITION_TYPE_FORM)
@@ -607,11 +613,7 @@ public class RuleService {
         if (ruleApprovalChain == null) {
             throw new BizException("approvalRule.createRuleApprovalNode", "ruleApprovalChain not exist , ruleApprovalChainOid : " + ruleApprovalNodeDTO.getRuleApprovalChainOid());
         }
-        //TODO 公司数据隔离
-        /*UUID companyOid = userService.findOneByUserOid(userOid).getCompanyId().getCompanyOid();
-        if (!companyOid.equals(ruleApprovalChain.getCompanyOid())) {
-            throw new ValidationException(new ValidationError("approvalRule.createRuleApprovalNode", "companyOid error , ruleApprovalChainOid : " + ruleApprovalNodeDTO.getRuleApprovalChainOid()));
-        }*/
+
         if (!ruleApprovalChain.getApprovalMode().equals(ApprovalMode.CUSTOM.getId())) {
             throw new BizException("approvalRule.createRuleApprovalNode", "approvalMode error , ruleApprovalChainOid : " + ruleApprovalNodeDTO.getRuleApprovalChainOid());
         }
@@ -681,15 +683,7 @@ public class RuleService {
                 throw new BizException("approvalRule.getRuleApprovalNode", "反序列化失败");
             }
         }
-        //TODO 公司数据隔离
-        /*RuleApprovalChain ruleApprovalChain = ruleApprovalChainService.getByOid(existRuleApprovalNode.getRuleApprovalChainOid());
-        if (ruleApprovalChain == null) {
-            throw new ValidationException(new ValidationError("approvalRule.createRuleApprovalNode", "ruleApprovalChain not exist , ruleApprovalChainOid : " + ruleApprovalNodeDTO.getRuleApprovalChainOid()));
-        }
-        UUID companyOid = userService.findOneByUserOid(userOid).getCompanyId().getCompanyOid();
-        if (!companyOid.equals(ruleApprovalChain.getCompanyOid())) {
-            throw new ValidationException(new ValidationError("approvalRule.createRuleApprovalNode", "companyOid error , ruleApprovalChainOid : " + ruleApprovalNodeDTO.getRuleApprovalChainOid()));
-        }*/
+
         RuleApprovalNodeDTO ruleApprovalNodeDTO = mapper.map(existRuleApprovalNode, RuleApprovalNodeDTO.class);
         consummateRuleApprovalNode(ruleApprovalNodeDTO, cascadeApprover, cascadeCondition);
         // 添加序列化知会内容
@@ -941,7 +935,7 @@ public class RuleService {
     public List<ApprovalFormDTO> getAllCustomForm(UUID userOid, boolean cascadeApprovalChain) {
         List<ApprovalFormDTO> approvalFormDTOS = null;
         try {
-            approvalFormDTOS = approvalFormService.listDTOByUserOid(userOid);
+            approvalFormDTOS = approvalFormService.listDTO();
             approvalFormDTOS = approvalFormDTOS.stream().filter(v -> !RuleConstants.excludeFormTypes.contains(v.getFormType())).collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -1249,24 +1243,23 @@ public class RuleService {
     /**
      * 初始化公司表单
      *
-     * @param companyOid
      */
-    public void initCompanyRule(UUID companyOid, Integer approvalType, UUID userOid) {
+    public void initRule(Integer approvalType) {
 
-        List<RuleApprovalChain> existRuleApprovalChains = ruleApprovalChainService.listAllByCompanyOid(companyOid);
+        List<RuleApprovalChain> existRuleApprovalChains = ruleApprovalChainService.listAll();
         if (!CollectionUtils.isEmpty(existRuleApprovalChains)) {
             return;
         }
 
         List<ApprovalFormDTO> approvalFormDTOS = null;
         try {
-            approvalFormDTOS = approvalFormService.listDTOByCompanyOid(companyOid);
+            approvalFormDTOS = approvalFormService.listDTO();
             for (ApprovalFormDTO formDTO : approvalFormDTOS) {
                 RuleApprovalChainDTO ruleApprovalChainDTO = RuleApprovalChainDTO.builder()
                         .formOid(formDTO.getFormOid())
                         .approvalMode(approvalType)
                         .build();
-                this.createRuleApprovalChain(ruleApprovalChainDTO, userOid, OrgInformationUtil.getCurrentCompanyOid());
+                this.createRuleApprovalChain(ruleApprovalChainDTO);
             }
 
         } catch (Exception e) {
@@ -1363,13 +1356,13 @@ public class RuleService {
     /**
      * 表单
      */
-    public List<ApprovalFormDTO> getAllCustomFormByCompany(UUID companyOid, boolean cascadeApprovalChain, String fromType, String roleType, String booksID,String formName,Long formTypeId) {
+    public List<ApprovalFormDTO> listAllForm(boolean cascadeApprovalChain, String fromType, String roleType, String formName, Long formTypeId) {
         List<ApprovalFormDTO> approvalFormDTOS = new ArrayList<>();
         try {
-            if ("TENANT".equals(roleType) && StringUtils.isNotEmpty(booksID)) {
-                approvalFormDTOS = approvalFormService.listTenantCustomFormsByCompanyOid(companyOid, booksID,formTypeId,formName);
+            if ("TENANT".equals(roleType) ) {
+                approvalFormDTOS = approvalFormService.listTenantForms(LoginInformationUtil.getCurrentTenantId(),formTypeId,formName);
             } else {
-                approvalFormDTOS = approvalFormService.listDTOByCompanyOid(companyOid);
+                approvalFormDTOS = approvalFormService.listDTO();
                 if (String.valueOf(ApprovalFormEnum.CUSTOMER_FROM_TENANT.getId()).equals(fromType)) {
                     approvalFormDTOS = approvalFormDTOS.stream().filter(v -> ApprovalFormEnum.CUSTOMER_FROM_TENANT.getId().equals(v.getFromType())).collect(Collectors.toList());
                 } else {
@@ -1379,7 +1372,7 @@ public class RuleService {
             approvalFormDTOS = approvalFormDTOS.stream().filter(v -> !RuleConstants.excludeFormTypes.contains(v.getFormType())).collect(Collectors.toList());
             consummateCustomForm(approvalFormDTOS, cascadeApprovalChain);
         } catch (Exception e) {
-            log.error("getAllCustomFormByCompanyOrTenant---------error:", e);
+            log.error("getAllCustomFormByTenant---------error:", e);
         }
         return approvalFormDTOS;
     }
@@ -1387,14 +1380,13 @@ public class RuleService {
     /**
      * 尚未初始化审批链的表单
      *
-     * @param companyOid
      * @param cascadeApprovalChain
      * @return
      */
-    public List<ApprovalFormDTO> getAllUnInitialCustomFormByCompany(UUID companyOid, boolean cascadeApprovalChain) {
+    public List<ApprovalFormDTO> getAllUnInitialCustomForm(boolean cascadeApprovalChain) {
         List<ApprovalFormDTO> approvalFormDTOS = null;
         try {
-            approvalFormDTOS = approvalFormService.listDTOByCompanyOid(companyOid);
+            approvalFormDTOS = approvalFormService.listDTO();
             approvalFormDTOS = approvalFormDTOS.stream().filter(v -> !RuleConstants.excludeFormTypes.contains(v.getFormType())).collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -1461,7 +1453,7 @@ public class RuleService {
      */
     public void additionalOperation(List<UUID> formOids) {
         formOids.stream().forEach(f -> {
-            RuleApprovalChainDTO ruleApprovalChainDTO = createRuleApprovalChain(RuleApprovalChainDTO.builder().approvalMode(ApprovalMode.CUSTOM.getId()).formOid(f).checkData(Boolean.FALSE).build(), OrgInformationUtil.getCurrentUserOid(), OrgInformationUtil.getCurrentCompanyOid());
+            RuleApprovalChainDTO ruleApprovalChainDTO = createRuleApprovalChain(RuleApprovalChainDTO.builder().approvalMode(ApprovalMode.CUSTOM.getId()).formOid(f).checkData(Boolean.FALSE).build());
             createRuleApprovalNodeMapping(RuleApprovalNodeDTO.builder().printFlag(Boolean.TRUE).name("结束").remark("结束").typeNumber(RuleApprovalEnum.NODE_TYPE_EED.getId()).ruleApprovalChainOid(ruleApprovalChainDTO.getRuleApprovalChainOid()).build(), OrgInformationUtil.getCurrentUserOid());
             approvalFormService.synchronizeApprovalMode(f, ApprovalMode.CUSTOM.getId(), OrgInformationUtil.getCurrentTenantId());
         });

@@ -5,7 +5,7 @@ import com.hand.hcf.app.workflow.brms.dto.RuleConditionDTO;
 import com.hand.hcf.app.workflow.brms.dto.SimpleValueDetailDTO;
 import com.hand.hcf.app.workflow.brms.dto.SimpleValueSymbolDTO;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.workflow.enums.FieldType;
+import com.hand.hcf.app.workflow.enums.FieldType;
 import lombok.Data;
 
 import java.util.HashMap;

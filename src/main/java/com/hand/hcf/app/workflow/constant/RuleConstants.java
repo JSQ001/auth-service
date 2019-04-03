@@ -3,11 +3,11 @@ package com.hand.hcf.app.workflow.constant;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hand.hcf.app.workflow.brms.dto.RuleEnumDTO;
-import com.hand.hcf.app.workflow.workflow.dto.FormFieldDTO;
-import com.hand.hcf.app.workflow.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.workflow.dto.FormValueI18nDTO;
-import com.hand.hcf.app.workflow.workflow.enums.ApprovalMode;
-import com.hand.hcf.app.workflow.workflow.enums.FieldType;
+import com.hand.hcf.app.workflow.dto.FormFieldDTO;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.FormValueI18nDTO;
+import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.enums.FieldType;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 
 import java.util.*;

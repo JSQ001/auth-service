@@ -11,7 +11,7 @@ import com.hand.hcf.app.workflow.brms.dto.RuleTransferDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.RuleTransferMapper;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalFormDTO;
+import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
 import com.hand.hcf.core.exception.core.ValidationError;
 import com.hand.hcf.core.exception.core.ValidationException;
 import com.hand.hcf.core.service.BaseService;
