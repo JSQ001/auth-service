@@ -72,4 +72,26 @@
         WHERE user_oid=#{userOid}
         order by created_date desc
     </select>
+    <select id="getUserByOauthClientId" resultType="com.hand.hcf.app.auth.dto.UserDTO">
+        SELECT
+            u.id,
+            u.user_oid,
+            u.login,
+            u.activated,
+            u.status,
+            u.language,
+            u.tenant_id,
+            u.lock_status,
+            u.lock_date_deadline,
+            u.user_name,
+            u.email,
+            u.mobile,
+            u.remark
+        FROM
+            sys_user u
+        where
+            u.deleted = 0
+            and u.status = 1001
+            and u.client_id = #{clientId}
+    </select>
 </mapper>
