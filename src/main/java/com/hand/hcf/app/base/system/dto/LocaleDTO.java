@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FrontLocaleDTO {
+public class LocaleDTO {
 
     //界面key值
     private String keyCode;
@@ -27,9 +27,17 @@ public class FrontLocaleDTO {
     //源语言key描述
     private String sourceKeyDescription;
 
+    //源语言类型
+    private String sourceCategory;
+
+
     //目标语言ID
     private Long targetId;
 
     //目标语言key描述
     private String targetKeyDescription;
+
+    //目标语言版本号
+    private Integer targetVersionNumber;
+
 }

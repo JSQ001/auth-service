@@ -51,7 +51,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             throw new BizException(RespCode.SYS_ID_NOT_NULL);
         }
         //检查用户角色数据权限组合
-        Integer count = getUserRoleCountByUserIdAndRoleId(userRole.getUserId(), userRole.getRoleId(),userRole.getDataAuthorityId());
+        Integer count = getUserRoleCountByUserIdAndRoleId(userRole.getUserId(), userRole.getRoleId(), userRole.getDataAuthorityId());
         if (count != null && count > 0) {
             throw new BizException(RespCode.USER_ROLE_EXISTS);
         }
@@ -76,14 +76,14 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         if (userRole == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (userRole1.getEnabled() == null || "".equals(userRole1.getEnabled())) {
+        if (userRole1.getEnabled() == null) {
             userRole1.setEnabled(userRole.getEnabled());
         }
         userRole1.setCreatedBy(userRole.getCreatedBy());
         userRole1.setCreatedDate(userRole.getCreatedDate());
-        this.updateById(userRole1);
+        this.updateAllColumnById(userRole1);
         //检查用户角色数据权限组合
-        Integer count = getUserRoleCountByUserIdAndRoleId(userRole1.getUserId(), userRole1.getRoleId(),userRole1.getDataAuthorityId());
+        Integer count = getUserRoleCountByUserIdAndRoleId(userRole1.getUserId(), userRole1.getRoleId(), userRole1.getDataAuthorityId());
         if (count != null && count > 1) {
             throw new BizException(RespCode.USER_ROLE_EXISTS);
         }
@@ -97,7 +97,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
      * @param roleId
      * @return
      */
-    public Integer getUserRoleCountByUserIdAndRoleId(Long userId, Long roleId,Long dataAuthorityId) {
+    public Integer getUserRoleCountByUserIdAndRoleId(Long userId, Long roleId, Long dataAuthorityId) {
         return userRoleMapper.selectCount(new EntityWrapper<UserRole>()
                 .eq("user_id", userId)
                 .eq("role_id", roleId)
@@ -130,7 +130,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     /**
      * 根据用户Id，获取分配的所有角色
      *
-     * @param userId    用户ID
+     * @param userId  用户ID
      * @param enabled 如果不传，则不控制，如果传了，则根据传的值控制
      * @param page
      * @return
@@ -152,9 +152,11 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         }
         return result;
     }
+
     /**
      * 根据用户Id，获取分配的所有角色
-     * @param userId    用户ID
+     *
+     * @param userId 用户ID
      * @return
      */
     public List<UserRole> getUserRolesByUserId(Long userId, Boolean enabled) {
@@ -163,6 +165,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                 .eq("user_id", userId));
         return list;
     }
+
     /**
      * 根据ID，获取对应的用户角色信息
      *
@@ -175,6 +178,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
 
     /**
      * 用户批量分配角色
+     *
      * @param userRole
      * @return
      */
@@ -191,10 +195,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         //需要保存的
         List<UserRole> userRoleList = new ArrayList<>();
         List<Long> userRoleIdList = new ArrayList<>();
-        if (userRole != null) {
-            userId = userRole.getUserId();
-            assignRole = userRole.getAssignRoleList();
-        }
+        userId = userRole.getUserId();
+        assignRole = userRole.getAssignRoleList();
         if (assignRole != null) {
             //取所有需要删除的角色ID
             assignRole.stream().filter(m -> FlagEnum.DELETE.getId().toString().equals(m.getFlag())).forEach(d -> {
@@ -204,8 +206,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             Long finalUserId = userId;
             assignRole.stream().filter(m -> FlagEnum.CREATE.getId().toString().equals(m.getFlag())).forEach(d -> {
                 //检查是否已经存在，已经存在的，则不更新
-                Integer exists = userRoleMapper.selectCount(new EntityWrapper<UserRole>().eq("user_id",finalUserId).eq("role_id",d.getRoleId()));
-                if(exists == null || exists == 0){
+                Integer exists = userRoleMapper.selectCount(new EntityWrapper<UserRole>().eq("user_id", finalUserId).eq("role_id", d.getRoleId()));
+                if (exists == null || exists == 0) {
                     userRoleIdList.add(d.getRoleId());
                 }
             });
@@ -213,7 +215,7 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                 // 删除
                 userRoleMapper.deleteUserRoleByUserIdAndRoleIds(userId, deleteRoleIds);
             }
-            userRoleIdList.stream().forEach( roleId -> {
+            userRoleIdList.stream().forEach(roleId -> {
                 UserRole ur = new UserRole();
                 ur.setUserId(userRole.getUserId());
                 ur.setRoleId(roleId);
@@ -221,34 +223,36 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
             });
             if (userRoleList.size() > 0) {
                 //保存角色与菜单的关联
-                this.insertBatch(userRoleList,50);
+                this.insertBatch(userRoleList, 50);
             }
         }
     }
 
     /**
      * 用户分配角色查询[所有启用且未删除的]
-     * @param userId 用户ID
-     * @param roleCode 角色代码
-     * @param roleName 角色名称
+     *
+     * @param userId    用户ID
+     * @param roleCode  角色代码
+     * @param roleName  角色名称
      * @param queryFlag ：ALL 查当前租户下所有启用的角色，ASSIGNED查 当前租户下用户已分配的启用的角色
      * @param page
      * @return
      */
-    public List<Role> getRolesByCond(Long userId, String roleCode, String roleName, String queryFlag, Page page){
+    public List<Role> getRolesByCond(Long userId, String roleCode, String roleName, String queryFlag, Page page) {
         List<Role> result = null;
-        if("ALL".equals(queryFlag)){
+        if ("ALL".equals(queryFlag)) {
             // 查当前租户下所有启用的角色
-            result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantId(),roleCode,roleName,page);
-        }else if ("ASSIGNED".equals(queryFlag)){
+            result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantId(), roleCode, roleName, page);
+        } else if ("ASSIGNED".equals(queryFlag)) {
             //查当前租房下用户已分配的启用的角色
-            result = userRoleMapper.getSelectedRolesByCond(userId,roleCode,roleName,page);
+            result = userRoleMapper.getSelectedRolesByCond(userId, roleCode, roleName, page);
         }
         return result;
     }
 
     /**
      * 判断用户是否含有启用的角色
+     *
      * @param userId
      * @return
      */
@@ -259,7 +263,8 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
 
     /**
      * 用户分配角色数据权限查询[所有启用且未删除的]
-     * @param userId 用户ID
+     *
+     * @param userId   用户ID
      * @param roleCode 角色代码
      * @param roleName 角色名称
      * @param page
@@ -269,20 +274,21 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                                                                          String dataAuthorityName,
                                                                          ZonedDateTime validDateFrom,
                                                                          ZonedDateTime validDateTo,
-                                                                         Page page){
+                                                                         Page page) {
         List<UserAssignRoleDataAuthority> result = null;
-        result = userRoleMapper.listSelectedUserRolesByCond(userId,roleCode,roleName,dataAuthorityName,validDateFrom,validDateTo,page);
+        result = userRoleMapper.listSelectedUserRolesByCond(userId, roleCode, roleName, dataAuthorityName, validDateFrom, validDateTo, page);
         return result;
     }
 
     /**
      * 用户分配角色查询[所有启用且未删除的] 不分页
+     *
      * @param roleCode 角色代码
      * @param roleName 角色名称
      * @return
      */
-    public List<Role> listAllRolesByCond(String roleCode, String roleName){
-        List<Role> result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantId(),roleCode,roleName);
+    public List<Role> listAllRolesByCond(String roleCode, String roleName) {
+        List<Role> result = userRoleMapper.getAllRolesByCond(LoginInformationUtil.getCurrentTenantId(), roleCode, roleName);
         result.stream().map(e -> {
             e.setRoleName(e.getRoleCode() + "-" + e.getRoleName());
             return e;
@@ -292,9 +298,11 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
 
     /**
      * 批量保存用户角色
+     *
      * @param list
      * @return
      */
+    @Transactional
     public Boolean createUserRoleBatch(List<UserRole> list) {
         list.stream().forEach((UserRole userRole) -> {
             createUserRole(userRole);
@@ -302,8 +310,10 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         //  返回成功标志
         return true;
     }
+
     /**
      * 批量更新用户角色
+     *
      * @param list
      * @return
      */

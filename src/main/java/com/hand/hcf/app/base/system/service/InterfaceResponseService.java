@@ -41,13 +41,11 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
             throw new BizException(RespCode.RESPONSE_CODE_NULL);
         }
-        if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+        if (interfaceResponse.getInterfaceId() == null ) {
             throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
         }
-        if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
-            interfaceResponse.setEnabledSearch(false);
-        }
-        if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+
+        if(interfaceResponse.getParentId() == null ){
             interfaceResponse.setParentId(0L);
         }
         interfaceResponseMapper.insert(interfaceResponse);
@@ -69,7 +67,7 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
             throw new BizException(RespCode.RESPONSE_CODE_NULL);
         }
-        if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+        if (interfaceResponse.getInterfaceId() == null ) {
             throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
         }
         //校验ID是否在数据库中存在
@@ -77,21 +75,19 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
         if (rr == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
+        if (interfaceResponse.getEnabled() == null ) {
             interfaceResponse.setEnabled(rr.getEnabled());
         }
-        if (interfaceResponse.getDeleted() == null || "".equals(interfaceResponse.getDeleted())) {
+        if (interfaceResponse.getDeleted() == null ) {
             interfaceResponse.setDeleted(rr.getDeleted());
         }
-        if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+        if (interfaceResponse.getInterfaceId() == null ) {
             interfaceResponse.setInterfaceId(rr.getInterfaceId());
         }
-        if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+        if(interfaceResponse.getParentId() == null ){
             interfaceResponse.setParentId(rr.getParentId());
         }
-        if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
-            interfaceResponse.setEnabledSearch(rr.getEnabledSearch());
-        }
+
         interfaceResponse.setKeyCode(rr.getKeyCode());
         interfaceResponse.setCreatedBy(rr.getCreatedBy());
         interfaceResponse.setCreatedDate(rr.getCreatedDate());
@@ -114,13 +110,11 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
                     if (interfaceResponse.getKeyCode() == null || "".equals(interfaceResponse.getKeyCode())) {
                         throw new BizException(RespCode.RESPONSE_CODE_NULL);
                     }
-                    if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+                    if (interfaceResponse.getInterfaceId() == null ) {
                         throw new BizException(RespCode.RESPONSE_INTERFACE_NULL);
                     }
-                    if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
-                        interfaceResponse.setEnabledSearch(false);
-                    }
-                    if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+
+                    if(interfaceResponse.getParentId() == null ){
                         interfaceResponse.setParentId(0L);
                     }
                 }else{
@@ -129,20 +123,17 @@ public class InterfaceResponseService extends BaseService<InterfaceResponseMappe
                     if (rr == null) {
                         throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
                     }
-                    if (interfaceResponse.getEnabled() == null || "".equals(interfaceResponse.getEnabled())) {
+                    if (interfaceResponse.getEnabled() == null ) {
                         interfaceResponse.setEnabled(rr.getEnabled());
                     }
-                    if (interfaceResponse.getDeleted() == null || "".equals(interfaceResponse.getDeleted())) {
+                    if (interfaceResponse.getDeleted() == null ) {
                         interfaceResponse.setDeleted(rr.getDeleted());
                     }
-                    if (interfaceResponse.getInterfaceId() == null || "".equals(interfaceResponse.getInterfaceId())) {
+                    if (interfaceResponse.getInterfaceId() == null ) {
                         interfaceResponse.setInterfaceId(rr.getInterfaceId());
                     }
-                    if(interfaceResponse.getParentId() == null || "".equals(interfaceResponse.getParentId())){
+                    if(interfaceResponse.getParentId() == null ){
                         interfaceResponse.setParentId(rr.getParentId());
-                    }
-                    if(interfaceResponse.getEnabledSearch() == null || "".equals(interfaceResponse.getEnabledSearch())){
-                        interfaceResponse.setEnabledSearch(rr.getEnabledSearch());
                     }
                     interfaceResponse.setKeyCode(rr.getKeyCode());
                     interfaceResponse.setCreatedBy(rr.getCreatedBy());

@@ -49,7 +49,6 @@ public class CodingRuleDetailResource {
     @PostMapping
     public ResponseEntity<CodingRuleDetail> insertCodingRuleDetail(@Valid @RequestBody CodingRuleDetail codingRuleDetail) {
         CodingRuleDetail codingRuleDetail1 = codingRuleDetailService.insertCodingRuleDetail(codingRuleDetail);
-//        updateDetailSynthesis(codingRuleDetail);
         return ResponseEntity.ok(codingRuleDetail1);
     }
 
@@ -62,7 +61,6 @@ public class CodingRuleDetailResource {
     @PutMapping
     public ResponseEntity<CodingRuleDetail> updateCodingRuleDetail(@Valid @RequestBody CodingRuleDetail codingRuleDetail) {
         CodingRuleDetail codingRuleDetail1 = codingRuleDetailService.updateCodingRuleDetail(codingRuleDetail);
-//        updateDetailSynthesis(codingRuleDetail);
         return ResponseEntity.ok(codingRuleDetail1);
     }
 
@@ -79,7 +77,6 @@ public class CodingRuleDetailResource {
             throw new BizException(RespCode.BUDGET_CODING_NOT_FOUND);
         }
         codingRuleDetailService.deleteCodingRuleDetail(codingRuleDetail);
-//        updateDetailSynthesis(codingRuleDetail);
         return ResponseEntity.ok().build();
     }
 
@@ -121,59 +118,4 @@ public class CodingRuleDetailResource {
         return new ResponseEntity(result.getRecords(), headers, HttpStatus.OK);
     }
 
-    /**
-     * 更新编码规则中detail_synthesis字段
-     *
-     * @param codingRuleDetail
-     */
-    @Transactional
-    public void updateDetailSynthesis(CodingRuleDetail codingRuleDetail) {
-        //编码规则明细合成值
-        String detailSynthesis = "";
-        List<CodingRuleDetail> codingRuleDetailList = codingRuleDetailService.getCodingRuleDetailByCond(codingRuleDetail.getCodingRuleId());
-        CodingRule codingRule = codingRuleService.selectById(codingRuleDetail.getCodingRuleId());
-        CodingRuleObject codingRuleObject = codingRuleObjectService.selectById(codingRule.getCodingRuleObjectId());
-        if (codingRuleDetailList != null && codingRuleDetailList.size() != 0) {
-            //固定字段
-            String segmentTypeFixedFields = "10";
-            //日期格式
-            String segmentTypeDateFormat = "20";
-            //单据类型代码
-            String segmentTypeDocumentTypeCode = "30";
-            //公司代码
-            String segmentTypeCompanyCode = "40";
-            //序列号
-            String segmentTypeSerialNumber = "50";
-            for (CodingRuleDetail codingRuleDetailOld : codingRuleDetailList) {
-                if (segmentTypeFixedFields.equals(codingRuleDetailOld.getSegmentType())) {
-                    detailSynthesis += codingRuleDetailOld.getSegmentValue();
-                }
-                if (segmentTypeDateFormat.equals(codingRuleDetailOld.getSegmentType())) {
-                    detailSynthesis += codingRuleDetailOld.getDateFormat();
-                }
-                if (segmentTypeDocumentTypeCode.equals(codingRuleDetailOld.getSegmentType())) {
-                    detailSynthesis += codingRuleObject.getDocumentTypeCode();
-                }
-                if (segmentTypeCompanyCode.equals(codingRuleDetailOld.getSegmentType())) {
-                    if ("".equals(codingRuleObject.getCompanyCode())) {
-                        //如果无应用公司先写死
-                        detailSynthesis += "tenant";
-                    } else {
-                        detailSynthesis += codingRuleObject.getCompanyCode();
-                    }
-                }
-                if (segmentTypeSerialNumber.equals(codingRuleDetailOld.getSegmentType())) {
-                    //有序列号不管几位都作为判断条件
-                    detailSynthesis += "SerialNumber";
-                }
-            }
-        }
-        if (StringUtils.isNotBlank(detailSynthesis)) {
-            if (detailSynthesis.toCharArray().length > 50) {
-                throw new BizException(RespCode.BUDGET_CODING_RULE_DETAILSYNTHESIS);
-            }
-        }
-        codingRule.setDetailSynthesis(detailSynthesis);
-        codingRuleService.updateById(codingRule);
-    }
 }

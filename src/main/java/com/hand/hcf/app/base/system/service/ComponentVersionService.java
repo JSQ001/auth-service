@@ -59,10 +59,10 @@ public class ComponentVersionService extends BaseService<ComponentVersionMapper,
         if (rr == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (componentVersion.getEnabled() == null || "".equals(componentVersion.getEnabled())) {
+        if (componentVersion.getEnabled() == null ) {
             componentVersion.setEnabled(rr.getEnabled());
         }
-        if (componentVersion.getDeleted() == null || "".equals(componentVersion.getDeleted())) {
+        if (componentVersion.getDeleted() == null ) {
             componentVersion.setDeleted(rr.getDeleted());
         }
         componentVersion.setCreatedBy(rr.getCreatedBy());

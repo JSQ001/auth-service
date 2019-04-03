@@ -144,11 +144,11 @@ public class AccountController {
 
         log.info("start to get password rule topic and loginName={}", username);
         Optional<User> user = userService.getByMobile(username);
-        if (user == null || !user.isPresent()) {
+        if (!user.isPresent()) {
             user = userService.getByEmail(username);
         }
 
-        if (user == null || !user.isPresent()) {
+        if (!user.isPresent()) {
             throw new ValidationException(new ValidationError("user", "user.not.found"));
         }
 
@@ -166,7 +166,6 @@ public class AccountController {
         }
 
         Map<String, Object> returnMap = new HashMap<>();
-        //StringBuffer passwordRuleGroup = new StringBuffer();
         String[] passwordRuleArray = passwordRule.split("");
         //密码长度规则
         returnMap.put("minLength", lengthMin);

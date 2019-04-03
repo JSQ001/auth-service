@@ -28,10 +28,7 @@ public class CodingRuleCacheObjectService extends ServiceImpl<CodingRuleObjectMa
                 .eq("enabled", true)
                 .eq("document_type_code", documentTypeCode)
             );
-        if (codingRuleObject == null) {
-            return false;
-        }
-        return true;
+        return codingRuleObject != null;
     }
 
     @Cacheable(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode).concat(#companyCode)")
@@ -44,10 +41,7 @@ public class CodingRuleCacheObjectService extends ServiceImpl<CodingRuleObjectMa
                 .eq("document_type_code", documentTypeCode)
             );
 
-        if (codingRuleObject != null) {
-            return true;
-        }
-        return false;
+        return codingRuleObject != null;
     }
 
     @CachePut(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode).concat(#companyCode)")

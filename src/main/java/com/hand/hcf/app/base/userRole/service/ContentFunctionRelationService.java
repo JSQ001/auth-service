@@ -168,4 +168,12 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
     public List<ContentFunctionDTO> listNotAssignFunction(List<Long> functionIds) {
         return baseMapper.listNotAssignFunction(functionIds);
     }
+
+    /**
+     * 查询角色可分配的菜单
+     * @return
+     */
+    public List<ContentFunctionDTO> listCanAssignFunction(Long roleId) {
+        return baseMapper.listCanAssignFunction(roleId);
+    }
 }

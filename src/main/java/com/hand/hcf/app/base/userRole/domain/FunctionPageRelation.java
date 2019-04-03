@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.core.domain.Domain;
 import com.hand.hcf.core.domain.DomainI18n;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +20,9 @@ import javax.validation.constraints.NotNull;
  * @date: 2019/1/29
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("sys_function_page_relation")
 public class FunctionPageRelation extends Domain {
     //功能id

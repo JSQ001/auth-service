@@ -59,7 +59,7 @@ public class BaiDuTransferController {
      * ]
      */
     @PostMapping
-    public String getTransResult(@RequestBody(required = true) TransferDTO transfer) {
+    public String getTransResult(@RequestBody() TransferDTO transfer) {
 
         String to = transfer.getTo();
         if (LanguageEnum.EN_US.getKey().equalsIgnoreCase(to)) {
@@ -70,21 +70,19 @@ public class BaiDuTransferController {
             to = "jp";
         }
         JSONArray result = null;
-        if (transfer != null) {
-            StringBuffer sb = new StringBuffer();
-            List<String> languages = transfer.getLanguages();
-            if (CollectionUtils.isNotEmpty(languages)) {
-                languages.stream().forEach(language -> {
-                    if (sb.length() == 0) {
-                        sb.append(language);
-                    } else {
-                        sb.append("\n").append(language);
-                    }
-                });
-            }
-            Map<String, String> params = buildParams(sb.toString(), "auto", to);
-            result = HttpGet.get(baiDuTransferConfig.getTransferApiHost(), params);
+        StringBuffer sb = new StringBuffer();
+        List<String> languages = transfer.getLanguages();
+        if (CollectionUtils.isNotEmpty(languages)) {
+            languages.stream().forEach(language -> {
+                if (sb.length() == 0) {
+                    sb.append(language);
+                } else {
+                    sb.append("\n").append(language);
+                }
+            });
         }
+        Map<String, String> params = buildParams(sb.toString(), "auto", to);
+        result = HttpGet.get(baiDuTransferConfig.getTransferApiHost(), params);
         if (result != null) {
             return result.toString();
         }
@@ -92,7 +90,8 @@ public class BaiDuTransferController {
     }
 
     private Map<String, String> buildParams(String query, String from, String to) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params;
+        params = new HashMap<>();
         params.put("q", query);
         params.put("from", from);
         params.put("to", to);

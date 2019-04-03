@@ -2,9 +2,9 @@ package com.hand.hcf.app.mdata.authorize.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.authorize.domain.FormCentralizedAuth;
 import com.hand.hcf.app.mdata.authorize.dto.FormCentralizedAuthDTO;
 import com.hand.hcf.app.mdata.authorize.persistence.FormCentralizedAuthMapper;

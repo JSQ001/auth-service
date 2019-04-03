@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -59,7 +58,7 @@ public class CodingRuleObjectResource {
      * @return ResponseEntity
      */
     @DeleteMapping("/{id}")
-    ResponseEntity deleteCodingRuleObject(@PathVariable Long id) {
+    public ResponseEntity deleteCodingRuleObject(@PathVariable Long id) {
         CodingRuleObject codingRuleObject = codingRuleObjectService.selectById(id);
         if (codingRuleObject != null) {
             codingRuleObjectService.deleteCodingRuleObject(codingRuleObject);
@@ -92,14 +91,13 @@ public class CodingRuleObjectResource {
      * @param companyCode      公司代码
      * @param pageable         页码
      * @return ResponseEntity<List       <       CodingRuleObject>>
-     * @throws URISyntaxException
      */
     @GetMapping("/query")
     public ResponseEntity<List<CodingRuleObject>> getCodingRuleObjectByCond(
         @RequestParam(required = false) String documentTypeCode,
         @RequestParam(required = false) String companyCode,
         @RequestParam(required = false, value = "enabled") Boolean enabled,
-        Pageable pageable) throws URISyntaxException {
+        Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
         Page<CodingRuleObject> result = codingRuleObjectService.getCodingRuleObjectByCond(documentTypeCode, companyCode, enabled, page);
         HttpHeaders headers = new HttpHeaders();
@@ -132,10 +130,9 @@ public class CodingRuleObjectResource {
      * 公司级供应商需优先检验公司级编码规则，如没有配置，再校验租户级编码规则；
      * @param roleType
      * @return {"result":true} : 自动编码； {"result":false} : 手动编码
-     * @throws URISyntaxException
      */
     @GetMapping(value = "/vendor/validate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<JSONObject> validateVendorAutoCode(@RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
+    public ResponseEntity<JSONObject> validateVendorAutoCode(@RequestParam(value = "roleType", required = false) String roleType) {
         return ResponseEntity.ok(codingRuleObjectService.validateVendorAutoCode(null, DocumentTypeEnum.VENDER.toString(), roleType));
     }
 }

@@ -11,6 +11,7 @@
                sys_interface ai
         where l.app_id=ap.id
           and l.api_id=ai.id
+          and l.deleted = 0
         <if test="lovCode != null">
             and l.lov_code like concat(concat('%',#{lovCode}),'%')
         </if>
@@ -20,7 +21,36 @@
         <if test="appId != null">
             and l.app_id like concat(concat('%',#{appId}),'%')
         </if>
+        <if test="remarks != null and remarks !=''">
+            and l.remarks like concat(concat('%',#{remarks}),'%')
+        </if>
           order by lov_code
     </select>
+    <select id="getById" resultType="com.hand.hcf.app.base.lov.domain.Lov">
+        select  l.*,ap.app_name,ai.interface_name api_name
+          from sys_lov l,
+               sys_application ap,
+               sys_interface ai
+        where l.app_id=ap.id
+          and l.api_id=ai.id
+          and l.id = #{id}
+    </select>
+    <select id="getDetailInfoByCode" resultType="com.hand.hcf.app.base.lov.web.dto.LovInfoDTO">
+        SELECT
+            l.lov_name AS title,
+            concat('/', concat(ap.app_code,ai.req_url)) AS url,
+            ai.request_method AS method,
+            l.request_column as requestColumn,
+            l.response_column as responseColumn
+        FROM
+            sys_lov l,
+            sys_application ap,
+            sys_interface ai
+        WHERE
+            l.app_id = ap.id
+            AND l.api_id = ai.id
+            AND l.lov_code = #{code}
+    </select>
+
 
 </mapper>

@@ -11,7 +11,7 @@ public interface RespCode extends com.hand.hcf.core.util.RespCode {
     String SYS_ID_NOT_NULL = "SYS_ID_NOT_NULL"; //ID 应该为空
     String SYS_DATASOURCE_CANNOT_FIND_OBJECT = "SYS_DATASOURCE_CANNOT_FIND_OBJECT"; //数据库不存在
     String SYS_READ_FILE_ERROR = "SYS_READ_FILE_ERROR"; // 读取文件异常 to
-
+    String SYS_LOV_NOT_EXISTS = "SYS_LOV_NOT_EXISTS"; // lov不存在！
 
     String APPLICATION_CODE_NOT_BE_NULL = "APPLICATION_CODE_NOT_BE_NULL";// 应用代码不允许为空
     String APPLICATION_NAME_NOT_BE_NULL = "APPLICATION_NAME_NOT_BE_NULL";// 应用名称不允许为空

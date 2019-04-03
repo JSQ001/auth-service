@@ -5,6 +5,11 @@ package com.hand.hcf.app.base.user.constant;
  * Created by fanfuqiang 2018/11/20
  */
 public class AccountConstants {
+
+    private AccountConstants() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static final int BIND_TYPE_EMAIL = 1001;
     public static final int BIND_TYPE_MOBILE = 1002;
 
@@ -27,13 +32,13 @@ public class AccountConstants {
     public final static String REDIS_NAME_SPACE_PREFIX = "authorize.code.";
 
     //包含小写字母
-    public final static String regexLowerCase = ".*[a-z]+.*";
+    public final static String REGEX_LOWER_CASE = ".*[a-z]+.*";
     //包含大写字母
-    public final static String regexUpperCase = ".*[A-Z]+.*";
+    public final static String REGEX_UPPER_CASE = ".*[A-Z]+.*";
     //包含数字
-    public final static String regenNum = ".*[\\d]+.*";
+    public final static String REGEX_NUM = ".*[\\d]+.*";
     //包含特殊字符
-    public final static String regexSpecialChar = ".*[`~!@#$%^&*()+=|{}':;'-,\"\\\\\\[\\].<>/?_]+.*";
+    public final static String REGEX_SPECIAL_CHAR = ".*[`~!@#$%^&*()+=|{}':;'-,\"\\\\\\[\\].<>/?_]+.*";
 
     public final static String INCLUDE_FLAG_CHAR = "1";
 

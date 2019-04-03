@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.system.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.ServeLocale;
+import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.service.ServeLocaleService;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,16 @@ public class ServeLocaleController {
     }
 
     /**
+     * 批量新增 服务端多语言
+     * @param list
+     * @return
+     */
+    @PostMapping("/batch")
+    public ResponseEntity<List<ServeLocale>> createServeLocaleBatch(@RequestBody List<ServeLocale> list){
+        return ResponseEntity.ok(serveLocaleService.createServeLocaleBatch(list));
+    }
+
+    /**
      * 单个编辑 服务端多语言
      * @param serveLocale
      * @return
@@ -47,6 +58,16 @@ public class ServeLocaleController {
     @PutMapping
     public ResponseEntity<ServeLocale> updateServeLocale(@RequestBody ServeLocale serveLocale){
         return ResponseEntity.ok(serveLocaleService.updateServeLocale(serveLocale));
+    }
+
+    /**
+     * 批量编辑 服务端多语言
+     * @param list
+     * @return
+     */
+    @PutMapping("/batch")
+    public ResponseEntity<List<ServeLocale>> updateServeLocaleBatch(@RequestBody List<ServeLocale> list){
+        return ResponseEntity.ok(serveLocaleService.updateServeLocaleBatch(list));
     }
 
     /**
@@ -105,5 +126,28 @@ public class ServeLocaleController {
             @RequestParam(value = "lang") String language,
             @RequestParam(value = "applicationId") Long applicationId){
         return ResponseEntity.ok(serveLocaleService.mapServeLocaleByCond(language,applicationId));
+    }
+
+    /**
+     * 分页查询 服务端多语言(返回外文描述信息)
+     * @param applicationId 应用ID
+     * @param sourceLanguage 源语言
+     * @param targetLanguage 目标语言
+     * @param keyCode 界面key值
+     * @param pageable
+     * @return
+     * @throws URISyntaxException
+     */
+    @GetMapping("/query/other/serve/locale/by/cond")
+    public ResponseEntity<List<LocaleDTO>> getOtherServeLocaleByCond(
+            @RequestParam(value = "applicationId") Long applicationId,
+            @RequestParam(value = "sourceLanguage") String sourceLanguage,
+            @RequestParam(value = "targetLanguage") String targetLanguage,
+            @RequestParam(value = "keyCode",required = false) String keyCode,
+            Pageable pageable) throws URISyntaxException{
+        Page page = PageUtil.getPage(pageable);
+        List<LocaleDTO> result = serveLocaleService.getOtherServeLocaleByCond(applicationId,sourceLanguage,targetLanguage,keyCode,page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
     }
 }

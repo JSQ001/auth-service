@@ -71,6 +71,18 @@ public class FunctionListService extends BaseService<FunctionListMapper,Function
             throw new BizException(RespCode.FUNCTION_LIST_FUNCTION_ROUTER_REPEAT);
         }
         functionListMapper.insert(functionList);
+
+        //将 该功能选择的主页面pageId作为关联关系存到 功能分配页面表中
+        FunctionPageRelation functionPageRelation = FunctionPageRelation.builder()
+                .functionId(functionList.getId())
+                .pageId(functionList.getPageId())
+                .build();
+        functionPageRelationMapper.insert(functionPageRelation);
+        //设置主页面的functionRouter(功能路由)
+        PageList pageList = pageListMapper.selectById(functionList.getPageId());
+        pageList.setFunctionRouter(functionList.getFunctionRouter());
+        pageListMapper.updateAllColumnById(pageList);
+
         return functionListMapper.selectById(functionList);
     }
 
@@ -134,6 +146,23 @@ public class FunctionListService extends BaseService<FunctionListMapper,Function
                     pageListMapper.updateAllColumnById(pageList);
                 });
             }
+        }
+
+        //判断该功能选择的主页面id->pageId是否改变，如果改变，将原来功能分配页面关联表中的数据删除
+        if ( !oldFunctionList.getPageId().equals(functionList.getPageId()) ){
+            FunctionPageRelation oldFunctionPageRelation = functionPageRelationMapper.selectOne(
+                    FunctionPageRelation.builder()
+                            .functionId(oldFunctionList.getId())
+                            .pageId(oldFunctionList.getPageId()).build()
+            );
+            functionPageRelationMapper.deleteById(oldFunctionPageRelation);
+
+            functionPageRelationMapper.insert(
+                    FunctionPageRelation.builder().functionId(functionList.getId()).pageId(functionList.getPageId()).build());
+            //设置主页面的functionRouter(功能路由)
+            PageList pageList = pageListMapper.selectById(functionList.getPageId());
+            pageList.setFunctionRouter(functionList.getFunctionRouter());
+            pageListMapper.updateAllColumnById(pageList);
         }
 
         functionListMapper.updateAllColumnById(functionList);

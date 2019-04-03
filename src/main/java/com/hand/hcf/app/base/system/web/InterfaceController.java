@@ -271,12 +271,12 @@ public class InterfaceController {
      * ]
      */
     @GetMapping("/query")
-    public ResponseEntity<List<Interface>> getInterfacesByAppId(@RequestParam(required = true) Long appId,
-                                                                   @RequestParam(required = false) Boolean enabled,
-                                                                   Pageable pageable)  {
+    public ResponseEntity<List<Interface>> getInterfacesByAppId(@RequestParam Long appId,
+                                                                @RequestParam(required = false) Boolean enabled,
+                                                                Pageable pageable)  {
         Page page = PageUtil.getPage(pageable);
         List<Interface> list = interfaceService.pageInterfacesByAppId(appId, enabled, page);
-        return new ResponseEntity(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
+        return new ResponseEntity<>(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
 
     /**
