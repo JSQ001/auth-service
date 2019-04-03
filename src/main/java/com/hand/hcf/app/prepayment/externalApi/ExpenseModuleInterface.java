@@ -1,11 +1,13 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.ApplicationAmountCO;
 import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.common.co.ApplicationTypeForOtherCO;
 import com.hand.hcf.app.common.co.PrepaymentRequisitionReleaseCO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @description:

@@ -6,11 +6,13 @@ package com.hand.hcf.app.prepayment.workflow;
  */
 
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.common.co.WorkflowMessageCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.common.event.WorkflowCustomRemoteEvent;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
