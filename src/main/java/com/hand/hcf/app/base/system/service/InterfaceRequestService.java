@@ -41,18 +41,16 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if (interfaceRequest.getKeyCode() == null || "".equals(interfaceRequest.getKeyCode())) {
             throw new BizException(RespCode.REQUEST_CODE_NULL);
         }
-        if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
+        if (interfaceRequest.getInterfaceId() == null ) {
             throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
         }
-        if(interfaceRequest.getParentId() == null || "".equals(interfaceRequest.getParentId())){
+        if(interfaceRequest.getParentId() == null ){
             interfaceRequest.setParentId(0L);//如果没有上级，则默认为0
         }
-        if(interfaceRequest.getRequiredFlag() == null || "".equals(interfaceRequest.getRequiredFlag())){
+        if(interfaceRequest.getRequiredFlag() == null ){
             interfaceRequest.setRequiredFlag(false);//必填标识 默认不必填
         }
-        if(interfaceRequest.getUnionFlag() == null || "".equals(interfaceRequest.getUnionFlag())){
-            interfaceRequest.setUnionFlag(false);//唯一标识 默认不唯一
-        }
+
         interfaceRequestMapper.insert(interfaceRequest);
         return interfaceRequest;
     }
@@ -69,7 +67,7 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if (interfaceRequest == null || interfaceRequest.getId() == null) {
             throw new BizException(RespCode.SYS_ID_NULL);
         }
-        if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
+        if (interfaceRequest.getInterfaceId() == null ) {
             throw new BizException(RespCode.REQUEST_INTERFACE_NULL);
         }
         //校验ID是否在数据库中存在
@@ -77,20 +75,17 @@ public class InterfaceRequestService extends BaseService<InterfaceRequestMapper,
         if (rr == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (interfaceRequest.getEnabled() == null || "".equals(interfaceRequest.getEnabled())) {
+        if (interfaceRequest.getEnabled() == null ) {
             interfaceRequest.setEnabled(rr.getEnabled());
         }
-        if (interfaceRequest.getDeleted() == null || "".equals(interfaceRequest.getDeleted())) {
+        if (interfaceRequest.getDeleted() == null ) {
             interfaceRequest.setDeleted(rr.getDeleted());
         }
-        if (interfaceRequest.getInterfaceId() == null || "".equals(interfaceRequest.getInterfaceId())) {
+        if (interfaceRequest.getInterfaceId() == null ) {
             interfaceRequest.setInterfaceId(rr.getInterfaceId());
         }
-        if(interfaceRequest.getRequiredFlag() == null || "".equals(interfaceRequest.getRequiredFlag())){
+        if(interfaceRequest.getRequiredFlag() == null ){
             interfaceRequest.setRequiredFlag(rr.getRequiredFlag());//必填标识 默认不必填
-        }
-        if(interfaceRequest.getUnionFlag() == null || "".equals(interfaceRequest.getUnionFlag())){
-            interfaceRequest.setUnionFlag(rr.getUnionFlag());//唯一标识 默认不唯一
         }
         interfaceRequest.setKeyCode(rr.getKeyCode());
         interfaceRequest.setCreatedBy(rr.getCreatedBy());

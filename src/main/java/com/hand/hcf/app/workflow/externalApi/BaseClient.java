@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 //import com.hand.hcf.app.client.system.ParameterClient;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.mdata.implement.web.CompanyControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.DepartmentControllerImpl;

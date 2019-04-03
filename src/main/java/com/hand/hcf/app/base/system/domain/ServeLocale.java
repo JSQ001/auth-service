@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.core.annotation.UniqueField;
 import com.hand.hcf.core.domain.DomainI18n;
+import com.hand.hcf.core.domain.DomainLogic;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("sys_serve_locale")
-public class ServeLocale extends DomainI18n{
+public class ServeLocale extends DomainLogic {
     //应用ID
     @NotNull
     @TableField("application_id")

@@ -8,6 +8,7 @@ import com.hand.hcf.app.base.dataAuthority.domain.DataAuthorityRule;
 import com.hand.hcf.app.base.dataAuthority.domain.DataAuthorityRuleDetail;
 import com.hand.hcf.app.base.dataAuthority.domain.DataAuthorityRuleDetailValue;
 import com.hand.hcf.app.base.dataAuthority.persistence.DataAuthorityMapper;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
@@ -259,5 +260,15 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
             return e;
         }).collect(Collectors.toList());
         return list;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void initDataAuthorityByTenant(Tenant tenant) {
+        DataAuthority dataAuthority = new DataAuthority();
+        dataAuthority.setTenantId(tenant.getId());
+        dataAuthority.setDataAuthorityCode("INIT_TENANT");
+        dataAuthority.setDataAuthorityName("租户初始化数据权限");
+        dataAuthority.setDescription("租户初始化数据权限");
+        this.insert(dataAuthority);
     }
 }

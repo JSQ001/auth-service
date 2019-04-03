@@ -14,4 +14,10 @@ public interface DimensionItemMapper extends BaseMapper<DimensionItem> {
                                                                         @Param("companyId") Long companyId,
                                                                         Page page);
 
+    /**
+     * 根据员工查询维值
+     * @param contactId
+     * @return
+     */
+    List<DimensionItem> listDimensionsByContactId(@Param("contactId") Long contactId);
 }

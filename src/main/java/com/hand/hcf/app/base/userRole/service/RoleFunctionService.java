@@ -18,6 +18,8 @@ import org.springframework.util.CollectionUtils;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,28 +53,35 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
      */
     public RoleFunctionDTO getRoleFunction(Long id){
         RoleFunctionDTO result = new RoleFunctionDTO();
-        List<ContentFunctionDTO> contentFunctionDTOList = new ArrayList<>();
-
+        List<ContentFunctionDTO> contentFunctionDTOS = contentFunctionRelationService.listCanAssignFunction(id);
+        Map<Long, ContentFunctionDTO> collect = contentFunctionDTOS
+                .stream()
+                .filter(e -> e.getContentId() != null)
+                .collect(Collectors.toMap(ContentFunctionDTO::getContentId, e -> e, (k1, k2) -> k1));
+        collect.forEach((key, value) -> {
+            ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
+                    .contentId(value.getContentId())
+                    .contentName(value.getContentName())
+                    .parentId(value.getParentId())
+                    .build();
+            contentFunctionDTOS.add(contentFunctionDTO);
+        });
+        /*
         //获取所有的目录数据
-        List<ContentList> contentLists = contentListService.selectList(
-                new EntityWrapper<ContentList>()
-                        .eq("deleted",false)
-        );
-        contentLists.stream().forEach(contentList -> {
+        List<ContentList> contentLists = contentListService.selectList(null);
+        contentLists.forEach(contentList -> {
             ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
                     .contentId(contentList.getId())
                     .contentName(contentList.getContentName())
                     .parentId(contentList.getParentId())
                     .build();
-            contentFunctionDTOList.add(contentFunctionDTO);
+            contentFunctionList.add(contentFunctionDTO);
         });
-
         //获取目录功能关联数据
         List<ContentFunctionRelation> contentFunctionRelationList = contentFunctionRelationService.selectList(new EntityWrapper<ContentFunctionRelation>());
-        contentFunctionRelationList.stream().forEach(contentFunctionRelation -> {
+        contentFunctionRelationList.forEach(contentFunctionRelation -> {
             ContentList contentList = contentListService.selectById(contentFunctionRelation.getContentId());
             FunctionList functionList = functionListService.selectById(contentFunctionRelation.getFunctionId());
-
             ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
                     .contentId(contentList.getId())
                     .contentName(contentList.getContentName())
@@ -103,14 +112,14 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
                     .applicationId(functionList.getApplicationId())
                     .build();
             contentFunctionDTOList.add(contentFunctionDTO);
-        });
+        });*/
 
         List<Long> functionIdList = roleFunctionMapper.selectList(
                 new EntityWrapper<RoleFunction>()
                         .eq("role_id",id)
         ).stream().map(RoleFunction::getFunctionId).collect(Collectors.toList());
 
-        result.setContentFunctionDTOList(contentFunctionDTOList);
+        result.setContentFunctionDTOList(contentFunctionDTOS);
         result.setFunctionIdList(functionIdList);
 
         return result;
@@ -300,14 +309,13 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
     @Transactional(rollbackFor = Exception.class)
     public void initRoleFunctionByTenant(Role role) {
         // 先查询系统管理员分配的菜单
-        List<RoleFunction> roleFunctions = this.selectList(new EntityWrapper<RoleFunction>().eq("role_id", 1));
-        List<RoleFunction> collect = roleFunctions.stream().map(e -> {
-            e.setRoleId(role.getId());
-            e.setId(null);
-            return e;
-        }).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(collect)){
-            this.insertBatch(collect);
+        List<RoleFunction> roleFunctions = this.selectList(new EntityWrapper<RoleFunction>().eq("role_id", 1L));
+        if (!CollectionUtils.isEmpty(roleFunctions)){
+            roleFunctions.forEach(e -> {
+                e.setRoleId(role.getId());
+                e.setId(null);
+            });
+            this.insertBatch(roleFunctions);
         }
     }
 }

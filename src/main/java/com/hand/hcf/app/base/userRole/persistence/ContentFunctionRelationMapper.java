@@ -17,9 +17,16 @@ import java.util.List;
  */
 public interface ContentFunctionRelationMapper extends BaseMapper<ContentFunctionRelation>{
     List<FunctionList> filterContentFunctionRelationByCond(@Param("functionName") String functionName,
-                                                           Page page);
+                                                          Page page);
 
     List<ContentFunctionDTO> listContentFunctions(@Param("functionIds") List<Long> functionIds);
 
-    List<ContentFunctionDTO> listNotAssignFunction(@Param("functionIds") List<Long> functionIds);
+    List<ContentFunctionDTO> listNotAssignFunction(@Param("functionIds")List<Long> functionIds);
+
+    /**
+     * 查询角色可分配的菜单
+     * @param roleId
+     * @return
+     */
+    List<ContentFunctionDTO> listCanAssignFunction(@Param("roleId") Long roleId);
 }

@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.company.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.domain.CompanyGroup;

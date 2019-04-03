@@ -11,4 +11,6 @@ public interface DimensionMapper extends BaseMapper<Dimension> {
     List<Dimension> listDimensionsByCompanyId(@Param("setOfBooksId") Long setOfBooksId,
                                               @Param("companyId") Long companyId,
                                               @Param("enabled") Boolean enabled);
+    List<Dimension> listDimensionsByParameterCode (@Param("setOfBooksId") Long setOfBooksId,
+                                                   @Param("parameterCode") String parameterCode);
 }

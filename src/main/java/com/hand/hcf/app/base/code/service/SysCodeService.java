@@ -10,7 +10,7 @@ import com.hand.hcf.app.base.code.dto.SysCodeValueDTO;
 import com.hand.hcf.app.base.code.persistence.SysCodeMapper;
 import com.hand.hcf.app.base.system.enums.SysCodeEnum;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.domain.ExportConfigByList;
 import com.hand.hcf.core.exception.BizException;
@@ -127,9 +127,9 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         if ("system".equalsIgnoreCase(systemFlag)){
             queryCode.setTypeFlag(sysCode.getTypeFlag());
             if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag())){
-                sysCode.setTenantId(-1L);
+                queryCode.setTenantId(-1L);
             }else{
-                sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
+                queryCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
             }
         }else{
             if (!SysCodeEnum.CUSTOM.equals(sysCode.getTypeFlag())){
@@ -443,6 +443,7 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
                 Long codeId = e.getId();
                 e.setTenantId(tenantId);
                 e.setId(null);
+                e.setCodeOid(UUID.randomUUID().toString());
                 this.insert(e);
                 itemService.initTenantBySysCode(e, codeId);
             });

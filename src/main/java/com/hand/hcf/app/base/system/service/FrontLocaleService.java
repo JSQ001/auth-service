@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.domain.FrontLocale;
-import com.hand.hcf.app.base.system.dto.FrontLocaleDTO;
+import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.persistence.FrontLocaleMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
@@ -43,7 +43,6 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
         }
         if ( frontLocaleMapper.selectList(
                 new EntityWrapper<FrontLocale>()
-                        .eq("deleted",false)
                         .eq("key_code",frontLocale.getKeyCode())
                         .eq("language",frontLocale.getLanguage())
         ).size() > 0 ){
@@ -134,7 +133,6 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     public List<FrontLocale> getFrontLocaleByCond(String language, Long applicationId, String keyCode, String keyDescription, Page page) {
         List<FrontLocale> result = frontLocaleMapper.selectPage(page,
                 new EntityWrapper<FrontLocale>()
-                        .eq("deleted",false)
                         .eq(language != null,"language",language)
                         .eq(applicationId != null,"application_id",applicationId)
                         .like(keyCode != null,"key_code",keyCode)
@@ -155,7 +153,6 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
 
         List<FrontLocale> frontLocaleList = frontLocaleMapper.selectList(
                 new EntityWrapper<FrontLocale>()
-                        .eq("deleted",false)
                         .eq(language != null,"language",language)
                         .eq(applicationId != null,"application_id",applicationId)
                         .orderBy("key_code")
@@ -178,12 +175,11 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
      * @param page
      * @return
      */
-    public List<FrontLocaleDTO> getOtherFrontLocaleByCond(Long applicationId, String sourceLanguage, String targetLanguage, String keyCode, Page page) {
-        List<FrontLocaleDTO> frontLocaleDTOList = new ArrayList<>();
+    public List<LocaleDTO> getOtherFrontLocaleByCond(Long applicationId, String sourceLanguage, String targetLanguage, String keyCode, Page page) {
+        List<LocaleDTO> localeDTOList = new ArrayList<>();
 
         List<FrontLocale> frontLocaleList = frontLocaleMapper.selectPage(page,
                 new EntityWrapper<FrontLocale>()
-                        .eq("deleted", false)
                         .eq(applicationId != null, "application_id", applicationId)
                         .eq(sourceLanguage != null, "language", sourceLanguage)
                         .like(keyCode != null, "key_code", keyCode)
@@ -193,30 +189,29 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
             frontLocaleList.stream().forEach(sourceFrontLocale -> {
                 FrontLocale targetFrontLocale = this.selectOne(
                         new EntityWrapper<FrontLocale>()
-                                .eq("deleted", false)
                                 .eq("application_id", sourceFrontLocale.getApplicationId())
                                 .eq("application_code", sourceFrontLocale.getApplicationCode())
                                 .eq("key_code", sourceFrontLocale.getKeyCode())
                                 .eq("language", targetLanguage)
-
                 );
 
-                FrontLocaleDTO frontLocaleDTO = FrontLocaleDTO.builder()
+                LocaleDTO localeDTO = LocaleDTO.builder()
                         .keyCode(sourceFrontLocale.getKeyCode())
                         .sourceId(sourceFrontLocale.getId())
                         .sourceKeyDescription(sourceFrontLocale.getKeyDescription())
                         .build();
 
                 if (targetFrontLocale != null){
-                    frontLocaleDTO.setTargetId(targetFrontLocale.getId());
-                    frontLocaleDTO.setTargetKeyDescription(targetFrontLocale.getKeyDescription());
+                    localeDTO.setTargetId(targetFrontLocale.getId());
+                    localeDTO.setTargetKeyDescription(targetFrontLocale.getKeyDescription());
+                    localeDTO.setTargetVersionNumber(targetFrontLocale.getVersionNumber());
                 }else {
-                    frontLocaleDTO.setTargetId(null);
-                    frontLocaleDTO.setTargetKeyDescription(null);
+                    localeDTO.setTargetId(null);
+                    localeDTO.setTargetKeyDescription(null);
                 }
-                frontLocaleDTOList.add(frontLocaleDTO);
+                localeDTOList.add(localeDTO);
             });
         }
-        return frontLocaleDTOList;
+        return localeDTOList;
     }
 }

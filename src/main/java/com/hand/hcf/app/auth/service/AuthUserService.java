@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
@@ -385,5 +386,18 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
         principalLite.setEmail(user.getEmail());
         principalLite.setMobile(user.getMobile());
         return principalLite;
+    }
+
+    /**
+     * 根据oauth客户端获取用户信息
+     * @param clientId 客户端id
+     * @return PrincipalLite
+     */
+    public PrincipalLite getUserByOauthClientId(String clientId){
+        List<UserDTO> userDTOS = baseMapper.getUserByOauthClientId(clientId);
+        if (CollectionUtils.isEmpty(userDTOS)){
+            return null;
+        }
+        return getPrincipal(userDTOS.get(0));
     }
 }

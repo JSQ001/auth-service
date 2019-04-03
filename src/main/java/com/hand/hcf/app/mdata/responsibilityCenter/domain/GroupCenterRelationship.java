@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @TableName("sys_res_group_center_relation")
-public class GroupCenterRelationship extends Domain {
+public class GroupCenterRelationship extends Domain{
 
     private Long groupId;
 

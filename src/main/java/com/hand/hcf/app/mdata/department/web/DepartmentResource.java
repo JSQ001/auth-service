@@ -557,8 +557,10 @@ public class DepartmentResource {
      * @return
      */
     @RequestMapping(value = "/department/tenant/all" , method = RequestMethod.GET)
-    public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsAll(@RequestParam(value = "status",required = false) Integer status ){
-        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
+    public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsAll(@RequestParam(value = "code", required = false) String code,
+                                                                     @RequestParam(value = "name", required = false) String name,
+                                                                     @RequestParam(value = "status",required = false) Integer status ){
+        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(code, name, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
         return ResponseEntity.ok(result);
     }
 

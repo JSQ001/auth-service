@@ -84,7 +84,7 @@ public class DepartmentPositionResource {
         result = new PageImpl<>(mybatisPage.getRecords(), pageable, mybatisPage.getTotal());
         result.getContent().stream().forEach(departmentPosition -> {
             //多语言bug修改
-            DepartmentPosition i18nDepartmentPosition = baseI18nService.selectOneTranslatedTableInfoWithI18n(departmentPosition.getId(), DepartmentPosition.class);
+            DepartmentPosition i18nDepartmentPosition = baseI18nService.selectOneTranslatedTableInfoWithI18n(departmentPosition.getId(),DepartmentPosition.class);
             departmentPosition.setI18n(i18nDepartmentPosition.getI18n());
         });
 

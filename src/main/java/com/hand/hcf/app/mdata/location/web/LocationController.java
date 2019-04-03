@@ -2,8 +2,10 @@ package com.hand.hcf.app.mdata.location.web;
 
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
+import com.hand.hcf.app.mdata.location.service.LocationDetailService;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,7 +32,8 @@ public class LocationController {
 
     @Autowired
     DtoService dtoService;
-
+    @Autowired
+    private LocationDetailService locationDetailService;
     /**
      *标准城市搜索（带权重分词）
      */
@@ -77,5 +80,16 @@ public class LocationController {
                 .vendorCountryCode(dto.getVendorCountryCode())//添加供应商国内国外识别码
                 .build();
         return locationDTO;
+    }
+
+    /**
+     * 模糊查询地点
+     */
+    @GetMapping("/location/search/cities")
+    public ResponseEntity<List<LocationInfoDTO>> queryCities(@RequestParam(required = false) String description,
+                                                             @RequestParam(required = false) Long id,
+                                                             @RequestParam(required = false) String code){
+
+        return ResponseEntity.ok(locationDetailService.listCityByDescription(description, id, code));
     }
 }

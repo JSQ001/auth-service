@@ -4,14 +4,27 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.lov.domain.Lov;
 import com.hand.hcf.app.base.lov.persistence.LovMapper;
+import com.hand.hcf.app.base.lov.web.dto.ColumnDTO;
+import com.hand.hcf.app.base.lov.web.dto.LovColumnInfoDTO;
+import com.hand.hcf.app.base.lov.web.dto.LovInfoDTO;
+import com.hand.hcf.app.base.lov.web.dto.SearchColumnDTO;
+import com.hand.hcf.app.base.system.domain.InterfaceRequest;
+import com.hand.hcf.app.base.system.domain.InterfaceResponse;
+import com.hand.hcf.app.base.system.dto.LovDTO;
+import com.hand.hcf.app.base.system.service.InterfaceRequestService;
+import com.hand.hcf.app.base.system.service.InterfaceResponseService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by weishan on 2019/3/5.
@@ -19,7 +32,10 @@ import java.util.List;
  */
 @Service
 public class LovService extends BaseService<LovMapper, Lov> {
-
+    @Autowired
+    private InterfaceRequestService requestService;
+    @Autowired
+    private InterfaceResponseService responseService;
 
     /**
      * 创建LOV
@@ -95,17 +111,88 @@ public class LovService extends BaseService<LovMapper, Lov> {
     }
 
 
-    public List<Lov> pageAll(Page page, String lovCode, String lovName,Long appId) {
-        return baseMapper.pageAll(lovCode,lovName,appId,page)
-                ;
+    public List<Lov> pageAll(Page page, String lovCode, String lovName,Long appId, String remarks) {
+        return baseMapper.pageAll(lovCode,lovName,appId,page, remarks);
     }
 
     public List<Lov> listAll(String lovCode, String lovName) {
         return selectList(new EntityWrapper<Lov>()
                 .like(StringUtils.isEmpty(lovCode), "lov_code", lovCode)
                 .like(StringUtils.isEmpty(lovName), "lov_name", lovName)
-                .orderBy("lov_code"))
-                ;
+                .orderBy("lov_code"));
     }
 
+    public Lov getById(Long id) {
+        Lov lov = baseMapper.getById(id);
+        if (null != lov){
+            if (!StringUtils.isEmpty(lov.getRequestColumn())){
+                String requestColumn = lov.getRequestColumn();
+                String[] requestColumnIds = requestColumn.split(",");
+                List<InterfaceRequest> interfaceRequests = requestService.selectBatchIds(Arrays.asList(requestColumnIds));
+                List<LovColumnInfoDTO> collect = interfaceRequests.stream().map(e -> {
+                    LovColumnInfoDTO lovColumnInfoDTO = new LovColumnInfoDTO();
+                    lovColumnInfoDTO.setId(e.getId());
+                    lovColumnInfoDTO.setName(e.getName());
+                    return lovColumnInfoDTO;
+                }).collect(Collectors.toList());
+                lov.setRequestColumnInfo(collect);
+            }else{
+                lov.setRequestColumnInfo(new ArrayList<>());
+            }
+            if (!StringUtils.isEmpty(lov.getResponseColumn())){
+                String responseColumn = lov.getResponseColumn();
+                String[] responseColumnIds = responseColumn.split(",");
+                List<InterfaceResponse> interfaceResponses = responseService.selectBatchIds(Arrays.asList(responseColumnIds));
+                List<LovColumnInfoDTO> collect = interfaceResponses.stream().map(e -> {
+                    LovColumnInfoDTO lovColumnInfoDTO = new LovColumnInfoDTO();
+                    lovColumnInfoDTO.setId(e.getId());
+                    lovColumnInfoDTO.setName(e.getName());
+                    return lovColumnInfoDTO;
+                }).collect(Collectors.toList());
+                lov.setResponseColumnInfo(collect);
+            }else{
+                lov.setResponseColumnInfo(new ArrayList<>());
+            }
+        }
+        return lov;
+    }
+
+
+    public LovInfoDTO getByCode(String code) {
+        LovInfoDTO lov = baseMapper.getDetailInfoByCode(code);
+        if (null != lov){
+            if (!StringUtils.isEmpty(lov.getRequestColumn())){
+                String requestColumn = lov.getRequestColumn();
+                String[] requestColumnIds = requestColumn.split(",");
+                List<InterfaceRequest> interfaceRequests = requestService.selectBatchIds(Arrays.asList(requestColumnIds));
+                List<SearchColumnDTO> collect = interfaceRequests.stream().map(e -> {
+                    SearchColumnDTO searchColumnDTO = new SearchColumnDTO();
+                    searchColumnDTO.setId(e.getKeyCode());
+                    searchColumnDTO.setLabel(e.getName());
+                    searchColumnDTO.setType("input");
+                    return searchColumnDTO;
+                }).collect(Collectors.toList());
+                lov.setSearchForm(collect);
+            }else{
+                lov.setSearchForm(new ArrayList<>());
+            }
+            if (!StringUtils.isEmpty(lov.getResponseColumn())){
+                String responseColumn = lov.getResponseColumn();
+                String[] responseColumnIds = responseColumn.split(",");
+                List<InterfaceResponse> interfaceResponses = responseService.selectBatchIds(Arrays.asList(responseColumnIds));
+                List<ColumnDTO> collect = interfaceResponses.stream().map(e -> {
+                    ColumnDTO columnDTO = new ColumnDTO();
+                    columnDTO.setDataIndex(e.getKeyCode());
+                    columnDTO.setTitle(e.getName());
+                    return columnDTO;
+                }).collect(Collectors.toList());
+                lov.setColumns(collect);
+            }else{
+                lov.setColumns(new ArrayList<>());
+            }
+        }else {
+            throw new BizException(RespCode.SYS_LOV_NOT_EXISTS);
+        }
+        return lov;
+    }
 }

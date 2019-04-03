@@ -1,12 +1,12 @@
 package com.hand.hcf.app.mdata.externalApi;
 
-import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.base.implement.web.UserControllerImpl;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.base.user.UserCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.system.enums.AttachmentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

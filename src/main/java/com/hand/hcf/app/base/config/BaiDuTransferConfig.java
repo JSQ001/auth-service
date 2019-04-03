@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BaiDuTransferConfig {
     @Value("${baidu.transferUrl:}")
-    private String transferApiHost; ;
+    private String transferApiHost;
     @Value("${baidu.appId:}")
     private  String appId;
     @Value("${baidu.securityKey:}")

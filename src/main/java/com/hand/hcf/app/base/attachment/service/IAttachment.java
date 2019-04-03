@@ -65,7 +65,7 @@ public interface IAttachment {
      * @param file
      * @return
      */
-    String uploadPublicStaticAttachment(AttachmentType attachmentType, MultipartFile file);
+    String uploadPublicStaticAttachment( AttachmentType attachmentType, MultipartFile file);
 
     AttachmentCO adapterAttachmentCO(Attachment attachment);
 

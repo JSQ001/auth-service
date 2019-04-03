@@ -99,7 +99,7 @@ public class PeriodRulesResource {
      */
     @RequestMapping(value = "/periodrule/batch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<List<PeriodRules>> createPeriodRulesBatch(@RequestBody List<PeriodRules> list) throws Exception {
+    public ResponseEntity<List<PeriodRules>> createPeriodRulesBatch(@RequestBody  List<PeriodRules> list) throws Exception {
         if (list.stream().anyMatch(u->u.getId() != null)) {
             return ResponseEntity.badRequest().body(null);
         }

@@ -8,6 +8,7 @@ import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.web.dto.ImportResultDTO;
 import com.itextpdf.text.io.StreamUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -36,6 +37,7 @@ import java.util.UUID;
  * @Date: 2018/12/26
  */
 @Service
+@Slf4j
 public class SysCodeValueTempService extends BaseService<SysCodeValueTempMapper, SysCodeValueTemp> {
 
     @Transactional(rollbackFor = Exception.class)
@@ -112,7 +114,7 @@ public class SysCodeValueTempService extends BaseService<SysCodeValueTempMapper,
                     bos.close();
                 }
             }catch (IOException e){
-                throw new BizException(RespCode.SYS_READ_FILE_ERROR);
+                log.error(e.getMessage());
             }
         }
     }

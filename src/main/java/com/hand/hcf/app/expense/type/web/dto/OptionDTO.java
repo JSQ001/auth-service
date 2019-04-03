@@ -1,6 +1,6 @@
 package com.hand.hcf.app.expense.type.web.dto;
 
-import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

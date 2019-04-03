@@ -52,7 +52,7 @@ public class DtoService {
         }
     };
 
-    private static LocationDTO toLocationDTO(Location location, VendorAlias vendorAlias, LocationDetail locationDetail){
+    private static LocationDTO toLocationDTO(Location location,VendorAlias vendorAlias,LocationDetail locationDetail){
         LocationDTO locationDTO = LocationDTO.builder()
                 .language(vendorAlias.getLanguage())
                 .code(location.getCode())

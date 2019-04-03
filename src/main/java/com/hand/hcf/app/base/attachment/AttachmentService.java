@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing Attachment.
+ * @author polus
  */
 @Service
 @CacheConfig(cacheNames = {CacheConstants.ATTACHMENT})
@@ -129,24 +130,7 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
     }
 
 
-    public List<AttachmentCO> searchAttachmentForImplement(List<UUID> attachmentOids) {
-        return this.findByAttachmentOids(attachmentOids);
-    }
 
-
-    /**
-     * 批量添加附件
-     * @param AttachmentCO：附件视图对象
-     */
-    @Transactional
-    public void saveAttachment(AttachmentCO AttachmentCO){
-        log.info("附件视图信息：{}",JSONObject.toJSONString(AttachmentCO));
-        if(null != AttachmentCO){
-            Attachment attachment = AttachmentCOToAttachment(AttachmentCO);
-            log.info("附件实体信息：{}", JSONObject.toJSONString(attachment));
-            attachmentMapper.insert(attachment);
-        }
-    }
 
     /**
      * 根据附件id获取附件信息

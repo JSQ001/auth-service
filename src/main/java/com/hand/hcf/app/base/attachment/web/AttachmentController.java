@@ -50,7 +50,7 @@ public class AttachmentController{
     @RequestMapping(value = "/upload/attachment", method = RequestMethod.POST)
     @Timed
     public ResponseEntity<AttachmentCO> uploadPicture(@RequestParam(name = "file") MultipartFile file,
-                                                      @RequestParam(name = "attachmentType") AttachmentType attachmentType
+                                                        @RequestParam(name = "attachmentType") AttachmentType attachmentType
     ) {
         return ResponseEntity.ok(attachmentService.uploadFile(file, attachmentType));
     }
@@ -59,10 +59,6 @@ public class AttachmentController{
     @Timed
     public ResponseEntity<List<AttachmentCO>> uploadPictureBatch(@RequestParam(name = "files") List<MultipartFile> files,
                                                                   @RequestParam(name = "attachmentType") AttachmentType attachmentType) {
-//        if (file.getSizes() > artemisProperties.getFileUploadMaxSize()) {
-//            throw new ValidationException(new ValidationError("file", "file is not allowed bigger than 2Mb"));
-//        }
-        //return ResponseEntity.ok(attachmentService.uploadFile(file, attachmentType, SecurityUtils.getCurrentUser().getCompany().getCompanyOID()));
         List<AttachmentCO> batch = new ArrayList<>();
         for (MultipartFile file : files){
             batch.add(attachmentService.uploadFile(file, attachmentType));
@@ -76,9 +72,6 @@ public class AttachmentController{
     @Timed
     public ResponseEntity<AttachmentCO> uploadPictureAsync(@RequestParam(name = "file") MultipartFile file,
                                                             @RequestParam(name = "attachmentType") AttachmentType attachmentType) {
-//        if (file.getSizes() > artemisProperties.getFileUploadMaxSize()) {
-//            throw new ValidationException(new ValidationError("file", "file is not allowed bigger than 2Mb"));
-//        }
         return ResponseEntity.ok(attachmentService.uploadFileAsync(file, attachmentType));
     }
 
@@ -104,11 +97,6 @@ public class AttachmentController{
                 attachmentDTOs.add(attachmentService.AttachmentToAttachmentCO(attachment));
             });
 
-//            for (MultipartFile f : file) {
-//                Attachment attachment = attachmentService.uploadStatic(f, attachmentType, SecurityUtils.getCurrentUser().getCompany().getCompanyOID());
-//                expenseTypeIconService.createExpenseTypeIcon(attachment);
-//                attachmentDTOs.add(attachmentService.adapterAttachmentDTO(attachment));
-//            }
         } else {
             Arrays.stream(file).forEach(
                     f -> {

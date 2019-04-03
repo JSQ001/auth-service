@@ -6,5 +6,5 @@ import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DepartmentResponsibilityCenterService extends BaseService<DepartmentResponsibilityCenterMapper, DepartmentResponsibilityCenter> {
+public class DepartmentResponsibilityCenterService extends BaseService<DepartmentResponsibilityCenterMapper,DepartmentResponsibilityCenter>{
 }

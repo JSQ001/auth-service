@@ -177,12 +177,6 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
             DataFilteringUtil.getDataFilterCode(codingRuleDetail.getSegmentValue());
         }
         CodingRule codingRule = codingRuleService.selectById(codingRuleDetail.getCodingRuleId());
-        CodingRuleObject codingRuleObject = codingRuleObjectService.selectById(codingRule.getCodingRuleObjectId());
-        if (StringUtils.isBlank(codingRuleObject.getCompanyCode())) {
-            if ("40".equals(codingRuleDetail.getSegmentType())) {
-                throw new BizException(RespCode.BUDGET_CODING_RULE_DETAIL_COMPANY_CODE);
-            }
-        }
         if (codingRule.getEnabled()) {
             throw new BizException(RespCode.BUDGET_CODING_RULE_DETAIL_OPERATION);
         }

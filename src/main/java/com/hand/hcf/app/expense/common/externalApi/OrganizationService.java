@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
-import com.hand.hcf.app.base.org.OrderNumberCO;
-import com.hand.hcf.app.base.org.OrderNumberCO.Message;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.mdata.implement.web.*;
@@ -230,7 +227,7 @@ public class OrganizationService {
         if (StringUtils.isEmpty(orderNumberCO.getOrderNumber())) {
             throw new BizException(orderNumberCO.getCode(), (String)orderNumberCO.getMessage().stream().filter((u) -> {
                 return u.getLanguage().equalsIgnoreCase(language);
-            }).findFirst().map(Message::getContent).get());
+            }).findFirst().map(OrderNumberCO.Message::getContent).get());
         } else {
             return orderNumberCO.getOrderNumber().toString();
         }

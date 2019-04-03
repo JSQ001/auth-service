@@ -15,8 +15,8 @@ import java.util.List;
  */
 public interface FrontLocaleMapper extends BaseMapper<FrontLocale>{
     List<FrontLocale> getFrontLocaleByCond(@Param("applicationId") Long applicationId,
-                                           @Param("targetLanguage") String targetLanguage,
-                                           @Param("keyCode") String keyCode,
-                                           Page page);
+                                  @Param("targetLanguage") String targetLanguage,
+                                  @Param("keyCode") String keyCode,
+                                  Page page);
 
 }

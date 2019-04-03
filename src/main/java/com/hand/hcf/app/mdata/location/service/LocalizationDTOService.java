@@ -37,11 +37,11 @@ public class LocalizationDTOService {
      * @param page 分页对象
      * @return
      */
-    public Page<LocalizationDTO> getLocalizationCountryByCode(String countryCode,
-                                                              String countryName,
-                                                              String language,
-                                                              List<String> includeList,
-                                                              Page<LocalizationDTO> page) {
+    public Page<LocalizationDTO> getLocalizationCountryByCode( String countryCode,
+                                                               String countryName,
+                                                               String language,
+                                                               List<String> includeList,
+                                                               Page<LocalizationDTO> page) {
         //  Code代码拼接
         String includeCode = "";
         //  准备拼接
@@ -216,7 +216,7 @@ public class LocalizationDTOService {
         return localizationDTO;
     }
 
-    public List<LocationDTO> listCityByIds(List<Long> cityIds, String vendorType) {
+    public List<LocationDTO> listCityByIds(List<Long> cityIds,String vendorType) {
         String language= OrgInformationUtil.getCurrentLanguage();
         if(org.apache.commons.collections.CollectionUtils.isEmpty(cityIds)){
             return  null;
