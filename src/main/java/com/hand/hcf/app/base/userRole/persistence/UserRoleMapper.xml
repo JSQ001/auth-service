@@ -30,7 +30,7 @@
             and sr.role_name like concat(concat('%',#{roleName}),'%')
         </if>
         and
-        ( sr.tenant_id = #{tenantId} OR sr.tenant_id = 0 )
+        ( sr.tenant_id = #{tenantId})
         order by role_code
     </select>
     <select id="getSelectedRolesByCond" resultType="com.hand.hcf.app.base.userRole.domain.Role">

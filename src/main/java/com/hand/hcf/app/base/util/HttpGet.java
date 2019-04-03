@@ -1,5 +1,6 @@
 package com.hand.hcf.app.base.util;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -14,13 +15,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/9/10.
  */
+@Slf4j
 public class HttpGet {
     protected static final int SOCKET_TIMEOUT = 10000; // 10S
     protected static final String GET = "GET";
@@ -40,7 +41,7 @@ public class HttpGet {
             conn.setRequestMethod(GET);
             int statusCode = conn.getResponseCode();
             if (statusCode != HttpURLConnection.HTTP_OK) {
-                System.out.println("Http错误码：" + statusCode);
+                log.error("Http错误码：" + statusCode);
             }
             // 读取服务器的数据
             InputStream is = conn.getInputStream();
@@ -127,10 +128,10 @@ public class HttpGet {
             return null;
         }
         @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
         }
         @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType)  {
         }
     };
 }

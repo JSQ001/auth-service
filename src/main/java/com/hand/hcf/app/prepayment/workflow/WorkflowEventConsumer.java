@@ -18,35 +18,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Component
-public class WorkflowEventConsumer  {
-    @Value("${spring.application.name:}")
-    private  String applicationName;
-
-    private static final Logger logger = LoggerFactory.getLogger(WorkflowEventConsumer.class);
-
+@RestController
+public class WorkflowEventConsumer extends AbstractWorkflowEventConsumerInterface {
     @Autowired
     private CashPaymentRequisitionHeadService cashPaymentRequisitionHeadService;
 
-    /**
-     * 该监听用于 工作流的撤回，审批拒绝(驳回)，审批通过 时 修改单据的相应状态
-     * @param workflowCustomRemoteEvent
-     */
-
     @LcnTransaction
     @Transactional(rollbackFor = Exception.class)
-    public void workFlowConsumer(WorkflowCustomRemoteEvent workflowCustomRemoteEvent) {
+    @Override
+    public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
+        Long documentId = approvalNoticeCO.getDocumentId();
+        Integer approvalStatus = approvalNoticeCO.getDocumentStatus();
+        Long userId = OrgInformationUtil.getCurrentUserId();
 
-        logger.info("预付款接收到工作流事件消息：" + workflowCustomRemoteEvent);
-        WorkflowMessageCO workflowMessage = workflowCustomRemoteEvent.getWorkflowMessage();
-       // UserBean userBean = workflowMessage.getUserBean();
-        PrincipalLite userBean = workflowMessage.getUserBean();
-        OrgInformationUtil.setAuthentication(userBean);
-        //增加一层判断，只有目标服务为自己的服务时，且状态 为审批通过，撤回，驳回 时 才处理
-        if((applicationName+":**").equalsIgnoreCase(workflowCustomRemoteEvent.getDestinationService()) && DocumentOperationEnum.APPROVAL.getId().compareTo( workflowMessage.getStatus()) <= 0){
-                //更新单据的状态为审批通过/撤回/驳回
-                cashPaymentRequisitionHeadService.updateDocumentStatus(workflowMessage.getStatus(),workflowMessage.getDocumentId(),workflowMessage.getApprovalText(),workflowMessage.getUserId());
-        }
+        //更新单据的状态为审批通过/撤回/驳回
+        cashPaymentRequisitionHeadService.updateDocumentStatus(approvalStatus, documentId, "", userId);
+
+        ApprovalResultCO approvalResultCO = new ApprovalResultCO();
+        approvalResultCO.setSuccess(true);
+        approvalResultCO.setStatus(approvalStatus);
+        approvalResultCO.setError(null);
+        return approvalResultCO;
     }
 }

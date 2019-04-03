@@ -51,28 +51,33 @@ public class LovController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Lov> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(lovService.selectById(id));
+        return ResponseEntity.ok(lovService.getById(id));
     }
 
 
     @GetMapping("/page")
     public ResponseEntity<List<Lov>> pageAll(
             Pageable pageable,
-            @RequestParam(required = false) String LovCode,
-            @RequestParam(required = false) String LovName,
+            @RequestParam(required = false) String lovCode,
+            @RequestParam(required = false) String lovName,
+            @RequestParam(required = false) String remarks,
             @RequestParam(required = false) Long appId
             ) {
         Page page = PageUtil.getPage(pageable);
-        List<Lov> list = lovService.pageAll(page, LovCode, LovName,appId);
-        return new ResponseEntity(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
+        List<Lov> list = lovService.pageAll(page, lovCode, lovName,appId, remarks);
+        return new ResponseEntity<>(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
 
     @GetMapping("/list")
     public ResponseEntity<List<Lov>> listAll(
-            @RequestParam(required = false) String LovCode,
-            @RequestParam(required = false) String LovName) {
-        List<Lov> list = lovService.listAll(LovCode,LovName);
+            @RequestParam(required = false) String lovCode,
+            @RequestParam(required = false) String lovName) {
+        List<Lov> list = lovService.listAll(lovCode,lovName);
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/detail/{code}")
+    public ResponseEntity getDetailByCode(@PathVariable("code") String code){
+        return ResponseEntity.ok(lovService.getByCode(code));
+    }
 }

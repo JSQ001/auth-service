@@ -54,7 +54,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (frontKey.getKeyCode() == null || "".equals(frontKey.getKeyCode())) {
             throw new BizException(RespCode.AUTH_FRONT_KEY_NULL);
         }
-        if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
+        if (frontKey.getModuleId() == null ) {
             throw new BizException(RespCode.AUTH_MODULE_ID_NULL);
         }
         //检查key是否唯一
@@ -82,7 +82,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (frontKey == null || frontKey.getId() == null) {
             throw new BizException(RespCode.SYS_ID_NULL);
         }
-        if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
+        if (frontKey.getModuleId() == null ) {
             throw new BizException(RespCode.AUTH_MODULE_ID_NULL);
         }
         //校验ID是否在数据库中存在
@@ -90,13 +90,13 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
         if (rr == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (frontKey.getEnabled() == null || "".equals(frontKey.getEnabled())) {
+        if (frontKey.getEnabled() == null ) {
             frontKey.setEnabled(rr.getEnabled());
         }
-        if (frontKey.getDeleted() == null || "".equals(frontKey.getDeleted())) {
+        if (frontKey.getDeleted() == null ) {
             frontKey.setDeleted(rr.getDeleted());
         }
-        if (frontKey.getModuleId() == null || "".equals(frontKey.getModuleId())) {
+        if (frontKey.getModuleId() == null ) {
             frontKey.setModuleId(rr.getModuleId());
         }
         if (frontKey.getModuleCode() == null || "".equals(frontKey.getModuleCode())) {
@@ -128,7 +128,7 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      * @return
      */
     @Transactional
-    public void deleteFrontKey(Long id) throws Exception {
+    public void deleteFrontKey(Long id) {
         if (id != null) {
             FrontKey frontKey = selectById(id);
             frontKey.setDeleted(true);
@@ -290,13 +290,13 @@ public class FrontKeyService extends BaseService<FrontKeyMapper, FrontKey> {
      *
      * @param frontKey
      */
+    @Transactional
     public void batchCreateFrontKey(List<FrontKey> frontKey) {
         if (frontKey != null && frontKey.size() > 0) {
             //批量保存，里面需要校验keyCode不允许重复
             frontKey.forEach(front -> {
                 this.createFrontKey(front);
             });
-            //this.insertBatch(frontKey);
         }
     }
 

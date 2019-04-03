@@ -25,16 +25,11 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
 
     private final ComponentMapper componentMapper;
 
-    private final MenuButtonService menuButtonService;
-
-    private final RoleMenuService roleMenuService;
 
     private final ComponentButtonService componentButtonService;
 
-    public ComponentService(ComponentMapper componentMapper, MenuButtonService menuButtonService, RoleMenuService roleMenuService, ComponentButtonService componentButtonService) {
+    public ComponentService(ComponentMapper componentMapper, ComponentButtonService componentButtonService) {
         this.componentMapper = componentMapper;
-        this.menuButtonService = menuButtonService;
-        this.roleMenuService = roleMenuService;
         this.componentButtonService = componentButtonService;
     }
 
@@ -59,31 +54,7 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (!"1".equals(component.getComponentType()) && !"2".equals(component.getComponentType())) {
             throw new BizException(RespCode.COMPONENT_TYPE_INVALID);
         }
-        //用于保存菜单的按钮
-        /*if (component.getButtonList() != null && component.getButtonList().size() > 0 && component.getMenuId() != null && component.getMenuId() > 0) {
-            resultButtons = component.getButtonList();
-            resultButtons.forEach(e -> {
-                e.setMenuId(component.getMenuId());
-            });
-            Long menuId = component.getMenuId();
-            Component cc = this.getComponentByMenuId(menuId);
-            if(cc != null){
-                this.deleteComponent(cc.getId());
-                //删除按钮与角色的关联
-                List<RoleMenu> roleMenus = roleMenuService.getRoleMenuListByMenuId(menuId);
-                if(roleMenus != null && roleMenus.size() > 0){
-                    List<Long> roleMenusId = roleMenus.stream().map(d -> {return d.getId();}).collect(Collectors.toList());
-                    roleMenuService.deleteBatchRoleMenu(roleMenusId);
-                }
-                //删除按钮与菜单的关联
-                List<MenuButton>  menuButtons = menuButtonService.getMenuButtonsByMenuId(menuId);
-                if(menuButtons != null && menuButtons.size() > 0){
-                    List<Long> menuButtonIds = menuButtons.stream().map(d -> {return d.getId();}).collect(Collectors.toList());
-                    menuButtonService.deleteBatchMenuButton(menuButtonIds);
-                }
-            }
-            resultButtons = menuButtonService.batchSaveAndUpdateMenuButton(component.getButtonList());
-        }*/
+
         componentMapper.insert(component);
         //保存组件与按钮
         List<ComponentButton> buttonList = component.getButtonList();
@@ -123,12 +94,9 @@ public class ComponentService extends BaseService<ComponentMapper, Component> {
         if (rr == null) {
             throw new BizException(RespCode.SYS_DATASOURCE_CANNOT_FIND_OBJECT);
         }
-        if (component.getEnabled() == null || "".equals(component.getEnabled())) {
+        if (component.getEnabled() == null) {
             component.setEnabled(rr.getEnabled());
         }
-       /* if (component.getDeleted() == null || "".equals(component.getDeleted())) {
-            component.setDeleted(rr.getDeleted());
-        }*/
         List<ComponentButton> resultButtons = null;
 
         //用于保存菜单的按钮

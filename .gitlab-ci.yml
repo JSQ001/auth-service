@@ -14,15 +14,14 @@ build:
     - tags
     - master
     - development
-    - dev-0.8.5
+    - /^dev-.*$/
     - /^release-.*$/
 
 dev-release:
     stage: dev-release
     only:
     - tags
-    - development
-    - dev-0.8.5
+    - /^dev-.*$/
     - master
     - /^release-.*$/
     when: manual

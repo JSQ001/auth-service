@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.location.persistence;
 
 import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import com.hand.hcf.app.common.dto.LocalizationDTO;
+import com.hand.hcf.app.common.dto.LocationDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -33,8 +34,16 @@ public interface LocalizationDTOMapper{
 
     public List<LocalizationDTO> getLocalizationDistrictByCode(@Param("code") String code, @Param("vendorType") String vendorType, @Param("language") String language, @Param("includeList") String includeList, Pagination page);
     // 新城市查询SQL
-    List<LocalizationDTO> getLocalizationCityByCountry(@Param("code") String code, @Param("vendorType") String vendorType, @Param("language") String language);
+    List<LocalizationDTO> getLocalizationCityByCountry(@Param("code") String code,
+                                                       @Param("city") String city,
+                                                       @Param("vendorType") String vendorType,
+                                                       @Param("language") String language);
     List<LocalizationDTO> selectLocalizationDistrictByCountry(@Param("code") String code, @Param("vendorType") String vendorType, @Param("language") String language);
 
     LocalizationDTO getOneLocalizationCountryByCode(@Param("language") String language, @Param("code") String code);
+
+    List<LocationDTO> listCityByIds(@Param("code") String code,
+                                    @Param("vendorType") String vendorType,
+                                    @Param("language") String language,
+                                    @Param("cityIds") List<Long> cityIds);
 }

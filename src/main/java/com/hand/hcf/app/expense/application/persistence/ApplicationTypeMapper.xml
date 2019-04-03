@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.application.persistence.ApplicationTypeMapper">
+
+    <select id="selectByUser" resultType="com.hand.hcf.app.expense.application.domain.ApplicationType">
+
+        SELECT
+        t.*
+        FROM
+        exp_application_type t
+        WHERE
+        t.id IN ( SELECT a.application_type_id
+        FROM exp_application_type_company a
+        WHERE a.company_id = #{companyId}
+        AND a.enabled = 1 )
+        AND t.set_of_books_id = #{setOfBooksId}
+        AND t.enabled = TRUE
+        AND (
+        t.apply_employee = '101'
+        OR (
+        t.apply_employee = '102'
+        AND id IN
+        ( SELECT b.application_type_id
+        FROM exp_application_type_user b
+        WHERE b.apply_type = '102'
+        AND b.user_type_id  = #{departmentId}
+        )
+        )
+        )
+        ORDER by t.type_code desc
+    </select>
+    <select id="selectByUserGroup" resultMap="selectTypeAndUsergroupIdResult">
+         SELECT
+            t.*, b.user_type_id as userGroupId
+        FROM
+            exp_application_type t, exp_application_type_user b
+        WHERE
+            t.id IN ( SELECT a.application_type_id FROM exp_application_type_company a WHERE a.company_id = #{companyId}
+            AND a.enabled = TRUE )
+            AND t.set_of_books_id = #{setOfBooksId}
+            and t.id = b.application_type_id
+            AND t.enabled = 1
+            AND t.apply_employee = '103'
+    </select>
+    <select id="listTypesByReportCondition"
+            resultType="com.hand.hcf.app.expense.application.domain.ApplicationType">
+        select t.* from exp_application_type t
+          where t.set_of_books_id = #{setOfBooksId}
+            and t.enabled = 1
+            <choose>
+                <when test="range =='notChoose'">
+                    <if test="ids != null and ids.size>0">
+                      and t.id not in
+                        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                            #{id}
+                        </foreach>
+                    </if>
+                </when>
+                <when test="range == 'selected'">
+                    <if test="ids != null and ids.size>0">
+                        and t.id in
+                        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                            #{id}
+                        </foreach>
+                    </if>
+                </when>
+                <otherwise>
+                    and 1 = 1
+                </otherwise>
+            </choose>
+            <if test="typeName != null and typeName !=''">
+                t.type_name like concat(concat('%',#{typeName}),'%')
+            </if>
+    </select>
+
+    <select id="queryApplicationTypeByCond" resultType="com.hand.hcf.app.expense.application.domain.ApplicationType">
+        SELECT eat.*
+        FROM exp_application_type eat
+        WHERE eat.set_of_books_id = #{setOfBooksId}
+        <if test="enabled != null and enabled !=''">
+            AND eat.enabled = #{enabled}
+        </if>
+        <if test="code != null and code !=''">
+            AND eat.type_code LIKE concat(concat('%', #{code}), '%')
+        </if>
+        <if test="name != null and name !=''">
+            AND eat.type_name LIKE concat(concat('%', #{name}), '%')
+        </if>
+        <choose>
+            <when test="range =='notChoose'">
+                <if test="idList != null and idList.size>0">
+                    and eat.id not in
+                    <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                        #{id}
+                    </foreach>
+                </if>
+            </when>
+            <when test="range == 'selected'">
+                <if test="idList != null and idList.size>0">
+                    and eat.id in
+                    <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                        #{id}
+                    </foreach>
+                </if>
+            </when>
+            <otherwise>
+                and 1 = 1
+            </otherwise>
+        </choose>
+        ORDER BY eat.enabled DESC,eat.type_code ASC
+    </select>
+
+    <select id="queryCreatedType" resultType="com.hand.hcf.app.expense.application.domain.ApplicationType">
+
+        SELECT
+        t.*
+        FROM
+        exp_application_type t
+        WHERE
+        t.id IN (
+          SELECT h.type_id
+           FROM exp_application_header h
+          WHERE h.SET_OF_BOOKS_ID = #{setOfBooksId}
+        )
+        <if test="enabled != null">
+            AND t.enabled = #{enabled}
+        </if>
+        ORDER by t.type_code desc
+    </select>
+
+    <resultMap id="selectTypeAndUsergroupIdResult"
+               type="com.hand.hcf.app.expense.application.web.dto.ApplicationTypeAndUserGroupDTO">
+        <id column="id" property="id" />
+        <result column="type_code" property="typeCode" />
+        <result column="type_name" property="typeName" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="budget_flag" property="budgetFlag" />
+        <result column="all_flag" property="allFlag" />
+        <result column="associate_contract" property="associateContract" />
+        <result column="require_input" property="requireInput" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="apply_employee" property="applyEmployee" />
+        <result column="form_oid" property="formOid" />
+        <result column="form_name" property="formName" />
+        <result column="form_type" property="formType" />
+        <result column="version_number" property="versionNumber" />
+        <result column="enabled" property="enabled" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <collection property="userGroupIds" ofType="java.lang.Long">
+            <id column="userGroupId"/>
+        </collection>
+    </resultMap>
+</mapper>

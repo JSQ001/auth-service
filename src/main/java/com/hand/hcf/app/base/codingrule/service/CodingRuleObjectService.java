@@ -31,8 +31,6 @@ public class CodingRuleObjectService extends ServiceImpl<CodingRuleObjectMapper,
     @Autowired
     private SysCodeService sysCodeService;
 
-//    private final BudgetCodingRuleService budgetCodingRuleService;
-
     @Autowired
     private CodingRuleService codingRuleService;
 
@@ -209,7 +207,7 @@ public class CodingRuleObjectService extends ServiceImpl<CodingRuleObjectMapper,
                 .codingRuleName("默认编码规则")
                 .tenantId(tenantId)
                 .build();
-            Map map_name = new HashMap();
+            Map mapName = new HashMap();
             List<Map> mapList = new ArrayList<>();
             Map map_zh = new HashMap();
             map_zh.put("language", LanguageEnum.ZH_CN.getKey());
@@ -219,8 +217,8 @@ public class CodingRuleObjectService extends ServiceImpl<CodingRuleObjectMapper,
             map_en.put("value", "Default encoding rules");
             mapList.add(map_zh);
             mapList.add(map_en);
-            map_name.put("codingRuleName", mapList);
-            codingRule.setI18n(map_name);
+            mapName.put("codingRuleName", mapList);
+            codingRule.setI18n(mapName);
             codingRuleService.insetCodingRule(codingRule);
             //【固定字符】+【序列号】（8位），开始位数为00100000，步长为1
             CodingRuleDetail codingRuleDetail_documentType = CodingRuleDetail.builder()

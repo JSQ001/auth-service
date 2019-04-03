@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.accounts.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.accounts.domain.Accounts;
 import com.hand.hcf.app.mdata.accounts.domain.AccountsHierarchy;
 import com.hand.hcf.app.mdata.accounts.dto.AccountsHierarchyDTO;

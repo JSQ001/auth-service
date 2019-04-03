@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="201811071056001" author="bin.xie">
+        <sqlFile path="classpath:db/liquibase/expense/sql/insert_expense_icon.sql" encoding="UTF-8"/>
+    </changeSet>
+    <changeSet id="201901181405001" author="zhu.zhao">
+        <sqlFile path="classpath:db/liquibase/expense/sql/insert_expense_icon20190118.sql" encoding="UTF-8"/>
+    </changeSet>
+</databaseChangeLog>

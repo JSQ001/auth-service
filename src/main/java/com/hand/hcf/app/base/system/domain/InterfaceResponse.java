@@ -33,7 +33,5 @@ public class InterfaceResponse extends DomainLogicEnable {
 
     private Long interfaceId;  // 接口ID
 
-    @TableField("enabled_search")
-    private Boolean enabledSearch;
 
 }

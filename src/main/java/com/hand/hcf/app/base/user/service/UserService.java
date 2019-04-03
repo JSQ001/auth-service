@@ -101,10 +101,10 @@ public class UserService extends BaseService<UserMapper, User> {
     private final static String[] ruleRegex = new String[4];
 
     static {
-        ruleRegex[0] = regexLowerCase;
-        ruleRegex[1] = regexUpperCase;
-        ruleRegex[2] = regenNum;
-        ruleRegex[3] = regexSpecialChar;
+        ruleRegex[0] = REGEX_LOWER_CASE;
+        ruleRegex[1] = REGEX_UPPER_CASE;
+        ruleRegex[2] = REGEX_NUM;
+        ruleRegex[3] = REGEX_SPECIAL_CHAR;
     }
 
     /**
@@ -270,7 +270,6 @@ public class UserService extends BaseService<UserMapper, User> {
         List<UserDTO> list = listByCondition(keyword, tenantId, isInactiveSearch, page);
         List<UserRoleListDTO> listr = null;
         if (list != null && list.size() > 0) {
-            Page pp = PageUtil.getPage(0, 1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
             //取用户分配的角色集合
             listr = list.stream().map(user -> userDtoToUserRoleList(user)).collect(Collectors.toList());
         }
@@ -435,7 +434,6 @@ public class UserService extends BaseService<UserMapper, User> {
             saveUser(u);
             log.debug("Changed Information for User: {}", u);
         });
-        // baseTokenService.updateOauthAccessTokenById(language);
 
         return true;
 
@@ -782,12 +780,8 @@ public class UserService extends BaseService<UserMapper, User> {
             if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
             }
-            if (AccountConstants.NOTICE_TYPE_MOBILE == noticeType) {
-                //sendNoticeUserSms(user);
-            }
             if (AccountConstants.NOTICE_TYPE_EMAIL_AND_MOBILE == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
-                //sendNoticeUserSms(user);
             }
             if (tenantId == null) {
                 tenantId = user.getTenantId();

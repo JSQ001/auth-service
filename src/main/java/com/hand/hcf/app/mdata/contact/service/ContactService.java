@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.base.user.UserCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;

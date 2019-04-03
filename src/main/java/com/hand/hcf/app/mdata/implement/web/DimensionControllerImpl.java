@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -279,5 +280,26 @@ public class DimensionControllerImpl {
                                                                      @RequestParam(value = "enabled",required = false) Boolean enabled,
                                                                      @RequestParam(value = "companyId",required = false) Long companyId) {
         return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId);
+    }
+
+    //jiu.zhao 修改三方接口 20190329
+    public List<DimensionDetailCO> listDimensionsByIdsAndEnabled(List<Long> ids, Boolean enabled) {
+        List<DimensionDetailCO> dimensionDetailCOS = this.listDimensionsBySetOfBooksIdAndIdsAndEnabled((Long)null, enabled, ids);
+        return (List)(dimensionDetailCOS == null ? new ArrayList() : dimensionDetailCOS);
+    }
+
+    public List<DimensionCO> listDimensionBySetOfBooksIdAndEnabled(Long setOfBooksId, Boolean enabled) {
+        List<DimensionCO> dimensionCOList = this.listDimensionsBySetOfBooksIdAndEnabled(setOfBooksId, enabled);
+        return (List)(dimensionCOList == null ? new ArrayList() : dimensionCOList);
+    }
+
+    public DimensionCO getDimensionById(Long dimensionId) {
+        List<DimensionCO> dimensionCOList = this.listDimensionsByIds(Arrays.asList(dimensionId));
+        return dimensionCOList != null && dimensionCOList.size() > 0 ? (DimensionCO)dimensionCOList.get(0) : null;
+    }
+
+    public DimensionItemCO getDimensionItemById(Long dimensionItemId) {
+        List<DimensionItemCO> dimensionItemCOList = this.listDimensionItemsByIds(Arrays.asList(dimensionItemId));
+        return dimensionItemCOList != null && dimensionItemCOList.size() > 0 ? (DimensionItemCO)dimensionItemCOList.get(0) : null;
     }
 }

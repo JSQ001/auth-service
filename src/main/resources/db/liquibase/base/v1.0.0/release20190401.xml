@@ -223,4 +223,42 @@
         <addUniqueConstraint tableName="sys_front_locale" columnNames="language,key_code" constraintName="sys_front_locale_u1"/>
     </changeSet>
 
+    <changeSet id="201903180928001" author="shaofeng.zheng">
+        <dropNotNullConstraint tableName="sys_code_value_temp" columnName="value" columnDataType="varchar(100)"></dropNotNullConstraint>
+    </changeSet>
+
+
+
+    <changeSet id="201903221333001" author="bin.xie">
+        <dropColumn tableName="sys_interface_request" columnName="union_flag"/>
+        <dropColumn tableName="sys_interface_request" columnName="default_value"/>
+        <dropColumn tableName="sys_interface_response" columnName="enabled_search"/>
+    </changeSet>
+
+    <changeSet id="201903221342001" author="bin.xie">
+        <dropColumn tableName="sys_lov" columnName="value_field"/>
+        <dropColumn tableName="sys_lov" columnName="desc_field"/>
+        <dropColumn tableName="sys_lov" columnName="id_field"/>
+        <addColumn tableName="sys_lov">
+            <column name="request_column" type="varchar(4000)" remarks="查询字段"/>
+            <column name="response_column" type="varchar(4000)" remarks="展示字段"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903261649001" author="bin.xie">
+        <addColumn tableName="sys_lov">
+            <column name="remarks" type="varchar(4000)" remarks="描述"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903271139001" author="bin.xie">
+        <addColumn tableName="sys_user">
+            <column name="client_id" type="varchar(255)" remarks="oauth客户端id"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903281753001" author="bin.xie">
+        <comment>初始化一个平台管理员</comment>
+        <sqlFile path="classpath:db/liquibase/base/v1.0.0/init/init.sql" encoding="UTF-8"/>
+    </changeSet>
 </databaseChangeLog>

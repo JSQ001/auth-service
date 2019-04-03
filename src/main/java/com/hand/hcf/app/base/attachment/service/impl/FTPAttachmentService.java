@@ -436,13 +436,15 @@ public class FTPAttachmentService implements IAttachment {
             }
             outputStream.flush();
         } catch (SftpException e) {
-            new BizException("sftp exception","sftp exception " + e.getMessage());
+            throw new BizException("sftp exception","sftp exception " + e.getMessage());
         } catch (IOException e) {
-            new BizException("io exception","io exception " + e.getMessage());
+            throw new BizException("io exception","io exception " + e.getMessage());
         }finally {
             sftpUtil.logout();
             try {
-                inputStream.close();
+                if(inputStream!=null) {
+                    inputStream.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

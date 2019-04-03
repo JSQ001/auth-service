@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.application.persistence.ApplicationTypeAssignTypeMapper">
+
+    <select id="queryExpenseTypeByApplicationTypeId" resultMap="ExpenseTypeMap">
+        select v.*, #{language} as language from exp_application_type_exp_type t, exp_expense_type v
+            where t.application_type_id = #{applicationTypeId}
+              and t.expense_type_id = v.id
+              and v.enabled = 1
+              and v.deleted = 0
+              <if test="categoryId != null">
+                  and v.type_category_id = #{categoryId}
+              </if>
+              <if test="expenseTypeName != null and expenseTypeName !=''">
+                  and v.name like concat(concat('%',#{expenseTypeName}),'%')
+              </if>
+            order by v.code asc
+
+    </select>
+
+
+    <select id="queryAllExpenseBySetOfBooksId" resultMap="ExpenseTypeMap">
+        select v.*, #{language} as language  from exp_expense_type v
+        where v.set_of_books_id = #{setOfBooksId}
+        and v.enabled = 1
+        and v.deleted = 0
+        <if test="typeFlag != null">
+            and v.type_flag = #{typeFlag}
+        </if>
+        <if test="id != null">
+            and v.id = #{id}
+        </if>
+        <if test="categoryId != null">
+            and v.type_category_id = #{categoryId}
+        </if>
+        <if test="expenseTypeName != null and expenseTypeName !=''">
+            and v.name like concat(concat('%',#{expenseTypeName}),'%')
+        </if>
+        order by v.code asc
+
+    </select>
+    <select id="listByApplicationTypeId"
+            resultType="com.hand.hcf.app.expense.application.domain.ApplicationTypeAssignType">
+
+        select t.*,coalesce(i18n.name,v.name) as expenseTypeName
+        from exp_application_type_exp_type t, exp_expense_type v
+        left join exp_expense_type_i18n i18n on v.id = i18n.id and lower(i18n.language) = lower(#{language})
+        where t.application_type_id = #{applicationTypeId}
+        and t.expense_type_id = v.id
+        and v.deleted = 0
+        order by t.id asc
+    </select>
+
+    <resultMap id="ExpenseTypeMap" type="com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO">
+        <id column="id" property="id" />
+        <result column="name" property="name"/>
+        <result property="iconUrl" column="icon_url"/>
+        <result property="code" column="code"/>
+        <result property="setOfBooksId" column="set_of_books_id"/>
+        <result property="typeCategoryId" column="type_category_id"/>
+        <result property="entryMode" column="entry_mode"/>
+        <result property="priceUnit" column="price_unit"/>
+        <result property="enabled" column="enabled"/>
+        <result property="sequence" column="sequence"/>
+        <result property="iconName" column="icon_name"/>
+        <collection property="fieldList" column="{typeId=id,language=language}"
+                    select="com.hand.hcf.app.expense.type.persistence.ExpenseFieldMapper.listFieldByTypeId"/>
+    </resultMap>
+</mapper>

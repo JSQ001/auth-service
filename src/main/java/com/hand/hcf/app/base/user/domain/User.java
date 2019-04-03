@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hand.hcf.app.base.user.enums.CreatedTypeEnum;
 import com.hand.hcf.app.base.user.enums.UserLockedEnum;
 import com.hand.hcf.app.base.user.enums.UserStatusEnum;
 import com.hand.hcf.core.domain.DomainLogic;
@@ -80,6 +81,8 @@ public class User extends DomainLogic implements Serializable {
     private String deviceVerificationStatus;
 
     private Boolean resetPassword;
+
+    private CreatedTypeEnum createdType;
 
     @Override
     public boolean equals(Object o) {

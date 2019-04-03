@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.application.persistence.ApplicationHeaderMapper">
+
+    <select id="getHeaderWebDTOById" resultMap="WebDTOResult">
+        select t.*, #{headerFlag} as header_flag from exp_application_header t where t.id = #{id}
+
+    </select>
+
+    <select id="listByCondition" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        select t.*, eat.type_name from exp_application_header t, exp_application_type eat
+        where t.type_id = eat.id
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+    </select>
+    <select id="getHeaderDetailById" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        select t.*, eat.type_name from exp_application_header t, exp_application_type eat
+        where t.type_id = eat.id
+          and t.id = #{id}
+    </select>
+
+    <select id="getHeaderByOid" resultType="com.hand.hcf.app.expense.application.domain.ApplicationHeader">
+        select * from exp_application_header where document_oid = #{documentOid}
+    </select>
+
+    <select id="getHeaderByDocumentOid" parameterType="string" resultType="com.hand.hcf.app.common.co.ApplicationHeaderCO">
+        select * from exp_application_header where document_oid = #{documentOid}
+    </select>
+
+    <select id="getHeaderByDocumentId"  resultType="com.hand.hcf.app.common.co.ApplicationHeaderCO">
+        select * from exp_application_header where id = #{documentId}
+    </select>
+
+
+    <select id="listConditionByWorkFlow" resultType="com.hand.hcf.app.common.co.ApplicationHeaderCO">
+        select t.*, eat.type_name from exp_application_header t, exp_application_type eat
+        where t.type_id = eat.id
+        <if test="companyId != null">
+            AND t.company_id = #{companyId}
+        </if>
+        <if test="typeId != null">
+            AND t.type_id = #{typeId}
+        </if>
+        <if test="currencyCode != null and currencyCode !=''">
+            AND t.currency_code = #{currencyCode}
+        </if>
+        <if test="amountFrom != null">
+            AND t.amount <![CDATA[ >= ]]> #{amountFrom}
+        </if>
+        <if test="amountTo != null">
+            AND t.amount <![CDATA[ <= ]]> #{amountTo}
+        </if>
+        <if test="submitDateFrom != null">
+            AND t.requisition_date <![CDATA[ >= ]]> #{submitDateFrom}
+        </if>
+        <if test="submitDateTo != null">
+            AND t.requisition_date <![CDATA[ < ]]> #{submitDateTo}
+        </if>
+        <if test="businessCode != null and businessCode !=''">
+            AND t.document_number like concat(concat('%',#{businessCode}),'%')
+        </if>
+        <if test="description != null and description !=''">
+            AND t.remarks like concat(concat('%',#{description}),'%')
+        </if>
+
+        order by t.document_number asc
+    </select>
+
+    <select id="getCountByCondition" resultType="java.lang.Integer">
+        select
+          count(0)
+        from
+            exp_application_header t,
+            exp_application_type eat
+        where
+            t.type_id = eat.id
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+    </select>
+
+
+    <!-- webDTO结果集映射-->
+    <resultMap id="WebDTOResult" type="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        <id column="id" property="id" />
+        <result column="document_number" property="documentNumber" />
+        <result column="type_id" property="typeId" />
+        <result column="requisition_date" property="requisitionDate" />
+        <result column="employee_id" property="employeeId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="amount" property="amount" />
+        <result column="functional_amount" property="functionalAmount" />
+        <result column="remarks" property="remarks" />
+        <result column="document_oid" property="documentOid" />
+        <result column="form_oid" property="formOid" />
+        <result column="status" property="status" />
+        <result column="document_type" property="documentType" />
+        <result column="company_id" property="companyId" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="department_id" property="departmentId" />
+        <result column="exchange_rate" property="exchangeRate" />
+        <result column="contract_header_id" property="contractHeaderId" />
+        <result column="budget_flag" property="budgetFlag" />
+        <result column="associate_contract" property="associateContract" />
+        <result column="require_input" property="requireInput" />
+        <result column="budget_status" property="budgetStatus" />
+        <result column="budget_error_message" property="budgetErrorMessage" />
+        <result column="closed_flag" property="closedFlag" />
+        <result column="version_number" property="versionNumber" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <result column="attachment_oid" property="attachmentOid"/>
+        <result column="application_oid" property="applicationOid"/>
+        <result column="department_oid" property="departmentOid" />
+        <result column="closed_flag" property="closedFlag" />
+        <result column="closed_amount" property="closedAmount" />
+        <result column="closed_functional_amount" property="closedFunctionalAmount" />
+        <collection property="dimensions" column="{headerFlag=header_flag, headerId=id,documentType=document_type}"
+                    select="com.hand.hcf.app.expense.type.persistence.ExpenseDimensionMapper.listDimensionByHeaderIdAndType"/>
+    </resultMap>
+
+    <select id="listByFinancial" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        select
+            t.*,
+            eat.type_name
+        from
+            exp_application_header t,
+            exp_application_type eat
+        where
+            t.type_id = eat.id
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+    </select>
+    <select id="listAssociateInfo" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationAssociateDTO">
+        select
+            rh.id as reportId,
+            rh.requisition_number as reportNumber,
+            rh.audit_flag as auditFlag,
+            sum(v.amount) as amount,
+            v.source_doc_id as applicationHeaderId,
+            v.source_doc_line_id as  applicationLineId
+        from
+            exp_requisition_release v,
+            exp_report_header rh
+        where
+            v.source_doc_category = 'EXP_REQUISITION'
+            and v.related_doc_id = rh.id
+            and v.source_doc_id in
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            and v.related_doc_category = 'PUBLIC_REPORT'
+            and rh.status in (1002, 1004)
+            group by rh.id, rh.requisition_number, rh.audit_flag, v.source_doc_id, v.source_doc_line_id
+    </select>
+
+    <resultMap id="ApplicationAssociateResult" type="com.hand.hcf.app.expense.application.web.dto.ApplicationAssociatePrepaymentDTO">
+        <id column="id" property="applicationId" />
+        <result column="document_number" property="applicationNumber" />
+        <result column="type_name" property="applicationType" />
+        <result column="requisition_date" property="requisitionDate" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="amount" property="amount" />
+        <result column="associatedAmount" property="associatedAmount" />
+        <result column="remarks" property="remarks" />
+    </resultMap>
+
+    <select id="listInfoByCondition" resultMap="ApplicationAssociateResult">
+        select t.id,
+        t.document_number,
+        t2.type_name,
+        t.requisition_date,
+        t.currency_code,
+        t.amount,
+        (SELECT case when sum(err.amount) > 0 then sum(err.amount) else 0 end
+        FROM  exp_prepayment_req_release err
+        WHERE err.source_doc_category = #{sourceDocumentCategory}
+        AND   err.source_doc_id = t.id) as associatedAmount,
+        t.remarks
+        from   exp_application_header t,exp_application_type t2
+        where  1 = 1
+        and    t.type_id = t2.id
+        and    t.closed_flag = 1001
+        and    t.currency_code = #{currencyCode}
+        <if test="typeId != null and typeId.size > 0">
+            and t.type_id in
+            <foreach item="item" index="index" collection="typeId" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="status != null">
+            and t.status = #{status}
+        </if>
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+        <if test="applicationNumber != null">
+            AND t.document_number LIKE  concat(concat('%',#{applicationNumber}),'%')
+        </if>
+        <if test="applicationType != null">
+            and t2.type_name LIKE  concat(concat('%',#{applicationType}),'%')
+        </if>
+        and t.amount > (SELECT case when sum(err.amount) > 0 then sum(err.amount) else 0 end
+        FROM  exp_prepayment_req_release err
+        WHERE err.source_doc_category = #{sourceDocumentCategory}
+        AND   err.source_doc_id = t.id)
+        order by t.document_number desc
+    </select>
+
+    <!--报账单关联申请单-->
+    <select id="selectRelateExpenseReportApplications" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderAbbreviateDTO" parameterType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderAbbreviateDTO">
+        SELECT
+        t.id,
+        t.type_id typeId,
+        t.document_number documentNumber,
+        t.requisition_date requisition_date,
+        t.currency_code currencyCode,
+        t.amount amount,
+        t.functional_amount functionalAmount,
+        t.remarks remarks,
+        t.employee_id employeeId
+        FROM
+        exp_application_header t
+        <where>
+            EXISTS (
+            SELECT
+            1
+            FROM
+            exp_application_line_dist m
+            WHERE
+            m.header_id = t.id
+            AND m.currency_code = #{currencyCode}
+            and m.expense_type_id = #{expenseTypeId}
+            <!-- 分摊行金额 > 已报销金额 -->
+            AND m.amount >
+            (SELECT
+            case when sum(err.amount) is not null then sum(err.amount) else 0 end
+            FROM
+            exp_requisition_release err
+            WHERE
+            err.source_doc_category = #{sourceDocumentCategory}
+            AND err.source_doc_dist_id = m.id)
+            )
+            <if test="headerCompanyId != null">
+                and t.company_id = #{headerCompanyId}
+            </if>
+            <if test="headerDepartmentId != null">
+                and t.department_id = #{headerDepartmentId}
+            </if>
+            <if test="documentNumber != null">
+                AND t.document_number LIKE  concat('%',#{documentNumber},'%')
+            </if>
+            <if test="employeeId != null">
+                and t.employee_id = #{employeeId}
+            </if>
+            <if test="status != null">
+                and t.status = #{status}
+            </if>
+        </where>
+    </select>
+
+
+	 <select id="listByfincancies" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationFinancRequsetDTO">
+        select t.*, eat.type_name, ((select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id)) associatedAmount
+                  from exp_application_header t, exp_application_type eat
+        <where>
+            t.type_id = eat.id
+            <if test="ew != null">
+                ${ew.sqlSegment}
+            </if>
+            <if test="associatedAmountFrom != null">
+                and (select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id) &gt; #{associatedAmountFrom}
+            </if>
+            <if test="associatedAmountTo != null">
+                and   (select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id)  &lt; #{associatedAmountTo}
+            </if>
+            <if test="relevanceAmountFrom != null">
+                and  t.amount-(select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id) &gt; #{relevanceAmountFrom}
+            </if>
+            <if test="relevanceAmountTo != null">
+                and t.amount-(select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id) &lt; #{relevanceAmountTo}
+            </if>
+        </where>
+    </select>
+
+
+    <resultMap id="ApplicationAmountResult" type="com.hand.hcf.app.common.co.ApplicationAmountCO">
+        <result column="currency_code" property="currencyCode" />
+        <result column="amount" property="amount" />
+        <result column="related_amount" property="relatedAmount" />
+    </resultMap>
+
+    <select id="getApplicationAmountById" resultMap="ApplicationAmountResult">
+        select t.currency_code,
+               t.amount,
+               (SELECT case when sum(err.amount) > 0 then sum(err.amount) else 0 end
+                FROM  exp_prepayment_req_release err
+                WHERE err.source_doc_id = t.id
+                and   err.currency_code = t.currency_code) as related_amount
+        from   exp_application_header t
+        where  t.id = #{applicationId}
+    </select>
+
+    <select id="getPrepaymentBydocumentNumber" resultType="com.hand.hcf.app.common.co.PrepaymentRequisitionReleaseCO">
+          select err.*
+          from  exp_prepayment_req_release err ,exp_application_header h
+            h.document_number = #{documentNumber}
+            and h.id = err.source_doc_id
+            <if test="ew!=null">
+                ${ew.sqlSegment}
+            </if>
+
+    </select>
+    <select id="listCloseByCondition"
+            resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        SELECT
+            t.*,
+            (t.amount - coalesce(t.closed_amount,
+            0) - t.associateAmount) AS canCloseAmount,
+            eat.type_name
+        FROM
+            (SELECT
+                t1.*,
+                (SELECT
+                    coalesce(SUM(v.amount),
+                    0) AS associateamount
+                FROM
+                    exp_requisition_release v,
+                    exp_report_header rh
+                WHERE
+                    v.source_doc_category = 'EXP_REQUISITION'
+                    AND v.related_doc_id = rh.id
+                    AND v.source_doc_id = t1.id
+                    AND v.related_doc_category = 'PUBLIC_REPORT'
+                    AND rh.audit_flag = 'Y') AS associateAmount
+            FROM
+                exp_application_header t1
+            ) t, exp_application_type eat
+        WHERE
+            t.type_id = eat.id
+            <if test="ew != null">
+                ${ew.sqlSegment}
+            </if>
+    </select>
+</mapper>

@@ -20,7 +20,7 @@
         <if test="includeList != null and includeList != '' " >
             and l.code IN ( #{includeList} )
         </if>
-        ORDER BY country
+        ORDER BY nlssort(country,'NLS_SORT=SCHINESE_PINYIN_M')
     </select>
 
     <select id="getLocalizationStateByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
@@ -132,7 +132,7 @@
         </if>
     </select>
     <select id="getLocalizationCityByCountry" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
-        SELECT l.code,l.type,ld.country,ld.state,va.alias city
+        SELECT  l.id, l.code,l.type,ld.country,ld.state,va.alias city
                      FROM sys_location l
                      LEFT JOIN sys_location_detail ld ON l.code = ld.code
                     LEFT JOIN sys_vendor_alias va ON l.code = va.code
@@ -141,6 +141,10 @@
                      AND va.vendor_type = #{vendorType}
                      AND ld.language = #{language}
                      AND va.language = #{language}
+                     <if test="city != null and city != ''">
+                      AND   va.alias like concat(concat('%',#{city}),'%')
+                     </if>
+        order by l.code
     </select>
     <select id="selectLocalizationDistrictByCountry" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
         SELECT l.code,l.type,ld.country,ld.state,ld.city,va.alias district
@@ -163,5 +167,24 @@
         WHERE l.type = 'COUNTRY'
         AND ld.language = #{language}
         AND l.code LIKE concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+    </select>
+
+    <select id="listCityByIds" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT  l.id, l.code,l.type,ld.country,ld.state,va.alias city
+        FROM sys_location l
+        LEFT JOIN sys_location_detail ld ON l.code = ld.code
+        LEFT JOIN sys_vendor_alias va ON l.code = va.code
+        WHERE l.country_code = SUBSTR( #{code}, 1, 3)
+        AND l.type = 'CITY'
+        AND va.vendor_type = #{vendorType}
+        AND ld.language = #{language}
+        AND va.language = #{language}
+            <if test="cityIds != null and cityIds.size() > 0">
+                AND l.id IN
+                <foreach collection="cityIds" item="cityId" open="(" separator="," close=")">
+                    #{cityId}
+                </foreach>
+            </if>
+        order by l.code
     </select>
 </mapper>

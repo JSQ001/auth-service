@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.book.persistence.ExpenseBookMapper">
+
+    <select id="getInvoiceByBookId" resultType="com.hand.hcf.app.expense.invoice.domain.InvoiceHead" parameterType="long">
+        SELECT ih.*
+          FROM invoice_line_expence ile
+         INNER JOIN invoice_line_dist ild
+            ON ild.id = ile.invoice_dist_id
+         INNER JOIN invoice_line il
+            ON il.id = ild.invoice_line_id
+         INNER JOIN invoice_head ih
+            ON il.invoice_head_id = ih.id
+         WHERE ile.expense_book_id = #{expenseBookId}
+    </select>
+
+    <select id="pageExpenseBookByCond" resultType="com.hand.hcf.app.expense.book.domain.ExpenseBook">
+        select *
+        from exp_expense_book eb
+        <where>
+            ${ew.sqlSegment}
+            and not exists(select 1 from exp_report_line el where eb.id = el.expense_book_id)
+        </where>
+    </select>
+</mapper>

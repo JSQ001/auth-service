@@ -55,7 +55,7 @@ public class CodingRuleResource {
      * @return ResponseEntity
      */
     @DeleteMapping("/{id}")
-    ResponseEntity deleteCodingRule(@PathVariable Long id) {
+    public ResponseEntity deleteCodingRule(@PathVariable Long id) {
         CodingRule codingRule = codingRuleService.selectById(id);
         codingRuleService.deleteCodingRule(codingRule);
         return ResponseEntity.ok().build();

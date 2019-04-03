@@ -698,7 +698,34 @@
         </createTable>
     </changeSet>
 
-
+    <changeSet id="20190110142939121" author="admin">
+        <createTable tableName="sys_carousel" remarks="公告信息表">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel"/>
+            </column>
+            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
+            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="carousel_oid" type="varchar(36)" remarks="公告信息oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_oid" type="varchar(36)" remarks="公司oid"/>
+            <column name="attachment_oid" type="varchar(36)" remarks="附件oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(256)" remarks="标题"/>
+            <column name="content" type="longtext" remarks="内容"/>
+            <column name="preferred_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP" remarks="提出日期"/>
+            <column name="out_link_flag" type="bit" defaultValue="0" remarks="是否外部链接"/>
+            <column name="tenant_id" type="bigint" remarks="租户Id"/>
+            <column name="source" type="bigint" remarks="项来源Id"/>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="created_by" type="bigint" remarks="创建人"/>
+            <column name="last_updated_by" type="bigint" remarks="最后修改人"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
     <changeSet id="20190110142938107" author="admin">
         <createTable tableName="sys_code_i18n" remarks="系统代码多语言">
@@ -2247,6 +2274,31 @@
             <column name="to_user" type="varchar(255)" remarks=""/>
         </createTable>
     </changeSet>
+    <changeSet id="20190110142942315" author="admin">
+        <createTable tableName="sys_carousel_template" remarks="公告图片表">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel_template"/>
+            </column>
+            <column name="attachment_oid" type="varchar(36)" remarks="附件oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_name" type="varchar(300)" remarks="图片名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_url" type="varchar(500)" remarks="图片链接"/>
+            <column name="type" type="varchar(20)" remarks="图片类型"/>
+            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
+            <column name="deleted" type="bit" defaultValue="0" remarks="是否删除 1：删除 0：未删除"/>
+            <column name="created_by" type="bigint" remarks="创建人"/>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_updated_by" type="bigint" remarks="最后更新人"/>
+            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 
 
     <changeSet id="20190110142942304" author="admin">
@@ -2273,7 +2325,28 @@
 
 
 
-
+    <changeSet id="20190110142942314" author="admin">
+        <createTable tableName="sys_carousel_deploy" remarks="公告信息分配表">
+            <column name="id" type="bigint" remarks="">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel_deploy"/>
+            </column>
+            <column name="carousel_id" type="bigint" remarks="公告信息ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deploy_flag" type="bit" defaultValue="1" remarks="是否分配 1:分配 0：未分配"/>
+            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
+            <column name="created_by" type="bigint" remarks="创建人"/>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_updated_by" type="bigint" remarks="最后更新人"/>
+            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
     <changeSet id="20190110141816228" author="admin">
         <addUniqueConstraint tableName="sys_data_auth_table_property" columnNames="data_type,table_name"

@@ -6,12 +6,15 @@ import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.code.service.SysCodeService;
+import com.hand.hcf.app.base.dataAuthority.domain.DataAuthority;
+import com.hand.hcf.app.base.dataAuthority.service.DataAuthorityService;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
 import com.hand.hcf.app.base.tenant.dto.TenantRegisterDTO;
 import com.hand.hcf.app.base.tenant.persistence.TenantMapper;
 import com.hand.hcf.app.base.user.domain.User;
+import com.hand.hcf.app.base.user.enums.CreatedTypeEnum;
 import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
@@ -73,6 +76,8 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private RoleFunctionService roleFunctionService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private DataAuthorityService dataAuthorityService;
 
     /**
      * save tenant
@@ -276,7 +281,8 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
 
         // 初始化用户
         User user = initUser(register);
-
+        // 初始化数据权限
+        dataAuthorityService.initDataAuthorityByTenant(tenant);
         // 初始化角色
         Role role = roleService.initRoleByTenant(tenant);
         // 初始化角色菜单
@@ -310,6 +316,7 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         }
         String passwordHash = passwordEncoder.encode(register.getPassword());
         User user = new User();
+        user.setCreatedType(CreatedTypeEnum.INIT_TENANT);
         user.setLogin(register.getLogin());
         user.setTenantId(register.getId());
         user.setUserOid(UUID.randomUUID());

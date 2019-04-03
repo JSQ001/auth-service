@@ -67,4 +67,39 @@
         order by c.sequence_number asc
     </select>
 
+    <select id="listCanAssignFunction" resultType="com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO">
+        SELECT
+            b.content_id as contentId,
+            c.content_name as contentName,
+            c.content_router as contentRouter,
+            c.parent_id as parentId,
+            c.sequence_number as contentSequenceNumber,
+            c.has_son_content as hasSonContent,
+            a.id as functionId,
+            a.function_name as functionName,
+            a.function_router as functionRouter,
+            a.param as param,
+            a.sequence_number as functionSequenceNumber,
+            a.page_id as pageId,
+            a.function_icon as functionIcon,
+            a.application_id as applicationId
+        FROM
+            sys_function_list a
+        LEFT JOIN
+            sys_content_function_rel b
+                ON a.id = b.function_id
+        LEFT JOIN
+            sys_content_list c
+                ON b.content_id = c.id
+                AND c.deleted = 0
+        WHERE
+            a.deleted = 0
+        <if test="roleId != 0">
+            and lower(coalesce(a.param, '0')) != 'system'
+        </if>
+        order by
+            c.sequence_number,
+            a.sequence_number
+    </select>
+
 </mapper>

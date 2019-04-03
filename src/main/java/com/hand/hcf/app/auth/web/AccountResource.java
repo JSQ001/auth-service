@@ -2,9 +2,11 @@
 
 package com.hand.hcf.app.auth.web;
 
+import com.hand.hcf.app.auth.service.AuthUserService;
 import com.hand.hcf.core.exception.core.UnauthenticatedException;
 import com.hand.hcf.core.security.domain.Authority;
 import com.hand.hcf.core.security.domain.PrincipalLite;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 public class AccountResource {
+    @Autowired
+    private AuthUserService userService;
     @RequestMapping(value = "/check_token", method = RequestMethod.GET)
     public PrincipalLite checkToken() {
         if (SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2Authentication) {
@@ -27,9 +31,13 @@ public class AccountResource {
                 }
                 return (PrincipalLite) auth2Authentication.getPrincipal();
             } else {
-                PrincipalLite principalLite = new PrincipalLite();
-                principalLite.setAuthorities(auth2Authentication.getAuthorities().stream().map(right -> new Authority(right.getAuthority())).collect(Collectors.toSet()));
+                String clientId = auth2Authentication.getOAuth2Request().getClientId();
+                PrincipalLite principalLite = userService.getUserByOauthClientId(clientId);
+                if(null == principalLite){
+                    principalLite = new PrincipalLite();
+                }
                 principalLite.setLogin((String) auth2Authentication.getPrincipal());
+                principalLite.setAuthorities(auth2Authentication.getAuthorities().stream().map(right -> new Authority(right.getAuthority())).collect(Collectors.toSet()));
                 return principalLite;
             }
         } else {

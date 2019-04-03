@@ -472,4 +472,9 @@ public class LocationControllerImpl {
         headers.add("Link", "/api/localization/query/state");
         return new ResponseEntity(pages.getContent(), headers, HttpStatus.OK);
     }
+
+    public List<LocationDTO> listCityByIds(@RequestBody List<Long> cityIds,
+                                           @RequestParam(value = "vendorType", defaultValue = "standard") String vendorType) {
+        return localizationDTOService.listCityByIds(cityIds,vendorType);
+    }
 }

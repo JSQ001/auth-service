@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.system.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.FrontLocale;
-import com.hand.hcf.app.base.system.dto.FrontLocaleDTO;
+import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.service.FrontLocaleService;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
@@ -138,14 +138,14 @@ public class FrontLocaleController {
      * @throws URISyntaxException
      */
     @GetMapping("/query/other/front/locale/by/cond")
-    public ResponseEntity<List<FrontLocaleDTO>> getOtherFrontLocaleByCond(
+    public ResponseEntity<List<LocaleDTO>> getOtherFrontLocaleByCond(
             @RequestParam(value = "applicationId") Long applicationId,
             @RequestParam(value = "sourceLanguage") String sourceLanguage,
             @RequestParam(value = "targetLanguage") String targetLanguage,
             @RequestParam(value = "keyCode",required = false) String keyCode,
             Pageable pageable) throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
-        List<FrontLocaleDTO> result = frontLocaleService.getOtherFrontLocaleByCond(applicationId,sourceLanguage,targetLanguage,keyCode,page);
+        List<LocaleDTO> result = frontLocaleService.getOtherFrontLocaleByCond(applicationId,sourceLanguage,targetLanguage,keyCode,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
     }

@@ -37,6 +37,7 @@ public interface RespCode {
     String SYS_GENDER_MAN = "sys.gender.man";//男
     String SYS_GENDER_WOMAN = "sys.gender.women";//女
     String SYS_GENDER_UNKNOWN = "sys.gender.unknown";//未知
+    String SYS_REQUEST_RESOURCE_COULD_NOT_BE_FOUND="SYS_REQUEST_RESOURCE_COULD_NOT_BE_FOUND";//找不到请求的资源！
 
     String CODE_CANT_CHINESE="6057001";//编码不能包含汉字
     String CODE_CANT_ILLEGAL="6057002";//编码不能包含非法字符
@@ -400,4 +401,5 @@ public interface RespCode {
     //参数定义
     String PARAMETER_VALUES_NOT_EXIST="PARAMETER_VALUES_NOT_EXIST";//当前参数值不存在!
     String PARAMETER_SETTING_NOT_EXIST="PARAMETER_SETTING_NOT_EXIST";//当前参数明细不存在!
+    String PARAMETER_NOT_EXIST="PARAMETER_NOT_EXIST";//当前参数不存在!
 }

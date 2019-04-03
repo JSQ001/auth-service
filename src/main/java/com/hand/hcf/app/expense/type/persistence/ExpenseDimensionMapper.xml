@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.type.persistence.ExpenseDimensionMapper">
+
+    <select id="listDimensionByHeaderIdAndType" resultType="com.hand.hcf.app.expense.type.domain.ExpenseDimension">
+        select * from exp_dimension ed
+        where ed.header_id = #{headerId}
+        and ed.document_type = #{documentType}
+        <if test="headerFlag != null">
+            and ed.header_flag = #{headerFlag}
+        </if>
+        order by ed.sequence asc
+    </select>
+</mapper>

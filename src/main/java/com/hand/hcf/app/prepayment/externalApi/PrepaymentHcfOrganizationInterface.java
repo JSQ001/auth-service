@@ -2,27 +2,26 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
-import com.hand.hcf.app.base.org.OrderNumberCO;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.*;
+import org.apache.commons.lang3.StringUtils;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.util.LoginInformationUtil;
 import ma.glasnost.orika.MapperFacade;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.springframework.util.CollectionUtils;
 
 //import com.hand.hcf.app.application.ApplicationService;
 //import com.hand.hcf.app.application.dto.ApplicationDTO;
@@ -425,18 +424,11 @@ public class PrepaymentHcfOrganizationInterface {
      * @param page
      * @return
      */
-    public Page<ContactCO> pageConditionNameAndIgnoreIds(String employeeCode,
-                                                         String fullName,
-                                                         String keyWord,
-                                                         List<Long> ignoreIds,
-                                                         Page page) {
-        //bo.liu 修改三方接口 20190329
-        //return userClient.pageConditionNameAndIgnoreIds(employeeCode, fullName, keyWord, ignoreIds, page);
-        return userClient.pageConditionNameAndIgnoreIds(employeeCode,
-                fullName,
-                keyWord,
-                ignoreIds == null ? new ArrayList<>() : ignoreIds,
-                page.getCurrent() - 1,
-                page.getSize());
-    }
+//    public Page<ContactCO> pageConditionNameAndIgnoreIds(String employeeCode,
+//                                                         String fullName,
+//                                                         String keyWord,
+//                                                         List<Long> ignoreIds,
+//                                                         Page page) {
+//        return userClient.pageConditionNameAndIgnoreIds(employeeCode, fullName, keyWord, ignoreIds, page);
+//    }
 }

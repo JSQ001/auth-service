@@ -16,7 +16,7 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
 
 
     // 根据用户ID，返回用户的所有角色已分配的菜单
-    List<Menu> getMenusByUserId(@Param("userId") Long userId, @Param("now") ZonedDateTime now);
+    List<Menu> getMenusByUserId(@Param("userId") Long userId,@Param("now") ZonedDateTime now);
 
     //根据角色ID，菜单ID集合，删除角色与菜单ID集合的关联 物理删除
     void deleteRoleMenuByRoleIdAndMenuIds(@Param("roleId") Long roleId, @Param("menuIds") List<Long> menuIds);
@@ -31,5 +31,5 @@ public interface RoleMenuMapper extends BaseMapper<RoleMenu> {
     List<RoleAssignMenuButtonDTO> getAllMenuAndButton();
 
     //根据菜单ID,角色ID，判断是否有其子菜单分配了该角色的菜单权限，根据判断的结果，去删除没有子菜单但又分配了菜单权限的菜单
-    Integer hasAssignChildrenRoleMenu(@Param("menuId") Long menuId, @Param("roleId") Long roleId);
+    Integer hasAssignChildrenRoleMenu(@Param("menuId") Long menuId,@Param("roleId") Long roleId);
 }

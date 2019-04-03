@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.contact.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.domain.ContactCard;
 import com.hand.hcf.app.mdata.contact.domain.ContactCardTempDomain;

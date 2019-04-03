@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.input.persistence.ExpInputTaxDistMapper">
+    <select id="listDistByLineId" resultType="com.hand.hcf.app.expense.input.dto.ExpInputForReportDistDTO">
+select * from (
+SELECT
+  null id,
+	#{inputTaxLineId} inputTaxLineId,
+	id EXP_REPORT_DIST_ID,
+	'N' selectFlag,
+	t.TENANT_ID,
+	t.SET_OF_BOOKS_ID,
+	t.COMPANY_ID,
+	t.DEPARTMENT_ID,
+	t.RESPONSIBILITY_CENTER_ID,
+	t.AMOUNT BASE_AMOUNT,
+	t.FUNCTION_AMOUNT BASE_FUNCTION_AMOUNT,
+	t.CURRENCY_CODE,
+	t.EXCHANGE_RATE rate
+FROM
+	exp_report_dist t
+WHERE
+  t.EXP_REPORT_LINE_ID = #{expReportLineId}
+	t.id NOT IN (
+SELECT
+	r1.EXP_REPORT_DIST_ID
+FROM
+	EXP_INPUT_TAX_DIST r1
+WHERE
+	r1.INPUT_TAX_LINE_ID = #{inputTaxLineId})
+	union all
+	select
+	id,
+	#{inputTaxLineId} inputTaxLineId,
+	EXP_REPORT_DIST_ID,
+	'Y' selectFlag,
+	t.TENANT_ID,
+	t.SET_OF_BOOKS_ID,
+	t.COMPANY_ID,
+	t.DEPARTMENT_ID,
+	t.RESPONSIBILITY_CENTER_ID,
+	t.BASE_AMOUNT,
+	t.BASE_FUNCTION_AMOUNT,
+	t.CURRENCY_CODE,
+	t.RATE
+	from EXP_INPUT_TAX_DIST t
+	where t.inputTaxLineId= #{inputTaxLineId})
+    </select>
+    <select id="getSumAmount" resultType="com.hand.hcf.app.expense.input.dto.ExpInputTaxSumAmountDTO">
+		select
+	SUM(t.BASE_AMOUNT),
+	SUM(t.BASE_FUNCTION_AMOUNT),
+	SUM(t.AMOUNT),
+	SUM(T.FUNCTION_AMOUNT)
+	 from EXP_INPUT_TAX_DIST t where t.input_tax_line_id= #{inputTaxLineId}
+	</select>
+</mapper>

@@ -3,19 +3,18 @@ package com.hand.hcf.app.base.implement.web;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.service.OrderNumberService;
-import com.hand.hcf.app.base.org.OrderNumberCO;
-import com.hand.hcf.app.base.org.SysCodeValueCO;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.common.co.OrderNumberCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.UUID;
 
 @RestController
 public class CommonControllerImpl {
@@ -23,10 +22,7 @@ public class CommonControllerImpl {
 
     @Autowired
     private SysCodeService sysCodeService;
-
-    @Autowired
-    private MessageSource exceptionSource;
-
+	
     @Autowired
     private OrderNumberService orderNumberService;
 
@@ -45,24 +41,7 @@ public class CommonControllerImpl {
         Long tenantId = LoginInformationUtil.getCurrentTenantId();
         OrderNumberCO orderNumberDTO = new OrderNumberCO();
         orderNumberDTO.setCode("0000");
-        String orderNumber = "";
-        try {
-            orderNumber = orderNumberService.getOderNumber(documentTypeCode, companyCode, operationDate, tenantId);
-        } catch (BizException b) {
-            Locale zh_cn = new Locale("zh_cn");
-            Locale en_us = Locale.ENGLISH;
-            orderNumberDTO.setCode(b.getCode());
-            OrderNumberCO.Message message_zh = new OrderNumberCO.Message();
-            OrderNumberCO.Message message_en = new OrderNumberCO.Message();
-            message_zh.setLanguage("zh_cn");
-            message_en.setLanguage("en_us");
-            message_zh.setContent(exceptionSource.getMessage(b.getCode(), null, zh_cn));
-            message_en.setContent(exceptionSource.getMessage(b.getCode(), null, en_us));
-            List<OrderNumberCO.Message> list = new ArrayList();
-            list.add(message_en);
-            list.add(message_zh);
-            orderNumberDTO.setMessage(list);
-        }
+        String orderNumber = orderNumberService.getOderNumber(documentTypeCode, companyCode, operationDate, tenantId);
         orderNumberDTO.setOrderNumber(orderNumber);
         return ResponseEntity.ok(orderNumberDTO);
     }
@@ -76,7 +55,7 @@ public class CommonControllerImpl {
      * @return
      */
     public List<SysCodeValueCO> listSysValueByCodeConditionByEnabled(@RequestParam("code") String code,
-                                                              @RequestParam(value = "enabled",required = false) Boolean enabled){
+                                                                     @RequestParam(value = "enabled",required = false) Boolean enabled){
         return sysCodeService.listSysValueByCodeConditionByEnabled(code,enabled);
     }
 
@@ -130,6 +109,12 @@ public class CommonControllerImpl {
         sysCodeValueCO.setName(sysCodeValue.getName());
         sysCodeValueCO.setValue(sysCodeValue.getValue());
         return sysCodeValueCO;
+    }
+
+    //jiu.zhao 修改三方接口 20190403
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCodeOid(UUID codeOid) {
+        List<SysCodeValueCO> sysCodeValueCOS = this.listSysValueByCodeOidConditionByEnabled(codeOid.toString(), true);
+        return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
     }
 }
 

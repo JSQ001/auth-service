@@ -80,9 +80,11 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
         }
         List<SysCodeValue> result = baseI18nService.selectListTranslatedTableInfoWithI18n(sysCodeValues.stream().map(SysCodeValue::getId).collect(Collectors.toList()), SysCodeValue.class);
         result.forEach(e -> {
-            e.setId(null);
-            e.setCodeId(sysCode.getId());
-            this.insert(e);
+            if(e != null){
+                e.setId(null);
+                e.setCodeId(sysCode.getId());
+                this.insert(e);
+            }
         });
         return true;
     }

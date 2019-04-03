@@ -33,7 +33,7 @@ public class AttchmentControllerImpl {
      * @param oidList 附件oid集合
      */
     public List<AttachmentCO> listByOids(@RequestBody List<String> oidList){
-        List<UUID> collect = oidList.stream().map(e -> UUID.fromString(e)).collect(Collectors.toList());
+        List<UUID> collect = oidList.stream().map(UUID::fromString).collect(Collectors.toList());
         return attachmentService.findByAttachmentOids(collect);
     }
 
@@ -42,7 +42,7 @@ public class AttchmentControllerImpl {
      * @param oidList 附件oid集合
      */
     public void deleteByOids(@RequestBody List<String> oidList){
-        List<UUID> collect = oidList.stream().map(e -> UUID.fromString(e)).collect(Collectors.toList());
+        List<UUID> collect = oidList.stream().map(UUID::fromString).collect(Collectors.toList());
         attachmentService.deleteByOids(collect);
     }
 
