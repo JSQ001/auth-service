@@ -12,10 +12,7 @@ import com.hand.hcf.app.expense.application.service.ApplicationLineDistService;
 import com.hand.hcf.app.expense.application.service.ExpenseRequisitionReleaseService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
-import com.hand.hcf.app.expense.common.externalApi.ContractService;
-import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
-import com.hand.hcf.app.expense.common.externalApi.PaymentService;
-import com.hand.hcf.app.expense.common.externalApi.WorkBenchService;
+import com.hand.hcf.app.expense.common.externalApi.*;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
@@ -49,6 +46,7 @@ import com.hand.hcf.core.service.MessageService;
 import com.hand.hcf.core.util.DateUtil;
 import com.hand.hcf.core.util.LoginInformationUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
+import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
@@ -59,9 +57,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -72,6 +73,7 @@ import java.util.stream.Collectors;
  * @remark
  */
 @Service
+@Slf4j
 public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderMapper,ExpenseReportHeader>{
 
     @Autowired
@@ -134,15 +136,14 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     @Autowired
     private MapperFacade mapperFacade;
 
-    //jiu.zhao 核算
-   /* @Autowired
-    private AccountingClient accountingClient;*/
-
     @Autowired
     private MessageService messageService;
 
     @Autowired
     private ApplicationLineDistService applicationLineDistService;
+
+    @Autowired
+    private AccountingService accountingService;
 
     /**
      * 保存费用类型
@@ -150,7 +151,6 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     public ExpenseReportHeader saveExpenseReportHeader(ExpenseReportHeaderDTO expenseReportHeaderDTO){
         ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
         if (!expenseReportType.getMultiPayee()) {
@@ -180,6 +180,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             expenseReportHeaderDTO.setStatus(DocumentOperationEnum.GENERATE.getId());
             expenseReportHeaderDTO.setAuditFlag("N");
             expenseReportHeaderDTO.setDocumentOid(UUID.randomUUID().toString());
+            expenseReportHeaderDTO.setJeCreationStatus(false);
         }else{
             //校验状态
             checkDocumentStatus(0, expenseReportHeaderDTO.getStatus());
@@ -615,7 +616,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param operateType 操作类型
      * @param status      单据状态
      */
-    private void checkDocumentStatus(Integer operateType, Integer status) {
+    public void checkDocumentStatus(Integer operateType, Integer status) {
         switch (operateType) {
             //点击删除
             case -1:
@@ -729,9 +730,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                             expenseReportDist.getSourceDocumentDistId());
                     BigDecimal sumAmount = expenseRequisitionReleaseBySourceDocumentMsg.stream().map(m -> m.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
                     sumAmount = sumAmount.add(expenseReportDist.getAmount());
-//                    if(applicationLineDist.getAmount().compareTo(sumAmount) < 0){
-//                        throw new BizException(RespCode.PUBLIC_REPORT_STATUS_NOT_ALLOW_MODIFY)
-//                    }
+                    if(applicationLineDist.getAmount().compareTo(sumAmount) < 0){
+                        throw new BizException(RespCode.EXPENSE_REPORT_LINE_AMOUNT_TOO_BIG);
+                    }
                     ExpenseRequisitionRelease release = new ExpenseRequisitionRelease();
                     release.setTenantId(expenseReportDist.getTenantId());
                     release.setSetOfBooksId(expenseReportDist.getSetOfBooksId());
@@ -943,11 +944,18 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             deleteContractDocumentRelations(header);
             //核销回滚
             //jiu.zhao 支付
-            //paymentService.updateWriteOffRollback(ExpenseDocumentTypeEnum.PUBLIC_REPORT.name(),header.getId(),Arrays.asList(),LoginInformationUtil.getCurrentUserId());
+			//paymentService.updateWriteOffRollback(DocumentTypeEnum.PUBLIC_REPORT.name(),header.getId(),Arrays.asList(),LoginInformationUtil.getCurrentUserId());
+            //删除凭证
+            if(BooleanUtils.isTrue(header.getJeCreationStatus())){
+                //jiu.zhao 合同
+                //accountingService.deleteExpReportGeneralLedgerJournalDataByHeaderId(header.getId());
+                header.setJeCreationStatus(false);
+                header.setJeCreationDate(null);
+            }
             header.setStatus(DocumentOperationEnum.APPROVAL_REJECT.getId());
         }
         // 保存
-        this.updateById(header);
+        this.updateAllColumnById(header);
     }
 
     private void deleteContractDocumentRelations(ExpenseReportHeader expenseReportHeader){
@@ -1033,7 +1041,24 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         reportCO.setExpenseReportTaxDistS(expenseReportTaxDistCOS);
         reportCO.setExpenseReportSchedules(expenseReportScheduleCOS);
         //jiu.zhao 核算
-        //accountingClient.saveInitializeExpReportGeneralLedgerJournalLine(reportCO);
+		/*accountingService.saveInitializeExpReportGeneralLedgerJournalLine(reportCO);
+        log.info("====核算模块创建凭证成功，开始组装核销报文===");
+        CashWriteOffAccountCO writeOffAccountCO = new CashWriteOffAccountCO();
+        writeOffAccountCO.setDocumentHeaderId(reportHeader.getId());
+        writeOffAccountCO.setDocumentType(DocumentTypeEnum.PUBLIC_REPORT.getCategory());
+        writeOffAccountCO.setTenantId(reportHeader.getTenantId());
+        writeOffAccountCO.setOperatorId(LoginInformationUtil.getCurrentUserId());
+        writeOffAccountCO.setAccountDate(expenseReportHeader.getAccountDate());
+        writeOffAccountCO.setAccountPeriod(expenseReportHeader.getAccountPeriod());
+        String writeOffResult = paymentService.saveWriteOffJournalLines(writeOffAccountCO);
+        if("NO_WRITE_OFF_DATA".equals(writeOffResult)){
+            log.info("====支付模块返回成功，没有核销，无须生成凭证===");
+        }else if ("SUCCESS".equals(writeOffResult)){
+            log.info("====创建核销凭证成功===");
+        }*/
+        reportHeader.setJeCreationStatus(true);
+        reportHeader.setJeCreationDate(ZonedDateTime.now());
+        updateById(reportHeader);
         return "SUCCESS";
     }
 

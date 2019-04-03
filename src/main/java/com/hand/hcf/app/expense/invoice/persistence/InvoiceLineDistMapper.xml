@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.invoice.persistence.InvoiceLineDistMapper">
+    <select id="getInvoiceRerpotDetail" resultType="com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO">
+      select
+        ld.id id,
+        ld.tenant_id tenantID,
+        ld.set_of_books_id setOfBooksId,
+        ld.invoice_line_id invoiceLineId,
+        ld.invoice_no invoiceNo,
+        ld.invoice_code invoiceCode,
+        ld.goods_name goodsName,
+        ld.specification_model specificationModel,
+        ld.unit unit,
+        ld.num num,
+        ld.unit_price unitPrice,
+        ld.detail_amount detailAmount,
+        ld.tax_rate taxRate,
+        ld.tax_amount taxAmount,
+        ld.currency_code currencyCode,
+        ld.exchange_rate exchangeRate,
+        ld.version_number versionNumber,
+        ld.created_date createdDate,
+        ld.created_by createdBy,
+        ld.last_updated_date lastUpdatedDate,
+        ld.last_updated_by lastUpdatedBy,
+        l.invoice_line_num invoiceLineNum,
+--         l.detail_amount detailAmount
+        l.invoice_head_id invoiceHeadId,
+        h.invoice_date invoiceDate,
+        h.invoice_amount invoiceAmount,
+        t.id invoiceTypeId,
+        t.invoice_type_name invoiceTypeName,
+        rh.requisition_number expenseNum,
+        rh.requisition_date applicationDate,
+        rh.applicant_id applicant,
+        rh.status documentState,
+        et.name costType,
+        rl.expense_amount costAmount,
+        rl.installment_deduction_flag installmentDeduction
+        from invoice_line_dist ld
+        left join invoice_line l on l.id = ld.invoice_line_id
+        left join invoice_head h on h.id = l.invoice_head_id
+        left join invoice_type t on t.id = h.invoice_type_id
+        left join invoice_line_expence le on le.invoice_dist_id = ld.id
+        left join exp_report_header rh on rh.id = le.exp_expense_head_id
+        left join exp_report_line rl on rl.id = le.exp_expense_line_id and rh.id = rl.exp_report_header_id
+        left join exp_expense_type et on et.id = rl.expense_type_id
+        <where>
+            and ld.tenant_id = #{tenantId}
+            and ld.set_of_books_id = #{setOfBooksId}
+            <if test="invoiceTypeId != null">
+                and t.id = #{invoiceTypeId}
+            </if>
+            <if test="invoiceCode != null and invoiceCode != ''">
+                and ld.invoice_code like concat(concat('%',#{invoiceCode}),'%')
+            </if>
+            <if test="invoiceNo != null and invoiceNo != ''">
+                and ld.invoice_no like concat(concat('%',#{invoiceNo}),'%')
+            </if>
+            <if test="expenseNum != null and expenseNum != ''">
+                and rh.requisition_number like concat(concat('%',#{expenseNum}),'%')
+            </if>
+            <if test="invoiceDateFrom != null">
+                and h.invoice_date &gt;= #{invoiceDateFrom}
+            </if>
+            <if test="invoiceDateTo != null">
+                and h.invoice_date &lt;= #{invoiceDateTo}
+            </if>
+            <if test="invoiceAmountFrom != null and invoiceAmountFrom != ''">
+                and h.invoice_amount &gt;= #{invoiceAmountFrom}
+            </if>
+            <if test="invoiceAmountTo != null and invoiceAmountTo != ''">
+                and h.invoice_amount &lt;= #{invoiceAmountTo}
+            </if>
+            <if test="invoiceLineNumFrom != null">
+                and l.invoice_line_num &gt;= #{invoiceLineNumFrom}
+            </if>
+            <if test="invoiceLineNumTo != null">
+                and l.invoice_line_num &lt;= #{invoiceLineNumTo}
+            </if>
+            <if test="taxRate != null">
+                and ld.tax_rate = #{taxRate}
+            </if>
+            <if test="taxAmountFrom != null and taxAmountFrom != ''">
+                and ld.tax_amount &gt;= #{taxAmountFrom}
+            </if>
+            <if test="taxAmountTo != null and taxAmountTo != ''">
+                and ld.tax_amount &lt;= #{taxAmountTo}
+            </if>
+            <if test="applyDateFrom != null">
+                and rh.requisition_date &gt;= #{applyDateFrom}
+            </if>
+            <if test="applyDateTo != null">
+                and rh.requisition_date &lt;= #{applyDateTo}
+            </if>
+            <if test="applicant != null">
+                and rh.applicant_id = #{applicant}
+            </if>
+            <if test="documentStatus != null">
+                and rh.status = #{documentStatus}
+            </if>
+            <if test="costLineNumberFrom != null">
+
+            </if>
+            <if test="costLineNumberTo != null">
+
+            </if>
+            <if test="costType != null">
+                and et.id = #{costType}
+            </if>
+            <if test="costAmountFrom != null and costAmountFrom != ''">
+                and rl.expense_amount &gt;= #{costAmountFrom}
+            </if>
+            <if test="costAmountTo != null and costAmountTo != ''">
+                and rl.expense_amount &lt;= #{costAmountTo}
+            </if>
+            <if test="installmentDeduction != null">
+                and rl.installment_deduction_flag = #{installmentDeduction}
+            </if>
+        </where>
+    </select>
+</mapper>

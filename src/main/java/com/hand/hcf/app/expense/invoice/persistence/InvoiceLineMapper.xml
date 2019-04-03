@@ -29,7 +29,7 @@
             invoice_line_expence e
             where l.id = d.invoice_line_id
               and d.id = e.invoice_dist_id
-              and e.exp_expense_line_id is not null)
+              )
           and l.invoice_head_id = #{invoiceHeadId}
     </select>
 

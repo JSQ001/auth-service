@@ -765,9 +765,15 @@ public class ApplicationTypeController {
      * @api {GET} /api/expense/application/type/users/{id} 【申请单类型】根据单据id查询有该单据权限的用户
      */
     @GetMapping("/users/{id}")
-    public List<ContactCO> listUsersByApplicationType(@PathVariable("id") Long id){
-
-        return service.listUsersByApplicationType(id);
+    public ResponseEntity listUsersByApplicationType(@PathVariable("id") Long id,
+                                                     @RequestParam(required = false) String userCode,
+                                                     @RequestParam(required = false) String userName,
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<ContactCO> result = service.listUsersByApplicationType(id, userCode, userName, queryPage);
+        HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
     /**
@@ -780,8 +786,8 @@ public class ApplicationTypeController {
      */
     @PostMapping("/query/by/cond")
     public ResponseEntity<Page<ApplicationTypeCO>> queryApplicationTypeByCond(@RequestBody ApplicationTypeForOtherCO applicationTypeForOtherCO,
-                                                                              @RequestParam(value = "page", required = false,defaultValue = "0") int page,
-                                                                              @RequestParam(value = "size", required = false,defaultValue = "10") int size) throws URISyntaxException {
+                                                       @RequestParam(value = "page", required = false,defaultValue = "0") int page,
+                                                       @RequestParam(value = "size", required = false,defaultValue = "10") int size) throws URISyntaxException {
         Page pageInfo = PageUtil.getPage(page,size);
         Page<ApplicationTypeCO> list = service.queryApplicationTypeByCond(applicationTypeForOtherCO,pageInfo);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(pageInfo);

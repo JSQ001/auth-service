@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.common.externalApi;
 
 import com.hand.hcf.app.common.co.ContractHeaderCO;
+import com.hand.hcf.app.common.co.ContractHeaderLineCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

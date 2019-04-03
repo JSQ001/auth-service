@@ -874,8 +874,16 @@ public class ExpenseReportTypeController {
      * @apiParam (请求参数) {Long} expenseReportTypeId  报账单类型ID
      */
     @GetMapping("/users/{expenseReportTypeId}")
-    public List<ContactCO> listUsersByApplicationType(@PathVariable("expenseReportTypeId") Long expenseReportTypeId){
-        return expenseReportTypeService.listUsersByExpenseReportType(expenseReportTypeId);
+    public ResponseEntity listUsersByApplicationType(@PathVariable("expenseReportTypeId") Long expenseReportTypeId,
+                                                     @RequestParam(required = false) String userCode,
+                                                     @RequestParam(required = false) String userName,
+                                                     @RequestParam(defaultValue = "0") int page,
+                                                     @RequestParam(defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<ContactCO> result = expenseReportTypeService.listUsersByExpenseReportType(expenseReportTypeId, userCode, userName, queryPage);
+
+        HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
 }

@@ -194,12 +194,14 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             commonApprovalHistoryCO.setEntityOid(docOid);
             commonApprovalHistoryCO.setOperationDetail("单据提交" + (desc != null ? ":" + desc : ""));
         } else if (DocumentOperationEnum.APPROVAL_PASS.getId() == status) {
+            header.setAuditDate(ZonedDateTime.now());
             if (!header.getStatus().equals(DocumentOperationEnum.APPROVAL.getId().toString())) {
                 return false;
             }
             commonApprovalHistoryCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
             commonApprovalHistoryCO.setOperationDetail("单据通过" + (desc != null ? ":" + desc : ""));
         } else if (DocumentOperationEnum.APPROVAL_REJECT.getId() == status) {
+            header.setAuditDate(ZonedDateTime.now());
             if (!header.getStatus().equals(DocumentOperationEnum.APPROVAL.getId().toString())) {
                 return false;
             }

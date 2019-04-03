@@ -249,7 +249,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         this.insert(expenseAdjustHeader);
         // 保存单据关联维度信息
         if (!CollectionUtils.isEmpty(adjustTypeWebDTO.getDimensions())){
-            adjustTypeWebDTO.getDimensions().stream().forEach(e -> {
+            adjustTypeWebDTO.getDimensions().forEach(e -> {
                 e.setHeaderId(expenseAdjustHeader.getId());
                 e.setId(null);
             });
@@ -294,7 +294,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
                 status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax, employeeId, description, adjustTypeCategory,
                 currencyCode, OrgInformationUtil.getCurrentUserId(),unitId,companyId, page);
         //isSetEmployee 暂时设置为 false
-        setCompanyAndDepartmentAndEmployee(result, true, false);
+        setCompanyAndDepartmentAndEmployee(result, true, true);
 
         return result;
     }
@@ -402,23 +402,15 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
 
             List<ExpenseAdjustDimensionDTO> dimensionDTOList = new ArrayList<>();
             List<Long> collect = dimensions.stream().map(ExpenseDimension::getDimensionId).collect(Collectors.toList());
-            Map<Long, Integer> map = dimensions.stream().collect(Collectors.toMap(ExpenseDimension::getDimensionId, ExpenseDimension::getSequence, (k1, k2) -> k1));
             List<DimensionDetailCO> costCenterDTOS = organizationService.listDimensionsBySetOfBooksIdAndIds(expenseAdjustHeader.getSetOfBooksId(), collect);
-            int sequence = 1;
             for (DimensionDetailCO detailCO : costCenterDTOS ){
 
                 ExpenseAdjustDimensionDTO expenseAdjustDimensionDTO = new ExpenseAdjustDimensionDTO();
                 expenseAdjustDimensionDTO.setId(detailCO.getId());
                 expenseAdjustDimensionDTO.setName(detailCO.getDimensionName());
-                if (map.containsKey(detailCO.getId())) {
-                    expenseAdjustDimensionDTO.setSequenceNumber(map.get(detailCO.getId()));
-                    sequence = map.get(detailCO.getId());
-                }else{
-                    expenseAdjustDimensionDTO.setSequenceNumber(sequence);
-                    sequence = sequence + 1;
-                }
+                expenseAdjustDimensionDTO.setSequenceNumber(detailCO.getDimensionSequence());
                 List<ExpenseAdjustDimensionItemDTO> itemDTOS = new ArrayList<>();
-                detailCO.getSubDimensionItemCOS().stream().forEach(e ->{
+                detailCO.getSubDimensionItemCOS().forEach(e ->{
                     ExpenseAdjustDimensionItemDTO itemDTO = new ExpenseAdjustDimensionItemDTO();
                     itemDTO.setItemId(e.getId());
                     itemDTO.setItemName(e.getDimensionItemName());

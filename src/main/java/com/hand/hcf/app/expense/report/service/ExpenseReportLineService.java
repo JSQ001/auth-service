@@ -15,6 +15,7 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.common.utils.SyncLockPrefix;
 import com.hand.hcf.app.expense.invoice.domain.*;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.service.*;
@@ -30,16 +31,20 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
 import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.core.redisLock.annotations.LockedObject;
+import com.hand.hcf.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.OperationUtil;
 import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.core.util.ReflectUtil;
+import com.hand.hcf.core.util.TypeConversionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -121,8 +126,9 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param id
      * @return
      */
+    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteExpenseReportLineById(Long id){
+    public boolean deleteExpenseReportLineById(@LockedObject Long id){
         ExpenseReportLine expenseReportLine = selectById(id);
         ExpenseReportHeader expenseReportHeader = expenseReportHeaderService.selectById(expenseReportLine.getExpReportHeaderId());
         // 判断单据状态 非编辑中、撤回、拒绝的单据，都不能删除
@@ -418,6 +424,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         expenseReportHeader.setTotalAmount(expenseReportLine == null ? BigDecimal.ZERO : expenseReportLine.getAmount());
         // 单据头本币金额由行汇总
         expenseReportHeader.setFunctionalAmount(expenseReportLine == null ? BigDecimal.ZERO : expenseReportLine.getFunctionAmount());
+        expenseReportHeaderService.checkDocumentStatus(0,expenseReportHeader.getStatus());
         expenseReportHeaderService.updateById(expenseReportHeader);
     }
 
@@ -731,6 +738,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         expenseReportLine.setTaxFunctionAmount(BigDecimal.ZERO);
         expenseReportLine.setDescription(expenseBook.getRemarks());
         expenseReportLine.setReverseFlag("N");
+        expenseReportLine.setInstallmentDeductionFlag("N");
         expenseReportLine.setAttachmentOid(expenseBook.getAttachmentOid());
         expenseReportLine.setExpenseBookId(expenseBook.getId());
         expenseReportLine.setFields(expenseBook.getFields());

@@ -1,8 +1,13 @@
 package com.hand.hcf.app.expense.invoice.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @description:
@@ -19,4 +24,8 @@ public interface InvoiceLineExpenceMapper extends BaseMapper<InvoiceLineExpence>
      */
     InvoiceLineExpence getInvoiceLineExpenceById(@Param("expenseBookId") Long expenseBookId,
                                                  @Param("invoiceLineId") Long invoiceLineId);
+
+    List<InvoiceLineExpenceWebQueryDTO> getInvoiceLineExpenceByHeadId(@Param("headId") Long headId,
+                                                                      @Param("ew") Wrapper wrapper,
+                                                                      Page page);
 }

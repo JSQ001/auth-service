@@ -1,6 +1,8 @@
 package com.hand.hcf.app.expense.policy.domain;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.core.annotation.UniqueField;
 import com.hand.hcf.core.domain.DomainLogicEnable;
 import lombok.Data;
@@ -32,6 +34,7 @@ public class ExpensePolicy extends DomainLogicEnable {
     /**
      * 公司级别ID
      */
+    @TableField(strategy = FieldStrategy.IGNORED)
     private Long companyLevelId;
     /**
      * 费用类型ID
@@ -44,14 +47,17 @@ public class ExpensePolicy extends DomainLogicEnable {
     /**
      * 申请人职务
      */
+    @TableField(strategy = FieldStrategy.IGNORED)
     private String dutyType;
     /**
      * 申请人员工级别
      */
+    @TableField(strategy = FieldStrategy.IGNORED)
     private String staffLevel;
     /**
      * 申请人所属部门ID
      */
+    @TableField(strategy = FieldStrategy.IGNORED)
     private Long departmentId;
     /**
      * 币种
