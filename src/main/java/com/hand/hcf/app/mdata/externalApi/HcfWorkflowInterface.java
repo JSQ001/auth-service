@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.externalApi;
 
 import com.hand.hcf.app.common.co.ApprovalFormCO;
+import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +16,8 @@ import java.util.List;
 @Service
 public class HcfWorkflowInterface {
 
-     //jiu.zhao TODO
-    //@Autowired
-    //private WorkflowControllerImpl ient;
+    @Autowired
+    private WorkflowControllerImpl workflowClient;
 
     /**
      * 根据单据类型id获取单据类型名称
@@ -26,17 +26,15 @@ public class HcfWorkflowInterface {
      */
     public ApprovalFormCO getFormNameByFormId(Long id) {
 
-        /*List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormsByIds(Arrays.asList(id));
+        List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormsByIds(Arrays.asList(id));
         if (approvalFormCOList.size() != 0) {
             return approvalFormCOList.get(0);
         } else {
             return null;
-        }*/
-        return null;
+        }
     }
 
     public List<ApprovalFormCO> listApprovalFormByFormIds(List<Long> ids) {
-        //return workflowClient.listApprovalFormsByIds(ids);
-        return null;
+        return workflowClient.listApprovalFormsByIds(ids);
     }
 }
