@@ -14,14 +14,12 @@ import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
 import com.hand.hcf.app.mdata.contact.domain.MdataUserTempDomain;
 import com.hand.hcf.app.mdata.contact.domain.Phone;
-import com.hand.hcf.app.mdata.contact.dto.ContactDTO;
-import com.hand.hcf.app.mdata.contact.dto.ContactQO;
-import com.hand.hcf.app.mdata.contact.dto.UserDTO;
-import com.hand.hcf.app.mdata.contact.dto.UserSimpleInfoDTO;
+import com.hand.hcf.app.mdata.contact.dto.*;
 import com.hand.hcf.app.mdata.contact.enums.*;
 import com.hand.hcf.app.mdata.contact.persistence.ContactMapper;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.domain.DepartmentUser;
+import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
@@ -122,6 +120,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     private MobileValidateMapper mobileValidateMapper;
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private DepartmentGroupService departmentGroupService;
 
 
     public Contact contactDTOToContact(ContactDTO contactDTO) {
@@ -803,14 +803,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         userDTO.setMobile(getMobile(contact.getId()));
         userDTO.setSenior(contact.getSenior());
         userDTO.setCorporationOid(contact.getCorporationOid());
-        userDTO.setGender(contact.getGender() == null ? 0 : contact.getGender());
-        if ("0".equals(contact.getGenderCode())) {
-            userDTO.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_MAN));
-        } else if ("1".equals(contact.getGenderCode())) {
-            userDTO.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_WOMAN));
-        } else if ("2".equals(contact.getGenderCode())) {
-            userDTO.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_UNKNOWN));
-        }
+        userDTO.setGender(contact.getGender());
+        userDTO.setGenderCode(contact.getGenderCode());
         userDTO.setDutyCode(contact.getDutyCode());
         userDTO.setDuty(contact.getDuty());
         userDTO.setRank(contact.getRank());
@@ -1241,6 +1235,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             else if (ContactBankAccountImportCode.TEMPLATE_SHEET_KEYWORD.contains(sheetName)) {
                 return contactBankAccountImportService.importUserInfo(file);
             }
+        } catch (BizException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -1497,6 +1493,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             Contact contact = new Contact();
             UserCO user = userMap.get(userTemp.getLogin());
             BeanUtils.copyProperties(userTemp,contact);
+            contact.setTenantId(OrgInformationUtil.getCurrentTenantId());
             contact.setUserId(user.getId());
             contact.setUserOid(user.getUserOid());
             contact.setSenior(false);
@@ -1570,6 +1567,15 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                 .status(statusValue)
                 .companyOids(companyOids)
                 .build(),page);
+        list.forEach(item -> {
+            if ("0".equals(item.getGenderCode())) {
+                item.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_MAN));
+            } else if ("1".equals(item.getGenderCode())) {
+                item.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_WOMAN));
+            } else if ("2".equals(item.getGenderCode())) {
+                item.setGenderCode(messageService.getMessageDetailByCode(RespCode.SYS_GENDER_UNKNOWN));
+            }
+        });
         return list;
     }
 
@@ -1716,4 +1722,55 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         return baseMapper.listUserByNameAndCodeAndCompanyAndUnit(userName, userCode, companyId, unitId, notExcludeIds, OrgInformationUtil.getCurrentTenantId(),page);
     }
 
+    /**
+     * 根据公司，部门id判断查询员工
+     * @param companyId
+     * @param departmentId
+     * @param userCode
+     * @param userName
+     * @param companyName
+     * @param page
+     * @return
+     */
+    public List<UserInfoDTO> getUserByDepartmentAndCompany(Long companyId, Long departmentId, String userCode, String userName, String companyName, Page page) {
+        List<Contact> contacts = new ArrayList<>();
+        if(companyId == null){
+            return new ArrayList<>();
+        }else {
+            if (departmentId != null) {
+                page = departmentGroupService.selectUsersByCompanyAndDepartment1(companyId, departmentId, userCode, userName, companyName, page);
+                if(CollectionUtils.isNotEmpty(page.getRecords())){
+                    return page.getRecords();
+                }
+            } else {
+                contacts = baseMapper.selectPage(page, new EntityWrapper<Contact>()
+                        .eq("company_id", companyId)
+                        .like(StringUtils.hasText(userCode), "full_name", userCode)
+                        .like(StringUtils.hasText(userName), "employee_id", userName));
+            }
+        }
+        List<UserInfoDTO> result = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(contacts)){
+            contacts.stream().forEach(contact -> {
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                userInfoDTO.setUserId(contact.getUserId());
+                userInfoDTO.setUserCode(contact.getEmployeeId());
+                userInfoDTO.setUserName(contact.getFullName());
+                userInfoDTO.setUserOid(contact.getUserOid().toString());
+                userInfoDTO.setCompanyName(companyService.findOne(contact.getCompanyId()).getName());
+                result.add(userInfoDTO);
+            });
+        }
+        return result;
+    }
+
+    public List<Contact> listContactByConditionAndWrapper(List<Long> companyIds,
+                                              List<Long> departmentIds,
+                                              List<Long> userGroupIds,
+                                              String userCode,
+                                              String userName,
+                                              Wrapper<Contact> orWrapper,
+                                              Page queryPage) {
+        return baseMapper.listContactByConditionAndWrapper(companyIds, departmentIds, userGroupIds, userCode, userName, orWrapper, queryPage);
+    }
 }

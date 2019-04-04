@@ -24,7 +24,7 @@ import java.util.UUID;
  * Created by 刘亮 on 2017/12/18.
  */
 @Service
-public class PrepaymentAttachmentService extends BaseService<PrepaymentAttachmentMapper, PrepaymentAttachment> {
+public class PrepaymentAttachmentService extends BaseService<PrepaymentAttachmentMapper,PrepaymentAttachment> {
     @Value("${Prepayment.attachments.path:}")
     private String path;//路径
     @Value("${Prepayment.attachments.prefix:}")

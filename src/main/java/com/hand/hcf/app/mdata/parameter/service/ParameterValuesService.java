@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
  * @Date: 2018/12/27 14:25
  */
 @Service
-public class ParameterValuesService extends BaseService<ParameterValuesMapper, ParameterValues> {
+public class ParameterValuesService extends BaseService<ParameterValuesMapper,ParameterValues> {
 
     @Autowired
     private ParameterValuesMapper parameterValuesMapper;

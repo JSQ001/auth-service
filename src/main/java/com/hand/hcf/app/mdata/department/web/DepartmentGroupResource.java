@@ -242,7 +242,7 @@ public class DepartmentGroupResource {
 
     @Timed
     @RequestMapping(value = "/selectDepartmentGroupByInput",method = RequestMethod.GET)
-    public ResponseEntity<List<DepartmentGroup>> selectDepartmentGroupByInput(@RequestParam String deptGroupCode, @RequestParam String description , @RequestParam(required = false) Boolean enable, Pageable pageable){
+    public ResponseEntity<List<DepartmentGroup>> selectDepartmentGroupByInput(@RequestParam String deptGroupCode, @RequestParam String description ,@RequestParam(required = false) Boolean enable,Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<DepartmentGroup> result= departmentGroupService.selectDepartmentGroupByInput(page,deptGroupCode, description,enable);
         HttpHeaders headers = new HttpHeaders();

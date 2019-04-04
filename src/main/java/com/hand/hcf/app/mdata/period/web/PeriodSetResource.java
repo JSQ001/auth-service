@@ -130,7 +130,7 @@ public class PeriodSetResource {
             return createPeriodSet(periodSet);
         }
         PeriodSet result=   periodSetService.updatePeriodSet(periodSet);
-        return ResponseEntity.ok(baseI18nService.selectOneTranslatedTableInfoWithI18n(result.getId(), PeriodSet.class));
+        return ResponseEntity.ok(baseI18nService.selectOneTranslatedTableInfoWithI18n(result.getId(),PeriodSet.class));
     }
 
     /**
@@ -143,7 +143,7 @@ public class PeriodSetResource {
         method = RequestMethod.DELETE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<Void> deletePeriodSet(@PathVariable Long id) throws URISyntaxException {
+    public  ResponseEntity<Void> deletePeriodSet(@PathVariable  Long id) throws URISyntaxException {
         periodSetService.deletePeriodSet(id);
         return ResponseEntity.ok().build();
     }

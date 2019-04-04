@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.*;
 @Service
 @Transactional
 @AllArgsConstructor
-public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitionTypeMapper, CashPayRequisitionType> {
+public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitionTypeMapper,CashPayRequisitionType> {
     private static final Logger log = LoggerFactory.getLogger(CashPayRequisitionTypeService.class);
 
     private final CashPayRequisitionTypeAssignRequisitionTypeService cashPayRequisitionTypeAssignRequisitionTypeService;
@@ -416,7 +416,7 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
      * @param page
      * @return
      */
-    public List<CashPayRequisitionType> getCashPayRequisitionTypeByCond(Long setOfBookId, String typeCode, String typeName, String paymentMethodCategory, Boolean isEnabled, Page page){
+    public List<CashPayRequisitionType> getCashPayRequisitionTypeByCond(Long setOfBookId, String typeCode, String typeName,String paymentMethodCategory,Boolean isEnabled, Page page){
         List<CashPayRequisitionType> list = new ArrayList<>();
 
         if (setOfBookId == null){

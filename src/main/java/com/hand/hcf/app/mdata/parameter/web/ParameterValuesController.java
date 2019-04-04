@@ -52,7 +52,7 @@ public class ParameterValuesController {
     }
     @GetMapping("/api/by/parameterValueType")
     public ResponseEntity<List<BasicCO>> pageParameterValuesByCond(@RequestParam(value = "parameterCode",required = false)String parameterCode,
-                                                                   @RequestParam(value = "parameterLevel") ParameterLevel parameterLevel,
+                                                                   @RequestParam(value = "parameterLevel")ParameterLevel parameterLevel,
                                                                    @RequestParam(value = "setOfBooksId",required = false)Long setOfBooksId,
                                                                    @RequestParam(value = "companyId",required = false)Long companyId,
                                                                    @RequestParam(value = "code",required = false)String code,

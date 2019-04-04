@@ -205,10 +205,13 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
             typeDTO.setSetOfBooksName(setOfBooksInfoCO.getSetOfBooksName());
         }
         //表单类型
-        List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
+        /**
+         * OrganizationService organizationService 中此方法listApprovalFormsByIds已被注释 by chenxu
+         */
+      /*  List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
         if (approvalFormCOList.size() > 0) {
             typeDTO.setFormName(approvalFormCOList.get(0).getFormName());
-        }
+        }*/
         //关联申请类型
         if (!typeDTO.getAllTypeFlag()) {
             List<Long> idList = assignTypeService.selectList(

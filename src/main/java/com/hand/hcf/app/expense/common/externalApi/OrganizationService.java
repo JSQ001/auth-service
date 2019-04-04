@@ -397,10 +397,12 @@ public class OrganizationService {
         return companyClient.listCompanyLevel(companyLevelId,companyLevelCode);
     }
 
-
-    public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> ids){
+    /**
+     * WorkflowControllerImpl workflowClient 中此方法listApprovalFormsByIds已不存在 by chenxu
+     */
+    /*public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> ids){
         return workflowClient.listApprovalFormsByIds(ids);
-    }
+    }*/
 
     /**
      * 根据公司Id分页获取指定公司的子公司

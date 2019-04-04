@@ -617,8 +617,8 @@ public class CashPaymentRequisitionHeadController {
      * */
     @GetMapping("/getReceivablesByNameAndCode")
     public ResponseEntity getReceivablesByNameAndCode(
-            @RequestParam String name,
-            @RequestParam String code,
+            @RequestParam(value = "name",required = false) String name,
+            @RequestParam(value = "code",required = false) String code,
             @RequestParam Integer empFlag,
             @RequestParam Boolean pageFlag,
             Pageable pageable
@@ -764,7 +764,7 @@ public class CashPaymentRequisitionHeadController {
             @RequestParam int status,
             @RequestParam Long id,
             @RequestParam Long userId,
-            @RequestBody Map<String, String> approvalRemark
+            @RequestBody(required = false) Map<String, String> approvalRemark
     ) {
         cashPaymentRequisitionHeadService.updateStatus(status, id, approvalRemark, userId, false);
         return ResponseEntity.ok().build();
@@ -1057,6 +1057,7 @@ public class CashPaymentRequisitionHeadController {
             @RequestParam(value = "noWriteAmountFrom", required = false) Double noWriteAmountFrom,
             @RequestParam(value = "noWriteAmountTo", required = false) Double noWriteAmountTo,
             @RequestParam(value = "remark", required = false) String remark,
+            @RequestParam(value = "reptypeId",required = false) Long reptypeId,
             Pageable pageable
     ) throws URISyntaxException {
 

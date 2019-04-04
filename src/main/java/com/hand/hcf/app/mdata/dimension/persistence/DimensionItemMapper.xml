@@ -18,4 +18,15 @@
           and dac.DIMENSION_ITEM_ID = d.id)
     </select>
 
+    <select id="listDimensionsByContactId" resultType="com.hand.hcf.app.mdata.dimension.domain.DimensionItem">
+        select di.*
+        from  SYS_DIMENSION_ITEM di
+        join sys_dimension_item_ass_emp diae on di.ID = diae.DIMENSION_ITEM_ID
+        where  di.ENABLED = 1
+        and di.DELETED = 0
+        and di.visible_user_scope = 1004
+        and diae.contact_id = #{contactId}
+    </select>
+
+
 </mapper>

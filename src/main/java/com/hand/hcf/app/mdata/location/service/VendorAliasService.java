@@ -142,7 +142,7 @@ public class VendorAliasService {
         return list;
     }
 
-    public List<VendorAlias> getForCode(String vendorCode, String vendorType, String language){
+    public List<VendorAlias> getForCode(String vendorCode,String vendorType,String language){
         List<VendorAlias> list = vendorAliasMapper.selectList(
                 new EntityWrapper<VendorAlias>()
                         .eq("alias",vendorCode)

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.brms.dto.RuleTransferDTO;
 import com.hand.hcf.app.workflow.brms.service.RuleTransferService;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalFormDTO;
+import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
 import com.hand.hcf.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;

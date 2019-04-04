@@ -24,15 +24,10 @@ public class RuleConditionDTO {
 
     private UUID ruleConditionOid;
 
-    /*@Type(typeNumber = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-    @JsonIgnore
-    @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
-    private ZonedDateTime createdDate;*/
+
 
     private Integer status;
 
-    private UUID companyOid;
 
     private String code;
 

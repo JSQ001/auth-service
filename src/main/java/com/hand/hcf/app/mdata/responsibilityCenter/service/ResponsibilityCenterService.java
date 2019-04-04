@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.responsibilityCenter.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.common.enums.RangeEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -675,4 +676,48 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                 .collect(Collectors.toList());
         return baseMapper.selectList(new EntityWrapper<ResponsibilityCenter>().in("id",resIdList).eq("enabled",true));
     }
+
+    /**
+     * 条件查询租户下责任中心
+     * @param selectId
+     * @param code
+     * @param name
+     * @param securityType
+     * @param filterId
+     * @param queryPage
+     * @return
+     */
+    public Page<BasicCO> pageResponsibilityCenterByInfoResultBasic(Long selectId, String code, String name, String securityType, Long filterId, Page queryPage) {
+        List<BasicCO> basicCOS = new ArrayList<>();
+        if (selectId != null) {
+            ResponsibilityCenter responsibilityCenter = this.selectById(selectId);
+            if(responsibilityCenter == null){
+                return queryPage;
+            }else {
+                BasicCO basicCO = BasicCO
+                        .builder()
+                        .id(responsibilityCenter.getId())
+                        .name(responsibilityCenter.getResponsibilityCenterName())
+                        .code(responsibilityCenter.getResponsibilityCenterCode())
+                        .build();
+                basicCOS.add(basicCO);
+            }
+        }else{
+            List<ResponsibilityCenter> responsibilityCenters = baseMapper.selectPage(queryPage, new EntityWrapper<ResponsibilityCenter>()
+                    .eq("tenant_id", filterId)
+                    .like(StringUtils.isNotEmpty(code), "responsibility_center_code", code)
+                    .like(StringUtils.isNotEmpty(name), "responsibility_center_name", name));
+            responsibilityCenters.forEach(responsibilityCenter -> {
+                BasicCO basicCO = BasicCO.builder()
+                        .id(responsibilityCenter.getId())
+                        .name(responsibilityCenter.getResponsibilityCenterName())
+                        .code(responsibilityCenter.getResponsibilityCenterCode())
+                        .build();
+                basicCOS.add(basicCO);
+            });
+        }
+        queryPage.setRecords(basicCOS);
+        return queryPage;
+    }
+
 }

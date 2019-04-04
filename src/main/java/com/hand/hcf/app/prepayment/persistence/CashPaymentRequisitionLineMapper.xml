@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.prepayment.persistence.CashPaymentRequisitionLineMapper">
+
+
+    <select id="getLineByQueryfromApplication"
+            resultType="com.hand.hcf.app.prepayment.web.dto.CashPaymentRequisitionHeadDto">
+         select h.*,l.id lineId ,l.csh_transaction_class_id cshTransactionClassId
+        from csh_payment_requisition_head h,csh_payment_requisition_line l
+        where
+              h.id = l.payment_requisition_header_id
+              and h.status in (1002,1004)
+          <if test="documentNumber!=null">
+              h.requisition_number = #{documentNumber}
+          </if>
+          <if test="typeId!=null">
+              h.payment_req_type_id = #{typeId}
+          </if>
+         <if test="ew!=null">
+          ${ew.sqlSegment}
+         </if>
+
+    </select>
+
+
+</mapper>

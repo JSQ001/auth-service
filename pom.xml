@@ -44,12 +44,6 @@
             <version>5.5.10</version>
         </dependency>
         <dependency>
-            <groupId>net.sf.json-lib</groupId>
-            <artifactId>json-lib</artifactId>
-            <version>2.4</version>
-            <classifier>jdk15</classifier>
-        </dependency>
-        <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>0.1.42</version>
@@ -75,15 +69,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.codingapi.txlcn</groupId>
+            <groupId>com.hand.hcf.lcn</groupId>
             <artifactId>txlcn-tc</artifactId>
             <version>5.0.2.RELEASE</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.alibaba</groupId>
-                    <artifactId>fastjson</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -129,6 +117,11 @@
             <groupId>org.kie</groupId>
             <artifactId>kie-spring</artifactId>
             <version>${drools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
     </dependencies>

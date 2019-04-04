@@ -22,4 +22,22 @@
             </if>
     </select>
 
+    <select id="listDimensionsByParameterCode" resultType="com.hand.hcf.app.mdata.dimension.domain.Dimension">
+        select d.*
+        from SYS_DIMENSION d
+        join sys_parameter_values p
+        on p.parameter_code = #{parameterCode} and p.parameter_value_code = d.dimension_code and p.ENABLED = 1
+        where d.ENABLED = 1
+        and d.SET_OF_BOOKS_ID = #{setOfBooksId}
+    </select>
+
+    <select id="listDimensionsByContactId" resultType="com.hand.hcf.app.mdata.dimension.domain.DimensionItem">
+        select di.*
+        from  SYS_DIMENSION_ITEM di
+        join sys_dimension_item_ass_emp diae on di.ID = diae.DIMENSION_ITEM_ID
+        where  di.ENABLED = 1
+        and di.DELETED = 0
+        and di.visible_user_scope = 1004
+        and diae.contact_id = #{contactId}
+    </select>
 </mapper>

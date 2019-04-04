@@ -246,11 +246,11 @@ public class DimensionItemController {
      */
     @GetMapping("/page/by/cond")
     public ResponseEntity<List<DimensionItemRequestDTO>> pageDimensionItemsByDimensionIdAndCond(@RequestParam(value = "dimensionId") Long dimensionId,
-                                                                                                @RequestParam(value = "dimensionItemCode",required = false) String dimensionItemCode,
-                                                                                                @RequestParam(value = "dimensionItemName",required = false) String dimensionItemName,
-                                                                                                @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                                                @RequestParam(value = "page",defaultValue = "0") int page,
-                                                                                                @RequestParam(value = "size",defaultValue = "10") int size){
+                                                                               @RequestParam(value = "dimensionItemCode",required = false) String dimensionItemCode,
+                                                                               @RequestParam(value = "dimensionItemName",required = false) String dimensionItemName,
+                                                                               @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                               @RequestParam(value = "page",defaultValue = "0") int page,
+                                                                               @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
         List<DimensionItemRequestDTO> result = dimensionItemService.pageDimensionItemsByDimensionIdAndCond(dimensionId, dimensionItemCode, dimensionItemName, enabled, queryPage);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(queryPage, "/api/dimension/item/page/by/cond");
@@ -413,11 +413,13 @@ public class DimensionItemController {
      */
     @GetMapping("/page/by/dimensionId")
     public ResponseEntity<List<DimensionItem>> pageDimensionItemsByDimensionId(@RequestParam(value = "dimensionId") Long dimensionId,
-                                                                               @RequestParam(value = "enabled", required = false) Boolean enabled,
-                                                                               @RequestParam(value = "page",defaultValue = "0") int page,
-                                                                               @RequestParam(value = "size",defaultValue = "10") int size){
+                                                                                @RequestParam(value = "enabled", required = false) Boolean enabled,
+                                                                                @RequestParam(value = "dimensionItemName", required = false) String dimensionItemName,
+                                                                                @RequestParam(value = "dimensionItemCode", required = false) String dimensionItemCode,
+                                                                                @RequestParam(value = "page",defaultValue = "0") int page,
+                                                                                @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
-        List<DimensionItem> result = dimensionItemService.pageDimensionItemsByDimensionId(dimensionId, queryPage, enabled);
+        List<DimensionItem> result = dimensionItemService.pageDimensionItemsByDimensionId(dimensionId, queryPage, enabled, dimensionItemName, dimensionItemCode);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
     }

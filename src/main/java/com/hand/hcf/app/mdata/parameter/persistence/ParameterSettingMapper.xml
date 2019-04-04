@@ -32,16 +32,16 @@
         AND pms.TENANT_ID = #{tenantId}
         AND ps.DELETED = 0
         AND ps.TENANT_ID = #{tenantId}
-        <if test="moduleCode != null">
+        <if test="moduleCode != null and moduleCode != ''">
             and pm.module_code = #{moduleCode}
         </if>
-        <if test="parameterLevel != null">
+        <if test="parameterLevel != null and parameterLevel != ''">
           and ps.parameter_level = #{parameterLevel}
         </if>
-        <if test="parameterCode != null">
+        <if test="parameterCode != null and parameterCode != ''">
           and p.parameter_code like concat('%', concat(#{parameterCode,jdbcType=VARCHAR}, '%'))
         </if>
-        <if test="parameterName != null">
+        <if test="parameterName != null and parameterName != ''">
             and p.parameter_name like concat('%', concat(#{parameterName,jdbcType=VARCHAR}, '%'))
         </if>
         <if test="setOfBooksId != null">
