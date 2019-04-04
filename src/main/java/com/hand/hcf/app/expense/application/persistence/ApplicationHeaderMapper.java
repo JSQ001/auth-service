@@ -99,14 +99,14 @@ public interface ApplicationHeaderMapper extends BaseMapper<ApplicationHeader> {
      * @return
      */
     List<ApplicationHeaderCO> listConditionByWorkFlow(@Param("submitDateFrom") ZonedDateTime submitDateFrom,
-                                                      @Param("submitDateTo") ZonedDateTime submitDateTo,
-                                                      @Param("amountFrom") BigDecimal amountFrom,
-                                                      @Param("amountTo") BigDecimal amountTo,
-                                                      @Param("businessCode") String businessCode,
-                                                      @Param("typeId") Long typeId,
-                                                      @Param("currencyCode") String currencyCode,
-                                                      @Param("description") String description,
-                                                      @Param("companyId") Long companyId);
+                                                       @Param("submitDateTo") ZonedDateTime submitDateTo,
+                                                       @Param("amountFrom") BigDecimal amountFrom,
+                                                       @Param("amountTo") BigDecimal amountTo,
+                                                       @Param("businessCode") String businessCode,
+                                                       @Param("typeId") Long typeId,
+                                                       @Param("currencyCode") String currencyCode,
+                                                       @Param("description") String description,
+                                                       @Param("companyId") Long companyId);
     /**
      * 分页条件查询费用申请单头信息
      * @param rowBounds
@@ -141,12 +141,12 @@ public interface ApplicationHeaderMapper extends BaseMapper<ApplicationHeader> {
     List<ApplicationHeaderAbbreviateDTO> selectRelateExpenseReportApplications(RowBounds rowBounds,
                                                                                ApplicationHeaderAbbreviateDTO dto);
 
-    List<ApplicationFinancRequsetDTO>  listByfincancies(RowBounds rowBounds,
-                                                        @Param("ew") Wrapper wrapper,
-                                                        @Param("associatedAmountFrom") BigDecimal associatedAmountFrom,
-                                                        @Param("associatedAmountTo") BigDecimal associatedAmountTo,
-                                                        @Param("relevanceAmountFrom") BigDecimal relevanceAmountFrom,
-                                                        @Param("relevanceAmountTo") BigDecimal relevanceAmountTo);
+    List<ApplicationFinancRequsetDTO>  listByfincancies (RowBounds rowBounds,
+                                                         @Param("ew") Wrapper wrapper,
+                                                         @Param("associatedAmountFrom")BigDecimal associatedAmountFrom,
+                                                         @Param("associatedAmountTo")BigDecimal associatedAmountTo,
+                                                         @Param("relevanceAmountFrom")BigDecimal relevanceAmountFrom,
+                                                         @Param("relevanceAmountTo")BigDecimal relevanceAmountTo);
 
     public List<ApplicationAmountCO> getApplicationAmountById(@Param("applicationId") Long applicationId);
 
@@ -154,5 +154,5 @@ public interface ApplicationHeaderMapper extends BaseMapper<ApplicationHeader> {
        获取关联申请单的预付款信息。
      */
     List<PrepaymentRequisitionReleaseCO> getPrepaymentBydocumentNumber(@Param("documentNumber") String documentNumber,
-                                                                       @Param("ew") Wrapper<ExpenseRequisitionReqRelease> eq);
+                                                         @Param("ew") Wrapper<ExpenseRequisitionReqRelease> eq);
 }

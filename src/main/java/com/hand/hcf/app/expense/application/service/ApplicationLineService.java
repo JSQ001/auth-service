@@ -334,8 +334,8 @@ public class ApplicationLineService extends BaseService<ApplicationLineMapper, A
      * @param page
      * @return
      */
-    public DocumentLineDTO<ApplicationLineWebDTO> getLinesByHeaderId(Long headerId, Page page) {
-        List<ApplicationLineWebDTO> dtoList = baseMapper.getLinesByHeaderId(headerId, page);
+    public DocumentLineDTO<ApplicationLineWebDTO> getLinesByHeaderId(Long headerId, Page page, boolean closeFlag) {
+        List<ApplicationLineWebDTO> dtoList = baseMapper.getLinesByHeaderId(headerId, page, closeFlag);
 
         if (CollectionUtils.isEmpty(dtoList)){
             return new DocumentLineDTO<>();

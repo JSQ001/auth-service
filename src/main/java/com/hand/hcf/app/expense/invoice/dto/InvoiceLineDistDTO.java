@@ -113,6 +113,8 @@ public class InvoiceLineDistDTO {
     //申请人
     private Long applicant;
 
+    private String applicantName;
+
     //单据状态
     private String documentState;
 

@@ -2334,4 +2334,11 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="201904011800001" author="kai.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="je_creation_status" type="tinyint" remarks="创建凭证标志"></column>
+            <column name="je_creation_date" type="timestamp" remarks="创建凭证日期"></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

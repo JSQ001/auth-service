@@ -14,4 +14,37 @@
             and ile.expense_book_id = #{expenseBookId}
 
     </select>
+    <select id="getInvoiceLineExpenceByHeadId" resultType="com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO">
+        SELECT ile.id               id,
+               ild.id               invoiceLineDistId,
+               il.id                invoiceLineId,
+               il.invoice_line_num  invoiceLineSequence,
+               r.id                 reportHeadId,
+               r.requisition_number requisitionNumber,
+               r.document_type_id   reportTypeId,
+               rt.report_type_name  reportTypeName,
+               r.applicant_id       applicantId,
+               r.requisition_date   requisitionDate,
+               rl.id                reportLineId,
+               rl.description       remarks,
+               et.id                expenseTypeId,
+               et.name              expenseTypeName
+        FROM invoice_line_expence ile
+        INNER JOIN invoice_line_dist ild
+        ON ild.id = ile.invoice_dist_id
+        INNER JOIN invoice_line il
+        ON il.id = ild.invoice_line_id
+        INNER JOIN exp_report_header r
+        ON r.id = ile.exp_expense_head_id
+        INNER JOIN exp_report_type rt
+        ON rt.id = r.document_type_id
+        INNER JOIN exp_report_line rl
+        ON rl.id = ile.exp_expense_line_id
+        INNER JOIN exp_expense_type et
+        ON et.id = rl.expense_type_id
+        WHERE il.invoice_head_id = #{headId}
+        <if test="ew != null">
+            ${ew.sqlSegment}
+        </if>
+    </select>
 </mapper>

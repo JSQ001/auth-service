@@ -26,5 +26,5 @@ public interface ExpenseReportTypeMapper extends BaseMapper<ExpenseReportType>{
                                                             @Param("companyId") Long companyId,
                                                             @Param("setOfBooksId") Long setOfBooksId);
 
-    List<ExpenseReportType> getExpenseReportTypeByFormTypes(@Param("ew") Wrapper<ExpenseReportType> orderBy);
+    List<ExpenseReportType> getExpenseReportTypeByFormTypes(@Param("ew")Wrapper<ExpenseReportType> orderBy);
 }

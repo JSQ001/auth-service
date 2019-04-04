@@ -21,8 +21,8 @@ public interface ApplicationTypeMapper extends BaseMapper<ApplicationType> {
                                        @Param("companyId") Long companyId,
                                        @Param("setOfBooksId") Long setOfBooksId);
 
-    List<ApplicationTypeAndUserGroupDTO> selectByUserGroup(@Param("setOfBooksId") Long setOfBooksId,
-                                                           @Param("companyId") Long companyId);
+    List<ApplicationTypeAndUserGroupDTO> selectByUserGroup(@Param("setOfBooksId")Long setOfBooksId,
+                                                           @Param("companyId")Long companyId);
 
     /**
      * 报账单表单关联申请单类型LOV查询
@@ -34,9 +34,9 @@ public interface ApplicationTypeMapper extends BaseMapper<ApplicationType> {
      * @return
      */
     List<ApplicationType> listTypesByReportCondition(@Param("setOfBooksId") Long setOfBooksId,
-                                                     @Param("range") String range,
-                                                     @Param("typeName") String typeName,
-                                                     @Param("ids") List<Long> ids,
+                                                     @Param("range")String range,
+                                                     @Param("typeName")String typeName,
+                                                     @Param("ids")List<Long> ids,
                                                      RowBounds rowBounds);
 
     List<ApplicationType> queryApplicationTypeByCond(

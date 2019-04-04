@@ -114,6 +114,12 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
      */
     @Transactional
     public void saveInvoice(ExpenseBook expenseBook,Boolean isNew){
+        if(!isNew) {
+            //编辑时先删除 发票行报销记录表
+            invoiceLineExpenceService.delete(
+                    new EntityWrapper<InvoiceLineExpence>()
+                            .eq("expense_book_id", expenseBook.getId()));
+        }
         expenseBook.getInvoiceHead().stream().forEach(invoiceHead -> {
             if(invoiceHead.getId() == null) {
                 if (invoiceHead.getFromBook()) {
@@ -129,7 +135,7 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
             }
             List<Long> lineId = invoiceHead.getInvoiceLineList().stream().map(InvoiceLine::getId).collect(Collectors.toList());
             //保存账本与发票行报销记录关联
-            saveInvoiceLineExpence(lineId,expenseBook.getId(),isNew);
+            saveInvoiceLineExpence(lineId,expenseBook.getId());
         });
     }
 
@@ -160,14 +166,8 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
      * @param expenseBookId 账本ID
      */
     private void saveInvoiceLineExpence(List<Long> invoiceLineIdList,
-                                        Long expenseBookId,
-                                        Boolean isNew) {
-        if(!isNew) {
-            //编辑时先删除 发票行报销记录表
-            invoiceLineExpenceService.delete(
-                    new EntityWrapper<InvoiceLineExpence>()
-                            .eq("expense_book_id", expenseBookId));
-        }
+                                        Long expenseBookId) {
+
         invoiceLineIdList.stream().forEach(invoiceLineId -> {
             InvoiceLine invoiceLine = invoiceLineService.selectById(invoiceLineId);
             if(invoiceLine == null){

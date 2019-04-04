@@ -179,5 +179,11 @@ public class ExpInputTaxHeader extends Domain {
     @TableField("document_oid")
     private String documentOid;
 
+    /**
+     * 审核日期
+     */
+    @TableField("audit_date")
+    private ZonedDateTime auditDate;
+
 
 }

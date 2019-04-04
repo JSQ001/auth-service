@@ -260,7 +260,7 @@ public class ApplicationDocumentController {
     public ResponseEntity<DocumentLineDTO<ApplicationLineWebDTO>> getLinesByHeaderId(@PathVariable("id") Long id,
                                                                                      Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        DocumentLineDTO<ApplicationLineWebDTO> result = service.getLinesByHeaderId(id, page);
+        DocumentLineDTO<ApplicationLineWebDTO> result = service.getLinesByHeaderId(id, page, false);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
@@ -361,6 +361,20 @@ public class ApplicationDocumentController {
 
     }
 
+    /**
+     * 申请单关闭行查询
+     * @param id
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/line/close/query/{id}")
+    public ResponseEntity<DocumentLineDTO<ApplicationLineWebDTO>> getCloseLinesByHeaderId(@PathVariable("id") Long id,
+                                                                                     Pageable pageable) {
+        Page page = PageUtil.getPage(pageable);
+        DocumentLineDTO<ApplicationLineWebDTO> result = service.getLinesByHeaderId(id, page, true);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
+    }
     /**
      * 关闭申请单
      *

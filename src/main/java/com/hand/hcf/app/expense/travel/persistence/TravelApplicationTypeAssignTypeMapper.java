@@ -43,7 +43,7 @@ public interface TravelApplicationTypeAssignTypeMapper extends BaseMapper<Travel
                                                           @Param("id") Long id,
                                                           @Param("categoryId") Long categoryId,
                                                           @Param("expenseTypeName") String expenseTypeName,
-                                                          @Param("typeFlag") Integer typeFlag,
+                                                          @Param("typeFlag")Integer typeFlag,
                                                           @Param("language") String language,
                                                           RowBounds rowBounds);
 

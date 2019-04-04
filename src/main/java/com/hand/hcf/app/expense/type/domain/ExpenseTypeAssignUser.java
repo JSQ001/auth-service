@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.core.domain.Domain;
+//import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,7 +32,7 @@ public class ExpenseTypeAssignUser extends Domain {
     /**
      * 适用类型
      */
-    private String applyType;
+    private Integer applyType;
 
     /**
      * 适用ID

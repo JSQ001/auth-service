@@ -199,7 +199,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
         //生成差旅申请单头关联地点表数据和关联人员表数据
         dto.setId(travelApplicationHeader.getId());
         generateTravelHeaderAssociatePlaceAndPeople(dto);
-        if (dimensions != null) {
+        if (CollectionUtils.isNotEmpty(dimensions)) {
             dimensions.stream().forEach(e -> {
                 e.setHeaderId(travelApplicationHeader.getId());
                 e.setId(null);

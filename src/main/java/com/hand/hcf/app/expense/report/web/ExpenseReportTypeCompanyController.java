@@ -258,11 +258,11 @@ public class ExpenseReportTypeCompanyController {
      */
     @GetMapping("/filter")
     public ResponseEntity<List<CompanyCO>> assignCompanyQuery(@RequestParam Long reportTypeId,
-                                                              @RequestParam(required = false) String companyCode,
-                                                              @RequestParam(required = false) String companyName,
-                                                              @RequestParam(required = false) String companyCodeFrom,
-                                                              @RequestParam(required = false) String companyCodeTo,
-                                                              Pageable pageable) throws URISyntaxException {
+                                             @RequestParam(required = false) String companyCode,
+                                             @RequestParam(required = false) String companyName,
+                                             @RequestParam(required = false) String companyCodeFrom,
+                                             @RequestParam(required = false) String companyCodeTo,
+                                             Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<CompanyCO> result = expenseReportTypeCompanyService.assignCompanyQuery(reportTypeId, companyCode, companyName, companyCodeFrom, companyCodeTo, page);
         HttpHeaders headers = PageUtil.getTotalHeader(result);

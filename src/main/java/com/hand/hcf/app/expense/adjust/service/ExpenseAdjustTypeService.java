@@ -24,6 +24,7 @@ import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
+import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.core.exception.BizException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,9 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
 
     @Autowired
     private ExpenseReportTypeService reportTypeService;
+
+    @Autowired
+    private ContactControllerImpl contactInterface;
 
     /**
      * 自定义条件查询 费用调整单类型定义(分页)
@@ -384,7 +388,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
             List<Long> departmentIdList = expenseAdjustTypeRequestDTO.getDepartmentOrUserGroupIdList();
             if (departmentIdList != null){
                 List<ExpenseAdjustTypeAssignDepartment> departmentList = new ArrayList<>();
-                departmentIdList.stream().forEach(departmentId ->{
+                departmentIdList.forEach(departmentId ->{
                     ExpenseAdjustTypeAssignDepartment department = ExpenseAdjustTypeAssignDepartment
                             .builder().expAdjustTypeId(expenseAdjustType.getId()).departmentId(departmentId).build();
                     departmentList.add(department);
@@ -395,7 +399,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
             List<Long> userGroupIdList = expenseAdjustTypeRequestDTO.getDepartmentOrUserGroupIdList();
             if (userGroupIdList != null){
                 List<ExpenseAdjustTypeAssignUserGroup> userGroupList = new ArrayList<>();
-                userGroupIdList.stream().forEach(userGroupId -> {
+                userGroupIdList.forEach(userGroupId -> {
                     ExpenseAdjustTypeAssignUserGroup userGroup = ExpenseAdjustTypeAssignUserGroup
                             .builder().expAdjustTypeId(expenseAdjustType.getId()).userGroupId(userGroupId).build();
                     userGroupList.add(userGroup);
@@ -439,7 +443,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
             DimensionCO costCenterDTO = centers.get(i - 1);
             dimension.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
             dimension.setHeaderFlag(true);
-            dimension.setDimensionField("dimension" + i + "Id");
+            dimension.setDimensionField("dimension" + costCenterDTO.getDimensionSequence() + "Id");
             dimension.setSequence(i);
             dimension.setName(costCenterDTO.getDimensionName());
             dimension.setDimensionId(costCenterDTO.getId());
@@ -525,7 +529,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         List<ExpenseAdjustTypeDTO> adjustTypeDTOList = baseMapper.selectByUser(departmentId, companyId, setOfBooksId);
 
         // 然后查询权限为人员组的单据类型
-        List<ExpenseAdjustTypeDTO> list = baseMapper.selectByUserGroup(setOfBooksId, companyId);
+        List<ExpenseAdjustTypeDTO> list = baseMapper.selectByUserGroup(companyId, setOfBooksId);
         if (!CollectionUtils.isEmpty(list)) {
             list.forEach(type -> {
 
@@ -540,7 +544,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         }
 
         //获取当前用户被授权的单据类型
-        listExpenseAdjustTypesByAuthorize().stream().forEach(e ->
+        listExpenseAdjustTypesByAuthorize().forEach(e ->
             adjustTypeDTOList.add(
                     ExpenseAdjustTypeDTO
                             .builder()
@@ -567,16 +571,18 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.EXPENSE_ADJUSTMENT.getCode(), OrgInformationUtil.getCurrentUserId());
 
         for(FormAuthorizeCO item : formAuthorizeCOList) {
-            List<Long> typeIdList = new ArrayList<>();
-            if (item.getCompanyId() != null) {
-                typeIdList = expenseAdjustTypeAssignCompanyMapper.selectList(
-                        new EntityWrapper<ExpenseAdjustTypeAssignCompany>()
-                                .eq("company_id", item.getCompanyId())
-                                .eq("enabled",true)
-                ).stream().map(ExpenseAdjustTypeAssignCompany::getExpAdjustTypeId).collect(Collectors.toList());
-                if (typeIdList.size() == 0) {
-                    continue;
-                }
+            OrganizationUserCO contactCO = new OrganizationUserCO();
+            if (item.getMandatorId() != null) {
+                contactCO = organizationService.getOrganizationCOByUserId(item.getMandatorId());
+            }
+            List<Long> typeIdList = expenseAdjustTypeAssignCompanyMapper.selectList(
+                    new EntityWrapper<ExpenseAdjustTypeAssignCompany>()
+                            .eq(item.getCompanyId() != null, "company_id", item.getCompanyId())
+                            .eq(contactCO.getCompanyId() != null, "company_id", contactCO.getCompanyId())
+                            .eq("enabled",true)
+            ).stream().map(ExpenseAdjustTypeAssignCompany::getExpAdjustTypeId).collect(Collectors.toList());
+            if (typeIdList.size() == 0) {
+                continue;
             }
             List<ExpenseAdjustType> expenseAdjustTypes = this.selectList(
                     new EntityWrapper<ExpenseAdjustType>()
@@ -735,7 +741,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         return page;
     }
 
-    public List<ContactCO> listUsersByExpenseAdjustType(Long id) {
+    public List<ContactCO> listUsersByExpenseAdjustType(Long id, String userCode, String userName, Page queryPage) {
         List<ContactCO> userCOList = new ArrayList<>();
 
         ExpenseAdjustType expenseAdjustType = this.getExpenseAdjustTypeById(id);
@@ -743,61 +749,45 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
             return userCOList;
         }
 
-        //查出有该单据权限的所有人员
-        Set<ContactCO> userCOS = new HashSet<>();
-        if (1001 == expenseAdjustType.getApplyEmployee()) {
-            userCOS.addAll(organizationService.listUserByTenantId(OrgInformationUtil.getCurrentTenantId()));
-        }
-        // 部门
-        if (1002 == expenseAdjustType.getApplyEmployee()){
-            List<Long> departmentIdList = expenseAdjustTypeAssignDepartmentService.selectList(
-                    new EntityWrapper<ExpenseAdjustTypeAssignDepartment>()
-                            .eq("exp_adjust_type_id",expenseAdjustType.getId())
-            ).stream().map(ExpenseAdjustTypeAssignDepartment::getDepartmentId).collect(toList());
-            if (!CollectionUtils.isEmpty(departmentIdList)) {
-
-                departmentIdList.stream().forEach(e -> userCOS.addAll(organizationService.listUsersByDepartmentId(e)));
-            }
-        }
-        // 人员组
-        if (1003 == expenseAdjustType.getApplyEmployee()){
-            List<Long> userGroupIdList = expenseAdjustTypeAssignUserGroupService.selectList(
-                    new EntityWrapper<ExpenseAdjustTypeAssignUserGroup>()
-                            .eq("exp_adjust_type_id",expenseAdjustType.getId())
-            ).stream().map(ExpenseAdjustTypeAssignUserGroup::getUserGroupId).collect(toList());
-            if (!CollectionUtils.isEmpty(userGroupIdList)) {
-
-                userGroupIdList.stream().forEach(e -> userCOS.addAll(organizationService.listUsersByUserGroupId(e)));
-            }
-        }
-
-        List<Long> companyList = expenseAdjustTypeAssignCompanyMapper.selectList(
+        List<Long> companyIdList = expenseAdjustTypeAssignCompanyMapper.selectList(
                 new EntityWrapper<ExpenseAdjustTypeAssignCompany>()
                         .eq("enabled", true)
                         .eq("exp_adjust_type_id", id)
         ).stream().map(ExpenseAdjustTypeAssignCompany::getCompanyId).collect(toList());
-
-        Map<Long, ContactCO> userCOMap = userCOS.stream().filter(u -> companyList.contains(u.getCompanyId())).collect(Collectors.toMap(ContactCO::getId, u -> u, (e1, e2) -> e1));
-
-        //当前用户是否有新建权限
-        if (userCOMap.containsKey(OrgInformationUtil.getCurrentUserId())) {
-            userCOList.add(userCOMap.get(OrgInformationUtil.getCurrentUserId()));
+        if (companyIdList.size() == 0){
+            return userCOList;
         }
 
-        //委托人是否有新建权限
-        List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.EXPENSE_ADJUSTMENT.getCode(), OrgInformationUtil.getCurrentUserId());
-        formAuthorizeCOList = formAuthorizeCOList.stream().filter(item -> {
-            if (item.getFormId() != null && !item.getFormId().equals(expenseAdjustType.getId())){
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
+        List<Long> departmentIdList = null;
+        List<Long> userGroupIdList = null;
 
-        for(FormAuthorizeCO item : formAuthorizeCOList) {
-            if (item.getMandatorId() != null && userCOMap.containsKey(item.getMandatorId())) {
-                userCOList.add(userCOMap.get(item.getMandatorId()));
-            }
+        // 部门
+        if (1002 == expenseAdjustType.getApplyEmployee()){
+            departmentIdList = expenseAdjustTypeAssignDepartmentService.selectList(
+                    new EntityWrapper<ExpenseAdjustTypeAssignDepartment>()
+                            .eq("exp_adjust_type_id",expenseAdjustType.getId())
+            ).stream().map(ExpenseAdjustTypeAssignDepartment::getDepartmentId).collect(toList());
         }
+        // 人员组
+        if (1003 == expenseAdjustType.getApplyEmployee()){
+            userGroupIdList = expenseAdjustTypeAssignUserGroupService.selectList(
+                    new EntityWrapper<ExpenseAdjustTypeAssignUserGroup>()
+                            .eq("exp_adjust_type_id",expenseAdjustType.getId())
+            ).stream().map(ExpenseAdjustTypeAssignUserGroup::getUserGroupId).collect(toList());
+        }
+
+        AuthorizeQueryCO queryCO = AuthorizeQueryCO
+                .builder()
+                .documentCategory(FormTypeEnum.EXPENSE_ADJUSTMENT.getCode())
+                .formTypeId(id)
+                .companyIdList(companyIdList)
+                .departmentIdList(departmentIdList)
+                .userGroupIdList(userGroupIdList)
+                .currentUserId(OrgInformationUtil.getCurrentUserId())
+                .build();
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        queryPage.setTotal(contactCOPage.getTotal());
+        userCOList = contactCOPage.getRecords();
 
         return userCOList;
     }

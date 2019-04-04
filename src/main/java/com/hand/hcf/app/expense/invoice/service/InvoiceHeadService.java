@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.invoice.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.ContactCO;
@@ -11,14 +12,24 @@ import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.*;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceHeadMapper;
+import com.hand.hcf.app.expense.invoice.persistence.InvoiceLineDistMapper;
+import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
+import com.hand.hcf.app.expense.report.domain.ExpenseReportLine;
+import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
+import com.hand.hcf.app.expense.report.service.ExpenseReportLineService;
+import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.service.LoggingRequestInterceptor;
+import com.hand.hcf.core.util.LoginInformationUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +63,12 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
 
     private final MapperFacade mapper;
 
+    private final ExpenseReportHeaderService reportHeaderService;
+
+    private final ExpenseReportLineService reportLineService;
+
+    private final InvoiceLineDistMapper invoiceLineDistMapper;
+
     /**
      * 新建 发票头、行
      * @param invoiceDTO
@@ -82,32 +99,7 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
         //插入发票行
         if (invoiceDTO.getInvoiceLineList().size() > 0 ){
             List<InvoiceLine> invoiceLineList = invoiceDTO.getInvoiceLineList();
-            //发票行金额之和
-            BigDecimal lineDetailAmountSum = BigDecimal.ZERO;
-            //发票行税额之和
-            BigDecimal lineTaxAmountSum = BigDecimal.ZERO;
-            //校验发票行
-            for (InvoiceLine invoiceLine : invoiceLineList) {
-                if (invoiceLine.getId() != null) {
-                    throw new BizException(RespCode.INVOICE_LINE_ID_IS_NOT_NULL);
-                }
-                invoiceLineService.checkInvoiceLine(invoiceLine);
-
-                lineDetailAmountSum = lineDetailAmountSum.add(invoiceLine.getDetailAmount());
-                lineTaxAmountSum = lineTaxAmountSum.add(invoiceLine.getTaxAmount());
-            }
-            //发票行金额之和不可大于发票头金额合计
-            if (null != invoiceHead.getInvoiceAmount()) {
-                if (lineDetailAmountSum.compareTo(invoiceHead.getInvoiceAmount()) == 1) {
-                    throw new BizException(RespCode.INVOICE_LINE_DETAIL_AMOUNT_SUM_NO_MORE_THAN_HEAD_INVOICE_AMOUNT_SUM);
-                }
-            }
-            //发票行税额之和不可大于发票头税额合计
-            if (null != invoiceHead.getTaxTotalAmount()) {
-                if (lineTaxAmountSum.compareTo(invoiceHead.getTaxTotalAmount()) == 1) {
-                    throw new BizException(RespCode.INVOICE_LINE_TAX_AMOUNT_SUM_NO_MORE_THAN_HEAD_TAX_TOTAL_AMOUNT_SUM);
-                }
-            }
+            checkInvoiceAmount(invoiceHead,invoiceLineList);
             //执行 插入发票行、和插入发票分配行 操作
             invoiceLineList.stream().forEach(invoiceLine -> {
                 // 插入发票行
@@ -399,69 +391,70 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
      * @param page
      * @return
      */
-    public Page<InvoiceLineExpence> getInvoiceLineExpenceByHeadId(Long headId,String expenseNum,Long expenseTypeId,Page page){
-        Page<InvoiceLineExpence> expenceList = new Page<>();
+    public Page<InvoiceLineExpenceWebQueryDTO> getInvoiceLineExpenceByHeadId(Long headId, String expenseNum, Long expenseTypeId, Page page){
+        Page<InvoiceLineExpenceWebQueryDTO> expencePage = new Page<>();
 
-        List<Long> lineIds = invoiceLineService.selectList(
-                new EntityWrapper<InvoiceLine>()
-                        .eq("invoice_head_id",headId)
-        ).stream().map(InvoiceLine::getId).collect(Collectors.toList());
-        if (lineIds.size() > 0){
-            List<Long> distIds = invoiceLineDistService.selectList(
-                    new EntityWrapper<InvoiceLineDist>().in("invoice_line_id",lineIds)
-            ).stream().map(InvoiceLineDist::getId).collect(Collectors.toList());
-            expenceList = invoiceLineExpenceService.selectPage(page,
-                    new EntityWrapper<InvoiceLineExpence>().in("invoice_dist_id",distIds)
-            );
-        }
-        return expenceList;
+        List<InvoiceLineExpenceWebQueryDTO> invoiceLineExpenceList = invoiceLineExpenceService.getInvoiceLineExpenceByHeadId(headId, expenseNum, expenseTypeId, page);
+
+        expencePage.setRecords(invoiceLineExpenceList);
+        expencePage.setTotal(page.getTotal());
+        return expencePage;
     }
 
-    public Page<InvoiceLineDistDTO> getInvoiceLineDistByCond(Long createdBy, Long invoiceTypeId, String invoiceCode, String invoiceNo, String expenseNum,
+    public Page<InvoiceLineDistDTO> getInvoiceLineDistByCond(Long invoiceTypeId, String invoiceCode, String invoiceNo, String expenseNum,
                                                              ZonedDateTime invoiceDateFrom, ZonedDateTime invoiceDateTo,
                                                              BigDecimal invoiceAmountFrom, BigDecimal invoiceAmountTo,
                                                              Integer invoiceLineNumFrom, Integer invoiceLineNumTo,
                                                              String taxRate,
                                                              BigDecimal taxAmountFrom, BigDecimal taxAmountTo,
-                                                             String createdMethod,
-                                                             Boolean checkResult,
+                                                             ZonedDateTime applyDateFrom,
+                                                             ZonedDateTime applyDateTo,
+                                                             Long applicant,
+                                                             String documentStatus,
+                                                             Long costLineNumberFrom,
+                                                             Long costLineNumberTo,
+                                                             String costType,
+                                                             BigDecimal costAmountFrom,
+                                                             BigDecimal costAmountTo,
+                                                             Boolean installmentDeduction,
                                                              Page page){
 //        Page<InvoiceLineDistDTO> result = new Page<>();
-        Page distPage = invoiceLineDistService.selectPage(page,
-                new EntityWrapper<InvoiceLineDist>()
-                        .eq(createdBy != null, "created_by", createdBy)
-                        .like(invoiceCode != null, "invoice_code", invoiceCode)
-                        .like(invoiceNo != null, "invoice_no", invoiceNo)
-                        .eq(taxRate != null, "tax_rate", taxRate)
-                        .ge(taxAmountFrom != null, "tax_amount", taxAmountFrom)
-                        .le(taxAmountTo != null, "tax_amount", taxAmountTo)
-        );
-        if (distPage.getRecords().size() > 0){
-            List<InvoiceLineDist> distList = distPage.getRecords();
 
-            List<InvoiceLineDistDTO> distDTOList = new ArrayList<>();
-
-            for (InvoiceLineDist invoiceLineDist : distList){
-                InvoiceLineDistDTO invoiceLineDistDTO = new InvoiceLineDistDTO();
-                mapper.map(invoiceLineDist,invoiceLineDistDTO);
-                InvoiceLine invoiceLine = invoiceLineService.selectById(invoiceLineDistDTO.getInvoiceLineId());
-                //设置发票行号、发票行金额、发票头id
-                invoiceLineDistDTO.setInvoiceLineNum(invoiceLine.getInvoiceLineNum());
-                invoiceLineDistDTO.setDetailAmount(invoiceLine.getDetailAmount());
-                invoiceLineDistDTO.setInvoiceHeadId(invoiceLine.getInvoiceHeadId());
-                InvoiceHead invoiceHead = invoiceHeadMapper.selectById(invoiceLine.getInvoiceHeadId());
-                //设置开票日期、金额合计
-                invoiceLineDistDTO.setInvoiceDate(invoiceHead.getInvoiceDate());
-                invoiceLineDistDTO.setInvoiceAmount(invoiceHead.getInvoiceAmount());
-                //设置发票类型id、发票类型名称
-                InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
-                invoiceLineDistDTO.setInvoiceTypeId(invoiceType.getId());
-                invoiceLineDistDTO.setInvoiceTypeName(invoiceType.getInvoiceTypeName());
-
-                distDTOList.add(invoiceLineDistDTO);
+        List<InvoiceLineDistDTO> results = invoiceLineDistMapper.getInvoiceRerpotDetail(
+                LoginInformationUtil.getCurrentTenantId(),
+                OrgInformationUtil.getCurrentSetOfBookId(),
+                invoiceTypeId,
+                invoiceCode,
+                invoiceNo,
+                expenseNum,
+                invoiceDateFrom,
+                invoiceDateTo,
+                invoiceAmountFrom,
+                invoiceAmountTo,
+                invoiceLineNumFrom,
+                invoiceLineNumTo,
+                taxRate,
+                taxAmountFrom,
+                taxAmountTo,
+                applyDateFrom,
+                applyDateTo,
+                applicant,
+                documentStatus,
+                costLineNumberFrom,
+                costLineNumberTo,
+                costType,
+                costAmountFrom,
+                costAmountTo,
+                installmentDeduction,
+                page);
+        results.forEach(result ->{
+            if(result.getApplicant() != null){
+                ContactCO user = organizationService.getUserById(result.getApplicant());
+                result.setApplicantName(user.getFullName());
             }
-            page.setRecords(distDTOList);
-        }
+        });
+
+        page.setRecords(results);
         return page;
     }
 
@@ -524,15 +517,16 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                             String currencyCode,
                             String salerName,
                             Page queryPage) {
-        List<InvoiceHead> heads = baseMapper.selectPage(queryPage,
-                new EntityWrapper<InvoiceHead>()
-                        .eq(createdBy != null, "created_by", createdBy)
-                        .eq(StringUtils.isNotEmpty(currencyCode),"currency_code",currencyCode)
-                        .like(StringUtils.isNotEmpty(salerName),"saler_name",salerName)
-                        .like(StringUtils.isNotEmpty(invoiceCode), "invoice_code", invoiceCode)
-                        .like(StringUtils.isNotEmpty(invoiceNo), "invoice_no", invoiceNo)
-                        .ge(StringUtils.isNotEmpty(invoiceDateFrom), "invoice_date", TypeConversionUtils.getStartTimeForDayYYMMDD(invoiceDateFrom))
-                        .le(StringUtils.isNotEmpty(invoiceDateTo), "invoice_date", TypeConversionUtils.getEndTimeForDayYYMMDD(invoiceDateTo)));
+
+        Wrapper wrapper = new EntityWrapper<InvoiceHead>()
+                .eq(createdBy != null, "h.created_by", createdBy)
+                .eq(StringUtils.isNotEmpty(currencyCode),"h.currency_code",currencyCode)
+                .like(StringUtils.isNotEmpty(salerName),"h.saler_name",salerName)
+                .like(StringUtils.isNotEmpty(invoiceCode), "h.invoice_code", invoiceCode)
+                .like(StringUtils.isNotEmpty(invoiceNo), "h.invoice_no", invoiceNo)
+                .ge(StringUtils.isNotEmpty(invoiceDateFrom), "h.invoice_date", TypeConversionUtils.getStartTimeForDayYYMMDD(invoiceDateFrom))
+                .le(StringUtils.isNotEmpty(invoiceDateTo), "h.invoice_date", TypeConversionUtils.getEndTimeForDayYYMMDD(invoiceDateTo));
+        List<InvoiceHead> heads = baseMapper.pageInvoiceByCond(queryPage, wrapper);
         heads.stream().forEach(head->{
             //设置发票类型名称
             InvoiceType invoiceType = invoiceTypeService.selectById(head.getInvoiceTypeId());
@@ -547,9 +541,7 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                 head.setCreatedMethodName(sysCodeValueCO.getName());
             }
             //发票行
-            List<InvoiceLine> invoiceLineList = invoiceLineService.selectList(
-                    new EntityWrapper<InvoiceLine>().eq("invoice_head_id", head.getId())
-            );
+            List<InvoiceLine> invoiceLineList = invoiceLineService.listNotAssignInvoiceLinesByInvoiceHeadId(head.getId());
            head.setInvoiceLineList(invoiceLineList);
         });
         return heads;
@@ -573,5 +565,74 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
             invoiceLineService.deleteBatchIds(invoiceLineIds);
         }
         invoiceLineDistService.deleteBatchIds(invoiceDistIds);
+    }
+
+
+    /**
+     * 校验发票头、行
+     * @param invoiceDTO
+     * @return
+     */
+    public InvoiceDTO checkInvoice(InvoiceDTO invoiceDTO){
+        //插入发票头
+        InvoiceHead invoiceHead = invoiceDTO.getInvoiceHead();
+        if (invoiceHead != null) {
+            //校验发票头
+            if (invoiceHead.getId() != null){
+                throw new BizException(RespCode.INVOICE_HEAD_ID_IS_NOT_NULL);
+            }
+            List<CurrencyRateCO> currencyRateCOs = organizationService.listCurrencysByCode("CNY", true, invoiceHead.getSetOfBooksId());
+            if (currencyRateCOs.size() > 0){
+                currencyRateCOs.stream().forEach(currencyRateCO -> {
+                    if (currencyRateCO.getCurrencyCode().equals(invoiceHead.getCurrencyCode())){
+                        invoiceHead.setExchangeRate(new BigDecimal(currencyRateCO.getRate()));
+                    }
+                });
+
+            }
+            checkInvoiceHead(invoiceHead);
+        }
+        //插入发票行
+        if (invoiceDTO.getInvoiceLineList().size() > 0 ){
+            List<InvoiceLine> invoiceLineList = invoiceDTO.getInvoiceLineList();
+            checkInvoiceAmount(invoiceHead,invoiceLineList);
+        }else {
+            throw new BizException(RespCode.INVOICE_LINE_IS_EMPTY);
+        }
+        return invoiceDTO;
+    }
+
+    /**
+     * 校验发票金额以及行
+     * @param invoiceHead 发票头
+     * @param invoiceLineList 发票行
+     */
+    public void checkInvoiceAmount(InvoiceHead invoiceHead, List<InvoiceLine> invoiceLineList){
+        //发票行金额之和
+        BigDecimal lineDetailAmountSum = BigDecimal.ZERO;
+        //发票行税额之和
+        BigDecimal lineTaxAmountSum = BigDecimal.ZERO;
+        //校验发票行
+        for (InvoiceLine invoiceLine : invoiceLineList) {
+            if (invoiceLine.getId() != null) {
+                throw new BizException(RespCode.INVOICE_LINE_ID_IS_NOT_NULL);
+            }
+            invoiceLineService.checkInvoiceLine(invoiceLine);
+
+            lineDetailAmountSum = lineDetailAmountSum.add(invoiceLine.getDetailAmount());
+            lineTaxAmountSum = lineTaxAmountSum.add(invoiceLine.getTaxAmount());
+        }
+        //发票行金额之和不可大于发票头金额合计
+        if (null != invoiceHead.getInvoiceAmount()) {
+            if (lineDetailAmountSum.compareTo(invoiceHead.getInvoiceAmount()) == 1) {
+                throw new BizException(RespCode.INVOICE_LINE_DETAIL_AMOUNT_SUM_NO_MORE_THAN_HEAD_INVOICE_AMOUNT_SUM);
+            }
+        }
+        //发票行税额之和不可大于发票头税额合计
+        if (null != invoiceHead.getTaxTotalAmount()) {
+            if (lineTaxAmountSum.compareTo(invoiceHead.getTaxTotalAmount()) == 1) {
+                throw new BizException(RespCode.INVOICE_LINE_TAX_AMOUNT_SUM_NO_MORE_THAN_HEAD_TAX_TOTAL_AMOUNT_SUM);
+            }
+        }
     }
 }

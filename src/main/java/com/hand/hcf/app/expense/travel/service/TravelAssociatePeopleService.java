@@ -34,7 +34,7 @@ public class TravelAssociatePeopleService extends BaseService<TravelAssociatePeo
      * @param headerId
      * @return
      */
-    public Page<ContactCO> listUsersByHeaderId(Long headerId, String employeeCode, String fullName, String keyWord, Page page) {
+    public Page<ContactCO> listUsersByHeaderId(Long headerId,String employeeCode,String fullName,String keyWord,Page page) {
         List<Long> userList = baseMapper.selectList(
                 new EntityWrapper<TravelAssociatePeople>()
                         .eq("asso_type","H")

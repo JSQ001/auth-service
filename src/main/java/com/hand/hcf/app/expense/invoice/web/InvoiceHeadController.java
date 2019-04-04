@@ -5,6 +5,7 @@ import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
 import com.hand.hcf.app.expense.invoice.service.InvoiceHeadService;
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.handler.ExcelExportHandler;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -531,13 +533,13 @@ public class InvoiceHeadController {
      * /api/invoice/head/query/invoice/line/expense/by/headId?headId=1088689956484284417
      */
     @GetMapping("/query/invoice/line/expense/by/headId")
-    public ResponseEntity<List<InvoiceLineExpence>> getInvoiceLineExpenceByHeadId(
+    public ResponseEntity<List<InvoiceLineExpenceWebQueryDTO>> getInvoiceLineExpenceByHeadId(
             @RequestParam("headId")Long headId,
             @RequestParam(value = "expenseNum",required = false)String expenseNum,
             @RequestParam(value = "expenseTypeId",required = false)Long expenseTypeId,
             Pageable pageable)throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
-        Page<InvoiceLineExpence> result = invoiceHeadService.getInvoiceLineExpenceByHeadId(headId, expenseNum, expenseTypeId, page);
+        Page<InvoiceLineExpenceWebQueryDTO> result = invoiceHeadService.getInvoiceLineExpenceByHeadId(headId, expenseNum, expenseTypeId, page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/invoice/head/query/invoice/line/expense/by/headId");
@@ -672,7 +674,6 @@ public class InvoiceHeadController {
      */
     @GetMapping("/query/invoice/line/dist/by/cond")
     public ResponseEntity<List<InvoiceLineDistDTO>> getInvoiceLineDistByCond(
-            @RequestParam("createdBy")Long createdBy,
             @RequestParam(value = "invoiceTypeId",required = false)Long invoiceTypeId,
             @RequestParam(value = "invoiceCode",required = false)String invoiceCode,
             @RequestParam(value = "invoiceNo",required = false)String invoiceNo,
@@ -686,22 +687,40 @@ public class InvoiceHeadController {
             @RequestParam(value = "taxRate",required = false)String taxRate,
             @RequestParam(value = "taxAmountFrom",required = false)BigDecimal taxAmountFrom,
             @RequestParam(value = "taxAmountTo",required = false)BigDecimal taxAmountTo,
-            @RequestParam(value = "createdMethod",required = false)String createdMethod,
-            @RequestParam(value = "checkResult",required = false)Boolean checkResult,
+            @RequestParam(value = "applyDateFrom",required = false)String applyDateFrom,
+            @RequestParam(value = "applyDateTo",required = false)String applyDateTo,
+            @RequestParam(value = "applicant",required = false)Long applicant,
+            @RequestParam(value = "documentStatus",required = false)String documentStatus,
+            @RequestParam(value = "costLineNumberFrom",required = false)Long costLineNumberFrom,
+            @RequestParam(value = "costLineNumberTo",required = false)Long costLineNumberTo,
+            @RequestParam(value = "costType",required = false)String costType,
+            @RequestParam(value = "costAmountFrom",required = false)BigDecimal costAmountFrom,
+            @RequestParam(value = "costAmountTo",required = false)BigDecimal costAmountTo,
+            @RequestParam(value = "installmentDeduction",required = false)Boolean installmentDeduction,
             Pageable pageable)throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        Page<InvoiceLineDistDTO> result = invoiceHeadService.getInvoiceLineDistByCond(createdBy,
+        Page<InvoiceLineDistDTO> result = invoiceHeadService.getInvoiceLineDistByCond(
                 invoiceTypeId,
-                invoiceCode, invoiceNo,
+                invoiceCode,
+                invoiceNo,
                 expenseNum,
                 invoiceDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(invoiceDateFrom),
                 invoiceDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(invoiceDateTo),
                 invoiceAmountFrom, invoiceAmountTo,
                 invoiceLineNumFrom, invoiceLineNumTo,
                 taxRate,
-                taxAmountFrom, taxAmountTo,
-                createdMethod,
-                checkResult,
+                taxAmountFrom,
+                taxAmountTo,
+                applyDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(applyDateFrom),
+                applyDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(applyDateTo),
+                applicant,
+                documentStatus,
+                costLineNumberFrom,
+                costLineNumberTo,
+                costType,
+                costAmountFrom,
+                costAmountTo,
+                installmentDeduction,
                 page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
@@ -776,7 +795,7 @@ public class InvoiceHeadController {
      * @param request
      * @param exportConfig
      * @param response
-     * @param createdBy
+     * @param
      * @param pageable
      * @throws IOException
      */
@@ -784,20 +803,53 @@ public class InvoiceHeadController {
     public void exportInvoiceLineDistInfo(HttpServletRequest request,
                                       @RequestBody ExportConfig exportConfig,
                                       HttpServletResponse response,
-                                      @RequestParam(value = "createdBy")Long createdBy,
+                                          @RequestParam(value = "invoiceTypeId",required = false)Long invoiceTypeId,
+                                          @RequestParam(value = "invoiceCode",required = false)String invoiceCode,
+                                          @RequestParam(value = "invoiceNo",required = false)String invoiceNo,
+                                          @RequestParam(value = "expenseNum",required = false)String expenseNum,
+                                          @RequestParam(value = "invoiceDateFrom",required = false)String invoiceDateFrom,
+                                          @RequestParam(value = "invoiceDateTo",required = false)String invoiceDateTo,
+                                          @RequestParam(value = "invoiceAmountFrom",required = false)BigDecimal invoiceAmountFrom,
+                                          @RequestParam(value = "invoiceAmountTo",required = false)BigDecimal invoiceAmountTo,
+                                          @RequestParam(value = "invoiceLineNumFrom",required = false)Integer invoiceLineNumFrom,
+                                          @RequestParam(value = "invoiceLineNumTo",required = false)Integer invoiceLineNumTo,
+                                          @RequestParam(value = "taxRate",required = false)String taxRate,
+                                          @RequestParam(value = "taxAmountFrom",required = false)BigDecimal taxAmountFrom,
+                                          @RequestParam(value = "taxAmountTo",required = false)BigDecimal taxAmountTo,
+                                          @RequestParam(value = "applyDateFrom",required = false)String applyDateFrom,
+                                          @RequestParam(value = "applyDateTo",required = false)String applyDateTo,
+                                          @RequestParam(value = "applicant",required = false)Long applicant,
+                                          @RequestParam(value = "documentStatus",required = false)String documentStatus,
+                                          @RequestParam(value = "costLineNumberFrom",required = false)Long costLineNumberFrom,
+                                          @RequestParam(value = "costLineNumberTo",required = false)Long costLineNumberTo,
+                                          @RequestParam(value = "costType",required = false)String costType,
+                                          @RequestParam(value = "costAmountFrom",required = false)BigDecimal costAmountFrom,
+                                          @RequestParam(value = "costAmountTo",required = false)BigDecimal costAmountTo,
+                                          @RequestParam(value = "installmentDeduction",required = false)Boolean installmentDeduction,
                                       Pageable pageable) throws IOException {
         Page page = PageUtil.getPage(pageable);
-        Page<InvoiceLineDistDTO> invoiceLineDistDTOPage = invoiceHeadService.getInvoiceLineDistByCond(createdBy,
-                null,
-                null, null,
-                null,
-                null, null,
-                null, null,
-                null, null,
-                null,
-                null, null,
-                null,
-                null,
+        Page<InvoiceLineDistDTO> invoiceLineDistDTOPage = invoiceHeadService.getInvoiceLineDistByCond(
+                invoiceTypeId,
+                invoiceCode,
+                invoiceNo,
+                expenseNum,
+                invoiceDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(invoiceDateFrom),
+                invoiceDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(invoiceDateTo),
+                invoiceAmountFrom, invoiceAmountTo,
+                invoiceLineNumFrom, invoiceLineNumTo,
+                taxRate,
+                taxAmountFrom,
+                taxAmountTo,
+                applyDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(applyDateFrom),
+                applyDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(applyDateTo),
+                applicant,
+                documentStatus,
+                costLineNumberFrom,
+                costLineNumberTo,
+                costType,
+                costAmountFrom,
+                costAmountTo,
+                installmentDeduction,
                 page);
         int total = TypeConversionUtils.parseInt(page.getTotal());
         int threadNumber = total > 100000 ? 8 : 2;
@@ -810,17 +862,28 @@ public class InvoiceHeadController {
 
             @Override
             public List<InvoiceLineDistDTO> queryDataByPage(Page page) {
-                Page<InvoiceLineDistDTO> invoiceLineDistDTOPage = invoiceHeadService.getInvoiceLineDistByCond(createdBy,
-                        null,
-                        null, null,
-                        null,
-                        null, null,
-                        null, null,
-                        null, null,
-                        null,
-                        null, null,
-                        null,
-                        null,
+                Page<InvoiceLineDistDTO> invoiceLineDistDTOPage = invoiceHeadService.getInvoiceLineDistByCond(
+                        invoiceTypeId,
+                        invoiceCode,
+                        invoiceNo,
+                        expenseNum,
+                        invoiceDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(invoiceDateFrom),
+                        invoiceDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(invoiceDateTo),
+                        invoiceAmountFrom, invoiceAmountTo,
+                        invoiceLineNumFrom, invoiceLineNumTo,
+                        taxRate,
+                        taxAmountFrom,
+                        taxAmountTo,
+                        applyDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(applyDateFrom),
+                        applyDateTo  == null ? null : TypeConversionUtils.getEndTimeForDayYYMMDD(applyDateTo),
+                        applicant,
+                        documentStatus,
+                        costLineNumberFrom,
+                        costLineNumberTo,
+                        costType,
+                        costAmountFrom,
+                        costAmountTo,
+                        installmentDeduction,
                         page);
                 return invoiceLineDistDTOPage.getRecords();
             }
@@ -949,5 +1012,147 @@ public class InvoiceHeadController {
         List<InvoiceHead> invoiceDTOS = invoiceHeadService.pageInvoiceByCond(createdBy,invoiceCode,invoiceNo,invoiceDateFrom,invoiceDateTo,currencyCode,salerName,queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return new ResponseEntity<>(invoiceDTOS,httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {POST}  /api/invoice/head/check/invoice
+     * @apiDescription  手工录入发票只校验不保存接口 （我的账本录入发票-手工录入-保存）
+     * @apiGroup InvoiceService
+     * @apiParam (请求参数) {InvoiceDTO} invoiceDTO 发票DTO
+     * @apiParam (InvoiceDTO的属性) {InvoiceHead} invoiceHead 发票头
+     * @apiParam (InvoiceDTO的属性) {List} invoiceLineList 发票行集合
+     * @apiParam (InvoiceHead的属性) {Long} tenantId 租户ID
+     * @apiParam (InvoiceHead的属性) {Long} setOfBooksId 账套ID
+     * @apiParam (InvoiceHead的属性) {ZonedDateTime} invoiceDate 开票日期
+     * @apiParam (InvoiceHead的属性) {String} invoiceNo 发票号码
+     * @apiParam (InvoiceHead的属性) {String} invoiceCode 发票代码
+     * @apiParam (InvoiceHead的属性) {String} machineNo 设备编号
+     * @apiParam (InvoiceHead的属性) {String} checkCode 校验码(后6位)
+     * @apiParam (InvoiceHead的属性) {BigDecimal} totalAmount 价税合计
+     * @apiParam (InvoiceHead的属性) {BigDecimal} invoiceAmount 金额合计
+     * @apiParam (InvoiceHead的属性) {BigDecimal} taxTotalAmount 税额合计
+     * @apiParam (InvoiceHead的属性) {String} currencyCode 币种
+     * @apiParam (InvoiceHead的属性) {BigDecimal} exchangeRate 汇率
+     * @apiParam (InvoiceHead的属性) {String} remark 备注
+     * @apiParam (InvoiceHead的属性) {String} buyerName 购方名称
+     * @apiParam (InvoiceHead的属性) {String} buyerTaxNo 购方纳税人识别号
+     * @apiParam (InvoiceHead的属性) {String} buyerAddPh 购方地址/电话
+     * @apiParam (InvoiceHead的属性) {String} buyerAccount 购方开户行/账号
+     * @apiParam (InvoiceHead的属性) {String} salerName 销方名称
+     * @apiParam (InvoiceHead的属性) {String} salerTaxNo 销方纳税人识别号
+     * @apiParam (InvoiceHead的属性) {String} salerAddPh 销方地址/电话
+     * @apiParam (InvoiceHead的属性) {String} salerAccount 销方开户行/账号
+     * @apiParam (InvoiceHead的属性) {Boolean} cancelFlag 作废标志
+     * @apiParam (InvoiceHead的属性) {Boolean} redInvoiceFlag 红票标志
+     * @apiParam (InvoiceHead的属性) {String} createdMethod 创建方式
+     * @apiParam (InvoiceHead的属性) {Boolean} checkResult 验真状态
+     * @apiParam (InvoiceHead的属性) {Boolean} fromBook 是否来源于账本
+     * @apiParam (InvoiceLine的属性) {Long} tenantId 租户ID
+     * @apiParam (InvoiceLine的属性) {Long} setOfBooksId 账套ID
+     * @apiParam (InvoiceLine的属性) {Long} invoiceHeadId 发票头ID
+     * @apiParam (InvoiceLine的属性) {Integer} invoiceLineNum 发票行序号
+     * @apiParam (InvoiceLine的属性) {String} goodsName 货物或应税劳务、服务名称
+     * @apiParam (InvoiceLine的属性) {String} specificationModel 规格型号
+     * @apiParam (InvoiceLine的属性) {String} unit 单位
+     * @apiParam (InvoiceLine的属性) {Long} num 数量
+     * @apiParam (InvoiceLine的属性) {BigDecimal} unitPrice 单价
+     * @apiParam (InvoiceLine的属性) {BigDecimal} detailAmount 金额
+     * @apiParam (InvoiceLine的属性) {String} taxRate 税率
+     * @apiParam (InvoiceLine的属性) {BigDecimal} taxAmount 税额
+     * @apiParam (InvoiceLine的属性) {String} currencyCode 币种
+     * @apiParam (InvoiceLine的属性) {BigDecimal} exchangeRate 汇率
+     * @apiSuccess (返回参数) {InvoiceDTO} invoiceDTO 发票DTO
+     * @apiParamExample {json} 请求参数
+    {
+        "invoiceHead":{
+        "invoiceTypeId":1087374219022475265,
+        "tenantId":1083751703623680001,
+        "setOfBooksId":1083762150064451585,
+        "invoiceDate":"2019-01-23T08:04:00.727Z",
+        "invoiceNo":"1234567890123457",
+        "invoiceCode":"002",
+        "totalAmount":2,
+        "invoiceAmount":1,
+        "taxTotalAmount":1,
+        "currencyCode":"CNY",
+        "remark":"hxtest2",
+        "createdMethod":"BY_HAND"
+        },
+        "invoiceLineList":[
+        {
+        "tenantId":1083751703623680001,
+        "setOfBooksId":1083762150064451585,
+        "invoiceLineNum":1,
+        "detailAmount":1,
+        "taxRate":"3%",
+        "taxAmount":0.01
+        }
+        ]
+    }
+     * @apiSuccessExample {json} 成功返回值
+    {
+        "invoiceHead": {
+        "id": "1088249100002455553",
+        "createdDate": "2019-01-24T09:36:18.79+08:00",
+        "createdBy": "1083751705402064897",
+        "lastUpdatedDate": "2019-01-24T09:36:18.79+08:00",
+        "lastUpdatedBy": "1083751705402064897",
+        "versionNumber": 1,
+        "invoiceTypeId": "1087374219022475265",
+        "tenantId": "1083751703623680001",
+        "setOfBooksId": "1083762150064451585",
+        "invoiceDate": "2019-01-23T08:04:00.727Z",
+        "invoiceNo": "1234567890123457",
+        "invoiceCode": "002",
+        "machineNo": null,
+        "checkCode": null,
+        "totalAmount": 2,
+        "invoiceAmount": 1,
+        "taxTotalAmount": 1,
+        "currencyCode": "CNY",
+        "exchangeRate": 1,
+        "remark": "hxtest2",
+        "buyerName": null,
+        "buyerTaxNo": null,
+        "buyerAddPh": null,
+        "buyerAccount": null,
+        "salerName": null,
+        "salerTaxNo": null,
+        "salerAddPh": null,
+        "salerAccount": null,
+        "cancelFlag": null,
+        "redInvoiceFlag": null,
+        "createdMethod": "BY_HAND",
+        "checkResult": null
+        },
+        "invoiceLineList": [
+        {
+        "id": "1088249101327855618",
+        "createdDate": "2019-01-24T09:36:19.104+08:00",
+        "createdBy": "1083751705402064897",
+        "lastUpdatedDate": "2019-01-24T09:36:19.104+08:00",
+        "lastUpdatedBy": "1083751705402064897",
+        "versionNumber": 1,
+        "tenantId": "1083751703623680001",
+        "setOfBooksId": "1083762150064451585",
+        "invoiceHeadId": "1088249100002455553",
+        "invoiceLineNum": 1,
+        "goodsName": null,
+        "specificationModel": null,
+        "unit": null,
+        "num": null,
+        "unitPrice": null,
+        "detailAmount": 1,
+        "taxRate": "3%",
+        "taxAmount": 0.01,
+        "currencyCode": "CNY",
+        "exchangeRate": 1
+        }
+        ]
+     }
+     */
+    @PostMapping("/check/invoice")
+    public ResponseEntity<InvoiceDTO> checkInvoice(@RequestBody InvoiceDTO invoiceDTO){
+        return ResponseEntity.ok(invoiceHeadService.checkInvoice(invoiceDTO));
     }
 }

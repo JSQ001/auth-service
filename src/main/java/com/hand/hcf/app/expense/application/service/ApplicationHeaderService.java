@@ -320,7 +320,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         BeanUtils.copyProperties(dto, applicationHeader);
         applicationHeader.setDepartmentOid(units.getDepartmentOid().toString());
         this.insert(applicationHeader);
-        if (dimensions != null) {
+        if (com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(dimensions)) {
             dimensions.stream().forEach(e -> {
                 e.setHeaderId(applicationHeader.getId());
                 e.setId(null);
@@ -804,8 +804,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     }
 
 
-    public DocumentLineDTO<ApplicationLineWebDTO> getLinesByHeaderId(Long id, Page page) {
-        return lineService.getLinesByHeaderId(id, page);
+    public DocumentLineDTO<ApplicationLineWebDTO> getLinesByHeaderId(Long id, Page page, boolean closeFlag) {
+        return lineService.getLinesByHeaderId(id, page, closeFlag);
     }
 
     private List<ApplicationLineDist> createDistLine(ApplicationHeader header) {
@@ -1053,6 +1053,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                         .functionalAmount(t.getFunctionalAmount())
                         .closedFlag(t.getClosedFlag().getDesc())
                         .remarks(t.getRemarks())
+                        .canCloseAmount(t.getCanCloseAmount())
                         .requisitionDate(t.getRequisitionDate()).build();
                 return dto;
             }
@@ -1071,6 +1072,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      * @param closedDTO 关闭的申请单Id集合和意见
      */
     @Transactional(rollbackFor = Exception.class)
+    //jiu.zhao 分布式锁
+    //@Lock(name = SyncLockPrefix.EXP_APPLICATION, lockType = LockType.TRY_LOCK_LIST, listKey = "#closedDTO.headerIds")
     public boolean closedHeader(ClosedDTO closedDTO) {
         if (CollectionUtils.isEmpty(closedDTO.getHeaderIds())) {
             return true;
@@ -1451,6 +1454,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
 
     @Transactional(rollbackFor = Exception.class)
+    //jiu.zhao 分布式锁
+    //@Lock(name = SyncLockPrefix.EXP_APPLICATION, keys = "#headerId")
     public boolean closedLine(Long id, String message, Long headerId) {
         ApplicationLine line = lineService.selectById(id);
         if (null == line || ClosedTypeEnum.CLOSED.equals(line.getClosedFlag())){
@@ -1643,6 +1648,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             ContactCO userById = organizationService.getUserById(applicationHeaderDTO.getEmployeeId());
             applicationHeaderDTO.setEmployeeCode(userById.getEmployeeCode());
             applicationHeaderDTO.setEmployeeName(userById.getFullName());
+            dto.setId(applicationHeaderDTO.getId());
             List<ApplicationLineAbbreviateDTO> applicationLineAbbreviateDTOS = distService.selectByApplicationHeaderId(dto);
             applicationLineAbbreviateDTOS.stream().forEach(applicationLineAbbreviateDTO -> {
                 applicationLineAbbreviateDTO.setUsableAmount(applicationLineAbbreviateDTO.getAmount().subtract(applicationLineAbbreviateDTO.getUsedAmount()));
