@@ -304,8 +304,8 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
      * @Modified by
      */
     public Page<CompanyCO> getCompanyByConditionFilter(Long applicationTypeId, String companyCode,
-                                                       String companyName, String companyCodeFrom, String companyCodeTo,
-                                                       Page page) {
+                                                           String companyName, String companyCodeFrom, String companyCodeTo,
+                                                           Page page) {
         ApplicationType applicationType = this.selectById(applicationTypeId);
         if (null == applicationType){
             throw new BizException(RespCode.SYS_OBJECT_IS_EMPTY);
@@ -496,16 +496,18 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
         List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.EXPENSE_REQUISITION.getCode(), OrgInformationUtil.getCurrentUserId());
 
         for(FormAuthorizeCO item : formAuthorizeCOList) {
-            List<Long> typeIdList = new ArrayList<>();
-            if (item.getCompanyId() != null) {
-                typeIdList = assignCompanyService.selectList(
-                        new EntityWrapper<ApplicationTypeAssignCompany>()
-                                .eq("company_id", item.getCompanyId())
-                                .eq("enabled",true)
-                ).stream().map(ApplicationTypeAssignCompany::getApplicationTypeId).collect(Collectors.toList());
-                if (typeIdList.size() == 0) {
-                    continue;
-                }
+            OrganizationUserCO contactCO = new OrganizationUserCO();
+            if (item.getMandatorId() != null) {
+                contactCO = organizationService.getOrganizationCOByUserId(item.getMandatorId());
+            }
+            List<Long> typeIdList = assignCompanyService.selectList(
+                    new EntityWrapper<ApplicationTypeAssignCompany>()
+                            .eq(item.getCompanyId() != null, "company_id", item.getCompanyId())
+                            .eq(contactCO.getCompanyId() != null, "company_id", contactCO.getCompanyId())
+                            .eq("enabled",true)
+            ).stream().map(ApplicationTypeAssignCompany::getApplicationTypeId).collect(Collectors.toList());
+            if (typeIdList.size() == 0) {
+                continue;
             }
             List<ApplicationType> applicationTypes = this.selectList(
                     new EntityWrapper<ApplicationType>()
@@ -514,8 +516,8 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
                             .eq("enabled", true));
 
             applicationTypes = applicationTypes.stream().filter(applicationType -> {
-                List<ApplicationTypeAssignUser> assignUsers = null;
-                List<Long> ids = null;
+                List<ApplicationTypeAssignUser> assignUsers;
+                List<Long> ids;
                 // 如果不是全部人员就去查询分配的部门或者人员组
                 if (!AssignUserEnum.USER_ALL.getKey().equals(applicationType.getApplyEmployee())){
                     assignUsers = assignUserService.selectList(
@@ -593,8 +595,7 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
         // 然后查询权限为人员组的单据类型
         List<ApplicationTypeAndUserGroupDTO> list = baseMapper.selectByUserGroup(setOfBooksId, companyId);
         if (!CollectionUtils.isEmpty(list)) {
-            list.forEach(type -> {
-
+            for (ApplicationTypeAndUserGroupDTO type : list) {
                 JudgeUserCO judgeUserCO = new JudgeUserCO();
                 judgeUserCO.setIdList(type.getUserGroupIds());
                 judgeUserCO.setUserId(OrgInformationUtil.getCurrentUserId());
@@ -602,8 +603,13 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
                 if (isExists) {
                     applicationTypes.add(type);
                 }
-            });
+            }
         }
+        applicationTypes.addAll(listAuthorizedApplicationType());
+        //根据ID去重
+        applicationTypes = applicationTypes.stream().collect(
+                collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ApplicationType::getId))), ArrayList::new)
+        );
         return applicationTypes;
     }
 
@@ -919,63 +925,55 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
         return result;
     }
 
-    public List<ContactCO> listUsersByApplicationType(Long id) {
+    public List<ContactCO> listUsersByApplicationType(Long id, String userCode, String userName, Page queryPage) {
         List<ContactCO> userCOList = new ArrayList<>();
 
         ApplicationType applicationType = this.getApplicationTypeById(id);
         if (applicationType == null){
             return userCOList;
         }
-        //查出有该单据权限的所有人员
-        List<ApplicationTypeAssignUser> assignUsers = null;
-        List<Long> ids = null;
-        Set<ContactCO> userCOS = new HashSet<>();
-        if (!AssignUserEnum.USER_ALL.getKey().equals(applicationType.getApplyEmployee())){
-            assignUsers = assignUserService.selectList(
-                    new EntityWrapper<ApplicationTypeAssignUser>().eq("application_type_id", applicationType.getId()));
-            ids = assignUsers.stream().map(ApplicationTypeAssignUser::getUserTypeId).collect(Collectors.toList());
-        } else {
-            userCOS.addAll(organizationService.listUserByTenantId(OrgInformationUtil.getCurrentTenantId()));
-        }
-        // 部门
-        if (AssignUserEnum.USER_DEPARTMENT.getKey().equals(applicationType.getApplyEmployee())){
-            if (!CollectionUtils.isEmpty(ids)) {
 
-                ids.forEach(e -> userCOS.addAll(organizationService.listUsersByDepartmentId(e)));
-            }
-        }
-        // 人员组
-        if (AssignUserEnum.USER_GROUP.getKey().equals(applicationType.getApplyEmployee())){
-            if (!CollectionUtils.isEmpty(ids)) {
-
-                ids.forEach(e -> userCOS.addAll(organizationService.listUsersByUserGroupId(e)));
-            }
-        }
-
-        List<Long> companyList = assignCompanyService.selectList(
+        //查出有该单据权限的所有公司的id
+        List<Long> companyIdList = assignCompanyService.selectList(
                 new EntityWrapper<ApplicationTypeAssignCompany>()
                         .eq("enabled", true)
                         .eq("application_type_id", id)
         ).stream().map(ApplicationTypeAssignCompany::getCompanyId).collect(toList());
 
-        Map<Long, ContactCO> userCOMap = userCOS.stream().filter(u -> companyList.contains(u.getCompanyId())).collect(Collectors.toMap(ContactCO::getId, u -> u, (e1, e2) -> e1));
-
-        //当前用户是否有新建权限
-        if (userCOMap.containsKey(OrgInformationUtil.getCurrentUserId())) {
-            userCOList.add(userCOMap.get(OrgInformationUtil.getCurrentUserId()));
+        if (companyIdList.size() == 0){
+            return userCOList;
         }
 
-        //委托人是否有新建权限
-        List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.EXPENSE_REQUISITION.getCode(), OrgInformationUtil.getCurrentUserId());
-        formAuthorizeCOList = formAuthorizeCOList.stream().filter(item ->
-             !(item.getFormId() != null && !item.getFormId().equals(applicationType.getId()))
-        ).collect(Collectors.toList());
+        List<Long> departmentIdList = null;
+        List<Long> userGroupIdList = null;
 
-        for(FormAuthorizeCO item : formAuthorizeCOList) {
-            if (item.getMandatorId() != null && userCOMap.containsKey(item.getMandatorId())) {
-                userCOList.add(userCOMap.get(item.getMandatorId()));
-            }
+        // 部门
+        if (AssignUserEnum.USER_DEPARTMENT.getKey().equals(applicationType.getApplyEmployee())){
+            departmentIdList = assignUserService.selectList(
+                    new EntityWrapper<ApplicationTypeAssignUser>()
+                            .eq("application_type_id", applicationType.getId())
+            ).stream().map(ApplicationTypeAssignUser::getUserTypeId).collect(Collectors.toList());
         }
+        // 人员组
+        if (AssignUserEnum.USER_GROUP.getKey().equals(applicationType.getApplyEmployee())){
+            userGroupIdList = assignUserService.selectList(
+                    new EntityWrapper<ApplicationTypeAssignUser>()
+                            .eq("application_type_id", applicationType.getId())
+            ).stream().map(ApplicationTypeAssignUser::getUserTypeId).collect(Collectors.toList());
+        }
+
+        AuthorizeQueryCO queryCO = AuthorizeQueryCO
+                .builder()
+                .documentCategory(FormTypeEnum.EXPENSE_REQUISITION.getCode())
+                .formTypeId(id)
+                .companyIdList(companyIdList)
+                .departmentIdList(departmentIdList)
+                .userGroupIdList(userGroupIdList)
+                .currentUserId(OrgInformationUtil.getCurrentUserId())
+                .build();
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        queryPage.setTotal(contactCOPage.getTotal());
+        userCOList = contactCOPage.getRecords();
 
         return userCOList;
     }

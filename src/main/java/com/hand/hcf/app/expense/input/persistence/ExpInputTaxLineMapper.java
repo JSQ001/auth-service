@@ -23,7 +23,7 @@ public interface ExpInputTaxLineMapper extends BaseMapper<ExpInputTaxLine>{
     /**
      * 获取 报账单的行数据 包含两部分-已经存在进项行的，未存在进项行的
      * */
-    List<ExpInputForReportLineDTO> listExpInputTaxLine(@Param("ew") Wrapper<ExpInputTaxLine> wrapper, @Param("setOfBooksId") Long setOfBooksId, @Param("headerId") Long headerId, Page page);
+    List<ExpInputForReportLineDTO> listExpInputTaxLine(@Param("ew") Wrapper<ExpInputTaxLine> wrapper,@Param("setOfBooksId") Long setOfBooksId, @Param("headerId") Long headerId, Page page);
     /**
      * 获取 报账单的行金额合计
      * */
@@ -31,5 +31,5 @@ public interface ExpInputTaxLineMapper extends BaseMapper<ExpInputTaxLine>{
     /**
      * 获取 报账单的行数据，部分数据需要联表查询
      * */
-    List<ExpInputTaxLineDTO> listLineById(@Param("inputTaxHeaderId") Long inputTaxHeaderId, Page page);
+    List<ExpInputTaxLineDTO> listLineById(@Param("inputTaxHeaderId") Long inputTaxHeaderId,Page page);
 }

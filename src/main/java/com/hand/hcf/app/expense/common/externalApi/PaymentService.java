@@ -2,8 +2,10 @@ package com.hand.hcf.app.expense.common.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.hand.hcf.app.common.co.CashDefaultFlowItemCO;
 import com.hand.hcf.app.common.co.CashTransactionClassCO;
 import com.hand.hcf.app.common.co.CashTransactionClassForOtherCO;
+import com.hand.hcf.app.common.co.CashWriteOffHistoryAndPaymentAmountCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -116,6 +118,39 @@ public class PaymentService {
      *//*
     public void saveDataToPayment(List<CashTransactionDataCreateCO> cashTransactionDataCreateCOS){
         paymentClient.saveTransactionDataBatch(cashTransactionDataCreateCOS);
+    }
+
+    *//**
+     * 核销记录生效
+     * @param documentType
+     * @param documentHeaderId
+     * @param documentLineIds
+     * @param lastUpdatedBy
+     * @return
+     *//*
+    public String saveWriteOffTakeEffect(String documentType, Long documentHeaderId, List<Long> documentLineIds, Long lastUpdatedBy) {
+        return paymentClient.saveWriteOffTakeEffect(documentType, documentHeaderId, documentLineIds, lastUpdatedBy);
+    }
+
+    *//**
+     * 回滚核算记录
+     * @param documentType
+     * @param documentHeaderId
+     * @param documentLineIds
+     * @param lastUpdatedBy
+     * @return
+     *//*
+    public String updateWriteOffRollback(String documentType, Long documentHeaderId, List<Long> documentLineIds, Long lastUpdatedBy) {
+        return paymentClient.updateRollback(documentType, documentHeaderId, documentLineIds, lastUpdatedBy);
+    }
+
+    *//**
+     * 创建核销凭证
+     * @param co
+     * @return
+     *//*
+    public String saveWriteOffJournalLines(CashWriteOffAccountCO co){
+        return paymentClient.saveWriteOffJournalLines(co);
     }*/
 
 }

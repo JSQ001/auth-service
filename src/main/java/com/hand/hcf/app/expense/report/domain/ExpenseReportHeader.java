@@ -162,6 +162,18 @@ public class ExpenseReportHeader extends Domain{
     private String budgetCheckResult;
 
     /**
+     * 创建凭证标志
+     */
+    @TableField("je_creation_status")
+    private Boolean jeCreationStatus;
+
+    /**
+     * 创建凭证日期
+     */
+    @TableField("je_creation_date")
+    private ZonedDateTime jeCreationDate;
+
+    /**
      * 预算校验返回结果描述
      */
     @TableField(exist = false)

@@ -44,7 +44,7 @@
         m.dimension18_id dimension18Id,
         m.dimension19_id dimension19Id,
         m.dimension20_id dimension20Id,
-        ,(SELECT
+        (SELECT
         case when sum(err.amount) is not null then sum(err.amount) else 0 end
         FROM
         exp_requisition_release err

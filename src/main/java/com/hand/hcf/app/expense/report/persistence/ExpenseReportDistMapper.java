@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface ExpenseReportDistMapper extends BaseMapper<ExpenseReportDist>{
     List<ExpenseReportDistDTO> queryExpenseReportDistFromApplication(RowBounds rowBounds,
-                                                                     @Param("ew") Wrapper<ExpenseReportDist> wrapper,
-                                                                     @Param("documentNumber") String documentNumber,
-                                                                     @Param("reportDocumentNumber") String reportDocumentNumber);
+                                                                     @Param("ew")Wrapper<ExpenseReportDist> wrapper,
+                                                                     @Param("documentNumber")String documentNumber,
+                                                                     @Param("reportDocumentNumber")String reportDocumentNumber);
 }

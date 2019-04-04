@@ -171,6 +171,19 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
         }
 
+        //在分摊设置表中插入默认值
+        ExpenseReportTypeDistSetting expenseReportTypeDistSetting = ExpenseReportTypeDistSetting
+                .builder()
+                .reportTypeId(expenseReportType.getId())
+                .companyDistFlag(false)
+                .companyVisible("EDITABLE")
+                .departmentDistFlag(false)
+                .departmentVisible("EDITABLE")
+                .resCenterDistFlag(false)
+                .resVisible("EDITABLE")
+                .build();
+        expenseReportTypeDistSettingService.insert(expenseReportTypeDistSetting);
+
         //返回给前台新增的报账单类型
         return expenseReportType;
     }
@@ -526,19 +539,22 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.BULLETIN_BILL.getCode(), OrgInformationUtil.getCurrentUserId());
 
         for(FormAuthorizeCO item : formAuthorizeCOList) {
-            List<Long> typeIdList = new ArrayList<>();
-            if (item.getCompanyId() != null) {
-                typeIdList = expenseReportTypeCompanyService.selectList(
-                        new EntityWrapper<ExpenseReportTypeCompany>()
-                                .eq("company_id", item.getCompanyId())
-                                .eq("enabled",true)
-                ).stream().map(ExpenseReportTypeCompany::getReportTypeId).collect(Collectors.toList());
-                if (typeIdList.size() == 0) {
-                    continue;
-                }
+            OrganizationUserCO contactCO = new OrganizationUserCO();
+            if (item.getMandatorId() != null) {
+                contactCO = organizationService.getOrganizationCOByUserId(item.getMandatorId());
+            }
+            List<Long> typeIdList = expenseReportTypeCompanyService.selectList(
+                    new EntityWrapper<ExpenseReportTypeCompany>()
+                            .eq(item.getCompanyId() != null, "company_id", item.getCompanyId())
+                            .eq(contactCO.getCompanyId() != null, "company_id", contactCO.getCompanyId())
+                            .eq("enabled",true)
+            ).stream().map(ExpenseReportTypeCompany::getReportTypeId).collect(Collectors.toList());
+            if (typeIdList.size() == 0) {
+                continue;
             }
             List<ExpenseReportType> expenseReportTypes = this.selectList(
                     new EntityWrapper<ExpenseReportType>()
+                            .eq("set_of_books_id",OrgInformationUtil.getCurrentSetOfBookId())
                             .in(typeIdList.size() != 0, "id", typeIdList)
                             .eq(item.getFormId() != null, "id", item.getFormId())
                             .eq("enabled", true));
@@ -849,62 +865,49 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
      * @param id
      * @return
      */
-    public List<ContactCO> listUsersByExpenseReportType(Long id) {
+    public List<ContactCO> listUsersByExpenseReportType(Long id, String userCode, String userName, Page queryPage) {
         List<ContactCO> userCOList = new ArrayList<>();
 
         ExpenseReportType expenseReportType = this.selectById(id);
         if (expenseReportType == null){
             return userCOList;
         }
-        //查出有该单据权限的所有人员
-        Set<ContactCO> userCOS = new HashSet<>();
-        if ("1001".equals(expenseReportType.getApplyEmployee())){
-            userCOS.addAll(organizationService.listUserByTenantId(OrgInformationUtil.getCurrentTenantId()));
-        }
-        // 部门
-        if ("1002".equals(expenseReportType.getApplyEmployee())){
-            List<Long> deparmentIds = expenseReportTypeDepartmentService.selectList(new EntityWrapper<ExpenseReportTypeDepartment>()
-                    .eq("report_type_id", expenseReportType.getId())).stream().map(ExpenseReportTypeDepartment::getDepartmentId).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(deparmentIds)) {
 
-                deparmentIds.forEach(e -> userCOS.addAll(organizationService.listUsersByDepartmentId(e)));
-            }
-        }
-        // 人员组
-        if ("1003".equals(expenseReportType.getApplyEmployee())){
-            List<Long> userGroupIds = expenseReportTypeUserGroupService.selectList(new EntityWrapper<ExpenseReportTypeUserGroup>()
-                    .eq("report_type_id", expenseReportType.getId())).stream().map(ExpenseReportTypeUserGroup::getUserGroupId).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(userGroupIds)) {
-
-                userGroupIds.forEach(e -> userCOS.addAll(organizationService.listUsersByUserGroupId(e)));
-            }
-        }
-
-        List<Long> companyList = expenseReportTypeCompanyService.selectList(
+        List<Long> companyIdList = expenseReportTypeCompanyService.selectList(
                 new EntityWrapper<ExpenseReportTypeCompany>()
                         .eq("enabled", true)
                         .eq("report_type_id", id)
         ).stream().map(ExpenseReportTypeCompany::getCompanyId).collect(toList());
-
-        Map<Long, ContactCO> userCOMap = userCOS.stream().filter(u -> companyList.contains(u.getCompanyId())).collect(Collectors.toMap(ContactCO::getId, u -> u, (e1, e2) -> e1));
-
-        //当前用户是否有新建权限
-        if (userCOMap.containsKey(OrgInformationUtil.getCurrentUserId())) {
-            userCOList.add(userCOMap.get(OrgInformationUtil.getCurrentUserId()));
+        if (companyIdList.size() == 0){
+            return userCOList;
         }
 
-        //委托人是否有新建权限
-        List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.BULLETIN_BILL.getCode(),
-                OrgInformationUtil.getCurrentUserId());
-        formAuthorizeCOList = formAuthorizeCOList.stream().filter(item ->
-                !(item.getFormId() != null && !item.getFormId().equals(expenseReportType.getId()))
-        ).collect(Collectors.toList());
+        List<Long> departmentIdList = null;
+        List<Long> userGroupIdList = null;
 
-        for(FormAuthorizeCO item : formAuthorizeCOList) {
-            if (item.getMandatorId() != null && userCOMap.containsKey(item.getMandatorId())) {
-                userCOList.add(userCOMap.get(item.getMandatorId()));
-            }
+        // 部门
+        if ("1002".equals(expenseReportType.getApplyEmployee())){
+            departmentIdList = expenseReportTypeDepartmentService.selectList(new EntityWrapper<ExpenseReportTypeDepartment>()
+                    .eq("report_type_id", expenseReportType.getId())).stream().map(ExpenseReportTypeDepartment::getDepartmentId).collect(Collectors.toList());
         }
+        // 人员组
+        if ("1003".equals(expenseReportType.getApplyEmployee())){
+            userGroupIdList = expenseReportTypeUserGroupService.selectList(new EntityWrapper<ExpenseReportTypeUserGroup>()
+                    .eq("report_type_id", expenseReportType.getId())).stream().map(ExpenseReportTypeUserGroup::getUserGroupId).collect(Collectors.toList());
+        }
+
+        AuthorizeQueryCO queryCO = AuthorizeQueryCO
+                .builder()
+                .documentCategory(FormTypeEnum.BULLETIN_BILL.getCode())
+                .formTypeId(id)
+                .companyIdList(companyIdList)
+                .departmentIdList(departmentIdList)
+                .userGroupIdList(userGroupIdList)
+                .currentUserId(OrgInformationUtil.getCurrentUserId())
+                .build();
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        queryPage.setTotal(contactCOPage.getTotal());
+        userCOList = contactCOPage.getRecords();
 
         return userCOList;
     }

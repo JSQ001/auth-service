@@ -5,6 +5,7 @@ import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -55,4 +56,6 @@ public class ApplicationLineWebDTO extends ApplicationLine {
      * 金额录入模式 false-总金额 true-单价*数量
      */
     private Boolean entryMode;
+
+    private BigDecimal canCloseAmount;
 }

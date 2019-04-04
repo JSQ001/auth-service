@@ -42,7 +42,7 @@ public class ExpenseAdjustTypeController {
      * @param expenseAdjustTypeRequestDTO
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST,produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExpenseAdjustType> createExpenseAdjustType(@RequestBody @NotNull ExpenseAdjustTypeRequestDTO expenseAdjustTypeRequestDTO){
         return ResponseEntity.ok(expenseAdjustTypeService.createExpenseAdjustType(expenseAdjustTypeRequestDTO));
     }
@@ -53,7 +53,7 @@ public class ExpenseAdjustTypeController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{id}",method = RequestMethod.GET,produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExpenseAdjustTypeRequestDTO> getExpenseAdjustType(@PathVariable Long id){
         return ResponseEntity.ok(expenseAdjustTypeService.getExpenseAdjustType(id));
     }
@@ -64,7 +64,7 @@ public class ExpenseAdjustTypeController {
      * @param expenseAdjustTypeRequestDTO
      * @return
      */
-    @RequestMapping(method = RequestMethod.PUT,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.PUT,produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExpenseAdjustType> updateExpenseAdjustType(@RequestBody ExpenseAdjustTypeRequestDTO expenseAdjustTypeRequestDTO){
         return ResponseEntity.ok(expenseAdjustTypeService.updateExpenseAdjustType(expenseAdjustTypeRequestDTO));
     }
@@ -102,7 +102,7 @@ public class ExpenseAdjustTypeController {
      * @return
      * @throws URISyntaxException
      */
-    @RequestMapping(value = "/query",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/query",method = RequestMethod.GET,produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ExpenseAdjustType>> getExpenseAdjustTypeByCond(
         @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
         @RequestParam(value = "expAdjustTypeCode", required = false) String expAdjustTypeCode,
@@ -164,8 +164,14 @@ public class ExpenseAdjustTypeController {
      * @api {GET} /api/expense/adjust/types/users/{id} 【调整单类型】根据单据id查询有该单据权限的用户
      */
     @GetMapping("/users/{id}")
-    public List<ContactCO> listUsersByExpenseAdjustType(@PathVariable("id") Long id){
-
-        return expenseAdjustTypeService.listUsersByExpenseAdjustType(id);
+    public ResponseEntity listUsersByExpenseAdjustType(@PathVariable("id") Long id,
+                                                       @RequestParam(required = false) String userCode,
+                                                       @RequestParam(required = false) String userName,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<ContactCO> result = expenseAdjustTypeService.listUsersByExpenseAdjustType(id, userCode, userName, queryPage);
+        HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 }

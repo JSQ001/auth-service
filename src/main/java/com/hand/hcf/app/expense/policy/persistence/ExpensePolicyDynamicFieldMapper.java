@@ -13,5 +13,5 @@ import java.util.List;
  * @date: 2019/1/29 11:44
  */
 public interface ExpensePolicyDynamicFieldMapper extends BaseMapper<ExpensePolicyDynamicField> {
-    List<ExpensePolicyDynamicField> selectExpensePolicyDynamicFieldByPolicyId(@Param("policyId") Long policyId);
+    List<ExpensePolicyDynamicField> selectExpensePolicyDynamicFieldByPolicyId(@Param("policyId")Long policyId);
 }

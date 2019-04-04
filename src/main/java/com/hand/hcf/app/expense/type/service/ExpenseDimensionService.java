@@ -36,6 +36,7 @@ public class ExpenseDimensionService extends BaseService<ExpenseDimensionMapper,
         dimensions.forEach(dimension -> {
             DimensionCO dimensionCO = orgService.getDimensionById(dimension.getDimensionId());
             dimension.setName(dimensionCO.getDimensionName());
+            dimension.setSequence(dimensionCO.getDimensionSequence());
         });
         return dimensions;
     }

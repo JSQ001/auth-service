@@ -198,20 +198,4 @@ public class DimensionUtils {
             }
         }
     }
-
-    public  static void setNullToDimensionId(int start, Object target, Class<?> clazz){
-        for (int i = start + 1; i <= DIMENSION_ID_SIZE; i++) {
-            Field field = ReflectionUtils.findField(clazz, "dimension" + i + "Id");
-            if (field == null){
-                log.error("属性{}不存在", "dimension" + i + "Id");
-                continue;
-            }
-            field.setAccessible(true);
-            try {
-                field.set(target, null);
-            } catch (IllegalAccessException e1) {
-                throw new BizException(RespCode.EXPENSE_SET_DIMENSION_ID_ERROR);
-            }
-        }
-    }
 }

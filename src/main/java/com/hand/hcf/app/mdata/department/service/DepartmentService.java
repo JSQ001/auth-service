@@ -26,12 +26,14 @@ import com.hand.hcf.app.mdata.system.enums.DataSourceTypeEnum;
 import com.hand.hcf.app.mdata.utils.PathUtil;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
+
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.core.exception.core.ValidationError;
 import com.hand.hcf.core.exception.core.ValidationException;
 import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,9 +44,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -1352,8 +1357,8 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
         return null;
     }
 
-    public List<DepartmentTreeDTO> getTenantDepartmentAll(Long currentTenantID, Integer status, String language) {
-        List<DepartmentTreeDTO> departmentTrees = departmentMapper.findTenantAllDepartment(currentTenantID, status, language);
+    public List<DepartmentTreeDTO> getTenantDepartmentAll(String code, String name, Long currentTenantID, Integer status, String language) {
+        List<DepartmentTreeDTO> departmentTrees = departmentMapper.findTenantAllDepartment(code, name, currentTenantID, status, language);
         return departmentTrees;
     }
     //------------------------------------ department mybatis refactor begin---------------------------------------//
@@ -1536,8 +1541,8 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
      * @return
      */
     public List<Department> getDepartmentInfoByTenantId(Long tenantId,
-                                                        String keyWord,
-                                                        com.baomidou.mybatisplus.plugins.Page page) {
+                                                               String keyWord,
+                                                               com.baomidou.mybatisplus.plugins.Page page) {
         Wrapper<Department> departmentWrapper = new EntityWrapper<Department>()
                 .eq("tenant_id", tenantId)
                 .ne("status", DepartmentTypeEnum.DELETE.getId())

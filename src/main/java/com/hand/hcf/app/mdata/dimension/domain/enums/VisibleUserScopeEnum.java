@@ -9,6 +9,7 @@ public enum VisibleUserScopeEnum implements SysEnum {
     ALL(1001),//全部
     DEPARTMENT(1002),//部门
     USER_GROUP(1003),//人员组
+    USER(1004)//人员
 
     ;
     private Integer id;
