@@ -263,7 +263,7 @@ public class DroolsService {
 
         try {
             if (ruleApprovalNode.getNotifyInfo() != null) {
-                ObjectMapper mapper = new ObjectMapper();
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 ruleApprovalNodeDTO.setNotifyInfo(mapper.readValue(ruleApprovalNode.getNotifyInfo(), NotifyInfo.class));
             }
         } catch (Exception e) {

@@ -14,8 +14,6 @@ import java.util.List;
 public class ApprovalFormForOtherRequestDTO {
     //账套id
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long setOfBookId;
-
 
     //范围
     //全部：all、已选：selected、未选：notChoose

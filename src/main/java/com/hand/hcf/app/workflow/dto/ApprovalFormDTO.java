@@ -34,23 +34,14 @@ public class ApprovalFormDTO {
     //申请关联报销单 表单
     private UUID referenceOid;
     private Boolean submitFlag = false;
-    //用户可见范围，1001，全部可见；1002，自定义用户组可见
-    private Integer VisibleUserScope;
     //表单编码
     private String formCode;
-    private Long companyId;
-    private UUID companyOid;
-    //private String companyName;
 
     private Long tenantId;
-
-    private Long setOfBooksId;
-    //private Long legalEntityId;
 
     //是否被分配
     private Boolean assigned;
     private Integer fromType;
-    private Integer visibleCompanyScope;
     private Integer approvalMode;
     private List<FormFieldDTO> formFieldList;
     private RuleApprovalChainDTO ruleApprovalChain;

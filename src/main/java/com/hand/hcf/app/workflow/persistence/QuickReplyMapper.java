@@ -14,9 +14,9 @@ import java.util.UUID;
  * @date: 2019/2/13
  */
 public interface QuickReplyMapper extends BaseMapper<QuickReply> {
-    List<QuickReply> findByUserOid(@Param(value = "userOid") UUID userOid);
+    List<QuickReply> findByUserOid(@Param(value = "userOid")UUID userOid);
 
-    void deleteByUserOid(@Param(value = "userOid") UUID userOid);
+    void deleteByUserOid(@Param(value = "userOid")UUID userOid);
 
-    void deleteByQuickReplyOids(@Param(value = "quickReplyOids") List<UUID> quickReplyOids);
+    void deleteByQuickReplyOids(@Param(value = "quickReplyOids")List<UUID> quickReplyOids);
 }

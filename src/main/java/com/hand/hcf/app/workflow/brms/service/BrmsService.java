@@ -147,7 +147,7 @@ public class BrmsService {
      * @param formOid
      * @return
      */
-    public boolean isEnableRule(UUID formOid) {
+    public boolean isEnableRule( UUID formOid) {
         if (formOid == null) {
             return false;
         }

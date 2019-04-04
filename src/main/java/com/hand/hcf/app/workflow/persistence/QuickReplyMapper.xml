@@ -4,14 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.workflow.persistence.QuickReplyMapper" >
 
-    <!--<resultMap id="QuickReplyResultMap" type="com.hand.hcf.app.workflow.domain.QuickReply">
-        <id column="id" property="id"/>
-        <result column="quick_reply_oid" property="quickReplyOid"/>
-        <result column="user_oid" property="userOid"/>
-        <result column="reply" property="reply"/>
-        <result column="status" property="status"/>
-        <result column="sequence_number" property="sequenceNumber"/>
-    </resultMap>-->
+
 
     <select id="findByUserOid" resultType="com.hand.hcf.app.workflow.domain.QuickReply">
         SELECT * FROM sys_quick_reply WHERE user_oid = #{userOid} ORDER BY sequence_number ASC

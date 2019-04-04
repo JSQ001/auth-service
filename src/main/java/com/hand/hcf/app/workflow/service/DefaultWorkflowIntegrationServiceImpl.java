@@ -11,13 +11,13 @@ import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.constant.WorkflowConstants;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.AssembleBrmsParamsRespDTO;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.enums.ApprovalPathModeEnum;
 import com.hand.hcf.app.workflow.enums.BusinessColumnMessageKey;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -656,13 +657,17 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
         //设置默认金额
         FormValueDTO budgetValueDTO = RuleConstants.DEFAULT_AMOUNT_VALUE;
-        budgetValueDTO.setValue(sysWorkFlowDocumentRef.getAmount().toString());
+        BigDecimal amount = sysWorkFlowDocumentRef.getAmount();
+        String amountStr = amount != null ? amount.toString() : "0";
+        budgetValueDTO.setValue(amountStr);
         budgetValueDTO.setFormOid(formOid);
         customFormValueDTOs.add(budgetValueDTO);
 
         //设置默认本币金额
         FormValueDTO customFormValueFunctionAmountDTO = RuleConstants.DEFAULT_FUNCTION_AMOUNT_VALUE;
-        customFormValueFunctionAmountDTO.setValue(sysWorkFlowDocumentRef.getFunctionAmount().toString());
+        BigDecimal functionAmount = sysWorkFlowDocumentRef.getFunctionAmount();
+        String functionAmountStr = functionAmount != null ? functionAmount.toString() : "0";
+        customFormValueFunctionAmountDTO.setValue(functionAmountStr);
         customFormValueFunctionAmountDTO.setFormOid(formOid);
         customFormValueDTOs.add(customFormValueFunctionAmountDTO);
 

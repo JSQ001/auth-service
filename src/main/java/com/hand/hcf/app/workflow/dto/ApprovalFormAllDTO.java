@@ -22,6 +22,4 @@ public class ApprovalFormAllDTO {
     //表单相关
     private ApprovalForm approvalFormDTO;
 
-    //适用范围相关
-    private ApprovalFormUserScopeDTO approvalFormUserScopeDTO;
 }

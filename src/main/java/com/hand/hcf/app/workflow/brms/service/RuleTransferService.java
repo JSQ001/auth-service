@@ -3,7 +3,6 @@ package com.hand.hcf.app.workflow.brms.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.brms.domain.RuleCondition;
 import com.hand.hcf.app.workflow.brms.domain.RuleConditionRelation;
 import com.hand.hcf.app.workflow.brms.domain.RuleTransfer;
@@ -128,9 +127,7 @@ public class RuleTransferService extends BaseService<RuleTransferMapper, RuleTra
             //创建条件
             RuleCondition ruleCondition = ruleConditionService.save(
                     RuleCondition.builder()
-                            .companyOid(OrgInformationUtil.getCurrentCompanyOid())
                             .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
-                            //.field(RuleApprovalEnum.CONDITION_TYPE_FORM_TRANFORM.getId().toString())
                             .typeNumber(RuleConstants.CONDITION_TYPE_FORM_TRANFORM)
                             .symbol(RuleConstants.SYMBOL_EQ)
                             .ruleValue(formOid.toString())
@@ -181,9 +178,7 @@ public class RuleTransferService extends BaseService<RuleTransferMapper, RuleTra
                 //创建条件
                 RuleCondition ruleCondition = ruleConditionService.save(
                         RuleCondition.builder()
-                                .companyOid(OrgInformationUtil.getCurrentCompanyOid())
                                 .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
-                                //.field(RuleApprovalEnum.CONDITION_TYPE_FORM_TRANFORM.getId().toString())
                                 .typeNumber(RuleConstants.CONDITION_TYPE_FORM_TRANFORM)
                                 .symbol(RuleConstants.SYMBOL_EQ)
                                 .ruleValue(formOid.toString())

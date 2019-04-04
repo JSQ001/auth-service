@@ -4,22 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.brms.domain.RuleApprovalChain;
-import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
-import com.hand.hcf.app.workflow.brms.domain.RuleApprover;
-import com.hand.hcf.app.workflow.brms.domain.RuleCondition;
-import com.hand.hcf.app.workflow.brms.domain.RuleConditionRelation;
-import com.hand.hcf.app.workflow.brms.domain.RuleScene;
-import com.hand.hcf.app.workflow.brms.dto.CustomFormApprovalModeDTO;
-import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
-import com.hand.hcf.app.workflow.brms.dto.NotifyInfo;
-import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleApproverDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleApproverUserOidsDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleConditionDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleEnumDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleNextApproverResult;
+import com.hand.hcf.app.workflow.brms.domain.*;
+import com.hand.hcf.app.workflow.brms.dto.*;
 import com.hand.hcf.app.workflow.brms.enums.OperationEntityTypeEnum;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.ApprovalFormApprovalModeMapper;
@@ -52,14 +38,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -1383,7 +1362,7 @@ public class RuleService {
      * @param cascadeApprovalChain
      * @return
      */
-    public List<ApprovalFormDTO> getAllUnInitialCustomForm(boolean cascadeApprovalChain) {
+    public List<ApprovalFormDTO> getAllUnInitialCustomForm( boolean cascadeApprovalChain) {
         List<ApprovalFormDTO> approvalFormDTOS = null;
         try {
             approvalFormDTOS = approvalFormService.listDTO();

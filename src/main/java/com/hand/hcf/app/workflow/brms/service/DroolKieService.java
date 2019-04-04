@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -94,12 +93,7 @@ public class DroolKieService {
                 .withStopStrategy(StopStrategies.stopAfterAttempt(1))
                 .build();
         try {
-            return retryer.call(new Callable<DroolsRuleDetailResult>() {
-                @Override
-                public DroolsRuleDetailResult call() throws Exception {
-                    return droolExecute(droolsRuleApprovalNodeDTO, customFormValueDTOS, filterDroolsRuleDetails, ruleApprovalNodeOid);
-                }
-            });
+            return retryer.call(() -> droolExecute(droolsRuleApprovalNodeDTO, customFormValueDTOS, filterDroolsRuleDetails, ruleApprovalNodeOid));
         } catch (Exception e) {
             logger.error("执行drool引擎 fail",e);
             e.printStackTrace();
@@ -109,9 +103,7 @@ public class DroolKieService {
 
     private DroolsRuleDetailResult droolExecute(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO, List<FormValueDTO> formValueDTOS, List<DroolsRuleDetail> filterDroolsRuleDetails, UUID ruleApprovalNodeOid) throws Exception {
         //找到对应的drool条件
-        List<String> drlList = filterDroolsRuleDetails.stream().map(c -> {
-            return c.getDroolsRuleDetailValue();
-        }).collect(Collectors.toList());
+        List<String> drlList = filterDroolsRuleDetails.stream().map(c -> c.getDroolsRuleDetailValue()).collect(Collectors.toList());
 
         DroolsRuleDetailResult droolsRuleDetailResult = new DroolsRuleDetailResult();
         droolsRuleDetailResult.setDroolsRuleDetailResultOid(UUID.randomUUID());

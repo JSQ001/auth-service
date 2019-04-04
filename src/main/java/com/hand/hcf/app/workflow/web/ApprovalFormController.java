@@ -225,7 +225,7 @@ public class ApprovalFormController {
      */
     @RequestMapping(value = "/custom/forms/setOfBooks/my/available/all", method = RequestMethod.GET)
     public ResponseEntity<List<ApprovalFormSummaryDTO>> listAvailableForms(@RequestParam(name = "formTypeId", required = true) Integer formTypeId,
-                                                                           @RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId) {
+                                                                          @RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId) {
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
         List<ApprovalFormSummaryDTO> approvalFormSummaryDTOS = approvalFormService.listByFormType(tenantId, formTypeId);
         return ResponseEntity.ok(approvalFormSummaryDTOS);

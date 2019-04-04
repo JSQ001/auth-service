@@ -29,8 +29,6 @@ public class RuleSceneDTO {
 
     private Integer status;
 
-    private UUID companyOid;
-
     private String code;
 
     private String name;

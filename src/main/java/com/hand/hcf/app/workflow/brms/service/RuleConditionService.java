@@ -105,10 +105,9 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
     }
 
     @Transactional(readOnly = true)
-    public RuleCondition findTopOneByCompanyOidAndStatusOrderByBatchCodeDesc(UUID companyOid) {
+    public RuleCondition findTopOneByStatusOrderByBatchCodeDesc() {
 
         return selectOne(new EntityWrapper<RuleCondition>()
-                .eq("company_oid", companyOid)
                 .eq("status", RuleApprovalEnum.VALID.getId())
                 .orderBy("batch_code", false));
 
@@ -164,7 +163,6 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
                 }
                 ruleCondition.setId(opt.getId());
                 ruleCondition.setStatus(opt.getStatus());
-                ruleCondition.setCompanyOid(opt.getCompanyOid());
             } else {
                 throw new ValidationException(new ValidationError("approvalRule.saveRuleCondition", "not exist : " + ruleCondition.getRuleConditionOid().toString()));
             }
@@ -193,19 +191,13 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
         ruleConditionDTO.getValueDetail().setValue(newValue);
     }
 
-    public RuleConditionDTO createRuleCondition(RuleConditionDTO ruleConditionDTO) {
-        return createRuleCondition(ruleConditionDTO, OrgInformationUtil.getCurrentCompanyOid());
-    }
 
-    public List<RuleConditionDTO> createRuleCondition(List<RuleConditionDTO> ruleConditionDTOList) {
-        return createRuleCondition(ruleConditionDTOList, OrgInformationUtil.getCurrentCompanyOid());
-    }
 
 
     /**
      * 规则条件相关接口 ***********************
      */
-    private RuleConditionDTO createRuleCondition(RuleConditionDTO ruleConditionDTO, UUID companyOid) {
+    public RuleConditionDTO createRuleCondition(RuleConditionDTO ruleConditionDTO) {
         if (ruleConditionDTO.getEntityType() == null || ruleConditionDTO.getEntityOid() == null) {
             throw new BizException("approvalRule.createRuleCondition", "entityType or entityOid is null");
         }
@@ -223,11 +215,10 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
 
                 RuleCondition newRuleCondition = fromDTO(ruleConditionDTO);
 
-                newRuleCondition.setCompanyOid(companyOid);
 
                 //TODO
                 if (newRuleCondition.getBatchCode() == null || newRuleCondition.getBatchCode() == 0L) {
-                    RuleCondition lastCondition = findTopOneByCompanyOidAndStatusOrderByBatchCodeDesc(companyOid);
+                    RuleCondition lastCondition = findTopOneByStatusOrderByBatchCodeDesc();
                     if (lastCondition == null) {
                         newRuleCondition.setBatchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT);
                     } else {
@@ -267,7 +258,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
     /**
      * 规则条件相关接口 ***********************
      */
-    private List<RuleConditionDTO> createRuleCondition(List<RuleConditionDTO> ruleConditionDTOList, UUID companyOid) {
+    public List<RuleConditionDTO> createRuleCondition(List<RuleConditionDTO> ruleConditionDTOList) {
         UUID userOid = OrgInformationUtil.getCurrentUserOid();
         List<RuleConditionDTO> ruleConditionDTOs = new ArrayList<>();
         Long batchCode = null;
@@ -277,7 +268,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
                     ruleConditionDTO.setBatchCode(batchCode);
                 }
             }
-            RuleConditionDTO newRuleConditionDTO = createRuleCondition(ruleConditionDTO, companyOid);
+            RuleConditionDTO newRuleConditionDTO = createRuleCondition(ruleConditionDTO);
 
             if (newRuleConditionDTO!=null) {
                 batchCode = newRuleConditionDTO.getBatchCode();

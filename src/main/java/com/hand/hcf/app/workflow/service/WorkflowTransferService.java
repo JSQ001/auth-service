@@ -59,7 +59,6 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
         };
         workflowTransfer.setAuthorizerId(OrgInformationUtil.getCurrentUserId());
         workflowTransfer.setTenantId(OrgInformationUtil.getCurrentTenantId());
-        workflowTransfer.setSetOfBooksId(OrgInformationUtil.getCurrentSetOfBookId());
         baseMapper.insert(workflowTransfer);
         return workflowTransfer;
     }
@@ -117,7 +116,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
             String documentCategory = workflowTransfer.getDocumentCategory();
             Long workflowId = workflowTransfer.getWorkflowId();
             //代理人
-            ContactCO agent= baseClient.getUserById(workflowTransfer.getAgentId());
+            ContactCO  agent= baseClient.getUserById(workflowTransfer.getAgentId());
             //授权人
             ContactCO authorizer = baseClient.getUserById(workflowTransfer.getAuthorizerId());
             workflowTransfer.setAuthorizerName(authorizer.getFullName());

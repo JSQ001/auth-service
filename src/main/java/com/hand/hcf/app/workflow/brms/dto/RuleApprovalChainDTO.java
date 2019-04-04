@@ -26,7 +26,6 @@ public class RuleApprovalChainDTO {
     private String code;
     private String name;
 
-    //private UUID companyOid;
     private String remark;
     private Integer status;
 

@@ -25,7 +25,6 @@ public class ApprovalFormQO {
     private List<Long> companyIds;
     private Long tenantId;
     private List<Long> tenantIds;
-    private Long setOfBooksId;
     private Integer formTypeId;
     private List<Integer> formTypeList;
 }
