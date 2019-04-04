@@ -190,6 +190,12 @@
         <if test="status == null">
             and d.status != 103
         </if>
+        <if test="code != null and code != ''">
+           AND d.department_code like concat(concat('%',#{code}),'%')
+        </if>
+        <if test="name != null and name != ''">
+           AND d.name like concat(concat('%',#{name}),'%')
+        </if>
         order by d.DEPARTMENT_CODE
     </select>
 

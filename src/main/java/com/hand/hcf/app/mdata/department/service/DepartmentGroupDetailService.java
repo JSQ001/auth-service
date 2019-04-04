@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class DepartmentGroupDetailService extends ServiceImpl<DepartmentGroupDetailMapper, DepartmentGroupDetail> {
+public class DepartmentGroupDetailService extends ServiceImpl<DepartmentGroupDetailMapper,DepartmentGroupDetail> {
     @Autowired
     private DepartmentGroupDetailMapper departmentGroupDetailMapper;
     @Autowired

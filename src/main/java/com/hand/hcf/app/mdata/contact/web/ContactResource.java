@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -963,6 +964,30 @@ public class ContactResource {
         Page page = PageUtil.getPage(pageable);
         List<UserSimpleInfoDTO> list = contactService.listUsersByCond(userSimpleInfoNotExcludeIdsDTO.getEmployeeCode(), userSimpleInfoNotExcludeIdsDTO.getName(), userSimpleInfoNotExcludeIdsDTO.getCompanyId(), userSimpleInfoNotExcludeIdsDTO.getUnitId(), userSimpleInfoNotExcludeIdsDTO.getIds(),page);
         return new ResponseEntity<>(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
+    }
+
+    /**
+     * {GET} /api/get/users/by/department/and/company  公司账户，添加授权员工查询使用
+     * @param companyId
+     * @param departmentId
+     * @param userCode
+     * @param userName
+     * @param companyName
+     * @param pageable
+     * @return
+     */
+    @RequestMapping(value = "/get/users/by/department/and/company",method = RequestMethod.GET)
+    public ResponseEntity<List<UserInfoDTO>> getUserByDepartmentAndCompany(
+            @RequestParam(value = "companyId", required = false) Long companyId,
+            @RequestParam(value = "departmentId", required = false) Long departmentId,
+            @RequestParam(value = "userCode", required = false) String userCode,
+            @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "companyName", required = false) String companyName,
+            Pageable pageable) {
+        Page page = PageUtil.getPage(pageable);
+        List<UserInfoDTO> result = contactService.getUserByDepartmentAndCompany(companyId, departmentId, userCode, userName, companyName, page);
+        HttpHeaders headers = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
 }

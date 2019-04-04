@@ -282,4 +282,9 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
         List<ContactCO> contactCOList = workFlowDocumentRefService.listCurrentApprover(entityType, entityOid);
         return contactCOList;
     }
+	
+	public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> formIds) {
+        List<ApprovalFormCO> approvalFormCOList = this.listApprovalFormByIds(formIds);
+        return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
+    }
 }

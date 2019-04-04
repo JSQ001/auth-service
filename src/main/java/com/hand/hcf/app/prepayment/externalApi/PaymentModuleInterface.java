@@ -1,18 +1,16 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
-//import com.hand.hcf.app.apply.payment.PaymentClient;
-//import com.hand.hcf.app.apply.payment.dto.*;
-import com.hand.hcf.app.common.co.*;
-import ma.glasnost.orika.MapperFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hand.hcf.app.common.co.CashDefaultFlowItemCO;
+import com.hand.hcf.app.common.co.CashTransactionClassCO;
+import com.hand.hcf.app.common.co.CashTransactionClassForOtherCO;
+import com.hand.hcf.app.common.co.CashTransactionDataCreateCO;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+
+//import com.hand.hcf.app.apply.payment.PaymentClient;
+//import com.hand.hcf.app.apply.payment.dto.*;
 
 
 /**
@@ -91,6 +89,7 @@ public class PaymentModuleInterface {
         }
         return true;*/
 
+        //bo.liu 支付
 //        paymentClient.saveTransactionDataBatch(dataCOS);
         return true;
     }
@@ -102,10 +101,12 @@ public class PaymentModuleInterface {
      * @param setOfBookId
      * @return
      */
-//    public  List<CashTransactionClassCO> listCashTransactionClassBySetOfBookId(Long setOfBookId) {
+    public  List<CashTransactionClassCO> listCashTransactionClassBySetOfBookId(Long setOfBookId) {
+        //bo.liu 支付
 //        List<CashTransactionClassCO> cashTransactionClassDTOS = mapper.mapAsList(paymentClient.listCashTransactionClassBySetOfBookId(setOfBookId), CashTransactionClassCO.class);
 //        return cashTransactionClassDTOS;
-//    }
+        return null;
+    }
 
     /**
      * 根据现金事务分类ID获取详情
@@ -113,10 +114,12 @@ public class PaymentModuleInterface {
      * @param cashTransactionClassId
      * @return
      */
-//    public CashTransactionClassCO selectCashTransactionClassById(Long cashTransactionClassId) {
-//        return mapper.map(paymentClient.getCashTransactionClassById(cashTransactionClassId), CashTransactionClassCO.class);
-//
-//    }
+    public CashTransactionClassCO selectCashTransactionClassById(Long cashTransactionClassId) {
+        //bo.liu 支付
+        //return mapper.map(paymentClient.getCashTransactionClassById(cashTransactionClassId), CashTransactionClassCO.class);
+        return null;
+
+    }
 
     /**
      * 根据现金事务分类ID集合 查询详情
@@ -124,10 +127,12 @@ public class PaymentModuleInterface {
      * @param cashTransactionClassIdList
      * @return
      */
-//    public  List<CashTransactionClassCO> listCashTransactionClassByIdList(List<Long> cashTransactionClassIdList) {
+    public  List<CashTransactionClassCO> listCashTransactionClassByIdList(List<Long> cashTransactionClassIdList) {
+        //bo.liu 支付
 //        List<CashTransactionClassCO> list = mapper.mapAsList(paymentClient.listCashTransactionClassByIdList(cashTransactionClassIdList), CashTransactionClassCO.class);
 //        return list;
-//    }
+        return null;
+    }
 
     /**
      * 根据指定范围 查询现金事务分类
@@ -135,30 +140,36 @@ public class PaymentModuleInterface {
      * @param cashTransactionClassForOtherCO
      * @return
      */
-//    public  List<CashTransactionClassCO> listTransactionClassByRange(CashTransactionClassForOtherCO cashTransactionClassForOtherCO, Page page) throws Exception {
+    public  List<CashTransactionClassCO> listTransactionClassByRange(CashTransactionClassForOtherCO cashTransactionClassForOtherCO, Page page) throws Exception {
+        //bo.liu 支付
 //        Page<CashTransactionClassCO>  casPage = paymentClient.listCashTransactionClassForPerPayByRange(cashTransactionClassForOtherCO, page);
 //        page.setTotal(casPage.getTotal());
 //        List<CashTransactionClassCO> cashTransactionClassDTOs = mapper.mapAsList(
 //                casPage.getRecords(),
 //                CashTransactionClassCO.class);
 //        return cashTransactionClassDTOs;
-//
-//    }
+        return null;
+
+    }
     /**
      * 根据现金事务分类ID ，获取现金事务分类详情 以及其下关联的默认现金流量项
      *
      * @param cashTransactionClassId
      * @return
      */
-//    public  CashDefaultFlowItemCO selectTransactionClassAndFlowItemById(Long cashTransactionClassId) {
+    public  CashDefaultFlowItemCO selectTransactionClassAndFlowItemById(Long cashTransactionClassId) {
+        //bo.liu 支付
 //        return paymentClient.getCashDefaultFlowItemByTransactionClassId(cashTransactionClassId);
-//    }
+        return null;
+    }
 
 
-//    public  List<Long> getExcludeDocumentCashWriteOffAmountDTOByInput(Double noWriteOffDocumentAmountFrom,Double noWriteOffDocumentAmountTo,Long setOfBooksId){
-//
+    public  List<Long> getExcludeDocumentCashWriteOffAmountDTOByInput(Double noWriteOffDocumentAmountFrom,Double noWriteOffDocumentAmountTo,Long setOfBooksId){
+        //bo.liu 支付
+
 //        return paymentClient.listExcludeDocumentByWriteOffAmount(noWriteOffDocumentAmountFrom != null ?
 //                        BigDecimal.valueOf(noWriteOffDocumentAmountFrom) : null,
 //                noWriteOffDocumentAmountTo != null ? BigDecimal.valueOf(noWriteOffDocumentAmountTo) : null, setOfBooksId);
-//    }
+        return null;
+    }
 }

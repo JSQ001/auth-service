@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-public class CashPayRequisitionTypeAssignCompanyService extends BaseService<CashPayRequisitionTypeAssignCompanyMapper, CashPayRequisitionTypeAssignCompany> {
+public class CashPayRequisitionTypeAssignCompanyService extends BaseService<CashPayRequisitionTypeAssignCompanyMapper,CashPayRequisitionTypeAssignCompany> {
     @Autowired
     private CashPayRequisitionTypeService cashPayRequisitionTypeService;
     @Autowired

@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.location.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
+import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
@@ -65,4 +66,17 @@ public interface LocationDetailMapper extends BaseMapper<LocationDetail> {
                                                                     @Param("vendorType") String vendorType,
                                                                     @Param("stateNames") List<String> stateNames,
                                                                     @Param("language") String language);
+
+    /**
+     * ģ����ѯ�ص�
+     * @param description ����
+     * @param id id
+     * @param code code
+     * @param language ����
+     * @return List<LocationInfoDTO>
+     */
+    List<LocationInfoDTO> listCityByDescription(@Param("description") String description,
+                                                @Param("id") Long id,
+                                                @Param("code") String code,
+                                                @Param("language") String language);
 }

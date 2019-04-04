@@ -640,4 +640,46 @@
         order by sct.employee_id asc
     </select>
 
+    <select id="listContactByConditionAndWrapper" resultType="com.hand.hcf.app.mdata.contact.domain.Contact">
+        select c.USER_ID, c.USER_OID, c.EMPLOYEE_ID, c.FULL_NAME
+          from SYS_CONTACT c
+          left join SYS_DEPARTMENT_USER du
+            on c.USER_ID = du.USER_ID
+         where 1 = 1
+         <if test="companyIds != null and !companyIds.isEmpty()">
+             and c.COMPANY_ID in
+             <foreach collection="companyIds" item="item" index="index" open="(" close=")" separator=",">
+                 #{item}
+             </foreach>
+         </if>
+         <if test="departmentIds != null and !departmentIds.isEmpty()">
+             and du.DEPARTMENT_ID in
+             <foreach collection="departmentIds" item="item" index="index" open="(" close=")" separator=",">
+                 #{item}
+             </foreach>
+         </if>
+         <if test="userGroupIds != null and !userGroupIds.isEmpty()">
+             and exists (
+                 select 1
+                 from SYS_USER_GROUP_USER ugu
+                 where c.USER_ID = ugu.USER_ID
+                 and ugu.USER_GROUP_ID in
+                 <foreach collection="userGroupIds" item="item" index="index" open="(" close=")" separator=",">
+                     #{item}
+                 </foreach>
+             )
+         </if>
+         <if test="userCode != null">
+             and c.EMPLOYEE_ID like concat(concat('%',#{userCode}),'%')
+         </if>
+         <if test="userName != null">
+              and c.FULL_NAME like concat(concat('%',#{userName}),'%')
+         </if>
+          and ( 1 = 1
+             <if test="ew != null">
+                 ${ew.sqlSegment}
+             </if>
+          )
+    </select>
+
 </mapper>

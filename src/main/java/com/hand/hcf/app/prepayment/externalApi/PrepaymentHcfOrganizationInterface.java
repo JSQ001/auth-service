@@ -2,26 +2,25 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.mdata.implement.web.*;
-import org.apache.commons.lang3.StringUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.implement.web.*;
 import com.hand.hcf.app.prepayment.web.dto.PartnerBankInfo;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.util.LoginInformationUtil;
 import ma.glasnost.orika.MapperFacade;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.springframework.util.CollectionUtils;
 
 //import com.hand.hcf.app.application.ApplicationService;
 //import com.hand.hcf.app.application.dto.ApplicationDTO;
@@ -70,11 +69,9 @@ public class PrepaymentHcfOrganizationInterface {
     private WorkflowControllerImpl workflowClient;
 
 
-
-
     public AttachmentCO getAttachmentByOID(String oid) {
         AttachmentCO attachmentCO = attachmentClient.getByOid(oid);
-        if (attachmentCO == null){
+        if (attachmentCO == null) {
             return null;
         }
         return attachmentCO;
@@ -157,7 +154,7 @@ public class PrepaymentHcfOrganizationInterface {
 //       return dto;
 //    }
 
-    public  String getPrepaymentCode() {
+    public String getPrepaymentCode() {
         Long companyID = OrgInformationUtil.getCurrentCompanyId();
         String companyCode = companyClient.getById(companyID).getCompanyCode();
         Date date = new Date();
@@ -167,9 +164,9 @@ public class PrepaymentHcfOrganizationInterface {
         //jiu.zhao 修改三方接口 20190328
         //return orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now);
         String language = LoginInformationUtil.getCurrentLanguage();
-        OrderNumberCO orderNumberCO = (OrderNumberCO)this.orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now).getBody();
+        OrderNumberCO orderNumberCO = (OrderNumberCO) this.orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now).getBody();
         if (StringUtils.isEmpty(orderNumberCO.getOrderNumber())) {
-            throw new BizException(orderNumberCO.getCode(), (String)orderNumberCO.getMessage().stream().filter((u) -> {
+            throw new BizException(orderNumberCO.getCode(), (String) orderNumberCO.getMessage().stream().filter((u) -> {
                 return u.getLanguage().equalsIgnoreCase(language);
             }).findFirst().map(OrderNumberCO.Message::getContent).get());
         } else {
@@ -262,14 +259,14 @@ public class PrepaymentHcfOrganizationInterface {
 //    }
 
     /**
+     * @return
      * @Description: 根据员工ID和银行账号获取银行账户信息
      * @param: userID 员工ID
      * @param: number  账户
-     * @return
      * @Date: Created in 2018/6/27 15:37
      * @Modified by
      */
-    public PartnerBankInfo getEmployeeCompanyBankByCode(Long userID, String number){
+    public PartnerBankInfo getEmployeeCompanyBankByCode(Long userID, String number) {
         UserBankAccountCO userBankAccountCO = userClient.getUserBankAccountByUserIdAndAccountNumber(userID, number);
         PartnerBankInfo partnerBankInfo = new PartnerBankInfo();
         mapper.map(userBankAccountCO, partnerBankInfo);
@@ -283,11 +280,11 @@ public class PrepaymentHcfOrganizationInterface {
     public Page<CompanyCO> pageBySetOfBooksIdConditionByIgnoreIds(Long setOfBookId, String companyCode, String companyName, String companyCodeFrom, String companyCodeTo, List<Long> collect, Page page) {
         //Page<CompanyCO> companyCOPage = companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBookId, companyCode, companyCodeFrom, companyCodeTo, companyName,true, page, collect);
         //jiu.zhao 修改三方接口 20190328
-        Page<CompanyCO> pageCompanies = this.companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBookId, companyCode, companyCodeFrom, companyCodeTo, companyName, true, page.getCurrent() - 1, page.getSize(), (List)(collect == null ? new ArrayList() : collect));
+        Page<CompanyCO> pageCompanies = this.companyClient.pageBySetOfBooksIdConditionByIgnoreIds(setOfBookId, companyCode, companyCodeFrom, companyCodeTo, companyName, true, page.getCurrent() - 1, page.getSize(), (List) (collect == null ? new ArrayList() : collect));
         return pageCompanies;
     }
 
-    public List<CompanyCO> listCompanyById(List<Long> companyIds){
+    public List<CompanyCO> listCompanyById(List<Long> companyIds) {
         return companyClient.listByIds(companyIds);
     }
 
@@ -317,15 +314,15 @@ public class PrepaymentHcfOrganizationInterface {
     public List<DepartmentCO> getDepartmentByDepartmentIds(List<Long> departmentOrUserGroupIdList) {
         //jiu.zhao 修改三方接口 20190328
         //return departmentClient.listDepartmentsByIds(departmentOrUserGroupIdList);
-        return this.departmentClient.listDepartmentsByIds(departmentOrUserGroupIdList, (String)null);
+        return this.departmentClient.listDepartmentsByIds(departmentOrUserGroupIdList, (String) null);
     }
 
     public List<UserGroupCO> listUserGroupAndUserIdByGroupIds(List<Long> departmentOrUserGroupIdList) {
         return userClient.listUserGroupAndUserIdByGroupIds(departmentOrUserGroupIdList);
     }
 
-    public List<ContactCO> listByUserIdsConditionByKeyWord(List<Long> ids,String keyWord) {
-        return userClient.listByUserIdsConditionByKeyWord(ids,keyWord);
+    public List<ContactCO> listByUserIdsConditionByKeyWord(List<Long> ids, String keyWord) {
+        return userClient.listByUserIdsConditionByKeyWord(ids, keyWord);
     }
 
     public Boolean judgeUserInUserGroups(JudgeUserCO judgeUserCO) {
@@ -352,6 +349,7 @@ public class PrepaymentHcfOrganizationInterface {
 
     /**
      * 根据用户id查询其组织架构Id信息
+     *
      * @param userId
      * @return
      */
@@ -361,38 +359,40 @@ public class PrepaymentHcfOrganizationInterface {
 
     /**
      * 根据部门ID查询用户信息
+     *
      * @param departmentId
      * @return
      */
-    public List<ContactCO> listUsersByDepartmentId(Long departmentId){
+    public List<ContactCO> listUsersByDepartmentId(Long departmentId) {
         return userClient.listUsersByDepartmentId(departmentId);
     }
 
     /**
      * 查询当前租户下的所有员工
+     *
      * @param tenantId
      * @return
      */
-    public List<ContactCO> listUserByTenantId(Long tenantId){
+    public List<ContactCO> listUserByTenantId(Long tenantId) {
         return userClient.listUserByTenantId(tenantId);
     }
 
     /**
      * 根据人员组ID查询用户信息
+     *
      * @param userGroupId
      * @return
      */
-    public List<ContactCO> listUsersByUserGroupId(Long userGroupId){
+    public List<ContactCO> listUsersByUserGroupId(Long userGroupId) {
         return userClient.listByUserGroupId(userGroupId);
     }
 
     /**
+     * @param userOid
+     * @return
      * @author mh.z
      * @date 2019/02/19
      * @description 根据用户oid获取用户信息
-     *
-     * @param userOid
-     * @return
      */
     public ContactCO getEmployeeByOid(String userOid) {
         //return userClient.getByUserOid(userOid);
@@ -402,33 +402,42 @@ public class PrepaymentHcfOrganizationInterface {
 
     /**
      * 保存审批历史至工作流模块
+     *
      * @param commonApprovalHistoryCO
      * @return
      */
-    public ApprovalHistoryCO saveHistory(CommonApprovalHistoryCO commonApprovalHistoryCO){
+    public ApprovalHistoryCO saveHistory(CommonApprovalHistoryCO commonApprovalHistoryCO) {
         return workflowClient.saveHistory(commonApprovalHistoryCO);
     }
 
     public List<ContactCO> listUsersByIds(List<Long> userList) {
         //return userClient.listByUserIds(userList);
         //jiu.zhao 修改三方接口 20190328
-        return (List)(CollectionUtils.isEmpty(userList) ? new ArrayList() : this.userClient.listByUserIdsConditionByKeyWord(userList, (String)null));
+        return (List) (CollectionUtils.isEmpty(userList) ? new ArrayList() : this.userClient.listByUserIdsConditionByKeyWord(userList, (String) null));
     }
 
     /**
      * 分页条件获取当前租户下的用户信息
+     *
      * @param employeeCode 员工代码
-     * @param fullName  员工名称
-     * @param keyWord  员工id、员工名称 关键词
-     * @param ignoreIds  忽略id
+     * @param fullName     员工名称
+     * @param keyWord      员工id、员工名称 关键词
+     * @param ignoreIds    忽略id
      * @param page
      * @return
      */
-//    public Page<ContactCO> pageConditionNameAndIgnoreIds(String employeeCode,
-//                                                         String fullName,
-//                                                         String keyWord,
-//                                                         List<Long> ignoreIds,
-//                                                         Page page) {
-//        return userClient.pageConditionNameAndIgnoreIds(employeeCode, fullName, keyWord, ignoreIds, page);
-//    }
+    public Page<ContactCO> pageConditionNameAndIgnoreIds(String employeeCode,
+                                                         String fullName,
+                                                         String keyWord,
+                                                         List<Long> ignoreIds,
+                                                         Page page) {
+        //bo.liu 修改三方接口 20190329
+        //return userClient.pageConditionNameAndIgnoreIds(employeeCode, fullName, keyWord, ignoreIds, page);
+        return userClient.pageConditionNameAndIgnoreIds(employeeCode,
+                fullName,
+                keyWord,
+                ignoreIds == null ? new ArrayList<>() : ignoreIds,
+                page.getCurrent() - 1,
+                page.getSize());
+    }
 }

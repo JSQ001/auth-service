@@ -136,4 +136,15 @@ public class ResponsibilityCenterGroupService extends BaseService<Responsibility
                         .eq("group_id",id));
         return true;
     }
+
+    public List<ResponsibilityCenterGroup> listResponsibilityCenterGroupByResCenterId(Long responsibilityCenterId) {
+       List<GroupCenterRelationship> groupCenterRelationships = groupCenterRelationshipService.selectList(
+               new EntityWrapper<GroupCenterRelationship>()
+                       .eq("responsibility_center_id",responsibilityCenterId));
+        if(CollectionUtils.isEmpty(groupCenterRelationships)){
+            return null;
+        }
+        List<Long> groupId  = groupCenterRelationships.stream().map(GroupCenterRelationship::getGroupId).collect(Collectors.toList());
+        return baseMapper.selectList(new EntityWrapper<ResponsibilityCenterGroup>().in("id",groupId));
+    }
 }

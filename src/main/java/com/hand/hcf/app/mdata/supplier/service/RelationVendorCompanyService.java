@@ -202,7 +202,7 @@ public class RelationVendorCompanyService extends BaseService<RelationVendorComp
         Map<Long, String> setBooksMap = new HashMap<>(16);
         List<CompanyDTO> list = mapper.mapAsList(coms, CompanyDTO.class);
         list.forEach(companyDTO -> {
-            if (companyDTO.getSetOfBooksId() != null && StringUtils.isEmpty(companyDTO.getSetOfBooksName())) {
+            if (companyDTO.getSetOfBooksId() != null && org.apache.commons.lang3.StringUtils.isEmpty(companyDTO.getSetOfBooksName())) {
                 if (setBooksMap.containsKey(companyDTO.getSetOfBooksId())) {
                     companyDTO.setSetOfBooksName(setBooksMap.get(companyDTO.getSetOfBooksId()));
                 } else {

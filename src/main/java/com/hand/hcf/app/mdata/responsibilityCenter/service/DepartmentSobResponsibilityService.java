@@ -256,17 +256,26 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
         Wrapper wrapper = new EntityWrapper<DepartmentSobResponsibility>()
                 .eq("company_id",companyId)
                 .eq("department_id", departmentId);
-        DepartmentSobResponsibility departmentSobResponsibility = selectOne(wrapper);
+        DepartmentSobResponsibility departmentSobResponsibility = null;
+        List<DepartmentSobResponsibility> list = this.selectList(wrapper);
+        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(list)){
+            departmentSobResponsibility = list.get(0);
+        }
         if(departmentSobResponsibility == null){
             Company company = companyService.selectById(companyId);
             wrapper = new EntityWrapper<DepartmentSobResponsibility>()
                     .eq("set_of_books_id",company.getSetOfBooksId())
                     .eq("department_id", departmentId)
                     .isNull("company_id");
-            departmentSobResponsibility = selectOne(wrapper);
+            list = this.selectList(wrapper);
+            if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(list)){
+                departmentSobResponsibility = list.get(0);
+            }
         }
-        if(departmentSobResponsibility.getDefaultResponsibilityCenter() != null){
-            return responsibilityCenterService.selectById(departmentSobResponsibility.getDefaultResponsibilityCenter());
+        if(departmentSobResponsibility != null){
+            if(departmentSobResponsibility.getDefaultResponsibilityCenter() != null){
+                return responsibilityCenterService.selectById(departmentSobResponsibility.getDefaultResponsibilityCenter());
+            }
         }
         return null;
     }

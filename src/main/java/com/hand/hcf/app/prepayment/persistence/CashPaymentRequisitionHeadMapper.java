@@ -19,7 +19,7 @@ public interface CashPaymentRequisitionHeadMapper extends BaseMapper<CashPayment
     List<CurrencyDTO> getAmountByHeadIdAndRefHeadId(
             @Param("refHeadId") Long refHeadId,
             @Param("headId") Long headId
-    );
+            );
 
     int getTotal(@Param("ew") Wrapper<CashPaymentRequisitionHead> wrapper);
 
@@ -30,4 +30,5 @@ public interface CashPaymentRequisitionHeadMapper extends BaseMapper<CashPayment
      * @return
      */
     List<CashPaymentRequisitionHead> listHeaderAndTypName(RowBounds rowBounds, @Param("ew") Wrapper<CashPaymentRequisitionHead> wrapper);
+
 }

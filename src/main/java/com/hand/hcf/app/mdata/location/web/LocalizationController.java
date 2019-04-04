@@ -12,10 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,5 +165,43 @@ public class LocalizationController {
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link","/api/localization/query/stateAndCity");
         return new ResponseEntity<>(stateDTOS, headers, HttpStatus.OK);
+    }
+    /**
+     * @api {GET} /api/localization/city/query 根据国家代码获取所有城市
+     * @apiDescription  根据国家代码获取所有城市
+     * @apiGroup Localization
+     * @apiParam {String}  code 国家代码
+     * @apiParam {String} city 国家名称
+     * @apiParamExample {json} Request-Param:
+     *      http://localhost:8000/mdata/api/localization/city/query?page=0&size=10&code=CHN000000000&roleType=TENANT
+     * @apiSuccessExample {json} Success-Response:
+     * [
+        {
+        "id": "51517",
+        "code": "CHN011001000",
+        "type": "CITY",
+        "country": "中国",
+        "state": "北京",
+        "city": "东城",
+        "district": null,
+        "vendorType": "standard"
+        }
+    ]
+     */
+    @GetMapping("/localization/city/query")
+    public ResponseEntity<List<LocalizationDTO>> pageLocalizationCityByCode(@RequestParam(value = "code")String code,
+                                                                            @RequestParam(value = "city",required = false) String city,
+                                                                            @RequestParam(value = "vendorType",defaultValue = "standard")String vendorType,
+                                                                            @RequestParam(value = "page", required = false,defaultValue = "0") int page,
+                                                                            @RequestParam(value = "size", required = false,defaultValue = "1000") int size){
+
+        String language= OrgInformationUtil.getCurrentLanguage();
+        Page mybatisPage = PageUtil.getPage(page,size);
+        List<LocalizationDTO> cityList = localizationDTOService.getLocalizationCityByCountry(code,city,vendorType,language);
+        mybatisPage.setRecords(cityList);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + mybatisPage.getTotal());
+        headers.add("Link","/api/localization/query/stateAndCity");
+        return new ResponseEntity<>(cityList, headers, HttpStatus.OK);
     }
 }

@@ -1,9 +1,11 @@
 package com.hand.hcf.app.prepayment.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+//import com.hand.hcf.app.application.dto.CustomFormForOtherRequestDTO;
 import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignRequisitionType;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignRequisitionTypeService;
+import com.hand.hcf.app.prepayment.web.dto.CustomFormForOtherDTO;
 import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.core.util.PaginationUtil;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URISyntaxException;
 import java.util.List;
-
-//import com.hand.hcf.app.application.dto.CustomFormForOtherRequestDTO;
 
 /**
  * Created by 韩雪 on 2017/12/5.
