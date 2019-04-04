@@ -4,6 +4,7 @@ package com.hand.hcf.app.prepayment.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.expense.application.implement.web.ApplicationControllerImpl;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
 import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
@@ -32,7 +33,7 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
     @Autowired
     private MapperFacade mapper;
     @Autowired
-    private ExpenseApplicationClient expenseApplicationClient;
+    private ApplicationControllerImpl expenseApplicationClient;
     @Autowired
     private PrepaymentHcfOrganizationInterface hcfOrganizationInterface;
 

@@ -14,10 +14,7 @@ import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
 import com.hand.hcf.app.prepayment.domain.enumeration.Constants;
-import com.hand.hcf.app.prepayment.externalApi.ContractModuleInterface;
-import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
-import com.hand.hcf.app.prepayment.externalApi.PaymentModuleInterface;
-import com.hand.hcf.app.prepayment.externalApi.VendorModuleInterface;
+import com.hand.hcf.app.prepayment.externalApi.*;
 import com.hand.hcf.app.prepayment.persistence.CashPaymentRequisitionHeadMapper;
 import com.hand.hcf.app.prepayment.utils.ContractOperationType;
 import com.hand.hcf.app.prepayment.utils.RespCode;
@@ -26,6 +23,7 @@ import com.hand.hcf.app.prepayment.web.adapter.CashPaymentRequisitionLineAdapter
 import com.hand.hcf.app.prepayment.web.dto.*;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.security.domain.PrincipalLite;
@@ -78,8 +76,10 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     @Autowired
     private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
     @Autowired
+    private ExpenseModuleInterface expenseModuleInterface;
+    @Autowired
     private PaymentModuleInterface paymentModuleInterface;
-    //@Autowired
+    //@Autowired  合同
     //private ContractClient contractService;
     @Autowired
     private SupplierImplementControllerImpl supplierClient;
@@ -192,7 +192,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         submitData.setDestinationService(applicationName); // 注册到Eureka中的名称
 
         //调用工作流的三方接口进行提交
-        ApprovalResultCO submitResult = workflowInterface.submitWorkflow(submitData);
+        ApprovalResultCO submitResult = workflowClient.submitWorkflow(submitData);
 
         if (Boolean.TRUE.equals(submitResult.getSuccess())){
             Integer approvalStatus = submitResult.getStatus();
@@ -747,7 +747,8 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                     });
                 }*/
                 dtoPage.setRecords(receivablesDTOS);
-                page.setTotal(contactCOS.getTotal());
+                //bo.liu 修改三方接口 201900404
+               /*page.setTotal(contactCOS.getTotal());*/
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new BizException(RespCode.PREPAY_USER_BANK_ERROR);
@@ -807,7 +808,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 
                // dtoPage = hcfOrganizationInterface.getContactBankAccountDTO(OrgInformationUtil.getCurrentTenantId(), name,code, page.getCurrent(), page.getSize());
                 List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
-                Page<ContactCO> contactCOS = hcfOrganizationInterface.pageConditionNameAndIgnoreIds(code,name,null,null,page);
+                Page<ContactCO> contactCOS = prepaymentHcfOrganizationInterface.pageConditionNameAndIgnoreIds(code,name,null,null,page);
                 if(CollectionUtils.isNotEmpty(contactCOS.getRecords())){
                     dtoPage.setTotal(contactCOS.getTotal());
                     contactCOS.getRecords().stream().forEach(e->{
@@ -1252,19 +1253,20 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                             }
                         }
 
-                        List<PublicReportWriteOffCO> reportWriteOffCOS = map.get(line.getId() + "");
-                        lineCO.setReportWriteOffDTOS(reportWriteOffCOS);//获取核销信息
-                        List<PaymentDocumentAmountCO> payReturnAmountByLines = paymentModuleInterface.getPayReturnAmountByLines(Arrays.asList(line.getId()));
-                        if (CollectionUtils.isEmpty(payReturnAmountByLines)) {
-                            lineCO.setPayAmount(BigDecimal.ZERO);
-                            lineCO.setPayAmount(BigDecimal.ZERO);
-                        } else {
-                            PaymentDocumentAmountCO paymentDocumentAmountCO = payReturnAmountByLines.get(0);
-                            lineCO.setPayAmount(paymentDocumentAmountCO.getPayAmount() != null ?
-                                    paymentDocumentAmountCO.getPayAmount() : BigDecimal.ZERO);
-                            lineCO.setReturnAmount(paymentDocumentAmountCO.getReturnAmount() != null ?
-                                    paymentDocumentAmountCO.getReturnAmount() : BigDecimal.ZERO);
-                        }
+                        // bo.liu 支付
+//                        List<PublicReportWriteOffCO> reportWriteOffCOS = map.get(line.getId() + "");
+//                        lineCO.setReportWriteOffDTOS(reportWriteOffCOS);//获取核销信息
+//                        List<PaymentDocumentAmountCO> payReturnAmountByLines = paymentModuleInterface.getPayReturnAmountByLines(Arrays.asList(line.getId()));
+//                        if (CollectionUtils.isEmpty(payReturnAmountByLines)) {
+//                            lineCO.setPayAmount(BigDecimal.ZERO);
+//                            lineCO.setPayAmount(BigDecimal.ZERO);
+//                        } else {
+//                            PaymentDocumentAmountCO paymentDocumentAmountCO = payReturnAmountByLines.get(0);
+//                            lineCO.setPayAmount(paymentDocumentAmountCO.getPayAmount() != null ?
+//                                    paymentDocumentAmountCO.getPayAmount() : BigDecimal.ZERO);
+//                            lineCO.setReturnAmount(paymentDocumentAmountCO.getReturnAmount() != null ?
+//                                    paymentDocumentAmountCO.getReturnAmount() : BigDecimal.ZERO);
+//                        }
 
 
                         list.add(lineCO);
@@ -1316,7 +1318,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         // 当前用户就是审批人
         String approverOidStr = OrgInformationUtil.getCurrentUserOid().toString();
         // 获取未审批/已审批的单据
-        List<String> documentOidStrList = workflowInterface.listApprovalDocument(Constants.PREPAYMENT_DOCUMENT_TYPE,
+        List<String> documentOidStrList = workflowClient.listApprovalDocument(Constants.PREPAYMENT_DOCUMENT_TYPE,
                 approverOidStr, finished, beginDate, endDate);
         // 若没有满足条件的单据则不继续执行代码
         if (documentOidStrList.isEmpty()) {

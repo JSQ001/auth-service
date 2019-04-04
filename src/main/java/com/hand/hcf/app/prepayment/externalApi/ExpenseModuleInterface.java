@@ -5,6 +5,8 @@ import com.hand.hcf.app.common.co.ApplicationAmountCO;
 import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.common.co.ApplicationTypeForOtherCO;
 import com.hand.hcf.app.common.co.PrepaymentRequisitionReleaseCO;
+import com.hand.hcf.app.expense.application.implement.web.ApplicationControllerImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +19,9 @@ import java.util.List;
  */
 @Service
 public class ExpenseModuleInterface {
-    //jiu.zhao TODO
-    /*@Autowired
-    private ApplicationControllerImpl expenseApplicationClient;*/
+
+    @Autowired
+    private ApplicationControllerImpl expenseApplicationClient;
 
     /**
      * 根据所选范围查询账套下符合条件的费用申请单类型

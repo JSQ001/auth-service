@@ -7,30 +7,21 @@ package com.hand.hcf.app.prepayment.workflow;
 
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
-import com.hand.hcf.app.common.co.WorkflowMessageCO;
-import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.common.event.WorkflowCustomRemoteEvent;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
 import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
-import com.hand.hcf.core.security.domain.PrincipalLite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class WorkflowEventConsumer extends AbstractWorkflowEventConsumerInterface {
+public class WorkflowEventConsumer  {
     @Autowired
     private CashPaymentRequisitionHeadService cashPaymentRequisitionHeadService;
 
     @LcnTransaction
     @Transactional(rollbackFor = Exception.class)
-    @Override
     public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
         Long documentId = approvalNoticeCO.getDocumentId();
         Integer approvalStatus = approvalNoticeCO.getDocumentStatus();

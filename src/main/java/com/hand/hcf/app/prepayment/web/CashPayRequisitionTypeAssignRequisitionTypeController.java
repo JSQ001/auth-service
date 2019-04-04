@@ -2,7 +2,7 @@ package com.hand.hcf.app.prepayment.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 //import com.hand.hcf.app.application.dto.CustomFormForOtherRequestDTO;
-import com.hand.hcf.app.apply.expense.dto.ApplicationTypeCO;
+import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignRequisitionType;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignRequisitionTypeService;
 import com.hand.hcf.app.prepayment.web.dto.CustomFormForOtherDTO;
