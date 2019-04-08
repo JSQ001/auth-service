@@ -31,10 +31,11 @@ public class ExpenseModuleInterface {
      */
     public Page<ApplicationTypeCO> queryApplicationTypeByCond(ApplicationTypeForOtherCO applicationTypeForOtherCO, Page page){
         Page<ApplicationTypeCO> applicationTypeCOList = new Page<>();
-        //jiu.zhao TODO
-        /*Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page);
+        //jiu.zhao 修改三方接口 20190404
+        //Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page);
+        Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page.getCurrent() - 1, page.getSize());
         applicationTypeCOList.setRecords(result.getRecords());
-        applicationTypeCOList.setTotal(result.getTotal());*/
+        applicationTypeCOList.setTotal(result.getTotal());
         return applicationTypeCOList;
     }
 

@@ -23,10 +23,8 @@ import java.util.UUID;
 @Service
 public class HcfOrganizationInterface {
 
-
-    //jiu.zhao TODO 预付款模块三方接口
-    //@Autowired
-    //private OrganizationClient orgClient;
+    @Autowired
+    private CommonControllerImpl orgClient;
 
     @Autowired
     private UserControllerImpl userClient;
@@ -36,19 +34,15 @@ public class HcfOrganizationInterface {
 
 
     public OrderNumberCO getVendorCode (String companyCode, Long tenantId) {
-        //return orgClient.getOrderNumberCO("VENDER",companyCode,"");
-        return null;
-
+        return orgClient.getOrderNumberCO("VENDER",companyCode,"");
     }
 
     public SysCodeValueCO getValueBySysCodeAndValue(String code, String value) {
-        //return orgClient.getSysCodeValueByCodeAndValue(code, value);
-        return null;
+        return orgClient.getSysCodeValueByCodeAndValue(code, value);
     }
 
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
-        //return orgClient.listAllSysCodeValueByCode(code);
-        return null;
+        return orgClient.listAllSysCodeValueByCode(code);
     }
 
     public AttachmentCO getAttachmentByOid(String oid){
