@@ -205,10 +205,13 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
             typeDTO.setSetOfBooksName(setOfBooksInfoCO.getSetOfBooksName());
         }
         //表单类型
-        List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
+        /**
+         * OrganizationService organizationService 中此方法listApprovalFormsByIds已被注释 by chenxu
+         */
+      /*  List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
         if (approvalFormCOList.size() > 0) {
             typeDTO.setFormName(approvalFormCOList.get(0).getFormName());
-        }
+        }*/
         //关联申请类型
         if (!typeDTO.getAllTypeFlag()) {
             List<Long> idList = assignTypeService.selectList(
@@ -276,7 +279,6 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
                 TravelApplicationTypeAssignDimension typeDimension = typeDimensions.get(i -1);
                 // 查询所有的维度，只有当是位置是头的时候才返回，以便确认 dimension*Id
                 ExpenseDimension expenseDimension = new ExpenseDimension();
-                expenseDimension.setDimensionField("dimension" + i + "Id");
                 expenseDimension.setDimensionId(typeDimension.getDimensionId());
                 expenseDimension.setHeaderFlag(typeDimension.getHeaderFlag());
                 expenseDimension.setSequence(typeDimension.getSequence());
@@ -287,6 +289,7 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
                             .getSubDimensionItemCOS()
                             .stream()
                             .collect(Collectors.toMap(DimensionItemCO::getId, e -> e));
+                    expenseDimension.setDimensionField("dimension" + detailCO.getDimensionSequence() + "Id");
                     expenseDimension.setName(detailCO.getDimensionName());
                     expenseDimension.setOptions(detailCO.getSubDimensionItemCOS());
                     if (collect.containsKey(typeDimension.getDefaultValue())) {
@@ -393,7 +396,7 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
                 return true;
             }
             // 部门
-            if (VisibleUserScopeEnum.USER_GROUP.getId().equals(applicationType.getVisibleUserScope())){
+            if (VisibleUserScopeEnum.DEPARTMENT.getId().equals(applicationType.getVisibleUserScope())){
                 List<Long> ids = assignDepartmentService.selectList(
                         new EntityWrapper<TravelApplicationTypeAssignDepartment>().eq("type_id", applicationType.getId())
                 ).stream().map(TravelApplicationTypeAssignDepartment::getDepartmentId).collect(Collectors.toList());

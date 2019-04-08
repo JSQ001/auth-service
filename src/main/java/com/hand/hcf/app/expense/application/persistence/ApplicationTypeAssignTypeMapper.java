@@ -43,10 +43,10 @@ public interface ApplicationTypeAssignTypeMapper extends BaseMapper<ApplicationT
      * @return
      */
     List<ExpenseTypeWebDTO> queryAllExpenseBySetOfBooksId(@Param("setOfBooksId") Long setOfBooksId,
-                                                          @Param("id") Long id,
+                                                          @Param("id")Long id,
                                                           @Param("categoryId") Long categoryId,
                                                           @Param("expenseTypeName") String expenseTypeName,
-                                                          @Param("typeFlag") Integer typeFlag,
+                                                          @Param("typeFlag")Integer typeFlag,
                                                           @Param("language") String language,
                                                           RowBounds rowBounds);
 

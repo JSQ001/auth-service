@@ -64,7 +64,7 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
 
     public Page<CashPaymentRequisitionHeadDto> getLineByQueryfromApplication(Page page, String requisitionNumber, String documentNumber, Long typeId, Long reptypeId) {
 
-        // é¦–å…ˆ å…ˆå» è´¹ç”¨æ¨¡å—æŸ¥è¯¢å‡ºæ¥ è¯¥å¯¹åº”çš„ç”³è¯·å•ç›¸å…³è”çš„é¢„ä»˜æ¬¾å•å·ã€‚ getPrepaymentByDocumentNumber
+        // Ê×ÏÈ ÏÈÈ¥ ·ÑÓÃÄ£¿é²éÑ¯³öÀ´ ¸Ã¶ÔÓ¦µÄÉêÇëµ¥Ïà¹ØÁªµÄÔ¤¸¶¿îµ¥ºÅ¡£ getPrepaymentByDocumentNumber
         List<PrepaymentRequisitionReleaseCO> prepaymentRequisitionReleaseCOS = expenseApplicationClient.getPrepaymentByDocumentNumber(requisitionNumber);
 
         List<Long> hids = prepaymentRequisitionReleaseCOS.stream().map(PrepaymentRequisitionReleaseCO::getRelatedDocumentId).collect(Collectors.toList());
@@ -74,16 +74,16 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
                 , documentNumber, typeId);
 
 
-        // å…¬å¸
+        // ¹«Ë¾
         Set<Long> ids = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHeadDto::getCompanyId).collect(Collectors.toSet());
         List<CompanyCO> companySumCO = hcfOrganizationInterface.listCompanyById(new ArrayList<>(ids));
         Map<Long, String> companyMap = companySumCO.stream().collect(Collectors.toMap(CompanyCO::getId, CompanyCO::getName, (k1, k2) -> k1));
-        // éƒ¨é—¨
+        // ²¿ÃÅ
         ids = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHeadDto::getUnitId).collect(Collectors.toSet());
         List<DepartmentCO> departments = hcfOrganizationInterface.getDepartmentByDepartmentIds(new ArrayList<>(ids));
         Map<Long, String> unitMap = departments.stream().collect(Collectors.toMap(DepartmentCO::getId, DepartmentCO::getName, (k1, k2) -> k1));
 
-        // å‘˜å·¥
+        // Ô±¹¤
         Set<Long> empIds = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHeadDto::getEmployeeId).collect(Collectors.toSet());
         ids = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHead::getCreatedBy).collect(Collectors.toSet());
         ids.addAll(empIds);

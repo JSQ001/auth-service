@@ -70,7 +70,7 @@ public class MobileValidateController {
         log.debug("REST request to get Contact : {}", id);
         MobileValidate result = mobileValidateService.findOne(id);
         if(result != null){
-            return  new ResponseEntity<>(result, HttpStatus.OK);
+            return  new ResponseEntity<>(result,HttpStatus.OK);
         }else{
             return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -96,6 +96,6 @@ public class MobileValidateController {
     public ResponseEntity<List<MobileValidate>> getMobileValidateList(@RequestParam(name = "isEnabled",required = false) Boolean isEnabled) {
         String language = LoginInformationUtil.getCurrentLanguage();
         List<MobileValidate> result = mobileValidateService.findAll(isEnabled,language);
-        return  new ResponseEntity<>(result, HttpStatus.OK);
+        return  new ResponseEntity<>(result,HttpStatus.OK);
     }
 }

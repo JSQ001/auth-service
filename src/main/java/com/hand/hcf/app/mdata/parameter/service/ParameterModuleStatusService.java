@@ -14,7 +14,7 @@ import java.util.List;
  * @Date: 2019/1/8 16:26
  */
 @Service
-public class ParameterModuleStatusService extends BaseService<ParameterModuleStatusMapper, ParameterModuleStatus> {
+public class ParameterModuleStatusService extends BaseService<ParameterModuleStatusMapper,ParameterModuleStatus> {
 
     @Autowired
     private ParameterModuleStatusMapper parameterModuleStatusMapper;

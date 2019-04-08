@@ -4,17 +4,18 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.common.co.ApprovalFormCO;
 import com.hand.hcf.app.common.co.ApprovalHistoryCO;
 import com.hand.hcf.app.common.co.CommonApprovalHistoryCO;
+import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
+import com.hand.hcf.app.workflow.approval.service.ApprovalSubmitService;
+import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.util.StringUtil;
-import com.hand.hcf.app.workflow.workflow.domain.ApprovalForm;
-import com.hand.hcf.app.workflow.workflow.domain.ApprovalHistory;
-import com.hand.hcf.app.workflow.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
-import com.hand.hcf.app.workflow.workflow.service.ApprovalFormService;
-import com.hand.hcf.app.workflow.workflow.service.ApprovalHistoryService;
-import com.hand.hcf.app.workflow.workflow.service.WorkFlowApprovalService;
-import com.hand.hcf.app.workflow.workflow.service.WorkFlowDocumentRefService;
+import com.hand.hcf.app.workflow.domain.ApprovalForm;
+import com.hand.hcf.app.workflow.domain.ApprovalHistory;
+import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
+import com.hand.hcf.app.workflow.service.ApprovalFormService;
+import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
+import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.core.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-public class WorkflowControllerImpl {
+public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
     @Autowired
     private ApprovalFormService approvalFormService;
-
-    @Autowired
-    private WorkFlowApprovalService sysWorkflowWorkflowApprovalService;
 
     @Autowired
     private WorkFlowDocumentRefService workFlowDocumentRefService;
@@ -43,6 +41,10 @@ public class WorkflowControllerImpl {
     @Autowired
     private ApprovalHistoryService approvalHistoryService;
 
+    @Autowired
+    private ApprovalSubmitService approvalSubmitService;
+
+    /*@Override*/
     public ApprovalHistoryCO saveHistory(@RequestBody CommonApprovalHistoryCO commonApprovalHistoryDTO) {
         ApprovalHistory approvalHistory = new ApprovalHistory();
         //默认的操作类型
@@ -76,6 +78,7 @@ public class WorkflowControllerImpl {
         return approvalHistoryCO;
     }
 
+    /*@Override*/
     public List<ApprovalHistoryCO> saveBatchHistory(@RequestBody List<CommonApprovalHistoryCO> dtoList) {
         if (CollectionUtils.isEmpty(dtoList)){
             return new ArrayList<>();
@@ -117,11 +120,14 @@ public class WorkflowControllerImpl {
         return result;
     }
 
+    /*@Override*/
     public Boolean deleteBatchLogs(@RequestBody List<ApprovalHistoryCO> dto) {
         List<Long> idList = dto.stream().map(ApprovalHistoryCO::getId).collect(Collectors.toList());
         return approvalHistoryService.deleteByIds(idList);
     }
 
+
+    /*@Override*/
     public List<ApprovalHistoryCO> listApprovalHistory(@RequestParam("entityType") Integer entityType,
                                                        @RequestParam("entityOid") String entityOid) {
         return null;
@@ -144,8 +150,9 @@ public class WorkflowControllerImpl {
      * currencyCode:币种,
      * documentTypeId:单据类型ID
      */
+    /*@Override*/
     public String submitWorkflow(@RequestBody WorkFlowDocumentRefCO workFlowDocumentRefDTO) {
-        return sysWorkflowWorkflowApprovalService.submitWorkflow(workFlowDocumentRefDTO);
+        return approvalSubmitService.submitWorkflow(workFlowDocumentRefDTO);
     }
 
     /**
@@ -156,8 +163,9 @@ public class WorkflowControllerImpl {
      * @param approvalDocumentCO 提交的单据
      * @return 提交结果
      */
+    /*@Override*/
     public ApprovalResultCO submitWorkflow(ApprovalDocumentCO approvalDocumentCO) {
-        return sysWorkflowWorkflowApprovalService.submitWorkflow(approvalDocumentCO);
+        return approvalSubmitService.submitWorkflow(approvalDocumentCO);
     }
 
     /**
@@ -165,6 +173,7 @@ public class WorkflowControllerImpl {
      * @param formOid
      * @return
      */
+    /*@Override*/
     public ApprovalFormCO getApprovalFormByOid(String formOid) {
         ApprovalForm approvalForm = approvalFormService.getByOid(UUID.fromString(formOid));
         return ApprovalFormCO.builder().formOid(approvalForm.getFormOid())
@@ -178,6 +187,7 @@ public class WorkflowControllerImpl {
      * @param formId
      * @return
      */
+    /*@Override*/
     public ApprovalFormCO getApprovalFormById(Long formId) {
         ApprovalForm approvalForm = approvalFormService.getById(formId);
         return ApprovalFormCO.builder()
@@ -194,6 +204,7 @@ public class WorkflowControllerImpl {
      * @param formOids
      * @return
      */
+    /*@Override*/
     public List<ApprovalFormCO> listApprovalFormByOids(List<UUID> formOids) {
         return approvalFormService.listByOids(formOids)
                 .stream().map(form -> ApprovalFormCO.builder().formOid(form.getFormOid())
@@ -202,6 +213,7 @@ public class WorkflowControllerImpl {
                         .build()).collect(Collectors.toList());
     }
 
+    /*@Override*/
     public List<ApprovalFormCO> listApprovalFormByIds(@RequestBody List<Long> formIds) {
         if (formIds.size() == 0) {
             return new ArrayList<>();
@@ -223,6 +235,7 @@ public class WorkflowControllerImpl {
      * @Date 2019/01/23
      * @Description 获取未审批/已审批的单据
      */
+    /*@Override*/
     public List<String> listApprovalDocument(@RequestParam(value = "entityType", required = false) Integer entityType,
                                              @RequestParam(value = "userOid", required = false) String userOid,
                                              @RequestParam(value = "approved", required = true) boolean approved,
@@ -254,7 +267,23 @@ public class WorkflowControllerImpl {
         return documentOidList;
     }
 
-    public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> formIds) {
+    /**
+     * @author lsq
+     * @date 2019/03/29
+     * @description 获取指定单据的当前审批人
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @return 当前审批人
+     */
+    /*@Override*/
+    public List<ContactCO> listCurrentApprover(@RequestParam(value = "entityType") Integer entityType,
+                                               @RequestParam(value = "entityOid")UUID entityOid) {
+        List<ContactCO> contactCOList = workFlowDocumentRefService.listCurrentApprover(entityType, entityOid);
+        return contactCOList;
+    }
+	
+	public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> formIds) {
         List<ApprovalFormCO> approvalFormCOList = this.listApprovalFormByIds(formIds);
         return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
     }

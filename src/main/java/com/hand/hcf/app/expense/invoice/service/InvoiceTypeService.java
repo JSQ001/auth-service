@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @version: 1.0.0
  */
 @Service
-public class InvoiceTypeService extends BaseService<InvoiceTypeMapper, InvoiceType> {
+public class InvoiceTypeService extends BaseService<InvoiceTypeMapper,InvoiceType> {
 
 
     @Autowired
@@ -98,7 +98,7 @@ public class InvoiceTypeService extends BaseService<InvoiceTypeMapper, InvoiceTy
      */
     @Transactional
     public InvoiceType updateInvoiceType(InvoiceType invoiceType) {
-        InvoiceType oldInvoiceType = baseMapper.selectById(invoiceType.getId());
+        InvoiceType  oldInvoiceType = baseMapper.selectById(invoiceType.getId());
         String invoiceNumberLength = invoiceType.getInvoiceNumberLength();
         String invoiceCodeLength = invoiceType.getInvoiceCodeLength();
         if(oldInvoiceType == null){
@@ -167,7 +167,7 @@ public class InvoiceTypeService extends BaseService<InvoiceTypeMapper, InvoiceTy
                        .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
                        .isNull("set_of_books_id")
        );
-        List<InvoiceTypeDTO> invoiceTypeDTOS = mapperFacade.mapAsList(invoiceTypes, InvoiceTypeDTO.class);
+        List<InvoiceTypeDTO> invoiceTypeDTOS = mapperFacade.mapAsList(invoiceTypes,InvoiceTypeDTO.class);
         //查询当前模板
         invoiceTypeDTOS.stream().forEach(invoiceTypeDTO -> {
             InvoiceTypeMouldDTO invoiceTypeMouldDTO = invoiceTypeMouldService.getInvoiceTypeMouldByTypeId(invoiceTypeDTO.getId());
@@ -179,7 +179,7 @@ public class InvoiceTypeService extends BaseService<InvoiceTypeMapper, InvoiceTy
         return invoiceTypeDTOS;
     }
 
-    public List<InvoiceType> queryInvoiceTypeForInvoice(Long tenantId, Long setOfBooksId){
+    public List<InvoiceType> queryInvoiceTypeForInvoice(Long tenantId,Long setOfBooksId){
         List<InvoiceType> invoiceTypes = this.selectList(
                 new EntityWrapper<InvoiceType>()
                         .eq("deleted",false)

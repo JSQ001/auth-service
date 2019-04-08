@@ -39,13 +39,6 @@ private MapperFacade mapper;
 
     }
 
-    @Transactional(readOnly = true)
-    public Page<RuleScene> listByCompanyOid(UUID companyOid, Page page) {
-      return selectPage(page,new EntityWrapper<RuleScene>()
-                .eq("company_oid",companyOid)
-                .eq("status",RuleApprovalEnum.VALID.getId()));
-
-    }
 
     @Transactional(readOnly = true)
     public RuleScene getByOid(UUID ruleSceneOid){
@@ -97,7 +90,6 @@ private MapperFacade mapper;
             RuleScene ruleScene = mapper.map(ruleSceneDTO, RuleScene.class);
             ruleScene.setId(opt.getId());
             ruleScene.setStatus(opt.getStatus());
-            ruleScene.setCompanyOid(opt.getCompanyOid());
             ruleScene.setCreatedDate(ZonedDateTime.now());
             insertOrUpdate(ruleScene);
             return ruleScene;

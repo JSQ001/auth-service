@@ -9,7 +9,7 @@ import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
+import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;

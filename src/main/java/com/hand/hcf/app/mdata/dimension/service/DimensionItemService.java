@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.DimensionDetailCO;
 import com.hand.hcf.app.common.co.DimensionItemCO;
-import com.hand.hcf.app.mdata.contact.domain.UserGroup;
-import com.hand.hcf.app.mdata.contact.service.UserGroupService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+
+import com.hand.hcf.app.mdata.contact.domain.Contact;
+import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.dimension.domain.*;
@@ -16,7 +18,12 @@ import com.hand.hcf.app.mdata.dimension.dto.DepartmentOrUserGroupReturnDTO;
 import com.hand.hcf.app.mdata.dimension.dto.DimensionItemExportDTO;
 import com.hand.hcf.app.mdata.dimension.dto.DimensionItemRequestDTO;
 import com.hand.hcf.app.mdata.dimension.persistence.DimensionItemMapper;
+import com.hand.hcf.app.mdata.dimension.persistence.DimensionMapper;
+import com.hand.hcf.app.mdata.parameter.service.ParameterService;
+import com.hand.hcf.app.mdata.parameter.service.ParameterValuesService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
+import com.hand.hcf.app.mdata.contact.domain.UserGroup;
+import com.hand.hcf.app.mdata.contact.service.UserGroupService;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.mdata.utils.StringUtil;
@@ -49,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +87,9 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
     private UserGroupService userGroupService;
 
     @Autowired
+    private ContactService contactService;
+
+    @Autowired
     private DimensionItemTempService dimensionItemTempService;
 
     @Autowired
@@ -95,6 +106,12 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
 
     @Autowired
     private BaseI18nService baseI18nService;
+
+    @Autowired
+    private DimensionItemAssignEmployeeService dimensionItemAssignEmployeeService;
+
+    @Autowired
+    private DimensionMapper dimensionMapper;
 
     /**
      *  新建维值
@@ -146,6 +163,18 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                 });
                 dimensionUserGroupService.insertBatch(userGroupList);
             }
+        }else if ( VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope()) ){
+            List<Long> contactIdList = dimensionItemRequestDTO.getDepartmentOrUserGroupIdList();
+            if ( null != contactIdList ){
+                List<DimensionItemAssignEmployee> assignEmployeeList = new ArrayList<>();
+                contactIdList.stream().forEach(contactId -> {
+                    DimensionItemAssignEmployee assignEmployee = new DimensionItemAssignEmployee();
+                    assignEmployee.setContactId(contactId);
+                    assignEmployee.setDimensionItemId(dimensionItem.getId());
+                    assignEmployeeList.add(assignEmployee);
+                });
+                dimensionItemAssignEmployeeService.insertBatch(assignEmployeeList);
+            }
         }
         return dimensionItemRequestDTO;
     }
@@ -185,6 +214,11 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                     new EntityWrapper<DimensionItemAssignUserGroup>()
                             .eq("dimension_item_id", oldDimensionItem.getId())
             );
+        } else if(VisibleUserScopeEnum.USER.getId().equals(oldDimensionItem.getVisibleUserScope()) ) {
+            dimensionItemAssignEmployeeService.delete(
+                    new EntityWrapper<DimensionItemAssignEmployee>()
+                            .eq("dimension_item_id", oldDimensionItem.getId())
+            );
         }
         //插入部门或人员组
         if ( VisibleUserScopeEnum.DEPARTMENT.getId().equals(newDimensionItem.getVisibleUserScope()) ){
@@ -210,6 +244,18 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                     userGroupList.add(userGroup);
                 });
                 dimensionUserGroupService.insertBatch(userGroupList);
+            }
+        }else if ( VisibleUserScopeEnum.USER.getId().equals(newDimensionItem.getVisibleUserScope()) ){
+            List<Long> contactIdList = dimensionItemRequestDTO.getDepartmentOrUserGroupIdList();
+            if ( null != contactIdList ){
+                List<DimensionItemAssignEmployee> assignEmployeeList = new ArrayList<>();
+                contactIdList.stream().forEach(contactId -> {
+                    DimensionItemAssignEmployee assignEmployee = new DimensionItemAssignEmployee();
+                    assignEmployee.setContactId(contactId);
+                    assignEmployee.setDimensionItemId(newDimensionItem.getId());
+                    assignEmployeeList.add(assignEmployee);
+                });
+                dimensionItemAssignEmployeeService.insertBatch(assignEmployeeList);
             }
         }
         return dimensionItemRequestDTO;
@@ -278,6 +324,20 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                     DepartmentOrUserGroupReturnDTO dep = new DepartmentOrUserGroupReturnDTO();
                     dep.setId(department.getId());
                     dep.setPathOrName(department.getName());
+                    dOrUgList.add(dep);
+                });
+            }
+        }else if (VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())) {
+            idList = dimensionItemAssignEmployeeService.selectList(
+                    new EntityWrapper<DimensionItemAssignEmployee>()
+                            .eq("dimension_item_id", dimensionItemId)
+            ).stream().map(DimensionItemAssignEmployee::getContactId).collect(toList());
+            if (idList != null) {
+                List<Contact> contactList = contactService.selectBatchIds(idList);
+                contactList.stream().forEach(contact -> {
+                    DepartmentOrUserGroupReturnDTO dep = new DepartmentOrUserGroupReturnDTO();
+                    dep.setId(contact.getId());
+                    dep.setPathOrName(contact.getFullName());
                     dOrUgList.add(dep);
                 });
             }
@@ -674,6 +734,11 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                 new EntityWrapper<DimensionItem>()
                         .eq("dimension_id", dimensionId)
                         .eq(enabled != null, "enabled",enabled)
+                        .le("start_date", ZonedDateTime.now())
+                        .andNew()
+                        .isNull("end_date")
+                        .or()
+                        .ge("end_date",ZonedDateTime.now())
                         .orderBy("enabled", false)
                         .orderBy("dimension_item_code")
         );
@@ -683,21 +748,35 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
             List<Long> dimensionItemIdList = dimensionItemAssignCompanyService.selectList(
                     new EntityWrapper<DimensionItemAssignCompany>().eq("company_id", companyId).eq("enabled", true)
             ).stream().map(DimensionItemAssignCompany::getDimensionItemId).collect(toList());
+
             if (dimensionItemIdList.size() != 0) {
                 dimensionItemList = dimensionItemList.stream().filter(
                         dimensionItem -> dimensionItemIdList.contains(dimensionItem.getId())
                 ).collect(toList());
             }
         }
+        //根据员工筛选维值
+        Long currentContactId = contactService.getContactByUserOid(OrgInformationUtil.getCurrentUserOid()).getId();
+        List<Long> ids = dimensionItemMapper.listDimensionsByContactId(currentContactId)
+                .stream().map(DimensionItem::getId).collect(toList());
+        dimensionItemList = dimensionItemList.stream().filter(
+                dimensionItem -> (ids.contains(dimensionItem.getId()) && VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())) || !VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())
+        ).collect(toList());
         return dimensionItemList;
     }
 
-    public List<DimensionItem> pageDimensionItemsByDimensionId(Long dimensionId, Page page, Boolean enabled) {
+    public List<DimensionItem> pageDimensionItemsByDimensionId(Long dimensionId,
+                                                               Page page,
+                                                               Boolean enabled,
+                                                               String dimensionItemName,
+                                                               String dimensionItemCode) {
         List<DimensionItem> dimensionItemList = dimensionItemMapper.selectPage(
                 page,
                 new EntityWrapper<DimensionItem>()
                         .eq("dimension_id", dimensionId)
                         .eq(enabled != null , "enabled", enabled)
+                        .like(org.springframework.util.StringUtils.hasText(dimensionItemCode), "dimension_item_code", dimensionItemCode)
+                        .like(org.springframework.util.StringUtils.hasText(dimensionItemName), "dimension_item_name", dimensionItemName)
                         .orderBy("enabled", false)
                         .orderBy("dimension_item_code")
         );
@@ -725,6 +804,7 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
             dto.setId(e);
             dto.setDimensionCode(dimension == null ? null : dimension.getDimensionCode());
             dto.setDimensionName(dimension == null ? null : dimension.getDimensionName());
+            dto.setDimensionSequence(dimension == null ? null : dimension.getDimensionSequence());
             List<DimensionItemCO> dimensionItemCOS = dimensionItems.stream().map(item -> {
                 DimensionItemCO itemCO = new DimensionItemCO();
                 itemCO.setDimensionId(item.getDimensionId());
@@ -740,6 +820,26 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
             result.add(dto);
         });
         return result;
+    }
+
+    /**
+     * 项目申请单插入维度值
+     * 由项目申请单审批完成时定义，根据参数定义中定义的维度代码，确认插入到哪个维度中。
+     */
+    public void proInsertDimensionItem(Long setOfBooksId, String parameterCode, String projectNumber,String projectName){
+        List<Dimension> dimensionList = dimensionMapper.listDimensionsByParameterCode(setOfBooksId,parameterCode);
+        dimensionList.stream().forEach(dimension ->{
+            DimensionItemRequestDTO dto = new DimensionItemRequestDTO();
+            DimensionItem dimensionItem = new DimensionItem();
+            dimensionItem.setDimensionItemCode(projectNumber);
+            dimensionItem.setDimensionItemName(projectName);
+            dimensionItem.setDimensionId(dimension.getId());
+            dimensionItem.setVisibleUserScope(1001);
+            dimensionItem.setStartDate(ZonedDateTime.now());
+            dto.setDimensionItem(dimensionItem);
+            insertDimensionItem(dto);
+            }
+        );
     }
 }
 

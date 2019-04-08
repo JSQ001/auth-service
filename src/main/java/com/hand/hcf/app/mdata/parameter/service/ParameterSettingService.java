@@ -51,10 +51,12 @@ public class ParameterSettingService extends BaseService<ParameterSettingMapper,
                                                                         String parameterCode,
                                                                         String parameterName,
                                                                         Page page){
-        List<ParameterSettingDTO> parameterSettingDTOS = parameterSettingMapper.pageParameterSettingByLevelAndCond(parameterLevel.getValue(), LoginInformationUtil.getCurrentTenantId(),setOfBooksId,companyId,moduleCode,parameterCode,parameterName,page);
-            if(parameterSettingDTOS != null && parameterSettingDTOS.size() > 0){
+        List<ParameterSettingDTO> count = parameterSettingMapper.pageParameterSettingByLevelAndCond(parameterLevel.getValue(), LoginInformationUtil.getCurrentTenantId(),null,null,null,null,null,page);
+        List<ParameterSettingDTO> results = new ArrayList<>();
+        if(count != null && count.size() > 0){
+            results = parameterSettingMapper.pageParameterSettingByLevelAndCond(parameterLevel.getValue(), LoginInformationUtil.getCurrentTenantId(),setOfBooksId,companyId,moduleCode,parameterCode,parameterName,page);
             //根据值类型拿值
-            parameterSettingDTOS.forEach(parameterSettingDTO -> {
+            results.forEach(parameterSettingDTO -> {
                 if(ParameterValueTypeEnum.VALUE_LIST.equals(parameterSettingDTO.getParameterValueType())){
                     if(!StringUtil.isNullOrEmpty(parameterSettingDTO.getParameterValueId())){
                         ParameterValues parameterValues = parameterValuesService.selectById(parameterSettingDTO.getParameterValueId());
@@ -97,8 +99,7 @@ public class ParameterSettingService extends BaseService<ParameterSettingMapper,
                 return this.pageParameterSettingByLevelAndCond(parameterLevel, LoginInformationUtil.getCurrentTenantId(),setOfBooksId,companyId,moduleCode,parameterCode,parameterName,page);
             }
         }
-
-        return parameterSettingDTOS;
+        return results;
     }
 
     @Transactional(rollbackFor = {Exception.class})
@@ -132,7 +133,7 @@ public class ParameterSettingService extends BaseService<ParameterSettingMapper,
      * @param parameterSettings 系统参数明细数据
      */
     @Transactional(rollbackFor = {Exception.class})
-    void initTenantParameterData(List<ParameterModuleStatus> parameterModuleStatuses, List<ParameterSetting> parameterSettings){
+    void initTenantParameterData(List<ParameterModuleStatus> parameterModuleStatuses,List<ParameterSetting> parameterSettings){
         List<ParameterModuleStatus> moduleStatusList = parameterModuleStatuses.stream().map(parameterModuleStatus -> {
             ParameterModuleStatus value = ParameterModuleStatus.builder()
                     .tenantId(LoginInformationUtil.getCurrentTenantId())

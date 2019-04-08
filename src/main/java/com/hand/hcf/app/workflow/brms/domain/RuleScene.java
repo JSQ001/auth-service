@@ -32,8 +32,5 @@ public class RuleScene extends Domain {
 
     private String remark;
 
-    @NotNull
-    private UUID companyOid;
-
     private int sequenceNumber;
 }

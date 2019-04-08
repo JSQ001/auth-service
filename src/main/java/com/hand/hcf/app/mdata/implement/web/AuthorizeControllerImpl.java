@@ -1,6 +1,9 @@
 package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.AuthorizeQueryCO;
+import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.FormAuthorizeCO;
 import com.hand.hcf.app.mdata.authorize.domain.FormCentralizedAuth;
 import com.hand.hcf.app.mdata.authorize.domain.FormPersonalAuth;
@@ -80,5 +83,11 @@ public class AuthorizeControllerImpl {
         });
 
         return result;
+    }
+
+    //jiu.zhao 修改三方接口 20190403
+    public Page<ContactCO> pageUsersByAuthorizeAndCondition(AuthorizeQueryCO queryCO, String userCode, String userName, Page page) {
+        Page<ContactCO> contactCOList = this.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, page);
+        return contactCOList != null ? contactCOList : new Page();
     }
 }

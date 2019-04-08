@@ -22,5 +22,5 @@ public class ExpenseTypeAssignInfoDTO implements Serializable {
 
     private Boolean allCompanyFlag;
 
-    private String applyType;
+    private Integer applyType;
 }

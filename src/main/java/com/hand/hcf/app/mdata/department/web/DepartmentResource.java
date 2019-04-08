@@ -403,7 +403,7 @@ public class DepartmentResource {
      *
      */
     @RequestMapping(value = "/departments/root/v2", method = RequestMethod.GET)
-    List<DepartmentDTO> getRootDepartmentsV2(@RequestParam(name = "flag" ,required = false) Integer flag, @RequestParam(name = "isCompany" ,required = false) boolean isCompany) {
+    List<DepartmentDTO> getRootDepartmentsV2(@RequestParam(name = "flag" ,required = false) Integer flag,@RequestParam(name = "isCompany" ,required = false) boolean isCompany) {
         if(flag == null){
             flag = 1001;
         }
@@ -496,10 +496,10 @@ public class DepartmentResource {
      *
      */
     @RequestMapping(value = "/department/like",
-        method= RequestMethod.GET,
+        method=RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<List<DepartmentDTO>> searchByLikeName(@RequestParam("name") String name, @RequestParam(name = "flag" ,required = false) Integer flag, @RequestParam(name = "hasChildren" ,required = false) boolean hasChildren){
+    public ResponseEntity<List<DepartmentDTO>> searchByLikeName(@RequestParam("name") String name,@RequestParam(name = "flag" ,required = false) Integer flag,@RequestParam(name = "hasChildren" ,required = false) boolean hasChildren){
        if(flag == null){
            flag = 1001;
        }
@@ -556,9 +556,39 @@ public class DepartmentResource {
      * @param status
      * @return
      */
+    /**
+     * @api {GET}  api/department/tenant/all
+     * @apiDescription  查询租户下所有部门(可选条件：部门代码、部门名称、部门状态 )
+     * @apiGroup Department
+     * @apiParam {String}  code 部门代码
+     * @apiParam {String}  name 部门名称
+     * @apiParam {String} status 状态
+     * @apiParamExample {json} Request-Param:
+     *     http://localhost:8000/mdata/api//department/tenant/all?page=0&size=10&code=003&name=&roleType=TENANT
+     * @apiSuccessExample {json} Success-Response:
+     * [{
+        "id": "1084808485898653698",
+        "parentId": null,
+        "parentDepartmentOid": null,
+        "departmentOid": "5e6ced84-54a6-4771-aa7d-ce0190ab52cd",
+        "name": "IT部",
+        "path": "IT部",
+        "status": 101,
+        "available": false,
+        "childrenDepartment": [],
+        "pathDepth": 1,
+        "rootFlag": false,
+        "hasUsers": true,
+        "hasChildrenDepartments": true,
+        "userCounts": 2,
+        "departmentCode": "003"
+     }]
+     */
     @RequestMapping(value = "/department/tenant/all" , method = RequestMethod.GET)
-    public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsAll(@RequestParam(value = "status",required = false) Integer status ){
-        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
+    public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsAll(@RequestParam(value = "code", required = false) String code,
+                                                                     @RequestParam(value = "name", required = false) String name,
+                                                                     @RequestParam(value = "status",required = false) Integer status ){
+        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(code, name, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
         return ResponseEntity.ok(result);
     }
 

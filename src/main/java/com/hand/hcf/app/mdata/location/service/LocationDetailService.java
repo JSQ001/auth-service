@@ -1,12 +1,16 @@
 package com.hand.hcf.app.mdata.location.service;
 
 
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
+import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import com.hand.hcf.app.mdata.location.persistence.LocationDetailMapper;
 import com.hand.hcf.app.mdata.location.persistence.LocationMapper;
+import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,4 +87,11 @@ public class LocationDetailService {
         return locationDetails;
     }
 
+    public List<LocationInfoDTO> listCityByDescription(String description, Long id, String code) {
+        String currentLanguage = OrgInformationUtil.getCurrentLanguage();
+        if (!StringUtils.hasText(currentLanguage)){
+            currentLanguage = LanguageEnum.ZH_CN.getKey();
+        }
+        return locationDetailMapper.listCityByDescription(description, id, code, currentLanguage);
+    }
 }

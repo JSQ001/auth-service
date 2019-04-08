@@ -11,7 +11,7 @@ import lombok.Data;
 */
 @Data
 @TableName("sys_mobile_validate")
-public class MobileValidate extends DomainI18nEnable {
+public class MobileValidate extends DomainI18nEnable{
 
     @TableField(value = "country_name_en")
     private String countryNameEn;

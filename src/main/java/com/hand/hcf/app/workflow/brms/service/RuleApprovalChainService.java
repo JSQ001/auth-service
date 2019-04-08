@@ -39,18 +39,11 @@ public class RuleApprovalChainService extends BaseService<RuleApprovalChainMappe
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public Page<RuleApprovalChain> pageAllByCompanyOid(UUID companyOid, Page page) {
-        Page<RuleApprovalChain> result = selectPage(page, new EntityWrapper<RuleApprovalChain>()
-                .eq("company_oid", companyOid)
-                .eq("status", RuleApprovalEnum.VALID.getId()));
-        return result;
-    }
+
 
     @Transactional(readOnly = true)
-    public List<RuleApprovalChain> listAllByCompanyOid(UUID companyOid) {
+    public List<RuleApprovalChain> listAll() {
         return selectList(new EntityWrapper<RuleApprovalChain>()
-                .eq("company_oid", companyOid)
                 .eq("status", RuleApprovalEnum.VALID.getId()));
     }
 

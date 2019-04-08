@@ -12,7 +12,7 @@ import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationHeaderService;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
+import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;

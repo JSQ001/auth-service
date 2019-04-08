@@ -90,10 +90,10 @@ public class ResponsibilityCenterGroupResource {
      */
     @RequestMapping(value = "/query", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ResponsibilityCenterGroup>> pageResponsibilityCenterGroupBySetOfBooksId(@RequestParam(value="setOfBooksId") Long setOfBooksId,
-                                                                                                       @RequestParam(value = "groupCode",required = false) String groupCode,
-                                                                                                       @RequestParam(value="groupName",required = false) String groupName,
-                                                                                                       @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                                                       Pageable pageable){
+                                                                                                        @RequestParam(value = "groupCode",required = false) String groupCode,
+                                                                                                        @RequestParam(value="groupName",required = false) String groupName,
+                                                                                                        @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                                        Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<ResponsibilityCenterGroup> result = centerGroupService.pageResponsibilityCenterGroupBySetOfBooksId(setOfBooksId,groupCode,groupName,enabled,page);
         return new ResponseEntity<>(result.getRecords(), PageUtil.getTotalHeader(page), HttpStatus.OK);

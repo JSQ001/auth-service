@@ -169,4 +169,24 @@
             </foreach>
         </if>
     </select>
+    <select id="listCityByDescription" resultType="com.hand.hcf.app.mdata.location.dto.LocationInfoDTO">
+        SELECT
+            a.id,
+            a.code,
+            a.description
+        FROM
+            sys_location_detail a
+        WHERE
+            a.language = #{language}
+        <if test="description !=null and description !=''">
+            AND a.description like concat(concat('%',#{description}),'%')
+        </if>
+        <if test="code !=null and code !=''">
+            AND a.code #{code}
+        </if>
+        <if test="id !=null ">
+            AND a.id = #{id}
+        </if>
+        order by a.code
+    </select>
 </mapper>

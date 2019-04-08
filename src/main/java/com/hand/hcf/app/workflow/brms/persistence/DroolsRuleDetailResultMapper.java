@@ -19,5 +19,5 @@ public interface DroolsRuleDetailResultMapper extends BaseMapper<DroolsRuleDetai
      */
     List<DroolsRuleDetailResult> findDroolResultDetailResult(@Param(value = "droolsRuleDetailOid") UUID droolsRuleDetailOid);
 
-    DroolsRuleDetailResult findByDroolsRuleDetailResultOid(UUID doorlsRuleDetailResultOids);
+    DroolsRuleDetailResult findByDroolsRuleDetailResultOid( UUID doorlsRuleDetailResultOids);
 }

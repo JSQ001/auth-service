@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.workflow.persistence.ApprovalFormMapper" >
+
+
+    <select id="listDTOByQO" parameterType="com.hand.hcf.app.workflow.dto.ApprovalFormQO" resultType="com.hand.hcf.app.workflow.dto.ApprovalFormDTO">
+        SELECT
+        a.*
+        FROM
+        sys_approval_form a
+        <where>
+            <include refid="commonSearchClause"/>
+        </where>
+
+    </select>
+
+    <sql id="commonSearchClause">
+        1=1
+        <if test="formOid != null">
+            AND a.form_oid = #{formOid}
+        </if>
+        <if test="formCode != null">
+            AND a.form_code = #{formCode}
+        </if>
+        <if test="formTypeId != null">
+            AND a.form_type_id = #{formTypeId}
+        </if>
+
+        <if test="fromType != null">
+            AND a.from_type = #{fromType}
+        </if>
+        <if test="tenantId != null">
+            AND a.tenant_id = #{tenantId}
+        </if>
+
+        <if test="formTypeList != null and formTypeList.size >0">
+            AND a.form_type_id in
+            <foreach collection="formTypeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+
+        <!-- 表单Oid -->
+        <if test="formOids != null and formOids.size >0">
+            AND a.form_oid in
+            <foreach collection="formOids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+
+        <!-- 排除的表单Oid -->
+        <if test="excludedFormOids != null and excludedFormOids.size >0">
+            AND a.form_oid not in
+            <foreach collection="excludedFormOids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+
+
+    </sql>
+
+</mapper>

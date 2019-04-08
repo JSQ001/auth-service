@@ -179,8 +179,6 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
             ExpenseAdjustLine expenseAdjustLine = toExpenseAdjustLinesByBean(linesBean);
             //  校验参数
             checkExpenseAdjustLinesDate(expenseAdjustLine);
-            // 没有的维度信息则默认为空
-            DimensionUtils.setNullToDimensionId(dimensions.size(), expenseAdjustLine, ExpenseAdjustLine.class);
             //  插入
             this.insert(expenseAdjustLine);
             line = expenseAdjustLine;
@@ -200,8 +198,6 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
 
             //  转化-获取第一页  单据行类型为1001
             ExpenseAdjustLine expenseAdjustLine = toExpenseAdjustLinesByBean(linesBean);
-            // 没有的维度信息则默认为空
-            DimensionUtils.setNullToDimensionId(dimensions.size(), expenseAdjustLine, ExpenseAdjustLine.class);
             //  更新
             this.updateById(expenseAdjustLine);
             line = expenseAdjustLine;
@@ -277,8 +273,6 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
                 lines.setExchangeRate(linesBean.getExchangeRate());
                 lines.setFunctionalAmount(TypeConversionUtils.roundHalfUp(lines.getAmount().multiply(lines.getExchangeRate())));
                 lines.setAmount(lines.getAmount());
-                //  判断是新增还是更新
-                DimensionUtils.setNullToDimensionId(dimensionIdSize, lines, ExpenseAdjustLine.class);
                 if (lines.getId() == null){ //  第二页 新增
                     //  建立层级关系
                     lines.setId(null);

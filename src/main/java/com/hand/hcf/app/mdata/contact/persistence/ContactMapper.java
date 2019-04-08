@@ -86,4 +86,23 @@ public interface ContactMapper extends BaseMapper<Contact> {
                                                                    @Param("ids") List<Long> ids,
                                                                    @Param("tenantId") Long tenantId,
                                                                    Page page);
+
+    /**
+     * 根据传入的条件查询员工
+     * @param companyIds
+     * @param departmentIds
+     * @param userGroupIds
+     * @param userCode
+     * @param userName
+     * @param orWrapper
+     * @param queryPage
+     * @return
+     */
+    List<Contact> listContactByConditionAndWrapper(@Param("companyIds") List<Long> companyIds,
+                                                   @Param("departmentIds") List<Long> departmentIds,
+                                                   @Param("userGroupIds") List<Long> userGroupIds,
+                                                   @Param("userCode") String userCode,
+                                                   @Param("userName") String userName,
+                                                   @Param("ew") Wrapper<Contact> orWrapper,
+                                                   Page queryPage);
 }

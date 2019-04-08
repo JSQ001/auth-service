@@ -30,8 +30,11 @@ public interface DepartmentMapper extends BaseMapper<Department> {
                                               @Param("keyword") String keyword,
                                               @Param("departmentStatus") Integer departmentStatus);
 
-    List<DepartmentTreeDTO> findTenantAllDepartment(@Param(value = "tenantId") Long tenantId,
-                                                    @Param("status") Integer status, @Param(value = "language") String language);
+    List<DepartmentTreeDTO> findTenantAllDepartment(@Param(value = "code") String code,
+                                                    @Param(value = "name") String name,
+                                                    @Param(value = "tenantId") Long tenantId,
+                                                    @Param("status") Integer status,
+                                                    @Param(value = "language") String language);
 
     Department selectByDepartmentOidAndStatus(@Param("departmentOid") UUID departmentOid, @Param("status") Integer status);
 

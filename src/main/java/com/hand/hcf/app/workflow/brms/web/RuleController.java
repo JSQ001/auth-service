@@ -8,8 +8,8 @@ import com.hand.hcf.app.workflow.brms.service.DroolsService;
 import com.hand.hcf.app.workflow.brms.service.RuleConditionService;
 import com.hand.hcf.app.workflow.brms.service.RuleService;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalFormDTO;
-import com.hand.hcf.app.workflow.workflow.dto.FormFieldDTO;
+import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
+import com.hand.hcf.app.workflow.dto.FormFieldDTO;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class RuleController {
     public ResponseEntity<RuleApprovalChainDTO> ctreateApprovalChain(@RequestBody RuleApprovalChainDTO ruleApprovalChain,
                                                                      @RequestParam(value = "companyOid", required = false) UUID companyOid) {
         UUID userOid = OrgInformationUtil.getCurrentUserOid();
-        return ResponseEntity.ok().body(ruleService.createRuleApprovalChain(ruleApprovalChain, userOid, companyOid));
+        return ResponseEntity.ok().body(ruleService.createRuleApprovalChain(ruleApprovalChain));
     }
 
     @RequestMapping(value = "/approval/chains",
@@ -361,7 +361,7 @@ public class RuleController {
                                                                   @RequestParam(value = "booksID", required = false) String booksID,
                                                                   @RequestParam(value = "formName",required = false) String formName,
                                                                   @RequestParam(value = "documentCategory",required = false) Long formTypeId) {
-        return ResponseEntity.ok(ruleService.getAllCustomFormByCompany(OrgInformationUtil.getCurrentCompanyOid(), true, fromType, roleType, booksID,formName,formTypeId));
+        return ResponseEntity.ok(ruleService.listAllForm(true, fromType, roleType,formName,formTypeId));
     }
 
     //表单列表
@@ -370,7 +370,7 @@ public class RuleController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     //@ApiOperation("初始化公司下未配置的表单")
     public ResponseEntity<List<ApprovalFormDTO>> initSpecificAllCustomForm() {
-        List<ApprovalFormDTO> approvalFormDTOList = ruleService.getAllUnInitialCustomFormByCompany(OrgInformationUtil.getCurrentCompanyOid(), true);
+        List<ApprovalFormDTO> approvalFormDTOList = ruleService.getAllUnInitialCustomForm(true);
         ruleService.additionalOperation(approvalFormDTOList.stream().map(c -> c.getFormOid()).collect(Collectors.toList()));
         return ResponseEntity.ok(approvalFormDTOList);
     }
@@ -497,7 +497,7 @@ public class RuleController {
         if (userOid == null) {
             userOid = OrgInformationUtil.getCurrentUserOid();
         }
-        ruleService.initCompanyRule(companyOid, approvalType, userOid);
+        ruleService.initRule( approvalType);
         return ResponseEntity
                 .ok().build();
     }
