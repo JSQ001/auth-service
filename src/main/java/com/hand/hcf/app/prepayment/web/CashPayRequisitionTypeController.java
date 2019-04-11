@@ -516,11 +516,19 @@ public class CashPayRequisitionTypeController {
     }
 
     /**
-     * @api {GET} /api/cash/pay/requisition/types/users/{id} 【预付款单类型】根据单据id查询有该单据权限的用户
+     * @api {GET} /api/cash/pay/requisition/types/users 【预付款单类型】根据单据id查询有该单据权限的用户
      */
-    @GetMapping("/users/{id}")
-    public List<ContactCO> listUsersByCashSobPayReqTypeId(@PathVariable("id") Long id){
+    @GetMapping("/users")
+    public ResponseEntity listUsersByCashSobPayReqTypeId(@RequestParam(value = "payReqTypeId") Long payReqTypeId,
+                                                         @RequestParam(required = false) String userCode,
+                                                         @RequestParam(required = false) String userName,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<ContactCO> result = cashSobPayReqTypeService.listUsersByCashSobPayReqTypeId(payReqTypeId,
+                userCode, userName, queryPage);
 
-        return cashSobPayReqTypeService.listUsersByCashSobPayReqTypeId(id);
+        HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 }

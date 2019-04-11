@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class CashPaymentRequisitionLineAdapter {
     @Autowired
-    private CashPaymentRequisitionLineService cashPaymentRequisitionLineService;
+    private  CashPaymentRequisitionLineService cashPaymentRequisitionLineService;
     @Autowired
     private  PrepaymentAttachmentService prepaymentAttachmentService;
     @Autowired
@@ -74,7 +74,7 @@ public class CashPaymentRequisitionLineAdapter {
         }
     }
 
-    public CashPaymentRequisitionLineCO toDTO(CashPaymentRequisitionLine line){
+    public  CashPaymentRequisitionLineCO toDTO(CashPaymentRequisitionLine line){
         CashPaymentRequisitionLineCO dto = new CashPaymentRequisitionLineCO();
         BeanUtils.copyProperties(line,dto);
         try {

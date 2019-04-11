@@ -653,16 +653,18 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
         List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.PREPAYMENT.getCode(), OrgInformationUtil.getCurrentUserId());
 
         for(FormAuthorizeCO item : formAuthorizeCOList) {
-            List<Long> typeIdList = new ArrayList<>();
-            if (item.getCompanyId() != null) {
-                typeIdList = cashPayRequisitionTypeAssignCompanyMapper.selectList(
-                        new EntityWrapper<CashPayRequisitionTypeAssignCompany>()
-                                .eq("company_id", item.getCompanyId())
-                                .eq("enabled",true)
-                ).stream().map(CashPayRequisitionTypeAssignCompany::getSobPayReqTypeId).collect(Collectors.toList());
-                if (typeIdList.size() == 0) {
-                    continue;
-                }
+            OrganizationUserCO contactCO = new OrganizationUserCO();
+            if (item.getMandatorId() != null) {
+                contactCO = prepaymentHcfOrganizationInterface.getOrganizationCOByUserId(item.getMandatorId());
+            }
+            List<Long> typeIdList = cashPayRequisitionTypeAssignCompanyMapper.selectList(
+                    new EntityWrapper<CashPayRequisitionTypeAssignCompany>()
+                            .eq(item.getCompanyId() != null, "company_id", item.getCompanyId())
+                            .eq(contactCO.getCompanyId() != null, "company_id", contactCO.getCompanyId())
+                            .eq("enabled",true)
+            ).stream().map(CashPayRequisitionTypeAssignCompany::getSobPayReqTypeId).collect(Collectors.toList());
+            if (typeIdList.size() == 0) {
+                continue;
             }
             List<CashPayRequisitionType> cashPayRequisitionTypes = this.selectList(
                     new EntityWrapper<CashPayRequisitionType>()
@@ -737,7 +739,7 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
      * @param id
      * @return
      */
-    public List<ContactCO> listUsersByCashSobPayReqTypeId(Long id) {
+    public List<ContactCO> listUsersByCashSobPayReqTypeId(Long id, String userCode, String userName, Page queryPage) {
         List<ContactCO> userCOList = new ArrayList<>();
 
         CashPayRequisitionType cashPayRequisitionType = this.getCashPayRequisitionTypeById(id);
@@ -745,61 +747,46 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
             return userCOList;
         }
 
-        //查出有该单据权限的所有人员
-        Set<ContactCO> userCOS = new HashSet<>();
-        if (CashPayRequisitionTypeEmployeeEnum.BASIS_01.equals(cashPayRequisitionType.getApplyEmployee())) {
-            userCOS.addAll(prepaymentHcfOrganizationInterface.listUserByTenantId(OrgInformationUtil.getCurrentTenantId()));
-        }
-        // 部门
-        if (CashPayRequisitionTypeEmployeeEnum.BASIS_02.equals(cashPayRequisitionType.getApplyEmployee())){
-            List<Long> departmentIdList = cashPayRequisitionTypeAssignDepartmentService.selectList(
-                    new EntityWrapper<CashPayRequisitionTypeAssignDepartment>()
-                            .eq("pay_requisition_type_id",cashPayRequisitionType.getId())
-            ).stream().map(CashPayRequisitionTypeAssignDepartment::getDepartmentId).collect(toList());
-            if (!CollectionUtils.isEmpty(departmentIdList)) {
-
-                departmentIdList.stream().forEach(e -> userCOS.addAll(prepaymentHcfOrganizationInterface.listUsersByDepartmentId(e)));
-            }
-        }
-        // 人员组
-        if (CashPayRequisitionTypeEmployeeEnum.BASIS_03.equals(cashPayRequisitionType.getApplyEmployee())){
-            List<Long> userGroupIdList = cashPayRequisitionTypeAssignUserGroupService.selectList(
-                    new EntityWrapper<CashPayRequisitionTypeAssignUserGroup>()
-                            .eq("pay_requisition_type_id",cashPayRequisitionType.getId())
-            ).stream().map(CashPayRequisitionTypeAssignUserGroup::getUserGroupId).collect(toList());
-            if (!CollectionUtils.isEmpty(userGroupIdList)) {
-
-                userGroupIdList.stream().forEach(e -> userCOS.addAll(prepaymentHcfOrganizationInterface.listUsersByUserGroupId(e)));
-            }
-        }
-
-        List<Long> companyList = cashPayRequisitionTypeAssignCompanyMapper.selectList(
+        List<Long> companyIdList = cashPayRequisitionTypeAssignCompanyMapper.selectList(
                 new EntityWrapper<CashPayRequisitionTypeAssignCompany>()
                         .eq("enabled", true)
                         .eq("sob_pay_req_type_id", id)
         ).stream().map(CashPayRequisitionTypeAssignCompany::getCompanyId).collect(toList());
 
-        Map<Long, ContactCO> userCOMap = userCOS.stream().filter(u -> companyList.contains(u.getCompanyId())).collect(Collectors.toMap(ContactCO::getId, u -> u, (e1, e2) -> e1));
-
-        //当前用户是否有新建权限
-        if (userCOMap.containsKey(OrgInformationUtil.getCurrentUserId())) {
-            userCOList.add(userCOMap.get(OrgInformationUtil.getCurrentUserId()));
+        if (companyIdList.size() == 0){
+            return userCOList;
         }
 
-        //委托人是否有新建权限
-        List<FormAuthorizeCO> formAuthorizeCOList = authorizeClient.listFormAuthorizeByDocumentCategoryAndUserId(FormTypeEnum.PREPAYMENT.getCode(), OrgInformationUtil.getCurrentUserId());
-        formAuthorizeCOList = formAuthorizeCOList.stream().filter(item -> {
-            if (item.getFormId() != null && !item.getFormId().equals(cashPayRequisitionType.getId())){
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
+        List<Long> departmentIdList = null;
+        List<Long> userGroupIdList = null;
 
-        for(FormAuthorizeCO item : formAuthorizeCOList) {
-            if (item.getMandatorId() != null && userCOMap.containsKey(item.getMandatorId())) {
-                userCOList.add(userCOMap.get(item.getMandatorId()));
-            }
+        // 部门
+        if (CashPayRequisitionTypeEmployeeEnum.BASIS_02.equals(cashPayRequisitionType.getApplyEmployee())){
+            departmentIdList = cashPayRequisitionTypeAssignDepartmentService.selectList(
+                    new EntityWrapper<CashPayRequisitionTypeAssignDepartment>()
+                            .eq("pay_requisition_type_id",cashPayRequisitionType.getId())
+            ).stream().map(CashPayRequisitionTypeAssignDepartment::getDepartmentId).collect(toList());
         }
+        // 人员组
+        if (CashPayRequisitionTypeEmployeeEnum.BASIS_03.equals(cashPayRequisitionType.getApplyEmployee())){
+            userGroupIdList = cashPayRequisitionTypeAssignUserGroupService.selectList(
+                    new EntityWrapper<CashPayRequisitionTypeAssignUserGroup>()
+                            .eq("pay_requisition_type_id",cashPayRequisitionType.getId())
+            ).stream().map(CashPayRequisitionTypeAssignUserGroup::getUserGroupId).collect(toList());
+        }
+
+        AuthorizeQueryCO queryCO = AuthorizeQueryCO
+                .builder()
+                .documentCategory(FormTypeEnum.PREPAYMENT.getCode())
+                .formTypeId(id)
+                .companyIdList(companyIdList)
+                .departmentIdList(departmentIdList)
+                .userGroupIdList(userGroupIdList)
+                .currentUserId(OrgInformationUtil.getCurrentUserId())
+                .build();
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        queryPage.setTotal(contactCOPage.getTotal());
+        userCOList = contactCOPage.getRecords();
 
         return userCOList;
     }

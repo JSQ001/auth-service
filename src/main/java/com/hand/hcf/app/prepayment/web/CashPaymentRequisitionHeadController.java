@@ -494,7 +494,6 @@ public class CashPaymentRequisitionHeadController {
      * totalFunctionAmount:3
      * }
      */
-    /*根据头id查询行各个币种金额信息*/
     @GetMapping("/getAmountByHeadId")
     public ResponseEntity<Map<String, BigDecimal>> getAmountByHeadId(@RequestParam Long headId) {
         return ResponseEntity.ok(cashPaymentRequisitionHeadService.getAmountGroupByCodeByHeadId(headId));
@@ -509,34 +508,44 @@ public class CashPaymentRequisitionHeadController {
      * @apiSuccessExample {json} 成功返回值:
      * {true}
      */
-    /*根据头id删除预付款单头行信息*/
     @DeleteMapping("/deleteHeadAndLineByHeadId")
     public ResponseEntity<Boolean> deleteByHeadId(@RequestParam Long headId) {
         return ResponseEntity.ok(cashPaymentRequisitionHeadService.deleteHeadAndLineByHeadId(headId));
     }
 
     /**
+     * @apiDescription 该接口用于根据头id删除预付款单头行信息 app无法使用delete方法
+     * @api {DELETE} /api/cash/prepayment/requisitionHead/deleteHeadAndLineByHeadId 【预付款】头id删除头行
+     * @apiGroup PrepaymentService
+     * @apiParam {Long} headId 预付款单头id
+     * @apiSuccessExample {json} 成功返回值:
+     * {true}
+     */
+    @GetMapping("/deleteHeadAndLineByHeadId")
+    public ResponseEntity<Boolean> deleteByHeadIdForApp(@RequestParam Long headId) {
+        return ResponseEntity.ok(cashPaymentRequisitionHeadService.deleteHeadAndLineByHeadId(headId));
+    }
+
+    /**
      * @apiDescription 该接口用于单独删除行
-     * @api {DELETE} /api/cash/prepayment/requisitionHead/deleteHeadAndLineByHeadId 【预付款】删除行
+     * @api {DELETE} /api/cash/prepayment/requisitionHead/deleteLineById 【预付款】删除行
      * @apiGroup PrepaymentService
      * @apiParam {Long} lineId 预付款单行id
      * @apiSuccessExample {json} 成功返回值:
      * {true}
      */
-    /*单独删除行*/
     @DeleteMapping("/deleteLineById")
     public ResponseEntity<Boolean> deleteLineByLineId(@RequestParam Long lineId) {
         return ResponseEntity.ok(cashPaymentRequisitionHeadService.deleteLine(lineId));
     }
     /**
      * @apiDescription 该接口用于App单独删除行,App不支持DELETE方法
-     * @api {DELETE} /api/cash/prepayment/requisitionHead/deleteHeadAndLineByHeadId 【预付款】删除行
+     * @api {DELETE} /api/cash/prepayment/requisitionHead/deleteLineById 【预付款】删除行
      * @apiGroup PrepaymentService
      * @apiParam {Long} lineId 预付款单行id
      * @apiSuccessExample {json} 成功返回值:
      * {true}
      */
-    /*单独删除行*/
     @GetMapping("/deleteLineById")
     public ResponseEntity<Boolean> appDeleteLineByLineId(@RequestParam Long lineId) {
         return ResponseEntity.ok(cashPaymentRequisitionHeadService.deleteLine(lineId));
@@ -1078,7 +1087,6 @@ public class CashPaymentRequisitionHeadController {
         );
 
         HttpHeaders headers = PageUtil.generateHttpHeaders(page, "/api/cash/prepayment/requisitionHead/get/head/by/query");
-//        headers.add("X-Total-Count", "" + page.getTotal());
         return new ResponseEntity<>(headByQuery.getRecords(), headers, HttpStatus.OK);
     }
 
@@ -1149,10 +1157,13 @@ public class CashPaymentRequisitionHeadController {
                 if (applicationOid != null) {
                     ContactCO userCO = cashPaymentRequisitionHeadService.getUserByOid(applicationOid);
                     if (userCO != null) {
-                        prepaymentApprovalDTO.setApplicantName(userCO.getFullName()); //申请人姓名
+                        //申请人姓名
+                        prepaymentApprovalDTO.setApplicantName(userCO.getFullName());
                     }
-                    prepaymentApprovalDTO.setApplicantOid(applicationOid); //申请人oid
-                    prepaymentApprovalDTO.setApplicantCode(userCO.getEmployeeCode()); //申请人
+                    //申请人oid
+                    prepaymentApprovalDTO.setApplicantOid(applicationOid);
+                    //申请人
+                    prepaymentApprovalDTO.setApplicantCode(userCO.getEmployeeCode());
                 }
 
                 //提交时间

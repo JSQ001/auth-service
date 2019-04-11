@@ -39,6 +39,24 @@ public class VendorModuleInterface {
         //jiu.zhao 修改三方接口
         return this.supplierClient.pageVendorInfosByConditions(companyId, vendorName, page.getCurrent() - 1, page.getSize());
     }
+    /**
+     * 根据租户id和供应商名称、供应商代码[模糊]分页查询供应商，包含银行账号信息
+     *
+     * @param tenantId
+     * @param venNickname
+     * @param vendorCode
+     * @param page
+     * @return
+     */
+
+    public Page<VendorInfoCO> pageVendorInfosByTenantIdAndNameAndCode(Long tenantId,String venNickname,String vendorCode,Page page){
+       /*return supplierClient.pageVendorInfosByTenantIdAndNameAndCode(tenantId,venNickname,vendorCode,page);*/
+        //bo.liu 修改三方接口
+      // return supplierClient.pageVendorInfosByTenantIdAndNameAndCode(tenantId,venNickname,vendorCode,page.getCurrent()-1,page.getSize());
+        //todo
+        return null;
+
+    }
 
 
     /**
