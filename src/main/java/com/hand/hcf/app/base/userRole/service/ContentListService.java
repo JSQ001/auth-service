@@ -55,9 +55,6 @@ public class ContentListService extends BaseService<ContentListMapper,ContentLis
         if (contentList.getContentName() == null){
             throw new BizException(RespCode.CONTENT_LIST_CONTENT_NAME_IS_NULL);
         }
-        if (contentList.getContentRouter() == null){
-            throw new BizException(RespCode.CONTENT_LIST_CONTENT_ROUTER_IS_NULL);
-        }
         if (contentList.getIcon() == null){
             throw new BizException(RespCode.CONTENT_LIST_ICON_IS_NULL);
         }
@@ -181,30 +178,6 @@ public class ContentListService extends BaseService<ContentListMapper,ContentLis
                 }
             }
         }
-
-        //如果修改了contentRouter，那要把该目录分配的每个功能对应的页面中的contentRouter改掉
-        if ( !oldContentList.getContentRouter().equals(contentList.getContentRouter()) ){
-            List<Long> functionIdList = contentFunctionRelationMapper.selectList(
-                    new EntityWrapper<ContentFunctionRelation>()
-                            .eq("content_id",contentList.getId())
-            ).stream().map(ContentFunctionRelation::getFunctionId).collect(Collectors.toList());
-            if ( functionIdList.size() > 0 ){
-                functionIdList.stream().forEach(functionId -> {
-                    List<Long> pageIdList = functionPageRelationMapper.selectList(
-                            new EntityWrapper<FunctionPageRelation>()
-                                    .eq("function_id",functionId)
-                    ).stream().map(FunctionPageRelation::getPageId).collect(Collectors.toList());
-                    if (pageIdList.size() > 0){
-                        pageIdList.stream().forEach(pageId -> {
-                            PageList pageList = pageListMapper.selectById(pageId);
-                            pageList.setContentRouter(contentList.getContentRouter());
-                            pageListMapper.updateAllColumnById(pageList);
-                        });
-                    }
-                });
-            }
-        }
-
         contentListMapper.updateAllColumnById(contentList);
         return contentListMapper.selectById(contentList);
     }

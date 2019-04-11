@@ -3,4 +3,5 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
   liquibase:
     change-log: classpath:db/liquibase/master.xml
-
+  profiles:
+    active: prod

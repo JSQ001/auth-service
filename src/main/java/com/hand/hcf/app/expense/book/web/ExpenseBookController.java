@@ -295,7 +295,6 @@ public class ExpenseBookController {
      * @apiParam {String} [remarks] 备注
      * @apiParam {BigDecimal} [amountFrom] 金额从
      * @apiParam {BigDecimal} [amountTo] 金额至
-     * @a/api/expense/book/release
      * @apiSuccessExample {json} Success-Response:
      * [
     {

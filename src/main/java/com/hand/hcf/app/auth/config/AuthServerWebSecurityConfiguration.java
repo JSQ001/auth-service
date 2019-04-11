@@ -2,9 +2,9 @@
 
 package com.hand.hcf.app.auth.config;
 
-import com.hand.hcf.app.auth.security.BaseProvider.BaseAuthenticationProvider;
-import com.hand.hcf.app.auth.security.BaseProvider.SSOAuthenticationProvider;
-import com.hand.hcf.app.auth.security.BaseProvider.SSODirectClientAuthenticationProvider;
+import com.hand.hcf.app.auth.security.provider.BaseAuthenticationProvider;
+import com.hand.hcf.app.auth.security.provider.SSOAuthenticationProvider;
+import com.hand.hcf.app.auth.security.provider.SSODirectClientAuthenticationProvider;
 import com.hand.hcf.app.auth.service.SSODetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,23 +67,7 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
         authenticationManagerBuilder.authenticationProvider(ssoDirectClientAuthenticationProvider());
     }
 
-   /* @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-      //return    new UnmappedIdPasswordEncoder();
-        //  return new BCryptPasswordEncoder();
-    }*/
-  /*  @Bean
-    public static NoOpPasswordEncoder passwordEncoder2() {
-        return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
-    }*/
 
-   /* @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-*/
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -102,7 +86,7 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
     }
 
     @Bean
-    public BaseAuthenticationProvider wxAuthProvider() throws Exception {
+    public BaseAuthenticationProvider wxAuthProvider() {
         BaseAuthenticationProvider provider = new BaseAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
@@ -144,10 +128,6 @@ public class AuthServerWebSecurityConfiguration extends WebSecurityConfigurerAda
         authenticationProvider.setSsourl(ssourl);
         return authenticationProvider;
     }
-  /*  @Bean
-    public PasswordEncoder passwordEncoder() {
-        //return new BCryptPasswordEncoder();
 
-    }*/
 }
 

@@ -169,7 +169,7 @@ public class InterfaceService extends BaseService<InterfaceMapper, Interface> {
      * @return
      */
     public Interface getInterfaceById(Long id) {
-        return interfaceMapper.selectById(id);
+        return interfaceMapper.getById(id);
     }
 
     /**

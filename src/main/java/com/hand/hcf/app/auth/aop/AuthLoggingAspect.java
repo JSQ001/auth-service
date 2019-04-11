@@ -23,7 +23,7 @@ public class AuthLoggingAspect {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 
-    @Pointcut("within(com.hand.hcf.app.base.web..*) ")
+    @Pointcut("within(com.hand.hcf.app.auth.web..*) ")
     public void loggingPointcut() {
     }
 

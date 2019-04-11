@@ -175,6 +175,18 @@ public class ExpenseReportLine extends Domain{
     private Long expenseBookId;
 
     /**
+     * 审核状态
+     */
+    @TableField(value = "audit_flag")
+    private String auditFlag;
+
+    /**
+     * 审核日期
+     */
+    @TableField(value = "audit_date")
+    private ZonedDateTime auditDate;
+
+    /**
      * 附件OID集合
      */
     @TableField(exist = false)

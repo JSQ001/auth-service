@@ -1,11 +1,11 @@
 package com.hand.hcf.app.expense.report.implement.web;
 
+import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.ws.soap.Addressing;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -28,5 +28,13 @@ public class ExpenseReportControllerImpl {
                                      @RequestParam("status") Integer status,
                                      @RequestParam(value = "approvalText",required = false) String approvalText) {
         expenseReportHeaderService.updateDocumentStatus(headerId, status, approvalText);
+    }
+
+    public boolean checkCreateVoucher(@RequestParam("headerId") Long headerId) {
+        ExpenseReportHeader expenseReportHeader = expenseReportHeaderService.selectById(headerId);
+        if (null == expenseReportHeader){
+            return false;
+        }
+        return expenseReportHeader.getJeCreationStatus() == null ? false : expenseReportHeader.getJeCreationStatus();
     }
 }

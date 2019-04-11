@@ -5,7 +5,7 @@
 <mapper namespace="com.hand.hcf.app.base.userRole.persistence.PageListMapper">
 
 
-    <select id="listPageByFunctionIds" resultType="com.hand.hcf.app.base.userRole.dto.FunctionPageDTO">
+    <select id="listPageByRoleIds" resultType="com.hand.hcf.app.base.userRole.dto.FunctionPageDTO">
         SELECT v.page_name,
         t.function_id,
         t.page_id,
@@ -13,15 +13,20 @@
         v.content_router,
         v.function_router,
         v.page_router,
-        v.page_url
-        FROM sys_function_page_relation t, sys_page_list v
-        WHERE t.page_id = v.id
-        AND v.deleted = 0
-        <if test="functionIds != null and functionIds.size > 0">
-            AND t.function_id in
-            <foreach collection="functionIds" open="(" close=")" separator="," item="functionId">
-                #{functionId}
-            </foreach>
-        </if>
+        v.page_url,
+        v.full_router as fullRouter,
+        v.full_url as fullUrl,
+        cfr.content_id
+        FROM sys_page_list v
+        inner join sys_function_page_relation t on t.page_id = v.id
+        left join sys_content_function_rel cfr on t.function_id = cfr.function_id
+        WHERE v.deleted = 0
+        AND exists (select 1 from sys_role_function rf where rf.function_id = t.function_id
+            <if test="roleIds != null and roleIds.size > 0">
+                AND rf.role_id in
+                <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+                    #{roleId}
+                </foreach>
+            </if>)
     </select>
 </mapper>

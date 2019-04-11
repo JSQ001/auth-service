@@ -19,7 +19,8 @@ public interface ApplicationLineDistMapper extends BaseMapper<ApplicationLineDis
     /**
      * 查申请单行表，用分摊行对象接，用于保存分摊行
      *
-     * @param id
+     * @param id 单据头id
+     * @return  id List<ApplicationLineDist>
      */
     List<ApplicationLineDist> listLinesByHeaderId(@Param("id") Long id);
 

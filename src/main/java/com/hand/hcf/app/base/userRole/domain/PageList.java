@@ -46,4 +46,10 @@ public class PageList extends DomainI18n {
     @NotNull
     @TableField("page_url")
     private String pageUrl;
+    /**
+     * 全路由
+     */
+    private String fullRouter;
+
+    private String fullUrl;
 }

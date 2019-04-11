@@ -297,7 +297,7 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
                 .in(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(expenseTypeIds),"expense_type_id",expenseTypeIds)
                 .eq("created_by",OrgInformationUtil.getCurrentUserId())
                 .orderBy("expense_date");
-        List<ExpenseBook> expenseBooks = baseMapper.selectPage(queryPage,wrapper);
+        List<ExpenseBook> expenseBooks = baseMapper.pageExpenseBookByCond(queryPage,wrapper);
         expenseBooks.stream().forEach(s->{
             ExpenseType expenseType = expenseTypeService.selectById(s.getExpenseTypeId());
             if(expenseType != null){

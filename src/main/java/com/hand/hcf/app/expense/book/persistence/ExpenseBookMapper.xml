@@ -20,8 +20,8 @@
         select *
         from exp_expense_book eb
         <where>
+            not exists(select 1 from exp_report_line el where eb.id = el.expense_book_id)
             ${ew.sqlSegment}
-            and not exists(select 1 from exp_report_line el where eb.id = el.expense_book_id)
         </where>
     </select>
 </mapper>

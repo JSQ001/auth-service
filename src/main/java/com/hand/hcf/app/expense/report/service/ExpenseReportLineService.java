@@ -34,10 +34,12 @@ import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.redisLock.annotations.LockedObject;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.service.MessageService;
 import com.hand.hcf.core.util.OperationUtil;
 import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.core.util.ReflectUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -105,6 +108,9 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
     @Autowired
     private ExpenseReportTypeDimensionService expenseReportTypeDimensionService;
 
+    @Autowired
+    private MessageService messageService;
+
 
     /**
      * 根据报账单头ID删除费用行信息
@@ -114,11 +120,33 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteExpenseReportLineByHeaderId(Long headerId){
         List<ExpenseReportLine> lines = selectList(new EntityWrapper<ExpenseReportLine>().eq("exp_report_header_id", headerId));
-        List<Long> collect = lines.stream().map(ExpenseReportLine::getId).collect(Collectors.toList());
-        //删除附件信息
-        String attachmentOid = lines.stream().map(ExpenseReportLine::getAttachmentOid).collect(Collectors.joining(","));
-        deleteAttachmentByAttachmentOid(attachmentOid);
-        return deleteBatchIds(collect);
+        if(CollectionUtils.isNotEmpty(lines)){
+            List<Long> collect = lines.stream().map(ExpenseReportLine::getId).collect(Collectors.toList());
+            //删除附件信息
+            String attachmentOid = lines.stream().filter(e -> com.baomidou.mybatisplus.toolkit.StringUtils.isNotEmpty(e.getAttachmentOid())).map(ExpenseReportLine::getAttachmentOid).collect(Collectors.joining(","));
+            deleteAttachmentByAttachmentOid(attachmentOid);
+            return deleteBatchIds(collect);
+        }
+       return true;
+    }
+
+    /**
+     * 更新审核状态
+     * @param headerId
+     * @param auditFlag
+     * @param auditDate
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateExpenseReportLineAduitStatusByHeaderId(Long headerId,
+                                                                String auditFlag,
+                                                                ZonedDateTime auditDate){
+        List<ExpenseReportLine> lines = selectList(new EntityWrapper<ExpenseReportLine>().eq("exp_report_header_id", headerId));
+        lines.stream().forEach(e -> {
+           e.setAuditFlag(auditFlag);
+           e.setAuditDate(auditDate);
+        });
+        return updateAllColumnBatchById(lines);
     }
 
     /**
@@ -186,6 +214,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             isNew = true;
             initExpenseReportLineMessage(expenseReportHeader,line);
         }
+        initExpenseReportLineAmount(line);
         //后续其他数据需要使用费用行ID，所以需要最先保存
         insertOrUpdate(line);
         // 保存发票信息
@@ -550,6 +579,11 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         });
     }
 
+    /**
+     * 初始化费用行信息
+     * @param expenseReportHeader
+     * @param line
+     */
     private void initExpenseReportLineMessage(ExpenseReportHeader expenseReportHeader, ExpenseReportLine line){
         line.setExpReportHeaderId(expenseReportHeader.getId());
         line.setTenantId(line.getTenantId() == null ? expenseReportHeader.getTenantId() : line.getTenantId());
@@ -557,11 +591,19 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         line.setCompanyId(line.getCompanyId() == null ? expenseReportHeader.getCompanyId() : line.getCompanyId());
         line.setExchangeRate(expenseReportHeader.getExchangeRate());
         line.setCurrencyCode(expenseReportHeader.getCurrencyCode());
-        line.setFunctionAmount(OperationUtil.safeMultiply(expenseReportHeader.getExchangeRate(),line.getAmount()));
-        line.setExpenseFunctionAmount(OperationUtil.safeMultiply(expenseReportHeader.getExchangeRate(),line.getExpenseAmount()));
+        line.setReverseFlag("N");
+        line.setAuditFlag("N");
+    }
+
+    /**
+     * 更新费用行金额
+     * @param line
+     */
+    private void initExpenseReportLineAmount(ExpenseReportLine line){
+        line.setFunctionAmount(OperationUtil.safeMultiply(line.getExchangeRate(),line.getAmount()));
+        line.setExpenseFunctionAmount(OperationUtil.safeMultiply(line.getExchangeRate(),line.getExpenseAmount()));
         line.setTaxAmount(OperationUtil.subtract(line.getAmount(),line.getExpenseAmount()));
         line.setTaxFunctionAmount(OperationUtil.subtract(line.getFunctionAmount(),line.getExpenseFunctionAmount()));
-        line.setReverseFlag("N");
     }
 
     /**
@@ -761,7 +803,11 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         expenseReportDist.setExpReportHeaderId(expenseReportHeader.getId());
         expenseReportDist.setExpReportLineId(expenseReportLine.getId());
         // 公司
-        if(reportTypeDistSetting.getCompanyDistFlag()){
+        if(BooleanUtils.isTrue(reportTypeDistSetting.getCompanyDistFlag())){
+            if(reportTypeDistSetting.getCompanyDefaultId() == null){
+                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_COMPANY)});
+            }
             expenseReportDist.setCompanyId(reportTypeDistSetting.getCompanyDefaultId());
         }
         if(expenseReportDist.getCompanyId() == null){
@@ -772,6 +818,10 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         expenseReportDist.setCurrencyCode(expenseReportLine.getCurrencyCode());
         // 部门
         if(reportTypeDistSetting.getDepartmentDistFlag()){
+            if(reportTypeDistSetting.getDepartmentDefaultId() == null){
+                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_DEPARTMENT)});
+            }
             expenseReportDist.setDepartmentId(reportTypeDistSetting.getDepartmentDefaultId());
         }
         if(expenseReportDist.getDepartmentId() == null){

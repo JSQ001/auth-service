@@ -10,17 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -35,12 +31,11 @@ public class WxService {
     @Value("${wechat.wechatUrl:}")
     private String wechatUrl;//微信中间件URL
 
-    private RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private AuthUserService authUserService;
 
 
-    public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId, Map<String, String> var3) {
+    public JSONObject authenticate(String code, String companyOid, String suiteId, String corpId) {
         JSONObject jsonResp = null;
         String retMsg;
         try {
@@ -88,11 +83,11 @@ public class WxService {
         return baseJson;
     }
 
-    public HttpURLConnection httpsPostJson(String https_url) {
+    public HttpURLConnection httpsPostJson(String httpsUrl) {
         URL url;
         HttpURLConnection conn = null;
         try {
-            url = new URL(https_url);
+            url = new URL(httpsUrl);
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
@@ -102,9 +97,6 @@ public class WxService {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.connect();
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -113,12 +105,12 @@ public class WxService {
     }
 
     public UserDetails loadUserByUsername(String code, String suiteId, String corpId, String companyStr)
-            throws UsernameNotFoundException {
+             {
 
            /*empCode是微信通讯录中的帐号,方案:
         1、保证微信通讯录中号码/邮箱的信息必须存在，可通过获取帐号调微信接口获取号码;
         2、数据库表中建立帐号与用户对应关系，由帐号确认用户身份*/
-        JSONObject userInfo = authenticate(code, companyStr, suiteId, corpId, (Map) null);//员工在微信通讯录中的帐号
+        JSONObject userInfo = authenticate(code, companyStr, suiteId, corpId);//员工在微信通讯录中的帐号
         UUID userOid = null;
         if (userInfo != null && userInfo.containsKey("errcode") && userInfo.getString("errcode").equals("0") && userInfo.containsKey("userOID")) {
             userOid = UUID.fromString(userInfo.getString("userOID"));

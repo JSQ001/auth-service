@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.BasicCO;
+import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
+import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
@@ -51,4 +53,11 @@ public interface ExpenseTypeMapper extends BaseMapper<ExpenseType> {
                                             @Param("code") String code,
                                             @Param("name") String name,
                                             RowBounds rowBounds);
+
+    /**
+     *  创建单据行选择有权限的费用体系信息
+     * @param expenseBO 查询条件
+     * @return List<ExpenseTypeWebDTO>
+     */
+    List<ExpenseTypeWebDTO> listByDocumentLov(ExpenseBO expenseBO);
 }

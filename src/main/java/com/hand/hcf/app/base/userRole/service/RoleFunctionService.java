@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,11 +33,9 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
 
     private final ContentFunctionRelationService contentFunctionRelationService;
 
-    private final FunctionPageRelationService functionPageRelationService;
 
     private final ContentListService contentListService;
 
-    private final FunctionListService functionListService;
 
     private final UserRoleMapper userRoleMapper;
 
@@ -66,54 +61,6 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
                     .build();
             contentFunctionDTOS.add(contentFunctionDTO);
         });
-        /*
-        //获取所有的目录数据
-        List<ContentList> contentLists = contentListService.selectList(null);
-        contentLists.forEach(contentList -> {
-            ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
-                    .contentId(contentList.getId())
-                    .contentName(contentList.getContentName())
-                    .parentId(contentList.getParentId())
-                    .build();
-            contentFunctionList.add(contentFunctionDTO);
-        });
-        //获取目录功能关联数据
-        List<ContentFunctionRelation> contentFunctionRelationList = contentFunctionRelationService.selectList(new EntityWrapper<ContentFunctionRelation>());
-        contentFunctionRelationList.forEach(contentFunctionRelation -> {
-            ContentList contentList = contentListService.selectById(contentFunctionRelation.getContentId());
-            FunctionList functionList = functionListService.selectById(contentFunctionRelation.getFunctionId());
-            ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
-                    .contentId(contentList.getId())
-                    .contentName(contentList.getContentName())
-                    .parentId(contentList.getParentId())
-                    .functionId(functionList.getId())
-                    .functionName(functionList.getFunctionName())
-                    .functionIcon(functionList.getFunctionIcon())
-                    .applicationId(functionList.getApplicationId())
-                    .build();
-            contentFunctionDTOList.add(contentFunctionDTO);
-        });
-
-        //获取没被目录分配的功能
-        List<FunctionList> functionLists = functionListService.selectList(
-                new EntityWrapper<FunctionList>()
-                        .eq("deleted",false)
-                        .notIn("id",contentFunctionRelationList.stream().map(ContentFunctionRelation::getFunctionId).collect(Collectors.toList()))
-        );
-        functionLists.stream().forEach(functionList -> {
-            ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
-                    .functionId(functionList.getId())
-                    .functionName(functionList.getFunctionName())
-                    .functionRouter(functionList.getFunctionRouter())
-                    .param(functionList.getParam())
-                    .functionSequenceNumber(functionList.getSequenceNumber())
-                    .pageId(functionList.getPageId())
-                    .functionIcon(functionList.getFunctionIcon())
-                    .applicationId(functionList.getApplicationId())
-                    .build();
-            contentFunctionDTOList.add(contentFunctionDTO);
-        });*/
-
         List<Long> functionIdList = roleFunctionMapper.selectList(
                 new EntityWrapper<RoleFunction>()
                         .eq("role_id",id)
@@ -166,8 +113,6 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
         if (userId != null) {
             //目录关联功能数据
             List<ContentFunctionDTO> contentFunctionDTOList = new ArrayList<>();
-            //角色分配的功能id
-            List<Long> functionIdList;
             //功能分配的页面数据
             List<FunctionPageDTO> functionPageDTOList;
 
@@ -182,9 +127,9 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
             if (CollectionUtils.isEmpty(roleFunctions)){
                 return result;
             }
-            functionIdList = roleFunctions.stream().map(RoleFunction::getFunctionId).distinct().collect(Collectors.toList());
-            functionPageDTOList = pageListService.listPageByFunctionIds(functionIdList);
-            List<ContentFunctionDTO> contentFunctionDTOS = contentFunctionRelationService.listContentFunctions(functionIdList);
+            Set<Long> functionIdList = roleFunctions.stream().map(RoleFunction::getFunctionId).collect(Collectors.toSet());
+            functionPageDTOList = pageListService.listPageByRoleIds(roleIdList);
+            List<ContentFunctionDTO> contentFunctionDTOS = contentFunctionRelationService.listContentFunctions(roleIdList);
             List<ContentList> contentLists = contentListService.selectList(null);
             List<ContentFunctionDTO> allContentDto = contentLists.stream().map(e -> {
                 ContentFunctionDTO dto = ContentFunctionDTO.builder()
@@ -201,101 +146,8 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
             contentFunctionDTOList.addAll(contentFunctionDTOS);
             contentFunctionDTOList.addAll(allContentDto);
 
-            /*//获取所有的目录数据
-            List<ContentList> contentLists = contentListService.selectList(
-                    new EntityWrapper<ContentList>()
-                            .eq("deleted",false)
-            );
-            contentLists.stream().forEach(contentList -> {
-                ContentFunctionDTO tempContentFunctionDTO = ContentFunctionDTO.builder().contentId(contentList.getId()).functionId(null).build();
-                if (!contentFunctionDTOList.contains(tempContentFunctionDTO)) {
-                    ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
-                            .contentId(contentList.getId())
-                            .contentName(contentList.getContentName())
-                            .contentRouter(contentList.getContentRouter())
-                            .icon(contentList.getIcon())
-                            .parentId(contentList.getParentId())
-                            .contentSequenceNumber(contentList.getSequenceNumber())
-                            .hasSonContent(contentList.getHasSonContent())
-                            .build();
-                    contentFunctionDTOList.add(contentFunctionDTO);
-                }
-            });
-
-            //遍历角色id
-            if (roleIdList != null){
-                for (Long roleId : roleIdList){
-                    //拿到每个角色分配的功能id
-                    List<Long> functionIds = roleFunctionMapper.selectList(
-                            new EntityWrapper<RoleFunction>()
-                                    .eq("role_id",roleId)
-                    ).stream().map(RoleFunction::getFunctionId).collect(Collectors.toList());
-                    for (Long functionId : functionIds){
-                        if (!functionIdList.contains(functionId)){
-                            //保存角色分配的功能id
-                            functionIdList.add(functionId);
-                            //保存目录关联功能数据
-                            List<ContentFunctionRelation> contentFunctionRelationList = contentFunctionRelationService.selectList(
-                                    new EntityWrapper<ContentFunctionRelation>()
-                                            .eq("function_id",functionId)
-                            );
-
-                            contentFunctionRelationList.stream().forEach(contentFunctionRelation -> {
-                                ContentFunctionDTO contentFunctionDTO = ContentFunctionDTO.builder()
-                                        .contentId(contentFunctionRelation.getContentId()).functionId(contentFunctionRelation.getFunctionId()).build();
-                                if ( !contentFunctionDTOList.contains(contentFunctionDTO)){
-                                    ContentList contentList = contentListService.selectById(contentFunctionRelation.getContentId());
-                                    FunctionList functionList = functionListService.selectById(contentFunctionRelation.getFunctionId());
-
-                                    ContentFunctionDTO contentFunctionDTO1 = ContentFunctionDTO.builder()
-                                            .contentId(contentList.getId())
-                                            .contentName(contentList.getContentName())
-                                            .contentRouter(contentList.getContentRouter())
-                                            .icon(contentList.getIcon())
-                                            .parentId(contentList.getParentId())
-                                            .contentSequenceNumber(contentList.getSequenceNumber())
-                                            .hasSonContent(contentList.getHasSonContent())
-                                            .functionId(functionList.getId())
-                                            .functionName(functionList.getFunctionName())
-                                            .functionRouter(functionList.getFunctionRouter())
-                                            .param(functionList.getParam())
-                                            .functionSequenceNumber(functionList.getSequenceNumber())
-                                            .pageId(functionList.getPageId())
-                                            .build();
-                                    contentFunctionDTOList.add(contentFunctionDTO1);
-                                    //保存功能分配的页面数据
-                                    List<Long> pageIds = functionPageRelationService.selectList(
-                                            new EntityWrapper<FunctionPageRelation>()
-                                                    .eq("function_id",functionId)
-                                    ).stream().map(FunctionPageRelation::getPageId).collect(Collectors.toList());
-                                    for (Long pageId : pageIds){
-                                        FunctionPageDTO functionPageDTO = FunctionPageDTO.builder().functionId(functionId).pageId(pageId).build();
-                                        if (!functionPageDTOList.contains(functionPageDTO)){
-                                            PageList pageList = pageListService.selectById(pageId);
-                                            FunctionPageDTO functionPageDTO1 = FunctionPageDTO.builder()
-                                                    .functionId(functionId)
-                                                    .pageId(pageList.getId())
-                                                    .pageName(pageList.getPageName())
-                                                    .filePath(pageList.getFilePath())
-                                                    .contentRouter(pageList.getContentRouter())
-                                                    .functionRouter(pageList.getFunctionRouter())
-                                                    .pageRouter(pageList.getPageRouter())
-                                                    .pageUrl(pageList.getPageUrl())
-                                                    .build();
-                                            functionPageDTOList.add(functionPageDTO1);
-                                        }
-                                    }
-                                }
-                            });
-
-
-
-                        }
-                    }
-                }
-            }*/
             result.setContentFunctionDTOList(contentFunctionDTOList);
-            result.setFunctionIdList(functionIdList);
+            result.setFunctionIdList(new ArrayList<>(functionIdList));
             result.setFunctionPageDTOList(functionPageDTOList);
         }
 

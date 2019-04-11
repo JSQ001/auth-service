@@ -7,6 +7,7 @@ import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.common.externalApi.BudgetService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.*;
 import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.domain.enums.FieldDataColumn;
@@ -14,16 +15,16 @@ import com.hand.hcf.app.expense.type.domain.enums.FieldType;
 import com.hand.hcf.app.expense.type.domain.enums.TypeEnum;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeCategoryMapper;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeMapper;
-import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
-import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeAssignInfoDTO;
-import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
-import com.hand.hcf.app.expense.type.web.dto.SortBySequenceDTO;
+import com.hand.hcf.app.expense.type.web.dto.*;
 import com.hand.hcf.app.expense.type.web.mapper.ExpenseFieldMapper;
 import com.hand.hcf.app.expense.type.web.mapper.FieldMappedColumn;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.core.util.PageUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -529,5 +530,82 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
 
     public List<BasicCO> listByExpenseTypesAndCond(Long tenantId, Long setOfBooksId, boolean enabled, String code, String name, Page page) {
         return baseMapper.listByExpenseTypesAndCond(tenantId, setOfBooksId, enabled, code, name, page);
+    }
+
+
+    public List<ExpenseTypeWebDTO> lovExpenseType(ExpenseBO expenseBO,
+                                                  Page<ExpenseTypeWebDTO> page){
+        List<ExpenseTypeWebDTO> expenseTypeWebDTOS = baseMapper.listByDocumentLov(expenseBO);
+        if (CollectionUtils.isEmpty(expenseTypeWebDTOS)){
+            return new ArrayList<>();
+        }
+
+        List<ExpenseTypeWebDTO> collect = expenseTypeWebDTOS
+                .stream()
+                .filter(e -> !e.getUserGroupFlag()).collect(Collectors.toList());
+        List<ExpenseTypeWebDTO> userGroupType = expenseTypeWebDTOS
+                .stream()
+                .filter(ExpenseTypeWebDTO::getUserGroupFlag)
+                .filter(e -> {
+                    if (expenseBO.getEmployeeId() == null || CollectionUtils.isEmpty(e.getUserGroupIds())){
+                        return false;
+                    }
+                    JudgeUserCO judgeUserCO = new JudgeUserCO(expenseBO.getEmployeeId(), e.getUserGroupIds());
+                    Boolean exists = organizationService.judgeUserInUserGroups(judgeUserCO);
+                    return exists == null ? Boolean.FALSE : exists;
+                }).collect(Collectors.toList());
+        collect.addAll(userGroupType);
+        Collections.sort(collect);
+        List<ExpenseTypeWebDTO> list = PageUtil.pageHandler(page, collect);
+        String currentLanguage = StringUtils.hasText(LoginInformationUtil.getCurrentLanguage()) ?
+                LoginInformationUtil.getCurrentLanguage() : LanguageEnum.ZH_CN.getKey();
+        list.forEach(e -> e.setFieldList(expenseFieldService.listFieldByTypeId(e.getId(), currentLanguage)));
+        return setFields(list);
+    }
+
+    private List<ExpenseTypeWebDTO> setFields(List<ExpenseTypeWebDTO> expenseTypeWebDTOS){
+        expenseTypeWebDTOS.forEach(field -> {
+            if (CollectionUtils.isEmpty(field.getFieldList())){
+                field.setFields(new ArrayList<>());
+            }else{
+                List<ExpenseFieldDTO> fieldDTOS = field.getFieldList().stream().map(e -> {
+                    ExpenseFieldDTO fieldDTO = ExpenseFieldDTO.builder()
+                            .commonField(e.getCommonField())
+                            .customEnumerationOid(e.getCustomEnumerationOid())
+                            .defaultValueConfigurable(e.getDefaultValueConfigurable())
+                            .defaultValueKey(e.getDefaultValueKey())
+                            .defaultValueMode(e.getDefaultValueMode())
+                            .fieldDataType(e.getFieldDataType())
+                            .fieldOid(e.getFieldOid())
+                            .fieldType(e.getFieldType())
+                            .i18n(e.getI18n())
+                            .mappedColumnId(e.getMappedColumnId())
+                            .messageKey(e.getMessageKey())
+                            .name(e.getName())
+                            .id(e.getId())
+                            .printHide(e.getPrintHide())
+                            .reportKey(e.getReportKey())
+                            .required(e.getRequired())
+                            .sequence(e.getSequence())
+                            .value(null)
+                            .editable(e.getEditable())
+                            .showOnList(e.getShowOnList())
+                            .showValue(null)
+                            .build();
+                    if (FieldType.CUSTOM_ENUMERATION.getId().equals(e.getFieldTypeId())){
+                        // 为值列表，则设置值列表的相关值
+                        List<SysCodeValueCO> sysCodeValueCOS = organizationService
+                                .listSysCodeValueCOByOid(e.getCustomEnumerationOid());
+                        List<OptionDTO> options = sysCodeValueCOS
+                                .stream()
+                                .map(OptionDTO::createOption).collect(Collectors.toList());
+                        fieldDTO.setOptions(options);
+                    }
+                    return fieldDTO;
+                }).collect(Collectors.toList());
+                field.setFields(fieldDTOS);
+            }
+        });
+        return expenseTypeWebDTOS;
     }
 }

@@ -205,13 +205,10 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
             typeDTO.setSetOfBooksName(setOfBooksInfoCO.getSetOfBooksName());
         }
         //表单类型
-        /**
-         * OrganizationService organizationService 中此方法listApprovalFormsByIds已被注释 by chenxu
-         */
-      /*  List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
+        List<ApprovalFormCO> approvalFormCOList = organizationService.listApprovalFormsByIds(Arrays.asList(typeDTO.getFormId()));
         if (approvalFormCOList.size() > 0) {
             typeDTO.setFormName(approvalFormCOList.get(0).getFormName());
-        }*/
+        }
         //关联申请类型
         if (!typeDTO.getAllTypeFlag()) {
             List<Long> idList = assignTypeService.selectList(
@@ -270,7 +267,12 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
         // 根据维度ID查询相关维度信息
         if (!CollectionUtils.isEmpty(typeDimensions)){
             List<Long> ids = typeDimensions.stream().map(TravelApplicationTypeAssignDimension::getDimensionId).collect(Collectors.toList());
-            List<DimensionDetailCO> dimensionDetails = organizationService.listDetailCOByDimensionIdsAndCompany(OrgInformationUtil.getCurrentCompanyId(), true, ids);
+            List<DimensionDetailCO> dimensionDetails = organizationService.listDetailCOByDimensionIdsAndCompany(
+                    OrgInformationUtil.getCurrentCompanyId(),
+                    OrgInformationUtil.getCurrentDepartmentId(),
+                    OrgInformationUtil.getCurrentUserId(),
+                    Boolean.TRUE,
+                    ids);
             Map<Long, DimensionDetailCO> dimensionDetailMap = dimensionDetails
                     .stream()
                     .collect(Collectors.toMap(DimensionDetailCO::getId, e -> e, (k1, k2) -> k1));

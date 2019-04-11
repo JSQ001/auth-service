@@ -10,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Map;
 
 /**
  * 钉钉业务逻辑实现类
@@ -34,7 +31,7 @@ public class DingTalkServiceImpl {
     private AuthUserService authUserService;
 
 
-    public JSONObject authenticate(String code, String corpId, Map<String, String> var3) {
+    public JSONObject authenticate(String code, String corpId) {
         try {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -50,13 +47,13 @@ public class DingTalkServiceImpl {
         }
     }
 
-    public UserDetails loadDingTalkUserByCodeAndCorpId(String code, String corpId) throws UsernameNotFoundException {
+    public UserDetails loadDingTalkUserByCodeAndCorpId(String code, String corpId)  {
         log.info("Authenticating code：{},corpId：{} dingtalk start ", code, corpId);
 
         /*code是钉钉的免登授权码,方案:
         1、根据code和corpId调用钉钉免登接口、保证钉钉号码/邮箱的信息必须存在，可通过获取帐号调钉钉接口获取号码;
         2、数据库表中建立帐号与用户对应关系，由帐号确认用户身份*/
-        JSONObject userInfo = this.authenticate(code, corpId, (Map) null);//员工在钉钉中的帐号
+        JSONObject userInfo = this.authenticate(code, corpId);//员工在钉钉中的帐号
 
         if (null == userInfo) {
             throw new UserNotActivatedException("user.not.bind");

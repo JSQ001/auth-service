@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by houyin.zhang@hand-china.com on 2018/8/20.
+ *
+ * @author houyin.zhang@hand-china.com
+ * @date 2018/8/20
  * 多前端TitleService
  */
 @Service

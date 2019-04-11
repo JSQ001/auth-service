@@ -40,10 +40,4 @@ public class FileUtil {
             System.out.println("文件不存在!");
         }
     }
-
-    public static void main(String[] args) {
-        //FileUtil.traverseFolder("C:\\Users\\24166\\Desktop\\icon\\icon\\icon_png\\icon@1x");
-        FileUtil.traverseFolder("C:\\Users\\24166\\Desktop\\icon\\icon");
-    }
-
 }

@@ -54,9 +54,6 @@ public class FunctionListService extends BaseService<FunctionListMapper,Function
         if (functionList.getFunctionName() == null){
             throw new BizException(RespCode.FUNCTION_LIST_FUNCTION_NAME_IS_NULL);
         }
-        if (functionList.getFunctionRouter() == null){
-            throw new BizException(RespCode.FUNCTION_LIST_FUNCTION_ROUTER_IS_NULL);
-        }
         if (functionList.getSequenceNumber() == null){
             throw new BizException(RespCode.FUNCTION_LIST_SEQUENCE_NUMBER_IS_NULL);
         }
@@ -133,21 +130,6 @@ public class FunctionListService extends BaseService<FunctionListMapper,Function
         if (oldFunctionList == null){
             throw new BizException(RespCode.FUNCTION_LIST_NOT_EXIST);
         }
-        //如果修改了functionRouter，那要把该功能分配的页面中的functionRouter改掉
-        if ( !oldFunctionList.getFunctionRouter().equals(functionList.getFunctionRouter()) ){
-            List<Long> pageIdList = functionPageRelationMapper.selectList(
-                    new EntityWrapper<FunctionPageRelation>()
-                            .eq("function_id",functionList.getId())
-            ).stream().map(FunctionPageRelation::getPageId).collect(Collectors.toList());
-            if (pageIdList.size() > 0){
-                pageIdList.stream().forEach(pageId -> {
-                    PageList pageList = pageListMapper.selectById(pageId);
-                    pageList.setFunctionRouter(functionList.getFunctionRouter());
-                    pageListMapper.updateAllColumnById(pageList);
-                });
-            }
-        }
-
         //判断该功能选择的主页面id->pageId是否改变，如果改变，将原来功能分配页面关联表中的数据删除
         if ( !oldFunctionList.getPageId().equals(functionList.getPageId()) ){
             FunctionPageRelation oldFunctionPageRelation = functionPageRelationMapper.selectOne(

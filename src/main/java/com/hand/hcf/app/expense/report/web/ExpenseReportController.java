@@ -1065,12 +1065,9 @@ public class ExpenseReportController {
      * @apiSuccess (返回参数){Integer} index 序号
      */
     @GetMapping("/dist/query/by/lineId")
-    public ResponseEntity<List<ExpenseReportDistDTO>> getExpenseReportDistByLineId(@RequestParam(value = "lineId") Long lineId,
-                                                                                   Pageable pageable){
-        Page page = PageUtil.getPage(pageable);
-        List<ExpenseReportDistDTO> expenseReportDistByLineId = expenseReportDistService.getExpenseReportDistByLineId(lineId, page);
-        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
-        return new ResponseEntity(expenseReportDistByLineId,totalHeader,HttpStatus.OK);
+    public ResponseEntity<List<ExpenseReportDistDTO>> getExpenseReportDistByLineId(@RequestParam(value = "lineId") Long lineId){
+        List<ExpenseReportDistDTO> expenseReportDistByLineId = expenseReportDistService.getExpenseReportDistDTOByLineId(lineId);
+        return ResponseEntity.ok(expenseReportDistByLineId);
     }
 
     /**

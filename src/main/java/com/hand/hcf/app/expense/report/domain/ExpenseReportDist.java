@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -47,7 +48,6 @@ public class ExpenseReportDist extends DimensionDomain {
     /**
      * 公司ID
      */
-    @NotNull
     @TableField(value = "company_id")
     private Long companyId;
 
@@ -60,7 +60,6 @@ public class ExpenseReportDist extends DimensionDomain {
     /**
      * 部门ID
      */
-    @NotNull
     @TableField(value = "department_id")
     private Long departmentId;
 
@@ -151,6 +150,18 @@ public class ExpenseReportDist extends DimensionDomain {
      */
     @TableField(value = "input_tax_flag")
     private String inputTaxFlag;
+
+    /**
+     * 审核状态
+     */
+    @TableField(value = "audit_flag")
+    private String auditFlag;
+
+    /**
+     * 审核日期
+     */
+    @TableField(value = "audit_date")
+    private ZonedDateTime auditDate;
 
     /**
      * 分摊含税总金额(费用行对应最大值，尾差处理在该数据上)

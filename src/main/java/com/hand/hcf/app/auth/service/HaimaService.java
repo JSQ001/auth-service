@@ -26,9 +26,9 @@ public class HaimaService {
     private static final Logger log = LoggerFactory.getLogger(HaimaService.class);
 
     @Value("${haima.server.userMapping:}")
-    public  String HAIMA_USERMAPPING_URL;
+    public  String haimaUsermappingUrl;
     @Value("${haima.server.userInfo:}")
-    public  String HAIMA_USERINFO_URL;
+    public  String haimaUserinfoUrl;
 
     @Autowired
     private AuthUserService authUserService;
@@ -70,7 +70,7 @@ public class HaimaService {
                 haimaUserDTO.setAccountNumber(first.get("accountNumber").toString());
             }
             try {
-                restTemplate.postForObject(HAIMA_USERMAPPING_URL,haimaUserDTO, Void.class);
+                restTemplate.postForObject(haimaUsermappingUrl,haimaUserDTO, Void.class);
             } catch (RestClientException e) {
                 e.printStackTrace();
                 throw new RuntimeException("user.not.bind");
@@ -82,11 +82,8 @@ public class HaimaService {
 
     public JSONObject authenticateHaiMa(String code, String tenantId) {
         try {
-//            String tokenUrl = HAIMA_SUB_ACCESSTOKEN + "?clientId=" + clientId + "&clientSecret=" + clientSecret + "&grantType=client_credentials";
-//            log.debug("海马子应用端获取token with url:{}, clientId:{},clientSecret:{}",tokenUrl, clientId, clientSecret);
-//            String access_token = restTemplate.getForObject(tokenUrl,String.class, new HashMap<>());
 
-            String userUrl = HAIMA_USERINFO_URL + "?tenantId=" + tenantId +"&code=" + code;
+            String userUrl = haimaUserinfoUrl + "?tenantId=" + tenantId +"&code=" + code;
             log.info("调用海马服务根据code和clientId获取用户信息,URL:{},参数:code:{},clientId:{}", userUrl, code,tenantId );
             JSONObject body = restTemplate.getForObject(userUrl, JSONObject.class, new HashMap<>());
             log.info("海马服务查询用户返回值:{}", body);

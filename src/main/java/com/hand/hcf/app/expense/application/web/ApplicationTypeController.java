@@ -708,12 +708,16 @@ public class ApplicationTypeController {
      */
     @GetMapping("/query/expense/type")
     public ResponseEntity<List<ExpenseTypeWebDTO>> queryExpenseType(@RequestParam("applicationTypeId") Long applicationTypeId,
-                                                                                  @RequestParam(value = "categoryId",required = false) Long categoryId,
-                                                                                  @RequestParam(value = "expenseTypeName", required = false) String expenseTypeName,
-                                                                                  Pageable pageable) throws URISyntaxException {
-        Page page = PageUtil.getPage(pageable);
-        List<ExpenseTypeWebDTO> result = service.queryExpenseTypeByApplicationTypeId(applicationTypeId,categoryId, expenseTypeName,page);
-        HttpHeaders headers = PageUtil.generateHttpHeaders(page, "/api/expense/application/type/query/expense/type");
+                                                                    @RequestParam("employeeId") Long employeeId,
+                                                                    @RequestParam("companyId") Long companyId,
+                                                                    @RequestParam("departmentId") Long departmentId,
+                                                                    @RequestParam(value = "categoryId",required = false) Long categoryId,
+                                                                    @RequestParam(value = "expenseTypeName", required = false) String expenseTypeName,
+                                                                    Pageable pageable){
+        Page<ExpenseTypeWebDTO> page = PageUtil.getPage(pageable);
+        List<ExpenseTypeWebDTO> result = service.queryExpenseTypeByApplicationTypeId(applicationTypeId,
+                categoryId, expenseTypeName, companyId, employeeId, departmentId, page);
+        HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
@@ -762,16 +766,16 @@ public class ApplicationTypeController {
     }
 
     /**
-     * @api {GET} /api/expense/application/type/users/{id} 【申请单类型】根据单据id查询有该单据权限的用户
+     * @api {GET} /api/expense/application/type/users 【申请单类型】根据单据id查询有该单据权限的用户
      */
-    @GetMapping("/users/{id}")
-    public ResponseEntity listUsersByApplicationType(@PathVariable("id") Long id,
-                                                     @RequestParam(required = false) String userCode,
-                                                     @RequestParam(required = false) String userName,
+    @GetMapping("/users")
+    public ResponseEntity listUsersByApplicationType(@RequestParam(value = "applicationTypeId") Long applicationTypeId,
+                                                     @RequestParam(value = "userCode", required = false) String userCode,
+                                                     @RequestParam(value = "userName", required = false) String userName,
                                                      @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
-        List<ContactCO> result = service.listUsersByApplicationType(id, userCode, userName, queryPage);
+        List<ContactCO> result = service.listUsersByApplicationType(applicationTypeId, userCode, userName, queryPage);
         HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }

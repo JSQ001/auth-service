@@ -29,6 +29,8 @@ public class ApplicationLineDist extends DimensionDomain {
      * 申请类型ID
      */
     private Long expenseTypeId;
+
+    private Long lineId;
     /**
      * 申请单头ID
      */
