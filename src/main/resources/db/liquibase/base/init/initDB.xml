@@ -698,35 +698,6 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="20190110142939121" author="admin">
-        <createTable tableName="sys_carousel" remarks="公告信息表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel"/>
-            </column>
-            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="carousel_oid" type="varchar(36)" remarks="公告信息oid">
-                <constraints nullable="false"/>
-            </column>
-            <column name="company_oid" type="varchar(36)" remarks="公司oid"/>
-            <column name="attachment_oid" type="varchar(36)" remarks="附件oid">
-                <constraints nullable="false"/>
-            </column>
-            <column name="title" type="varchar(256)" remarks="标题"/>
-            <column name="content" type="longtext" remarks="内容"/>
-            <column name="preferred_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP" remarks="提出日期"/>
-            <column name="out_link_flag" type="bit" defaultValue="0" remarks="是否外部链接"/>
-            <column name="tenant_id" type="bigint" remarks="租户Id"/>
-            <column name="source" type="bigint" remarks="项来源Id"/>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建人"/>
-            <column name="last_updated_by" type="bigint" remarks="最后修改人"/>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
     <changeSet id="20190110142938107" author="admin">
         <createTable tableName="sys_code_i18n" remarks="系统代码多语言">
             <column name="id" type="bigint" remarks="">
@@ -841,42 +812,6 @@
             <column name="target" type="varchar(32)" remarks="环境"/>
             <column name="has_toolbar" type="bit" defaultValue="0" remarks="是否有导航条"/>
             <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-        </createTable>
-    </changeSet>
-
-
-    <changeSet id="20190110142939130" author="admin">
-        <createTable tableName="sys_data_authority" remarks="数据权限定义表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_data_authority"/>
-            </column>
-            <column name="tenant_id" type="bigint" remarks="租户ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_code" type="varchar(50)" remarks="数据权限代码">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_name" type="varchar(500)" remarks="数据权限名称">
-                <constraints nullable="false"/>
-            </column>
-            <column name="description" type="varchar(2000)" remarks="数据权限说明"/>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-            <column name="enabled" type="bit" remarks="是否启用">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deleted" type="bit" remarks="是否删除">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
     </changeSet>
 
@@ -1217,97 +1152,6 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="20190110142940196" author="admin">
-        <createTable tableName="sys_data_auth_rule_detail" remarks="数据权限规则明细表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_data_auth_rule_detail"/>
-            </column>
-            <column name="data_authority_rule_id" type="bigint" remarks="数据权限规则ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_type" type="varchar(30)" remarks="数据类型">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_scope" type="varchar(30)" remarks="数据范围">
-                <constraints nullable="false"/>
-            </column>
-            <column name="filtrate_method" type="varchar(30)" remarks="取值方式"/>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deleted" type="bit" remarks="是否删除">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_id" type="bigint" remarks="数据权限ID"/>
-        </createTable>
-    </changeSet>
-    <changeSet id="20190110142940197" author="admin">
-        <createTable tableName="sys_data_auth_rule_del_value" remarks="数据权限规则明细值表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_data_auth_rule_del_value"/>
-            </column>
-            <column name="data_auth_rule_detail_id" type="bigint" remarks="数据权限规则明细ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="value_key" type="varchar(500)" remarks="规则明细值">
-                <constraints nullable="false"/>
-            </column>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_id" type="bigint" remarks="数据权限ID"/>
-        </createTable>
-    </changeSet>
-    <changeSet id="20190110142940198" author="admin">
-        <createTable tableName="sys_data_auth_table_property" remarks="数据权限表配置">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_data_auth_table_property"/>
-            </column>
-            <column name="table_name" type="varchar(50)" remarks="表名">
-                <constraints nullable="false"/>
-            </column>
-            <column name="filter_method" type="varchar(30)" remarks="筛选方式">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_type" type="varchar(50)" remarks="数据类型">
-                <constraints nullable="false"/>
-            </column>
-            <column name="column_name" type="varchar(50)" remarks="匹配列名称">
-                <constraints nullable="false"/>
-            </column>
-            <column name="custom_sql" type="longtext" remarks="自定义sql"/>
-            <column name="enabled" type="bit" remarks="是否启用">
-                <constraints nullable="false"/>
-            </column>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
     <changeSet id="20190110142940199" author="admin">
         <createTable tableName="sys_error_message" remarks="报错信息表">
             <column name="id" type="bigint" remarks="">
@@ -1524,57 +1368,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="20190110142940193" author="admin">
-        <createTable tableName="sys_data_authority_i18n" remarks="数据权限定义多语言表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false"/>
-            </column>
-            <column name="description" type="varchar(2000)" remarks="数据权限备注"/>
-            <column name="language" type="varchar(20)" remarks="语言">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_name" type="varchar(500)" remarks="数据权限名称"/>
-        </createTable>
-    </changeSet>
-    <changeSet id="20190110142940194" author="admin">
-        <createTable tableName="sys_data_authority_rule" remarks="数据权限规则表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_data_authority_rule"/>
-            </column>
-            <column name="data_authority_id" type="bigint" remarks="数据权限ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_rule_name" type="varchar(500)" remarks="数据权限规则名称">
-                <constraints nullable="false"/>
-            </column>
-            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deleted" type="bit" remarks="是否删除">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks="创建用户id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新用户id">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-    <changeSet id="20190110142940195" author="admin">
-        <createTable tableName="sys_data_authority_rule_i18n" remarks="数据权限定义多语言表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data_authority_rule_name" type="varchar(500)" remarks="数据权限名称"/>
-            <column name="language" type="varchar(20)" remarks="语言">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
 
     <changeSet id="20190110142940213" author="admin">
         <createTable tableName="sys_async_email_evt" remarks="">
@@ -2274,32 +2067,6 @@
             <column name="to_user" type="varchar(255)" remarks=""/>
         </createTable>
     </changeSet>
-    <changeSet id="20190110142942315" author="admin">
-        <createTable tableName="sys_carousel_template" remarks="公告图片表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel_template"/>
-            </column>
-            <column name="attachment_oid" type="varchar(36)" remarks="附件oid">
-                <constraints nullable="false"/>
-            </column>
-            <column name="template_name" type="varchar(300)" remarks="图片名称">
-                <constraints nullable="false"/>
-            </column>
-            <column name="template_url" type="varchar(500)" remarks="图片链接"/>
-            <column name="type" type="varchar(20)" remarks="图片类型"/>
-            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
-            <column name="deleted" type="bit" defaultValue="0" remarks="是否删除 1：删除 0：未删除"/>
-            <column name="created_by" type="bigint" remarks="创建人"/>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新人"/>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="version_number" type="int" defaultValue="1" remarks="">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-
 
     <changeSet id="20190110142942304" author="admin">
         <createTable tableName="sys_email_send_record" remarks="邮件发送记录">
@@ -2322,41 +2089,6 @@
             <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
-
-
-
-    <changeSet id="20190110142942314" author="admin">
-        <createTable tableName="sys_carousel_deploy" remarks="公告信息分配表">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_carousel_deploy"/>
-            </column>
-            <column name="carousel_id" type="bigint" remarks="公告信息ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="company_id" type="bigint" remarks="公司ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="deploy_flag" type="bit" defaultValue="1" remarks="是否分配 1:分配 0：未分配"/>
-            <column name="enabled" type="bit" defaultValue="1" remarks="是否启用 1:启用 0：未启用"/>
-            <column name="created_by" type="bigint" remarks="创建人"/>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新人"/>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="version_number" type="int" defaultValue="1" remarks="">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet id="20190110141816228" author="admin">
-        <addUniqueConstraint tableName="sys_data_auth_table_property" columnNames="data_type,table_name"
-                             constraintName="sys_data_auth_table_pro_u1"/>
-    </changeSet>
-    <changeSet id="20190110141816229" author="admin">
-        <addUniqueConstraint tableName="sys_data_auth_table_property" columnNames="column_name,table_name"
-                             constraintName="sys_data_auth_table_pro_u2"/>
-    </changeSet>
-
 
     <changeSet id="20190110141816271" author="admin">
         <addUniqueConstraint tableName="sys_feedback" columnNames="feedback_oid" constraintName="feedback_oid28"/>
@@ -2665,40 +2397,6 @@
     </changeSet>
 
 
-
-    <changeSet id="20190110141815216" author="admin">
-        <createIndex tableName="sys_data_authority" indexName="data_authority_n1">
-            <column name="tenant_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet id="20190110141815217" author="admin">
-        <addUniqueConstraint tableName="sys_data_authority" columnNames="data_authority_code,tenant_id"
-                             constraintName="data_authority_u1"/>
-    </changeSet>
-    <changeSet id="20190110141815218" author="admin">
-        <addUniqueConstraint tableName="sys_data_authority_i18n" columnNames="id,language"
-                             constraintName="pk_data_auth_i18n"/>
-    </changeSet>
-    <changeSet id="20190110141815220" author="admin">
-        <createIndex tableName="sys_data_authority_rule" indexName="data_authority_rule_n1">
-            <column name="data_authority_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet id="20190110141815221" author="admin">
-        <addUniqueConstraint tableName="sys_data_authority_rule_i18n" columnNames="id,language"
-                             constraintName="pk_data_auth_rule_i18n"/>
-    </changeSet>
-    <changeSet id="20190110141815223" author="admin">
-        <createIndex tableName="sys_data_auth_rule_del_value" indexName="data_auth_rule_del_value_n1">
-            <column name="data_auth_rule_detail_id"/>
-        </createIndex>
-    </changeSet>
-    <changeSet id="20190110141816225" author="admin">
-        <createIndex tableName="sys_data_auth_rule_detail" indexName="data_auth_rule_detail_n1">
-            <column name="data_authority_rule_id"/>
-        </createIndex>
-    </changeSet>
-
     <changeSet id="20190110141820444" author="admin">
         <createIndex tableName="sys_mail_template" indexName="mail_temp_tenant_form_type">
             <column name="tenant_id"/>
@@ -2758,10 +2456,6 @@
     <changeSet id="20190110141821468" author="admin">
         <addUniqueConstraint tableName="sys_page_role" columnNames="page_name,role_id"
                              constraintName="uq_role_id_page_name98"/>
-    </changeSet>
-
-    <changeSet id="201901241504001" author="xue.han">
-        <dropNotNullConstraint tableName="sys_data_auth_table_property" columnName="column_name" columnDataType="varchar(50)"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.lov.domain.Lov;
 import com.hand.hcf.app.base.lov.web.dto.LovInfoDTO;
+import com.hand.hcf.app.base.system.domain.Interface;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -39,4 +40,11 @@ public interface LovMapper extends BaseMapper<Lov> {
      * @return Lov
      */
     LovInfoDTO getDetailInfoByCode(@Param("code")String code);
+    /**
+     * 根据Code获取接口信息
+     * @param code id
+     * @return List<Interface>
+     */
+    List<Interface> getLovApiInfoByCode(@Param("code") String code);
 }
+

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hand.hcf.app.base.user.enums.CreatedTypeEnum;
 import com.hand.hcf.app.base.user.enums.UserLockedEnum;
-import com.hand.hcf.app.base.user.enums.UserStatusEnum;
+import com.hand.hcf.app.common.enums.UserStatusEnum;
 import com.hand.hcf.core.domain.DomainLogic;
 import lombok.Data;
 

@@ -5,15 +5,16 @@ import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.base.implement.web.UserControllerImpl;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.OrderNumberCO;
-import com.hand.hcf.app.base.user.UserCO;
+import com.hand.hcf.app.common.co.UserCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.system.enums.AttachmentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /*import com.hand.hcf.app.client.user.UserCO;*/
 
@@ -23,10 +24,8 @@ import java.util.*;
 @Service
 public class HcfOrganizationInterface {
 
-
-    //jiu.zhao TODO 预付款模块三方接口
-    //@Autowired
-    //private OrganizationClient orgClient;
+    @Autowired
+    private CommonControllerImpl orgClient;
 
     @Autowired
     private UserControllerImpl userClient;
@@ -36,27 +35,15 @@ public class HcfOrganizationInterface {
 
 
     public OrderNumberCO getVendorCode (String companyCode, Long tenantId) {
-        //return orgClient.getOrderNumberCO("VENDER",companyCode,"");
-        return null;
-
+        return orgClient.getOrderNumberCO("VENDER",companyCode,"");
     }
 
     public SysCodeValueCO getValueBySysCodeAndValue(String code, String value) {
-        //return orgClient.getSysCodeValueByCodeAndValue(code, value);
-        return null;
+        return orgClient.getSysCodeValueByCodeAndValue(code, value);
     }
 
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
-       // return orgClient.listAllSysCodeValueByCode(code);
-        //jiu.zhao TODO
-        return null;
-    }
-
-
-    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
-       // return orgClient.listEnabledSysCodeValueByCode(code);
-        //jiu.zhao TODO
-        return null;
+        return orgClient.listAllSysCodeValueByCode(code);
     }
 
     public AttachmentCO getAttachmentByOid(String oid){
@@ -130,4 +117,9 @@ public class HcfOrganizationInterface {
         return userClient.saveUserBatch(users);
     }
 
+    //jiu.zhao 修改三方接口
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+        List<SysCodeValueCO> sysCodeValueCOS = orgClient.listSysValueByCodeConditionByEnabled(code, true);
+        return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
+    }
 }

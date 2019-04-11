@@ -51,6 +51,20 @@
             AND l.api_id = ai.id
             AND l.lov_code = #{code}
     </select>
+    <select id="getLovApiInfoByCode" resultType="com.hand.hcf.app.base.system.domain.Interface">
+        SELECT
+            t.*,
+            sa.app_code
+        FROM
+            sys_interface t,
+            sys_lov v,
+            sys_application sa
+        WHERE
+            t.id = v.api_id
+            AND v.lov_code = #{code}
+            AND v.deleted = 0
+            AND t.app_id = sa.id
+    </select>
 
 
 </mapper>

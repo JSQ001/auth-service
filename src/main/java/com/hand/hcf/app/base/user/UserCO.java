@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.user;
 
-import com.hand.hcf.app.base.user.enums.UserStatusEnum;
+import com.hand.hcf.app.common.enums.UserStatusEnum;
 import lombok.Data;
 
 import java.io.Serializable;

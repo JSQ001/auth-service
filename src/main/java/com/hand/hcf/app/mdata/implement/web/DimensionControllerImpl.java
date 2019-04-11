@@ -7,7 +7,6 @@ import com.hand.hcf.app.common.co.DimensionCO;
 import com.hand.hcf.app.common.co.DimensionDetailCO;
 import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.common.enums.MdataRangeEnum;
-import com.hand.hcf.app.common.enums.RangeEnum;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItem;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemService;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -152,12 +152,12 @@ public class DimensionControllerImpl {
         Page myBatisPage = PageUtil.getPage(page, size);
         Wrapper wrapper = new EntityWrapper<Dimension>();
         if (range != null) {
-            if (range.equals(RangeEnum.SELECTED.getId())) {
+            if (range.equals(MdataRangeEnum.SELECTED.getId())) {
                 if(CollectionUtils.isEmpty(ids)){
                     return myBatisPage;
                 }
                 wrapper = wrapper.in("id", ids);
-            } else if (range.equals(RangeEnum.UN_SELECTED.getId())) {
+            } else if (range.equals(MdataRangeEnum.UN_SELECTED.getId())) {
                 wrapper = wrapper.notIn(ids != null, "id", ids);
             }
         }
@@ -306,5 +306,26 @@ public class DimensionControllerImpl {
             dimensionItemCOList.add(dimensionItemCO);
         });
         return dimensionItemCOList;
+    }
+
+    //jiu.zhao 修改三方接口 20190411
+    public List<DimensionDetailCO> listDimensionsByIdsAndEnabled(List<Long> ids, Boolean enabled) {
+        List<DimensionDetailCO> dimensionDetailCOS = listDimensionsBySetOfBooksIdAndIdsAndEnabled((Long)null, enabled, ids);
+        return (List)(dimensionDetailCOS == null ? new ArrayList() : dimensionDetailCOS);
+    }
+
+    public List<DimensionCO> listDimensionBySetOfBooksIdAndEnabled(Long setOfBooksId, Boolean enabled) {
+        List<DimensionCO> dimensionCOList = listDimensionsBySetOfBooksIdAndEnabled(setOfBooksId, enabled);
+        return (List)(dimensionCOList == null ? new ArrayList() : dimensionCOList);
+    }
+
+    public DimensionCO getDimensionById(Long dimensionId) {
+        List<DimensionCO> dimensionCOList = listDimensionsByIds(Arrays.asList(dimensionId));
+        return dimensionCOList != null && dimensionCOList.size() > 0 ? (DimensionCO)dimensionCOList.get(0) : null;
+    }
+
+    public DimensionItemCO getDimensionItemById(Long dimensionItemId) {
+        List<DimensionItemCO> dimensionItemCOList = listDimensionItemsByIds(Arrays.asList(dimensionItemId));
+        return dimensionItemCOList != null && dimensionItemCOList.size() > 0 ? (DimensionItemCO)dimensionItemCOList.get(0) : null;
     }
 }

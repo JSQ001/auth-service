@@ -19,6 +19,7 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * 根据租户ID，[角色代码]，[角色名称] 获取所有角色 分页
      */
     List<Role> getAllRolesByCond(@Param("tenantId") Long tenantId, @Param("roleCode") String roleCode, @Param("roleName") String roleName, Page page);
+
     /**
      * 根据用户ID，[角色代码]，[角色名称] 获取已分配的角色 分页
      */
@@ -26,6 +27,7 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     /**
      * 判断用户是否含有启用的角色
+     *
      * @param userId
      * @return
      */
@@ -47,4 +49,24 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
 
     List<Long> getRoleIdByUserIdAndTime(@Param("userId") Long userId,
                                         @Param("now") ZonedDateTime now);
+
+    /**
+     * 根据用户及功能ID获取数据权限ID
+     *
+     * @param userId
+     * @param now
+     * @param functionId
+     * @return
+     */
+    List<Long> listDataAuthIdByFunctionId(@Param("userId") Long userId,
+                                          @Param("now") ZonedDateTime now,
+                                          @Param("functionId") Long functionId);
+
+    /**
+     * 校验数据权限规则是否被使用
+     *
+     * @param id 数据权限id
+     * @return count值
+     */
+    Integer dataAuthHasUsed(@Param("dataAuthority_id") Long id);
 }

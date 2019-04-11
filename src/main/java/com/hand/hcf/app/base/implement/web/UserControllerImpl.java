@@ -1,8 +1,8 @@
 package com.hand.hcf.app.base.implement.web;
 
 import com.hand.hcf.app.base.user.service.UserService;
-import com.hand.hcf.app.base.user.UserCO;
-import com.hand.hcf.app.base.user.enums.UserStatusEnum;
+import com.hand.hcf.app.common.co.UserCO;
+import com.hand.hcf.app.common.enums.UserStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;

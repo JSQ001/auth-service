@@ -10,7 +10,7 @@ import com.hand.hcf.app.auth.dto.UserQO;
 import com.hand.hcf.app.auth.enums.UserLockedEnum;
 import com.hand.hcf.app.auth.persistence.AuthUserMapper;
 import com.hand.hcf.app.auth.persistence.UserLockMapper;
-import com.hand.hcf.app.base.user.enums.UserStatusEnum;
+import com.hand.hcf.app.common.enums.UserStatusEnum;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.UserNotActivatedException;

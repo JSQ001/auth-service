@@ -3,11 +3,9 @@ package com.hand.hcf.app.mdata.dataAuthority.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.dto.CompanyDTO;
 import com.hand.hcf.app.mdata.company.service.CompanyService;

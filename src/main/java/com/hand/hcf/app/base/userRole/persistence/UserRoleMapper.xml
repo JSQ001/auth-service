@@ -35,11 +35,11 @@
     </select>
     <select id="getSelectedRolesByCond" resultType="com.hand.hcf.app.base.userRole.domain.Role">
         select id,
-            role_code,
-            role_name,
-            tenant_id,
-            deleted,
-            enabled
+        role_code,
+        role_name,
+        tenant_id,
+        deleted,
+        enabled
         from sys_role sr
         where sr.enabled = 1 and sr.deleted = 0
         <if test=" roleCode != null">
@@ -49,10 +49,10 @@
             and sr.role_name like concat(concat('%',#{roleName}),'%')
         </if>
         and exists (
-            select 1 from sys_user_role sur
-            where sur.role_id = sr.id
-                and sur.enabled = 1
-                and sur.user_id = #{userId}
+        select 1 from sys_user_role sur
+        where sur.role_id = sr.id
+        and sur.enabled = 1
+        and sur.user_id = #{userId}
         )
         order by role_code
     </select>
@@ -64,7 +64,8 @@
           and sur.user_id = #{userId}
     </select>
 
-    <select id="listSelectedUserRolesByCond" resultType="com.hand.hcf.app.base.userRole.dto.UserAssignRoleDataAuthority">
+    <select id="listSelectedUserRolesByCond"
+            resultType="com.hand.hcf.app.base.userRole.dto.UserAssignRoleDataAuthority">
         SELECT
         sur.*,
         sr.role_code,
@@ -109,4 +110,23 @@
         AND (sur.valid_date_to is null or sur.valid_date_to &gt;= #{now})
     </select>
 
+    <select id="listDataAuthIdByFunctionId" resultType="java.lang.Long">
+        select sur.data_authority_id from sys_user_role sur,
+          sys_role sr,
+          sys_role_function srf
+        where sr.id = sur.role_id
+          and srf.role_id = sr.id
+          and sr.enabled = 1
+          and sr.deleted = 0
+          and sur.enabled = 1
+          and (sur.valid_date_from is null or sur.valid_date_from &lt;= #{now})
+          and (sur.valid_date_to is null or sur.valid_date_to &gt;= #{now})
+          and sur.user_id = #{userId}
+          and srf.function_id = #{functionId}
+    </select>
+
+    <select id="dataAuthHasUsed" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM SYS_USER_ROLE SUR
+        WHERE SUR.DATA_AUTHORITY_ID = #{dataAuthority_id}
+    </select>
 </mapper>

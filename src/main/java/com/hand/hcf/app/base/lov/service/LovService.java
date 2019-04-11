@@ -8,22 +8,22 @@ import com.hand.hcf.app.base.lov.web.dto.ColumnDTO;
 import com.hand.hcf.app.base.lov.web.dto.LovColumnInfoDTO;
 import com.hand.hcf.app.base.lov.web.dto.LovInfoDTO;
 import com.hand.hcf.app.base.lov.web.dto.SearchColumnDTO;
+import com.hand.hcf.app.base.system.domain.Interface;
 import com.hand.hcf.app.base.system.domain.InterfaceRequest;
 import com.hand.hcf.app.base.system.domain.InterfaceResponse;
-import com.hand.hcf.app.base.system.dto.LovDTO;
 import com.hand.hcf.app.base.system.service.InterfaceRequestService;
 import com.hand.hcf.app.base.system.service.InterfaceResponseService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +36,8 @@ public class LovService extends BaseService<LovMapper, Lov> {
     private InterfaceRequestService requestService;
     @Autowired
     private InterfaceResponseService responseService;
+    /*@Autowired
+    private FeignDynamicClient feignDynamicClient;*/
 
     /**
      * 创建LOV
@@ -195,4 +197,34 @@ public class LovService extends BaseService<LovMapper, Lov> {
         }
         return lov;
     }
+
+    //jiu.zhao TODO
+    /*public Object getObjectByLovCode(String code, String id) {
+        List<Interface> apiInfos = baseMapper.getLovApiInfoByCode(code);
+        if (CollectionUtils.isEmpty(apiInfos)) {
+            return null;
+        }
+        Interface api = apiInfos.get(0);
+        String url = api.getReqUrl() + "?id=" + id;
+
+        FeignDynamicInterface target = feignDynamicClient.target(api.getAppCode(), url);
+        Object forObject;
+        if (HttpMethod.GET.toString().equalsIgnoreCase(api.getRequestMethod())){
+            forObject = target.getForObject();
+        } else {
+            forObject = target.postForObject(null);
+        }
+        if (forObject == null){
+            return null;
+        }
+        if (forObject instanceof List){
+            if (CollectionUtils.isEmpty(apiInfos)) {
+                return null;
+            } else {
+                return ((List) forObject).get(0);
+            }
+        } else {
+            return forObject;
+        }
+    }*/
 }

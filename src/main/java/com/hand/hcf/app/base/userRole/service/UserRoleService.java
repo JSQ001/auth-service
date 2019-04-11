@@ -325,4 +325,24 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
         //  返回成功标志
         return true;
     }
+
+    /**
+     * 根据功能ID返回数据权限信息
+     *
+     * @param functionId
+     * @return
+     */
+    public List<Long> listDataAuthIdByFunctionId(Long functionId) {
+        return userRoleMapper.listDataAuthIdByFunctionId(LoginInformationUtil.getCurrentUserId(), ZonedDateTime.now(), functionId);
+    }
+
+    /**
+     * 校验数据权限规则是否被使用
+     *
+     * @param id 用户权限id
+     * @return 是否被启用
+     */
+    public Boolean dataAuthHasUsed(Long id) {
+        return userRoleMapper.dataAuthHasUsed(id) != 0;
+    }
 }

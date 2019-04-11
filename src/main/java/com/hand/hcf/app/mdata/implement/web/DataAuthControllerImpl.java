@@ -36,9 +36,7 @@ public class DataAuthControllerImpl  {
 
     //@GetMapping(value = "/data/auth/value/properties/get/by/request")
     public List<Map<String, List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest() {
-        //return dataAuthorityService.getDataAuthValuePropertiesByRequest();
-        return  null;
-        //jiu.zhao TODO
+        return dataAuthorityService.getDataAuthValuePropertiesByRequest();
     }
 
 }

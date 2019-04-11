@@ -267,7 +267,12 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
         // 根据维度ID查询相关维度信息
         if (!CollectionUtils.isEmpty(typeDimensions)){
             List<Long> ids = typeDimensions.stream().map(TravelApplicationTypeAssignDimension::getDimensionId).collect(Collectors.toList());
-            List<DimensionDetailCO> dimensionDetails = organizationService.listDetailCOByDimensionIdsAndCompany(OrgInformationUtil.getCurrentCompanyId(), true, ids);
+            List<DimensionDetailCO> dimensionDetails = organizationService.listDetailCOByDimensionIdsAndCompany(
+                    OrgInformationUtil.getCurrentCompanyId(),
+                    OrgInformationUtil.getCurrentDepartmentId(),
+                    OrgInformationUtil.getCurrentUserId(),
+                    Boolean.TRUE,
+                    ids);
             Map<Long, DimensionDetailCO> dimensionDetailMap = dimensionDetails
                     .stream()
                     .collect(Collectors.toMap(DimensionDetailCO::getId, e -> e, (k1, k2) -> k1));

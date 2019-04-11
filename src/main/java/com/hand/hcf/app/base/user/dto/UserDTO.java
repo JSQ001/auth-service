@@ -4,10 +4,9 @@ package com.hand.hcf.app.base.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hand.hcf.app.base.user.enums.UserLockedEnum;
-import com.hand.hcf.app.base.user.enums.UserStatusEnum;
+import com.hand.hcf.app.common.enums.UserStatusEnum;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

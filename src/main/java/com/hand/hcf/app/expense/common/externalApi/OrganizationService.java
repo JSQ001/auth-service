@@ -385,11 +385,13 @@ public class OrganizationService {
      * @param  dimensionIds 维度集合
      */
     public List<DimensionDetailCO> listDetailCOByDimensionIdsAndCompany(Long companyId,
+                                                                        Long unitId,
+                                                                        Long userId,
                                                                         Boolean enabled,
                                                                         List<Long> dimensionIds){
         //jiu.zhao 修改三方接口 20190401
-        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, enabled);
-        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, enabled, companyId);
+        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, unitId, userId, enabled);
+        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, enabled, companyId, unitId, userId);
     }
 
 

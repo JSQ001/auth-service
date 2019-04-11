@@ -116,5 +116,15 @@ public class CommonControllerImpl {
         List<SysCodeValueCO> sysCodeValueCOS = this.listSysValueByCodeOidConditionByEnabled(codeOid.toString(), true);
         return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
     }
+
+    public OrderNumberCO getOrderNumberCO(String documentTypeCode, String companyCode, String operationDate) {
+        String language = LoginInformationUtil.getCurrentLanguage();
+        return (OrderNumberCO)getOrderNumber(documentTypeCode, companyCode, operationDate).getBody();
+    }
+
+    public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
+        List<SysCodeValueCO> sysCodeValueCOS = listSysValueByCodeConditionByEnabled(code, (Boolean)null);
+        return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
+    }
 }
 

@@ -21,10 +21,10 @@ public class AccountConstants {
     public static final int DEFAULT_PASSWORD_REPEAT_TIME = 1;
     public static final int DEFAULT_PASSWORD_EXPIRE_DAYS = 0;
     public static final int DEFAULT_CRATE_DATA_TYPE = 1001;
-    public static final String DEFAULT_PASSWORD="123654";
+    public static final String DEFAULT_PASSWORD = "123654";
 
     public static final int NOTICE_TYPE_EMAIL = 1001;
-    public static final int NOTICE_TYPE_MOBILE= 1002;
+    public static final int NOTICE_TYPE_MOBILE = 1002;
     public static final int NOTICE_TYPE_EMAIL_AND_MOBILE = 1003;
 
     public static final String NOT_AUTHORIZED = "NOT_AUTHORIZED";

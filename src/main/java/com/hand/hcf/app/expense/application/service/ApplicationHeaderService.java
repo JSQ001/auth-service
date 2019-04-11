@@ -424,7 +424,12 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         ApplicationType applicationType = typeService.selectById(applicationHeaderWebDTO.getTypeId());
         applicationHeaderWebDTO.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
         // 编辑时设置保存的值，如果保存的值不存在，则为空，同时设置可以选到的维值
-        commonService.setDimensionValueNameAndOptions(applicationHeaderWebDTO.getDimensions(), applicationHeaderWebDTO.getCompanyId());
+        commonService.setDimensionValueNameAndOptions(
+                applicationHeaderWebDTO.getDimensions(),
+                applicationHeaderWebDTO.getCompanyId(),
+                applicationHeaderWebDTO.getDepartmentId(),
+                applicationHeaderWebDTO.getEmployeeId()
+        );
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(applicationHeaderWebDTO), true);
         setAttachments(applicationHeaderWebDTO);
         //jiu.zhao 合同
@@ -597,7 +602,12 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             List<ExpenseFieldDTO> fields = lineService.getFields(line);
             lineDto.setFields(fields);
         }
-        commonService.setDimensionValueNameAndOptions(dimensions, isNew ? headerDTO.getCompanyId() : lineDto.getCompanyId());
+        commonService.setDimensionValueNameAndOptions(
+                dimensions,
+                isNew ? headerDTO.getCompanyId() : lineDto.getCompanyId(),
+                isNew ? headerDTO.getDepartmentId() : lineDto.getDepartmentId(),
+                headerDTO.getEmployeeId()
+        );
         lineDto.setDimensions(dimensions);
         return lineDto;
     }
@@ -791,7 +801,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         //设置typeName
         ApplicationType applicationType = typeService.selectById(dto.getTypeId());
         dto.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
-        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId());
+        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId(),dto.getDepartmentId(),
+                dto.getEmployeeId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(dto), true);
         //jiu.zhao 合同
         /*if (dto.getContractHeaderId() != null) {

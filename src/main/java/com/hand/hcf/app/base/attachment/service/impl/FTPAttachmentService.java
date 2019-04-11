@@ -360,6 +360,15 @@ public class FTPAttachmentService implements IAttachment {
             case EXP_REVERSE:
                 path = rootPath+"/exp_reverse" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
                 break;
+            case FUND:
+                path = rootPath+"/fund" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                break;
+            case TAX:
+                path = rootPath+"/tax" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                break;
+            case SUPPLIER:
+                path = rootPath+"/supplier" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                break;
             case OTHER:
                 path = rootPath + "/" + "other/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;

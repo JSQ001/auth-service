@@ -2,7 +2,6 @@ package com.hand.hcf.app.base.system.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.domain.FrontLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.persistence.FrontLocaleMapper;

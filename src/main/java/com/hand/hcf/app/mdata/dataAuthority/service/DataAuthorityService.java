@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.dataAuthority.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-
+import com.hand.hcf.app.base.implement.web.UserRoleControllerImpl;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthority;
@@ -55,9 +55,9 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
     private final DepartmentService departmentService;
     private final CompanyService companyService;
 
-   @Autowired
-  //  private UserRoleClient userRoleClient;
-//jiu.zhao TODO
+    @Autowired
+    private UserRoleControllerImpl userRoleClient;
+
     /**
      * 保存数据权限
      */
@@ -163,8 +163,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * 根绝登录人信息获取相关数据权限
      * @return
      */
-    //jiu.zhao TODO
-   /* public List<Map<String,List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest(){
+    public List<Map<String,List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest(){
         // ... 需要根据登录人信息获取 关联的数据权限
         List<Map<String,List<DataAuthValuePropertyDTO>>> list = new ArrayList<>();
         Long functionId = Long.valueOf(HttpServletUtil.getHeaderMessage("X-Menu-Id"));
@@ -222,7 +221,7 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
             });
         }
         return list;
-    }*/
+    }
 
     private List<String> getDataValueKeyToStringByDataTypeAndDataScope(String dataType,String dataScope){
         return getDataValueKeyByDataTypeAndDataScope(dataType,dataScope).stream().map(e -> e.toString()).collect(Collectors.toList());

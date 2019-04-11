@@ -6,8 +6,6 @@ import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.code.service.SysCodeService;
-import com.hand.hcf.app.base.dataAuthority.domain.DataAuthority;
-import com.hand.hcf.app.base.dataAuthority.service.DataAuthorityService;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
@@ -19,7 +17,6 @@ import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
 import com.hand.hcf.app.base.userRole.service.RoleFunctionService;
-import com.hand.hcf.app.base.userRole.service.RoleMenuService;
 import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.base.util.RespCode;
@@ -39,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -56,8 +52,6 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
 
     @Autowired
     private MapperFacade mapper;
-
-
 
     @Autowired
     private UserService userService;
@@ -76,8 +70,6 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private RoleFunctionService roleFunctionService;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private DataAuthorityService dataAuthorityService;
 
     /**
      * save tenant
@@ -281,8 +273,6 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
 
         // 初始化用户
         User user = initUser(register);
-        // 初始化数据权限
-        dataAuthorityService.initDataAuthorityByTenant(tenant);
         // 初始化角色
         Role role = roleService.initRoleByTenant(tenant);
         // 初始化角色菜单
