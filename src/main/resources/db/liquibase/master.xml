@@ -33,6 +33,8 @@
 
     <!-- prepayment表初始化 -->
     <include file="classpath:db/liquibase/prepayment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>
+	<!--1.1.0版本-->
+    <include file="classpath:db/liquibase/prepayment/version1.0.0/release.1.1.0.xml" relativeToChangelogFile="false"/>
 
     <!-- expense表初始化 -->
     <include file="classpath:db/liquibase/expense/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
