@@ -394,7 +394,7 @@ public class ExpenseReportTypeDistSettingController {
 
 
     /**
-     * 根据费用类型获取公司范围
+     * 根据单据类型获取公司范围
      * @param expenseTypeId
      * @param companyCode
      * @param companyName
@@ -402,8 +402,8 @@ public class ExpenseReportTypeDistSettingController {
      * @return
      */
     /**
-     * @api {GET} /api/expense/report/type/dist/setting/query/company/by/expenseTypeId 【报账单】根据费用类型获取公司
-     * @apiDescription 根据费用类型获取公司范围
+     * @api {GET} /api/expense/report/type/dist/setting/query/company/by/expenseTypeId 【报账单】根据单据类型获取公司
+     * @apiDescription 根据单据类型获取公司范围
      * @apiGroup ExpenseReport
      * @apiParam {Long} expenseTypeId 费用类型ID
      * @apiParam {String} [companyCode] 公司代码
@@ -440,17 +440,18 @@ public class ExpenseReportTypeDistSettingController {
     @GetMapping("/query/company/by/expenseTypeId")
     public ResponseEntity<List<CompanyCO>> queryCompanyByExpenseTypeId (
             @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @RequestParam(value = "companyId",required = false) Long companyId,
             @RequestParam(value = "companyCode",required = false) String companyCode,
             @RequestParam(value = "companyName",required = false) String companyName,
             Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<CompanyCO> result = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseTypeId,companyCode,companyName,page);
+        Page<CompanyCO> result = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseTypeId, companyId, companyCode,companyName,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders, HttpStatus.OK);
     }
 
     /**
-     * 根据费用类型获取部门范围
+     * 根据单据类型获取部门范围
      * @param expenseTypeId
      * @param departmentCode
      * @param departmentName
@@ -458,8 +459,8 @@ public class ExpenseReportTypeDistSettingController {
      * @return
      */
     /**
-     * @api {GET} /api/expense/report/type/dist/setting/query/department/by/expenseTypeId 【报账单】根据费用类型查询分摊行部门
-     * @apiDescription 根据费用类型查询分摊行部门范围
+     * @api {GET} /api/expense/report/type/dist/setting/query/department/by/expenseTypeId 【报账单】根据单据类型查询分摊行部门
+     * @apiDescription 根据单据类型查询分摊行部门范围
      * @apiGroup ExpenseReport
      * @apiParam {Long} expenseTypeId 费用类型ID
      * @apiParam {String} [departmentCode] 部门代码
@@ -486,17 +487,18 @@ public class ExpenseReportTypeDistSettingController {
     @GetMapping("/query/department/by/expenseTypeId")
     public ResponseEntity<List<DepartmentCO>> queryDepartmentByDepartmentDistRange (
             @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @RequestParam(value = "departmentId",required = false) Long departmentId,
             @RequestParam(value = "departmentCode",required = false) String departmentCode,
             @RequestParam(value = "departmentName",required = false) String departmentName,
             Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(expenseTypeId,departmentCode,departmentName,page);
-        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(expenseTypeId,departmentId,departmentCode,departmentName,page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders, HttpStatus.OK);
     }
 
     /**
-     * 根据费用类型获取责任中心范围
+     * 根据单据类型获取责任中心范围
      * @param expenseTypeId
      * @param responsibilityCenterCode
      * @param responsibilityCenterCodeName
@@ -506,20 +508,19 @@ public class ExpenseReportTypeDistSettingController {
      * @return
      */
     /**
-     * @api {GET} /api/expense/report/type/dist/setting/query/respCenter/by/expenseTypeId【报账单】根据费用类型获取责任中心
-     * @apiDescription 根据费用类型获取责任中心范围
+     * @api {GET} /api/expense/report/type/dist/setting/query/respCenter/by/expenseTypeId 【报账单】根据单据类型获取责任中心
+     * @apiDescription 根据单据类型获取责任中心
      * @apiGroup ExpenseReport
-     * @apiParam {Long} expenseTypeId 费用类型ID
+     * @apiParam {Long} expenseTypeId 单据类型ID
      * @apiParam {String} [responsibilityCenterCode] 责任中心代码
      * @apiParam {String} [responsibilityCenterCodeName] 责任中心名称
-     * @apiParam {Long} [companyId] 公司ID(当分摊规则为DEP_RES_CENTER时，传递，且不能为空)
-     * @apiParam {Long} [departmentId] 部门ID(当分摊规则为DEP_RES_CENTER时，传递，且不能为空)
+     * @apiParam {Long} [companyId] 公司ID，当分摊规则为DEP_RES_CENTER时，传递，且不能为空
+     * @apiParam {Long} [departmentId] 部门ID，当分摊规则为DEP_RES_CENTER时，传递，且不能为空
      * @apiParam {int} [page] 页数
      * @apiParam {int} [size] 每页大小
      * @apiSuccess {Long} id  部门ID
-     * @apiSuccess {String} departmentCode 部门代码
-     * @apiSuccess {String} name 部门名称
-     * @apiSuccess {String} path 部门path
+     * @apiSuccess {String} responsibilityCenterCode 责任中心代码
+     * @apiSuccess {String} responsibilityCenterName 责任中心名称
      * @apiParamExample {json} 请求参数:
     /api/expense/report/type/dist/setting/query/respCenter/by/expenseTypeId?expenseTypeId=1
      * @apiSuccessExample {json} 成功返回值:

@@ -19,7 +19,7 @@ public interface ContentFunctionRelationMapper extends BaseMapper<ContentFunctio
     List<FunctionList> filterContentFunctionRelationByCond(@Param("functionName") String functionName,
                                                           Page page);
 
-    List<ContentFunctionDTO> listContentFunctions(@Param("functionIds") List<Long> functionIds);
+    List<ContentFunctionDTO> listContentFunctions(@Param("roleIds") List<Long> roleIds);
 
     List<ContentFunctionDTO> listNotAssignFunction(@Param("functionIds")List<Long> functionIds);
 

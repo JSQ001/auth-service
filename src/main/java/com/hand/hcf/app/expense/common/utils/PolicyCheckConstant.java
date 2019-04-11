@@ -24,10 +24,10 @@ public class PolicyCheckConstant {
     /**
      * 条件
      */
-    public static final String JUDGEMENT_SYMBOL_LESS_THEN = "<";
-    public static final String JUDGEMENT_SYMBOL_LESS_EQUAL = "≤";
-    public static final String JUDGEMENT_SYMBOL_BELONG = "属于";
-    public static final String JUDGEMENT_SYMBOL_NOT_BELONG = "不属于";
+    public static final String JUDGEMENT_SYMBOL_LESS_THEN = "01"; //<
+    public static final String JUDGEMENT_SYMBOL_LESS_EQUAL = "02"; //≤
+    public static final String JUDGEMENT_SYMBOL_BELONG = "03"; //属于
+    public static final String JUDGEMENT_SYMBOL_NOT_BELONG = "04"; //不属于
 
     /**
      * 系统级控件

@@ -48,6 +48,16 @@ public class ExpInputForReportDistDTO {
 
   private BigDecimal baseFunctionAmount;
 
+  /**
+   * 报账单分摊行分摊金额
+   */
+  private BigDecimal distAmount;
+  /**
+   * 报账单分摊行分摊税额
+   */
+  private BigDecimal distTaxAmount;
+
+
 
 
 

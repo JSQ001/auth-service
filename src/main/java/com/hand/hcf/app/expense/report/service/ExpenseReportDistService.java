@@ -16,22 +16,22 @@ import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineDist;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineDistService;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineService;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportDist;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportLine;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportTaxDist;
+import com.hand.hcf.app.expense.report.domain.*;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportDistDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportDistMapper;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.service.MessageService;
 import com.hand.hcf.core.util.OperationUtil;
 import com.hand.hcf.core.util.PageUtil;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,6 +61,12 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
 
     @Autowired
     private ExpenseReportLineService expenseReportLineService;
+
+    @Autowired
+    private ExpenseReportTypeDistSettingService expenseReportTypeDistSettingService;
+
+    @Autowired
+    private MessageService messageService;
 
     /**
      * 根据报账单ID删除分摊行信息
@@ -98,6 +104,25 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
             return deleteBatchIds(collect);
         }
         return true;
+    }
+
+    /**
+     * 更新审核状态
+     * @param headerId
+     * @param auditFlag
+     * @param auditDate
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateExpenseReportDistAduitStatusByHeaderId(Long headerId,
+                                                                String auditFlag,
+                                                                ZonedDateTime auditDate){
+        List<ExpenseReportDist> dists = selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_header_id", headerId));
+        dists.stream().forEach(e -> {
+            e.setAuditFlag(auditFlag);
+            e.setAuditDate(auditDate);
+        });
+        return updateAllColumnBatchById(dists);
     }
 
     /**
@@ -205,18 +230,60 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
             if(expenseReportDist.getSetOfBooksId() == null){
                 expenseReportDist.setSetOfBooksId(expenseReportHeader.getSetOfBooksId());
             }
-            if(expenseReportDist.getResponsibilityCenterId() == null){
-                ResponsibilityCenterCO defaultResponsibilityCenter = organizationService.getDefaultResponsibilityCenter(expenseReportDist.getCompanyId(), expenseReportDist.getDepartmentId());
-                if(defaultResponsibilityCenter != null){
-                    expenseReportDist.setResponsibilityCenterId(defaultResponsibilityCenter.getId());
+            ExpenseReportTypeDistSetting reportTypeDistSetting =
+                    expenseReportTypeDistSettingService.selectOne(new EntityWrapper<ExpenseReportTypeDistSetting>().eq("report_type_id", expenseReportHeader.getDocumentTypeId()));
+            // 公司
+            if(expenseReportDist.getCompanyId() == null){
+                if(BooleanUtils.isNotTrue(reportTypeDistSetting.getCompanyDistFlag())){
+                    expenseReportDist.setCompanyId(expenseReportHeader.getCompanyId());
+                }else{
+                    if(reportTypeDistSetting.getCompanyDefaultId() == null){
+                        throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+                                new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_COMPANY)});
+                    }
+                    expenseReportDist.setCompanyId(reportTypeDistSetting.getCompanyDefaultId());
+                    if(expenseReportDist.getCompanyId() == null){
+                        throw new BizException(RespCode.SYS_REQUIRED_FIELD_NONE);
+                    }
+                }
+
+            }
+            // 部门
+            if(expenseReportDist.getDepartmentId() == null){
+                if(BooleanUtils.isNotTrue(reportTypeDistSetting.getDepartmentDistFlag())){
+                    expenseReportDist.setDepartmentId(expenseReportHeader.getDepartmentId());
+                }else{
+                    if(reportTypeDistSetting.getDepartmentDefaultId() == null){
+                        throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+                                new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_DEPARTMENT)});
+                    }
+                    expenseReportDist.setDepartmentId(reportTypeDistSetting.getDepartmentDefaultId());
+                    if(expenseReportDist.getDepartmentId() == null){
+                        throw new BizException(RespCode.SYS_REQUIRED_FIELD_NONE);
+                    }
                 }
             }
+            // 责任中心
+            if(expenseReportDist.getResponsibilityCenterId() == null){
+                if(BooleanUtils.isTrue(reportTypeDistSetting.getResCenterDistFlag())){
+                    if("DEP_RES_CENTER".equals(reportTypeDistSetting.getResDistRange())){
+                        ResponsibilityCenterCO defaultResponsibilityCenter = organizationService.getDefaultResponsibilityCenter(expenseReportDist.getCompanyId(), expenseReportDist.getDepartmentId());
+                        if(defaultResponsibilityCenter != null){
+                            expenseReportDist.setResponsibilityCenterId(defaultResponsibilityCenter.getId());
+                        }
+                    }else{
+                        expenseReportDist.setResponsibilityCenterId(reportTypeDistSetting.getResDefaultId());
+                    }
+                }
+            }
+
             if(expenseReportDist.getExpenseTypeId() == null){
                 expenseReportDist.setExpenseTypeId(line.getExpenseTypeId());
             }
             expenseReportDist.setCurrencyCode(line.getCurrencyCode());
             expenseReportDist.setExchangeRate(line.getExchangeRate());
             expenseReportDist.setReverseFlag("N");
+            expenseReportDist.setAuditFlag("N");
         }
         expenseReportDist.setFunctionAmount(OperationUtil.safeMultiply(expenseReportDist.getAmount(),expenseReportDist.getExchangeRate()));
         //税分摊额计算
@@ -326,9 +393,9 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         return null;
     }
 
-    public List<ExpenseReportDistDTO> getExpenseReportDistByLineId(Long lineId, Page page){
-        List<ExpenseReportDist> distList = baseMapper.selectPage(page, new EntityWrapper<ExpenseReportDist>().eq("exp_report_line_id", lineId));
-        int index = PageUtil.getPageStartIndex(page) + 1;
+    public List<ExpenseReportDistDTO> getExpenseReportDistDTOByLineId(Long lineId){
+        List<ExpenseReportDist> distList = baseMapper.selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_line_id", lineId));
+        int index = 1;
         List<ExpenseReportDistDTO> list = new ArrayList<>();
         //税金分摊方式
         ExpenseReportLine expenseReportLine = expenseReportLineService.selectById(lineId);
@@ -337,8 +404,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         for(ExpenseReportDist dist : distList){
             ExpenseReportDistDTO dto = new ExpenseReportDistDTO();
             BeanUtils.copyProperties(dist,dto);
-            dto.setIndex(index);
-            index ++;
+            dto.setIndex(index ++);
             CompanyCO companyById = organizationService.getCompanyById(dto.getCompanyId());
             dto.setCompanyName(companyById.getName());
             DepartmentCO departmentById = organizationService.getDepartmentById(dto.getDepartmentId());

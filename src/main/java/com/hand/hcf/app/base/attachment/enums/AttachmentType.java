@@ -103,5 +103,9 @@ public enum AttachmentType {
     /**
      * 税务
      */
-    TAX
+    TAX,
+    /**
+     * 供应商
+     */
+    SUPPLIER
 }

@@ -50,10 +50,10 @@ public class BaseTokenStore extends JdbcTokenStore {
                     (rs, rowNum) -> deserializeAccessToken(rs.getBytes(2)), key);
         } catch (EmptyResultDataAccessException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Failed to find access token for authentication " + authentication);
+                LOG.debug("Failed to find access token for authentication {}" , authentication);
             }
         } catch (IllegalArgumentException e) {
-            LOG.error("Could not extract access token for authentication " + authentication, e);
+            LOG.error("Could not extract access token for authentication {}" , authentication, e);
         }
 
         if (accessToken != null
@@ -66,10 +66,7 @@ public class BaseTokenStore extends JdbcTokenStore {
         return accessToken;
     }
 
-    @Override
-    public void removeAccessToken(String token) {
-        super.removeAccessToken(token);
-    }
+
 
     @Override
     public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
@@ -104,10 +101,10 @@ public class BaseTokenStore extends JdbcTokenStore {
                     (rs, rowNum) -> deserializeAuthentication(rs.getBytes(2)), extractTokenKey(token));
         } catch (EmptyResultDataAccessException e) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Failed to find access token for token " + token);
+                LOG.info("Failed to find access token for token {}" , token);
             }
         } catch (IllegalArgumentException e) {
-            LOG.warn("Failed to deserialize authentication for " + token, e);
+            LOG.warn("Failed to deserialize authentication for {}",  token, e);
             removeAccessToken(token);
         }
 
@@ -148,14 +145,14 @@ public class BaseTokenStore extends JdbcTokenStore {
         }
         catch (EmptyResultDataAccessException e) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Failed to find access token for token " + tokenId);
+                LOG.info("Failed to find access token for token {}" , tokenId);
             }
         }
         catch (IllegalArgumentException e) {
-            LOG.warn("Failed to deserialize access token for " + tokenId, e);
+            LOG.warn("Failed to deserialize access token for {}" , tokenId, e);
             removeAccessToken(tokenId);
         }
 
-        return accessToken.getValue();
+        return accessToken==null?null:accessToken.getValue();
     }
 }

@@ -2341,4 +2341,99 @@
             <column name="je_creation_date" type="timestamp" remarks="创建凭证日期"></column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="201904021800001" author="kai.zhang">
+        <dropTable tableName="exp_requisition_release"/>
+        <createTable tableName="exp_requisition_release" remarks="申请释放表">
+            <column name="id" type="bigint" remarks="ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_requisition_release"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_doc_category" type="varchar(30)" remarks="来源单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_id" type="bigint" remarks="来源单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_line_id" type="bigint" remarks="来源单据行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_doc_dist_id" type="bigint" remarks="来源单据分摊行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_category" type="varchar(30)" remarks="关联单据类别">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_id" type="bigint" remarks="关联单据ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_line_id" type="bigint" remarks="关联单据行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="related_doc_dist_id" type="bigint" remarks="关联单据分摊行ID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency_code" type="varchar(30)" remarks="币种">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_rate" type="double" remarks="汇率">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="decimal(20,2)" remarks="金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="functional_amount" type="decimal(20,2)" remarks="本币金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201904031420001" author="kai.zhang">
+        <dropNotNullConstraint tableName="exp_report_payment_schedule" columnName="payee_category" columnDataType="varchar(30)"/>
+        <dropNotNullConstraint tableName="exp_report_payment_schedule" columnName="payee_id" columnDataType="bigint"/>
+    </changeSet>
+    <changeSet id="201904031420002" author="kai.zhang">
+        <addColumn tableName="exp_report_line">
+            <column name="audit_flag" type="varchar(1)" remarks="审核状态Y/N" />
+            <column name="audit_date" type="timestamp" remarks="审核日期"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904031420003" author="kai.zhang">
+        <addColumn tableName="exp_report_dist">
+            <column name="audit_flag" type="varchar(1)" remarks="审核状态Y/N" />
+            <column name="audit_date" type="timestamp" remarks="审核日期"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904031420004" author="kai.zhang">
+        <addColumn tableName="exp_report_tax_dist">
+            <column name="audit_flag" type="varchar(1)" remarks="审核状态Y/N" />
+            <column name="audit_date" type="timestamp" remarks="审核日期"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904031420005" author="kai.zhang">
+        <addColumn tableName="exp_report_payment_schedule">
+            <column name="audit_flag" type="varchar(1)" remarks="审核状态Y/N" />
+            <column name="audit_date" type="timestamp" remarks="审核日期"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

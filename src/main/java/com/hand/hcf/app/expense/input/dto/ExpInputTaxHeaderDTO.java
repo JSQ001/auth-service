@@ -34,4 +34,7 @@ public class ExpInputTaxHeaderDTO extends ExpInputTaxHeader {
 
     private List<AttachmentCO> attachments;
 
+    private  String applicantName;
+    private  String createdName;
+
 }

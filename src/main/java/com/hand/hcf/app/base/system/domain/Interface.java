@@ -36,5 +36,10 @@ public class Interface extends DomainLogicEnable {
 
     @TableField("app_id")
     private Long appId;  // 模块ID
+    /**
+     * 模块代码
+     */
+    @TableField(exist = false)
+    private String appCode;
 
 }

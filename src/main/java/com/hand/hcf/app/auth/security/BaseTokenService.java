@@ -2,11 +2,8 @@
 
 package com.hand.hcf.app.auth.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
@@ -16,7 +13,9 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
-import org.springframework.security.oauth2.provider.token.*;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -25,11 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public class BaseTokenService extends DefaultTokenServices {
-    private static final Logger LOG = LoggerFactory.getLogger(BaseTokenService.class);
     private boolean supportRefreshToken = false;
     private TokenStore tokenStore;
     private TokenEnhancer accessTokenEnhancer;
-    private AuthenticationKeyGenerator authenticationKeyGenerator = new DefaultAuthenticationKeyGenerator();
     @Autowired
     private ApplicationContext applicationContext;
     @Override
@@ -50,7 +47,7 @@ public class BaseTokenService extends DefaultTokenServices {
         this.accessTokenEnhancer = accessTokenEnhancer;
     }
     @Override
-    public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest tokenRequest) throws AuthenticationException {
+    public OAuth2AccessToken refreshAccessToken(String refreshTokenValue, TokenRequest tokenRequest)  {
         if (!supportRefreshToken) {
             throw new InvalidGrantException("Invalid refresh token: " + refreshTokenValue);
         } else {
@@ -98,8 +95,7 @@ public class BaseTokenService extends DefaultTokenServices {
             clientAuth = clientAuth.narrowScope(scope);
         }
 
-        OAuth2Authentication narrowed = new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
-        return narrowed;
+        return new OAuth2Authentication(clientAuth, authentication.getUserAuthentication());
     }
 
     private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
@@ -115,7 +111,7 @@ public class BaseTokenService extends DefaultTokenServices {
     }
 
     @Override
-    public OAuth2Authentication loadAuthentication(String accessTokenValue) throws AuthenticationException, InvalidTokenException {
+    public OAuth2Authentication loadAuthentication(String accessTokenValue)  {
         OAuth2Authentication oAuth2Authentication = super.loadAuthentication(accessTokenValue);
         String uri = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getRequestURI();
         if ("/api/refactor/devicebind/bind".equals(uri)) {
@@ -130,7 +126,7 @@ public class BaseTokenService extends DefaultTokenServices {
     }
 
     @Override
-    public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
+    public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication)  {
         return super.createAccessToken(authentication);
     }
 }

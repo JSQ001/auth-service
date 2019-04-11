@@ -17,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotEmpty;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -127,14 +129,23 @@ public class AttachmentController{
 
     @RequestMapping(value = "/attachments/download/{oid}", method = RequestMethod.GET)
     @Timed
-    public void getExpenseReport(@PathVariable String oid, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        final String ENC = "UTF-8";
+    public void getExpenseReport(@PathVariable String oid,
+                                 HttpServletRequest httpServletRequest,
+                                 HttpServletResponse httpServletResponse) throws Exception {
         Attachment attachment = attachmentService.findByOId(oid);
-
-        response.addHeader("ContentList-Disposition", "attachment;filename=\"" + URLEncoder.encode(attachment.getName(), ENC) + "\"");
-        response.setContentType( "application/octet-stream;charset=" + ENC);
-        response.setHeader("Accept-Ranges", "bytes");
-        attachmentService.writeFileToResp(response, attachment);
+        String name = attachment.getName();
+        String userAgent = httpServletRequest.getHeader("User-Agent");
+        httpServletResponse.reset();
+        if (userAgent.contains("Firefox")) {
+            name = new String(name.getBytes(StandardCharsets.UTF_8), "ISO8859-1");
+        } else {
+            name = URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+        }
+        httpServletResponse.addHeader("Content-Disposition",
+                "attachment; filename=" + name);
+        httpServletResponse.setContentType( "application/octet-stream;charset=" + StandardCharsets.UTF_8.name());
+        httpServletResponse.setHeader("Accept-Ranges", "bytes");
+        attachmentService.writeFileToResp(httpServletResponse, attachment);
     }
 
 }

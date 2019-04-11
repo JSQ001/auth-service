@@ -22,7 +22,7 @@ public class ExtWebResponseExceptionTranslator implements WebResponseExceptionTr
         OAuth2Exception oAuth2Exception = (OAuth2Exception) e;
 
         String message=oAuth2Exception.getMessage();
-        if (Constants.BAD_CREDENTIALS.equals(message)){
+        if (com.hand.hcf.app.auth.constant.Constants.BAD_CREDENTIALS.equals(message)){
             message=messageService.getMessageFromSource(Constants.USER_BAD_CREDENTIALS);
         }
 

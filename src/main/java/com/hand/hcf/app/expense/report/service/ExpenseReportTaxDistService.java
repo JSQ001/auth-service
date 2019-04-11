@@ -7,6 +7,7 @@ import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -33,6 +34,7 @@ public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDis
      * @param distId
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteExpenseReportTaxDistByDistId(Long distId){
         return delete(new EntityWrapper<ExpenseReportTaxDist>().eq("exp_report_dist_id",distId));
     }
@@ -42,6 +44,7 @@ public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDis
      * @param distIds
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteExpenseReportTaxDistByDistIds(List<Long> distIds){
         return delete(new EntityWrapper<ExpenseReportTaxDist>().in("exp_report_dist_id",distIds));
     }
@@ -53,6 +56,25 @@ public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDis
      */
     public List<ExpenseReportTaxDist> getExpenseReportTaxDistByHeaderId(Long headerId){
         return selectList(new EntityWrapper<ExpenseReportTaxDist>().eq("exp_report_header_id",headerId));
+    }
+
+    /**
+     * 更新审核状态
+     * @param headerId
+     * @param auditFlag
+     * @param auditDate
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateExpenseReportTaxDistAduitStatusByHeaderId(Long headerId,
+                                                                String auditFlag,
+                                                                ZonedDateTime auditDate){
+        List<ExpenseReportTaxDist> dists = selectList(new EntityWrapper<ExpenseReportTaxDist>().eq("exp_report_header_id", headerId));
+        dists.stream().forEach(e -> {
+            e.setAuditFlag(auditFlag);
+            e.setAuditDate(auditDate);
+        });
+        return updateAllColumnBatchById(dists);
     }
 
 }

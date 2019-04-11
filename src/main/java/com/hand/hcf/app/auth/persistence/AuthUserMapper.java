@@ -8,7 +8,9 @@ import org.apache.ibatis.annotations.Param;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-
+/**
+ * @author polus
+ */
 public interface AuthUserMapper extends BaseMapper<UserDTO> {
 
    List<UserDTO> listDtoByQO(UserQO userQO);

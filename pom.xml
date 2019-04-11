@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>auth-service</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 
     <parent>
         <groupId>com.hand.hcf.app</groupId>
         <artifactId>hcf-app-parent</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>1.0.0.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <properties>

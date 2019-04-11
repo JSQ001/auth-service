@@ -161,16 +161,16 @@ public class ExpenseAdjustTypeController {
     }
 
     /**
-     * @api {GET} /api/expense/adjust/types/users/{id} 【调整单类型】根据单据id查询有该单据权限的用户
+     * @api {GET} /api/expense/adjust/types/users 【调整单类型】根据单据id查询有该单据权限的用户
      */
-    @GetMapping("/users/{id}")
-    public ResponseEntity listUsersByExpenseAdjustType(@PathVariable("id") Long id,
-                                                       @RequestParam(required = false) String userCode,
-                                                       @RequestParam(required = false) String userName,
+    @GetMapping("/users")
+    public ResponseEntity listUsersByExpenseAdjustType(@RequestParam(value = "adjustTypeId") Long adjustTypeId,
+                                                       @RequestParam(value = "userCode", required = false) String userCode,
+                                                       @RequestParam(value = "userName", required = false) String userName,
                                                        @RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
-        List<ContactCO> result = expenseAdjustTypeService.listUsersByExpenseAdjustType(id, userCode, userName, queryPage);
+        List<ContactCO> result = expenseAdjustTypeService.listUsersByExpenseAdjustType(adjustTypeId, userCode, userName, queryPage);
         HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }

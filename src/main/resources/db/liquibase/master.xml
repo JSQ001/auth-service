@@ -13,6 +13,8 @@
     <include file="classpath:db/liquibase/base/v0.8.5/release20190110.xml" relativeToChangelogFile="false"/>
     <!-- 1.0.0  修改全部放到后面的版本分支上-->
     <include file="classpath:db/liquibase/base/v1.0.0/release20190401.xml" relativeToChangelogFile="false"/>
+	<!-- 1.1.0 修改全部放到后面的版本分支上 -->
+    <include file="classpath:db/liquibase/base/v1.1.0/release-1.1.0.xml" relativeToChangelogFile="false"/>
 
     <!-- 主数据建表语句 -->
     <include file="classpath:db/liquibase/mdata/version1.0.0/init.xml" relativeToChangelogFile="false"/>
@@ -37,4 +39,6 @@
     <include file="classpath:db/liquibase/expense/changelog/initSql.xml" relativeToChangelogFile="false"/>
     <!-- 1.0.0  修改全部放到后面的版本分支上-->
     <include file="classpath:db/liquibase/expense/version.1.0.0/release20190118.xml" relativeToChangelogFile="false"/>
+	<!-- 1.1.0 版本-->
+    <include file="classpath:db/liquibase/expense/changelog/release.1.1.0.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

@@ -39,9 +39,9 @@ import java.util.UUID;
 public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
 
     //默认最大尝试登陆次数
-    private static final int defaultMaxLoginAttempt = 5;
+    private static final int DEFAULT_MAX_LOGIN_ATTEMPT = 5;
     //自动解锁等待时间分钟数
-    private static final int defaultUnLockMinutes = 30;
+    private static final int DEFAULT_UNLOCK_MINUTES = 30;
 
     //默认自动锁定持续时间,单位:second
     private static final int DEFAULT_AUTO_UNLOCK_DURATION = 3600;
@@ -57,7 +57,7 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
 
     private UserDTO getDtoByQO(UserQO userQO) {
         List<UserDTO> users = baseMapper.listDtoByQO(userQO);
-        if (users.size() > 0) {
+        if (!users.isEmpty()) {
             return users.get(0);
         }
         return null;
@@ -91,28 +91,27 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
     }
 
 
-
     private ZonedDateTime getLastPasswordDate(UUID userOid) {
         List<ZonedDateTime> days = baseMapper.listLastPasswordDate(userOid);
-        if (days.size() > 0) {
+        if (!days.isEmpty()) {
             return days.get(0);
         }
         return null;
     }
 
-    private PasswordPolicyDTO getPasswordPolicy(Long tenantId){
-        PasswordPolicyDTO passwordPolicyDTO=new PasswordPolicyDTO();
+    private PasswordPolicyDTO getPasswordPolicy(Long tenantId) {
+        PasswordPolicyDTO passwordPolicyDTO = new PasswordPolicyDTO();
         passwordPolicyDTO.setPasswordExpireDays(0);
-        passwordPolicyDTO.setPasswordAttemptTimes(defaultMaxLoginAttempt);
-        passwordPolicyDTO.setAutoUnlockDuration(defaultUnLockMinutes);
+        passwordPolicyDTO.setPasswordAttemptTimes(DEFAULT_MAX_LOGIN_ATTEMPT);
+        passwordPolicyDTO.setAutoUnlockDuration(DEFAULT_UNLOCK_MINUTES);
         return passwordPolicyDTO;
     }
 
-    private Integer countLoginBind(UUID userOid){
+    private Integer countLoginBind(UUID userOid) {
         return baseMapper.countLoginBind(userOid);
     }
 
-    public Integer updateUserLockStatus(UserDTO userDTO){
+    public Integer updateUserLockStatus(UserDTO userDTO) {
         return baseMapper.updateUserLockStatus(userDTO);
     }
 
@@ -128,11 +127,12 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
         log.debug("Authenticating {}", login);
         UserDTO user = null;
         List<UserDTO> users = listDtoByLoginBind(login);
-        if (users != null && users.size() >= 1) {
-            if (users.size() == 1) {
-                user = users.get(0);
-            } else {
+        if (users != null && !users.isEmpty()) {
+            if (users.size() > 1) {
                 throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_LOGIN_MULTI_USER));
+
+            } else {
+                user = users.get(0);
             }
         }
 
@@ -140,10 +140,10 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
         if (user == null) {
             boolean isEmailLogin = false;
             user = getDtoByLogin(login);
-            if (user==null) {
+            if (user == null) {
                 user = getDtoByMobile(login);
             }
-            if (user==null) {
+            if (user == null) {
                 user = getDtoByEmail(login);
 
                 isEmailLogin = true;
@@ -160,17 +160,17 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
                 }
 
 
-            }else{
+            } else {
                 //新用户登录，手机号没有激活（邮箱激活的场景提示）
-                if(user==null ){
+                if (user == null) {
 
-                   UserDTO userQueryByPhone=getDtoByMobile(login);
-                    if(userQueryByPhone!=null && userQueryByPhone.getActivated()){
-                        Integer userLoginBinds = countLoginBind(user.getUserOid());
-                        if(userLoginBinds!=null && userLoginBinds>0){
+                    UserDTO userQueryByPhone = getDtoByMobile(login);
+                    if (userQueryByPhone != null && userQueryByPhone.getActivated()) {
+                        Integer userLoginBinds = countLoginBind(userQueryByPhone.getUserOid());
+                        if (userLoginBinds != null && userLoginBinds > 0) {
                             throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_MOBILE_NOT_BIND));
                         }
-                    }else if(userQueryByPhone!=null && !userQueryByPhone.getActivated()){
+                    } else if (userQueryByPhone != null && !userQueryByPhone.getActivated()) {
                         throw new UserNotActivatedException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
                     }
                 }
@@ -186,7 +186,7 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
     }
 
 
-    public PrincipalLite loadUserByUserOid(UUID userOid){
+    public PrincipalLite loadUserByUserOid(UUID userOid) {
         UserDTO u = getDtoByUserOid(userOid);
         if (u == null) {
             throw new UsernameNotFoundException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
@@ -204,7 +204,7 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
         // 判断手机号码是否存在
         UserDTO u = getDtoByEmail(email);
 
-        if (u==null) {
+        if (u == null) {
             throw new UsernameNotFoundException(messageService.getMessageFromSource(Constants.USER_NOT_FOUND));
         }
         //1.用户是否被激活
@@ -244,56 +244,41 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
     }
 
 
-
     private boolean isPasswordExpire(UserDTO user, Long tenantId) {
 
-        PasswordPolicyDTO passwordPolicyDTO=getPasswordPolicy(tenantId);
-        if (passwordPolicyDTO == null) {
-            return true;
-        }
+        PasswordPolicyDTO passwordPolicyDTO = getPasswordPolicy(tenantId);
+
         //密码过期时间为-1，标识密码永不过期。
         if (passwordPolicyDTO.getPasswordExpireDays() == 0) {
             return true;
         }
-        ZonedDateTime expireDate= getLastPasswordDate(user.getUserOid());
+        ZonedDateTime expireDate = getLastPasswordDate(user.getUserOid());
         if (expireDate != null) {
-             expireDate = expireDate.plusDays(passwordPolicyDTO.getPasswordExpireDays());
-            if (expireDate.isAfter(ZonedDateTime.now()) || expireDate.isEqual(ZonedDateTime.now())) {
-                return true;
-            } else {
-                return false;
-            }
+            expireDate = expireDate.plusDays(passwordPolicyDTO.getPasswordExpireDays());
+            return (expireDate.isAfter(ZonedDateTime.now()) || expireDate.isEqual(ZonedDateTime.now()));
         } else {
             ZonedDateTime passwordExpireDate = user.getCreatedDate().plusDays(passwordPolicyDTO.getPasswordExpireDays());
-            if (passwordExpireDate.isAfter(ZonedDateTime.now()) || passwordExpireDate.isEqual(ZonedDateTime.now())) {
-                return true;
-            } else {
-                return false;
-            }
+            return (passwordExpireDate.isAfter(ZonedDateTime.now()) || passwordExpireDate.isEqual(ZonedDateTime.now()));
         }
     }
 
 
     public void loginFailed(String login, HttpServletRequest request) {
         //1.根据username获取user
-        UserDTO user= getDtoByMobile(login);
-        if (user==null) {
+        UserDTO user = getDtoByMobile(login);
+        if (user == null) {
             user = getDtoByEmail(login);
-            if (user==null) {
+            if (user == null) {
                 log.debug("Can't find user name/email equals {}", login);
                 return;
             }
         }
 
         //2.根据companyId拿到SecurityPolicy
-        PasswordPolicyDTO passwordPolicyDTO=getPasswordPolicy(user.getTenantId());
-        if (passwordPolicyDTO==null) {
-            log.debug("Can't getPasswordPolicy tenantId equals {}", user.getTenantId());
-            return;
-        }
+        PasswordPolicyDTO passwordPolicyDTO = getPasswordPolicy(user.getTenantId());
 
         //3.拿到LoginAttempt
-        Integer maxAttemptTimes =  passwordPolicyDTO.getPasswordAttemptTimes() == 0 ? defaultMaxLoginAttempt : passwordPolicyDTO.getPasswordAttemptTimes();
+        Integer maxAttemptTimes = passwordPolicyDTO.getPasswordAttemptTimes() == 0 ? DEFAULT_MAX_LOGIN_ATTEMPT : passwordPolicyDTO.getPasswordAttemptTimes();
 
         //4.增加失败次数:1,最大到maxAttemptTimes,如果小于则直接返回,等于则lockUser
         if (maxAttemptTimes.longValue() > redisHelper.increment(CacheConstants.LOGIN_ATTEMPT_PREFIX + user.getId(), 1)) {
@@ -308,7 +293,7 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
                 .build();
 
         //6.lock user
-        lockUser(userLock, passwordPolicyDTO.getAutoUnlockDuration() == 0 ? defaultUnLockMinutes : passwordPolicyDTO.getAutoUnlockDuration());
+        lockUser(userLock, passwordPolicyDTO.getAutoUnlockDuration() == 0 ? DEFAULT_UNLOCK_MINUTES : passwordPolicyDTO.getAutoUnlockDuration());
     }
 
 
@@ -390,12 +375,13 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
 
     /**
      * 根据oauth客户端获取用户信息
+     *
      * @param clientId 客户端id
      * @return PrincipalLite
      */
-    public PrincipalLite getUserByOauthClientId(String clientId){
+    public PrincipalLite getUserByOauthClientId(String clientId) {
         List<UserDTO> userDTOS = baseMapper.getUserByOauthClientId(clientId);
-        if (CollectionUtils.isEmpty(userDTOS)){
+        if (CollectionUtils.isEmpty(userDTOS)) {
             return null;
         }
         return getPrincipal(userDTOS.get(0));
