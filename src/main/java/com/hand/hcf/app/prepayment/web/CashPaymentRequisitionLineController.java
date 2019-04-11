@@ -30,10 +30,10 @@ public class CashPaymentRequisitionLineController {
     private CashPaymentRequisitionLineService cashPaymentRequisitionLineService;
     @GetMapping("/get/line/by/query")
     public ResponseEntity<List<CashPaymentRequisitionHeadDto>> getHeadByQuery(
-            @RequestParam(value = "requisitionNumber", required = false) String requisitionNumber, // Ô¤¸¶¿î±àºÅ
-            @RequestParam(value = "documentNumber", required = false) String documentNumber,  // ÉêÇëµ¥±àºÅ
+            @RequestParam(value = "requisitionNumber", required = false) String requisitionNumber, // é¢„ä»˜æ¬¾ç¼–å·
+            @RequestParam(value = "documentNumber", required = false) String documentNumber,  // ç”³è¯·å•ç¼–å·
             @RequestParam(value = "typeId", required = false) Long typeId,
-            @RequestParam(value = "reptypeId",required = false) Long reptypeId,  //ĞĞÉÏ ÏÖ½ğÊÂÎñÀàĞÍ
+            @RequestParam(value = "reptypeId",required = false) Long reptypeId,  //è¡Œä¸Š ç°é‡‘äº‹åŠ¡ç±»å‹
             Pageable pageable
     ) throws URISyntaxException {
 

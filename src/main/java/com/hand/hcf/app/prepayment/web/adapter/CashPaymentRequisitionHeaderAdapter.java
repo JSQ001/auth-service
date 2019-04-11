@@ -124,7 +124,7 @@ public class CashPaymentRequisitionHeaderAdapter {
 
 
     //StringToJson
-    public static void AttachmentOidParseArray(String attachmentOid, CashPaymentRequisitionHeaderCO dto){
+    public static void AttachmentOidParseArray(String attachmentOid,CashPaymentRequisitionHeaderCO dto){
         dto.setAttachmentOids(JSON.parseArray(attachmentOid,String.class));
     }
 

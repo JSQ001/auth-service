@@ -231,6 +231,9 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 List<CashPaymentRequisitionLine> cashLines = map.get(applicationId);
                 //取过来的总金额
            //     Map<String, Double> stringDoubleMap = hcfOrganizationInterface.getApplicationAmountById(applicationId);
+                List<ApplicationAmountCO> applicationAmounts = expenseModuleInterface.getApplicationAmountById(applicationId);
+                Map<String, Double> stringDoubleMap = applicationAmounts.stream().collect(
+                        Collectors.groupingBy(ApplicationAmountCO::getCurrencyCode, summingDouble(ApplicationAmountCO::AmountToDouble)));
                 //已关联金额
                 Map<String, Double> arlMap = new HashMap<>();
                 //已关联金额从申请单关联表里面取
@@ -754,7 +757,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 throw new BizException(RespCode.PREPAY_USER_BANK_ERROR);
             }
         }else{
-           Page<VendorInfoCO> pageVendorInfoDTOs = vendorModuleInterface.getBankInfoByCompanyId(OrgInformationUtil.getCurrentCompanyId(), name,page);
+           Page<VendorInfoCO> pageVendorInfoDTOs = vendorModuleInterface.pageVendorInfosByTenantIdAndNameAndCode(OrgInformationUtil.getCurrentTenantId(), name,null,page);
             List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(pageVendorInfoDTOs.getRecords())) {
                 dtoPage.setTotal(pageVendorInfoDTOs.getTotal());
@@ -828,7 +831,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 throw new BizException(RespCode.PREPAY_USER_BANK_ERROR);
             }
         }else{
-            Page<VendorInfoCO> pageVendorInfoDTOs =vendorModuleInterface.getBankInfoByCompanyAndVendorInfo(OrgInformationUtil.getCurrentCompanyId(), name,code,page);
+            Page<VendorInfoCO> pageVendorInfoDTOs =vendorModuleInterface.pageVendorInfosByTenantIdAndNameAndCode(OrgInformationUtil.getCurrentTenantId(), name,code,page);
             List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(pageVendorInfoDTOs.getRecords())) {
                 dtoPage.setTotal(pageVendorInfoDTOs.getTotal());

@@ -25,9 +25,9 @@ import static java.util.stream.Collectors.toList;
  */
 @Service
 @Transactional
-public class CashPayRequisitionTypeAssignTransactionClassService extends BaseService<CashPayRequisitionTypeAssignTransactionClassMapper, CashPayRequisitionTypeAssignTransactionClass> {
+public class CashPayRequisitionTypeAssignTransactionClassService extends BaseService<CashPayRequisitionTypeAssignTransactionClassMapper,CashPayRequisitionTypeAssignTransactionClass> {
     @Autowired
-    private CashPayRequisitionTypeMapper cashPayRequisitionTypeMapper;
+    private  CashPayRequisitionTypeMapper cashPayRequisitionTypeMapper;
     @Autowired
     private PaymentModuleInterface paymentModuleInterface;
 
