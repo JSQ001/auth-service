@@ -141,13 +141,18 @@
 
     <!-- 待办事项-待审批单据-单据列表 -->
     <select id="getApprovalToPendDeatil" resultType="com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef">
-        SELECT dr.*
+        SELECT DISTINCT dr.*
         FROM sys_wfl_document_ref dr
-        WHERE
-        EXISTS ( SELECT swra.workflow_document_ref_id
-        FROM sys_wfl_ref_approvers swra
-        WHERE swra.approver_oid = #{userOid}
-        AND dr.id = swra.workflow_document_ref_id )
+        WHERE EXISTS (
+        SELECT 1
+        FROM sys_approval_chain ac
+        WHERE ac.status = 1000
+        AND ac.current_flag = 1
+        <!-- 审批人 -->
+        AND ac.approver_oid = #{userOid}
+        AND ac.entity_oid = dr.document_oid
+        AND ac.entity_type = dr.document_category
+        )
         <!-- 单据大类 -->
         <if test="documentCategory != null">
             AND dr.document_category = #{documentCategory}
@@ -189,13 +194,18 @@
 
     <!-- 待办事项-待审批单据-分类信息 -->
     <select id="getApprovalToPendTotal" resultType="com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO">
-        SELECT dr.document_category type, count(dr.ID) count
+        SELECT DISTINCT dr.document_category type, count(dr.ID) count
         FROM sys_wfl_document_ref dr
-        WHERE
-        EXISTS ( SELECT swra.workflow_document_ref_id
-        FROM sys_wfl_ref_approvers swra
-        WHERE swra.approver_oid = #{userOid}
-        AND dr.id = swra.workflow_document_ref_id )
+        WHERE EXISTS (
+        SELECT 1
+        FROM sys_approval_chain ac
+        WHERE ac.status = 1000
+        AND ac.current_flag = 1
+        <!-- 审批人 -->
+        AND ac.approver_oid = #{userOid}
+        AND ac.entity_oid = dr.document_oid
+        AND ac.entity_type = dr.document_category
+        )
         <!-- 单据大类 -->
         <if test="documentCategory != null">
             AND dr.document_category = #{documentCategory}
@@ -235,31 +245,46 @@
         GROUP BY dr.document_category
     </select>
 
-    <!-- 待办事项-未完成单据 -->
-    <select id="getUnFinishedList" resultType="com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef">
-        SELECT dr.*
-        FROM sys_wfl_document_ref dr
-        WHERE dr.applicant_oid = #{applicantOid}
-        AND
-        EXISTS ( SELECT swra.workflow_document_ref_id
-        FROM sys_wfl_ref_approvers swra
-        WHERE dr.id = swra.workflow_document_ref_id
+    <!-- 待办事项-被退回单据/未完成单据 -->
+    <select id="getRejectORUnFinishedList" resultType="com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef">
+        SELECT DISTINCT dr.*
+        FROM sys_approval_chain ac, sys_wfl_document_ref dr
+        WHERE ac.entity_oid = dr.document_oid
+        AND ac.entity_type = dr.document_category
+        <!-- tabNumber=1(被退回的单据) tabNumber=2(未完成的单据) -->
+        <choose>
+            <when test="tabNumber == 1">
+                  AND dr.status = 1005
+                  AND ac.status = 1001
+                  AND ac.current_flag = 1
+                  AND ac.finish_flag = 0
+                  AND ac.all_finished = 0
+            </when>
+            <when test="tabNumber == 2">
+                AND dr.status = 1002
+                AND ac.status = 1000
+                AND ac.current_flag = 1
+                AND ac.finish_flag = 0
+                AND ac.all_finished = 0
+            </when>
+        </choose>
+        <!-- 申请人 -->
+        AND dr.applicant_oid = #{workFlowDocumentRefDTO.applicantOid}
         <!-- 当前审批人 -->
-        <if test="lastApproverOid != null">
-            AND  swra.approver_oid = #{lastApproverOid}
+        <if test="workFlowDocumentRefDTO.approverOid != null">
+            AND  ac.approver_oid = #{workFlowDocumentRefDTO.approverOid}
         </if>
-        )
         <!-- 单据大类 -->
-        <if test="documentCategory != null">
-            AND dr.document_category = #{documentCategory}
+        <if test="workFlowDocumentRefDTO.documentCategory != null">
+            AND dr.document_category = #{workFlowDocumentRefDTO.documentCategory}
         </if>
         <!-- 单据类型 -->
-        <if test="documentTypeId != null">
-            AND dr.document_type_id = #{documentTypeId}
+        <if test="workFlowDocumentRefDTO.documentTypeId != null">
+            AND dr.document_type_id = #{workFlowDocumentRefDTO.documentTypeId}
         </if>
         <!-- 申请人 -->
-        <if test="applicantName != null and applicantName != ''">
-            AND dr.applicant_name LIKE #{applicantName}
+        <if test="workFlowDocumentRefDTO.applicantName != null and workFlowDocumentRefDTO.applicantName != ''">
+            AND dr.applicant_name LIKE #{workFlowDocumentRefDTO.applicantName}
         </if>
         <!-- 最小提交日期 -->
         <if test="beginDate != null">
@@ -278,17 +303,25 @@
             <![CDATA[ AND dr.function_amount <= #{amountTo} ]]>
         </if>
         <!-- 审批节点名称 -->
-        <if test="approvalNodeName != null and approvalNodeName != ''">
-            AND dr.approval_node_name like #{approvalNodeName}
+        <if test="workFlowDocumentRefDTO.nodeName != null and workFlowDocumentRefDTO.nodeName != ''">
+            AND dr.approval_node_name like #{workFlowDocumentRefDTO.nodeName}
         </if>
         <!-- 备注 -->
-        <if test="remark != null and remark != ''">
-            AND dr.remark like #{remark}
+        <if test="workFlowDocumentRefDTO.remark != null and workFlowDocumentRefDTO.remark != ''">
+            AND dr.remark like #{workFlowDocumentRefDTO.remark}
         </if>
         <!-- 单据编号 -->
-        <if test="documentNumber != null and documentNumber != ''">
-            AND dr.document_number like #{documentNumber}
+        <if test="workFlowDocumentRefDTO.documentNumber != null and workFlowDocumentRefDTO.documentNumber != ''">
+            AND dr.document_number like #{workFlowDocumentRefDTO.documentNumber}
         </if>
-        ORDER BY dr.document_number ASC
+        <!-- 排序 -->
+        <choose>
+            <when test="tabNumber == 1">
+                  ORDER BY dr.last_updated_date
+            </when>
+            <when test="tabNumber == 2">
+                  ORDER BY dr.document_number
+            </when>
+        </choose>
     </select>
 </mapper>

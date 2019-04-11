@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
+import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
@@ -125,31 +126,22 @@ public interface WorkFlowDocumentRefMapper extends BaseMapper<WorkFlowDocumentRe
                                                             @Param("documentNumber") String documentNumber);
 
     /**
-     * 待办事项-未完成单据
-     * @param documentCategory 单据大类
-     * @param documentTypeId 单据类型id
-     * @param beginDate 提交日期从
-     * @param endDate 提交日期至
-     * @param amountFrom 本币金额从
-     * @param amountTo 本币金额至
-     * @param lastApproverOid 当前审批人oid
-     * @param approvalNodeName 当前审批节点名称
-     * @param remark 备注
-     * @param documentNumber 单据编号
-     * @param rowBounds 分页信息
+     * 待办事项-被退回单据/未完成单据
+     * @param workFlowDocumentRefDTO
+     * @param beginDate
+     * @param endDate
+     * @param amountFrom
+     * @param amountTo
+     * @param tabNumber tabNumber=1(被退回的单据) tabNumber=2(未完成的单据)
+     * @param rowBounds 分页
      * @return
      */
-    List<WorkFlowDocumentRef> getUnFinishedList(@Param("documentCategory") Integer documentCategory,
-                                                @Param("documentTypeId") Long documentTypeId,
-                                                @Param("applicantName") String applicantName,
-                                                @Param("beginDate") ZonedDateTime beginDate,
-                                                @Param("endDate") ZonedDateTime endDate,
-                                                @Param("amountFrom") Double amountFrom,
-                                                @Param("amountTo") Double amountTo,
-                                                @Param("lastApproverOid") UUID lastApproverOid,
-                                                @Param("approvalNodeName") String approvalNodeName,
-                                                @Param("remark") String remark,
-                                                @Param("documentNumber") String documentNumber,
-                                                @Param("applicantOid") UUID applicantOid,
-                                                RowBounds rowBounds);
+    List<WorkFlowDocumentRef> getRejectORUnFinishedList(@Param("workFlowDocumentRefDTO") 
+    	WorkFlowDocumentRefDTO workFlowDocumentRefDTO,
+                                                        @Param("beginDate") ZonedDateTime beginDate,
+                                                        @Param("endDate") ZonedDateTime endDate,
+                                                        @Param("amountFrom") Double amountFrom,
+                                                        @Param("amountTo") Double amountTo,
+                                                        @Param("tabNumber") int tabNumber,
+                                                        RowBounds rowBounds);
 }

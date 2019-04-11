@@ -63,15 +63,15 @@ public class WorkflowTransferController {
      */
     @GetMapping(value = "/query")
     public ResponseEntity<List<WorkflowTransferDTO>> pageWorkflowTransferByCond(@RequestParam(value = "documentCategory",required = false) String documentCategory,
-                                                                             @RequestParam(value = "workflowId",required = false) Long workflowId,
-                                                                             @RequestParam(value = "authorizeId",required = false) Long authorizeId,
-                                                                             @RequestParam(value = "agentId",required = false) Long agentId,
-                                                                             @RequestParam(value = "startDate",required = false) String startDate,
-                                                                             @RequestParam(value = "endDate",required = false) String endDate,
-                                                                             @RequestParam(value = "authorizationNotes",required = false) String authorizationNotes,
-                                                                             @RequestParam(value = "tab") String tab,
-                                                                             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                             @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+                                                                                @RequestParam(value = "workflowId",required = false) Long workflowId,
+                                                                                @RequestParam(value = "authorizeId",required = false) Long authorizeId,
+                                                                                @RequestParam(value = "agentId",required = false) Long agentId,
+                                                                                @RequestParam(value = "startDate",required = false) String startDate,
+                                                                                @RequestParam(value = "endDate",required = false) String endDate,
+                                                                                @RequestParam(value = "authorizationNotes",required = false) String authorizationNotes,
+                                                                                @RequestParam(value = "tab") String tab,
+                                                                                @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                @RequestParam(value = "size", required = false, defaultValue = "10") int size){
         Page mybaitsPage = PageUtil.getPage(page,size);
         List<WorkflowTransferDTO> workflowTransferList = workflowTransferService.pageWorkflowTransferByCond(documentCategory,workflowId,authorizeId,agentId,startDate,endDate,authorizationNotes,tab,mybaitsPage);
         HttpHeaders headers = PageUtil.getTotalHeader(mybaitsPage);

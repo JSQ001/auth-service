@@ -55,10 +55,10 @@ public class WorkFlowApprovalService {
 
     public Map<String, Set<UUID>> getRuleApproverUserOIDs(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
         return defaultWorkflowIntegrationService.getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(),
-                droolsRuleApprovalNodeDTO.getFormValues(),
-                droolsRuleApprovalNodeDTO.getApplicantOid(),
-                droolsRuleApprovalNodeDTO.getRuleApprovalNodeOid(),
-                droolsRuleApprovalNodeDTO);
+                        droolsRuleApprovalNodeDTO.getFormValues(),
+                        droolsRuleApprovalNodeDTO.getApplicantOid(),
+                        droolsRuleApprovalNodeDTO.getRuleApprovalNodeOid(),
+                        droolsRuleApprovalNodeDTO);
     }
 
 
@@ -243,6 +243,9 @@ public class WorkFlowApprovalService {
             if (workFlowDocumentRef.getSubmitDate() != null) {
                 workFlowDocumentRefDTO.setSubmittedDate(workFlowDocumentRef.getSubmitDate());
             }
+            if (workFlowDocumentRef.getDocumentOid() != null) {
+                workFlowDocumentRefDTO.setEntityOid(workFlowDocumentRef.getDocumentOid());
+            }
             list.add(workFlowDocumentRefDTO);
         }
 
@@ -324,7 +327,6 @@ public class WorkFlowApprovalService {
      */
     public List<WorkFlowDocumentRefDTO> listMyDocumentDetail(Integer tabNumber,Integer documentCategory, Long documentTypeId, String applicantName, ZonedDateTime beginDate, ZonedDateTime endDate, Double amountFrom, Double amountTo, UUID lastApproverOid, String approvalNodeName, String remark, String documentNumber, Page mybatisPage){
         List<WorkFlowDocumentRefDTO> list = new ArrayList<>();
-        List<Integer> statusList = new ArrayList<>();
         List<WorkFlowDocumentRef> workFlowDocumentRefList = null;
         Map<String, String> categoryMap = new HashMap<String, String>();
 
@@ -332,28 +334,6 @@ public class WorkFlowApprovalService {
         for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
             categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
         }
-        if(tabNumber == 1){
-            statusList.add(DocumentOperationEnum.APPROVAL_REJECT.getId());//1005审批驳回
-            statusList.add(2001);//2001审核驳回
-            workFlowDocumentRefList = workFlowDocumentRefMapper.selectPage(mybatisPage,
-                    new EntityWrapper<WorkFlowDocumentRef>()
-                            .in(CollectionUtils.isNotEmpty(statusList), "status", statusList)
-                            .eq("applicant_oid", OrgInformationUtil.getCurrentUserOid())
-                            .eq(documentCategory != null, "document_category", documentCategory)
-                            .eq(documentTypeId != null, "document_type_id", documentTypeId)
-                            .like(applicantName != null, "applicant_name", applicantName)
-                            .ge(beginDate != null, "submit_date", beginDate)
-                            .le(endDate != null, "submit_date", endDate)
-                            .ge(amountFrom != null, "function_amount", amountFrom)
-                            .le(amountTo != null, "function_amount", amountTo)
-                            .eq(lastApproverOid != null, "last_approver_oid", lastApproverOid) //驳回人
-                            .like(approvalNodeName != null, "approval_node_name", approvalNodeName)
-                            .like(remark != null, "remark", remark)
-                            .like(documentNumber != null, "document_number", documentNumber)
-                            .orderBy("last_updated_date", true));
-        }else if(tabNumber == 2){
-            statusList.add(DocumentOperationEnum.APPROVAL.getId());//1002审批中
-            statusList.add(DocumentOperationEnum.APPROVAL_PASS.getId());//1004审批通过
 
             //审批节点名称模糊查询
             if (StringUtils.isNotEmpty(approvalNodeName)) {
@@ -370,9 +350,22 @@ public class WorkFlowApprovalService {
                 documentNumber = '%' + documentNumber + '%';
             }
 
-            workFlowDocumentRefList = workFlowDocumentRefMapper.getUnFinishedList(documentCategory,documentTypeId,applicantName,beginDate,endDate,amountFrom, amountTo,lastApproverOid,approvalNodeName,remark,documentNumber,OrgInformationUtil.getCurrentUserOid(),mybatisPage);
-        }
+        //申请人
+        UUID applicantOid = OrgInformationUtil.getCurrentUserOid();
 
+        //用于传递参数
+        WorkFlowDocumentRefDTO workFlowDocumentRefDTO = new WorkFlowDocumentRefDTO();
+        workFlowDocumentRefDTO.setDocumentCategory(documentCategory);
+        workFlowDocumentRefDTO.setDocumentTypeId(documentTypeId);
+        workFlowDocumentRefDTO.setApplicantName(applicantName);
+        workFlowDocumentRefDTO.setApproverOid(lastApproverOid);
+        workFlowDocumentRefDTO.setNodeName(approvalNodeName);
+        workFlowDocumentRefDTO.setRemark(remark);
+        workFlowDocumentRefDTO.setDocumentNumber(documentNumber);
+        workFlowDocumentRefDTO.setApplicantOid(applicantOid);
+
+        workFlowDocumentRefList = workFlowDocumentRefMapper
+        .getRejectORUnFinishedList(workFlowDocumentRefDTO,beginDate,endDate,amountFrom, amountTo,tabNumber,mybatisPage);
 
         //封装数据
         if(workFlowDocumentRefList.size() > 0){
@@ -389,6 +382,9 @@ public class WorkFlowApprovalService {
                 }
                 if (workFlowDocumentRef.getSubmitDate() != null) {
                     documentDTO.setSubmittedDate(workFlowDocumentRef.getSubmitDate());
+                }
+                if (workFlowDocumentRef.getDocumentOid() != null) {
+                    documentDTO.setEntityOid(workFlowDocumentRef.getDocumentOid());
                 }
 
                 if(tabNumber == 1) {

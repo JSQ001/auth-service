@@ -62,6 +62,9 @@ public class WorkFlowDocumentRefDTO {
     // 备注
     private String remark;
 
+    //对于被退回单据 approverOid指驳回人Oid  对于未完成单据 approverOid指当前审批人Oid
+    private UUID approverOid;
+
     //对于被退回单据 rejecterName指驳回人  对于未完成单据 rejecterName指当前审批人
     private String rejecterName;
 
@@ -76,5 +79,11 @@ public class WorkFlowDocumentRefDTO {
 
     //当前审批人名称
     private String approverName;
+
+    //表单Oid
+    private UUID formOid;
+
+    //单据类型ID
+    private Long documentTypeId;
 
 }

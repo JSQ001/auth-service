@@ -49,11 +49,7 @@
             </column>
         </createTable>
     </changeSet>
-    <!--此语句不兼容MySQL -->
-<!--    <changeSet id="201901211707001" author="shaofeng.zheng">
-        <dropNotNullConstraint tableName="sys_workflow_transfer" columnName="end_date"/>
-        <addNotNullConstraint tableName="sys_workflow_transfer" columnName="start_date"/>
-    </changeSet>-->
+
     <changeSet id="201901211707001" author="shaofeng.zheng">
         <dropNotNullConstraint tableName="sys_workflow_transfer" columnName="end_date" columnDataType="timestamp"/>
         <addNotNullConstraint tableName="sys_workflow_transfer" columnName="start_date" columnDataType="timestamp"/>

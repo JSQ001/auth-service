@@ -2,9 +2,9 @@ package com.hand.hcf.app.workflow.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.approval.service.ApprovalPassService;
-import com.hand.hcf.app.workflow.approval.service.ApprovalRejectService;
-import com.hand.hcf.app.workflow.approval.service.ApprovalWithdrawService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowPassService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowRejectService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowWithdrawService;
 import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalHistoryDTO;
@@ -50,13 +50,13 @@ public class WorkFlowApproveController {
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
-    private ApprovalPassService approvalPassService;
+    private WorkflowPassService approvalPassService;
 
     @Autowired
-    private ApprovalRejectService approvalRejectService;
+    private WorkflowRejectService approvalRejectService;
 
     @Autowired
-    private ApprovalWithdrawService approvalWithdrawService;
+    private WorkflowWithdrawService approvalWithdrawService;
 
     /**
      * @api {post} /pass    审批通过
@@ -70,7 +70,7 @@ public class WorkFlowApproveController {
      */
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
     public ResponseEntity passWorkflow(@Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
-        ApprovalResDTO approvalResDTO = approvalPassService.passWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO,approvalReqDTO.getFormOid());
+        ApprovalResDTO approvalResDTO = approvalPassService.passWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
 

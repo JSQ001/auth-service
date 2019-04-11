@@ -6,7 +6,7 @@ import com.hand.hcf.app.common.co.ApprovalHistoryCO;
 import com.hand.hcf.app.common.co.CommonApprovalHistoryCO;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
-import com.hand.hcf.app.workflow.approval.service.ApprovalSubmitService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowSubmitService;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.util.StringUtil;
@@ -42,7 +42,7 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
     private ApprovalHistoryService approvalHistoryService;
 
     @Autowired
-    private ApprovalSubmitService approvalSubmitService;
+    private WorkflowSubmitService approvalSubmitService;
 
     /*@Override*/
     public ApprovalHistoryCO saveHistory(@RequestBody CommonApprovalHistoryCO commonApprovalHistoryDTO) {
@@ -152,7 +152,8 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
      */
     /*@Override*/
     public String submitWorkflow(@RequestBody WorkFlowDocumentRefCO workFlowDocumentRefDTO) {
-        return approvalSubmitService.submitWorkflow(workFlowDocumentRefDTO);
+        //return approvalSubmitService.submitWorkflow(workFlowDocumentRefDTO);
+        return null;
     }
 
     /**

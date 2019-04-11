@@ -217,7 +217,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
         ruleApprovalNodeDTO.setRuleApproverMap(ruleApproverMap);
     }
 
-    private List<UUID> buildApproverByRule(RuleApprovalNodeDTO ruleApprovalNodeDTO, Map<String, Set<UUID>> ruleApproverMap, UUID applicantOid, List<UUID> approvers) {
+    public List<UUID> buildApproverByRule(RuleApprovalNodeDTO ruleApprovalNodeDTO, Map<String, Set<UUID>> ruleApproverMap, UUID applicantOid, List<UUID> approvers) {
         if (approvers != null) {
             approvers.remove(null);
         }
