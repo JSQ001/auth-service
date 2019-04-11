@@ -146,6 +146,7 @@
 
 
     <changeSet id="201811070949001" author="bin.xie">
+        <validCheckSum>8:9d82d5cb59a73bf00e2c437dd08599a9</validCheckSum>
         <createTable tableName="exp_expense_type_icon" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_art_expense_type_icon"/>
@@ -1384,7 +1385,9 @@
         </createTable>
     </changeSet>
 
+
     <changeSet id="201812111132001" author="bin.xie">
+        <validCheckSum>8:3f332f9f75d0304720362bfdfb1e4500</validCheckSum>
         <createTable tableName="exp_adjust_line_temp" remarks="费用调整单行导入临时表">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_adjust_line_temp"/>
@@ -2357,6 +2360,12 @@
         <addColumn tableName="exp_policy_field_property">
             <column name="date_time1" type="timestamp" remarks="日期字段1"></column>
             <column name="date_time2" type="timestamp" remarks="日期字段2"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904021751001" author="bin.xie">
+        <addColumn tableName="exp_application_line_dist">
+            <column name="line_id" type="bigint" remarks="行id"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -9,6 +9,7 @@ import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeRequestDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
+import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -721,8 +722,11 @@ public class ExpenseReportTypeController {
      * @apiDescription 根据报账单类型ID获取配置的部分费用类型
      * @apiGroup ExpenseReport
      * @apiParam (请求参数) {Long} expenseReportTypeId  报账单类型ID
-     * @apiParam (请求参数) {int} [name]  费用类型名称
-     * @apiParam (请求参数) {int} [code]  费用类型代码
+     * @apiParam (请求参数) {Long} employeeId  申请人ID
+     * @apiParam (请求参数) {Long} companyId   公司ID
+     * @apiParam (请求参数) {Long} departmentId  部门ID
+     * @apiParam (请求参数) {Long} typeCategoryId    单据大类ID
+     * @apiParam (请求参数) {Long} expenseTypeName  费用类型名称
      * @apiParam (请求参数) {int} [page]  页数
      * @apiParam (请求参数) {int} [size]  每页大小
      * @apiSuccess (返回参数) {Long} id  主键id
@@ -778,12 +782,15 @@ public class ExpenseReportTypeController {
      */
     @GetMapping("/section/expense/type")
     public ResponseEntity<List<ExpenseType>> getExpenseTypesById(@RequestParam("expenseReportTypeId") Long expenseReportTypeId,
-                                                                 @RequestParam(value = "code",required = false) String code,
-                                                                 @RequestParam(value = "name",required = false) String name,
+                                                                 @RequestParam("employeeId") Long employeeId,
+                                                                 @RequestParam("companyId") Long companyId,
+                                                                 @RequestParam("departmentId") Long departmentId,
+                                                                 @RequestParam(value = "typeCategoryId",required = false) Long typeCategoryId,
+                                                                 @RequestParam(value = "expenseTypeName", required = false) String expenseTypeName,
                                                                  Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        List<ExpenseType> expenseReportTypeExpenseType =
-                expenseReportTypeService.getExpenseReportTypeExpenseType(expenseReportTypeId,code,name, page);
+        List<ExpenseTypeWebDTO> expenseReportTypeExpenseType =
+                expenseReportTypeService.getExpenseReportTypeExpenseType(expenseReportTypeId,employeeId,companyId, departmentId, typeCategoryId, expenseTypeName, page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity(expenseReportTypeExpenseType,totalHeader,HttpStatus.OK);
     }
@@ -868,15 +875,15 @@ public class ExpenseReportTypeController {
 
     /**
      *
-     * @api {GET} /api/expense/report/type/users/{expenseReportTypeId} 【报账单】根据单据类型id查询有该单据权限的用户
+     * @api {GET} /api/expense/report/type/users 【报账单】根据单据类型id查询有该单据权限的用户
      * @apiDescription 根据单据类型id查询有该单据权限的用户
      * @apiGroup ExpenseReport
      * @apiParam (请求参数) {Long} expenseReportTypeId  报账单类型ID
      */
-    @GetMapping("/users/{expenseReportTypeId}")
-    public ResponseEntity listUsersByApplicationType(@PathVariable("expenseReportTypeId") Long expenseReportTypeId,
-                                                     @RequestParam(required = false) String userCode,
-                                                     @RequestParam(required = false) String userName,
+    @GetMapping("/users")
+    public ResponseEntity listUsersByApplicationType(@RequestParam(value = "expenseReportTypeId") Long expenseReportTypeId,
+                                                     @RequestParam(value = "userCode", required = false) String userCode,
+                                                     @RequestParam(value = "userName", required = false) String userName,
                                                      @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);

@@ -28,6 +28,7 @@
         <result column="last_updated_by" property="lastUpdatedBy"/>
         <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
                 javaType="java.time.ZonedDateTime"/>
+        <result column="vendor_bank_status" property="vendorBankStatus"/>
     </resultMap>
 
 
@@ -42,6 +43,17 @@
         </if>
        ORDER BY avba.last_updated_date DESC
     </select>
+
+    <select id="selectVendorBankAccountsByVendorInfoIdAndStatusAndVendorBankStatus" resultMap="VendorBankAccountMap">
+        SELECT avba.*
+        FROM ven_vendor_bank_account avba
+        WHERE
+          avba.vendor_info_id = #{vendorInfoId}
+          AND avba.status = 1001
+          AND avba.vendor_bank_status = 'APPROVED'
+        ORDER BY avba.last_updated_date DESC
+    </select>
+
 
     <select id="selectVendorBankAccountsByConditions" resultMap="VendorBankAccountMap">
         SELECT avba.* FROM ven_vendor_bank_account avba

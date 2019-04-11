@@ -6,11 +6,12 @@ import com.hand.hcf.app.auth.service.AuthUserService;
 import com.hand.hcf.core.exception.core.UnauthenticatedException;
 import com.hand.hcf.core.security.domain.Authority;
 import com.hand.hcf.core.security.domain.PrincipalLite;
+import jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -21,13 +22,13 @@ import java.util.stream.Collectors;
 public class AccountResource {
     @Autowired
     private AuthUserService userService;
-    @RequestMapping(value = "/check_token", method = RequestMethod.GET)
+    @GetMapping(value = "/check_token")
     public PrincipalLite checkToken() {
         if (SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2Authentication) {
             OAuth2Authentication auth2Authentication = (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
             if (auth2Authentication.getUserAuthentication() != null) {
                 if (auth2Authentication.getPrincipal() instanceof Map) {
-                    System.out.println("map");
+                    Log.info("auth2Authentication is map");
                 }
                 return (PrincipalLite) auth2Authentication.getPrincipal();
             } else {

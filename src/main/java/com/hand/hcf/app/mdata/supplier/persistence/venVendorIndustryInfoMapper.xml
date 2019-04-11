@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.supplier.persistence.VenVendorIndustryInfoMapper">
+
+    <resultMap id="VendorTypeMap" type="com.hand.hcf.app.mdata.supplier.domain.VendorIndustryInfo">
+        <id column="id" property="id"/>
+        <result column="vendor_id" property="vendorId"/>
+        <result column="industry_id" property="industryId"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" jdbcType="TIMESTAMP" property="createdDate" javaType="java.time.ZonedDateTime"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
+                javaType="java.time.ZonedDateTime"/>
+    </resultMap>
+    <select id="selectVenVendorIndustryInfoByVenderId" resultMap="VendorTypeMap">
+         SELECT * FROM ven_vendor_industry_info t where 1=1
+      <if test="vendorId != null">
+          and t.vendor_id =#{vendorId}
+      </if>
+        <if test="industryId != null">
+            and t.industry_id = #{industryId}
+        </if>
+
+    </select>
+    <delete id="deleteVenVendorIndustryInfoByVenderId">
+        delete from ven_vendor_industry_info t
+        <if test="vendorId != null">
+            where t.vendor_id =#{vendorId}
+        </if>
+    </delete>
+</mapper>

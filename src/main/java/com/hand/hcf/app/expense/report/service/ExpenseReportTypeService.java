@@ -15,10 +15,12 @@ import com.hand.hcf.app.expense.report.dto.DepartmentOrUserGroupDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeRequestDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
+import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
+import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import com.hand.hcf.core.domain.SystemCustomEnumerationType;
@@ -677,32 +679,32 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
      * @param typeId
      * @param page
      */
-    public List<ExpenseType> getExpenseReportTypeExpenseType(Long typeId,
-                                                             String code,
-                                                             String name,
-                                                             Page page){
+    public List<ExpenseTypeWebDTO> getExpenseReportTypeExpenseType(Long typeId,
+                                                                   Long employeeId,
+                                                                   Long companyId,
+                                                                   Long departmentId,
+                                                                   Long categoryId,
+                                                                   String expenseTypeName,
+                                                                   Page page){
         ExpenseReportType expenseReportType = selectById(typeId);
+        ExpenseBO expenseBO = new ExpenseBO();
+        expenseBO.setTypeFlag(1);
+        expenseBO.setSetOfBooksId(expenseReportType.getSetOfBooksId());
+        expenseBO.setCompanyId(companyId);
+        expenseBO.setDepartmentId(departmentId);
+        expenseBO.setEmployeeId(employeeId);
+        expenseBO.setCategoryId(categoryId);
+        expenseBO.setExpenseTypeName(expenseTypeName);
         if(BooleanUtils.isNotTrue(expenseReportType.getAllExpenseFlag())){
-            List<ExpenseReportTypeExpenseType> expenseTypes = expenseReportTypeExpenseTypeService.selectList(new EntityWrapper<ExpenseReportTypeExpenseType>()
+            List<ExpenseReportTypeExpenseType> expenseReportTypeExpenseTypes = expenseReportTypeExpenseTypeService.selectList(new EntityWrapper<ExpenseReportTypeExpenseType>()
                     .eq("report_type_id", typeId));
-            List<Long> collect = expenseTypes.stream().map(e -> e.getExpenseTypeId()).collect(toList());
-            return expenseTypeService.selectPage(page,new EntityWrapper<ExpenseType>()
-                    .in("id",collect)
-                    .like(StringUtils.isNotEmpty(code),"code",code)
-                    .like(StringUtils.isNotEmpty(name),"name",name)
-                    .eq("enabled",true)
-                    .orderBy("sequence")).getRecords();
+            List<Long> collect = expenseReportTypeExpenseTypes.stream().map(e -> e.getExpenseTypeId()).collect(toList());
+            expenseBO.setAllFlag(false);
+            expenseBO.setAssignTypeIds(collect);
         }else{
-            return expenseTypeService.queryLovByDocumentTypeAssign(expenseReportType.getSetOfBooksId(),
-                    "all",
-                    ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(),
-                    expenseReportType.getId(),
-                    code,
-                    name,
-                    null,
-                    1,
-                    page);
+            expenseBO.setAllFlag(true);
         }
+        return expenseTypeService.lovExpenseType(expenseBO,page);
     }
 
     /**

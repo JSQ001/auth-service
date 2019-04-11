@@ -45,4 +45,13 @@ public class FunctionPageDTO {
     //页面地址
     private String pageUrl;
 
+    /**
+     * 全路由
+     */
+    private String fullRouter;
+
+    private Long contentId;
+
+    private String fullUrl;
+
 }

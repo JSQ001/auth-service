@@ -98,4 +98,28 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201903271644001" author="hws">
+        <dropNotNullConstraint tableName="sys_rule_scene" columnName="company_oid" columnDataType="varchar(36)"/>
+        <dropNotNullConstraint tableName="sys_rule_approval_chain" columnName="company_oid" columnDataType="varchar(36)"/>
+        <dropNotNullConstraint tableName="sys_rule_condition" columnName="company_oid" columnDataType="varchar(36)"/>
+    </changeSet>
+
+    <changeSet id="201903271644002" author="hws">
+        <dropColumn tableName="sys_rule_scene" columnName="company_oid"/>
+        <dropColumn tableName="sys_rule_approval_chain" columnName="company_oid"/>
+        <dropColumn tableName="sys_rule_condition" columnName="company_oid"/>
+    </changeSet>
+
+
+    <changeSet id="201903271644003" author="hws">
+        <dropUniqueConstraint tableName="sys_approval_form" constraintName="idx_sys_custom_form_u1"/>
+        <addUniqueConstraint tableName="sys_approval_form" columnNames="form_name" constraintName="idx_sys_approval_form_u1"/>
+        <dropColumn tableName="sys_approval_form" columnName="company_id"/>
+        <dropColumn tableName="sys_approval_form" columnName="set_of_books_id"/>
+        <dropColumn tableName="sys_approval_form" columnName="visible_company_scope"/>
+        <dropColumn tableName="sys_approval_form" columnName="visible_user_scope"/>
+        <dropColumn tableName="sys_approval_form" columnName="visible_expense_type_scope"/>
+        <dropColumn tableName="sys_approval_form" columnName="expense_type_check_status"/>
+    </changeSet>
+
 </databaseChangeLog>

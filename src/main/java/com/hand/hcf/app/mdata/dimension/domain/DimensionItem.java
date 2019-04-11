@@ -33,4 +33,10 @@ public class DimensionItem extends DomainI18nEnable {
     @TableField(value = "end_date",strategy = FieldStrategy.IGNORED)
     private ZonedDateTime endDate;
 
+    /**
+     * 分配全部公司标识
+     */
+    @TableField(value = "all_company_flag")
+    private Boolean allCompanyFlag;
+
 }

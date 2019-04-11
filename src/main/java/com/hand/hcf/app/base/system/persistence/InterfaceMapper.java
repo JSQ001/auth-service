@@ -26,5 +26,11 @@ public interface InterfaceMapper extends BaseMapper<Interface> {
      */
     List<InterfaceTreeDTO> getAllInterfaces();
 
+    /**
+     * 根据id查询接口
+     * @param id id
+     * @return Interface
+     */
+    Interface getById(@Param("id") Long id);
 
 }

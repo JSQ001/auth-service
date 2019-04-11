@@ -2760,33 +2760,6 @@
                              constraintName="uq_role_id_page_name98"/>
     </changeSet>
 
-
-
-
-    <changeSet id="201901102250002" author="bin.xie">
-        <comment>初始化值列表数据</comment>
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/csv/sys_code.csv"
-                  separator=","
-                  tableName="sys_code"/>
-
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/csv/sys_code_i18n.csv"
-                  separator=","
-                  tableName="sys_code_i18n"/>
-
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/csv/sys_code_value.csv"
-                  separator=","
-                  tableName="sys_code_value"/>
-
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/csv/sys_code_value_i18n.csv"
-                  separator=","
-                  tableName="sys_code_value_i18n"/>
-    </changeSet>
-
-
     <changeSet id="201901241504001" author="xue.han">
         <dropNotNullConstraint tableName="sys_data_auth_table_property" columnName="column_name" columnDataType="varchar(50)"/>
     </changeSet>

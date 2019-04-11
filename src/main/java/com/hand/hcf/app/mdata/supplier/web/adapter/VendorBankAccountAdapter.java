@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.supplier.web.adapter;
 
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
+import com.hand.hcf.app.mdata.supplier.service.dto.VendorBankAccountforStatusDTO;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -27,11 +28,11 @@ public class VendorBankAccountAdapter {
         return vendorBankAccount;
     }
 
-    public static VendorBankAccountCO vendorBankAccountToVendorBankAccountCO(VendorBankAccount vendorBankAccount) {
+    public static VendorBankAccountforStatusDTO vendorBankAccountToVendorBankAccountCO(VendorBankAccount vendorBankAccount) {
         if (vendorBankAccount == null) {
             return null;
         }
-        VendorBankAccountCO vendorBankAccountCO = new VendorBankAccountCO();
+        VendorBankAccountforStatusDTO vendorBankAccountCO = new VendorBankAccountforStatusDTO();
         BeanUtils.copyProperties(vendorBankAccount, vendorBankAccountCO);
         vendorBankAccountCO.setVenInfoId(vendorBankAccount.getVendorInfoId().toString());
         vendorBankAccountCO.setVenNickOid(vendorBankAccount.getVendorId());
@@ -44,6 +45,7 @@ public class VendorBankAccountAdapter {
         vendorBankAccountCO.setCreateTime(vendorBankAccount.getCreatedDate());
         vendorBankAccountCO.setUpdateTime(vendorBankAccount.getLastUpdatedDate());
         vendorBankAccountCO.setBankAddress(vendorBankAccount.getBankAddress());
+        vendorBankAccountCO.setVendorBankStatus(vendorBankAccount.getVendorBankStatus());
         return vendorBankAccountCO;
     }
 }

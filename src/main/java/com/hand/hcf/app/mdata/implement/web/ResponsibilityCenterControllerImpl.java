@@ -1,9 +1,13 @@
 package com.hand.hcf.app.mdata.implement.web;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
+import com.hand.hcf.app.common.co.ResponsibilityCenterGroupCO;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
+import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.DepartmentSobResponsibilityService;
+import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterGroupService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterService;
 import com.hand.hcf.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +37,9 @@ public class ResponsibilityCenterControllerImpl {
 
     @Autowired
     private DepartmentSobResponsibilityService departmentSobResponsibilityService;
+
+    @Autowired
+    private ResponsibilityCenterGroupService resCenterGroupService;
     /**
      * 根据责任中心id列表查询责任中心信息
      * @param setOfBooksId 账套id
@@ -178,8 +186,69 @@ public class ResponsibilityCenterControllerImpl {
      * @return
      */
     public List<ResponsibilityCenterCO> listResponsibilityCenterByGroupId(@PathVariable(value = "groupId")  Long groupId) {
-        List<ResponsibilityCenter> res = responsibilityCenterService.listResponsibilityCenterByGroupId(groupId);
+        List<ResponsibilityCenter> res = resCenterGroupService.listResponsibilityCenterByGroupId(groupId);
         return mapperFacade.mapAsList(res,ResponsibilityCenterCO.class);
+    }
+    /**
+     * 根据责任中心获取责任中心组 （预算模块）
+     * @param responsibilityCenterId 责任中心
+     * @return
+     */
+    //@Override
+    public List<ResponsibilityCenterGroupCO> listResponsibilityCenterGroupByResCenterId(@RequestParam(value = "responsibilityCenterId") Long responsibilityCenterId) {
+        List<ResponsibilityCenterGroup> responsibilityCenters =  resCenterGroupService.listResponsibilityCenterGroupByResCenterId(responsibilityCenterId);
+        return mapperFacade.mapAsList(responsibilityCenters,ResponsibilityCenterGroupCO.class);
+    }
+
+    /**
+     * 根据账套Id获取责任中心组及其关联责任中心信息
+     * @return
+     */
+    //@Override
+    public List<ResponsibilityCenterGroupCO> listResCenterGroupBySetOfBooksId() {
+        List<ResponsibilityCenterGroupCO> resCenterGroupCOS = new ArrayList<>();
+        List<ResponsibilityCenterGroup> resCenterGroups = resCenterGroupService.listResCenterGroupBySetOfBooksId();
+        resCenterGroups
+                .stream()
+                .forEach(resCenterGroup -> {
+           resCenterGroupCOS.add(resCenterGroupService.toCO(resCenterGroup));
+        });
+        return resCenterGroupCOS;
+    }
+
+    /**
+     * 根据责任中心组Ids责任中心组及其关联责任中心信息
+     * @param groupIds 责任中心组Ids
+     * @return
+     */
+    //@Override
+    public List<ResponsibilityCenterGroupCO> listResCenterGroupByIds(List<Long> groupIds) {
+        List<ResponsibilityCenterGroupCO> resCenterGroupCOS = new ArrayList<>();
+       List<ResponsibilityCenterGroup> resCenterGroups = resCenterGroupService.selectList(
+               new EntityWrapper<ResponsibilityCenterGroup>()
+                       .in("id",groupIds));
+       resCenterGroups
+               .stream()
+               .forEach(resCenterGroup -> {
+           resCenterGroupCOS.add(resCenterGroupService.toCO(resCenterGroup));
+       });
+        return resCenterGroupCOS;
+    }
+
+    /**
+     * 公司为空情况下获取默认责任中心
+     * @param tenantId 租户
+     * @param setOfBooksId 账套
+     * @param unitId 部门
+     * @param companyId 公司
+     * @return 默认责任中心
+     */
+    //@Override
+    public ResponsibilityCenterCO getDepartmentDefaultResponsibility(@RequestParam("tenantId") Long tenantId,
+                                                                     @RequestParam("setOfBooksId") Long setOfBooksId,
+                                                                     @RequestParam("unitId") Long unitId,
+                                                                     @RequestParam(value = "companyId", required = false) Long companyId) {
+        return departmentSobResponsibilityService.getDefaultResponsibilityCenterByUnit(tenantId, setOfBooksId, unitId, companyId);
     }
 
 }

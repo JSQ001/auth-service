@@ -80,6 +80,12 @@ public class ApplicationType extends DomainEnable {
 
     private String applyEmployee;
 
+    //是否可同时发起预付款标志（true：可发起，false：不可发起）
+    @TableField("pre_payment_flag")
+    private Boolean prePaymentFlag;
+
+
+
     public ApplicationType(String typeCode, Long setOfBooksId){
         this.setOfBooksId = setOfBooksId;
         this.typeCode = typeCode;

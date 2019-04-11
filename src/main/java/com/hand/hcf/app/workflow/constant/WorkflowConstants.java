@@ -16,7 +16,6 @@ public final class WorkflowConstants {
     public static final String WORKFLOW_APPROVAL_SPLIT = ":";
     public static final String WORKFLOW_COST_CENTER_ITEM_OID_KEY = "costCenterItemOid";
     public static final String WORKFLOW_DEPARTMENT_OID_KEY = "departmentOid";
-    public static final String WORKFLOW_COMPANY_OID_KEY = "companyOid";
     //workflow reimbursement
     public static final String WORKFLOW_NEXT_APPROVER_KEY = "nextApprover";
     public static final String WORKFLOW_APPLICANT_KEY = "applicant";

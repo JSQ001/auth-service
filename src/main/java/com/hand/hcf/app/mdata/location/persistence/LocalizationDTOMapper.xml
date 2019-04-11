@@ -20,7 +20,7 @@
         <if test="includeList != null and includeList != '' " >
             and l.code IN ( #{includeList} )
         </if>
-        ORDER BY nlssort(country,'NLS_SORT=SCHINESE_PINYIN_M')
+        ORDER BY /*nlssort(country,'NLS_SORT=SCHINESE_PINYIN_M')mysql不支持*/ CONVERT(country USING gbk ) COLLATE gbk_chinese_ci ASC
     </select>
 
     <select id="getLocalizationStateByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">

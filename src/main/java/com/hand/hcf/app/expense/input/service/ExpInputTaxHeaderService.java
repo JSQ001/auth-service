@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.input.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
@@ -12,8 +13,11 @@ import com.hand.hcf.app.expense.input.dto.ExpInputTaxHeaderDTO;
 import com.hand.hcf.app.expense.input.persistence.ExpInputTaxHeaderMapper;
 import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.core.domain.ExportConfig;
+import com.hand.hcf.core.handler.ExcelExportHandler;
 import com.hand.hcf.core.security.domain.PrincipalLite;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.service.ExcelExportService;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -43,7 +50,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
     private ExpInputTaxDistService expInputTaxDistService;
     @Autowired
     private OrganizationService organizationService;
-
+    @Autowired
+    private ExcelExportService excelExportService;
     @Autowired
     private MapperFacade mapperFacade;
 
@@ -69,7 +77,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         //设置 名称（公司，部门，员工）
         setDesc(headers);
         //设置 值列表的 name
-        for (ExpInputTaxHeaderDTO header : headers) {
+        setSysCodeValue(headers);
+       /* for (ExpInputTaxHeaderDTO header : headers) {
             SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue("transferType", header.getTransferType());
             if (sysCodeValueCO != null) {
                 header.setTransferTypeName(sysCodeValueCO.getName());
@@ -79,7 +88,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             if (sysCodeValueCO1 != null) {
                 header.setUseTypeName(sysCodeValueCO1.getName());
             }
-        }
+        }*/
 
         page.setRecords(headers);
         return page;
@@ -97,14 +106,15 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         header.setCompanyName(organizationService.getCompanyById(header.getCompanyId()).getName());
 
         //设置 值列表的 name
-        SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue("transferType", header.getTransferType());
+        setSysCodeValue(header);
+        /*SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue("transferType", header.getTransferType());
         if (sysCodeValueCO != null) {
             header.setTransferTypeName(sysCodeValueCO.getName());
         }
         SysCodeValueCO sysCodeValueCO1 = organizationService.getSysCodeValueByCodeAndValue("useType", header.getUseType());
         if (sysCodeValueCO1 != null) {
             header.setUseTypeName(sysCodeValueCO1.getName());
-        }
+        }*/
         return header;
     }
 
@@ -236,5 +246,156 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                 dto.setAttachments(attachments);
             }
         }
+    }
+
+    public List<ExpInputTaxHeaderDTO> queryExpInputFinance(Page page, Long companyId, Long unitId, Long applyId, Long status,
+                                                           String transferType, String useType, String currencyCode,
+                                                           BigDecimal amountFrom, BigDecimal amountTo, String reverseFlag, String remark,
+                                                           ZonedDateTime creatDateFrom, ZonedDateTime creatDateTo, ZonedDateTime auditDateFrom,
+                                                           ZonedDateTime auditDateTo, Long tenantId, String documentNumber) {
+
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId,unitId,applyId,status,transferType,useType,currencyCode,amountFrom,amountTo,
+                reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber);
+        List<ExpInputTaxHeaderDTO> expInputFinances=baseMapper.queryExpInputFinance(page,wrapper);
+        setDesc(expInputFinances);
+        setSysCodeValue(expInputFinances);
+        /*for (ExpInputTaxHeaderDTO header : expInputFinances) {
+            SysCodeValueCO sysCodeValueCO = getSysCodeValueByCodeAndValue("transferType",header.getTransferType());
+            if (sysCodeValueCO != null) {
+                header.setTransferTypeName(sysCodeValueCO.getName());
+            }
+
+            SysCodeValueCO sysCodeValueCO1 =getSysCodeValueByCodeAndValue("useType",header.getUseType());
+            if (sysCodeValueCO1 != null) {
+                header.setUseTypeName(sysCodeValueCO1.getName());
+            }
+        }*/
+        //setCompanyAndDepartmentAndEmployee1(expInputFinances);
+        return  expInputFinances;
+    }
+    //获取业务大类和用途类型值列表
+    public void setSysCodeValue(List<ExpInputTaxHeaderDTO> headerDTOS){
+        if(!CollectionUtils.isEmpty(headerDTOS)){
+            headerDTOS.stream().forEach(e->{
+                setSysCodeValue(e);
+            });
+        }
+    }
+    public void setSysCodeValue(ExpInputTaxHeaderDTO headerDTO){
+        if(headerDTO!=null){
+                SysCodeValueCO sysCodeValueCO = getSysCodeValueByCodeAndValue("transferType",headerDTO.getTransferType());
+                if (sysCodeValueCO != null) {
+                    headerDTO.setTransferTypeName(sysCodeValueCO.getName());
+                }
+
+                SysCodeValueCO sysCodeValueCO1 =getSysCodeValueByCodeAndValue("useType",headerDTO.getUseType());
+                if (sysCodeValueCO1 != null) {
+                    headerDTO.setUseTypeName(sysCodeValueCO1.getName());
+                }
+
+        }
+    }
+
+
+    //获取系统代码值列表
+    public SysCodeValueCO getSysCodeValueByCodeAndValue(String code,String type){
+        SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(code, type);
+
+        return sysCodeValueCO ;
+
+    }
+
+    public void exportFormExcel(Long companyId,
+                                Long unitId,
+                                Long applyId,
+                                Long status,
+                                String transferType,
+                                String useType,
+                                String currencyCode,
+                                BigDecimal amountFrom,
+                                BigDecimal amountTo,
+                                String reverseFlag,
+                                String remark,
+                                ZonedDateTime creatDateFrom,
+                                ZonedDateTime creatDateTo,
+                                ZonedDateTime auditDateFrom,
+                                ZonedDateTime auditDateTo,
+                                Long tenantId,
+                                String documentNumber,
+                                HttpServletResponse response,
+                                HttpServletRequest request,
+                                ExportConfig exportConfig)throws IOException {
+        //获取查询的Sql
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId,unitId,applyId,status,transferType,useType,currencyCode,amountFrom,amountTo,
+                reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber);
+        //获取 查询的总数
+        int total = baseMapper.getCountByCondition(wrapper);
+        int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
+        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpInputTaxHeaderDTO,ExpInputTaxHeaderDTO>(){
+            @Override
+            public int getTotal() {
+                return total;
+            }
+
+            @Override
+            public List<ExpInputTaxHeaderDTO> queryDataByPage(Page page) {
+                return ListExpInputTaxHeaderFianicen(page,wrapper);
+            }
+
+            @Override
+            public ExpInputTaxHeaderDTO toDTO(ExpInputTaxHeaderDTO t) {
+                return t;
+            }
+
+            @Override
+            public Class<ExpInputTaxHeaderDTO> getEntityClass() {
+                return ExpInputTaxHeaderDTO.class;
+            }
+        }, availProcessors, request, response);
+    }
+    public List<ExpInputTaxHeaderDTO> ListExpInputTaxHeaderFianicen(Page page,
+                                                                    Wrapper<ExpInputTaxHeader> wrapper){
+        List<ExpInputTaxHeaderDTO>headers = baseMapper.queryExpInputFinance(page,wrapper);
+        setDesc(headers);
+        setSysCodeValue(headers);
+        return headers;
+    }
+    public  Wrapper<ExpInputTaxHeader> getQueryExpInputFinance (Long companyId,
+                                                                Long unitId,
+                                                                Long applyId,
+                                                                Long status,
+                                                                String transferType,
+                                                                String useType,
+                                                                String currencyCode,
+                                                                BigDecimal amountFrom,
+                                                                BigDecimal amountTo,
+                                                                String reverseFlag,
+                                                                String remark,
+                                                                ZonedDateTime creatDateFrom,
+                                                                ZonedDateTime creatDateTo,
+                                                                ZonedDateTime auditDateFrom,
+                                                                ZonedDateTime auditDateTo,
+                                                                Long tenantId,
+                                                                String documentNumber){
+        Wrapper<ExpInputTaxHeader> wrapper = new EntityWrapper<ExpInputTaxHeader>()
+                .eq(companyId!=null,"t.company_id",companyId)
+                .eq(unitId!=null,"t.department_id",unitId)
+                .eq(applyId!=null,"t.applicant_id",applyId)
+                .eq(status!=null,"t.status",status)
+                .eq(StringUtils.hasText(transferType),"t.transfer_type",transferType)
+                .eq(StringUtils.hasText(useType),"t.use_type",useType)
+                .eq(StringUtils.hasText(currencyCode),"t.currency_code",currencyCode)
+                .gt(amountFrom!=null,"t.amount",amountFrom)
+                .lt(amountTo!=null,"t.amount",amountTo)
+                .eq(StringUtils.hasText(reverseFlag),"t.reverse_flag",reverseFlag)
+                .like(StringUtils.hasText(remark),"t.description",remark)
+                .gt(creatDateFrom!=null,"t.created_date",creatDateFrom)
+                .lt(creatDateTo!=null,"t.created_date",creatDateTo)
+                .gt(auditDateFrom!=null,"t.audit_date",auditDateFrom)
+                .lt(auditDateTo!=null,"t.audit_date",auditDateTo)
+                .eq(tenantId!=null,"t.tenant_id",tenantId)
+                .like(StringUtils.hasText(documentNumber),"t.document_number",documentNumber)
+                .orderBy("t.document_number",false);
+        return wrapper ;
     }
 }

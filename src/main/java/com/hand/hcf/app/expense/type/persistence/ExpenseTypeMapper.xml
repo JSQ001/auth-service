@@ -102,7 +102,149 @@
             </if>
         </where>
         order by et.code asc
-
-
     </select>
+    <select id="listByDocumentLov" resultMap="ExpenseTypeWebMap" parameterType="com.hand.hcf.app.expense.type.bo.ExpenseBO">
+        SELECT
+            temp.*
+        FROM
+            (SELECT
+                v.*,
+                0 AS user_group_flag,
+                NULL AS user_type_id
+            FROM
+                (SELECT
+                    *
+                FROM
+                    exp_expense_type t
+                WHERE
+                    t.set_of_books_id = #{setOfBooksId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_company ec
+                        WHERE
+                            ec.expense_type_id = t.id
+                            AND ec.company_id = #{companyId}
+                    )
+                UNION
+                ALL                 SELECT
+                    *
+                FROM
+                    exp_expense_type t
+                WHERE
+                    t.set_of_books_id = #{setOfBooksId}
+                    AND NOT EXISTS                  (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_company ec
+                        WHERE
+                            ec.expense_type_id = t.id
+                    )
+                ) v
+            WHERE
+                (
+                    EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_user eu
+                        WHERE
+                            eu.apply_type = '102'
+                            AND eu.expense_type_id = v.id
+                            AND eu.user_type_id = #{departmentId}
+                    )
+                    OR NOT EXISTS                 (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_user eu
+                        WHERE
+                            eu.expense_type_id = v.id
+                    )
+                )
+            UNION ALL
+            SELECT
+                v.*,
+                1 as user_group_flag,
+                eu.user_type_id
+            FROM
+                (SELECT
+                    *
+                FROM
+                    exp_expense_type t
+                WHERE
+                    t.set_of_books_id = #{setOfBooksId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_company ec
+                        WHERE
+                            ec.expense_type_id = t.id
+                            AND ec.company_id = #{companyId}
+                    )
+                UNION ALL
+                SELECT
+                    *
+                FROM
+                    exp_expense_type t
+                WHERE
+                    t.set_of_books_id = #{setOfBooksId}
+                    AND NOT EXISTS                  (
+                        SELECT
+                            1
+                        FROM
+                            exp_expense_type_company ec
+                        WHERE
+                            ec.expense_type_id = t.id
+                    )
+                ) v,                exp_expense_type_user eu
+            WHERE
+                v.id = eu.expense_type_id
+                AND eu.apply_type = '103'
+        ) temp
+        WHERE
+        temp.enabled = 1
+        AND temp.deleted = 0
+        AND temp.type_flag = #{typeFlag}
+        <if test="categoryId != null">
+            AND temp.type_category_id = #{categoryId}
+        </if>
+        <if test="expenseTypeName != null and expenseTypeName != ''">
+            AND temp.name like concat(concat('%', #{expenseTypeName}),'%')
+        </if>
+        <if test="allFlag != null and !allFlag">
+            <if test="assignTypeIds != null and assignTypeIds.size > 0">
+                AND temp.id in
+                <foreach collection="assignTypeIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </if>
+    </select>
+
+    <resultMap id="ExpenseTypeWebMap" type="com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO">
+        <id column="id" property="id" />
+        <result column="name" property="name"/>
+        <result property="iconUrl" column="icon_url"/>
+        <result property="code" column="code"/>
+        <result property="setOfBooksId" column="set_of_books_id"/>
+        <result property="typeCategoryId" column="type_category_id"/>
+        <result property="entryMode" column="entry_mode"/>
+        <result property="priceUnit" column="price_unit"/>
+        <result property="enabled" column="enabled"/>
+        <result property="sequence" column="sequence"/>
+        <result property="iconName" column="icon_name"/>
+        <result property="sourceTypeId" column="source_type_id"/>
+        <result property="applicationModel" column="application_model"/>
+        <result property="contrastSign" column="contrast_sign"/>
+        <result property="amount" column="amount"/>
+        <result property="travelTypeCode" column="travel_type_code"/>
+        <result property="userGroupFlag" column="user_group_flag"/>
+        <collection property="userGroupIds" ofType="java.lang.Long">
+            <result column="user_type_id"/>
+        </collection>
+    </resultMap>
 </mapper>

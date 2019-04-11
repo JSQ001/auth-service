@@ -7,10 +7,12 @@ import com.hand.hcf.app.common.co.DimensionCO;
 import com.hand.hcf.app.common.co.DimensionDetailCO;
 import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.common.enums.MdataRangeEnum;
+import com.hand.hcf.app.common.enums.RangeEnum;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItem;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemService;
 import com.hand.hcf.app.mdata.dimension.service.DimensionService;
+
 import com.hand.hcf.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
@@ -19,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -89,7 +91,7 @@ public class DimensionControllerImpl {
                         .eq(enabled != null, "enabled",enabled)
         );
         List<DimensionCO> dimensionCOList = new ArrayList<>();
-        dimensionList.stream().forEach(e -> {
+        dimensionList.forEach(e -> {
             DimensionCO dimensionCO = mapper.map(e, DimensionCO.class);
             dimensionCOList.add(dimensionCO);
         });
@@ -112,7 +114,7 @@ public class DimensionControllerImpl {
                         .in(ids != null && ids.size() > 0, "id", ids)
         );
         List<DimensionDetailCO> dimensionDetailCOList = new ArrayList<>();
-        dimensionList.stream().forEach(e -> {
+        dimensionList.forEach(e -> {
             DimensionDetailCO dimensionDetailCO = mapper.map(e, DimensionDetailCO.class);
 
             List<DimensionItem> dimensionItemList = dimensionItemService.selectList(
@@ -150,12 +152,12 @@ public class DimensionControllerImpl {
         Page myBatisPage = PageUtil.getPage(page, size);
         Wrapper wrapper = new EntityWrapper<Dimension>();
         if (range != null) {
-            if (range.equals(MdataRangeEnum.SELECTED.getId())) {
+            if (range.equals(RangeEnum.SELECTED.getId())) {
                 if(CollectionUtils.isEmpty(ids)){
                     return myBatisPage;
                 }
                 wrapper = wrapper.in("id", ids);
-            } else if (range.equals(MdataRangeEnum.UN_SELECTED.getId())) {
+            } else if (range.equals(RangeEnum.UN_SELECTED.getId())) {
                 wrapper = wrapper.notIn(ids != null, "id", ids);
             }
         }
@@ -259,7 +261,7 @@ public class DimensionControllerImpl {
         List<Dimension> dimensionList = dimensionService.listDimensionsByCompanyId(companyId);
 
         List<DimensionCO> dimensionCOList = new ArrayList<>();
-        dimensionList.stream().forEach(e -> {
+        dimensionList.forEach(e -> {
             DimensionCO dimensionCO = mapper.map(e, DimensionCO.class);
             dimensionCOList.add(dimensionCO);
         });
@@ -272,34 +274,37 @@ public class DimensionControllerImpl {
                                                                               @RequestParam(value = "enabled", required = false) Boolean enabled,
                                                                               @RequestBody(required = false) List<Long> ignoreIds) {
         List<Dimension> dimensionList = dimensionService.listDimensionsBySetOfBooksIdConditionByIgnoreIds(setOfBooksId,dimensionCode,dimensionName,enabled,ignoreIds);
-        List<DimensionCO> dimensionCOList = mapper.mapAsList(dimensionList,DimensionCO.class);
-        return dimensionCOList;
+        return mapper.mapAsList(dimensionList,DimensionCO.class);
     }
 
     public List<DimensionDetailCO> listDetailByIdsConditionCompanyId(@RequestBody List<Long> dimensionIds,
                                                                      @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                     @RequestParam(value = "companyId",required = false) Long companyId) {
-        return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId);
+                                                                     @RequestParam(value = "companyId") Long companyId,
+                                                                     @RequestParam(value = "unitId") Long unitId,
+                                                                     @RequestParam(value = "userId") Long userId) {
+        return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId, unitId, userId);
     }
 
-    //jiu.zhao 修改三方接口 20190329
-    public List<DimensionDetailCO> listDimensionsByIdsAndEnabled(List<Long> ids, Boolean enabled) {
-        List<DimensionDetailCO> dimensionDetailCOS = this.listDimensionsBySetOfBooksIdAndIdsAndEnabled((Long)null, enabled, ids);
-        return (List)(dimensionDetailCOS == null ? new ArrayList() : dimensionDetailCOS);
+   // @Override
+    public void proInsertDimensionItem(Long setOfBooksId,
+                                       String parameterCode,
+                                       String projectNumber,
+                                       String projectName,
+                                       String startDate,
+                                       String endDate,
+                                       Integer visibleUserScope,
+                                       List<Long> departmentOrUserGroupIdList) {
+        dimensionItemService.proInsertDimensionItem(setOfBooksId,parameterCode,projectNumber,projectName,startDate,endDate,visibleUserScope,departmentOrUserGroupIdList);
     }
 
-    public List<DimensionCO> listDimensionBySetOfBooksIdAndEnabled(Long setOfBooksId, Boolean enabled) {
-        List<DimensionCO> dimensionCOList = this.listDimensionsBySetOfBooksIdAndEnabled(setOfBooksId, enabled);
-        return (List)(dimensionCOList == null ? new ArrayList() : dimensionCOList);
-    }
-
-    public DimensionCO getDimensionById(Long dimensionId) {
-        List<DimensionCO> dimensionCOList = this.listDimensionsByIds(Arrays.asList(dimensionId));
-        return dimensionCOList != null && dimensionCOList.size() > 0 ? (DimensionCO)dimensionCOList.get(0) : null;
-    }
-
-    public DimensionItemCO getDimensionItemById(Long dimensionItemId) {
-        List<DimensionItemCO> dimensionItemCOList = this.listDimensionItemsByIds(Arrays.asList(dimensionItemId));
-        return dimensionItemCOList != null && dimensionItemCOList.size() > 0 ? (DimensionItemCO)dimensionItemCOList.get(0) : null;
+   // @Override
+    public List<DimensionItemCO> listDimensionItemsByDimensionIdAndEnabledAndPermission(Long dimensionId, Boolean enabled, Long companyId, Long departmentId, Long userId) {
+        List<DimensionItem> dimensionItemList = dimensionItemService.listDimensionItemsByDimensionIdAndEnabledAndPermission(dimensionId,enabled,companyId,departmentId,userId);
+        List<DimensionItemCO> dimensionItemCOList = new ArrayList<>();
+        dimensionItemList.stream().forEach(e -> {
+            DimensionItemCO dimensionItemCO = mapper.map(e, DimensionItemCO.class);
+            dimensionItemCOList.add(dimensionItemCO);
+        });
+        return dimensionItemCOList;
     }
 }

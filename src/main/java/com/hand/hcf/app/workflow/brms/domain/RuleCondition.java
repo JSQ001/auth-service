@@ -24,7 +24,6 @@ public class RuleCondition extends Domain implements Serializable {
     @NotNull
     private UUID ruleConditionOid;
     private Integer status;
-    private UUID companyOid;
     private String code;
     private String name;
     private String remark;

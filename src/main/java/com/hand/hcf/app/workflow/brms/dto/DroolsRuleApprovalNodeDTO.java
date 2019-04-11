@@ -3,7 +3,7 @@ package com.hand.hcf.app.workflow.brms.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.hand.hcf.app.workflow.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

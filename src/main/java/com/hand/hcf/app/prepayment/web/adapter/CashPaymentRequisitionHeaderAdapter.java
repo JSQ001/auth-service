@@ -28,11 +28,11 @@ import java.util.List;
 public class CashPaymentRequisitionHeaderAdapter {
 
     @Autowired
-    private CashPaymentRequisitionLineService cashPaymentRequisitionLineService;
+    private  CashPaymentRequisitionLineService cashPaymentRequisitionLineService;
     @Autowired
-    private PrepaymentAttachmentService prepaymentAttachmentService;
+    private  PrepaymentAttachmentService prepaymentAttachmentService;
     @Autowired
-    private CashPayRequisitionTypeService cashPayRequisitionTypeService;
+    private  CashPayRequisitionTypeService cashPayRequisitionTypeService;
     @Autowired
     private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
 

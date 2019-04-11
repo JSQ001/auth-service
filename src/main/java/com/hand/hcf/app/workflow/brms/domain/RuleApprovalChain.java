@@ -25,7 +25,6 @@ public class RuleApprovalChain extends Domain {
     private UUID ruleApprovalChainOid;
     private Integer status;
     @NotNull
-    private UUID companyOid;
     private String code;
     private String name;
     private String remark;

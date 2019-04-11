@@ -165,6 +165,29 @@ public class SupplierImplementControllerImpl {
 
         return pageo;
     }
+
+    /**
+     * 根据租户id和供应商名称、供应商代码[模糊]分页查询供应商，包含银行账号信息
+     *
+     * @param tenantId
+     * @param venNickname
+     * @param vendorCode
+     * @param page
+     * @param size
+     * @return
+     * @throws URISyntaxException
+     */
+    //@Override
+    public Page<VendorInfoCO> pageVendorInfosByTenantIdAndNameAndCode(@RequestParam("tenantId") Long tenantId,
+                                                          @RequestParam(value = "venNickname", required = false) String venNickname,
+                                                          @RequestParam(value = "vendorCode",required = false) String vendorCode,
+                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        Page<VendorInfoCO> pageo = vendorInfoService.pageVendorInfosByTenantIdAndNameAndCode(tenantId,venNickname,vendorCode, page, size);
+
+        return pageo;
+    }
+
     /**
      * 根据公司id和供应商名称，代码[模糊]分页查询供应商，包含银行账号信息
      * 按代码升序

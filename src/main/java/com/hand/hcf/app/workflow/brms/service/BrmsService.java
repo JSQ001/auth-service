@@ -4,11 +4,11 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.brms.dto.*;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.util.RespCode;
-import com.hand.hcf.app.workflow.workflow.domain.ApprovalForm;
-import com.hand.hcf.app.workflow.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.workflow.enums.ApprovalMode;
-import com.hand.hcf.app.workflow.workflow.enums.FieldType;
-import com.hand.hcf.app.workflow.workflow.service.ApprovalFormService;
+import com.hand.hcf.app.workflow.domain.ApprovalForm;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.enums.FieldType;
+import com.hand.hcf.app.workflow.service.ApprovalFormService;
 import com.hand.hcf.core.exception.BizException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -109,7 +109,7 @@ public class BrmsService {
 
     @Transactional
     public RuleApprovalChainDTO changeApprovalMode(RuleApprovalChainDTO ruleApprovalChain) {
-        return ruleService.createRuleApprovalChain(ruleApprovalChain, OrgInformationUtil.getCurrentUserOid(), OrgInformationUtil.getCurrentCompanyOid());
+        return ruleService.createRuleApprovalChain(ruleApprovalChain);
     }
 
     /**
@@ -144,21 +144,15 @@ public class BrmsService {
      * 判断是否启用规则审批
      * 若不启用按原规则走
      *
-     * @param companyOid
      * @param formOid
      * @return
      */
-    public boolean isEnableRule(UUID companyOid, UUID formOid) {
+    public boolean isEnableRule( UUID formOid) {
         if (formOid == null) {
             return false;
         }
-       /* FunctionProfile functionProfile = functionProfileService.getFunctionProfileByCompanyOid(companyOid);
-        boolean enableRule = functionProfile.getProfileDetail().optBoolean(ProfileConstants.APPROVAL_RULE_ENABLED, false);
-        if (!enableRule) {
-            return false;
-        }*/
+
         ApprovalForm approvalForm = approvalFormService.getByOid(formOid);
-        //RuleApprovalChainDTO ruleApprovalChainDTO = this.getApprovalChain(formOid);
         return approvalForm != null && approvalForm.getApprovalMode() != null;
     }
 

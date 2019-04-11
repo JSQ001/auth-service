@@ -18,8 +18,8 @@ public interface PageListMapper extends BaseMapper<PageList>{
     /**
      * 根据功能id集合获取其所有的界面
      *
-     * @param functionIds
-     * @return
+     * @param roleIds 角色id集合
+     * @return List<FunctionPageDTO>
      */
-    List<FunctionPageDTO> listPageByFunctionIds(@Param("functionIds") List<Long> functionIds);
+    List<FunctionPageDTO> listPageByRoleIds(@Param("roleIds") List<Long> roleIds);
 }

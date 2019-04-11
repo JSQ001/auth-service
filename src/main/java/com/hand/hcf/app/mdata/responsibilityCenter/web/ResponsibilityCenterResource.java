@@ -127,9 +127,6 @@ public class ResponsibilityCenterResource {
      *   "enabled": null,
      *   "tenantId": "1",
      *   "setOfBooksId": "1",
-     *   "responsibilityCenterCode": "test",
-     *   "responsibilityCenterName": "测试",
-     *   "responsibilityCenterType": null
      *   },
      *   {
      *   "id": "1080290737754476545",
@@ -149,13 +146,13 @@ public class ResponsibilityCenterResource {
      */
     @RequestMapping(value = "/query", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ResponsibilityCenter>> pageResponsibilityCenterBySetOfBooksId(@RequestParam(value = "keyword",required = false) String keyword,
-                                                                                             @RequestParam(value="codeFrom",required = false) String codeFrom,
-                                                                                             @RequestParam(value = "codeTo",required = false) String codeTo,
-                                                                                             @RequestParam(value="setOfBooksId") Long setOfBooksId,
-                                                                                             @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
-                                                                                             @RequestParam(value = "responsibilityCenterName",required = false) String responsibilityCenterName,
-                                                                                             @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                                             Pageable pageable){
+                                                                                              @RequestParam(value="codeFrom",required = false) String codeFrom,
+                                                                                              @RequestParam(value = "codeTo",required = false) String codeTo,
+                                                                                              @RequestParam(value="setOfBooksId") Long setOfBooksId,
+                                                                                              @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
+                                                                                              @RequestParam(value = "responsibilityCenterName",required = false) String responsibilityCenterName,
+                                                                                              @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                              Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<ResponsibilityCenter> result = responsibilityCenterService.pageResponsibilityCenterBySetOfBooksId(keyword,codeFrom,codeTo,setOfBooksId,responsibilityCenterCode,responsibilityCenterName,enabled,page);
         HttpHeaders headers = new HttpHeaders();
@@ -195,20 +192,20 @@ public class ResponsibilityCenterResource {
             }
        ]
      */
-    @RequestMapping(value = "/query/default",method ={ RequestMethod.POST, RequestMethod.GET},produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ResponsibilityCenter>> pageDefaultResponsibilityCenter(@RequestParam(value="setOfBooksId",required = false) Long setOfBooksId,
-                                                                                      @RequestParam(required = false) Long companyId,
-                                                                                      @RequestParam(required = false) String info,
-                                                                                      @RequestParam(required = false) String codeFrom,
-                                                                                      @RequestParam(required = false) String codeTo,
-                                                                                      @RequestBody(required = false) List<Long> ids,
-                                                                                      @RequestParam(required = false,defaultValue ="true") Boolean enabled,
-                                                                                      Pageable pageable){
+    @RequestMapping(value = "/query/default",method ={ RequestMethod.POST,RequestMethod.GET},produces = MediaType.APPLICATION_JSON_VALUE)
+    public  ResponseEntity<List<ResponsibilityCenter>> pageDefaultResponsibilityCenter(@RequestParam(value="setOfBooksId",required = false) Long setOfBooksId,
+                                                                                       @RequestParam(required = false) Long companyId,
+                                                                                       @RequestParam(required = false) String info,
+                                                                                       @RequestParam(required = false) String codeFrom,
+                                                                                       @RequestParam(required = false) String codeTo,
+                                                                                       @RequestBody(required = false) List<Long> ids,
+                                                                                       @RequestParam(required = false,defaultValue ="true") Boolean enabled,
+                                                                                       Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<ResponsibilityCenter> result = responsibilityCenterService.pageDefaultResponsibilityCenter(setOfBooksId,companyId,info,codeFrom,codeTo,ids,enabled,page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
-        return new ResponseEntity<>(result.getRecords(),headers, HttpStatus.OK);
+        return new ResponseEntity<>(result.getRecords(),headers,HttpStatus.OK);
     }
 
 
@@ -248,9 +245,6 @@ public class ResponsibilityCenterResource {
      *   "enabled": null,
      *   "tenantId": "1",
      *   "setOfBooksId": "1",
-     *   "responsibilityCenterCode": "test",
-     *   "responsibilityCenterName": "测试",
-     *   "responsibilityCenterType": null
      *   },
      *   {
      *   "id": "1080290737754476545",
@@ -269,13 +263,13 @@ public class ResponsibilityCenterResource {
      *    ]
      */
     @RequestMapping(value = "/query/by/groupId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ResponsibilityCenter>> pageResponsibilityCenterBySetOfBooksIdAndGroupId(@RequestParam(value = "groupId")Long  groupId,
-                                                                                                       @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
-                                                                                                       @RequestParam(value="setOfBooksId") Long setOfBooksId,
-                                                                                                       @RequestParam(value = "responsibilityCenterName",required = false) String responsibilityCenterName,
-                                                                                                       @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                                                       @RequestParam(value = "range",required = false) String range,
-                                                                                                       Pageable pageable){
+    public  ResponseEntity<List<ResponsibilityCenter>> pageResponsibilityCenterBySetOfBooksIdAndGroupId(@RequestParam(value = "groupId")Long  groupId,
+                                                                                                         @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
+                                                                                                         @RequestParam(value="setOfBooksId") Long setOfBooksId,
+                                                                                                         @RequestParam(value = "responsibilityCenterName",required = false) String responsibilityCenterName,
+                                                                                                         @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                                         @RequestParam(value = "range",required = false) String range,
+                                                                                                         Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<ResponsibilityCenter> result = responsibilityCenterService.pageResponsibilityCenterBySetOfBooksIdAndGroupId(groupId,responsibilityCenterCode,setOfBooksId,responsibilityCenterName,enabled,range,page);
         int count = responsibilityCenterService.getResponsibilityCenterCountByGroupId(groupId);
@@ -557,7 +551,7 @@ public class ResponsibilityCenterResource {
      */
     @PostMapping(value = "/import",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, UUID>> importresponsibilityCenters(@RequestParam("file") MultipartFile file,
-                                                                         @RequestParam(value="setOfBooksId") Long setOfBooksId) throws Exception {
+                                                                          @RequestParam(value="setOfBooksId") Long setOfBooksId) throws Exception {
         try(InputStream in = file.getInputStream()) {
             UUID transactionOid = responsibilityCenterService.importResponsibilityCenters(in, setOfBooksId);
             Map<String, UUID> result = new HashMap<>();

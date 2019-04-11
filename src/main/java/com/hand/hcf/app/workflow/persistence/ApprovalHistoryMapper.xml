@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.workflow.persistence.ApprovalHistoryMapper">
+
+    <select id="checkAuditNotice" resultType="com.hand.hcf.app.workflow.dto.CheckAuditNoticeDTO">
+        SELECT entity_oid,MAX(id) as id from sys_approval_history WHERE entity_oid IN
+        <foreach collection="entityOids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <!--operation 3006-财务通知 8001-员工回复 1001-单据提交-->
+        and operation IN
+        <foreach collection="operations" item="operation" open="(" close=")" separator=",">
+            #{operation}
+        </foreach>
+        GROUP BY entity_oid
+    </select>
+
+    <select id="getApprovalHistoryByEntityOids" resultType="com.hand.hcf.app.workflow.domain.ApprovalHistory">
+        select a.* from
+            (select *
+                from sys_approval_history
+                where 1 = 1
+                <if test="entityOids !=null and entityOids.size > 0">
+                    and entity_oid IN
+                    <foreach collection="entityOids" item="entityOid" open="(" close=")" separator=",">
+                        #{entityOid}
+                    </foreach>
+                </if>
+                order by created_date desc
+            ) as a
+        group by entity_oid
+    </select>
+
+    <select id="getByEntityTypeAndEntityOidAndOperation" parameterType="java.util.Map" resultType="com.hand.hcf.app.workflow.domain.ApprovalHistory">
+        /*FORCE_MASTER*/SELECT
+         history.*
+        FROM sys_approval_history history ,sys_approval_chain chain
+        WHERE history.ref_approval_chain_id = chain.id
+        AND history.entity_type = #{entityType} AND history.entity_oid = #{entityOid}
+        AND history.operation =#{operation}
+        AND chain.all_finished = true
+    </select>
+
+    <select id="getByEntityTypeAndEntityOidAndOperationAndCountersignTypeIsNull" parameterType="java.util.Map" resultType="com.hand.hcf.app.workflow.domain.ApprovalHistory">
+        /*FORCE_MASTER*/SELECT
+        history.*
+        FROM sys_approval_history history ,sys_approval_chain chain
+        WHERE history.ref_approval_chain_id = chain.id
+        AND history.entity_type = #{entityType} AND history.entity_oid = #{entityOid}
+        AND history.operation =#{operation}
+        AND history.countersign_type is null
+        AND chain.all_finished = true
+    </select>
+
+    <select id="getByEntityTypeAndEntityOidAndOperationAndCountersignTypeNotNull" parameterType="java.util.Map" resultType="com.hand.hcf.app.workflow.domain.ApprovalHistory">
+        /*FORCE_MASTER*/SELECT
+        history.*
+        FROM sys_approval_history history ,sys_approval_chain chain
+        WHERE history.ref_approval_chain_id = chain.id
+        AND history.entity_type = #{entityType} AND history.entity_oid = #{entityOid}
+        AND history.operation =#{operation}
+        AND history.countersign_type is not null
+        AND chain.all_finished = true
+    </select>
+
+    <select id="findTopOneByEntityTypeAndEntityOidAndOperationOrderByIdDesc" parameterType="java.util.Map" resultType="com.hand.hcf.app.workflow.domain.ApprovalHistory">
+        /*FORCE_MASTER*/
+
+        select a.* from sys_approval_history a, (SELECT
+        max(created_date),
+        max(id) as id
+        FROM sys_approval_history
+        WHERE entity_type = #{entityType} AND entity_oid = #{entityOid}
+        AND operation =#{operation}) b
+        where a.id = b.id
+
+    </select>
+
+
+</mapper>

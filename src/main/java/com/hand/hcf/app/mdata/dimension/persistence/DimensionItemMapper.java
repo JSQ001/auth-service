@@ -15,7 +15,7 @@ public interface DimensionItemMapper extends BaseMapper<DimensionItem> {
                                                                         Page page);
 
     /**
-     * ¸ù¾İÔ±¹¤²éÑ¯Î¬Öµ
+     * æ ¹æ®å‘˜å·¥æŸ¥è¯¢ç»´å€¼
      * @param contactId
      * @return
      */

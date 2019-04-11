@@ -34,9 +34,10 @@ import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
+
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.handler.ExcelExportHandler;

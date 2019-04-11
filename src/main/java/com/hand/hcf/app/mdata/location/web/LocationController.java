@@ -5,6 +5,7 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocationDetailService;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,8 +89,10 @@ public class LocationController {
     @GetMapping("/location/search/cities")
     public ResponseEntity<List<LocationInfoDTO>> queryCities(@RequestParam(required = false) String description,
                                                              @RequestParam(required = false) Long id,
-                                                             @RequestParam(required = false) String code){
-
-        return ResponseEntity.ok(locationDetailService.listCityByDescription(description, id, code));
+                                                             @RequestParam(required = false) String code,
+                                                             Pageable pageable){
+        com.baomidou.mybatisplus.plugins.Page page = PageUtil.getPage(pageable);
+        page.setSearchCount(false);
+        return ResponseEntity.ok(locationDetailService.listCityByDescription(description, id, code, page));
     }
 }

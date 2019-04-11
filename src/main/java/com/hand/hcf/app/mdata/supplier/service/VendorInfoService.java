@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.supplier.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
+
 import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.common.enums.SourceEnum;
 import com.hand.hcf.app.mdata.bank.domain.BankInfo;
@@ -14,10 +15,14 @@ import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
+import com.hand.hcf.app.mdata.supplier.domain.VendorIndustryInfo;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
 import com.hand.hcf.app.mdata.supplier.enums.StatusEnum;
+import com.hand.hcf.app.mdata.supplier.enums.VendorStatusEnum;
+import com.hand.hcf.app.mdata.supplier.persistence.VenVendorIndustryInfoMapper;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorBankAccountMapper;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorInfoMapper;
+import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
 import com.hand.hcf.app.mdata.supplier.web.adapter.VendorBankAccountAdapter;
 import com.hand.hcf.app.mdata.supplier.web.adapter.VendorInfoAdapter;
 import com.hand.hcf.app.mdata.supplier.web.dto.CompanyDTO;
@@ -73,6 +78,9 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
 
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private VenVendorIndustryInfoMapper venVendorIndustryInfoMapper;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendorInfoService.class);
 
@@ -91,7 +99,8 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
     private static final String SUCCEED = "0000";
 
 
-    public VendorInfoCO insertOrUpdateVendorInfo(VendorInfoCO vendorInfoCO, String roleType) {
+    public vendorInfoforStatusDTO insertOrUpdateVendorInfo(vendorInfoforStatusDTO vendorInfoCO, String roleType) {
+
         validateVendorInfoCO(vendorInfoCO);
         VendorInfo oldVendorInfo;
         if (vendorInfoCO.getId() != null) {
@@ -123,24 +132,34 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
             validateVendorInfoNameAndCode(vendorInfoCO, vendorInfoList, RespCode.SUPPLIER_NAME_EXISTS, RespCode.SUPPLIER_NAME_EXISTS_IN_COMPANY_OR_TENANT_LEVEL);
         }
 
-            VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(vendorInfoCO);
-            vendorInfo.setVendorCode(vendorInfoCO.getVenderCode());
-            vendorInfo.setLastUpdatedBy(OrgInformationUtil.getCurrentUserId());
-            if (vendorInfoCO.getId() != null) {
-                vendorInfo.setLastUpdatedDate(ZonedDateTime.now());
-                super.updateById(vendorInfo);
-            } else {
-                vendorInfo.setTenantId(tenantId);
-                vendorInfo.setCompanyOid(companyOid);
-                vendorInfo.setCreatedBy(vendorInfo.getLastUpdatedBy());
-                baseMapper.insert(vendorInfo);
+        VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(vendorInfoCO);
+        vendorInfo.setVendorCode(vendorInfoCO.getVenderCode());
+        vendorInfo.setVendorStatus(VendorStatusEnum.EDITOR.getVendorStatus());
+        if (vendorInfoCO.getId() != null) {
+           super.updateById(vendorInfo);
+        } else {
+            vendorInfo.setTenantId(tenantId);
+            vendorInfo.setCompanyOid(companyOid);
+            baseMapper.insert(vendorInfo);
+
+
+        }
+        venVendorIndustryInfoMapper.deleteVenVendorIndustryInfoByVenderId(vendorInfo.getId());
+        for (String industryId : vendorInfoCO.getVenVendorIndustryInfoList()) {
+            if(industryId != null && !"".equals(industryId)){
+                VendorIndustryInfo venVendorVndustryInfo = new VendorIndustryInfo();
+                venVendorVndustryInfo.setIndustryId(Long.valueOf(industryId));
+                venVendorVndustryInfo.setVendorId(vendorInfo.getId());
+
+                venVendorIndustryInfoMapper.insert(venVendorVndustryInfo);
             }
-        VendorInfoCO result = VendorInfoAdapter.vendorInfoToVendorInfoCO(baseMapper.selectById(vendorInfo.getId()));
+        }
+        vendorInfoforStatusDTO result = VendorInfoAdapter.vendorInfoToVendorInfoCO(baseMapper.selectById(vendorInfo.getId()));
         return result;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public Page<VendorInfoCO> searchVendorInfos(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
+    public Page<vendorInfoforStatusDTO> searchVendorInfos(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
         String companyOid = OrgInformationUtil.getCurrentCompanyOid().toString();
         String companyId = OrgInformationUtil.getCurrentCompanyId().toString();
         String tenantId = OrgInformationUtil.getCurrentTenantId().toString();
@@ -157,34 +176,49 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
             vendorInfos = baseMapper.selectVendorInfosByRelationCompanyForPage(venderTypeId, venderCode, venNickname, bankAccount, venType, companyId, companyOid, page);
         }
         page.setRecords(vendorInfos);
-        List<VendorInfoCO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
+        List<vendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(vendorInfoCOs)) {
-            for (VendorInfoCO vendorInfoCO : vendorInfoCOs) {
+            for (vendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
                 vendorInfoCO.setVenBankAccountBeans(
                         vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
                 );
+
+                List<VendorIndustryInfo> vendorIndustryInfoList = venVendorIndustryInfoMapper.selectVenVendorIndustryInfoByVenderId(vendorInfoCO.getId(), null);
+                List<String> venVenInduInfoList = new ArrayList<>();
+                for (VendorIndustryInfo info : vendorIndustryInfoList) {
+                    venVenInduInfoList.add(String.valueOf(info.getIndustryId()));
+                }
+                vendorInfoCO.setVenVendorIndustryInfoList(venVenInduInfoList);
+
             }
         }
-        Page<VendorInfoCO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
+        Page<vendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         result.setRecords(vendorInfoCOs);
         result.setTotal(page.getTotal());
         return result;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public VendorInfoCO searchVendorInfoByOne(Long id) {
-        VendorInfoCO vendorInfoCO ;
+    public vendorInfoforStatusDTO searchVendorInfoByOne(Long id) {
+        vendorInfoforStatusDTO vendorInfoCO;
         VendorInfo vendorInfo = baseMapper.selectById(id);
         if (vendorInfo == null) {
             throw new BizException(RespCode.SUPPLIER_NOT_EXISTS);
         } else {
             vendorInfoCO = VendorInfoAdapter.vendorInfoToVendorInfoCO(vendorInfo);
+
+            List<VendorIndustryInfo> vendorIndustryInfoList = venVendorIndustryInfoMapper.selectVenVendorIndustryInfoByVenderId(id, null);
+            List<String> venVenInduInfoList = new ArrayList<>();
+            for (VendorIndustryInfo info : vendorIndustryInfoList) {
+                venVenInduInfoList.add(String.valueOf(info.getIndustryId()));
+            }
+            vendorInfoCO.setVenVendorIndustryInfoList(venVenInduInfoList);
         }
         return vendorInfoCO;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public Page<VendorInfoCO> pageVendorInfos(String companyOid, Long companyId, Long tenantId, Long startDate, Long endDate, int page,int size) {
+    public Page<VendorInfoCO> pageVendorInfos(String companyOid, Long companyId, Long tenantId, Long startDate, Long endDate, int page, int size) {
         ZonedDateTime startDateTime = ZonedDateTime.of(LocalDateTime.ofEpochSecond(startDate / 1000, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
         ZonedDateTime endDateTime = ZonedDateTime.of(LocalDateTime.ofEpochSecond(endDate / 1000, 0, ZoneOffset.UTC), ZoneId.of("UTC"));
         Page<VendorInfo> pageo = new Page<>(page, size);
@@ -206,7 +240,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
             }
         }
 
-        Page<VendorInfoCO> result = new Page<>(page + 1,size);
+        Page<VendorInfoCO> result = new Page<>(page + 1, size);
         result.setRecords(vendorInfoCOs);
         result.setTotal(pageo.getTotal());
         return result;
@@ -356,7 +390,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
         return vendorInfoCO;
     }
 
-    public Page<VendorInfoCO> pageVendorInfosByConditions(Long companyId, String venNickname, int page,int size) {
+    public Page<VendorInfoCO> pageVendorInfosByConditions(Long companyId, String venNickname, int page, int size) {
         Page<VendorInfo> pageo = new Page<>(page + 1, size, "last_updated_date");
         pageo.setAsc(false);
         pageo.setRecords(baseMapper.selectVendorInfosByCompanyIdAndVendorNameForPage(companyId, MyStringUtils.formatFuzzyQuery(venNickname), pageo));
@@ -368,13 +402,31 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
                 );
             }
         }
-        Page<VendorInfoCO> result = new Page<>(page+ 1, size);
+        Page<VendorInfoCO> result = new Page<>(page + 1, size);
         result.setRecords(vendorInfoCOs);
         result.setTotal(pageo.getTotal());
         return result;
     }
 
-    public Page<VendorInfoCO> pageVendorInfosByConditions(Long companyId, String venNickname,String vendorCode, int page,int size) {
+    public Page<VendorInfoCO> pageVendorInfosByTenantIdAndNameAndCode(Long tenantId, String venNickname, String vendorCode,int page, int size) {
+        Page<VendorInfo> pageo = new Page<>(page + 1, size, "last_updated_date");
+        pageo.setAsc(false);
+        pageo.setRecords(baseMapper.selectVendorInfosByTenantIdAndVendorNameAndCodeForPage(tenantId, MyStringUtils.formatFuzzyQuery(venNickname),vendorCode, pageo));
+        List<VendorInfoCO> vendorInfoCOs = pageo.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(vendorInfoCOs)) {
+            for (VendorInfoCO vendorInfoCO : vendorInfoCOs) {
+                vendorInfoCO.setVenBankAccountBeans(
+                        vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
+                );
+            }
+        }
+        Page<VendorInfoCO> result = new Page<>(page + 1, size);
+        result.setRecords(vendorInfoCOs);
+        result.setTotal(pageo.getTotal());
+        return result;
+    }
+
+    public Page<VendorInfoCO> pageVendorInfosByConditions(Long companyId, String venNickname, String vendorCode, int page, int size) {
         Page<VendorInfo> pageo = new Page<>(page + 1, size, "last_updated_date");
         pageo.setAsc(false);
         pageo.setRecords(baseMapper.selectVendorInfosByCompanyIdAndVendorNameAndCodeForPage(companyId, MyStringUtils.formatFuzzyQuery(venNickname), MyStringUtils.formatFuzzyQuery(vendorCode), pageo));
@@ -386,14 +438,15 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
                 );
             }
         }
-        Page<VendorInfoCO> result = new Page<>(page+ 1, size);
+        Page<VendorInfoCO> result = new Page<>(page + 1, size);
         result.setRecords(vendorInfoCOs);
         result.setTotal(pageo.getTotal());
         return result;
     }
+
     public Page<VendorInfoCO> searchVendorInfosByPage(String venNickname, String userOid, Pageable pageable) {
         UserDTO userDTO = contactService.getUserDTOByUserOid(userOid);
-        Page<VendorInfo> page = new Page<>(pageable.getPageNumber()+1, pageable.getPageSize());
+        Page<VendorInfo> page = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         page.setRecords(baseMapper.selectVendorInfosByRelationCompanyForPage(null, null, MyStringUtils.formatFuzzyQuery(venNickname), null, null, userDTO.getCompanyId().toString(), userDTO.getCompanyOid().toString(), page));
         Page<VendorInfoCO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         result.setRecords(page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList()));
@@ -459,7 +512,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public VendorInfoCO searchVendorInfoAndBank(String vendorInfoId, String bankId) {
-        VendorInfoCO vendorInfoCO ;
+        VendorInfoCO vendorInfoCO;
         VendorInfo vendorInfo = baseMapper.selectById(vendorInfoId);
         if (vendorInfo == null) {
             throw new BizException(RespCode.SUPPLIER_NOT_EXISTS);
@@ -539,7 +592,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
                 }
                 vendorCode = orderNumberCO.getOrderNumber();
                 vendorInfos = baseMapper.selectVendorInfosByVendorCodeAndTenantId(vendorCode, tenantId);
-                count ++;
+                count++;
                 LOGGER.info("Get vendor code to artemis, vendorCode : {}, counts : {}", vendorCode, count);
             } while (!CollectionUtils.isEmpty(vendorInfos) && count < 3);
             if (!CollectionUtils.isEmpty(vendorInfos) && count >= 3) {
@@ -603,6 +656,57 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
                 throw new BizException(RespCode.SUPPLIER_NAME_EXISTS_IN_COMPANY_OR_TENANT_LEVEL);
             }
         }
+    }
+    public VendorInfoCO operationVendor(vendorInfoforStatusDTO vendorInfoCO, String roleType, String action) {
+        VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(vendorInfoCO);
+        String vendorStatus = vendorInfo.getVendorStatus();
+        //提交校验
+        if (action.equals(VendorStatusEnum.PENGDING.getVendorStatus())&&(vendorStatus.equals(VendorStatusEnum.PENGDING.getVendorStatus())||vendorStatus.equals(VendorStatusEnum.PENGDING.getVendorStatus()))){
+            throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
+        }
+        //APPROVED(审批通过)REFUSE(审批驳回)
+        if ((action.equals(VendorStatusEnum.APPROVED.getVendorStatus())||(action.equals(VendorStatusEnum.APPROVED.getVendorStatus()))&&(!vendorStatus.equals(VendorStatusEnum.APPROVED.getVendorStatus())))){
+            throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
+        }
+        vendorInfo.setVendorStatus(action);
+        vendorInfo.setLastUpdatedBy(vendorInfo.getLastUpdatedBy());
+        vendorInfo.setLastUpdatedDate(ZonedDateTime.now());
+        baseMapper.updateById(vendorInfo);
+     return vendorInfoCO;
+    }
+
+    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    public Page<vendorInfoforStatusDTO> searchVendorInfosforApproval(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
+        String companyOid = OrgInformationUtil.getCurrentCompanyOid().toString();
+        String companyId = OrgInformationUtil.getCurrentCompanyId().toString();
+        String tenantId = OrgInformationUtil.getCurrentTenantId().toString();
+        venderCode = MyStringUtils.formatFuzzyQuery(venderCode);
+        venNickname = MyStringUtils.formatFuzzyQuery(venNickname);
+        bankAccount = MyStringUtils.formatFuzzyQuery(bankAccount);
+        Page<VendorInfo> page = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
+        List<VendorInfo> vendorInfos;
+        vendorInfos = baseMapper.selectVendorInfosByPage(venderTypeId, venderCode, venNickname, bankAccount, venType, tenantId, page);
+        page.setRecords(vendorInfos);
+        List<vendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(vendorInfoCOs)) {
+            for (vendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
+                vendorInfoCO.setVenBankAccountBeans(
+                        vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
+                );
+
+                List<VendorIndustryInfo> vendorIndustryInfoList = venVendorIndustryInfoMapper.selectVenVendorIndustryInfoByVenderId(vendorInfoCO.getId(), null);
+                List<String> venVenInduInfoList = new ArrayList<>();
+                for (VendorIndustryInfo info : vendorIndustryInfoList) {
+                    venVenInduInfoList.add(String.valueOf(info.getIndustryId()));
+                }
+                vendorInfoCO.setVenVendorIndustryInfoList(venVenInduInfoList);
+
+            }
+        }
+        Page<vendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
+        result.setRecords(vendorInfoCOs);
+        result.setTotal(page.getTotal());
+        return result;
     }
     public List<ReceivablesDTO>  selectVendorInfosByCompanyIdAndVendorName(Long companyId, String venNickname){
         List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();

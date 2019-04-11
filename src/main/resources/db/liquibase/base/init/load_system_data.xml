@@ -14,29 +14,4 @@
         <comment>初始化admin角色信息</comment>
         <sqlFile path="classpath:db/liquibase/base/init/insert_system_data.sql" encoding="UTF-8"/>
     </changeSet>
-
-
-    <changeSet id="201801111527002" author="bin.xie">
-        <comment>初始化sys_role_menu</comment>
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/sys_role_menu.csv"
-                  separator="|"
-                  tableName="sys_role_menu"/>
-    </changeSet>
-
-    <changeSet id="201801111718001" author="bin.xie">
-        <comment>初始化sys_module</comment>
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/sys_module.csv"
-                  separator="|"
-                  tableName="sys_module"/>
-    </changeSet>
-
-    <changeSet id="201801111719001" author="bin.xie">
-        <comment>初始化sys_front_key</comment>
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/base/init/sys_front_key.csv"
-                  separator="|"
-                  tableName="sys_front_key"/>
-    </changeSet>
 </databaseChangeLog>

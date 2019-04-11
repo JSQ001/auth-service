@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.location.persistence.LocationLevelAssignMapper">
+    <!-- 根据地点级别id删除地点级别分配信息 -->
+    <delete id="deleteLocationLevelAssignByLevelId">
+        delete from sys_location_level_assign where level_id = #{levelId}
+    </delete>
+    <!-- 根据id删除地点级别分配信息 -->
+    <delete id="deleteLocationLevelAssignById">
+        delete from sys_location_level_assign where id = #{id}
+    </delete>
+
+    <select id="queryLocationLevelAssign" resultType="com.hand.hcf.app.mdata.location.domain.LocationLevelAssign">
+        select slla.id,
+                sl.code,
+                sld.description,
+                sl.type,
+                sl.country_code,
+                sld.country,
+                sl.state_code,
+                sld.state,
+                sl.city_code,
+                sld.city
+        from sys_location_level_assign slla
+        inner join sys_location sl on slla.location_id = sl.id
+        inner join sys_location_detail sld on sl.code = sld.code and sld.language = #{language}
+        where slla.level_id = #{levelId}
+        <if test="countryCode != null and countryCode != ''">
+            and sl.country_code = #{countryCode}
+        </if>
+        <if test="stateCode != null and stateCode != ''">
+            and sl.state_code = #{stateCode}
+        </if>
+        <if test="cityCode != null and cityCode != ''">
+            and sl.city_code = #{cityCode}
+        </if>
+        <if test="type != null and type != ''">
+            and sl.type = #{type}
+        </if>
+        <if test="code != null and code != ''">
+            and sl.code like concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != null and description != ''">
+            and sld.description like concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+</mapper>

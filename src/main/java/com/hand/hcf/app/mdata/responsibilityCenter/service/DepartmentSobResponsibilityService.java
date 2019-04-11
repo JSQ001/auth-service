@@ -4,6 +4,7 @@ package com.hand.hcf.app.mdata.responsibilityCenter.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
@@ -18,6 +19,7 @@ import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.service.MessageService;
+import com.hand.hcf.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DepartmentSobResponsibilityService extends BaseService<DepartmentSobResponsibilityMapper,DepartmentSobResponsibility> {
+public class DepartmentSobResponsibilityService extends BaseService<DepartmentSobResponsibilityMapper,DepartmentSobResponsibility>{
 
     @Autowired
     private DepartmentSobResponsibilityMapper departmentSobResMapper;
@@ -295,5 +297,33 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
         toDTO(departmentSobResDTO);
         return departmentSobResDTO;
 
+    }
+
+    /**
+     * 公司为空情况下获取部门默认责任中心
+     *
+     * @param tenantId 租户id
+     * @param setOfBooksId 账套id
+     * @param unitId 部门id
+     * @param companyId 公司id
+     * @return 默认责任中心
+     */
+    public ResponsibilityCenterCO getDefaultResponsibilityCenterByUnit(Long tenantId, Long setOfBooksId, Long unitId, Long companyId) {
+        List<DepartmentSobResponsibility> list = baseMapper.selectList(
+                new EntityWrapper<DepartmentSobResponsibility>().eq("tenant_id", tenantId)
+                        .eq("set_of_books_id", setOfBooksId)
+                        .eq("department_id", unitId)
+                        .eq(TypeConversionUtils.isNotEmpty(companyId), "company_id", companyId)
+        );
+        if (com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(list)) {
+            DepartmentSobResponsibility departmentSobResponsibility = list.get(0);
+            if (departmentSobResponsibility.getDefaultResponsibilityCenter() != null) {
+                return mapperFacade.map(responsibilityCenterService.selectById(departmentSobResponsibility.getDefaultResponsibilityCenter()), ResponsibilityCenterCO.class);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 }

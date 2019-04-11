@@ -3,8 +3,10 @@ package com.hand.hcf.app.mdata.location.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.dto.LocalizationDTO;
 import com.hand.hcf.app.common.dto.LocalizationStateDTO;
+import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocalizationDTOService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -203,5 +205,18 @@ public class LocalizationController {
         headers.add("X-Total-Count", "" + mybatisPage.getTotal());
         headers.add("Link","/api/localization/query/stateAndCity");
         return new ResponseEntity<>(cityList, headers, HttpStatus.OK);
+    }
+
+    /**
+     * @api {POST} /api/localization/city/ids 根据id集合查询城市
+     * @apiGroup Localization
+     */
+    @PostMapping("/localization/city/ids")
+    public List<LocationDTO> listLocalizationCityByIds(
+            @RequestBody List<Long> ids,
+            @RequestParam(value = "vendorType", defaultValue = "standard") String vendorType){
+
+        List<LocationDTO> cityList = localizationDTOService.listCityByIds(ids, vendorType);
+        return cityList;
     }
 }

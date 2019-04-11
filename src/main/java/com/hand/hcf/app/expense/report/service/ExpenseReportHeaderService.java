@@ -35,9 +35,9 @@ import com.hand.hcf.app.expense.type.domain.ExpenseDocumentField;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
+import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.redisLock.annotations.LockedObject;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
@@ -57,8 +57,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -216,8 +214,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             //收款方变更
             boolean accountChange = (!StringUtils.isEmpty(oldExpenseReportHeader.getAccountNumber()) &&
                     !oldExpenseReportHeader.getAccountNumber().equals(expenseReportDTO.getAccountNumber())) ||
-                    (!oldExpenseReportHeader.getPayeeCategory().equals(expenseReportDTO.getPayeeCategory())
-                    || !oldExpenseReportHeader.getPayeeId().equals(expenseReportDTO.getPayeeId()));
+                    (!(oldExpenseReportHeader.getPayeeCategory() == null ? "" : oldExpenseReportHeader.getPayeeCategory()).equals(expenseReportDTO.getPayeeCategory())
+                    || oldExpenseReportHeader.getPayeeId() != expenseReportDTO.getPayeeId());
             //合同变更
             boolean contractChange = (!StringUtils.isEmpty(oldExpenseReportHeader.getContractHeaderId()) &&
                     !oldExpenseReportHeader.getContractHeaderId().equals(expenseReportDTO.getContractHeaderId()))
@@ -415,15 +413,17 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @return
      */
     public BudgetCheckResultDTO checkBudget(ExpenseReportHeader expenseReportHeader,
-                                            boolean ignoreWarningFlag){
+                                            Boolean ignoreWarningFlag,
+                                            String expTaxDist){
         BudgetCheckMessageCO param = new BudgetCheckMessageCO();
         List<BudgetReserveCO> budgetReserveDtoList;
         List<ExpenseReportDist> expenseReportDistList = expenseReportDistService.selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_header_id", expenseReportHeader.getId()));
-        budgetReserveDtoList = expenseReportDistToBudgetReserveCO(expenseReportHeader,expenseReportDistList);
+        //jiu.zhao 预算
+        //budgetReserveDtoList = expenseReportDistToBudgetReserveCO(expenseReportHeader,expenseReportDistList, expTaxDist);
         param.setTenantId(expenseReportHeader.getTenantId());
         param.setSetOfBooksId(expenseReportHeader.getSetOfBooksId());
-        param.setBudgetReserveDtoList(budgetReserveDtoList);
-        param.setIgnoreWarningFlag(ignoreWarningFlag ? "Y" : "N");
+        //param.setBudgetReserveDtoList(budgetReserveDtoList);
+        param.setIgnoreWarningFlag(BooleanUtils.isTrue(ignoreWarningFlag) ? "Y" : "N");
         param.setIncludeReleaseFlag("Y");
         return commonService.checkBudget(param);
     }
@@ -433,10 +433,12 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param expenseReportDistList
      * @return
      */
-    private List<BudgetReserveCO> expenseReportDistToBudgetReserveCO(ExpenseReportHeader expenseReportHeader,List<ExpenseReportDist> expenseReportDistList){
+    //jiu.zhao 预算
+    /*private List<BudgetReserveCO> expenseReportDistToBudgetReserveCO(ExpenseReportHeader expenseReportHeader,
+                                                                     List<ExpenseReportDist> expenseReportDistList,
+                                                                     String expTaxDist){
         List<BudgetReserveCO> budgetReserveCOList = new ArrayList<>();
         for (ExpenseReportDist expenseReportDist : expenseReportDistList) {
-            ExpenseReportLine expenseReportLine = expenseReportLineService.selectById(expenseReportDist.getExpReportLineId());
             BudgetReserveCO budgetReserveCO = new BudgetReserveCO();
             budgetReserveCO.setCompanyId(expenseReportDist.getCompanyId());
             budgetReserveCO.setCompanyCode(organizationService.getCompanyById(expenseReportDist.getCompanyId()).getCompanyCode());
@@ -448,14 +450,23 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             budgetReserveCO.setDocumentLineId(expenseReportDist.getId());
             budgetReserveCO.setCurrency(expenseReportDist.getCurrencyCode());
             budgetReserveCO.setExchangeRate(expenseReportDist.getExchangeRate().doubleValue());
-            budgetReserveCO.setAmount(expenseReportDist.getAmount());
-            budgetReserveCO.setFunctionalAmount(expenseReportDist.getFunctionAmount());
-            budgetReserveCO.setQuantity(expenseReportLine.getQuantity() == null ? 1 : expenseReportLine.getQuantity());
-            budgetReserveCO.setUom(expenseReportLine.getUom());
+            if(ParameterConstant.TAX_IN.equals(expTaxDist)){
+                budgetReserveCO.setAmount(expenseReportDist.getAmount());
+                budgetReserveCO.setFunctionalAmount(expenseReportDist.getFunctionAmount());
+            }else if(ParameterConstant.TAX_OFF.equals(expTaxDist)){
+                budgetReserveCO.setAmount(expenseReportDist.getNoTaxDistAmount());
+                budgetReserveCO.setFunctionalAmount(expenseReportDist.getNoTaxDistFunctionAmount());
+            }
+            budgetReserveCO.setQuantity(1);
             budgetReserveCO.setUnitId(expenseReportDist.getDepartmentId());
             budgetReserveCO.setUnitCode(organizationService.getDepartmentById(expenseReportDist.getDepartmentId()).getDepartmentCode());
             budgetReserveCO.setEmployeeId(expenseReportHeader.getApplicantId());
             budgetReserveCO.setEmployeeCode(organizationService.getUserById(expenseReportHeader.getApplicantId()).getEmployeeCode());
+            if(expenseReportDist.getResponsibilityCenterId() != null){
+                budgetReserveCO.setResponsibilityCenterId(expenseReportDist.getResponsibilityCenterId());
+                budgetReserveCO.setResponsibilityCenterCode(
+                        organizationService.getResponsibilityCenterById(expenseReportDist.getResponsibilityCenterId()).getResponsibilityCenterCode());
+            }
             budgetReserveCO.setCreatedBy(expenseReportDist.getCreatedBy());
             DimensionUtils.setDimensionMessage(expenseReportDist,budgetReserveCO,organizationService,true,true,false);
             budgetReserveCO.setDocumentItemSourceType("EXPENSE_TYPE");
@@ -493,7 +504,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
 
         }
         return budgetReserveCOList;
-    }
+    }*/
 
     /**
      * 费用对接工作台
@@ -689,6 +700,10 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         ExpenseReportTypeDTO expenseReportType = expenseReportTypeService.getExpenseReportType(expenseReportHeader.getDocumentTypeId(), expenseReportHeader.getId());
         //计划付款行校验
         List<ExpenseReportPaymentSchedule> expenseReportPaymentSchedules = checkPaymentSchedule(expenseReportHeader);
+        //校验费用行及分摊行
+        checkExpenseReportLineAndDist(expenseReportHeader);
+        //关联申请单校验
+        checkReleaseRequisition(expenseReportHeader,expTaxDist);
         // 发送合同信息
         sendContract(expenseReportHeader,expenseReportPaymentSchedules);
         //核销记录生效
@@ -701,7 +716,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         if (expenseReportType.getBudgetFlag()) {
             // 只有当启用预算
             budgetCheckResultDTO = checkBudget(
-                    expenseReportHeader, ignoreWarningFlag);
+                    expenseReportHeader, ignoreWarningFlag, expTaxDist);
         } else {
             budgetCheckResultDTO = BudgetCheckResultDTO.ok();
         }
@@ -714,7 +729,29 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         return budgetCheckResultDTO;
     }
 
-    //校验关联申请单 ...
+    private void checkExpenseReportLineAndDist(ExpenseReportHeader expenseReportHeader){
+        List<ExpenseReportLine> expenseReportLines = expenseReportLineService.selectList(new EntityWrapper<ExpenseReportLine>().eq("exp_report_header_id", expenseReportHeader.getId()));
+        if(CollectionUtils.isEmpty(expenseReportLines)){
+            throw new BizException(RespCode.EXPENSE_REPORT_LINE_NOT_NULL);
+        }
+        expenseReportLines.stream().forEach(line -> {
+            List<ExpenseReportDist> expenseReportDists = expenseReportDistService.selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_line_id", line.getId()));
+            if(CollectionUtils.isEmpty(expenseReportDists)){
+                throw new BizException(RespCode.EXPENSE_REPORT_DIST_NOT_NULL);
+            }
+            BigDecimal reduce = expenseReportDists.stream().map(ExpenseReportDist::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal noTaxReduce = expenseReportDists.stream().map(ExpenseReportDist::getNoTaxDistAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            if(!reduce.equals(line.getAmount()) || !noTaxReduce.equals(line.getExpenseAmount())){
+                throw new BizException(RespCode.EXPENSE_REPORT_DIST_TOTAL_AMOUNT_ERROR);
+            }
+        });
+    }
+
+    /**
+     * 校验关联申请单
+     * @param expenseReportHeader
+     * @param expTaxDist          分摊方式
+     */
     private void checkReleaseRequisition(ExpenseReportHeader expenseReportHeader,
                                          String expTaxDist) {
         List<ExpenseReportDist> expenseReportDists = expenseReportDistService.selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_header_id", expenseReportHeader.getId()));
@@ -728,8 +765,19 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                             expenseReportDist.getSourceDocumentId(),
                             null,
                             expenseReportDist.getSourceDocumentDistId());
+
                     BigDecimal sumAmount = expenseRequisitionReleaseBySourceDocumentMsg.stream().map(m -> m.getAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                    sumAmount = sumAmount.add(expenseReportDist.getAmount());
+                    // 分摊行金额
+                    BigDecimal distAmount = null;
+                    BigDecimal distFunctionAmount = null;
+                    if(ParameterConstant.TAX_IN.equals(expTaxDist)){
+                        distAmount = expenseReportDist.getAmount();
+                        distFunctionAmount= expenseReportDist.getFunctionAmount();
+                    }else if(ParameterConstant.TAX_OFF.equals(expTaxDist)){
+                        distAmount = expenseReportDist.getNoTaxDistAmount();
+                        distFunctionAmount= expenseReportDist.getNoTaxDistFunctionAmount();
+                    }
+                    sumAmount = sumAmount.add(distAmount);
                     if(applicationLineDist.getAmount().compareTo(sumAmount) < 0){
                         throw new BizException(RespCode.EXPENSE_REPORT_LINE_AMOUNT_TOO_BIG);
                     }
@@ -745,8 +793,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                     release.setRelatedDocumentDistId(expenseReportDist.getId());
                     release.setCurrencyCode(expenseReportDist.getCurrencyCode());
                     release.setExchangeRate(expenseReportDist.getExchangeRate().doubleValue());
-                    release.setAmount(expenseReportDist.getAmount());
-                    release.setFunctionalAmount(expenseReportDist.getFunctionAmount());
+                    release.setAmount(distAmount);
+                    release.setFunctionalAmount(distFunctionAmount);
                     expenseRequisitionReleaseService.saveExpenseRequisitionRelease(release);
                 });
     }
@@ -933,6 +981,10 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             header.setStatus(DocumentOperationEnum.APPROVAL_PASS.getId());
             header.setAuditFlag("Y");
             header.setAuditDate(ZonedDateTime.now());
+            expenseReportLineService.updateExpenseReportLineAduitStatusByHeaderId(header.getId(),"Y",ZonedDateTime.now());
+            expenseReportDistService.updateExpenseReportDistAduitStatusByHeaderId(header.getId(),"Y",ZonedDateTime.now());
+            expenseReportTaxDistService.updateExpenseReportTaxDistAduitStatusByHeaderId(header.getId(),"Y",ZonedDateTime.now());
+            expenseReportPaymentScheduleService.updateExpenseReportScheduleAduitStatusByHeaderId(header.getId(),"Y",ZonedDateTime.now());
         }
         // 复核拒绝
         if(DocumentOperationEnum.AUDIT_REJECT.getId().equals(status)){

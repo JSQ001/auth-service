@@ -75,18 +75,15 @@ public class PageListController {
      * @param pageRouter
      * @param pageable
      * @return
-     * @throws URISyntaxException
      */
     @GetMapping("/query/by/cond")
     public ResponseEntity<List<PageList>> getPageListByCond(
             @RequestParam(value = "pageName",required = false)String pageName,
             @RequestParam(value = "pageRouter",required = false)String pageRouter,
-            Pageable pageable)throws URISyntaxException{
+            Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<PageList> result = pageListService.getPageListByCond(pageName,pageRouter,page);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", "" + result.getTotal());
-        headers.add("Link", "/api/page/list/query/by/cond");
+        HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
     }
 }

@@ -33,6 +33,7 @@
         <result column="last_updated_by" property="lastUpdatedBy"/>
         <result column="last_updated_date" jdbcType="TIMESTAMP" property="lastUpdatedDate"
                 javaType="java.time.ZonedDateTime"/>
+        <result column="vendor_status" property="vendorStatus"/>
     </resultMap>
 
 
@@ -54,6 +55,7 @@
         <if test="source == 'BILL' || source == 'COMPANY'">
             AND ((vvi.source IN ('BILL', 'COMPANY') AND vvi.company_oid = #{companyOid}) OR (vvi.source = 'TENANT'))
         </if>
+
         ORDER BY vvi.last_updated_date DESC
     </select>
 
@@ -80,6 +82,7 @@
             AND vvba.bank_account LIKE concat(concat('%',#{bankAccount}),'%')
             )
         </if>
+
         order by vvi.status,vvi.vendor_code
     </select>
 
@@ -139,7 +142,7 @@
         SELECT avin.* FROM ven_vendor_info avin
         WHERE avin.source IN ('BILL','COMPANY')
         <if test="venderCode != null">
-            AND avin.vendor_code  LIKE concat(concat('%',#{venderCode}),'%')
+            AND avin.vendor_code LIKE concat(concat('%',#{venderCode}),'%')
         </if>
         <if test="venNickname != null">
             AND avin.vendor_name LIKE concat(concat('%',#{venNickname}),'%')
@@ -171,7 +174,7 @@
     <select id="selectVendorInfosByCompanyIdAndVendorName" resultMap="VendorInfoMap">
         SELECT avi.* FROM ven_vendor_info avi
         INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
-        AND arvc.company_id = #{companyId}  AND arvc.enabled = 1
+        AND arvc.company_id = #{companyId} AND arvc.enabled = 1
         WHERE 1 = 1
         <if test="venNickname != null">
             AND avi.vendor_name like #{venNickname}
@@ -196,6 +199,38 @@
         INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
         AND arvc.company_id = #{companyId} AND arvc.enabled = 1
         WHERE 1 = 1
+        <if test="venNickname != null and venNickname != ''">
+            AND avi.vendor_name like concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="vendorCode != null and vendorCode != ''">
+            AND avi.vendor_code like concat(concat('%',#{vendorCode}),'%')
+        </if>
+        ORDER BY avi.vendor_code
+    </select>
+
+
+    <select id="selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
+        AND arvc.company_id = #{companyId}
+        AND arvc.enabled = 1
+        WHERE
+        avi.tenant_id = #{tenantId}
+        AND avi.status = 1001
+        AND avi.vendor_status = 'APPROVED'
+        <if test="venNickname != null and venNickname != ''">
+            AND avi.vendor_name like concat(concat('%',#{venNickname}),'%')
+        </if>
+        <if test="vendorCode != null and vendorCode != ''">
+            AND avi.vendor_code like concat(concat('%',#{vendorCode}),'%')
+        </if>
+        ORDER BY avi.vendor_code
+    </select>
+
+    <select id="selectVendorInfosByTenantIdAndVendorNameAndCodeForPage" resultMap="VendorInfoMap">
+        SELECT avi.* FROM ven_vendor_info avi
+        WHERE
+        avi.tenant_id = #{tenantId}
         <if test="venNickname != null and venNickname != ''">
             AND avi.vendor_name like concat(concat('%',#{venNickname}),'%')
         </if>
@@ -271,21 +306,42 @@
 
     <select id="selectVendorInfosByVendorCodeForArtemis" resultMap="VendorInfoMap">
         SELECT avi.* FROM ven_vendor_info avi
-        WHERE 1 = 1
-        <if test="tenantId != null">
-            AND avi.tenant_id = #{tenantId}
-        </if>
-        <if test="vendorCode != null">
-            AND avi.vendor_code = #{vendorCode}
-        </if>
-        <if test="source == 'TENANT'">
-            AND avi.source = 'TENANT'
-        </if>
-        <if test="source == 'BILL' || source == 'COMPANY'">
-            AND avi.source IN ('BILL', 'COMPANY') AND avi.company_oid = #{companyOid}
-        </if>
+        <where>
+            <if test="tenantId != null">
+                AND avi.tenant_id = #{tenantId}
+            </if>
+            <if test="vendorCode != null">
+                AND avi.vendor_code = #{vendorCode}
+            </if>
+            <if test="source == 'TENANT'">
+                AND avi.source = 'TENANT'
+            </if>
+            <if test="source == 'BILL' || source == 'COMPANY'">
+                AND avi.source IN ('BILL', 'COMPANY') AND avi.company_oid = #{companyOid}
+            </if>
+        </where>
         ORDER BY avi.last_updated_date DESC
     </select>
 
-
+    <select id="selectVendorInfoforApprovalByPage" resultMap="VendorInfoMap">
+        SELECT vvi.* FROM ven_vendor_info vvi
+        where (vvi.vendor_Status ='PENGDING'
+        or (select count(1) from ven_vendor_bank_account vba where vba.vendor_bank_status ='PENGDING' and vba.vendor_info_id =
+        vvi.id)> 0)
+        <if test="tenantId != null">
+            AND vvi.tenant_id = #{tenantId}
+        </if>
+        <if test="vendorName != null">
+            AND vvi.vendor_name = #{vendorName}
+        </if>
+        <if test="vendorCode != null">
+            AND vvi.vendor_code = #{vendorCode}
+        </if>
+        <if test="source == 'TENANT'">
+            AND vvi.source = 'TENANT'
+        </if>
+        <if test="source == 'BILL' || source == 'COMPANY'">
+            AND ((vvi.source IN ('BILL', 'COMPANY') AND vvi.company_oid = #{companyOid}) OR (vvi.source = 'TENANT'))
+        </if>
+    </select>
 </mapper>

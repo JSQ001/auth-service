@@ -25,10 +25,6 @@ public class RuleApprovalNodeDTO {
 
     private UUID ruleApprovalNodeOid;
 
-   /* @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
-    private ZonedDateTime createdDate;*/
-
     private Integer status;
 
     private UUID ruleApprovalChainOid;

@@ -7,7 +7,7 @@
 
     <select id="listLinesByHeaderId"
             resultType="com.hand.hcf.app.expense.application.domain.ApplicationLineDist">
-        select * from exp_application_line t where t.header_id = #{id}
+        select t.id as line_id, t.* from exp_application_line t where t.header_id = #{id}
     </select>
 
     <select id="selectByApplicationHeaderId" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationLineAbbreviateDTO" parameterType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderAbbreviateDTO">
@@ -57,6 +57,7 @@
         m.header_id = #{id}
         AND m.currency_code = #{currencyCode}
         and m.expense_type_id = #{expenseTypeId}
+        and (m.closed_flag is null or m.closed_flag = 1001)
         <!-- 分摊行金额 > 已报销金额 -->
         AND m.amount > (
         (SELECT

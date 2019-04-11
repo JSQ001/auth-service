@@ -13,7 +13,7 @@ import com.hand.hcf.app.workflow.brms.persistence.DroolsRuleDetailResultMapper;
 import com.hand.hcf.app.workflow.brms.util.event.Event;
 import com.hand.hcf.app.workflow.brms.util.event.RuleApproverEvent;
 import com.hand.hcf.app.workflow.brms.util.rule.RuleGenerator;
-import com.hand.hcf.app.workflow.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.core.exception.core.ValidationError;
 import com.hand.hcf.core.exception.core.ValidationException;
@@ -263,7 +263,7 @@ public class DroolsService {
 
         try {
             if (ruleApprovalNode.getNotifyInfo() != null) {
-                ObjectMapper mapper = new ObjectMapper();
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 ruleApprovalNodeDTO.setNotifyInfo(mapper.readValue(ruleApprovalNode.getNotifyInfo(), NotifyInfo.class));
             }
         } catch (Exception e) {

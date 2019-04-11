@@ -7,6 +7,7 @@ import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
 import com.hand.hcf.app.mdata.supplier.domain.VendorType;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorTypeMapper;
+import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +30,13 @@ public class VendorInfoAdapter {
 
     private static VendorInfoAdapter vendorInfoAdapter;
     @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
+    private  HcfOrganizationInterface hcfOrganizationInterface;
     @Autowired
     private ContactService contactService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendorInfoAdapter.class);
 
-    public VendorInfoAdapter(VendorTypeMapper vendorTypeMapper, HcfOrganizationInterface hcfOrganizationInterface){
+    public VendorInfoAdapter(VendorTypeMapper vendorTypeMapper,HcfOrganizationInterface hcfOrganizationInterface){
         this.vendorTypeMapper = vendorTypeMapper;
         this.hcfOrganizationInterface = hcfOrganizationInterface;
     }
@@ -66,12 +67,12 @@ public class VendorInfoAdapter {
         return vendorInfo;
     }
 
-    public static VendorInfoCO vendorInfoToVendorInfoCO(VendorInfo vendorInfo) {
+    public static vendorInfoforStatusDTO vendorInfoToVendorInfoCO(VendorInfo vendorInfo) {
         if (vendorInfo == null) {
             return null;
         }
         Long vendorTypeId = vendorInfo.getVendorTypeId();
-        VendorInfoCO vendorInfoCO = new VendorInfoCO();
+        vendorInfoforStatusDTO vendorInfoCO = new vendorInfoforStatusDTO();
         BeanUtils.copyProperties(vendorInfo, vendorInfoCO);
         vendorInfoCO.setVenNickOid(vendorInfo.getVendorCode());
         vendorInfoCO.setVenNickname(vendorInfo.getVendorName());
