@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.location.service;
 
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
@@ -87,11 +88,14 @@ public class LocationDetailService {
         return locationDetails;
     }
 
-    public List<LocationInfoDTO> listCityByDescription(String description, Long id, String code) {
+    public List<LocationInfoDTO> listCityByDescription(String description,
+                                                       Long id,
+                                                       String code,
+                                                       Page page) {
         String currentLanguage = OrgInformationUtil.getCurrentLanguage();
         if (!StringUtils.hasText(currentLanguage)){
             currentLanguage = LanguageEnum.ZH_CN.getKey();
         }
-        return locationDetailMapper.listCityByDescription(description, id, code, currentLanguage);
+        return locationDetailMapper.listCityByDescription(description, id, code, currentLanguage, page);
     }
 }

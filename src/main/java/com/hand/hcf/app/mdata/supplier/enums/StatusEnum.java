@@ -9,6 +9,7 @@ public enum StatusEnum {
 
     ENABLE(1001),
     DISABLE(1002);
+
     private Integer id;
 
     StatusEnum(Integer id) {
@@ -27,4 +28,5 @@ public enum StatusEnum {
     public Integer getId() {
         return this.id;
     }
+
 }

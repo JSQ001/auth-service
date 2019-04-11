@@ -68,15 +68,17 @@ public interface LocationDetailMapper extends BaseMapper<LocationDetail> {
                                                                     @Param("language") String language);
 
     /**
-     * ģ����ѯ�ص�
-     * @param description ����
+     * 模糊查询地点
+     * @param description 描述
      * @param id id
      * @param code code
-     * @param language ����
+     * @param language 语言
+     * @param rowBounds 分页参数
      * @return List<LocationInfoDTO>
      */
     List<LocationInfoDTO> listCityByDescription(@Param("description") String description,
                                                 @Param("id") Long id,
                                                 @Param("code") String code,
-                                                @Param("language") String language);
+                                                @Param("language") String language,
+                                                RowBounds rowBounds);
 }

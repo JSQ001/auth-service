@@ -11,6 +11,7 @@ import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
 import com.hand.hcf.app.mdata.supplier.enums.StatusEnum;
+import com.hand.hcf.app.mdata.supplier.enums.VendorStatusEnum;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorBankAccountMapper;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorInfoMapper;
 import com.hand.hcf.app.mdata.supplier.web.adapter.VendorBankAccountAdapter;
@@ -19,6 +20,7 @@ import com.hand.hcf.app.mdata.utils.MyStringUtils;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +64,7 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
             validateVendorBankAccountCO(vendorBankAccountCO);
             // 公司权限无法新增或修改租户级供应商下的银行账号信息
             if (!Constants.TENANT_LEVEL.equals(roleType) && SourceEnum.TENANT == vendorInfo.getSource()) {
-               throw new BizException(RespCode.SUPPLIER_LACK_OF_COMPANY_AUTHORITY_TO_UPDATE_ACCOUNT);
+                throw new BizException(RespCode.SUPPLIER_LACK_OF_COMPANY_AUTHORITY_TO_UPDATE_ACCOUNT);
             }
             Long currentUserId = OrgInformationUtil.getCurrentUserId();
             vendorBankAccountCO.setVenInfoName(vendorInfo.getVendorName());
@@ -78,8 +80,7 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
                         vendorBankAccountList.forEach(vendorBankAccount -> {
                             if (vendorBankAccountCO.getId() == null || !vendorBankAccount.getId().equals(vendorBankAccountCO.getId())) {
                                 vendorBankAccount.setPrimaryFlag(Boolean.FALSE);
-                                vendorBankAccount.setLastUpdatedBy(currentUserId);
-                                vendorBankAccount.setLastUpdatedDate(ZonedDateTime.now());
+                                vendorBankAccount.setVendorBankStatus(VendorStatusEnum.EDITOR.getVendorStatus());
                                 super.updateById(vendorBankAccount);
                             }
                         });
@@ -108,13 +109,13 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
                     super.updateById(vendorBankAccount);
                 }
                 result = VendorBankAccountAdapter.vendorBankAccountToVendorBankAccountCO(baseMapper.selectById(vendorBankAccount.getId()));
-            
+
             }
 
-            if ( result != null ) {
+            if (result != null) {
                 // 维护供应商银行账号信息成功后，需要同步供应商的最后修改人信息
-               // vendorInfo.setLastUpdatedByEmployeeId(vendorBankAccountCO.getVenOperatorNumber());
-               // vendorInfo.setLastUpdatedByName(vendorBankAccountCO.getVenOperatorName());
+                // vendorInfo.setLastUpdatedByEmployeeId(vendorBankAccountCO.getVenOperatorNumber());
+                // vendorInfo.setLastUpdatedByName(vendorBankAccountCO.getVenOperatorName());
                 vendorInfo.setLastUpdatedBy(currentUserId);
                 vendorInfo.setLastUpdatedDate(ZonedDateTime.now());
                 vendorInfoMapper.updateById(vendorInfo);
@@ -124,10 +125,10 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public Page<VendorBankAccountCO> searchVendorBankAccounts(String vendorInfoId,Integer status, Pageable pageable) {
+    public Page<VendorBankAccountCO> searchVendorBankAccounts(String vendorInfoId, Integer status, Pageable pageable) {
         Page<VendorBankAccount> page = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize(), "bank_code");
         page.setAsc(true);
-        page.setRecords(baseMapper.selectVendorBankAccountsByPages(vendorInfoId,status, page));
+        page.setRecords(baseMapper.selectVendorBankAccountsByPages(vendorInfoId, status, page));
         List<VendorBankAccountCO> vendorBankAccountCOs = page.getRecords().stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList());
         Page<VendorBankAccountCO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         result.setRecords(vendorBankAccountCOs);
@@ -142,7 +143,7 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
         if (vendorInfo == null) {
             throw new BizException(RespCode.SUPPLIER_NOT_EXIST);
         } else {
-            List<VendorBankAccount> vendorBankAccounts = baseMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoId);
+            List<VendorBankAccount> vendorBankAccounts = baseMapper.selectVendorBankAccountsByVendorInfoIdAndStatusAndVendorBankStatus(vendorInfoId);
             result = vendorBankAccounts.stream().map(vendorBankAccount -> {
                 VendorBankAccountCO vendorBankAccountCO = VendorBankAccountAdapter.vendorBankAccountToVendorBankAccountCO(vendorBankAccount);
                 vendorBankAccountCO.setVenInfoName(vendorInfo.getVendorName());
@@ -290,15 +291,15 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
     }
 
     /**
-     * 获取供应商银行信息
+     * 根据租户id和供应商名称,代码【模糊】分页查询 获取供应商银行信息
      * @param name
      * @param code
      * @param queryPage
      * @return
      */
-    public List<VendorAccountDTO> getReceivablesByNameAndCode(String name, String code, Page queryPage){
+    public List<VendorAccountDTO> getReceivablesByNameAndCode(String name, String code, Page queryPage) {
         List<VendorInfo> vendorInfos = vendorInfoMapper
-                .selectVendorInfosByCompanyIdAndVendorNameAndCodeForPage(OrgInformationUtil.getCurrentCompanyId(), name, code, queryPage);
+                .selectVendorInfosByTenantIdAndVendorNameAndCodeForPage(OrgInformationUtil.getCurrentTenantId(), name, code, queryPage);
         List<VendorAccountDTO> result = new ArrayList<>(32);
         vendorInfos.stream().forEach(vendorInfo -> {
             VendorAccountDTO vendorAccountDTO = new VendorAccountDTO();
@@ -306,7 +307,7 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
             vendorAccountDTO.setCode(vendorInfo.getVendorCode());
             vendorAccountDTO.setName(vendorInfo.getVendorName());
             vendorAccountDTO.setIsEmp(false);
-            vendorAccountDTO.setSign(vendorAccountDTO.getId()+"_"+vendorAccountDTO.getIsEmp());
+            vendorAccountDTO.setSign(vendorAccountDTO.getId() + "_" + vendorAccountDTO.getIsEmp());
             List<VendorBankAccount> vendorBankAccounts = vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfo.getId().toString());
             List<BankAccountDTO> bankInfos = vendorBankAccounts.stream().map(vendorBankAccount -> {
                 BankAccountDTO bankAccount = new BankAccountDTO();
@@ -322,5 +323,60 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
         });
 
         return result;
+    }
+
+    /**
+     * 查询某公司下的、启用状态为启用的、审核状态为审核通过的租户下的供应商
+     * @param companyId
+     * @param name
+     * @param code
+     * @param queryPage
+     * @return
+     */
+    public List<VendorAccountDTO> getVendorByCompanyIdAndNameAndCode(Long companyId,String name, String code, Page queryPage) {
+        List<VendorInfo> vendorInfos = vendorInfoMapper
+                .selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(OrgInformationUtil.getCurrentTenantId(),companyId, name, code, queryPage);
+        List<VendorAccountDTO> result = new ArrayList<>(32);
+        vendorInfos.stream().forEach(vendorInfo -> {
+            VendorAccountDTO vendorAccountDTO = new VendorAccountDTO();
+            vendorAccountDTO.setId(vendorInfo.getId());
+            vendorAccountDTO.setCode(vendorInfo.getVendorCode());
+            vendorAccountDTO.setName(vendorInfo.getVendorName());
+            vendorAccountDTO.setIsEmp(false);
+            vendorAccountDTO.setSign(vendorAccountDTO.getId() + "_" + vendorAccountDTO.getIsEmp());
+            List<VendorBankAccount> vendorBankAccounts = vendorBankAccountMapper.selectVendorBankAccountsByVendorInfoIdAndStatusAndVendorBankStatus(vendorInfo.getId().toString());
+            List<BankAccountDTO> bankInfos = vendorBankAccounts.stream().map(vendorBankAccount -> {
+                BankAccountDTO bankAccount = new BankAccountDTO();
+                bankAccount.setAccount(vendorBankAccount.getBankAccount());
+                bankAccount.setBankAccountName(vendorBankAccount.getVenBankNumberName());
+                bankAccount.setBankCode(vendorBankAccount.getBankCode());
+                bankAccount.setBankName(vendorBankAccount.getBankName());
+                bankAccount.setPrimary(vendorBankAccount.getPrimaryFlag());
+                return bankAccount;
+            }).collect(Collectors.toList());
+            vendorAccountDTO.setBankInfos(bankInfos);
+            result.add(vendorAccountDTO);
+        });
+
+        return result;
+    }
+
+
+
+    public VendorBankAccountCO operationVendor(VendorBankAccountCO vendorBankAccountCO, String roleType, String action) {
+        VendorBankAccount vendorBankAccount = VendorBankAccountAdapter.vendorBankAccountCOToVendorBankAccount(vendorBankAccountCO);
+        //提交校验
+        if (action.equals(VendorStatusEnum.PENGDING.getVendorStatus())&&(vendorBankAccount.equals(VendorStatusEnum.PENGDING.getVendorStatus())||vendorBankAccount.equals(VendorStatusEnum.PENGDING.getVendorStatus()))){
+            throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
+        }
+        //APPROVED(审批通过)REFUSE(审批驳回)
+        if ((action.equals(VendorStatusEnum.APPROVED.getVendorStatus())||(action.equals(VendorStatusEnum.APPROVED.getVendorStatus()))&&(!vendorBankAccount.equals(VendorStatusEnum.APPROVED.getVendorStatus())))){
+            throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
+        }
+        vendorBankAccount.setVendorBankStatus(action);
+        vendorBankAccount.setLastUpdatedBy(vendorBankAccount.getLastUpdatedBy());
+        vendorBankAccount.setLastUpdatedDate(ZonedDateTime.now());
+        baseMapper.updateById(vendorBankAccount);
+        return vendorBankAccountCO;
     }
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.mdata.location.persistence.LocationDTOMapper">
+
+    <select id="queryLocationByCondition" resultType="com.hand.hcf.app.mdata.location.dto.LocationDTO">
+        select sl.id location_id,
+                sl.code,
+                sld.description,
+                sl.type,
+                sl.country_code,
+                sld.country,
+                sl.state_code,
+                sld.state,
+                sl.city_code,
+                sld.city
+          from sys_location sl
+          left join sys_location_detail sld
+            on sl.code = sld.code
+           and sld.language = #{language}
+          where not exists (select 'X' from sys_location_level_assign slla where slla.location_id = sl.id)
+        <if test="countryCode != null and countryCode != ''">
+            and  sl.country_code = #{countryCode}
+        </if>
+        <if test="stateCode != null and stateCode != ''">
+            and  sl.state_code = #{stateCode}
+        </if>
+        <if test="cityCode != null and cityCode != ''">
+            and  sl.city_code = #{cityCode}
+        </if>
+        <if test="type != null and type != ''">
+            and  sl.type = #{type}
+        </if>
+        <if test="code != null and code != ''">
+            and  sl.code like concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="description != null and description != ''">
+            and  sld.description like concat('%', concat(#{description,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+    <select id="getCountryList" resultType="com.hand.hcf.app.mdata.location.dto.LocationDTO">
+        select sl.country_code as country_code, sld.country as country
+          from sys_location sl
+          left join sys_location_detail sld
+            on sl.code = sld.code
+            and sld.language = #{language}
+         where sl.type = 'COUNTRY'
+           order by sl.country_code
+    </select>
+
+    <select id="getStateListByCountryCode" resultType="com.hand.hcf.app.mdata.location.dto.LocationDTO">
+        select sl.state_code, sld.state
+          from sys_location sl
+          left join sys_location_detail sld
+            on sl.code = sld.code
+            and sld.language = #{language}
+         where (sl.type = 'STATE' or sl.type = 'CITY/STATE')
+           and sl.country_code = #{countryCode}
+    </select>
+
+    <select id="getCityListByStateCode" resultType="com.hand.hcf.app.mdata.location.dto.LocationDTO">
+        select sl.city_code, decode(sl.type,'CITY',sld.district,sld.city) city
+          from sys_location sl
+          left join sys_location_detail sld
+            on sl.code = sld.code
+            and sld.language = #{language}
+         where sl.type = 'CITY'
+           and sl.state_code = #{stateCode}
+    </select>
+</mapper>

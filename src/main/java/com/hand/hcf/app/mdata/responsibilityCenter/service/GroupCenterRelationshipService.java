@@ -1,10 +1,14 @@
 package com.hand.hcf.app.mdata.responsibilityCenter.service;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.GroupCenterRelationship;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.GroupCenterRelationshipMapper;
 import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author rookie
@@ -24,5 +28,20 @@ public class GroupCenterRelationshipService extends BaseService<GroupCenterRelat
          centerRelationship.setGroupId(centerGroupId);
          centerRelationship.setResponsibilityCenterId(id);
          this.insert(centerRelationship);
+    }
+
+    /**
+     * 获取责任中心组关联的责任中心Ids
+     * @param groupId
+     * @return
+     */
+    public List<Long> listGroupCenterRelByGroupId(Long groupId){
+        List<Long> resIdList = this.selectList(
+                new EntityWrapper<GroupCenterRelationship>()
+                        .eq("group_id",groupId))
+                .stream()
+                .map(GroupCenterRelationship::getResponsibilityCenterId)
+                .collect(Collectors.toList());
+        return resIdList;
     }
 }

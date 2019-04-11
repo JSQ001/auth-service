@@ -5,6 +5,7 @@ import com.hand.hcf.app.common.co.DimensionDetailCO;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItem;
 import com.hand.hcf.app.mdata.dimension.domain.enums.DimensionItemImportCode;
 import com.hand.hcf.app.mdata.dimension.dto.DimensionItemRequestDTO;
+import com.hand.hcf.app.mdata.dimension.dto.QueryDimensionIdsForAppDTO;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemService;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.core.domain.ExportConfig;
@@ -433,8 +434,26 @@ public class DimensionItemController {
     @PostMapping("/list/By/dimensionIds/companyId/enabled")
     public List<DimensionDetailCO> listDimensionItemsByDimensionIdAndEnabled(@RequestBody List<Long> dimensionIds,
                                                                              @RequestParam(value = "enabled",required = false) Boolean enabled,
-                                                                             @RequestParam(value = "companyId",required = false) Long companyId){
-        return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId);
+                                                                             @RequestParam(value = "companyId") Long companyId,
+                                                                             @RequestParam(value = "unitId") Long unitId,
+                                                                             @RequestParam(value = "userId") Long userId){
+        return dimensionItemService.listItemsByDimensionIdsAndEnabled(dimensionIds, enabled, companyId, unitId, userId);
+    }
+
+    /**
+     * @api {post} /api/dimension/item/list/By/dimensionIds/companyId/enabled 【维值】根据维度id集合和enabled字段查询维值
+     * 因为中控的限制，整合了原接口的参数。
+     * @apiGroup DimensionItem
+     */
+   @PostMapping("/list/By/dimensionIds/companyId/enabled/forApp")
+    public List<DimensionDetailCO> listDimensionItemsByDimensionIdAndEnabledForApp(
+            @RequestBody QueryDimensionIdsForAppDTO queryDimensionIdsForAppDTO) {
+        return dimensionItemService.listItemsByDimensionIdsAndEnabled(
+                queryDimensionIdsForAppDTO.getDimensionIds(),
+                queryDimensionIdsForAppDTO.getEnabled(),
+                queryDimensionIdsForAppDTO.getCompanyId(),
+                queryDimensionIdsForAppDTO.getUnitId(),
+                queryDimensionIdsForAppDTO.getUserId());
     }
 
     /**
@@ -454,5 +473,44 @@ public class DimensionItemController {
         List<DimensionItem> result = dimensionItemService.pageDimensionItemsByDimensionIdEnabledCompanyId(dimensionId,enabled,companyId, queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/dimension/item/page/enabled/date/item/by/dimensionId 【维值】分页查询启用日期范围内的维值
+     * @apiGroup DimensionItem
+     * @apiParam {Long} dimensionId  维度id
+     * @apiParam {int} page 分页page
+     * @apiParam {int} size 分页size
+     */
+    @GetMapping("/page/enabled/date/item/by/dimensionId")
+    public ResponseEntity<List<DimensionItem>> pageEnabledDateDimensionItemsByDimensionId(
+            @RequestParam(value = "dimensionId") Long dimensionId,
+            @RequestParam(value = "enabled", required = false) Boolean enabled,
+            @RequestParam(value = "dimensionItemName", required = false) String dimensionItemName,
+            @RequestParam(value = "dimensionItemCode", required = false) String dimensionItemCode,
+            @RequestParam(value = "page",defaultValue = "0") int page,
+            @RequestParam(value = "size",defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<DimensionItem> result = dimensionItemService.pageEnabledDateDimensionItemsByDimensionId(
+                dimensionId, queryPage, enabled, dimensionItemName, dimensionItemCode);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
+        return  new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {get} /api/dimension/item/list/By/dimensionId/companyId/unitId/userId 【维值】查询维集合
+     * @apiGroup DimensionItem
+     * @apiParam {Long} dimensionId 维度id
+     * @apiParam {Boolean} [enabled] 是否启用
+     */
+    @GetMapping("/list/By/dimensionId/companyId/unitId/userId")
+    public List<DimensionItem> listDimensionItemsByDimensionIdAndCompanyIdAndUnitId(
+            @RequestParam(value = "dimensionId") Long dimensionId,
+            @RequestParam(value = "enabled",required = false) Boolean enabled,
+            @RequestParam(value = "companyId") Long companyId,
+            @RequestParam(value = "unitId") Long unitId,
+            @RequestParam(value = "userId") Long userId){
+        return dimensionItemService.listDimensionItemsByDimensionIdAndEnabledAndPermission(
+                dimensionId, enabled, companyId, unitId, userId);
     }
 }

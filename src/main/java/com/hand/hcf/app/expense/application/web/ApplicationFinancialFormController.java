@@ -76,7 +76,6 @@ public class ApplicationFinancialFormController {
                                      @RequestParam(value = "closedFlag",required = false)Long closedFlag,
                                      @RequestParam(value = "remark",required = false)String  remark,
                                      @RequestParam(value = "documentNumber",required = false) String documentNumber,
-                                     @RequestParam(value = "tenantId",required = false)Long tenantId,
                                      Pageable pageable) {
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(applyDateFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(applyDateTo);
@@ -102,8 +101,7 @@ public class ApplicationFinancialFormController {
                 associatedAmountFrom,
                 associatedAmountTo,
                 relevanceAmountFrom,
-                relevanceAmountTo,
-                tenantId);
+                relevanceAmountTo);
 
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return  new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
@@ -152,7 +150,6 @@ public class ApplicationFinancialFormController {
                        @RequestParam(value = "closed_flag",required = false)Integer closed_flag,
                        @RequestParam(value = "remark",required = false)String  remark,
                        @RequestParam(value = "documentNumber",required = false) String documentNumber,
-                       @RequestParam(value = "tenantId",required = false)Long tenantId,
                        Pageable pageable,
                        @RequestBody ExportConfig exportConfig,
                        HttpServletResponse response,
@@ -163,6 +160,6 @@ public class ApplicationFinancialFormController {
             requisitionDateTo = requisitionDateTo.plusDays(1);
         }
         applicationHeaderService.exportFormExcel(documentNumber, typeId, requisitionDateFrom, requisitionDateTo, amountFrom, amountTo,
-                closed_flag, currencyCode, remark, applyId, companyId,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo,tenantId, response, request, exportConfig);
+                closed_flag, currencyCode, remark, applyId, companyId,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo, response, request, exportConfig);
     }
 }

@@ -282,12 +282,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
         TravelApplicationType travelApplicationType = typeService.selectById(travelApplicationHeaderWebDTO.getDocumentTypeId());
         travelApplicationHeaderWebDTO.setTypeName(null != travelApplicationType ? travelApplicationType.getName() : null);
         // 编辑时设置保存的值，如果保存的值不存在，则为空，同时设置可以选到的维值
-        commonService.setDimensionValueNameAndOptions(
-                travelApplicationHeaderWebDTO.getDimensions(),
-                travelApplicationHeaderWebDTO.getCompanyId(),
-                travelApplicationHeaderWebDTO.getUnitId(),
-                travelApplicationHeaderWebDTO.getEmployeeId()
-        );
+        commonService.setDimensionValueNameAndOptions(travelApplicationHeaderWebDTO.getDimensions(), travelApplicationHeaderWebDTO.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Arrays.asList(travelApplicationHeaderWebDTO), true);
         travelApplicationHeaderWebDTO.setTravelPeopleDTOList(associatePeopleService.listTravelPeopleByAssoPkIdAndPosition(travelApplicationHeaderWebDTO.getId(), "H"));
         travelApplicationHeaderWebDTO.setTravelFromPlaceDTOS(associatePlaceService.listTravelFromPlaceByTypeAndId(travelApplicationHeaderWebDTO.getId(),"F"));
@@ -514,11 +509,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
             List<ExpenseFieldDTO> fields = lineService.getFields(line);
             lineDto.setFields(fields);
         }
-        commonService.setDimensionValueNameAndOptions(dimensions,
-                isNew || lineDto.getCompanyId() == null ? headerDTO.getCompanyId() : lineDto.getCompanyId(),
-                isNew || lineDto.getUnitId() == null  ? headerDTO.getUnitId() : lineDto.getUnitId(),
-                headerDTO.getEmployeeId()
-        );
+        commonService.setDimensionValueNameAndOptions(dimensions, isNew ? headerDTO.getCompanyId() : lineDto.getCompanyId());
         lineDto.setDimensions(dimensions);
         lineDto.setTravelPeopleDTOList(associatePeopleService.listTravelPeopleByAssoPkIdAndPosition(lineDto.getId(), "L"));
         return lineDto;
@@ -598,7 +589,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
         //设置typeName
         TravelApplicationType applicationType = typeService.selectById(dto.getDocumentTypeId());
         dto.setTypeName(null != applicationType ? applicationType.getName() : null);
-        commonService.setDimensionValueName(dto.getDimensions(),dto.getCompanyId(),dto.getUnitId(),dto.getEmployeeId());
+        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Arrays.asList(dto), true);
         dto.setTravelPeopleDTOList(associatePeopleService.listTravelPeopleByAssoPkIdAndPosition(dto.getId(), "H"));
         setAttachments(dto);

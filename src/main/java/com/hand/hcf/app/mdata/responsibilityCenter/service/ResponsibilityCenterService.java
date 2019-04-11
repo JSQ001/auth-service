@@ -51,6 +51,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -62,12 +63,6 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
 
     @Autowired
     private ResponsibilityCenterMapper responsibilityCenterMapper;
-
-    @Autowired
-    private ResponsibilityCenterGroupService resCenterGroupService;
-
-    @Autowired
-    private MessageService messageService;
 
     @Autowired
     private GroupCenterRelationshipService groupCenterRelationshipService;
@@ -168,12 +163,12 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
      * @return
      */
     public Page<ResponsibilityCenter> pageResponsibilityCenterBySetOfBooksIdAndGroupId(Long groupId,
-                                                                                       String responsibilityCenterCode,
-                                                                                       Long setOfBooksId,
-                                                                                       String responsibilityCenterName,
-                                                                                       Boolean enabled,
-                                                                                       String range,
-                                                                                       Page page) {
+                                                                                          String responsibilityCenterCode,
+                                                                                          Long setOfBooksId,
+                                                                                          String responsibilityCenterName,
+                                                                                          Boolean enabled,
+                                                                                          String range,
+                                                                                          Page page) {
         Wrapper<ResponsibilityCenter> wapper = new EntityWrapper<ResponsibilityCenter>()
                 .eq("set_of_books_id",setOfBooksId)
                 .eq(enabled != null,"enabled",enabled)
@@ -275,8 +270,8 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
         //非空校验
         importData.stream().filter(e-> StringUtil.isNullOrEmpty(e.getRowNumber())
                 || StringUtil.isNullOrEmpty(e.getEnabledStr())
-                || StringUtil.isNullOrEmpty(e.getResponsibilityCenterCode())
-                || StringUtil.isNullOrEmpty(e.getResponsibilityCenterName()))
+                ||StringUtil.isNullOrEmpty(e.getResponsibilityCenterCode())
+                ||StringUtil.isNullOrEmpty(e.getResponsibilityCenterName()))
                 .forEach(e ->{
                     e.setErrorFlag(true);
                     e.setErrorDetail("必输字段不能为空");
@@ -657,24 +652,6 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
             result = mapperFacade.mapAsList(responsibilityCenters,ResponsibilityCenterCO.class);
         }
         return result;
-    }
-    /**
-     * 根据责任中心组Id获取其责任中心
-     * @param groupId 责任中心组Id
-     * @return
-     */
-    public List<ResponsibilityCenter> listResponsibilityCenterByGroupId(Long groupId) {
-        ResponsibilityCenterGroup responsibilityCenterGroup = resCenterGroupService.selectById(groupId);
-        if(responsibilityCenterGroup == null){
-            throw new BizException(messageService.getMessageDetailByCode("RESPONSIBILITY_CENTER_GROUP_NOT_EXIST"));
-        }
-        List<Long> resIdList = groupCenterRelationshipService.selectList(
-                new EntityWrapper<GroupCenterRelationship>()
-                        .eq("group_id",groupId))
-                .stream()
-                .map(GroupCenterRelationship::getResponsibilityCenterId)
-                .collect(Collectors.toList());
-        return baseMapper.selectList(new EntityWrapper<ResponsibilityCenter>().in("id",resIdList).eq("enabled",true));
     }
 
     /**

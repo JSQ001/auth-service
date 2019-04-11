@@ -160,6 +160,37 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
                                                                              Pagination page);
 
     /**
+     * 根据租户id、公司id和供应商名称,代码【模糊】分页查询
+     * 按代码升序
+     * @param tenantId
+     * @param companyId
+     * @param venNickname
+     * @param vendorCode
+     * @param page
+     * @return
+     */
+    List<VendorInfo> selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
+            @Param("tenantId") Long tenantId,
+            @Param("companyId") Long companyId,
+            @Param("venNickname") String venNickname,
+            @Param("vendorCode") String vendorCode,
+            Pagination page);
+
+    /**
+     * 根据租户id和供应商名称,代码【模糊】分页查询
+     * 按代码升序
+     * @param tenantId
+     * @param venNickname
+     * @param page
+     * @return
+     */
+    List<VendorInfo> selectVendorInfosByTenantIdAndVendorNameAndCodeForPage(@Param("tenantId") Long tenantId,
+                                                                            @Param("venNickname") String venNickname,
+                                                                            @Param("vendorCode") String vendorCode,
+                                                                            Pagination page);
+
+
+    /**
      * 同一个租户下，查询重复的供应商名称
      *
      * @return
@@ -250,6 +281,23 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
                                                              @Param("companyOid") String companyOid,
                                                              @Param("vendorCode") String vendorCode,
                                                              @Param("source") String source);
-
+    /**
+     * 用于供应商审批留查询
+     *
+     * @param venderTypeId
+     * @param venderCode
+     * @param venNickname
+     * @param bankAccount
+     * @param venType
+     * @param tenantId
+     * @return
+     */
+    List<VendorInfo> selectVendorInfoforApprovalByPage(@Param("venderTypeId") Long venderTypeId,
+                                                 @Param("venderCode") String venderCode,
+                                                 @Param("venNickname") String venNickname,
+                                                 @Param("bankAccount") String bankAccount,
+                                                 @Param("venType") Integer venType,
+                                                 @Param("tenantId") String tenantId,
+                                                 Pagination page);
 
 }

@@ -37,6 +37,7 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
+
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.handler.ExcelExportHandler;
@@ -423,12 +424,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         ApplicationType applicationType = typeService.selectById(applicationHeaderWebDTO.getTypeId());
         applicationHeaderWebDTO.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
         // 编辑时设置保存的值，如果保存的值不存在，则为空，同时设置可以选到的维值
-        commonService.setDimensionValueNameAndOptions(
-                applicationHeaderWebDTO.getDimensions(),
-                applicationHeaderWebDTO.getCompanyId(),
-                applicationHeaderWebDTO.getDepartmentId(),
-                applicationHeaderWebDTO.getEmployeeId()
-        );
+        commonService.setDimensionValueNameAndOptions(applicationHeaderWebDTO.getDimensions(), applicationHeaderWebDTO.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(applicationHeaderWebDTO), true);
         setAttachments(applicationHeaderWebDTO);
         //jiu.zhao 合同
@@ -601,12 +597,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             List<ExpenseFieldDTO> fields = lineService.getFields(line);
             lineDto.setFields(fields);
         }
-        commonService.setDimensionValueNameAndOptions(
-                dimensions,
-                isNew ? headerDTO.getCompanyId() : lineDto.getCompanyId(),
-                isNew ? headerDTO.getDepartmentId() : lineDto.getDepartmentId(),
-                headerDTO.getEmployeeId()
-        );
+        commonService.setDimensionValueNameAndOptions(dimensions, isNew ? headerDTO.getCompanyId() : lineDto.getCompanyId());
         lineDto.setDimensions(dimensions);
         return lineDto;
     }
@@ -800,8 +791,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         //设置typeName
         ApplicationType applicationType = typeService.selectById(dto.getTypeId());
         dto.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
-        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId(),dto.getDepartmentId(),
-                dto.getEmployeeId());
+        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(dto), true);
         //jiu.zhao 合同
         /*if (dto.getContractHeaderId() != null) {
@@ -853,10 +843,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         if (period == null) {
             throw new BizException(RespCode.EXPENSE_PERIODS_ERROR);
         }
-
         //组装请求参数 (从分摊行取)
-        //jiu.zhao 预算
-        /*for (ApplicationLineDist lineDist : distLine) {
+        for (ApplicationLineDist lineDist : distLine) {
             BudgetReserveCO detail = new BudgetReserveCO();
             //会计期间名称
             detail.setPeriodName(period.getPeriodName());
@@ -888,13 +876,11 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             detail.setDocumentLineId(lineDist.getId());
             //单位
             detail.setUom(lineDist.getPriceUnit());
-            //责任中心id
-            detail.setResponsibilityCenterId(lineDist.getResponsibilityCenterId());
             //创建人
             detail.setCreatedBy(lineDist.getCreatedBy());
             DimensionUtils.setDimensionIdByObject(lineDist, detail, ApplicationLineDist.class, BudgetReserveCO.class);
             details.add(detail);
-        }*/
+        }
         //预算保留行数据
         log.info("预算保留行数据设置公司，部门，维度等信息");
         commonService.setBudgetReserveOtherInfo(details);
@@ -1109,8 +1095,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             }
             // 更改行金额和释放预算
             updateLinesClosedAmount(applicationHeaders, appAssociateMap);
-            // 更改申请单分摊行为已关闭
-            distService.updateClosedByHeaders(applicationHeaders);
             // 插入日志
             List<CommonApprovalHistoryCO> collect = applicationHeaders.stream().map(e -> {
                 CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
@@ -1180,7 +1164,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     /**
      * 申请单关闭时释放预算
      */
-    private void releaseBudgetByClose(ApplicationHeader header, List<Long> lineDistIds) {
+    private void releaseBudgetByClose(ApplicationHeader header, Long lineDistId) {
         ZonedDateTime periodDate = ZonedDateTime.now();
         String parameterValue = organizationService.getParameterValue(header.getCompanyId(),
                 header.getSetOfBooksId(), ParameterConstant.BGT_CLOSED_PERIOD);
@@ -1192,12 +1176,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             throw new BizException(RespCode.EXPENSE_PERIODS_ERROR);
         }
         //jiu.zhao 预算
-        /*BudgetCloseCO budgetCloseCO = new BudgetCloseCO();
-        budgetCloseCO.setBusinessType("EXP_REQUISITION");
-        budgetCloseCO.setDocumentId(header.getId());
-        budgetCloseCO.setDocumentDistLineIds(lineDistIds);
-        budgetCloseCO.setPeriod(period);
-        budgetClient.closeRequisition(budgetCloseCO);*/
+        //budgetClient.closeRequisition(period, "EXP_REQUISITION", header.getId(), lineDistId);
     }
 
     /**
@@ -1264,8 +1243,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                                          BigDecimal associatedAmountFrom,
                                                                          BigDecimal associatedAmountTo,
                                                                          BigDecimal relevanceAmountFrom,
-                                                                         BigDecimal relevanceAmountTo,
-                                                                         Long tenantId){
+                                                                         BigDecimal relevanceAmountTo
+    ){
 
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 //.eq("t.created_by", OrgInformationUtil.getCurrentUserId())
@@ -1282,7 +1261,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .lt(requisitionDateTo != null, "t.requisition_date", requisitionDateTo)
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
-                .eq(tenantId!=null,"t.tenant_id",tenantId)
                 .orderBy("t.id", false);
         List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo);
 
@@ -1367,7 +1345,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                             String currencyCode,
                                                             String remarks,
                                                             Long employeeId,
-                                                            Long companyId, Long tenantId) {
+                                                            Long companyId) {
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 .eq(typeId != null, "t.type_id", typeId)
                 .eq(closedFlag != null, "t.closed_flag", closedFlag)
@@ -1380,7 +1358,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
                 .eq(companyId!=null, "t.company_id", companyId)
-                .eq(tenantId!=null,"t.tenant_id",tenantId)
                 .orderBy("t.id", false);
         log.debug("申请单财务查询的查询条件为：{}", wrapper.getSqlSegment());
         return wrapper;
@@ -1445,12 +1422,12 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                 BigDecimal associatedAmountTo,
                                 BigDecimal relevanceAmountFrom,
                                 BigDecimal relevanceAmountTo,
-                                Long tenantId, HttpServletResponse response,
+                                HttpServletResponse response,
                                 HttpServletRequest request,
                                 ExportConfig exportConfig) throws IOException {
         // 获取查询条件SQL
         Wrapper<ApplicationHeader> wrapper = getFDformQueryWrapper(documentNumber, typeId, requisitionDateFrom,
-                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId,tenantId);
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId);
 
         int total = baseMapper.getCountByCondition(wrapper);
 
@@ -1523,11 +1500,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         if (null != header.getBudgetFlag() && header.getBudgetFlag()) {
             // 预算释放
-            List<ApplicationLineDist> distList = distService.selectList(new EntityWrapper<ApplicationLineDist>().eq("line_id", line.getId()));
-            releaseBudgetByClose(header, distList.stream().map(ApplicationLineDist::getId).collect(Collectors.toList()));
+            releaseBudgetByClose(header, line.getId());
         }
-        // 更改分摊行状态
-        distService.updateClosedByLineId(line.getId());
         CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
         historyCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
         historyCO.setEntityType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());

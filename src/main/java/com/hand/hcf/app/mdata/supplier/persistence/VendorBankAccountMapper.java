@@ -25,6 +25,15 @@ public interface VendorBankAccountMapper extends BaseMapper<VendorBankAccount> {
                                                                                 @Param("vendorInfoId") String vendorInfoId);
 
     /**
+     * 获取 所选择供应商下启用状态为启用的、审核状态为审核通过的银行账号
+     *
+     * @param vendorInfoId
+     * @return
+     */
+    List<VendorBankAccount> selectVendorBankAccountsByVendorInfoIdAndStatusAndVendorBankStatus(@Param("vendorInfoId") String vendorInfoId);
+
+
+    /**
      * 租户级别 根据银行账号获取 供应商银行账号
      *
      * @param tenantId

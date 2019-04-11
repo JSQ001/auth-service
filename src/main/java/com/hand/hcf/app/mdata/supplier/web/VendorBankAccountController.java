@@ -32,20 +32,20 @@ public class VendorBankAccountController {
 
     @PostMapping("/ven/bank/insert")
     public ResponseEntity<VendorBankAccountCO> createVendorBankAccount(@RequestBody VendorBankAccountCO vendorBankAccountCO,
-                                                                       @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
+                                                        @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
         return ResponseEntity.ok(vendorBankAccountService.createOrUpdateVendorBankAccount(vendorBankAccountCO, roleType));
     }
 
     @PutMapping("/ven/bank/update")
     public ResponseEntity<VendorBankAccountCO> updateVendorBankAccount(@RequestBody VendorBankAccountCO vendorBankAccountCO,
-                                                                       @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
+                                                        @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
         return ResponseEntity.ok(vendorBankAccountService.createOrUpdateVendorBankAccount(vendorBankAccountCO, roleType));
     }
 
     @GetMapping("/ven/bank")
     public ResponseEntity<List<VendorBankAccountCO>> searchVendorBankAccounts(@RequestParam("vendorInfoId") String vendorInfoId,
-                                                                              @RequestParam(value = "status",required = false) Integer status,
-                                                                              Pageable pageable)
+                                                         @RequestParam(value = "status",required = false) Integer status,
+                                                         Pageable pageable)
             throws URISyntaxException {
         Page<VendorBankAccountCO> page = vendorBankAccountService.searchVendorBankAccounts(vendorInfoId,status, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/ven/bank");
@@ -86,6 +86,7 @@ public class VendorBankAccountController {
         return ResponseEntity.ok(vendorBankAccountService.listVendorBankAccountsByBankAccount(bankAccount));
     }
     /**
+     * 根据租户id和供应商名称,代码【模糊】分页查询 获取供应商银行信息
      * 获取供应商及银行信息，（预付款，合同）
      * @param name
      * @param code
@@ -102,5 +103,45 @@ public class VendorBankAccountController {
         List<VendorAccountDTO> result = vendorBankAccountService.getReceivablesByNameAndCode(name, code, queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 根据公司id和供应商名称,代码【模糊】分页查询 获取供应商银行信息
+     * 获取供应商及银行信息（查询某公司下的、启用状态为启用的、审核状态为审核通过的租户下的供应商）
+     * @param companyId
+     * @param name
+     * @param code
+     * @param page
+     * @param size
+     * @return
+     */
+    @RequestMapping(value = "/vendor/account/by/companyId/name/code", method = RequestMethod.GET)
+    public ResponseEntity<List<VendorAccountDTO>> getVendorByCompanyIdAndNameAndCode(
+            @RequestParam(value = "companyId") Long companyId,
+            @RequestParam(value = "name",required = false) String name,
+            @RequestParam(value = "code",required = false) String code,
+            @RequestParam(value = "page",defaultValue = "0") int page,
+            @RequestParam(value = "size",defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<VendorAccountDTO> result = vendorBankAccountService.getVendorByCompanyIdAndNameAndCode(companyId,name, code, queryPage);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
+        return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
+    }
+
+
+
+    /**
+     * 对供应商下银行状态进行操作
+     *提交，审批和拒绝
+     * @param VendorBankAccountCO
+     * @return
+     * @throws URISyntaxException
+     */
+    @PutMapping("/ven/bank/info/operation")
+    public ResponseEntity<VendorBankAccountCO> operationBankVendorInfo(@RequestBody VendorBankAccountCO vendorBankAccountCO,
+                                                            @RequestParam(value = "roleType", required = false) String roleType,
+                                                            @RequestParam(value = "action",required = true) String action) throws URISyntaxException {
+       return ResponseEntity.ok(vendorBankAccountService.operationVendor(vendorBankAccountCO,roleType,action));
+
     }
 }

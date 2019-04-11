@@ -35,6 +35,7 @@ import com.hand.hcf.core.service.BaseI18nService;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.service.ExcelExportService;
 import com.hand.hcf.core.service.ExcelImportService;
+import com.hand.hcf.core.util.DateUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import com.hand.hcf.core.web.dto.ImportResultDTO;
 import com.itextpdf.text.io.StreamUtil;
@@ -111,6 +112,9 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
     private DimensionItemAssignEmployeeService dimensionItemAssignEmployeeService;
 
     @Autowired
+    private DimensionItemAssignDepartmentService dimensionItemAssignDepartmentService;
+
+    @Autowired
     private DimensionMapper dimensionMapper;
 
     /**
@@ -176,6 +180,7 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                 dimensionItemAssignEmployeeService.insertBatch(assignEmployeeList);
             }
         }
+        dimensionItemRequestDTO.getDimensionItem().setId(dimensionItem.getId());
         return dimensionItemRequestDTO;
     }
 
@@ -734,7 +739,43 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                 new EntityWrapper<DimensionItem>()
                         .eq("dimension_id", dimensionId)
                         .eq(enabled != null, "enabled",enabled)
-                        .le("start_date", ZonedDateTime.now())
+                        .le("start_date",ZonedDateTime.now())
+                        .andNew()
+                        .isNull("end_date")
+                        .or()
+                        .ge("end_date",ZonedDateTime.now())
+                        .orderBy("enabled", false)
+                        .orderBy("dimension_item_code")
+        );
+
+        //根据已分配公司筛选维值
+        if (companyId != null) {
+            List<Long> dimensionItemIdList = dimensionItemAssignCompanyService.selectList(
+                    new EntityWrapper<DimensionItemAssignCompany>().eq("company_id", companyId).eq("enabled", true)
+            ).stream().map(DimensionItemAssignCompany::getDimensionItemId).collect(toList());
+            if (dimensionItemIdList.size() != 0) {
+                dimensionItemList = dimensionItemList.stream().filter(
+                        dimensionItem -> dimensionItemIdList.contains(dimensionItem.getId())
+                ).collect(toList());
+            }
+        }
+        return dimensionItemList;
+    }
+
+    /**
+     * 查询维值根据维值、启用标志、权限设置
+     * @param dimensionId
+     * @param enabled
+     * @param companyId
+     * @return
+     */
+    public List<DimensionItem> listDimensionItemsByDimensionIdAndEnabledAndPermission(Long dimensionId, Boolean enabled, Long companyId, Long departmentId, Long userId) {
+
+        List<DimensionItem> dimensionItemList = dimensionItemMapper.selectList(
+                new EntityWrapper<DimensionItem>()
+                        .eq("dimension_id", dimensionId)
+                        .eq(enabled != null, "enabled",enabled)
+                        .le("start_date",ZonedDateTime.now())
                         .andNew()
                         .isNull("end_date")
                         .or()
@@ -751,17 +792,61 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
 
             if (dimensionItemIdList.size() != 0) {
                 dimensionItemList = dimensionItemList.stream().filter(
-                        dimensionItem -> dimensionItemIdList.contains(dimensionItem.getId())
+                        dimensionItem -> dimensionItemIdList.contains(dimensionItem.getId()) || Boolean.TRUE.equals(dimensionItem.getAllCompanyFlag())
                 ).collect(toList());
             }
         }
-        //根据员工筛选维值
-        Long currentContactId = contactService.getContactByUserOid(OrgInformationUtil.getCurrentUserOid()).getId();
-        List<Long> ids = dimensionItemMapper.listDimensionsByContactId(currentContactId)
-                .stream().map(DimensionItem::getId).collect(toList());
-        dimensionItemList = dimensionItemList.stream().filter(
-                dimensionItem -> (ids.contains(dimensionItem.getId()) && VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())) || !VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())
-        ).collect(toList());
+
+        //根据权限筛选维值
+        dimensionItemList = dimensionItemList.stream().filter(dimensionItem -> {
+            boolean flag = true;
+            // 全部人员
+            if (VisibleUserScopeEnum.ALL.getId().equals(dimensionItem.getVisibleUserScope())){
+                return true;
+            }
+            // 按部门
+            if (VisibleUserScopeEnum.DEPARTMENT.getId().equals(dimensionItem.getVisibleUserScope())){
+                List<Long> ids = dimensionItemAssignDepartmentService.selectList(
+                        new EntityWrapper<DimensionItemAssignDepartment>().eq("dimension_item_id", dimensionItem.getId())
+                ).stream().map(DimensionItemAssignDepartment::getDepartmentId).collect(Collectors.toList());
+
+                if (!org.springframework.util.CollectionUtils.isEmpty(ids)) {
+                    if (ids.contains(departmentId)) {
+                        flag = true;
+                    } else {
+                        flag = false;
+                    }
+                }
+            }
+            // 按人员组
+            if (VisibleUserScopeEnum.USER_GROUP.getId().equals(dimensionItem.getVisibleUserScope())){
+                List<Long> ids = dimensionUserGroupService.selectList(
+                        new EntityWrapper<DimensionItemAssignUserGroup>().eq("dimension_item_id", dimensionItem.getId())
+                ).stream().map(DimensionItemAssignUserGroup::getUserGroupId).collect(Collectors.toList());
+                if (!org.springframework.util.CollectionUtils.isEmpty(ids)) {
+                    if (userGroupService.hasUserGroupPermissionForMuti(ids,userId)) {
+                        flag = true;
+                    } else {
+                        flag = false;
+                    }
+                }
+            }
+            //按人员
+            if (VisibleUserScopeEnum.USER.getId().equals(dimensionItem.getVisibleUserScope())){
+                List<Long> ids = dimensionItemAssignEmployeeService.selectList(
+                        new EntityWrapper<DimensionItemAssignEmployee>().eq("dimension_item_id", dimensionItem.getId())
+                ).stream().map(DimensionItemAssignEmployee::getContactId).collect(Collectors.toList());
+                if (!org.springframework.util.CollectionUtils.isEmpty(ids)) {
+                    Long contactId = contactService.getContactByUserId(userId).getId();
+                    if (ids.contains(contactId)) {
+                        flag = true;
+                    } else {
+                        flag = false;
+                    }
+                }
+            }
+            return flag;
+        }).collect(Collectors.toList());
         return dimensionItemList;
     }
 
@@ -790,7 +875,7 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
 
     public List<DimensionDetailCO> listItemsByDimensionIdsAndEnabled(List<Long> dimensionIds,
                                                                      Boolean enabled,
-                                                                     Long companyId) {
+                                                                     Long companyId, Long unitId, Long userId) {
         if (CollectionUtils.isEmpty(dimensionIds)){
             return new ArrayList<>();
         }
@@ -800,7 +885,8 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
         dimensionIds.forEach(e -> {
             Dimension dimension = collect.get(e);
             DimensionDetailCO dto = new DimensionDetailCO();
-            List<DimensionItem> dimensionItems = listDimensionItemsByDimensionIdAndEnabled(e, enabled, companyId);
+            List<DimensionItem> dimensionItems =
+                    listDimensionItemsByDimensionIdAndEnabledAndPermission(e,enabled,companyId,unitId,userId);
             dto.setId(e);
             dto.setDimensionCode(dimension == null ? null : dimension.getDimensionCode());
             dto.setDimensionName(dimension == null ? null : dimension.getDimensionName());
@@ -826,20 +912,114 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
      * 项目申请单插入维度值
      * 由项目申请单审批完成时定义，根据参数定义中定义的维度代码，确认插入到哪个维度中。
      */
-    public void proInsertDimensionItem(Long setOfBooksId, String parameterCode, String projectNumber,String projectName){
+    public void proInsertDimensionItem(Long setOfBooksId,
+                                       String parameterCode,
+                                       String projectNumber,
+                                       String projectName,
+                                       String startDate,
+                                       String endDate,
+                                       Integer visibleUserScope,
+                                       List<Long> departmentOrUserGroupIdList){
+        //按公司
+        Integer company = 1005;
         List<Dimension> dimensionList = dimensionMapper.listDimensionsByParameterCode(setOfBooksId,parameterCode);
-        dimensionList.stream().forEach(dimension ->{
-            DimensionItemRequestDTO dto = new DimensionItemRequestDTO();
-            DimensionItem dimensionItem = new DimensionItem();
-            dimensionItem.setDimensionItemCode(projectNumber);
-            dimensionItem.setDimensionItemName(projectName);
-            dimensionItem.setDimensionId(dimension.getId());
-            dimensionItem.setVisibleUserScope(1001);
-            dimensionItem.setStartDate(ZonedDateTime.now());
-            dto.setDimensionItem(dimensionItem);
-            insertDimensionItem(dto);
-            }
-        );
+        if(CollectionUtils.isEmpty(dimensionList)){
+            throw new BizException(RespCode.DIMENSION_NOT_EXIST);
+        }else{
+            dimensionList.stream().forEach(dimension ->{
+                        DimensionItemRequestDTO dto = new DimensionItemRequestDTO();
+                        DimensionItem dimensionItem = new DimensionItem();
+                        dimensionItem.setDimensionItemCode(projectNumber);
+                        dimensionItem.setDimensionItemName(projectName);
+                        dimensionItem.setDimensionId(dimension.getId());
+                        //1005代表分配公司
+                        if(visibleUserScope.equals(company)){
+                            dimensionItem.setVisibleUserScope(VisibleUserScopeEnum.ALL.getId());
+                        }else{
+                            dimensionItem.setVisibleUserScope(visibleUserScope);
+                        }
+                        dimensionItem.setStartDate(DateUtil.stringToZonedDateTime(startDate));
+                        dimensionItem.setEndDate(DateUtil.stringToZonedDateTime(endDate));
+                        dimensionItem.setEnabled(Boolean.TRUE);
+                        //当全部人员时，维值分配全部公司标志为true
+                        if (VisibleUserScopeEnum.ALL.getId().equals(visibleUserScope)) {
+                            dimensionItem.setAllCompanyFlag(Boolean.TRUE);
+                        } else {
+                            dimensionItem.setAllCompanyFlag(Boolean.FALSE);
+                        }
+                        //todo 如果给我人员和部门我这边公司怎么分配呢，分配当前账套下的所有公司嘛？
+                        dto.setDimensionItem(dimensionItem);
+                        dto.setDepartmentOrUserGroupIdList(departmentOrUserGroupIdList);
+                        Integer count = baseMapper.selectCount(new EntityWrapper<DimensionItem>()
+                                .eq("dimension_item_code",dimensionItem.getDimensionItemCode())
+                                .eq("dimension_id",dimensionItem.getDimensionId())
+                        );
+                        if (count == 0) {
+                            insertDimensionItem(dto);
+                        }else if (count == 1){
+                            DimensionItem temp = new DimensionItem();
+                            temp.setDimensionItemCode(dimensionItem.getDimensionItemCode());
+                            temp.setDimensionId(dimensionItem.getDimensionId());
+                            DimensionItem exist = baseMapper.selectOne(temp);
+                            dto.getDimensionItem().setId(exist.getId());
+                            updateDimensionItem(dto);
+                        }
+                        if(visibleUserScope.equals(company)) {
+                            List<DimensionItemAssignCompany> assignCompanyList = new ArrayList<>();
+                            departmentOrUserGroupIdList.stream().forEach(e -> {
+                                DimensionItemAssignCompany temp = new DimensionItemAssignCompany();
+                                temp.setDimensionItemId(dto.getDimensionItem().getId());
+                                temp.setCompanyId(e);
+                                temp.setEnabled(Boolean.TRUE);
+                                assignCompanyList.add(temp);
+                            });
+                            if(count == 0) {
+                                dimensionItemAssignCompanyService.insertDimensionItemAssignCompanyBatch(assignCompanyList);
+                            }else if (count == 1){
+                                dimensionItemAssignCompanyService.delete(new EntityWrapper<DimensionItemAssignCompany>()
+                                    .eq("dimension_item_id",dto.getDimensionItem().getId())
+                                );
+                                dimensionItemAssignCompanyService.insertDimensionItemAssignCompanyBatch(assignCompanyList);
+                            }
+                        }
+            });
+        }
     }
+
+    /**
+     * 分页查询启用日期范围内的维值
+     * @param dimensionId
+     * @param page
+     * @param enabled
+     * @param dimensionItemName
+     * @param dimensionItemCode
+     * @return
+     */
+    public List<DimensionItem> pageEnabledDateDimensionItemsByDimensionId(Long dimensionId,
+                                                                           Page page,
+                                                                           Boolean enabled,
+                                                                           String dimensionItemName,
+                                                                           String dimensionItemCode) {
+        List<DimensionItem> dimensionItemList = dimensionItemMapper.selectPage(
+                page,
+                new EntityWrapper<DimensionItem>()
+                        .eq("dimension_id", dimensionId)
+                        .eq(enabled != null , "enabled", enabled)
+                        .like(org.springframework.util.StringUtils.hasText(dimensionItemCode),
+                                "dimension_item_code", dimensionItemCode)
+                        .like(org.springframework.util.StringUtils.hasText(dimensionItemName),
+                                "dimension_item_name", dimensionItemName)
+                        .le("start_date",ZonedDateTime.now())
+                        .andNew()
+                        .isNull("end_date")
+                        .or()
+                        .ge("end_date",ZonedDateTime.now())
+                        .orderBy("enabled", false)
+                        .orderBy("dimension_item_code")
+        );
+        return dimensionItemList;
+    }
+
+
 }
 

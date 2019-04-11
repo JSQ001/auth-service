@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /*import com.hand.hcf.app.client.user.UserCO;*/
 
@@ -23,8 +23,10 @@ import java.util.UUID;
 @Service
 public class HcfOrganizationInterface {
 
-    @Autowired
-    private CommonControllerImpl orgClient;
+
+    //jiu.zhao TODO 预付款模块三方接口
+    //@Autowired
+    //private OrganizationClient orgClient;
 
     @Autowired
     private UserControllerImpl userClient;
@@ -34,15 +36,27 @@ public class HcfOrganizationInterface {
 
 
     public OrderNumberCO getVendorCode (String companyCode, Long tenantId) {
-        return orgClient.getOrderNumberCO("VENDER",companyCode,"");
+        //return orgClient.getOrderNumberCO("VENDER",companyCode,"");
+        return null;
+
     }
 
     public SysCodeValueCO getValueBySysCodeAndValue(String code, String value) {
-        return orgClient.getSysCodeValueByCodeAndValue(code, value);
+        //return orgClient.getSysCodeValueByCodeAndValue(code, value);
+        return null;
     }
 
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
-        return orgClient.listAllSysCodeValueByCode(code);
+       // return orgClient.listAllSysCodeValueByCode(code);
+        //jiu.zhao TODO
+        return null;
+    }
+
+
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+       // return orgClient.listEnabledSysCodeValueByCode(code);
+        //jiu.zhao TODO
+        return null;
     }
 
     public AttachmentCO getAttachmentByOid(String oid){

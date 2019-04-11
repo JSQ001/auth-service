@@ -193,9 +193,6 @@ public class OrganizationService {
         return departmentClient.getDepartmentByEmpOid(userOid);
     }
 
-    public DepartmentCO getDepartmentByEmployeeId(Long userId){
-        return departmentClient.getDepartmentByEmployeeId(userId);
-    }
     public Boolean judgeUserInUserGroups(JudgeUserCO judgeUserCO) {
         return userClient.judgeUserInUserGroups(judgeUserCO);
     }
@@ -388,13 +385,11 @@ public class OrganizationService {
      * @param  dimensionIds 维度集合
      */
     public List<DimensionDetailCO> listDetailCOByDimensionIdsAndCompany(Long companyId,
-                                                                        Long unitId,
-                                                                        Long userId,
                                                                         Boolean enabled,
                                                                         List<Long> dimensionIds){
-        //jiu.zhao TODO
-        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, unitId, userId, enabled);
-        return null;
+        //jiu.zhao 修改三方接口 20190401
+        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, enabled);
+        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, enabled, companyId);
     }
 
 
