@@ -57,7 +57,7 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
         return baseMapper.getTenantClient(tenantId);
     }
 
-    public void updateOauthAccessTokenCompanyByLogin(String login, Long companyId, UUID companyOid) {
+    public void updateOauthAccessTokenCompanyByLogin(String login) {
         BaseTokenStore baseTokenStore = (BaseTokenStore) applicationContext.getBean("tokenStore");
         List<String> tokenIds = oauthMapper.findAuthenticationIdByLogin(login);
         if (!org.springframework.util.CollectionUtils.isEmpty(tokenIds)) {
@@ -71,7 +71,7 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
                     return;
                 }
                 String key = authenticationKeyGenerator.extractKey(authentication);
-                Map<String, Object> map = new HashMap<String, Object>();
+                Map<String, Object> map = new HashMap<>();
                 map.put("authentication", SerializationUtils.serialize(authentication));
                 map.put("authenticationId", key);
                 oauthMapper.updateOauthAccessTokenById(map);

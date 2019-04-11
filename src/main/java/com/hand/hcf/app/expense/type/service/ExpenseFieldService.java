@@ -27,4 +27,8 @@ public class ExpenseFieldService extends BaseService<ExpenseFieldMapper, Expense
         return this.selectOne(new EntityWrapper<ExpenseField>().eq("field_oid", oid));
     }
 
+    public List<ExpenseField> listFieldByTypeId(Long typeId,
+                                                String language){
+        return baseMapper.listFieldByTypeId(typeId, language);
+    }
 }

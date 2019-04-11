@@ -26,7 +26,7 @@ public class OauthControllerImpl {
     public void updateOauthAccessTokenCompanyByLogin(@RequestParam(value = "login") String login,
                                                      @RequestParam(value = "companyId") Long companyId,
                                                      @RequestParam(value = "companyOid") String companyOid) {
-        oauthService.updateOauthAccessTokenCompanyByLogin(login, companyId, UUID.fromString(companyOid));
+        oauthService.updateOauthAccessTokenCompanyByLogin(login);
     }
 
     public void deleteOauthAccessTokenByLogin(String login) {

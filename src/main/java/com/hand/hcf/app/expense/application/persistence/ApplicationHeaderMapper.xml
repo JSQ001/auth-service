@@ -143,20 +143,23 @@
             rh.audit_flag as auditFlag,
             sum(v.amount) as amount,
             v.source_doc_id as applicationHeaderId,
-            v.source_doc_line_id as  applicationLineId
+            t.line_id as  applicationLineId
         from
             exp_requisition_release v,
-            exp_report_header rh
+            exp_report_header rh,
+            exp_application_line_dist t
         where
             v.source_doc_category = 'EXP_REQUISITION'
             and v.related_doc_id = rh.id
+            and v.source_doc_dist_id = t.id
+            and v.source_doc_id = t.header_id
             and v.source_doc_id in
             <foreach collection="ids" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
             and v.related_doc_category = 'PUBLIC_REPORT'
             and rh.status in (1002, 1004)
-            group by rh.id, rh.requisition_number, rh.audit_flag, v.source_doc_id, v.source_doc_line_id
+            group by rh.id, rh.requisition_number, rh.audit_flag, v.source_doc_id, t.line_id
     </select>
 
     <resultMap id="ApplicationAssociateResult" type="com.hand.hcf.app.expense.application.web.dto.ApplicationAssociatePrepaymentDTO">
@@ -236,6 +239,7 @@
             m.header_id = t.id
             AND m.currency_code = #{currencyCode}
             and m.expense_type_id = #{expenseTypeId}
+            and (m.closed_flag is null or m.closed_flag = 1001)
             <!-- 分摊行金额 > 已报销金额 -->
             AND m.amount >
             (SELECT
@@ -246,6 +250,7 @@
             err.source_doc_category = #{sourceDocumentCategory}
             AND err.source_doc_dist_id = m.id)
             )
+            and (t.closed_flag is null or t.closed_flag in (1001,1002))
             <if test="headerCompanyId != null">
                 and t.company_id = #{headerCompanyId}
             </if>
@@ -270,9 +275,6 @@
                   from exp_application_header t, exp_application_type eat
         <where>
             t.type_id = eat.id
-            <if test="ew != null">
-                ${ew.sqlSegment}
-            </if>
             <if test="associatedAmountFrom != null">
                 and (select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id) &gt; #{associatedAmountFrom}
             </if>
@@ -284,6 +286,9 @@
             </if>
             <if test="relevanceAmountTo != null">
                 and t.amount-(select COALESCE(sum(el.amount),0) from exp_requisition_release el where el.source_doc_id = t.id) &lt; #{relevanceAmountTo}
+            </if>
+            <if test="ew != null">
+                ${ew.sqlSegment}
             </if>
         </where>
     </select>

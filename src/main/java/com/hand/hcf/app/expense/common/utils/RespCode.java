@@ -17,6 +17,10 @@ public interface RespCode {
     String SYS_FIELD_IS_NULL = "SYS_FIELD_IS_NULL";
     String SYS_VERSION_IS_ERROR = "SYS_VERSION_IS_ERROR";
     String SYS_DATA_FORMAT_ERROR = "SYS_DATA_FORMAT_ERROR";//数据格式错误
+    /**
+     * 必输字段不能为空！
+     */
+    String SYS_REQUIRED_FIELD_NONE = "SYS_REQUIRED_FIELD_NONE";
     // 关联申请类型不允许为空
     String EXPENSE_ASSOICATE_TYPE_NOT_EXISTS = "EXPENSE_ASSOICATE_TYPE_NOT_EXISTS";
     // 适用人员不允许为空
@@ -207,8 +211,6 @@ public interface RespCode {
     String EXPENSE_REPORT_LINE_IS_NULL = "EXPENSE_REPORT_LINE_IS_NULL";
     //付款行金额超出单据金额!
     String EXPENSE_REPORT_PAYMENT_SCHEDULE_AMOUT_GREATER_DOCUMENT_AMOUNT = "EXPENSE_REPORT_PAYMENT_SCHEDULE_AMOUT_GREATER_DOCUMENT_AMOUNT";
-    //报账单提交发生异常！
-    String EXPENSE_REPORT_SUBMIT_ERROR = "EXPENSE_REPORT_SUBMIT_ERROR";
     // 单据状态不允许进行此处操作，请检查单据状态！
     String EXPENSE_REPORT_STATUS_ERROR = "EXPENSE_REPORT_STATUS_ERROR";
     // 费用行金额合计不等于分摊行金额！
@@ -223,6 +225,34 @@ public interface RespCode {
     String EXPENSE_REPORT_SCHEDULE_TOTAL_AMOUNT_ERROR = "EXPENSE_REPORT_SCHEDULE_TOTAL_AMOUNT_ERROR";//计划付款行总金额必须等于报账单总金额
     String EXPENSE_REPORT_PAYMENT_INFO_ERROR = "EXPENSE_REPORT_PAYMENT_INFO_ERROR";//该计划付款行信息不完整
     String EXPENSE_REPORT_LINE_AMOUNT_TOO_BIG = "EXPENSE_REPORT_LINE_AMOUNT_TOO_BIG";//费用行金额大于申请单行可关联金额
+    /**
+     * 分摊行XX字段需参与分摊，不可为空，请检查该报账单类型分摊设置！
+     */
+    String EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE = "EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE";
+    /**
+     * 公司
+     */
+    String EXPENSE_REPORT_DIST_COMPANY = "expense.report.company";
+    /**
+     * 部门
+     */
+    String EXPENSE_REPORT_DIST_DEPARTMENT = "expense.report.department";
+    /**
+     * 责任中心
+     */
+    String EXPENSE_REPORT_DIST_REST_CENTER = "expense.report.responsibility.center";
+    /**
+     * 请维护费用行信息
+     */
+    String EXPENSE_REPORT_LINE_NOT_NULL = "EXPENSE_REPORT_LINE_NOT_NULL";
+    /**
+     * 请维护分摊行信息
+     */
+    String EXPENSE_REPORT_DIST_NOT_NULL = "EXPENSE_REPORT_DIST_NOT_NULL";
+    /**
+     * 分摊行总金额必须等于费用行金额
+     */
+    String EXPENSE_REPORT_DIST_TOTAL_AMOUNT_ERROR = "EXPENSE_REPORT_DIST_TOTAL_AMOUNT_ERROR";
 
     //已有差旅类的申请大类!
     String EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE = "EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE";

@@ -1,0 +1,126 @@
+server:
+  port: 9082
+spring:
+  dbType: mysql
+  datasource:
+    #driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ali_dev?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: ali_dev
+    password: ali_dev
+    #url: jdbc:mysql://101.132.114.170:3306/hcf_base?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    #username: hcf
+    #password: hcf@112358
+  #  dbType: oracle
+    maximum-pool-size: 10
+    pool-name: HikariPool
+    type: com.zaxxer.hikari.HikariDataSource
+  redis:
+    host: localhost
+    port: 6379
+  cloud:
+    bus:
+      enabled: false
+  cache:
+    cache-names: HCF_TOKEN
+    type: caffeine
+
+j2cache:
+  open-spring-cache: true
+  allow-null-values: true
+  cache-clean-mode: passive
+  serialization: com.hand.hcf.core.j2cache.support.util.KryoSerializer
+  sync_ttl_to_redis: true
+  broadcast:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisPubSubPolicy
+  L1:
+    provider: caffeine
+    region:
+      HCF_TOKEN: 3000,24h
+      default: 3000,24h
+  L2:
+    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisProvider
+    database: 0
+    channel: j2cache
+    storage: generic
+
+mybatis-plus:
+  mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml
+  type-aliases-package: com.hand.hcf.app.**.domain
+  type-handlers-package: com.hand.hcf.core.persistence.typehandler
+  enable-performance-interceptor: true
+  type-enums-package: com.hand.hcf.app.**.enums
+
+#
+security:
+  oauth2:
+    client:
+      access-token-uri: http://localhost:9082/oauth/token
+      client-authentication-scheme: form
+      client-id: implement-integration
+      client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+      grant-type: client_credentials
+    resource:
+      user-info-uri: http://localhost:9082/api/check_token
+
+logging:
+  config: classpath:logback/logback-prod.xml
+
+single-sign:
+  server:
+    host: http://sso-service:11059
+    access-token-uri: http://auth-service:9999/auth/oauth/token
+    client-id: implement-integration
+    client-secret: K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd
+
+wechat:
+    wechatUrl: http://wechat-service:11001/wechat-service/wechat/
+
+haima:
+    server:
+        userMapping: http://haima-service:9090/haima/api/user/mapping
+        userInfo: http://haima-service:9090/haima/api/user/userInfo
+
+
+app-center:
+  authentication:
+    download-url: http://downloads.huilianyi.com/app/sit
+    client-id: ArtemisWeb
+
+trialService:
+    api:
+        host: http://apiuat.huilianyi.com
+        get_trialUser: ${trialService.api.host}/trial/public/getTrialUser
+        bind_wechat_user: ${trialService.api.host}/trial/public/bind
+
+management:
+  health:
+    rabbit:
+      enabled: false
+
+mail:
+  password: ZhenHui2017
+  protocol: smtp
+  port: 25
+  auth: true
+  host: smtpdm.aliyun.com
+  tls: false
+  from: notice@service.huilianyi.com
+  enabled: true
+  username: notice@service.huilianyi.com
+
+async:
+  enable: true
+  max-pool-size: 250
+  queue-capacity: 8
+  core-pool-size: 8
+  keep-alive-seconds: 30
+hcf:
+  storage:
+    ftp:
+      port: 22
+      privateKey: /config/id_rsa_hcfftp
+      staticUrl: http://47.101.143.73:9089/
+      url: 47.101.143.73
+      username: hcfftp
+    mode: FTP
+

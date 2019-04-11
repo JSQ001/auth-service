@@ -43,4 +43,13 @@
            and si.enabled = 1
            order by sm.id,si.id
     </select>
+    <select id="getById" resultType="com.hand.hcf.app.base.system.domain.Interface">
+        SELECT
+               sm.app_code,
+               si.*
+        FROM sys_application sm
+        INNER JOIN sys_interface si
+        ON sm.id = si.app_id
+        WHERE si.id = #{id}
+    </select>
 </mapper>

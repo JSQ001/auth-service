@@ -193,6 +193,9 @@ public class OrganizationService {
         return departmentClient.getDepartmentByEmpOid(userOid);
     }
 
+    public DepartmentCO getDepartmentByEmployeeId(Long userId){
+        return departmentClient.getDepartmentByEmployeeId(userId);
+    }
     public Boolean judgeUserInUserGroups(JudgeUserCO judgeUserCO) {
         return userClient.judgeUserInUserGroups(judgeUserCO);
     }
@@ -385,11 +388,13 @@ public class OrganizationService {
      * @param  dimensionIds 维度集合
      */
     public List<DimensionDetailCO> listDetailCOByDimensionIdsAndCompany(Long companyId,
+                                                                        Long unitId,
+                                                                        Long userId,
                                                                         Boolean enabled,
                                                                         List<Long> dimensionIds){
-        //jiu.zhao 修改三方接口 20190401
-        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, enabled);
-        return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, enabled, companyId);
+        //jiu.zhao TODO
+        //return dimensionClient.listDetailByIdsConditionCompanyId(dimensionIds, companyId, unitId, userId, enabled);
+        return null;
     }
 
 
@@ -397,12 +402,10 @@ public class OrganizationService {
         return companyClient.listCompanyLevel(companyLevelId,companyLevelCode);
     }
 
-    /**
-     * WorkflowControllerImpl workflowClient 中此方法listApprovalFormsByIds已不存在 by chenxu
-     */
-    /*public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> ids){
+
+    public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> ids){
         return workflowClient.listApprovalFormsByIds(ids);
-    }*/
+    }
 
     /**
      * 根据公司Id分页获取指定公司的子公司

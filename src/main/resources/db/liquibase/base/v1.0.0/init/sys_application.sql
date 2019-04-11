@@ -1,0 +1,16 @@
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105012932669386754,'expense','费用',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013416159391745,'workflow','工作流服务',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1107952706836819969,'peripheral','外围服务',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105012845650161666,'budget','预算',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105012984301268993,'fund','资金',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013168313774082,'payment','支付',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013233900105729,'prepayment','预付款',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013284043010049,'tax','税务',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013339835641858,'workbench','共享工作台',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1104603306175856641,'base','基础服务',0,1,1,1);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1104604025725485057,'register-server','服务注册中心',0,1,1,1);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1109000637429776385,'job','调度中心',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105012801953902594,'mdata','主数据服务',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105012891829448706,'contract','合同',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013066048253954,'auth','认证服务',0,1,1083751705402064897,1083751705402064897);
+INSERT INTO sys_application(id, app_code, app_name, deleted, version_number, created_by, last_updated_by) VALUES (1105013118762266625,'accounting','会计核算',0,4,1083751705402064897,1105678381476745217);

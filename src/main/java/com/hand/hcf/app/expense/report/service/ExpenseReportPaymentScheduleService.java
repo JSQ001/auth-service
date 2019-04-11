@@ -29,6 +29,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.toList;
  * @remark
  */
 @Service
-public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseReportPaymentScheduleMapper, ExpenseReportPaymentSchedule> {
+public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseReportPaymentScheduleMapper,ExpenseReportPaymentSchedule>{
 
     @Autowired
     private ExpenseReportHeaderService expenseReportHeaderService;
@@ -89,6 +90,25 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         //jiu.zhao 支付
         //paymentService.deleteWriteOffForDocumentMessage(ExpenseDocumentTypeEnum.PUBLIC_REPORT.name(),expenseReportPaymentSchedule.getExpReportHeaderId(),id);
         return deleteById(id);
+    }
+
+    /**
+     * 更新审核状态
+     * @param headerId
+     * @param auditFlag
+     * @param auditDate
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateExpenseReportScheduleAduitStatusByHeaderId(Long headerId,
+                                                                   String auditFlag,
+                                                                   ZonedDateTime auditDate){
+        List<ExpenseReportPaymentSchedule> schedules = selectList(new EntityWrapper<ExpenseReportPaymentSchedule>().eq("exp_report_header_id", headerId));
+        schedules.stream().forEach(e -> {
+            e.setAuditFlag(auditFlag);
+            e.setAuditDate(auditDate);
+        });
+        return updateAllColumnBatchById(schedules);
     }
 
     /**
@@ -141,8 +161,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
      * @param expenseReportType
      */
     private void setDefaultAccountInfo(ExpenseReportPaymentSchedule expensePaymentSchedule,
-                                       ExpenseReportHeader expenseReportHeader,
-                                       ExpenseReportType expenseReportType){
+                      ExpenseReportHeader expenseReportHeader,
+                      ExpenseReportType expenseReportType){
         expensePaymentSchedule.setAccountNumber(expenseReportHeader.getAccountNumber());
         expensePaymentSchedule.setAccountName(expenseReportHeader.getAccountName());
         expensePaymentSchedule.setPayeeCategory(expenseReportHeader.getPayeeCategory());
@@ -316,7 +336,11 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         BeanUtils.copyProperties(expensePaymentSchedule, paymentScheduleDTO);
 
         //付款方式
-        SysCodeValueCO paymentMethodSysCode = organizationService.getSysCodeValueByCodeAndValue("2105",expensePaymentSchedule.getPaymentMethod());
+        if(StringUtils.isNotEmpty(expensePaymentSchedule.getPaymentMethod())){
+            SysCodeValueCO paymentMethodSysCode = organizationService.getSysCodeValueByCodeAndValue("2105",expensePaymentSchedule.getPaymentMethod());
+            paymentScheduleDTO.setPaymentMethodName(paymentMethodSysCode == null ? null : paymentMethodSysCode.getName());
+        }
+
         //现金事物分类、默认现金事物流量项
         //jiu.zhao 支付
         /*if (expensePaymentSchedule.getCshTransactionClassId() != null) {
@@ -324,7 +348,10 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
             paymentScheduleDTO.setCshTransactionClassName(cashTransactionClass.getDescription());
         }*/
         //收款对象类型
-        SysCodeValueCO payeeSysCode = organizationService.getSysCodeValueByCodeAndValue("2107", expensePaymentSchedule.getPayeeCategory());
+        if(StringUtils.isNotEmpty(expensePaymentSchedule.getPayeeCategory())) {
+            SysCodeValueCO payeeSysCode = organizationService.getSysCodeValueByCodeAndValue("2107", expensePaymentSchedule.getPayeeCategory());
+            paymentScheduleDTO.setPayeeCategoryName(payeeSysCode == null ? null : payeeSysCode.getName());
+        }
         //收款对象
         String payeeName = null;
         String payCode = null;
@@ -344,13 +371,11 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         paymentScheduleDTO.setPayeeCode(payCode);
         paymentScheduleDTO.setPayeeName(payeeName);
         //合同编号
-        //jiu.zhao 支付
+        //jiu.zhao 合同
         /*if(expensePaymentSchedule.getConPaymentScheduleLineId() != null){
             ContractHeaderLineCO contractLine = contractService.getContractLine(expenseReportHeader.getContractHeaderId(), expensePaymentSchedule.getConPaymentScheduleLineId());
             paymentScheduleDTO.setContractHeaderLineMessage(contractLine);
         }*/
-        paymentScheduleDTO.setPaymentMethodName(paymentMethodSysCode == null ? null : paymentMethodSysCode.getValue());
-        paymentScheduleDTO.setPayeeCategoryName(payeeSysCode == null ? null : payeeSysCode.getValue());
         return paymentScheduleDTO;
     }
 

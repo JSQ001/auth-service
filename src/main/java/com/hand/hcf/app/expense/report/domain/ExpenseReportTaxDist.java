@@ -6,6 +6,7 @@ import com.hand.hcf.app.expense.common.domain.DimensionDomain;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -105,4 +106,16 @@ public class ExpenseReportTaxDist extends DimensionDomain {
      */
     @TableField(value = "reverse_flag")
     private String reverseFlag;
+
+    /**
+     * 审核状态
+     */
+    @TableField(value = "audit_flag")
+    private String auditFlag;
+
+    /**
+     * 审核日期
+     */
+    @TableField(value = "audit_date")
+    private ZonedDateTime auditDate;
 }

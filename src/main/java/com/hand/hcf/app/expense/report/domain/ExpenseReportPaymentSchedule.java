@@ -165,4 +165,16 @@ public class ExpenseReportPaymentSchedule extends Domain {
     @TableField(value = "write_off_amount")
     private BigDecimal writeOffAmount;
 
+    /**
+     * 审核状态
+     */
+    @TableField(value = "audit_flag")
+    private String auditFlag;
+
+    /**
+     * 审核日期
+     */
+    @TableField(value = "audit_date")
+    private ZonedDateTime auditDate;
+
 }

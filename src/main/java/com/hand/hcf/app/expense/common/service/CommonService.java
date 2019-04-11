@@ -42,13 +42,14 @@ public class CommonService {
      * 根据维度ID查询维度并且赋值
      * @param dimensions
      */
-    public void setDimensionValueName(List<ExpenseDimension> dimensions, Long companyId){
+    public void setDimensionValueName(List<ExpenseDimension> dimensions, Long companyId, Long unitId, Long userId){
         if (!CollectionUtils.isEmpty(dimensions)){
             List<Long> dimensionIds = dimensions
                     .stream()
                     .map(ExpenseDimension::getDimensionId)
                     .collect(Collectors.toList());
-            List<DimensionDetailCO> detailCOS = orgService.listDetailCOByDimensionIdsAndCompany(companyId, null, dimensionIds);
+            List<DimensionDetailCO> detailCOS = orgService.listDetailCOByDimensionIdsAndCompany(
+                    companyId, unitId, userId, null, dimensionIds);
 
             Map<Long, DimensionDetailCO> detailCOMap = detailCOS
                     .stream()
@@ -217,7 +218,7 @@ public class CommonService {
     }
 
 
-    public void setDimensionValueNameAndOptions(List<ExpenseDimension> dimensions, Long companyId){
+    public void setDimensionValueNameAndOptions(List<ExpenseDimension> dimensions, Long companyId, Long unitId, Long userId){
         if (!CollectionUtils.isEmpty(dimensions)){
             List<Long> dimensionIds = dimensions
                     .stream()
@@ -225,7 +226,7 @@ public class CommonService {
                     .collect(Collectors.toList());
             // 查询当前公司这些维度启用的维值
             List<DimensionDetailCO> valueDTOs = orgService.listDetailCOByDimensionIdsAndCompany(
-                    companyId, true, dimensionIds);
+                    companyId, unitId, userId, Boolean.TRUE, dimensionIds);
 
             Map<Long, DimensionDetailCO> detailCOMap = valueDTOs
                     .stream()

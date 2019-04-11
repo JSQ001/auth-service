@@ -38,12 +38,13 @@
         LEFT JOIN sys_application a on f.application_id = a.id
         WHERE
               f.deleted = 0
-        <if test="functionIds != null and functionIds.size>0">
-            AND  f.id in
-            <foreach collection="functionIds" item="functionId" separator="," open="(" close=")">
-                #{functionId}
-            </foreach>
-        </if>
+            AND exists (select 1 from sys_role_function rf where rf.function_id = f.id
+            <if test="roleIds != null and roleIds.size > 0">
+                AND rf.role_id in
+                <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+                    #{roleId}
+                </foreach>
+            </if>)
         ORDER BY c.sequence_number asc , f.sequence_number asc
     </select>
     <select id="listNotAssignFunction" resultType="com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO">

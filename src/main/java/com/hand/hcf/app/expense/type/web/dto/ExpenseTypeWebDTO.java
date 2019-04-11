@@ -15,11 +15,18 @@ import java.util.List;
  * @Date: 2018/11/26
  */
 @Data
-public class ExpenseTypeWebDTO extends ExpenseType {
-
-    @TableField(exist = false)
-    private List<ExpenseFieldDTO> fields;
+public class ExpenseTypeWebDTO extends ExpenseType  implements Comparable<ExpenseType>{
 
     @JsonIgnore
     private List<ExpenseField> fieldList;
+
+    @JsonIgnore
+    private List<Long> userGroupIds;
+    @JsonIgnore
+    private Boolean userGroupFlag;
+
+    @Override
+    public int compareTo(ExpenseType o) {
+        return this.getCode().compareTo(o.getCode());
+    }
 }

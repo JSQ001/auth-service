@@ -161,8 +161,8 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
         return result;
     }
 
-    public List<ContentFunctionDTO> listContentFunctions(List<Long> functionIds){
-        return baseMapper.listContentFunctions(functionIds);
+    public List<ContentFunctionDTO> listContentFunctions(List<Long> roleIds){
+        return baseMapper.listContentFunctions(roleIds);
     }
 
     public List<ContentFunctionDTO> listNotAssignFunction(List<Long> functionIds) {

@@ -49,12 +49,6 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         if (pageList.getFilePath() == null){
             throw new BizException(RespCode.PAGE_LIST_FILE_PATH_IS_NULL);
         }
-        if (pageList.getPageRouter() == null){
-            throw new BizException(RespCode.PAGE_LIST_PAGE_ROUTER_IS_NULL);
-        }
-        if (pageList.getPageUrl() == null){
-            throw new BizException(RespCode.PAGE_LIST_PAGE_URL_IS_NULL);
-        }
 
         pageListMapper.insert(pageList);
         return pageListMapper.selectById(pageList);
@@ -130,7 +124,7 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         return result;
     }
 
-    public List<FunctionPageDTO> listPageByFunctionIds(List<Long> functionIds){
-        return baseMapper.listPageByFunctionIds(functionIds);
+    public List<FunctionPageDTO> listPageByRoleIds(List<Long> roleIds){
+        return baseMapper.listPageByRoleIds(roleIds);
     }
 }

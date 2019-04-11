@@ -2,7 +2,10 @@
 
 package com.hand.hcf.app.auth.config;
 
-import com.hand.hcf.app.auth.security.*;
+import com.hand.hcf.app.auth.security.BaseAuthorizationCodeServices;
+import com.hand.hcf.app.auth.security.BaseRedisTokenStore;
+import com.hand.hcf.app.auth.security.BaseTokenEnhancer;
+import com.hand.hcf.app.auth.security.BaseTokenService;
 import com.hand.hcf.core.config.AuthExceptionEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +17,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.OAuth2RequestValidator;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
@@ -47,6 +49,7 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
     public AuthServerConfiguration(AuthenticationManager authenticationManager,DataSource dataSource) {
         this.authenticationManager = authenticationManager;
         this.dataSource=dataSource;
+
     }
 
     @Bean
@@ -73,9 +76,6 @@ public class AuthServerConfiguration extends AuthorizationServerConfigurerAdapte
         tokenServices.setReuseRefreshToken(true);
         tokenServices.setTokenEnhancer(tokenEnhancer());
         tokenServices.setClientDetailsService(jdbcClientDetailsService());
-        //tokenServices.setAccessTokenValiditySeconds(7200);
-        //tokenServices.setTokenEnhancer(this.tokenEnhancer());
-        //this.addUserDetailsService(tokenServices, this.userDetailsService);
         return tokenServices;
     }
 

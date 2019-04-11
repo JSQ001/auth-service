@@ -22,8 +22,8 @@ public class BaseAuthorizationCode implements Serializable {
 	}
 
 	public int getExpiresIn() {
-		return expiration != null ? Long.valueOf((expiration.getTime() - System.currentTimeMillis()) / 1000L)
-				.intValue() : 0;
+		return expiration != null ? (int) ((expiration.getTime() - System.currentTimeMillis()) / 1000)
+				 : 0;
 	}
 
 	protected void setExpiresIn(int delta) {

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 /**
  * A Attachment.
+ * @author polus
  */
 @Data
 @TableName("sys_attachment")

@@ -17,12 +17,14 @@ SELECT
 	t.RESPONSIBILITY_CENTER_ID,
 	t.AMOUNT BASE_AMOUNT,
 	t.FUNCTION_AMOUNT BASE_FUNCTION_AMOUNT,
+	t.AMOUNT distAmount,
+	t.TAX_DIST_AMOUNT distTaxAmount,
 	t.CURRENCY_CODE,
 	t.EXCHANGE_RATE rate
 FROM
 	exp_report_dist t
 WHERE
-  t.EXP_REPORT_LINE_ID = #{expReportLineId}
+  t.EXP_REPORT_LINE_ID = #{expReportLineId} and
 	t.id NOT IN (
 SELECT
 	r1.EXP_REPORT_DIST_ID
@@ -43,10 +45,14 @@ WHERE
 	t.RESPONSIBILITY_CENTER_ID,
 	t.BASE_AMOUNT,
 	t.BASE_FUNCTION_AMOUNT,
+	(select d.amount from  exp_report_dist d
+	where d.id = t.EXP_REPORT_DIST_ID) distAmount,
+	(select d.tax_dist_amount from  exp_report_dist d
+	where d.id = t.EXP_REPORT_DIST_ID) distTaxAmount,
 	t.CURRENCY_CODE,
 	t.RATE
 	from EXP_INPUT_TAX_DIST t
-	where t.inputTaxLineId= #{inputTaxLineId})
+	where t.input_tax_line_id= #{inputTaxLineId})
     </select>
     <select id="getSumAmount" resultType="com.hand.hcf.app.expense.input.dto.ExpInputTaxSumAmountDTO">
 		select

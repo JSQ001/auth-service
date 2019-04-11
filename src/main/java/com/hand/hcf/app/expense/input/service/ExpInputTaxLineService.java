@@ -71,6 +71,36 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
         for (ExpInputForReportLineDTO line : expInputForReportLineDTOS) {
             //获取到头数据
             ExpInputTaxHeaderDTO header = expInputTaxHeaderService.queryById(line.getInputTaxHeaderId());
+
+            //然后操作行数据 三种可能，新增，更新，删除
+            ExpInputTaxLine expInputTaxLine = mapperFacade.map(line, ExpInputTaxLine.class);
+            //头字段插入
+            expInputTaxLine.setStatus(header.getStatus());
+            expInputTaxLine.setAuditStatus(header.getAuditStatus());
+            expInputTaxLine.setReverseFlag(header.getReverseFlag());
+            expInputTaxLine.setUseType(header.getUseType());
+            expInputTaxLine.setTransferProportion(header.getTransferProportion());
+            //这里必须采用累加才能避免尾差
+            expInputTaxLine.setBaseAmount(BigDecimal.ZERO);
+            expInputTaxLine.setBaseFunctionAmount(BigDecimal.ZERO);
+            expInputTaxLine.setAmount(BigDecimal.ZERO);
+            expInputTaxLine.setFunctionAmount(BigDecimal.ZERO);
+            //日志信息
+            expInputTaxLine.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
+            expInputTaxLine.setLastUpdatedDate(ZonedDateTime.now());
+            //新增
+            if (line.getId() == null && !line.getSelectFlag().equals("N")) {
+                expInputTaxLine.setCreatedBy(OrgInformationUtil.getUser().getId());
+                expInputTaxLine.setCreatedDate(ZonedDateTime.now());
+                expInputTaxLineMapper.insert(expInputTaxLine);
+            } else if (line.getId() != null && !line.getSelectFlag().equals("N")) {
+                //更新
+                expInputTaxLineMapper.updateById(expInputTaxLine);
+            } else if (line.getId() != null && line.getSelectFlag().equals("N")) {
+                //删除
+                expInputTaxLineMapper.deleteById(line.getId());
+            }
+
             //首先保存分配行数据,对于分配行，只有新增和删除两个可能
             for (ExpInputForReportDistDTO dist : line.getExpInputForReportDistDTOS()) {
                 //如果id存在，但是选择标志变为N，则说明这个行被删除了
@@ -79,6 +109,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                 } else if (dist.getId() == null && dist.getSelectFlag().equals("Y")) {
                     ExpInputTaxDist expInputTaxDist = mapperFacade.map(dist, ExpInputTaxDist.class);
                     //头字段插入
+                    expInputTaxDist.setInputTaxLineId(expInputTaxLine.getId());
                     expInputTaxDist.setStatus(header.getStatus());
                     expInputTaxDist.setAuditStatus(header.getAuditStatus());
                     expInputTaxDist.setReverseFlag(header.getReverseFlag());
@@ -97,37 +128,22 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                     expInputTaxDistService.insertDistData(expInputTaxDist);
                 }
             }
-            //然后操作行数据 三种可能，新增，更新，删除
-            ExpInputTaxLine expInputTaxLine = mapperFacade.map(line, ExpInputTaxLine.class);
-            //头字段插入
-            expInputTaxLine.setStatus(header.getStatus());
-            expInputTaxLine.setAuditStatus(header.getAuditStatus());
-            expInputTaxLine.setReverseFlag(header.getReverseFlag());
-            expInputTaxLine.setUseType(header.getUseType());
-            expInputTaxLine.setTransferProportion(header.getTransferProportion());
-            //这里必须采用累加才能避免尾差
-            ExpInputTaxSumAmountDTO sumAmount = expInputTaxDistService.getSumAmount(line.getId());
-            expInputTaxLine.setBaseAmount(sumAmount.getBaseAmount());
-            expInputTaxLine.setBaseFunctionAmount(sumAmount.getBaseFunctionAmount());
-            expInputTaxLine.setAmount(sumAmount.getAmount());
-            expInputTaxLine.setFunctionAmount(sumAmount.getFunctionAmount());
-            //日志信息
-            expInputTaxLine.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
-            expInputTaxLine.setLastUpdatedDate(ZonedDateTime.now());
-            //新增
-            if (line.getId() == null && !line.getSelectFlag().equals("N")) {
-                expInputTaxLine.setCreatedBy(OrgInformationUtil.getUser().getId());
-                expInputTaxLine.setCreatedDate(ZonedDateTime.now());
-                expInputTaxLineMapper.insert(expInputTaxLine);
-            } else if (line.getId() != null && !line.getSelectFlag().equals("N")) {
-                //更新
-                expInputTaxLineMapper.updateById(expInputTaxLine);
-            } else if (line.getId() != null && line.getSelectFlag().equals("N")) {
-                //删除
-                expInputTaxLineMapper.deleteById(line.getId());
+
+            //更新行金额
+            if(!line.getSelectFlag().equals("N")) {
+                ExpInputTaxLine l = expInputTaxLineMapper.selectById(expInputTaxLine.getId());
+                if(l != null) {
+                    ExpInputTaxSumAmountDTO sumAmount = expInputTaxDistService.getSumAmount(expInputTaxLine.getId());
+                    l.setBaseAmount(sumAmount.getBaseAmount());
+                    l.setBaseFunctionAmount(sumAmount.getBaseFunctionAmount());
+                    l.setAmount(sumAmount.getAmount());
+                    l.setFunctionAmount(sumAmount.getFunctionAmount());
+                    expInputTaxLineMapper.updateById(l);
+                }
             }
+
             //最后需要更新头的金额
-            ExpInputTaxSumAmountDTO sumLineAmount = getSumAmount(line.getId());
+            ExpInputTaxSumAmountDTO sumLineAmount = getSumAmount(expInputTaxLine.getId());
             header.setBaseAmount(sumLineAmount.getBaseAmount());
             header.setBaseFunctionAmount(sumLineAmount.getBaseFunctionAmount());
             header.setAmount(sumLineAmount.getAmount());
