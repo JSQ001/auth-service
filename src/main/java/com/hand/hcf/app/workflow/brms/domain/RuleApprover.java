@@ -36,12 +36,12 @@ public class RuleApprover extends Domain implements Serializable {
     private UUID ruleApprovalNodeOid;
     //包含分摊成本中心主管
     @TableField("contains_appo_center_manger")
-    private Boolean containsApportionmentCostCenterManager;
+    private Boolean containsAppoCenterManger;
     //包含分摊组织架构主管
     @TableField("contains_appo_depart_manager")
-    private Boolean containsApportionmentDepartmentManager;
+    private Boolean containsAppoDepartManager;
     //包含分摊成本中心主要部门的部门经理
     @TableField("contains_appo_pri_dept_manager")
-    private Boolean containsApportionmentCostCenterPrimaryDepartmentManager;
+    private Boolean containsAppoPriDeptManager;
 
 }

@@ -76,7 +76,7 @@ public class ResponseDataDTO<T> {
         return new ResponseDataDTO(body);
     }
 
-    public static <T> ResponseDataDTO<T> error(T result, String code, String message){
+    public static <T> ResponseDataDTO<T> error(T result,String code,String message){
         return new ResponseDataDTO(result,code,message,false);
     }
 

@@ -38,7 +38,7 @@ public class WorkflowWithdrawService {
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
-    private WorkflowMessageService workflowMessageService;
+    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
     /**
      * 撤回工作流
@@ -89,11 +89,13 @@ public class WorkflowWithdrawService {
         Assert.notNull(userOid, "userOid null");
 
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
-        UUID submittorOid = workFlowDocumentRef.getSubmittedBy();
-        Integer approvalStatus = workFlowDocumentRef.getStatus();
         if (workFlowDocumentRef == null) {
             throw new BizException(ErrorConstants.NOT_FIND_THE_INSTANCE);
-        } else if (!userOid.equals(submittorOid)) {
+        }
+
+        UUID submitterOid = workFlowDocumentRef.getSubmittedBy();
+        Integer approvalStatus = workFlowDocumentRef.getStatus();
+        if (!userOid.equals(submitterOid)) {
             // 暂定只能提交人可以撤回实例
             throw new BizException(ErrorConstants.NOT_FIND_THE_INSTANCE);
         } else if (!DocumentOperationEnum.APPROVAL.getId().equals(approvalStatus)) {
@@ -101,7 +103,7 @@ public class WorkflowWithdrawService {
             throw new BizException(ErrorConstants.INSTANCE_STATUS_CANNOT_WITHDRAW);
         }
 
-        WorkflowInstance instance = WorkflowInstance.toInstance(workFlowDocumentRef);
+        WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowWithdrawInstanceAction action = new WorkflowWithdrawInstanceAction(this, instance, user, approvalText);
 
@@ -112,8 +114,8 @@ public class WorkflowWithdrawService {
         workflowMainService.runWorkflow(action);
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 发送消息
-        workflowMessageService.sendMessage(workFlowDocumentRef);
+        // 通知审批结果
+        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
     }
 
     /**
@@ -131,7 +133,7 @@ public class WorkflowWithdrawService {
         // 清除跟实例关联的所有任务
         workflowBaseService.clearAllTasks(instance);
         // 更新实例的状态成撤回
-        instance.setStatus(WorkflowInstance.STATUS_WITHDRAW);
+        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_WITHDRAW);
         workflowBaseService.updateInstance(instance);
         // 保存撤回的历史
         workflowBaseService.saveHistory(instance, user, WorkflowWithdrawInstanceAction.ACTION_NAME, remark);

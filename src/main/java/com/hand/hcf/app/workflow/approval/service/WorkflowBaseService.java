@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.approval.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowPassTaskAction;
@@ -84,20 +85,15 @@ public class WorkflowBaseService {
 
         ApprovalChain approvalChain = approvalChainService.getByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApproverOid(
                 entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), true, userOid);
-        WorkflowTask task = WorkflowTask.toTask(approvalChain);
+        WorkflowTask task = null;
 
-        if (task != null) {
+        if (approvalChain != null) {
             // 获取节点
             UUID ruleApprovalNodeOid = approvalChain.getRuleApprovalNodeOid();
             RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getRuleApprovalNode(ruleApprovalNodeOid);
-            WorkflowNode node = WorkflowNode.toNode(ruleApprovalNode);
-            // node
-            node.setInstance(instance);
-            task.setNode(node);
-            // instance
-            task.setInstance(instance);
-            // user
-            task.setUser(user);
+            WorkflowNode node = new WorkflowNode(ruleApprovalNode, instance);
+            // 创建任务
+            task = new WorkflowTask(approvalChain, instance, node, user);
         }
 
         return task;
@@ -133,8 +129,7 @@ public class WorkflowBaseService {
         }
 
         RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getNextByRuleApprovalChainOid(ruleApprovalChainOid, ruleApprovalNodeSequence);
-        WorkflowNode nextNode = WorkflowNode.toNode(ruleApprovalNode);
-        nextNode.setInstance(instance);
+        WorkflowNode nextNode = new WorkflowNode(ruleApprovalNode, instance);
         return nextNode;
     }
 
@@ -181,12 +176,12 @@ public class WorkflowBaseService {
      * @date 2019/04/07
      *
      * @param node
-     * @param status
+     * @param approvalStatus
      * @return
      */
-    public int countTasks(WorkflowNode node, String status) {
+    public int countTasks(WorkflowNode node, Integer approvalStatus) {
         Assert.notNull(node, "node null");
-        Assert.notNull(status, "status null");
+        Assert.notNull(approvalStatus, "approvalStatus null");
         Assert.notNull(node.getInstance(), "node.instance null");
         Assert.notNull(node.getNodeOid(), "node.nodeOid null");
         WorkflowInstance instance = node.getInstance();
@@ -194,7 +189,7 @@ public class WorkflowBaseService {
         UUID entityOid = instance.getEntityOid();
         UUID nodeOid = node.getNodeOid();
 
-        int taskTotal = doCountTasks(entityType, entityOid, nodeOid, status);
+        int taskTotal = doCountTasks(entityType, entityOid, nodeOid, approvalStatus);
         return taskTotal;
     }
 
@@ -204,15 +199,15 @@ public class WorkflowBaseService {
      * @date 2019/04/07
      *
      * @param instance
-     * @param status
+     * @param approvalStatus
      * @return
      */
-    public int countTasks(WorkflowInstance instance, String status) {
+    public int countTasks(WorkflowInstance instance, Integer approvalStatus) {
         Assert.notNull(instance, "instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        int taskTotal = doCountTasks(entityType, entityOid, null, status);
+        int taskTotal = doCountTasks(entityType, entityOid, null, approvalStatus);
         return taskTotal;
     }
 
@@ -294,16 +289,17 @@ public class WorkflowBaseService {
     public void updateTask(WorkflowTask task) {
         Assert.notNull(task, "task null");
         Assert.notNull(task.getId(), "task.id null");
+        Assert.notNull(task.getApprovalChain(), "task.approvalChain null");
         Assert.notNull(task.getStatus(), "task.status null");
-        Assert.notNull(task.getEnabled(), "task.enabled null");
         Long taskId = task.getId();
-        String taskStatus = task.getStatus();
-        Boolean taskEnabled = task.getEnabled();
+        ApprovalChain taskApprovalChain = task.getApprovalChain();
+        Integer taskStatus = task.getStatus();
 
         ApprovalChain approvalChain = approvalChainService.selectById(taskId);
         // 设置状态
-        approvalChain.setStatus(WorkflowTask.getEnabledValue(taskEnabled));
-        WorkflowTask.getStatusValue(approvalChain, taskStatus);
+        approvalChain.setStatus(taskStatus);
+        approvalChain.setCurrentFlag(taskApprovalChain.getCurrentFlag());
+        approvalChain.setFinishFlag(taskApprovalChain.getFinishFlag());
         // 更新任务
         approvalChainService.save(approvalChain);
     }
@@ -319,17 +315,17 @@ public class WorkflowBaseService {
     public WorkflowInstance updateInstance(WorkflowInstance instance) {
         Assert.notNull(instance, "instance null");
         Assert.notNull(instance.getId(), "instance.id null");
-        Assert.notNull(instance.getStatus(), "instance.status null");
+        Assert.notNull(instance.getApprovalStatus(), "instance.approvalStatus null");
         Long instanceId = instance.getId();
-        String instanceStatus = instance.getStatus();
+        Integer instanceStatus = instance.getApprovalStatus();
 
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.selectById(instanceId);
         // 设置实例的状态
-        workFlowDocumentRef.setStatus(WorkflowInstance.getStatusValue(instanceStatus));
+        workFlowDocumentRef.setStatus(instanceStatus);
         // 更新实例的状态
         workFlowDocumentRefService.updateById(workFlowDocumentRef);
 
-        instance = WorkflowInstance.toInstance(workFlowDocumentRef);
+        instance = new WorkflowInstance(workFlowDocumentRef);
         return instance;
     }
 
@@ -346,14 +342,16 @@ public class WorkflowBaseService {
         Assert.notNull(user, "user null");
         Assert.notNull(node.getInstance(), "node.instance null");
         Assert.notNull(node.getType(), "node.type null");
+        Assert.notNull(node.getRule(), "node.rule null");
 
         WorkflowInstance instance = node.getInstance();
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
         UUID nodeOid = node.getNodeOid();
         Integer nodeSequence = node.getSequence();
-        String countersign = node.getCountersign();
-        String nodeType = node.getType();
+        WorkflowRule rule = node.getRule();
+        Integer countersign = rule.getCountersignRule();
+        Integer nodeType = node.getType();
         UUID userOid = user.getUserOid();
         ZonedDateTime now = ZonedDateTime.now();
         Assert.notNull(entityType, "node.instance.entityType null");
@@ -369,7 +367,7 @@ public class WorkflowBaseService {
         approvalChain.setSequence(nodeSequence);
         approvalChain.setCountersignType(null);
         // 会签规则
-        approvalChain.setCountersignRule(WorkflowNode.getCountersignValue(countersign));
+        approvalChain.setCountersignRule(countersign);
 
         approvalChain.setApproverOid(userOid);
         approvalChain.setCurrentFlag(true);
@@ -516,22 +514,22 @@ public class WorkflowBaseService {
         workFlowDocumentRefService.updateForSet("version_number = version_number", wrapper);
     }
 
-    private int doCountTasks(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, String status) {
+    private int doCountTasks(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Integer approvalStatus) {
         Assert.notNull(entityType, "entityType null");
         Assert.notNull(entityOid, "entityOid null");
-        Assert.notNull(status, "status null");
+        Assert.notNull(approvalStatus, "approvalStatus null");
 
         EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
 
-        if (WorkflowTask.STATUS_GENERAL.equals(status)) {
+        if (WorkflowTask.APPROVAL_STATUS_GENERAL.equals(approvalStatus)) {
             wrapper.eq("current_flag", false);
             wrapper.eq("finish_flag", false);
-        } else if (WorkflowTask.STATUS_APPROVAL.equals(status)) {
+        } else if (WorkflowTask.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
             wrapper.eq("current_flag", true);
-        } else if (WorkflowTask.STATUS_APPROVED.equals(status)) {
+        } else if (WorkflowTask.APPROVAL_STATUS_APPROVED.equals(approvalStatus)) {
             wrapper.eq("finish_flag", true);
         } else {
-            throw new IllegalArgumentException(String.format("status(%s) invalid", status));
+            throw new IllegalArgumentException(String.format("approvalStatus(%s) invalid", approvalStatus));
         }
 
         wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);

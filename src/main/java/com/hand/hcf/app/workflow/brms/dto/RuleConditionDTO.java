@@ -60,11 +60,6 @@ public class RuleConditionDTO {
     @NotNull
     private UUID entityOid;
 
-    private UUID customEnumerationOid;
-
     private String fieldContent;
 
-    private UUID refCostCenterOid;
-
-    private String costCenterName;
 }

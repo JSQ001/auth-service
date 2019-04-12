@@ -6,7 +6,6 @@ import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.constant.SyncLockPrefix;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
@@ -19,6 +18,7 @@ import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.ServiceUnavailableException;
 import com.hand.hcf.core.redisLock.annotations.LockedObject;
@@ -81,7 +81,7 @@ public class ApprovalRejectService {
 
                     // 只有提交状态的单据才可以审批通过和拒绝和撤回
                     if (!DocumentOperationEnum.APPROVAL.getId().equals(workFlowDocumentRef.getStatus())) {
-                        throw new BizException(RespCode.STATUS_ERROR_200003);
+                        throw new BizException(ExceptionCode.STATUS_ERROR_200003);
                     }
 
                     // 支持任一人（任一审批人审批通过则单据被审批通过，所有审批人都审批驳回则单据才被驳回）会签规则
@@ -102,7 +102,7 @@ public class ApprovalRejectService {
                         String messageDetailByCode = messageService.getMessageDetailByCode(((BizException) e).getCode());
                         approvalResDTO.getFailReason().put(entity.getEntityOid(), messageDetailByCode);
                     } else if (e instanceof ServiceUnavailableException) {
-                        approvalResDTO.getFailReason().put(entity.getEntityOid(), messageService.getMessageDetailByCode(RespCode.SERVICE_6001, e.getMessage()));
+                        approvalResDTO.getFailReason().put(entity.getEntityOid(), messageService.getMessageDetailByCode(ExceptionCode.SERVICE_6001, e.getMessage()));
                     } else {
                         approvalResDTO.getFailReason().put(entity.getEntityOid(), e.getMessage());
                     }
@@ -122,7 +122,7 @@ public class ApprovalRejectService {
      * @return true可以最终决定驳回单据，false无法最终决定驳回单据
      */
     @Transactional
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = RespCode.SYS_REQUEST_BE_PROCESSING)
+    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
     public boolean rejectWorkflow(UUID approverOid, Integer entityType, @LockedObject UUID entityOid, UUID chainApproverOid, String approvalTxt) {
         ApprovalChain approvalChain;
         RuleApprovalNodeDTO ruleApprovalNode = new RuleApprovalNodeDTO();

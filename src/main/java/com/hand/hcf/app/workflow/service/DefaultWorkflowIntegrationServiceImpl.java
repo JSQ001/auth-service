@@ -11,16 +11,16 @@ import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.constant.WorkflowConstants;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
-import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.RespCode;
-import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.AssembleBrmsParamsRespDTO;
+import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.enums.ApprovalPathModeEnum;
 import com.hand.hcf.app.workflow.enums.BusinessColumnMessageKey;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
+import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.core.exception.core.ValidationError;
@@ -53,23 +53,22 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
 
 
-    public List<String> getWorkflowApprovalPath(UUID userOid, UUID entityOid, Integer approvalPathType) {
+    public List<String> getWorkflowApprovalPath(UUID userOid, UUID entityOid) {
         CompanyCO company = baseClient.getCompanyByUserOid(userOid);
         CompanyConfigurationCO companyConfiguration = baseClient.getCompanyConfigByCompanyOid(company.getCompanyOid());
         if (companyConfiguration==null) {//公司配置不存在
             throw new ValidationException(new ValidationError("CompanyConfiguration.not.exist", "CompanyConfiguration.not.exist"));
         }
 
-        return this.getWorkflowApprovalPath(userOid, entityOid,approvalPathType,
+        return this.getWorkflowApprovalPath(userOid, entityOid,
                 companyConfiguration.getApprovalMode(),
                 companyConfiguration.getDepartmentLevel());
     }
 
-    public List<String> getWorkflowApprovalPath(UUID userOid, UUID entityOid,Integer approvalPathType, int approvalMode, int departmentLevel) {
+    public List<String> getWorkflowApprovalPath(UUID userOid, UUID entityOid, int approvalMode, int departmentLevel) {
         CompanyCO company = baseClient.getCompanyByUserOid(userOid);
         List<String> result = new ArrayList<>();
         String approvalOids = "";
-        Double amount = 0d;
         UUID chooseDepartment = null;// 获取单据 部门OID
         UUID chooseCostCenterItem = null;
         boolean isUserPick = approvalMode == ApprovalMode.USER_PICK.getId();
@@ -79,40 +78,22 @@ public class DefaultWorkflowIntegrationServiceImpl {
             result=baseClient.getDepartmentPath(userOid,chooseDepartment,departmentLevel);
 
         } else if (approvalMode == ApprovalMode.USER_PICK.getId()) {//选人审批
-            if (StringUtils.isNotBlank(approvalOids)) {//approvalOids--2016-11-15 防止为空
+            if (StringUtils.isNotBlank(approvalOids)) {
                 List<String> userPick = new ArrayList<>(Arrays.asList(approvalOids.split(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT)));
-                if (userPick.contains(userOid.toString())) {//移除自己
-                    //userPick.remove(user.getUserOid().toString());
-                }
                 result = userPick;
             }
         }
 
         if (CollectionUtils.isEmpty(result)) {//从审批规则获取
 
-                //result = workflowRulesSettingService.getWorkflowRulesSettingRoleListByDepartmentOId(amount, department.getDepartmentOid().toString());
                 result = workflowRulesSettingService.getWorkflowRulesSettingRoleListNoCondition(company.getCompanyOid(), chooseDepartment, chooseCostCenterItem, userOid, StringUtil.getStringValue(approvalOids), 1001);
         }
 
 
         if (CollectionUtils.isEmpty(result)) {
             log.info("====userOid:" + userOid + "  " + " entityOid:" + entityOid + "=======workflowRulesSettingRoleList.empty");
-            //throw new ValidationException(new ValidationError("workflowRulesSettingRoleList.empty", "workflowRulesSettingRoleList.empty"));
-            throw new BizException(RespCode.SYS_APPROVAL_CHAIN_IS_NULL);
+            throw new BizException(ExceptionCode.SYS_APPROVAL_CHAIN_IS_NULL);
         } else {
-            /*if (approvalMode != ApprovalMode.USER_PICK.getId()) {//不是选人审批返回审批链
-                for (int i = 0; i < result.size(); i++) {//处理审批链 例:a-b-c 当前用户a 返回b-c
-                    if (result.get(i).equals(user.getUserOid().toString())) {
-                        if (i == result.size() - 1) {
-                            result = result.subList(i, result.size());
-                        } else {
-                            result = result.subList(i + 1, result.size());
-                        }
-                        break;
-                    }
-
-                }
-            }*/
 
             /**
              * 替换申请人
@@ -144,7 +125,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                         UUID managerOid = baseClient.getLastDepartmentManagerByApplicantOid(userOid);
                         if (managerOid == null) {
                             log.info("SELFAPPROVAL ,replace approver error ,applicatOid : {} ", applicantOidStirng);
-                            throw new BizException(RespCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                            throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                         }
                         result.set(result.indexOf(applicantOidStirng), managerOid.toString());
                         break;
@@ -160,10 +141,10 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
 
 
-    public List<String> getWorkflowNextApprovalPath(UUID userOid, UUID entityOid, UUID lastApproval, Integer approvalPathType) {
+    public List<String> getWorkflowNextApprovalPath(UUID userOid, UUID entityOid, UUID lastApproval) {
 
 
-        List<String> list = this.getWorkflowApprovalPath(userOid, entityOid, approvalPathType).stream().collect(Collectors.toList());
+        List<String> list = this.getWorkflowApprovalPath(userOid, entityOid).stream().collect(Collectors.toList());
         if (lastApproval == null) {//第一次获取审批人
             return Arrays.asList(list.get(0));
         } else {
@@ -174,12 +155,11 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     linkedList.add(user);
                 }
             }
-            //ApprovalChain approvalChain = approvalChainRepository.findByEntityTypeAndEntityOidAndStatusAndCurrentFlag(entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), true);
             int sequence = linkedList.indexOf(lastApproval.toString());
             if (sequence != -1 && sequence + 1 < linkedList.size()) {
                 return Arrays.asList(linkedList.get(sequence + 1));
             } else if (sequence + 1 == linkedList.size()) {//最后一个审批
-                return null;
+                return new ArrayList<>();
             } else {
                 return Arrays.asList(linkedList.get(0));//审批规则改变从头获取
             }
@@ -192,24 +172,19 @@ public class DefaultWorkflowIntegrationServiceImpl {
         return ApprovalPathModeEnum.parse(companyConfiguration.getApprovalPathMode());
     }
 
-    public RuleNextApproverResult getWorkflowNextApprovalPathByRule(UUID entityOid, Integer entityType, UUID lastApprovalNodeOid, UUID applicantOid) {
-        AssembleBrmsParamsRespDTO assembleBrmsParamsRespDTO = null;//TODO assembleBrmsNewParams(entityOid, entityType, applicantOid);
-        return getRuleNextApproverResult(assembleBrmsParamsRespDTO.getFormValueDTOS(), assembleBrmsParamsRespDTO.getFormOid(), lastApprovalNodeOid, applicantOid, entityType, entityOid, assembleBrmsParamsRespDTO.getEntityData());
-    }
-
-    private void getRuleApproverUserOids(RuleApprovalNodeDTO ruleApprovalNodeDTO, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO, Integer entityType) {
+    private void getRuleApproverUserOids(RuleApprovalNodeDTO ruleApprovalNodeDTO, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
         //查找具体审批人
         log.info("DefaultWorkflowIntegrationServiceImpl->getRuleApproverUserOids->request:ruleApprovalNodeDTO:{};droolsRuleApprovalNodeDTO:{}", JSONObject.toJSONString(ruleApprovalNodeDTO), JSONObject.toJSONString(droolsRuleApprovalNodeDTO));
         List<RuleApproverDTO> ruleApproverDTOS = ruleApprovalNodeDTO.getRuleApprovers();
         droolsRuleApprovalNodeDTO.setRuleApproverDTOs(ruleApproverDTOS);
         droolsRuleApprovalNodeDTO.setRuleApprovalNodeDTO(ruleApprovalNodeDTO);
 
-        Map<String, Set<UUID>> ruleApproverMap = getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(), droolsRuleApprovalNodeDTO.getFormValues(), droolsRuleApprovalNodeDTO.getApplicantOid(), droolsRuleApprovalNodeDTO.getRuleApprovalNodeOid(), droolsRuleApprovalNodeDTO, entityType);
+        Map<String, Set<UUID>> ruleApproverMap = getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(), droolsRuleApprovalNodeDTO.getFormValues(), droolsRuleApprovalNodeDTO.getApplicantOid(),  droolsRuleApprovalNodeDTO);
         Set<UUID> countersignApprover = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(WorkflowConstants.COUNTERSIGN_APPROVER))));
         Set<UUID> approver = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(WorkflowConstants.APPROVER))));
         //没有找到审批人逻辑处理
-        if (RuleConstants.RULE_NULLABLE_THROW.equals(ruleApprovalNodeDTO.getNullableRule()) && countersignApprover == null && approver == null) {
-            throw new BizException(RespCode.SYS_APPROVAL_NO_APPROVER);
+        if (RuleConstants.RULE_NULLABLE_THROW.equals(ruleApprovalNodeDTO.getNullableRule()) ) {
+            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER);
         }
         ruleApproverMap.put(WorkflowConstants.COUNTERSIGN_APPROVER, countersignApprover);
         ruleApproverMap.put(WorkflowConstants.APPROVER, approver);
@@ -236,7 +211,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     UUID managerOid = baseClient.getLastDepartmentManagerByApplicantOid(applicantOid, Boolean.FALSE);
                     if (managerOid == null) {
                         log.info("SELFAPPROVAL ,replace approver error ,applicantOid : {} ", applicantOid);
-                        throw new BizException(RespCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                        throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                     }
                     approvers.set(approvers.indexOf(applicantOid), managerOid);
                     log.info("SELFAPPROVAL ,replace approver from {} to {} ", applicantOid, managerOid);
@@ -245,7 +220,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     UUID peerManagerOid = baseClient.getLastDepartmentManagerByApplicantOid(applicantOid, Boolean.TRUE);
                     if (peerManagerOid == null) {
                         log.info("SELFAPPROVAL ,replace approver error ,applicantOid : {} ", applicantOid);
-                        throw new BizException(RespCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                        throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                     }
                     approvers.set(approvers.indexOf(applicantOid), peerManagerOid);
                     log.info("SELFAPPROVAL ,replace approver from {} to {} ", applicantOid, peerManagerOid);
@@ -254,7 +229,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     //TODO
                     break;
                 default:
-                    throw new BizException(RespCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                    throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
             }
         }
         if (approvers != null) {
@@ -272,7 +247,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
      * @return
      */
     public String getDepartmentRoleStringByDepartmentPosition(Long departmentId, UUID applicantOid) {
-        StringBuffer departmentRoleString = new StringBuffer();
+        StringBuilder departmentRoleString = new StringBuilder();
         List<DepartmentPositionCO> departmentPositions = baseClient.getDepartmentPositionByUserAndDepartment(departmentId, applicantOid);
         if (CollectionUtils.isNotEmpty(departmentPositions)) {
             for (DepartmentPositionCO departmentPosition : departmentPositions) {
@@ -283,66 +258,6 @@ public class DefaultWorkflowIntegrationServiceImpl {
     }
 
 
-    /**
-     * 拼接部门角色属性
-     * 申请人所担任的部门角色,多个时用分隔符|
-     *
-     * @param departmentId
-     * @param applicantOid
-     * @return
-     */
-    public String getDepartmentRoleString(Long departmentId, UUID applicantOid) {
-        StringBuffer departmentRoleString = new StringBuffer();
-        DepartmentRoleCO departmentRole = baseClient.getDepartmentRole(departmentId);
-        if (departmentRole != null) {
-            if (applicantOid.equals(departmentRole.getManagerOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_MANAGER).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getViceManagerOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_VICE_MANAGER).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getChargeManagerOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_CHARGE_MANAGER).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getDepartmentManagerOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_DEPARTMENT_MANAGER).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getFinancialBPOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_FINANCIAL_BP).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getFinancialDirectorOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_FINANCIAL_DIRECTOR).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getFinancialManagerOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_FINANCIAL_MANAGER).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getHrbpOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_HRBP).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getVicePresidentOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_VICE_PRESIDENT).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-            if (applicantOid.equals(departmentRole.getPresidentOid())) {
-                departmentRoleString.append(RuleConstants.APPROVAL_TYPE_DEPARTMENT_PRESIDENT).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-            }
-        }
-        List<String> list = null;
-        return departmentRoleString.length() > 0 ? departmentRoleString.substring(0, departmentRoleString.length() - 1) : "";
-    }
-
-    /**
-     * 将费用类型oid转成string 用冒号隔开
-     */
-    private String getExpenseTypeString(Set<UUID> expenseTypeIcons) {
-        if (expenseTypeIcons == null || expenseTypeIcons.size() == 0) {
-            return "";
-        }
-        StringBuffer expenseTypeString = new StringBuffer("");
-        for (UUID expenseTypeIcon : expenseTypeIcons) {
-            expenseTypeString.append(expenseTypeIcon).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
-        }
-        return expenseTypeString.substring(0, expenseTypeString.length() - 1);
-    }
 
     /**
      * 根据审批者定义RuleConstants 查出用户列表
@@ -352,7 +267,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
      * @param applicantOid
      * @return
      */
-    public Map<String, Set<UUID>> getApproverUserOids(List<RuleApproverDTO> ruleApproverDTOs, List<FormValueDTO> customFormValueDTOs, UUID applicantOid, UUID ruleApprovalNodeOid, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
+    public Map<String, Set<UUID>> getApproverUserOids(List<RuleApproverDTO> ruleApproverDTOs, List<FormValueDTO> customFormValueDTOs, UUID applicantOid, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
         HashMap<String, Set<UUID>> map = new HashMap<>();
         map.put("countersignApprover", new HashSet<>());  //会签审批人
         map.put("approver", new HashSet<>());
@@ -387,86 +302,30 @@ public class DefaultWorkflowIntegrationServiceImpl {
         Map<String, Object> entityData = droolsRuleApprovalNodeDTO.getEntityData();
         //获取实体对应的分摊的部门 及成本中心
         List<UUID> apportionmentDepartmentOids = null;
-        List<UUID> apportionmentCostCentItemOids = null;
         if (entityData != null) {
             apportionmentDepartmentOids = (List<UUID>) entityData.get(WorkflowConstants.APPORTIONMENT_DEPARTMENTS);
-            apportionmentCostCentItemOids = (List<UUID>) entityData.get(WorkflowConstants.APPORTIONMENT_COST_CENT_ITEMS);
         }
         // 结束
         if (ruleApproverDTOs != null && ruleApproverDTOs.size() > 0) {
             for (RuleApproverDTO ruleApproverDTO : ruleApproverDTOs) {
-                getApproverOidsByRuleApproverDTO(ruleApproverDTO, userDepartmentOid, departmentOid, apportionmentDepartmentOids, apportionmentCostCentItemOids, map, applicantOid, droolsRuleApprovalNodeDTO.getEntityType(), droolsRuleApprovalNodeDTO.getEntityOid(), ruleApprovalNodeOid, droolsRuleApprovalNodeDTO);
+                getApproverOidsByRuleApproverDTO(ruleApproverDTO, userDepartmentOid, departmentOid, apportionmentDepartmentOids, map, applicantOid);
             }
         }
         return map;
     }
 
-    /**
-     * 根据审批者定义RuleConstants 查出用户列表
-     *
-     * @param ruleApproverDTOs
-     * @param customFormValueDTOs
-     * @param applicantOid
-     * @return
-     */
-    public Map<String, Set<UUID>> getApproverUserOids(List<RuleApproverDTO> ruleApproverDTOs, List<FormValueDTO> customFormValueDTOs, UUID applicantOid, UUID ruleApprovalNodeOid, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO, Integer entityType) {
-        HashMap<String, Set<UUID>> map = new HashMap<>();
-        map.put("countersignApprover", new HashSet<>());  //会签审批人
-        map.put("approver", new HashSet<>());
-        UserApprovalDTO applicant = baseClient.getUserByUserOid(applicantOid);
-        if (applicant == null) {
-            throw new ObjectNotFoundException(UserApprovalDTO.class, applicantOid);
-        }
-        //用户所在部门
-        DepartmentCO userDepartment = baseClient.getDepartmentByUserOid(applicantOid);
-        //用户所在部门Oid
-        UUID userDepartmentOid = null;
-        if (userDepartment != null) {
-            userDepartmentOid = userDepartment.getDepartmentOid();
-        }
-        //获取自定义表单中的部门字段
 
-        FormValueDTO departmentField = null;
-        if (CollectionUtils.isNotEmpty(getCustomFormValueByCode(customFormValueDTOs, BusinessColumnMessageKey.SELECT_DEPARTMENT.getKey()))) {
-            departmentField = getCustomFormValueByCode(customFormValueDTOs, BusinessColumnMessageKey.SELECT_DEPARTMENT.getKey()).get(0);
-        }
-
-        UUID departmentOid = null;
-        if (departmentField == null) {
-            departmentOid = userDepartmentOid;
-        } else {   // 取部门Oid时，只有对公报账单之前的可以使用表单上的字段
-            departmentOid = UUID.fromString(departmentField.getValue());
-
-        }
-        Map<String, Object> entityData = droolsRuleApprovalNodeDTO.getEntityData();
-        //获取实体对应的分摊的部门 及成本中心
-        List<UUID> apportionmentDepartmentOids = null;
-        List<UUID> apportionmentCostCentItemOids = null;
-        if (entityData != null) {
-            apportionmentDepartmentOids = (List<UUID>) entityData.get(WorkflowConstants.APPORTIONMENT_DEPARTMENTS);
-            apportionmentCostCentItemOids = (List<UUID>) entityData.get(WorkflowConstants.APPORTIONMENT_COST_CENT_ITEMS);
-        }
-        // 结束
-        if (ruleApproverDTOs != null && ruleApproverDTOs.size() > 0) {
-            for (RuleApproverDTO ruleApproverDTO : ruleApproverDTOs) {
-                getApproverOidsByRuleApproverDTO(ruleApproverDTO, userDepartmentOid, departmentOid, apportionmentDepartmentOids, apportionmentCostCentItemOids, map, applicantOid, droolsRuleApprovalNodeDTO.getEntityType(), droolsRuleApprovalNodeDTO.getEntityOid(), ruleApprovalNodeOid, droolsRuleApprovalNodeDTO);
-            }
-        }
-        return map;
-    }
 
 
     //根据单条审批规则获取审批人Oid
     private void getApproverOidsByRuleApproverDTO(RuleApproverDTO ruleApproverDTO, UUID userDepartmentOid, UUID departmentOid,
                                                   List<UUID> apportionmentDepartmentOids,
-                                                  List<UUID> apportionmentCostCentItemOids, HashMap<String, Set<UUID>> map, UUID applicantOid, Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
+                                                   HashMap<String, Set<UUID>> map, UUID applicantOid) {
         Set<UUID> approverUserOids = new HashSet<>();
         Set<UUID> apportionApprovalUserOids = new HashSet<>();
         Integer approverType = ruleApproverDTO.getApproverType();
         Integer departmentType = ruleApproverDTO.getDepartmentType();
         DepartmentCO department = null;
-        DepartmentRoleCO departmentRole = null;
-        UUID costCenterItemOid = null;
         Boolean withApportionment = Boolean.FALSE;
 
         switch (approverType) {
@@ -482,7 +341,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
             //用户组 ，查找审批规则中配置的用户组的所有用户
             case RuleConstants.APPROVAL_TYPE_USERGROUP:
                 approverUserOids.addAll(baseClient.listUserByUserGroupOid(ruleApproverDTO.getApproverEntityOid())
-                        .stream().map(userDTO -> userDTO.getUserOid()).collect(Collectors.toList()));
+                        .stream().map(UserApprovalDTO::getUserOid).collect(Collectors.toList()));
                 log.info("Look up by APPROVAL_TYPE_USERGROUP,approvers size:{},detail:{}", approverUserOids.size(), approverUserOids);
                 break;
 
@@ -542,62 +401,13 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
 
 
-    private void getApprovalByDepartmentRule(DepartmentRoleCO departmentRole, Set<UUID> approverUserOids, Integer approverType) {
-        if (departmentRole != null) {
-            switch (approverType) {
-                //部门经理
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_MANAGER:
-                    approverUserOids.add(departmentRole.getManagerOid());
-                    break;
-                //副经理
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_VICE_MANAGER:
-                    approverUserOids.add(departmentRole.getViceManagerOid());
-                    break;
-                //分管领导
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_CHARGE_MANAGER:
-                    approverUserOids.add(departmentRole.getChargeManagerOid());
-                    break;
-                //部门主管
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_DEPARTMENT_MANAGER:
-                    approverUserOids.add(departmentRole.getDepartmentManagerOid());
-                    break;
-                //财务BP
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_FINANCIAL_BP:
-                    approverUserOids.add(departmentRole.getFinancialBPOid());
-                    break;
-                //财务总监
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_FINANCIAL_DIRECTOR:
-                    approverUserOids.add(departmentRole.getFinancialDirectorOid());
-                    break;
-                //财务经理
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_FINANCIAL_MANAGER:
-                    approverUserOids.add(departmentRole.getFinancialManagerOid());
-                    break;
-                //HRBP
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_HRBP:
-                    approverUserOids.add(departmentRole.getHrbpOid());
-                    break;
-                //副总裁
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_VICE_PRESIDENT:
-                    approverUserOids.add(departmentRole.getVicePresidentOid());
-                    break;
-                //总裁
-                case RuleConstants.APPROVAL_TYPE_BIZ_DEPARTMENT_PRESIDENT:
-                    approverUserOids.add(departmentRole.getPresidentOid());
-                    break;
-            }
-        }
-    }
-
 
     //根据fieldCode ，获取自定义表单中对应的字段(先用messageKey做匹配)
     public List<FormValueDTO> getCustomFormValueByCode(List<FormValueDTO> customFormValueDTOs, String code) {
-        FormValueDTO customFormValueDTO = null;
-        List<FormValueDTO> formValueDTOList = customFormValueDTOs.stream()
+       return customFormValueDTOs.stream()
                 .filter(customFormValue ->
                         code.equals(customFormValue.getMessageKey()) && !StringUtils.isEmpty(customFormValue.getValue()) && customFormValue.getValue() != "null")
                 .collect(Collectors.toList());
-        return formValueDTOList;
     }
 
     /**
@@ -683,7 +493,6 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
         FormValueDTO departmentPathValueDTO = RuleConstants.DEFAULT_DEPARTMENT_PATH_VALUE;
         // modify by mh.z 20190115 drool规则里写的是根据部门OID判断
-        //departmentPathValueDTO.setValue(department.getPath() + "|");
         departmentPathValueDTO.setValue(department.getDepartmentOid() + "|");
         departmentPathValueDTO.setFormOid(formOid);
         customFormValueDTOs.add(departmentPathValueDTO);
@@ -692,69 +501,14 @@ public class DefaultWorkflowIntegrationServiceImpl {
         departmentRoleValueDTO.setValue(getDepartmentRoleStringByDepartmentPosition(department.getId(), applicantOid));
         departmentRoleValueDTO.setFormOid(formOid);
         customFormValueDTOs.add(departmentRoleValueDTO);
-       /* //申请人所在公司
-        User user = userService.getByUserOid(applicantOid);
-        FormValueDTO applicantCompanyValueDTO = new FormValueDTO(RuleConstants.DEFAULT_APPLICANT_COMPANY_VALUE);
-        applicantCompanyValueDTO.setValue(user.getCompany().getCompanyOid() + "");
-        applicantCompanyValueDTO.setFormOid(formOid);
-        customFormValueDTOs.add(applicantCompanyValueDTO);*/
+
         assembleBrmsParamsRespDTO.setFormValueDTOS(customFormValueDTOs);
         assembleBrmsParamsRespDTO.setEntityData(entityData);
         assembleBrmsParamsRespDTO.setFormOid(formOid);
         return assembleBrmsParamsRespDTO;
     }
 
-    public AssembleBrmsParamsRespDTO assembleBrmsParams(UUID entityOid, Integer entityType, UUID applicantOid) {
-        AssembleBrmsParamsRespDTO assembleBrmsParamsRespDTO = new AssembleBrmsParamsRespDTO();
-        List<FormValueDTO> customFormValueDTOs = null;
-        //获取实体对应的分摊的部门 及成本中心
-        List<UUID> apportionmentDepartmentOids = new ArrayList<>();
-        Map<String, Object> entityData = new HashMap<>();
-        UUID formOid = null;
 
-        if (CollectionUtils.isEmpty(customFormValueDTOs)) {
-            return null;
-        }
-
-        // UUID formOid = null;
-        DepartmentCO department = baseClient.getDepartmentByUserOid(applicantOid);
-        if (department == null) {
-            throw new ValidationException(new ValidationError("department", "department is null , applicantOid : " + applicantOid));
-        }
-
-        int level = 1;
-        if (StringUtils.isNotEmpty(department.getPath()) && department.getPath().contains(Constants.DEPARTMENT_SPLIT)) {
-            level = department.getPath().split("\\|").length;
-        }
-
-        FormValueDTO departmentLevelValueDTO = RuleConstants.DEFAULT_DEPARTMENT_LEVEL_VALUE;
-        departmentLevelValueDTO.setValue(level + "");
-        departmentLevelValueDTO.setFormOid(formOid);
-        customFormValueDTOs.add(departmentLevelValueDTO);
-
-        FormValueDTO departmentPathValueDTO = RuleConstants.DEFAULT_DEPARTMENT_PATH_VALUE;
-        departmentPathValueDTO.setValue(department.getPath() + "|");
-        departmentPathValueDTO.setFormOid(formOid);
-        customFormValueDTOs.add(departmentPathValueDTO);
-
-        FormValueDTO departmentRoleValueDTO = RuleConstants.DEFAULT_DEPARTMENT_ROLE_VALUE;
-        departmentRoleValueDTO.setValue(getDepartmentRoleStringByDepartmentPosition(department.getId(), applicantOid));
-        departmentRoleValueDTO.setFormOid(formOid);
-        customFormValueDTOs.add(departmentRoleValueDTO);
-
-        //初始化申请人所在公司
-        FormValueDTO applicantCompanyValueDTO = RuleConstants.DEFAULT_APPLICANT_COMPANY_VALUE;
-        applicantCompanyValueDTO.setValue(baseClient.getCompanyByUserOid(applicantOid).getCompanyOid() + "");
-        applicantCompanyValueDTO.setFormOid(formOid);
-        customFormValueDTOs.add(applicantCompanyValueDTO);
-
-        //封装分摊数据
-        entityData.put(WorkflowConstants.APPORTIONMENT_DEPARTMENTS, apportionmentDepartmentOids);
-        assembleBrmsParamsRespDTO.setFormValueDTOS(customFormValueDTOs);
-        assembleBrmsParamsRespDTO.setEntityData(entityData);
-        assembleBrmsParamsRespDTO.setFormOid(formOid);
-        return assembleBrmsParamsRespDTO;
-    }
 
 
     //调用brms获取下一个
@@ -772,10 +526,10 @@ public class DefaultWorkflowIntegrationServiceImpl {
                 .build();
 
         if (ruleNextApproverResult != null && ruleNextApproverResult.getDroolsApprovalNode() != null && RuleConstants.RULE_NULLABLE_THROW.equals(ruleNextApproverResult.getDroolsApprovalNode().getNullableRule()) && CollectionUtils.isEmpty(ruleNextApproverResult.getDroolsApprovalNode().getRuleApprovers())) {
-            throw new BizException(RespCode.SYS_APPROVAL_NO_APPROVER);
+            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER);
         }
         if (ruleNextApproverResult != null && ruleNextApproverResult.getDroolsApprovalNode() != null && CollectionUtils.isNotEmpty(ruleNextApproverResult.getDroolsApprovalNode().getRuleApprovers())) {
-            getRuleApproverUserOids(ruleNextApproverResult.getDroolsApprovalNode(), droolsRuleApprovalNodeDTO, entityType);
+            getRuleApproverUserOids(ruleNextApproverResult.getDroolsApprovalNode(), droolsRuleApprovalNodeDTO);
         }
         return ruleNextApproverResult;
     }

@@ -3,7 +3,6 @@ package com.hand.hcf.app.workflow.approval.service;
 import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.workflow.constant.SyncLockPrefix;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
@@ -16,6 +15,7 @@ import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.core.redisLock.enums.CredentialTypeEnum;
@@ -65,7 +65,7 @@ public class ApprovalWithdrawService {
                     try {
                         // 只有提交状态的单据才可以审批通过和拒绝和撤回
                         if (!DocumentOperationEnum.APPROVAL.getId().equals(workFlowDocumentRef.getStatus())) {
-                            throw new BizException(RespCode.STATUS_ERROR_200003);
+                            throw new BizException(ExceptionCode.STATUS_ERROR_200003);
                         }
                         workFlowDocumentRef.setLastApproverOid(userOid);
                         documentRefList.add(workFlowDocumentRef);

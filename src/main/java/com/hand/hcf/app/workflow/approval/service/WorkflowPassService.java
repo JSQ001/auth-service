@@ -4,6 +4,7 @@ import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowNextNodeAction;
@@ -45,7 +46,7 @@ public class WorkflowPassService {
     private WorkflowMainService workflowMainService;
 
     @Autowired
-    private WorkflowMessageService workflowMessageService;
+    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
     /**
      * 通过审批
@@ -96,7 +97,7 @@ public class WorkflowPassService {
         Assert.notNull(userOid, "userOid null");
 
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
-        WorkflowInstance instance = WorkflowInstance.toInstance(workFlowDocumentRef);
+        WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowPassTaskAction action = new WorkflowPassTaskAction(this, instance, user, approvalText);
 
@@ -107,8 +108,8 @@ public class WorkflowPassService {
         workflowMainService.runWorkflow(action);
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 发送消息
-        workflowMessageService.sendMessage(workFlowDocumentRef);
+        // 通知审批结果
+        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
     }
 
     /**
@@ -130,7 +131,7 @@ public class WorkflowPassService {
         }
 
         // 更新任务的状态成通过
-        task.setStatus(WorkflowTask.STATUS_APPROVED);
+        task.setApprovalStatus(WorkflowTask.APPROVAL_STATUS_APPROVED);
         workflowBaseService.updateTask(task);
         // 保存通过的历史
         workflowBaseService.saveHistory(task, WorkflowPassTaskAction.ACTION_NAME, remark);
@@ -163,14 +164,15 @@ public class WorkflowPassService {
     public WorkflowResult passNode(WorkflowNode node, WorkflowUser user, String remark) {
         Assert.notNull(node, "node null");
         Assert.notNull(node.getInstance(), "node.instance null");
-        Assert.notNull(node.getCountersign(), "node.countersign null");
+        Assert.notNull(node.getRule(), "node.rule null");
         WorkflowInstance instance = node.getInstance();
-        String countersign = node.getCountersign();
+        WorkflowRule rule = node.getRule();
+        Integer countersign = rule.getCountersignRule();
 
         boolean canPassNode = true;
         // 这个会签规则要求同个节点上所有人都通过才能通过节点
-        if (WorkflowNode.COUNTERSIGN_ALL_PASS_OR_ANY_REJECT.equals(countersign)) {
-            int unfinishedTotal = workflowBaseService.countTasks(node, WorkflowTask.STATUS_APPROVAL);
+        if (WorkflowRule.COUNTERSIGN_ALL_PASS_OR_ANY_REJECT.equals(countersign)) {
+            int unfinishedTotal = workflowBaseService.countTasks(node, WorkflowTask.APPROVAL_STATUS_APPROVAL);
             canPassNode = unfinishedTotal == 0;
         }
 
@@ -205,7 +207,7 @@ public class WorkflowPassService {
         Assert.notNull(instance.getId(), "instance.id null");
 
         // 若有节点审批通过则单据通过（当前判断有完成的任务则单据通过）
-        int taskTotal = workflowBaseService.countTasks(instance, WorkflowTask.STATUS_APPROVED);
+        int taskTotal = workflowBaseService.countTasks(instance, WorkflowTask.APPROVAL_STATUS_APPROVED);
         if (taskTotal == 0) {
             throw new BizException(ErrorConstants.CHAIN_NOT_EXISTS_TASK);
         }
@@ -214,7 +216,7 @@ public class WorkflowPassService {
         workflowBaseService.clearUnfinishedTasks(instance);
 
         // 更新实例的状态成通过
-        instance.setStatus(WorkflowInstance.STATUS_PASS);
+        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_PASS);
         workflowBaseService.updateInstance(instance);
 
         WorkflowResult result = new WorkflowResult();

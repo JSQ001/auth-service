@@ -3,14 +3,17 @@ package com.hand.hcf.app.workflow.constant;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hand.hcf.app.workflow.brms.dto.RuleEnumDTO;
+import com.hand.hcf.app.workflow.brms.enums.FieldType;
+import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
 import com.hand.hcf.app.workflow.dto.FormFieldDTO;
 import com.hand.hcf.app.workflow.dto.FormValueDTO;
 import com.hand.hcf.app.workflow.dto.FormValueI18nDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
-import com.hand.hcf.app.workflow.enums.FieldType;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 
 import java.util.*;
+
+import static java.util.Arrays.stream;
 
 public final class RuleConstants {
     //审批规则Rule
@@ -22,13 +25,14 @@ public final class RuleConstants {
     public static final Long RULE_BATCH_CODE_DEFAULT = 1L;
     //累加数量
     public static final Long RULE_BATCH_CODE_INCREMENT = 1L;
-    //最大值
-    public static final int RULE_SEQUENCE_MAX = 10000;
+
+    //规则条件分隔符
+    public static final String RULE_CONDITION_VALUE_SPLIT = ":";
+
 
     //条件类型-表单
     public static final int CONDITION_TYPE_FORM = 10001;
     //条件类型-差标类型
-    public static final int CONDITION_TYPE_TRAVEL_STANDARD = 10005;
     //条件类型-转交
     public static final int CONDITION_TYPE_FORM_TRANFORM = 10002;
 
@@ -67,39 +71,31 @@ public final class RuleConstants {
     // modify by mh.z 20190226 机器人审批人类型的值是1003
     // 机器人
     public static final int APPROVAL_TYPE_DEPARTMENT_ROBOT = 1003;
-    // 机器人
-    //public static final int APPROVAL_TYPE_DEPARTMENT_ROBOT = 6111;
     // END modify by mh.z
 
-    // 外部接口获取审批人
-    public static final int APPROVAL_TYPE_DEPARTMENT_INTERFACE = 1004;
-
     //机器人对象标识符
-    public static  final String APPROVER_ROBOT_NAME ="机器人";
-    public static  final String APPROVER_TYPE_ROBOT_OID="00000000-0000-0000-0000-000000000000";
-    public static  final String APPROVER_TYPE_ROBOT_NAME="系统审批";
-    public static  final String APPROVER_TYPE_ROBOT_NAME_ENGLISH="Approved by system";
+    public static final String APPROVER_TYPE_ROBOT_OID = "00000000-0000-0000-0000-000000000000";
+    public static final String APPROVER_TYPE_ROBOT_NAME = "系统审批";
+    public static final String APPROVER_TYPE_ROBOT_NAME_ENGLISH = "Approved by system";
 
-    public static  final String APPROVER_ROBOT_PASS_Detail="系统自动通过";
-    public static  final String APPROVER_ROBOT_PASS_Detail_ENGLISH="Passed by system automatically";
-    public static  final String APPROVER_ROBOT_REJECT_Detail="系统自动驳回";
-    public static  final String APPROVER_ROBOT_REJECT_Detail_ENGLISH="Rejected by system automatically";
+    public static final String APPROVER_ROBOT_PASS_DETAIL = "系统自动通过";
+    public static final String APPROVER_ROBOT_PASS_DETAIL_ENGLISH = "Passed by system automatically";
+    public static final String APPROVER_ROBOT_REJECT_DETAIL = "系统自动驳回";
+    public static final String APPROVER_ROBOT_REJECT_DETAIL_ENGLISH = "Rejected by system automatically";
 
-    public static  final String CANNOT_FIND_CURRENT_APPROVAL="无审批人，请联系管理员";
+    public static final String CANNOT_FIND_CURRENT_APPROVAL = "无审批人，请联系管理员";
 
     /**
      * 机器人节点并且审批结果为驳回
-     *
      */
-    public static  final Integer ROBOT_NODE_AND_APPROVAL_REJECT_RESULT =1;
+    public static final Integer ROBOT_NODE_AND_APPROVAL_REJECT_RESULT = 1;
 
-    public static  final Integer ROBOT_NODE_AND_APPROVAL_PASS_RESULT=2;
+    public static final Integer ROBOT_NODE_AND_APPROVAL_PASS_RESULT = 2;
 
     /**
-     *  加签 和 过滤规则常量
+     * 加签 和 过滤规则常量
      */
 
-    public static final Integer RULE_CONUTERSIGN_ALL = 0;  //所有人审批通过
     public static final Integer RULE_CONUTERSIGN_ANY = 1;  // 一人审批通过
     public static final Integer RULE_SEQUENCE = 2; //顺序审批
 
@@ -173,11 +169,11 @@ public final class RuleConstants {
      * key：账号语言
      * value：多语言
      */
-    public static final Map<String,String> LANGUAGE_MAPPING = Collections.unmodifiableMap(new HashMap<String, String>() {{
-        put("zh_cn","zh_cn");
-        put("en_us","en_us");
+    public static final Map<String, String> LANGUAGE_MAPPING = Collections.unmodifiableMap(new HashMap<String, String>() {{
+        put("zh_cn", "zh_cn");
+        put("en_us", "en_us");
     }});
-    public static final Map<UUID,List<FormValueI18nDTO>> CUSTOM_ROLE_DTO_MAP;
+    public static final Map<UUID, List<FormValueI18nDTO>> CUSTOM_ROLE_DTO_MAP;
 
 
     //金额字段Oid
@@ -204,15 +200,7 @@ public final class RuleConstants {
     public static final UUID CONTROL_BEYOUND_APPLICATION_OID = UUID.fromString("316761c7-0e7a-4f01-9203-fe92ebe1bfba");
     //部门字段Oid
     public static final UUID DEFAULT_DEPARTMENT_FIELD_OID = UUID.fromString("48be4384-d986-4f56-9bc7-3d932ddef67d");
-    //默认字段-返回前端审批人的fieldOid
-    public static final UUID DEFAULT_APPROVAL_FIELD_OID = UUID.fromString("87f979b0-4163-4481-8313-1cda2f844001");
-    //默认字段-返回前端申请人的fieldOid
-    public static final UUID DEFAULT_APPLICANT_FIELD_OID = UUID.fromString("87f979b0-4163-4481-8313-1cda2f844002");
 
-    public static final String I18N_LANGUAGE="language";
-    public static final String I18N_VALUE="value";
-    public static final String I18N_FIELDCONTENT="fieldContent";
-    public static final String FORM_ID_NEW="100000";
     //申请人公司
     public static final UUID DEFAULT_APPLICANT_COMPANY_OID = UUID.fromString("d2a7e02a-5f09-11e8-9c2d-fa7ae01bbebc");
 
@@ -222,43 +210,6 @@ public final class RuleConstants {
 
     //部门类型  2:来源单据
     public static final Integer DEPARTMENT_TYPE_BY_BILLS = 2;
-    /**
-     * 操作符
-     * > >=  <  <=  ==  !=  contains / not contains / memberOf / not memberOf /matches/ not matches/range
-     */
-    //大于
-    public static final int SYMBOL_GT = 9001;
-    //大于等于
-    public static final int SYMBOL_GT_OR_EQ = 9002;
-    //小于
-    public static final int SYMBOL_LT = 9003;
-    //小于等于
-    public static final int SYMBOL_LT_OR_EQ = 9004;
-    //等于
-    public static final int SYMBOL_EQ = 9005;
-    //不等于
-    public static final int SYMBOL_NOT_EQ = 9006;
-    //包含
-    public static final int SYMBOL_CONTAINS = 9007;
-    //不包含
-    public static final int SYMBOL_NOT_CONTAINS = 9008;
-    //in
-    public static final int SYMBOL_MEMBEROF = 9009;
-    //not in
-    public static final int SYMBOL_NOT_MEMBEROF = 9010;
-    //range
-    public static final int SYMBOL_RANGE = 9011;
-    //为true
-    public static final int SYMBOL_IS_TRUE = 9012;
-    //为false
-    public static final int SYMBOL_IS_FALSE = 9013;
-    //in
-    @Deprecated
-    public static final int SYMBOL_IN = 9014;
-    //is Null
-    public static final int SYMBOL_IS_NULL = 9015;
-    //is not null
-    public static final int SYMBOL_IS_NOT_NULL = 9016;
 
     //默认字段-金额
     public static FormFieldDTO DEFAULT_AMOUNT_FIELD = null;
@@ -341,8 +292,8 @@ public final class RuleConstants {
     public static FormValueDTO DEFAULT_DOCUMENT_COMPANY_VALUE = null;
     public static final UUID DEFAULT_DOCUMENT_COMPANY_FIELD_OID = UUID.fromString("293b0f1c-6123-450a-b2e8-270f1f37b7ac");
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_DOCUMENT_COMPANY = "select_company";
-    public static final RuleEnumDTO directManagerEnumDTO = new RuleEnumDTO(APPROVAL_TYPE_APPLICANT_DIRECT_MANAGER,"直属领导","");
-    public static final RuleEnumDTO directManagerEnumDTOEnglish = new RuleEnumDTO(APPROVAL_TYPE_APPLICANT_DIRECT_MANAGER,"Direct Manager","");
+    public static final RuleEnumDTO directManagerEnumDTO = new RuleEnumDTO(APPROVAL_TYPE_APPLICANT_DIRECT_MANAGER, "直属领导", "");
+    public static final RuleEnumDTO directManagerEnumDTOEnglish = new RuleEnumDTO(APPROVAL_TYPE_APPLICANT_DIRECT_MANAGER, "Direct Manager", "");
     //不能有打印节点的表单类型
     public static List<Integer> getNotPrintCustomFormType = new ArrayList<>();
     //不能修改核定金额的表单类型
@@ -405,7 +356,7 @@ public final class RuleConstants {
     //管控字段-超预算
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_BUDGET = "control_beyound_budget";
     //管控字段-超申请
-    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION =  "control_beyound_application";
+    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION = "control_beyound_application";
     //管控字段-超额度
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION = "control_beyound_position";
     //管控字段-未还款金额
@@ -427,20 +378,14 @@ public final class RuleConstants {
     //法人实体
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_CORPORATION_ENTITY = "select_corporation_entity";
     //成本中心
-    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_COST_CENTER = "select_cost_center";
     //单据部门
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_DOCUMENT_DEPARTMENT = "select_department";
     // 申请人部门
-    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_DEPARTMENT="default_user_department";
+    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_DEPARTMENT = "default_user_department";
     //开关
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SWITCH = "switch";
     //是由
     public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_TITLE = "title";
-    //多行输入框
-    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_TEXT_AREA = "text_area";
-    //替票
-    public static final String CUSTOM_FILED_TYPE_MESSAGE_KEY_SUBSTITUTION_INVOICE = "substitution_invoice";
-
 
     static {
         //approvalType
@@ -512,21 +457,9 @@ public final class RuleConstants {
         //actionMap.put(ACTION_COUNTERSIGNED,"同级加签");
 
         //rulesymbol
-        symbols.add(new RuleEnumDTO(SYMBOL_GT, ">", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_GT_OR_EQ, "≥", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_LT, "<", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_LT_OR_EQ, "≤", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_EQ, "=", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_NOT_EQ, "!=", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_CONTAINS, "contains", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_NOT_CONTAINS, "not contains", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_MEMBEROF, "in", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_NOT_MEMBEROF, "not in", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_RANGE, "range", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_IS_TRUE, "isTrue", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_IS_FALSE, "isFalse", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_IS_NULL, "isNull", ""));
-        symbols.add(new RuleEnumDTO(SYMBOL_IS_NOT_NULL, "isNotNull", ""));
+        stream(SymbolEnum.values()).forEach((SymbolEnum symbol) ->
+                symbols.add(new RuleEnumDTO(symbol.getId(), symbol.getSymbol(), "")));
+
 
         //approvalMode
         approvalModes.add(new RuleEnumDTO(ApprovalMode.DEPARTMENT.getId(), "部门经理审批", "由提交人所在部门的所有领导审批"));
@@ -537,10 +470,8 @@ public final class RuleConstants {
         fieldTypeGroups.put(FieldType.TEXT.getId(), FieldType.TEXT.getId());
         fieldTypeGroups.put(FieldType.LONG.getId(), FieldType.DOUBLE.getId());
         fieldTypeGroups.put(FieldType.DOUBLE.getId(), FieldType.DOUBLE.getId());
-        //fieldTypeGroups.put(FieldType.DATETIME.getID(), FieldType.DATETIME.getID());
         fieldTypeGroups.put(FieldType.DATE.getId(), FieldType.DATE.getId());
         fieldTypeGroups.put(FieldType.CUSTOM_ENUMERATION.getId(), FieldType.CUSTOM_ENUMERATION.getId());
-        //fieldTypeGroups.put(FieldType.GPS.getID(), FieldType.GPS.getID());
         fieldTypeGroups.put(FieldType.BOOLEAN.getId(), FieldType.BOOLEAN.getId());
 
 
@@ -571,8 +502,6 @@ public final class RuleConstants {
          * excludeMessageKey
          */
 
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_CORPORATION);
         //不支持类型
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_IMAGE);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_ATTACHMENT);
@@ -582,19 +511,13 @@ public final class RuleConstants {
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_BUDGET_DETAIL);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_OUT_PARTICIPANT_NAME);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_APPROVER);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_AMOUNT);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SUPPLIER);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_CURRENCY_CODE);
         //暂不支持类型
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_VAT_INVOICE);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_DESTINATION);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_CONTACT_BANK_ACCOUNT);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_TOTAL_BUDGET);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_AVERAGE_BUDGET);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_BOX);
         excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_EMPLOYEE_EXPAND);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_WRITEOFF_FLAG);
-        //excludeFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_REMARK);
         excludeFieldKeys.addAll(defaultFieldKeys);
         excludeFieldKeys.addAll(controlFieldKeys);
 
@@ -613,7 +536,6 @@ public final class RuleConstants {
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_CURRENCY_CODE);
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_REMARK);
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_CORPORATION_ENTITY);
-        showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SELECT_COST_CENTER);
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_SWITCH);
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_TITLE);
         showFieldKeys.add(CUSTOM_FILED_TYPE_MESSAGE_KEY_TOTAL_BUDGET);
@@ -842,60 +764,72 @@ public final class RuleConstants {
                 .messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION)
                 .fieldType(FieldType.BOOLEAN).build();
     }
+
     static {
 
-        Map<UUID,List<FormValueI18nDTO>> CUSTOM_ROLE_DTO_MAP_TEMP = new HashMap<>();
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_APPLICANT_COMPANY_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("申请人公司").fieldOid(DEFAULT_APPLICANT_COMPANY_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_APPLICANT_COMPANY).build());
+        Map<UUID, List<FormValueI18nDTO>> CUSTOM_ROLE_DTO_MAP_TEMP = new HashMap<>();
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_APPLICANT_COMPANY_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("申请人公司").fieldOid(DEFAULT_APPLICANT_COMPANY_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_APPLICANT_COMPANY).build());
             add(FormValueI18nDTO.builder().fieldName("Applicant company").fieldOid(DEFAULT_APPLICANT_COMPANY_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_APPLICANT_COMPANY).build());
             add(FormValueI18nDTO.builder().fieldName("申請者所属会社").fieldOid(DEFAULT_APPLICANT_COMPANY_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_APPLICANT_COMPANY).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_LEVEL_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("部门层级").fieldOid(DEFAULT_DEPARTMENT_LEVEL_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_LEVEL).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_LEVEL_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("部门层级").fieldOid(DEFAULT_DEPARTMENT_LEVEL_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_LEVEL).build());
             add(FormValueI18nDTO.builder().fieldName("Department level").fieldOid(DEFAULT_DEPARTMENT_LEVEL_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_LEVEL).build());
             add(FormValueI18nDTO.builder().fieldName("部門階層").fieldOid(DEFAULT_DEPARTMENT_LEVEL_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_LEVEL).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_PATH_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("部门路径").fieldOid(DEFAULT_DEPARTMENT_PATH_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_PATH).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_PATH_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("部门路径").fieldOid(DEFAULT_DEPARTMENT_PATH_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_PATH).build());
             add(FormValueI18nDTO.builder().fieldName("Department path").fieldOid(DEFAULT_DEPARTMENT_PATH_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_PATH).build());
             add(FormValueI18nDTO.builder().fieldName("部門パス").fieldOid(DEFAULT_DEPARTMENT_PATH_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_PATH).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_ROLE_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("部门角色").fieldOid(DEFAULT_DEPARTMENT_ROLE_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_ROLE).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_DEPARTMENT_ROLE_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("部门角色").fieldOid(DEFAULT_DEPARTMENT_ROLE_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_ROLE).build());
             add(FormValueI18nDTO.builder().fieldName("Department role").fieldOid(DEFAULT_DEPARTMENT_ROLE_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_ROLE).build());
             add(FormValueI18nDTO.builder().fieldName("部門ロール").fieldOid(DEFAULT_DEPARTMENT_ROLE_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_DEPARTMENT_ROLE).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_AMOUNT_FIELD_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("金额").fieldOid(DEFAULT_AMOUNT_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_AMOUNT).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_AMOUNT_FIELD_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("金额").fieldOid(DEFAULT_AMOUNT_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_AMOUNT).build());
             add(FormValueI18nDTO.builder().fieldName("Amount").fieldOid(DEFAULT_AMOUNT_FIELD_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_AMOUNT).build());
             add(FormValueI18nDTO.builder().fieldName("金額").fieldOid(DEFAULT_AMOUNT_FIELD_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_AMOUNT).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_FUNCTION_AMOUNT_FIELD_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("本币金额").fieldOid(DEFAULT_FUNCTION_AMOUNT_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_FUNCTION_AMOUNT).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_FUNCTION_AMOUNT_FIELD_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("本币金额").fieldOid(DEFAULT_FUNCTION_AMOUNT_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_FUNCTION_AMOUNT).build());
             add(FormValueI18nDTO.builder().fieldName("Base Amount").fieldOid(DEFAULT_FUNCTION_AMOUNT_FIELD_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_FUNCTION_AMOUNT).build());
             add(FormValueI18nDTO.builder().fieldName("元貨金額").fieldOid(DEFAULT_FUNCTION_AMOUNT_FIELD_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_FUNCTION_AMOUNT).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_EXPENSE_TYPE_FIELD_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("费用类型").fieldOid(DEFAULT_EXPENSE_TYPE_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_EXPENSETYPE).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(DEFAULT_EXPENSE_TYPE_FIELD_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("费用类型").fieldOid(DEFAULT_EXPENSE_TYPE_FIELD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_EXPENSETYPE).build());
             add(FormValueI18nDTO.builder().fieldName("Expense Type").fieldOid(DEFAULT_EXPENSE_TYPE_FIELD_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_EXPENSETYPE).build());
             add(FormValueI18nDTO.builder().fieldName("費目").fieldOid(DEFAULT_EXPENSE_TYPE_FIELD_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_EXPENSETYPE).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_TRAVEL_STANDARD_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("超差标").fieldOid(CONTROL_BEYOUND_TRAVEL_STANDARD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_TRAVEL_STANDARD).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_TRAVEL_STANDARD_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("超差标").fieldOid(CONTROL_BEYOUND_TRAVEL_STANDARD_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_TRAVEL_STANDARD).build());
             add(FormValueI18nDTO.builder().fieldName("Exceed travel policy").fieldOid(CONTROL_BEYOUND_TRAVEL_STANDARD_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_TRAVEL_STANDARD).build());
             add(FormValueI18nDTO.builder().fieldName("超出張基準").fieldOid(CONTROL_BEYOUND_TRAVEL_STANDARD_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_TRAVEL_STANDARD).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_BUDGET_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("超预算").fieldOid(CONTROL_BEYOUND_BUDGET_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_BUDGET).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_BUDGET_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("超预算").fieldOid(CONTROL_BEYOUND_BUDGET_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_BUDGET).build());
             add(FormValueI18nDTO.builder().fieldName("Exceed budget").fieldOid(CONTROL_BEYOUND_BUDGET_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_BUDGET).build());
             add(FormValueI18nDTO.builder().fieldName("超予算").fieldOid(CONTROL_BEYOUND_BUDGET_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_BUDGET).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_APPLICATION_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("超申请").fieldOid(CONTROL_BEYOUND_APPLICATION_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_APPLICATION_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("超申请").fieldOid(CONTROL_BEYOUND_APPLICATION_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION).build());
             add(FormValueI18nDTO.builder().fieldName("Exceed related request").fieldOid(CONTROL_BEYOUND_APPLICATION_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION).build());
             add(FormValueI18nDTO.builder().fieldName("超申請").fieldOid(CONTROL_BEYOUND_APPLICATION_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_APPLICATION).build());
         }});
 
-        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_POSITION_OID,new ArrayList<FormValueI18nDTO>(){{add(FormValueI18nDTO.builder().fieldName("超额度").fieldOid(CONTROL_BEYOUND_POSITION_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION).build());
+        CUSTOM_ROLE_DTO_MAP_TEMP.put(CONTROL_BEYOUND_POSITION_OID, new ArrayList<FormValueI18nDTO>() {{
+            add(FormValueI18nDTO.builder().fieldName("超额度").fieldOid(CONTROL_BEYOUND_POSITION_OID).language(LanguageEnum.ZH_CN.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION).build());
             add(FormValueI18nDTO.builder().fieldName("Exceed related request").fieldOid(CONTROL_BEYOUND_POSITION_OID).language(LanguageEnum.EN_US.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION).build());
             add(FormValueI18nDTO.builder().fieldName("超閾値").fieldOid(CONTROL_BEYOUND_POSITION_OID).language(LanguageEnum.JA.getKey()).messageKey(RuleConstants.CUSTOM_FILED_TYPE_MESSAGE_KEY_BEYOUND_POSITION).build());
         }});
@@ -903,6 +837,7 @@ public final class RuleConstants {
         CUSTOM_ROLE_DTO_MAP = Collections.unmodifiableMap(CUSTOM_ROLE_DTO_MAP_TEMP);
 
     }
+
     private RuleConstants() {
     }
 }

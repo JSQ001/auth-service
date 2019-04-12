@@ -121,7 +121,7 @@ public class ApprovalFormController {
                                                                     @RequestParam(name = "valid", required = false) Boolean valid,
                                                                     Pageable pageable) {
         List<ApprovalForm> lists = null;
-        Page page= PageUtil.getPage(pageable);
+        Page page=PageUtil.getPage(pageable);
         if (roleType != null && Constants.ROLE_TENANT.equals(roleType) && StringUtils.isNotEmpty(booksId)) {
             lists = approvalFormService.listDTOByTenantAndCondition(OrgInformationUtil.getCurrentTenantId(), formTypeId,formName,remark,valid,page);
             return new ResponseEntity<>(lists, PageUtil.getTotalHeader(page), HttpStatus.OK);

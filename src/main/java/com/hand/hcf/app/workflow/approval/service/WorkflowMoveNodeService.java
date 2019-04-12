@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.approval.service;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowInitNodeAction;
@@ -71,7 +72,7 @@ public class WorkflowMoveNodeService {
         Assert.notNull(node, "node null");
         Assert.notNull(node.getType(), "node.type null");
 
-        String nodeType = node.getType();
+        Integer nodeType = node.getType();
         WorkflowResult result = null;
 
         if (!WorkflowNode.TYPE_END.equals(nodeType)) {
@@ -111,10 +112,10 @@ public class WorkflowMoveNodeService {
         Assert.notNull(node, "node null");
         Assert.notNull(userList, "userList null");
         Assert.notNull(node.getInstance(), "node.instance null");
-        Assert.notNull(node.getSkipEmpty(), "node.skipEmpty null");
+        Assert.notNull(node.getRule(), "node.rule null");
 
         WorkflowInstance instance = node.getInstance();
-        Boolean skipEmpty = node.getSkipEmpty();
+        WorkflowRule rule = node.getRule();
         String status = null;
         WorkflowAction action = null;
 
@@ -125,7 +126,7 @@ public class WorkflowMoveNodeService {
             for (WorkflowUser user : userList) {
                 workflowBaseService.saveTask(node, user);
             }
-        } else if (skipEmpty) {
+        } else if (WorkflowRule.EMPTY_NODE_SKIP.equals(rule.getEmptyNodeRule())) {
             status = WorkflowInitNodeAction.RESULT_EMPTY_NODE;
             action = new WorkflowNextNodeAction(this, instance, node);
         } else {

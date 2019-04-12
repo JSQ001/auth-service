@@ -7,18 +7,17 @@ import com.google.common.collect.Maps;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.constant.WorkflowConstants;
-import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.WorkflowRole;
 import com.hand.hcf.app.workflow.domain.WorkflowRulesSetting;
 import com.hand.hcf.app.workflow.dto.WorkflowRoleDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowRulesSettingDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.enums.WorkflowRoleType;
-import com.hand.hcf.app.workflow.enums.WorkflowSettingDefaultRulesEnum;
 import com.hand.hcf.app.workflow.enums.WorkflowSettingType;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkFlowRoleMapper;
 import com.hand.hcf.app.workflow.persistence.WorkFlowRuleSettingMapper;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.ValidationError;
 import com.hand.hcf.core.exception.core.ValidationException;
@@ -255,7 +254,7 @@ public class WorkflowRulesSettingService extends BaseService<WorkFlowRuleSetting
             return list;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BizException(RespCode.SYS_APPROVAL_CHAIN_IS_NULL);
+            throw new BizException(ExceptionCode.SYS_APPROVAL_CHAIN_IS_NULL);
         }
 
     }

@@ -83,7 +83,7 @@ public class WorkflowSubmitService {
         }
 
         // WorkflowInstance
-        WorkflowInstance instance = WorkflowInstance.toInstance(workFlowDocumentRef);
+        WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         // WorkflowUser
         WorkflowUser user = new WorkflowUser(submitterOid);
         // WorkflowSubmitInstanceAction
@@ -116,17 +116,17 @@ public class WorkflowSubmitService {
      */
     public WorkflowResult submitInstance(WorkflowInstance instance, WorkflowUser user, String remark) {
         Assert.notNull(instance, "instance null");
-        Assert.notNull(instance.getStatus(), "instance.status null");
-        String status = instance.getStatus();
+        Assert.notNull(instance.getApprovalStatus(), "instance.approvalStatus null");
+        Integer status = instance.getApprovalStatus();
 
         // 不能提交审批中和已经通过的实例
-        if (WorkflowInstance.STATUS_APPROVAL.equals(status)
-                || WorkflowInstance.STATUS_PASS.equals(status)) {
+        if (WorkflowInstance.APPROVAL_STATUS_APPROVAL.equals(status)
+                || WorkflowInstance.APPROVAL_STATUS_PASS.equals(status)) {
             throw new BizException(ErrorConstants.INSTANCE_STATUS_CANNOT_SUBMIT);
         }
 
         // 更新实例的状态
-        instance.setStatus(WorkflowInstance.STATUS_APPROVAL);
+        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_APPROVAL);
         workflowBaseService.updateInstance(instance);
 
         // 保存提交的历史

@@ -17,13 +17,14 @@ import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
+import com.hand.hcf.app.workflow.util.StringUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -57,7 +58,6 @@ public class WorkFlowApprovalService {
         return defaultWorkflowIntegrationService.getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(),
                         droolsRuleApprovalNodeDTO.getFormValues(),
                         droolsRuleApprovalNodeDTO.getApplicantOid(),
-                        droolsRuleApprovalNodeDTO.getRuleApprovalNodeOid(),
                         droolsRuleApprovalNodeDTO);
     }
 
@@ -335,20 +335,20 @@ public class WorkFlowApprovalService {
             categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
         }
 
-            //审批节点名称模糊查询
-            if (StringUtils.isNotEmpty(approvalNodeName)) {
-                approvalNodeName = '%' + approvalNodeName + '%';
-            }
+        //审批节点名称模糊查询
+        if (StringUtils.isNotEmpty(approvalNodeName)) {
+            approvalNodeName = '%' + approvalNodeName + '%';
+        }
 
-            //申请人名称模糊查询
-            if (StringUtils.isNotEmpty(applicantName)) {
-                applicantName = '%' + applicantName + '%';
-            }
+        //申请人名称模糊查询
+        if (StringUtils.isNotEmpty(applicantName)) {
+            applicantName = '%' + applicantName + '%';
+        }
 
-            //单据编号模糊查询
-            if (StringUtils.isNotEmpty(documentNumber)) {
-                documentNumber = '%' + documentNumber + '%';
-            }
+        //单据编号模糊查询
+        if (StringUtils.isNotEmpty(documentNumber)) {
+            documentNumber = '%' + documentNumber + '%';
+        }
 
         //申请人
         UUID applicantOid = OrgInformationUtil.getCurrentUserOid();

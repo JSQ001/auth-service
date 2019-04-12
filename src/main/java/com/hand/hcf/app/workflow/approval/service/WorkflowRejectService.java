@@ -4,6 +4,7 @@ import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowRejectInstanceAction;
@@ -41,7 +42,7 @@ public class WorkflowRejectService {
     private WorkflowMainService workflowMainService;
 
     @Autowired
-    private WorkflowMessageService workflowMessageService;
+    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
     /**
      * 驳回审批
@@ -92,7 +93,7 @@ public class WorkflowRejectService {
         Assert.notNull(userOid, "userOid null");
 
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
-        WorkflowInstance instance = WorkflowInstance.toInstance(workFlowDocumentRef);
+        WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowRejectTaskAction action = new WorkflowRejectTaskAction(this, instance, user, approvalText);
 
@@ -103,8 +104,8 @@ public class WorkflowRejectService {
         workflowMainService.runWorkflow(action);
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 发送消息
-        workflowMessageService.sendMessage(workFlowDocumentRef);
+        // 通知审批结果
+        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
     }
 
     /**
@@ -126,8 +127,8 @@ public class WorkflowRejectService {
         }
 
         // 更新任务的状态成驳回
-        task.setStatus(WorkflowTask.STATUS_APPROVED);
-        task.setEnabled(false);
+        task.setApprovalStatus(WorkflowTask.APPROVAL_STATUS_APPROVED);
+        task.setStatus(WorkflowTask.STATUS_INVALID);
         workflowBaseService.updateTask(task);
         // 保存撤回的历史
         workflowBaseService.saveHistory(task, WorkflowRejectTaskAction.ACTION_NAME, remark);
@@ -151,14 +152,15 @@ public class WorkflowRejectService {
     public WorkflowResult rejectNode(WorkflowNode node, WorkflowUser user, String remark) {
         Assert.notNull(node, "node null");
         Assert.notNull(node.getInstance(), "node.instance null");
-        Assert.notNull(node.getCountersign(), "node.countersign null");
+        Assert.notNull(node.getRule(), "node.rule null");
         WorkflowInstance instance = node.getInstance();
-        String countersign = node.getCountersign();
+        WorkflowRule rule = node.getRule();
+        Integer countersign = rule.getCountersignRule();
 
         boolean canRejectNode = true;
         // 这个会签规则要求同个节点上所有人都驳回才能驳回节点
-        if (WorkflowNode.COUNTERSIGN_ANY_PASS_OR_ALL_REJECT.equals(countersign)) {
-            int unfinishedTotal = workflowBaseService.countTasks(node, WorkflowTask.STATUS_APPROVAL);
+        if (WorkflowRule.COUNTERSIGN_ANY_PASS_OR_ALL_REJECT.equals(countersign)) {
+            int unfinishedTotal = workflowBaseService.countTasks(node, WorkflowTask.APPROVAL_STATUS_APPROVAL);
             canRejectNode = unfinishedTotal == 0;
         }
 
@@ -195,7 +197,7 @@ public class WorkflowRejectService {
         workflowBaseService.clearAllTasks(instance);
 
         // 更新实例的状态成驳回
-        instance.setStatus(WorkflowInstance.STATUS_REJECT);
+        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_REJECT);
         workflowBaseService.updateInstance(instance);
 
         WorkflowResult result = new WorkflowResult();

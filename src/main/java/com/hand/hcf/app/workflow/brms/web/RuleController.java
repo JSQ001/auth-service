@@ -506,7 +506,7 @@ public class RuleController {
             method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     //@ApiOperation("查询表单审批模式")
-    public ResponseEntity<CustomFormApprovalModeDTO> getCustomFormApproverMode() {
+    public ResponseEntity<FormApprovalModeListDTO> getCustomFormApproverMode() {
         return ResponseEntity.ok().body(ruleService.getCustomFormApproverMode());
     }
 }

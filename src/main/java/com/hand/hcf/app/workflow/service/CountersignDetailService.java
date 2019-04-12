@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.ApprovalFormPropertyConstants;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.CountersignDetail;
 import com.hand.hcf.app.workflow.enums.CounterSignOperationTypeEnum;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.CountersignDetailMapper;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
@@ -125,7 +125,7 @@ public class CountersignDetailService extends BaseService<CountersignDetailMappe
         }
         if (CollectionUtils.isNotEmpty(countersignApproverOids)) {
             if (countersignApproverOids.size() > maxApproversNum) {
-                throw new BizException(RespCode.APPROVER_MUST_LT_26, "已选审批人超过26个，无法提交");
+                throw new BizException(ExceptionCode.APPROVER_MUST_LT_26, "已选审批人超过26个，无法提交");
             }
             StringBuffer approverOidString = new StringBuffer();
             countersignApproverOids.stream().forEach(approverOid -> {

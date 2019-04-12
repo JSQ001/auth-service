@@ -8,6 +8,7 @@ import com.hand.hcf.app.workflow.brms.domain.RuleConditionRelation;
 import com.hand.hcf.app.workflow.brms.domain.RuleTransfer;
 import com.hand.hcf.app.workflow.brms.dto.RuleTransferDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
+import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
 import com.hand.hcf.app.workflow.brms.persistence.RuleTransferMapper;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
@@ -129,7 +130,7 @@ public class RuleTransferService extends BaseService<RuleTransferMapper, RuleTra
                     RuleCondition.builder()
                             .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                             .typeNumber(RuleConstants.CONDITION_TYPE_FORM_TRANFORM)
-                            .symbol(RuleConstants.SYMBOL_EQ)
+                            .symbol(SymbolEnum.EQUAL.getId())
                             .ruleValue(formOid.toString())
                             .build()
             );
@@ -180,7 +181,7 @@ public class RuleTransferService extends BaseService<RuleTransferMapper, RuleTra
                         RuleCondition.builder()
                                 .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                                 .typeNumber(RuleConstants.CONDITION_TYPE_FORM_TRANFORM)
-                                .symbol(RuleConstants.SYMBOL_EQ)
+                                .symbol(SymbolEnum.EQUAL.getId())
                                 .ruleValue(formOid.toString())
                                 .build()
                 );

@@ -7,10 +7,11 @@ import com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetail;
 import com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetailResult;
 import com.hand.hcf.app.workflow.brms.dto.CustomMessagesDTO;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
+import com.hand.hcf.app.workflow.brms.enums.FieldType;
 import com.hand.hcf.app.workflow.brms.impl.RuleManagerImpl;
 import com.hand.hcf.app.workflow.brms.impl.TrackingAgendaEventListener;
+import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.enums.FieldType;
 import com.hand.hcf.core.util.AsciiUtil;
 import org.drools.compiler.compiler.DrlParser;
 import org.drools.compiler.compiler.DroolsParserException;
@@ -95,13 +96,13 @@ public class DroolKieService {
         try {
             return retryer.call(() -> droolExecute(droolsRuleApprovalNodeDTO, customFormValueDTOS, filterDroolsRuleDetails, ruleApprovalNodeOid));
         } catch (Exception e) {
-            logger.error("执行drool引擎 fail",e);
+            logger.error("执行drool引擎 fail", e);
             e.printStackTrace();
         }
         return new DroolsRuleDetailResult();
     }
 
-    private DroolsRuleDetailResult droolExecute(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO, List<FormValueDTO> formValueDTOS, List<DroolsRuleDetail> filterDroolsRuleDetails, UUID ruleApprovalNodeOid) throws Exception {
+    private DroolsRuleDetailResult droolExecute(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO, List<FormValueDTO> formValueDTOS, List<DroolsRuleDetail> filterDroolsRuleDetails, UUID ruleApprovalNodeOid) {
         //找到对应的drool条件
         List<String> drlList = filterDroolsRuleDetails.stream().map(c -> c.getDroolsRuleDetailValue()).collect(Collectors.toList());
 
@@ -110,15 +111,10 @@ public class DroolKieService {
         droolsRuleDetailResult.setDroolsRuleDetailResultFlg(false);
         BatchExecutionCommandImpl batchExecutionCommand = new BatchExecutionCommandImpl();
 
-        //过滤没有用到的CustomFormValue，只匹配规则中的CustomFormValue
+        //过滤没有用到的FormValue，只匹配规则中的FormValue
         List<FormValueDTO> filterdCustomFormValue = formValueDTOS.stream().filter(e -> (filterDroolsRuleDetails.stream().filter(
-            c -> c.getRuleCondition().getRuleField().equals(e.getFieldOid().toString()) && (c.getRuleCondition().getRefCostCenterOid() == null
-            || (c.getRuleCondition().getRefCostCenterOid() != null
-                    //&& c.getRuleCondition().getRefCostCenterOid().equals(e.getRefCostCenterOid())
-            ))
-                &&  (c.getRuleCondition().getRemark() != null && (((c.getRuleCondition().getRemark().equals("select_cost_center") || c.getRuleCondition().getRemark().equals("judge_cost_center")) && c.getRuleCondition().getRemark().equals(e.getMessageKey()))
-            || (!c.getRuleCondition().getRemark().equals("select_cost_center") && !c.getRuleCondition().getRemark().equals("judge_cost_center"))))
-
+                c -> c.getRuleCondition().getRuleField().equals(e.getFieldOid().toString())
+                        && (c.getRuleCondition().getRemark() != null)
         ).count() == 1)).collect(Collectors.toList());
 
         filterdCustomFormValue.forEach((FormValueDTO c) -> {
@@ -129,19 +125,18 @@ public class DroolKieService {
                 }
 
                 if (c.getFieldType().getId().equals(FieldType.LIST.getId()) && c.getValue() != null) {
-                    Arrays.stream(c.getValue().split(":")).forEach(a -> {
+                    Arrays.stream(c.getValue().split(RuleConstants.RULE_CONDITION_VALUE_SPLIT)).forEach(a -> {
                         FormValueDTO copyOfFormValueDTO = new FormValueDTO();
                         copyOfFormValueDTO.setValue(a);
                         copyOfFormValueDTO.setFieldOid(c.getFieldOid());
-                        //copyOfFormValueDTO.setRefCostCenterOid(c.getRefCostCenterOid());
                         batchExecutionCommand.addCommand(new InsertObjectCommand(copyOfFormValueDTO));
                     });
                 }
                 batchExecutionCommand.addCommand(new InsertObjectCommand(c));
 
             } catch (Exception e) {
-                e.printStackTrace();;
-                logger.error("batchExecutionCommand fail:",e);
+                e.printStackTrace();
+                logger.error("batchExecutionCommand fail:", e);
             }
         });
 
@@ -202,37 +197,27 @@ public class DroolKieService {
     private boolean doSingleRuleExecutor(List<FormValueDTO> formValueDTOS, String drl, DroolsRuleDetail droolsRuleDetail) {
 
         AtomicBoolean resultflg = new AtomicBoolean(true);
-        AtomicBoolean selectflg = new AtomicBoolean(true);
-        AtomicBoolean judgeflg = new AtomicBoolean(true);
         try {
             formValueDTOS.stream().filter(c -> (c.getFieldOid().toString().equals(droolsRuleDetail.getRuleCondition().getRuleField()))).collect(Collectors.toList()).forEach(d -> {
                 //List情况下要全部满足
                 if (d.getFieldType().equals(FieldType.LIST)) {
-                    Arrays.stream(d.getValue().split(":")).forEach(f -> {
+                    Arrays.stream(d.getValue().split(RuleConstants.RULE_CONDITION_VALUE_SPLIT)).forEach(f -> {
                         FormValueDTO newFormValueDTO = new FormValueDTO();
                         BeanUtils.copyProperties(d, newFormValueDTO);
-                        newFormValueDTO.setValue(f.toString());
+                        newFormValueDTO.setValue(f);
                         boolean flg = execute(newFormValueDTO, drl, droolsRuleDetail);
                         if (!flg) {
                             resultflg.set(flg);
                         }
                     });
-                } else if (d.getMessageKey().equals("judge_cost_center") || d.getMessageKey().equals("select_cost_center")){
-                    if(d.getMessageKey().equals("judge_cost_center")){
-                        judgeflg.set(execute(d, drl, droolsRuleDetail));
-                    } else if (d.getMessageKey().equals("select_cost_center")){
-                        selectflg.set(execute(d, drl, droolsRuleDetail));
-                    }
-                }else{
+                } else {
                     resultflg.set(execute(d, drl, droolsRuleDetail));
                 }
             });
         } catch (Exception e) {
             logger.error("Exception: {}", e);
         }
-        if(!selectflg.get() || !judgeflg.get()){
-            return Boolean.FALSE;
-        }
+
         return resultflg.get();
     }
 

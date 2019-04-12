@@ -5,10 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.hand.hcf.app.base.system.constant.Constants;
-import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.brms.dto.NotifyInfo;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleNextApproverResult;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
@@ -18,10 +16,9 @@ import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.constant.SyncLockPrefix;
 import com.hand.hcf.app.workflow.constant.WorkflowConstants;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.RespCode;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
-import com.hand.hcf.app.workflow.domain.ApprovalNodeEnum;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalFormPropertyRuleDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalReqDTO;
@@ -45,13 +42,11 @@ import com.hand.hcf.app.workflow.service.DefaultWorkflowIntegrationServiceImpl;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
 import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.exception.core.ValidationException;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.core.service.BaseI18nService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,10 +69,10 @@ import static com.hand.hcf.app.workflow.constant.RuleConstants.ALL_REPEATED_FILT
 import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVAL_CHAIN_FILTER;
 import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ADD_SIGN;
 import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_FILTER;
-import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_PASS_Detail;
-import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_PASS_Detail_ENGLISH;
-import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_REJECT_Detail;
-import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_REJECT_Detail_ENGLISH;
+import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_PASS_DETAIL;
+import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_PASS_DETAIL_ENGLISH;
+import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_REJECT_DETAIL;
+import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_ROBOT_REJECT_DETAIL_ENGLISH;
 import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_TYPE_ROBOT_OID;
 import static com.hand.hcf.app.workflow.constant.RuleConstants.COUNTERSIGN_APPROVER_FILTER;
 import static com.hand.hcf.app.workflow.constant.RuleConstants.ROBOT_NODE_AND_APPROVAL_PASS_RESULT;
@@ -91,8 +86,8 @@ import static com.hand.hcf.app.workflow.constant.RuleConstants.RULE_SEQUENCE;
  * @since 2018/12/12
  */
 @Service
+@Slf4j
 public class ApprovalRuleService {
-    public static Logger logger = LoggerFactory.getLogger(ApprovalRuleService.class);
 
     @Autowired
     private ApprovalChainService approvalChainService;
@@ -147,7 +142,7 @@ public class ApprovalRuleService {
             //创建或更新加签详情表
             countersignDetailService.saveCountersignDetailByEntityTypeAndEntityOidAndApplicantOidAndCountersignApproverOids(sysWorkFlowDocumentRef.getDocumentCategory(), sysWorkFlowDocumentRef.getDocumentOid(), baseClient.getUserByUserOid(sysWorkFlowDocumentRef.getUserOid()).getId(), sysWorkFlowDocumentRef.getCountersignApproverOids(), null, sysWorkFlowDocumentRef.getFormOid());
             //激活审批链
-            activeApprovalChain(sysWorkFlowDocumentRef.getDocumentOid(), sysWorkFlowDocumentRef.getDocumentCategory(), approvalChainList, sysWorkFlowDocumentRef.getFormOid());
+            activeApprovalChain( approvalChainList, sysWorkFlowDocumentRef.getFormOid());
         } else {
             //根据规则构建审批节点
             buildApprovalChainResult = buildNextApprovalChainByRule(approvalPathType, ruleApprovalNodeOid, true, sysWorkFlowDocumentRef);
@@ -158,7 +153,7 @@ public class ApprovalRuleService {
     /*
         激活审批链 返回需要知会的审批人
      */
-    private List<UUID> activeApprovalChain(UUID entityOid, Integer entityType, List<ApprovalChain> approvalChainList, UUID formOid) {
+    private List<UUID> activeApprovalChain( List<ApprovalChain> approvalChainList, UUID formOid) {
         //查询实体对应的表单
         String countersignType = approvalFormPropertyService.getPropertyValueByFormOidAndPropertyName(formOid, ApprovalFormPropertyConstants.COUNTERSIGN_TYPE_FOR_SUBMITTER);
         if (StringUtils.isBlank(countersignType)) {
@@ -282,7 +277,7 @@ public class ApprovalRuleService {
         approvalHistory.setCountersignType(countersignFlag);
         approvalHistory.setApprovalNodeName(ruleApprovalNodeName);
         approvalHistory.setApprovalNodeOid(ruleApprovalNodeOid);
-        StringBuffer countersignApproverFullName = new StringBuffer();
+        StringBuilder countersignApproverFullName = new StringBuilder();
         countersignApproverOids.stream().distinct().forEach(countersignApproverOid -> {
             UserApprovalDTO countersignApprover = baseClient.getUserByUserOid(countersignApproverOid);
             if (StringUtils.isEmpty(countersignApproverFullName.toString())) {
@@ -319,139 +314,6 @@ public class ApprovalRuleService {
         approvalChain.setCountersignRule(countersignRule);
     }
 
-    private List<UUID> getNextApproversByCompute(UUID ruleApprovalNodeOid, Integer approvalPathType, WorkFlowDocumentRef workFlowDocumentRef) {
-        ZonedDateTime now = ZonedDateTime.now();
-        UUID formOid = workFlowDocumentRef.getFormOid();
-        UUID entityOid = workFlowDocumentRef.getDocumentOid();
-        Integer entityType = workFlowDocumentRef.getDocumentCategory();
-        UUID companyOid = workFlowDocumentRef.getCompanyOid();
-        UUID applicantOid = workFlowDocumentRef.getApplicantOid();
-        //启用规则计算
-        RuleNextApproverResult ruleNextApproverResult = null;
-        //所有待审批的用户
-        List<UUID> approvalUserOids = new ArrayList<>();
-        //所有机器人
-        List<UUID> robotUserOids = new ArrayList<>();
-        //审批链结果
-        List<ApprovalChain> approvelList = new ArrayList<ApprovalChain>();
-        //机器人
-        List<ApprovalChain> robotList = new ArrayList<ApprovalChain>();
-        RuleApprovalNodeDTO ruleApprovalNodeDTO = null;
-        //是否执行了过滤方法
-        boolean filterReleInvoked = false;
-        //查询实体对应的表单过滤规则
-        String filterRule = approvalFormPropertyService.getPropertyValueByFormOidAndPropertyName(formOid, ApprovalFormPropertyConstants.FILTER_RULE);
-        String filterTypeRule = approvalFormPropertyService.getPropertyValueByFormOidAndPropertyName(formOid, ApprovalFormPropertyConstants.FILTER_TYPE_RULE);
-        //封装调用brms的数据
-        AssembleBrmsParamsRespDTO assembleBrmsParamsRespDTO = defaultWorkflowIntegrationService.assembleBrmsParams(entityOid, entityType, applicantOid);
-        logger.info("ApprovalItemService : getNextApproversByCompute:assembleBrmsParamsRespDTO:" + com.alibaba.fastjson.JSONObject.toJSONString(assembleBrmsParamsRespDTO));
-        do {
-            //未找到审批者 继续执行
-            ruleNextApproverResult = defaultWorkflowIntegrationService.getRuleNextApproverResult(assembleBrmsParamsRespDTO.getFormValueDTOS(), assembleBrmsParamsRespDTO.getFormOid(), ruleApprovalNodeOid, applicantOid, entityType, entityOid, assembleBrmsParamsRespDTO.getEntityData());
-            logger.info("ApprovalItemService : getNextApproversByCompute:ruleNextApproverResult:" + com.alibaba.fastjson.JSONObject.toJSONString(ruleNextApproverResult));
-            if (ruleNextApproverResult == null) {
-                break;
-            }
-            if (ruleNextApproverResult.getApprovalMode() == null || ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.CUSTOM) {
-                //自定义审批 根据节点
-                ruleApprovalNodeDTO = ruleNextApproverResult.getDroolsApprovalNode();
-
-                if (ruleApprovalNodeDTO == null || ruleApprovalNodeDTO.getRuleApprovalNodeOid() == null) {
-                    break;
-                }
-                ruleApprovalNodeOid = ruleApprovalNodeDTO.getRuleApprovalNodeOid();
-
-                List<UUID> countersignApproverOids = null;
-                List<UUID> approverOids = null;
-                if (ruleApprovalNodeDTO.getRuleApproverMap() != null) {
-                    countersignApproverOids = new ArrayList<>(ruleApprovalNodeDTO.getRuleApproverMap().get(WorkflowConstants.COUNTERSIGN_APPROVER));
-                    approverOids = new ArrayList<>(ruleApprovalNodeDTO.getRuleApproverMap().get(WorkflowConstants.APPROVER));
-                    countersignApproverOids.removeAll(approverOids);
-                }
-                //过滤重复审批人 优先保留分摊的成本中心和部门对应的审批人   分摊审批人approverOids不受会签规则影响
-                Set<UUID> allApproaverOids = new HashSet<>();
-                if (countersignApproverOids != null) {
-                    allApproaverOids.addAll(countersignApproverOids);
-                }
-                if (approverOids != null) {
-                    allApproaverOids.addAll(approverOids);
-                }
-                logger.info("ruleApprovalNodeDTO.getRuleApproverMap() : {}", StringUtils.join(approvalUserOids.toArray()));
-                // 承接已有的审批步骤
-                ApprovalChain existApprovalChain = approvalChainService.getTop1ByEntityTypeAndEntityOidAndStatusOrderBySequenceDesc(entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId());
-                int start = existApprovalChain == null ? 0 : existApprovalChain.getSequence();
-                ApprovalChain approvalChain = null;
-                if (CollectionUtils.isNotEmpty(countersignApproverOids)) {
-                    countersignApproverOids.remove(null);
-                }
-                if (CollectionUtils.isNotEmpty(approverOids)) {
-                    approverOids.remove(null);
-                }
-                switch (RuleApprovalEnum.parse(ruleApprovalNodeDTO.getTypeNumber())) {
-                    case NODE_TYPE_PRINT:
-                        break;
-                    case NODE_TYPE_EED:
-                        break;
-                    case NODE_TYPE_NOTICE:
-                        break;
-                    case NODE_TYPE_APPROVAL: {
-                        if (CollectionUtils.isNotEmpty(countersignApproverOids)) {
-                            //根据过滤规则过滤审批人
-                            filterReleInvoked = filterApproverByFilterRule(countersignApproverOids, filterRule, filterReleInvoked, filterTypeRule, workFlowDocumentRef);
-                            for (UUID approverOid : countersignApproverOids) {
-                                approvalChain = new ApprovalChain();
-                                preApprovalChain(approvalChain, entityType, entityOid, start, now, ruleApprovalNodeOid, ruleApprovalNodeDTO.getInvoiceAllowUpdateType());
-                                initApprovalChain(false, true, false, approverOid, approvalChain, false, ruleApprovalNodeDTO.getCountersignRule());
-                                approvelList.add(approvalChain);
-                            }
-                            approvalUserOids.addAll(countersignApproverOids);
-                        }
-                        //分摊的成本中心对应负责人不受会签规则影响
-                        if (CollectionUtils.isNotEmpty(approverOids)) {
-                            //根据过滤规则过滤审批人
-                            filterReleInvoked = filterApproverByFilterRule(approverOids, filterRule, filterReleInvoked, filterTypeRule, workFlowDocumentRef);
-                            for (UUID approverOid : approverOids) {
-                                approvalChain = new ApprovalChain();
-                                preApprovalChain(approvalChain, entityType, entityOid, start, now, ruleApprovalNodeOid, ruleApprovalNodeDTO.getInvoiceAllowUpdateType());
-                                initApprovalChain(false, true, false, approverOid, approvalChain, true, ruleApprovalNodeDTO.getCountersignRule());
-                                approvelList.add(approvalChain);
-                            }
-                            approvalUserOids.addAll(approverOids);
-                        }
-                    }
-                    break;
-                    case NODE_TYPE_ROBOT: {
-                        if (CollectionUtils.isNotEmpty(allApproaverOids)) {
-                            //保存关联单据信息
-                            workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
-                            for (UUID approverOid : allApproaverOids) {
-                                approvalChain = new ApprovalChain();
-                                preApprovalChain(approvalChain, entityType, entityOid, start, now, ruleApprovalNodeOid, ruleApprovalNodeDTO.getInvoiceAllowUpdateType());
-                                initApprovalChain(false, true, false, approverOid, approvalChain, false, ruleApprovalNodeDTO.getCountersignRule());
-                                robotList.add(approvalChain);
-                            }
-                            robotUserOids.addAll(allApproaverOids);
-                        }
-                    }
-                    break;
-                }
-            } else if (ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.DEPARTMENT) {
-                break;
-            } else if (ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.USER_PICK || ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.YING_FU_USER_PICK) {
-                break;
-            }
-        }
-        while (CollectionUtils.isEmpty(approvalUserOids) && CollectionUtils.isEmpty(robotUserOids));
-
-        if (CollectionUtils.isNotEmpty(approvalUserOids)) {
-            return approvalUserOids;
-        }
-        if (CollectionUtils.isNotEmpty(robotUserOids)) {
-            return robotUserOids;
-        }
-        return new ArrayList<UUID>();
-    }
-
     protected BuildApprovalChainResult buildNextApprovalChainByRule(Integer approvalPathType, UUID ruleApprovalNodeOid, boolean isFirstNode, WorkFlowDocumentRef workFlowDocumentRef) {
         ZonedDateTime now = ZonedDateTime.now();
         //启用规则计算
@@ -463,22 +325,16 @@ public class ApprovalRuleService {
         //所有机器人
         List<UUID> robotUserOids = new ArrayList<>();
         //审批链结果
-        List<ApprovalChain> approvelList = new ArrayList<ApprovalChain>();
+        List<ApprovalChain> approvelList = new ArrayList<>();
         //知会人
-        List<ApprovalChain> noticeList = new ArrayList<ApprovalChain>();
-        //知会配置信息
-        NotifyInfo notifyInfo = null;
+        List<ApprovalChain> noticeList = new ArrayList<>();
         //机器人
-        List<ApprovalChain> robotList = new ArrayList<ApprovalChain>();
-        //打印节点开启打印
-        boolean isEndNode = false;
+        List<ApprovalChain> robotList = new ArrayList<>();
         //结束节点控制 审批完后是否推送PDF邮件
         Boolean endNodePrintEnable = null;
         /**
          * 查询审批者,通知者
          */
-        //是否包含自审批跳过
-        boolean containsSelfApprovalSkip = false;
         //自审批
         boolean autoSelfApproval = false;
         Integer nodeTypeAndApprovalResult = 0;
@@ -495,11 +351,11 @@ public class ApprovalRuleService {
 
         //封装调用brms的数据
         AssembleBrmsParamsRespDTO assembleBrmsParamsRespDTO = defaultWorkflowIntegrationService.assembleNewBrmsParams(workFlowDocumentRef);
-        logger.info("ApprovalItemService : buildNextApprovalChainByRule:assembleBrmsParamsRespDTO:" + com.alibaba.fastjson.JSONObject.toJSONString(assembleBrmsParamsRespDTO));
+        log.info("ApprovalItemService : buildNextApprovalChainByRule:assembleBrmsParamsRespDTO:" + com.alibaba.fastjson.JSONObject.toJSONString(assembleBrmsParamsRespDTO));
         do {
             //未找到审批者 继续执行
             ruleNextApproverResult = defaultWorkflowIntegrationService.getRuleNextApproverResult(assembleBrmsParamsRespDTO.getFormValueDTOS(), assembleBrmsParamsRespDTO.getFormOid(), ruleApprovalNodeOid, applicantOid, entityType, entityOid, assembleBrmsParamsRespDTO.getEntityData());
-            logger.info("ApprovalItemService : buildNextApprovalChainByRule:ruleNextApproverResult:" + com.alibaba.fastjson.JSONObject.toJSONString(ruleNextApproverResult));
+            log.info("ApprovalItemService : buildNextApprovalChainByRule:ruleNextApproverResult:" + com.alibaba.fastjson.JSONObject.toJSONString(ruleNextApproverResult));
             if (ruleNextApproverResult == null) {
                 break;
             }
@@ -515,10 +371,7 @@ public class ApprovalRuleService {
                 workFlowDocumentRef.setApprovalNodeName(ruleApprovalNodeDTO.getRemark());
                 workFlowDocumentRef.setApprovalNodeOid(ruleApprovalNodeDTO.getRuleApprovalNodeOid().toString());
 
-                if (ruleApprovalNodeDTO.getContainsSelfApprovalSkip() != null
-                        && ruleApprovalNodeDTO.getContainsSelfApprovalSkip()) {
-                    containsSelfApprovalSkip = true;
-                }
+
                 List<UUID> countersignApproverOids = null;
                 List<UUID> approverOids = null;
                 if (ruleApprovalNodeDTO.getRuleApproverMap() != null) {
@@ -534,7 +387,7 @@ public class ApprovalRuleService {
                 if (approverOids != null) {
                     allApproaverOids.addAll(approverOids);
                 }
-                logger.info("ruleApprovalNodeDTO.getRuleApproverMap() : {}", StringUtils.join(approvalUserOids.toArray()));
+                log.info("ruleApprovalNodeDTO.getRuleApproverMap() : {}", StringUtils.join(approvalUserOids.toArray()));
                 // 承接已有的审批步骤
                 ApprovalChain existApprovalChain = approvalChainService.getTop1ByEntityTypeAndEntityOidAndStatusOrderBySequenceDesc(entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId());
                 int start = existApprovalChain == null ? 0 : existApprovalChain.getSequence();
@@ -547,7 +400,6 @@ public class ApprovalRuleService {
                 }
                 switch (RuleApprovalEnum.parse(ruleApprovalNodeDTO.getTypeNumber())) {
                     case NODE_TYPE_EED: {
-                        isEndNode = true;
                         endNodePrintEnable = ruleApprovalNodeDTO.getPrintFlag() == null ? true : ruleApprovalNodeDTO.getPrintFlag();
                     }
                     break;
@@ -559,7 +411,6 @@ public class ApprovalRuleService {
                                 initApprovalChain(true, false, true, approverOid, approvalChain, false, ruleApprovalNodeDTO.getCountersignRule());
                                 noticeList.add(approvalChain);
                             }
-                            notifyInfo = ruleApprovalNodeDTO.getNotifyInfo();
                             noticeUserOids.addAll(allApproaverOids);
                         }
                     }
@@ -606,14 +457,14 @@ public class ApprovalRuleService {
                     break;
                 }
             } else if (ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.DEPARTMENT) {
-                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowApprovalPath(applicantOid, entityOid, approvalPathType, ApprovalMode.DEPARTMENT.getId(), 1);
+                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowApprovalPath(applicantOid, entityOid, approvalPathType, ApprovalMode.DEPARTMENT.getId());
                 if (!CollectionUtils.isEmpty(approverList)) {
                     approvalUserOids.addAll(approverList.stream().map(UUID::fromString).collect(Collectors.toList()));
                     buildApprovalChain(entityOid, entityType, approverList, false);
                 }
                 break;
             } else if (ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.USER_PICK || ApprovalMode.parse(ruleNextApproverResult.getApprovalMode()) == ApprovalMode.YING_FU_USER_PICK) {
-                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowApprovalPath(applicantOid, entityOid, approvalPathType, ApprovalMode.USER_PICK.getId(), 1);
+                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowApprovalPath(applicantOid, entityOid, approvalPathType, ApprovalMode.USER_PICK.getId());
                 if (!CollectionUtils.isEmpty(approverList)) {
                     approvalUserOids.addAll(approverList.stream().map(UUID::fromString).collect(Collectors.toList()));
                     //英孚选人模式  所有人一起审批
@@ -623,7 +474,7 @@ public class ApprovalRuleService {
             }
         }
         while (CollectionUtils.isEmpty(approvalUserOids) && CollectionUtils.isEmpty(robotUserOids));
-        logger.info("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , get approvalUserOids result : {}", entityOid, entityType, approvalUserOids);
+        log.info("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , get approvalUserOids result : {}", entityOid, entityType, approvalUserOids);
 
         /**
          *  获取首个审批者为空
@@ -633,35 +484,15 @@ public class ApprovalRuleService {
          *      filterReleInvoked 过滤过审批人
          */
         if (!filterReleInvoked && isFirstNode && CollectionUtils.isEmpty(approvalUserOids) && CollectionUtils.isEmpty(robotUserOids)) {
-            // modify by mh.z 20190117 去掉自审批通过的逻辑
-            /*if (containsSelfApprovalSkip) {
-                //自审批
-                autoSelfApproval = true;
-                ApprovalChain approvalChain = new ApprovalChain();
-                approvalChain.setEntityType(entityType);
-                approvalChain.setEntityOid(entityOid);
-                approvalChain.setSequence(1);
-                approvalChain.setApproverOid(applicantOid);
-                approvalChain.setStatus(ApprovalChainStatusEnum.NORMAL.getId());
-                approvalChain.setCreatedDate(now);
-                approvalChain.setLastUpdatedDate(now);
-                approvalChain.setRuleApprovalNodeOid(ruleApprovalNodeOid);
-                approvalChain.setNoticed(false);
-                approvalChain.setCurrentFlag(true);
-                approvalChain.setFinishFlag(false);
-                approvelList.add(approvalChain);
-            } else {
-                logger.error("rule approval path is null，buildNextApprovalChainByRule, entityOid :{} , entityType :{} ", entityOid, entityType);
-                throw new BizException(RespCode.SYS_APPROVAL_NO_APPROVER, RuleConstants.CANNOT_FIND_CURRENT_APPROVAL);
-            }*/
 
-            logger.error("rule approval path is null，buildNextApprovalChainByRule, entityOid :{} , entityType :{} ", entityOid, entityType);
-            throw new BizException(RespCode.SYS_APPROVAL_NO_APPROVER, RuleConstants.CANNOT_FIND_CURRENT_APPROVAL);
+
+            log.error("rule approval path is null，buildNextApprovalChainByRule, entityOid :{} , entityType :{} ", entityOid, entityType);
+            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER, RuleConstants.CANNOT_FIND_CURRENT_APPROVAL);
         }
         if (CollectionUtils.isNotEmpty(robotList)) {
-            logger.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save robotList count : {}", entityOid, entityType, robotList.size());
+            log.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save robotList count : {}", entityOid, entityType, robotList.size());
             try {
-                logger.debug("debug->buildNextApprovalChainByRule->robotList：{}", objectMapper.writeValueAsString(robotList));
+                log.debug("debug->buildNextApprovalChainByRule->robotList：{}", objectMapper.writeValueAsString(robotList));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -676,9 +507,9 @@ public class ApprovalRuleService {
             if (ruleApprovalNodeDTO.getApprovalActions().contains(String.valueOf(ACTION_APPROVAL_PASS))) {
                 if (StringUtils.isEmpty(ruleApprovalNodeDTO.getComments())) {
                     if (!Constants.DEFAULT_LANGUAGE.equals(OrgInformationUtil.getCurrentLanguage())) {
-                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_PASS_Detail_ENGLISH);
+                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_PASS_DETAIL_ENGLISH);
                     } else {
-                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_PASS_Detail);
+                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_PASS_DETAIL);
                     }
                 } else {
                     approvalReqDTO.setApprovalTxt(ruleApprovalNodeDTO.getComments());
@@ -689,9 +520,9 @@ public class ApprovalRuleService {
             } else {
                 if (StringUtils.isEmpty(ruleApprovalNodeDTO.getComments())) {
                     if (!Constants.DEFAULT_LANGUAGE.equals(OrgInformationUtil.getCurrentLanguage())) {
-                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_REJECT_Detail_ENGLISH);
+                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_REJECT_DETAIL_ENGLISH);
                     } else {
-                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_REJECT_Detail);
+                        approvalReqDTO.setApprovalTxt(APPROVER_ROBOT_REJECT_DETAIL);
                     }
                 } else {
                     approvalReqDTO.setApprovalTxt(ruleApprovalNodeDTO.getComments());
@@ -701,11 +532,11 @@ public class ApprovalRuleService {
             }
         }
         if (CollectionUtils.isNotEmpty(noticeList)) {
-            logger.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save noticeList count : {}", entityOid, entityType, noticeList.size());
+            log.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save noticeList count : {}", entityOid, entityType, noticeList.size());
             approvalChainService.saveAll(noticeList);
         }
         if (CollectionUtils.isNotEmpty(approvelList)) {
-            logger.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save approvelList count : {}", entityOid, entityType, approvelList.size());
+            log.debug("buildNextApprovalChainByRule param entityOid : {} , entityType : {} , approvalChainService save approvelList count : {}", entityOid, entityType, approvelList.size());
             approvelList = approvalChainService.saveAll(approvelList);
         }
         /**
@@ -797,8 +628,8 @@ public class ApprovalRuleService {
             if (StringUtils.isNotBlank(filterRule) && ALL_REPEATED_FILTER.equals(Integer.valueOf(filterRule))) {
                 List<ApprovalHistory> existApprovalHistoryList = approvalHistoryService.listByEntityTypeAndEntityOidAndOperation(
                         entityType, entityOid, ApprovalOperationEnum.APPROVAL_PASS.getId());
-                logger.info("filter:filterApproverByFilterRule, existApprovalHistoryList:{},approvalUserOids:{},approvalUserOids:{},approvalUserOids:{}", existApprovalHistoryList, approvalUserOids, filterRule, filterTypeRule);
-                logger.info("filter:filterApproverByFilterRule,entityType:{},entityOid:{}:", entityType, entityOid);
+                log.info("filter:filterApproverByFilterRule, existApprovalHistoryList:{},approvalUserOids:{},approvalUserOids:{},approvalUserOids:{}", existApprovalHistoryList, approvalUserOids, filterRule, filterTypeRule);
+                log.info("filter:filterApproverByFilterRule,entityType:{},entityOid:{}:", entityType, entityOid);
 
                 if (CollectionUtils.isNotEmpty(existApprovalHistoryList)) {
                     //过滤重复审批人, 保留当前审批人的加签审批
@@ -817,20 +648,18 @@ public class ApprovalRuleService {
     private void filterApproverByFilterRule(List<ApprovalHistory> approvalUserOids, List<UUID> ruleApproverUserOids) {
         List<UUID> approvers = Lists.newArrayList();
         List<UUID> newApprovers = approvalUserOids.stream().filter(p -> p.getRefApprovalChainId() != null).map(p -> approvalChainService.getApprovalChainByRefId(p.getRefApprovalChainId())).collect(Collectors.toList()).stream().filter(l -> l.getApproverOid() != null).map(l -> l.getApproverOid()).collect(Collectors.toList());
-        logger.info("filter:filterApproverByFilterRule,newApprovers:{}", newApprovers);
-        logger.info("filter:filterApproverByFilterRule,ruleApproverUserOids:{}", ruleApproverUserOids);
+        log.info("filter:filterApproverByFilterRule,newApprovers:{}", newApprovers);
+        log.info("filter:filterApproverByFilterRule,ruleApproverUserOids:{}", ruleApproverUserOids);
         if (CollectionUtils.isNotEmpty(newApprovers)) {
             approvers.addAll(newApprovers);
         }
-        approvers.stream().forEach(a -> {
-            ruleApproverUserOids.remove(a);
-        });
+        approvers.stream().forEach(ruleApproverUserOids::remove);
     }
 
     private void filterApproverByApprovalChain(List<ApprovalChain> approvalUserOids, List<UUID> ruleApproverUserOids) {
-        approvalUserOids.stream().forEach(approvalChain -> {
-            ruleApproverUserOids.remove(approvalChain.getApproverOid());
-        });
+        approvalUserOids.stream().forEach(approvalChain ->
+            ruleApproverUserOids.remove(approvalChain.getApproverOid())
+        );
     }
 
     public void buildApprovalChain(UUID entityOid, Integer entityType, List<String> approverList, boolean emergency) {
@@ -876,6 +705,7 @@ public class ApprovalRuleService {
      * @param approverOid
      * @param approvalTxt
      */
+    @Transactional
     public void selfApproval(UUID approverOid, String approvalTxt, WorkFlowDocumentRef sysWorkFlowDocumentRef) {
         passWorkflow(approverOid, null, approvalTxt, true, false, null, sysWorkFlowDocumentRef);
     }
@@ -887,8 +717,8 @@ public class ApprovalRuleService {
      * @param approverOid 其实是当前登录人,可能是审批人本人,也可能是其代理人
      * @param approvalTxt
      */
-    @Transactional
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = RespCode.SYS_REQUEST_BE_PROCESSING)
+    @Transactional(rollbackFor = Exception.class)
+    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
     public void passWorkflow(UUID approverOid, UUID chainApproverOid, String approvalTxt, boolean selfApproval, boolean priceAuditor, ApprovalResDTO approvalResDTO, WorkFlowDocumentRef sysWorkFlowDocumentRef) {
         ZonedDateTime now = ZonedDateTime.now();
         UUID entityOid = sysWorkFlowDocumentRef.getDocumentOid();
@@ -902,8 +732,7 @@ public class ApprovalRuleService {
             approvalChain = approvalChainService.getByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApproverOid(entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), true, approverOid);
         }
         if (approvalChain == null) {
-            throw new BizException(RespCode.SYS_APPROVAL_NO_APPROVER, RuleConstants.CANNOT_FIND_CURRENT_APPROVAL);
-            //throw new RuntimeException("Cannot find current approval step for: " + entityType + ", " + entityOid);
+            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER, RuleConstants.CANNOT_FIND_CURRENT_APPROVAL);
         }
         //获取当前审批节点
         if (approvalChain.getRuleApprovalNodeOid() != null) {
@@ -1042,7 +871,6 @@ public class ApprovalRuleService {
         }
 
         // modify by mh.z 20190308 机器人审批通过则单据审批通过
-        //normalApprovalNode(approvalChain, now,sysWorkFlowDocumentRef);
         if (approvalChain != null && RuleConstants.APPROVER_TYPE_ROBOT_OID.equals(String.valueOf(approvalChain.getApproverOid()))) {
             // 通过单据
             passDocument(approvalChain, sysWorkFlowDocumentRef);
@@ -1134,9 +962,9 @@ public class ApprovalRuleService {
             //构建加签审批链
             List<ApprovalChain> approvalChainList = buildApprovalChainByCountersignApproverOids(entityOid, entityType, submittedBy, countersignApproversOidsSet, currentSequence++, APPROVER_ADD_SIGN, null, approvalNodeName, false, ApprovalFormPropertyConstants.COUNTERSIGN_TYPE_FOR_SUBMITTER, null, formOid);
             //激活审批链
-            return activeApprovalChain(entityOid, entityType, approvalChainList, formOid);
+            return activeApprovalChain( approvalChainList, formOid);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     /**
@@ -1191,7 +1019,7 @@ public class ApprovalRuleService {
         Integer entityType = workFlowDocumentRef.getDocumentCategory();
         UUID entityOid = workFlowDocumentRef.getDocumentOid();
 
-        logger.info("审批结束 param entityOid : {} , entityType : {} , finish approval ", entityOid, entityType);
+        log.info("审批结束 param entityOid : {} , entityType : {} , finish approval ", entityOid, entityType);
         workFlowDocumentRef.setStatus(DocumentOperationEnum.APPROVAL_PASS.getId());
         workFlowDocumentRef.setRejectType("");
         workFlowDocumentRef.setRejectReason("");
@@ -1211,13 +1039,12 @@ public class ApprovalRuleService {
         //如果上一个审批链的规则审批节点Oid不为null 或者是加签的审批链走BRMS工作流
         if (last != null && (last.getRuleApprovalNodeOid() != null || last.getCountersignType() != null)) {
             //使用规则审批
-            logger.debug("debug->getNextChain：");
-            BuildApprovalChainResult buildApprovalChainResult = buildNextApprovalChainByRule(entityType, last.getRuleApprovalNodeOid(), false, sysWorkFlowDocumentRef);
-            return buildApprovalChainResult;
+            log.debug("debug->getNextChain：");
+            return buildNextApprovalChainByRule(entityType, last.getRuleApprovalNodeOid(), false, sysWorkFlowDocumentRef);
         } else {
             ApprovalPathModeEnum companyApprovalPathMode = defaultWorkflowIntegrationService.getCompanyApprovalPathMode(companyOid);
             if (companyApprovalPathMode != ApprovalPathModeEnum.FULL) {
-                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowNextApprovalPath(sysWorkFlowDocumentRef.getUserOid(), entityOid, last == null ? null : last.getApproverOid(), entityType);
+                List<String> approverList = defaultWorkflowIntegrationService.getWorkflowNextApprovalPath(sysWorkFlowDocumentRef.getUserOid(), entityOid, last == null ? null : last.getApproverOid());
                 if (CollectionUtils.isNotEmpty(approverList)) {
                     buildApprovalChain(entityOid, entityType, approverList, false);
                 }
@@ -1238,7 +1065,7 @@ public class ApprovalRuleService {
     }
 
     private ApprovalChain dealWithNextChain(Integer entityType, UUID entityOid, ApprovalChain next, List<UUID> noticeMessageList) {
-        if (next != null && next.getNoticed()) {//通知
+        if (next != null && next.getNoticed()) {
             // 消息推送知会人
             noticeMessageList.add(next.getApproverOid());
             next = approvalChainService.getTop1ByEntityTypeAndEntityOidAndStatusAndFinishFlagIsFalseAndSequenceGreaterThanOrderBySequenceAsc(entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), next.getSequence());
@@ -1258,9 +1085,9 @@ public class ApprovalRuleService {
                 resubmittedAmount = BigDecimal.ZERO;
             }
             ApprovalFormPropertyRuleDTO formRule = approvalFormPropertyService.selectByFormOid(workFlowDocumentRef.getFormOid());
-            logger.info("Form config: enableAmountFilter[{}], enableExpenseTypeFilter[{}]", formRule.isEnableAmountFilter
+            log.info("Form config: enableAmountFilter[{}], enableExpenseTypeFilter[{}]", formRule.isEnableAmountFilter
                     (), formRule.isEnableExpenseTypeFilter());
-            logger.info("Amount change: {} -> {}", rejectedAmount, resubmittedAmount);
+            log.info("Amount change: {} -> {}", rejectedAmount, resubmittedAmount);
             // 不开启审批人过滤的条件：
             // 1. 启用了『当单据金额变大时，再提交时不跳过已审批环节』，并且金额变大
             return !(formRule.isEnableAmountFilter() && resubmittedAmount.compareTo(rejectedAmount) > 0);
@@ -1269,70 +1096,4 @@ public class ApprovalRuleService {
         }
     }
 
-    /**
-     * 单据提交
-     */
-    @Transactional
-    public void submitWorkflow(WorkFlowDocumentRef workFlowDocumentRef) {
-        // 设置FilterFlag
-        if (workFlowDocumentRef.getDocumentOid() == null) {
-            throw new BizException("提交失败，单据Oid不允许为空!");
-        }
-        UUID documentOid = workFlowDocumentRef.getDocumentOid();
-        UUID userOid = workFlowDocumentRef.getUserOid();
-        UUID formOid = workFlowDocumentRef.getFormOid();
-        Boolean filterFlag = findFilterRuleNew(workFlowDocumentRef);
-        workFlowDocumentRef.setFilterFlag(filterFlag);
-        //保存单据信息
-        workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
-        //获取公司信息
-        CompanyCO company = baseClient.getCompanyById(workFlowDocumentRef.getCompanyId());
-        //查询审批人
-        //设置审批历史
-        ApprovalHistory approvalHistory = new ApprovalHistory();
-        approvalHistory.setEntityType(workFlowDocumentRef.getDocumentCategory());
-        approvalHistory.setEntityOid(documentOid);
-        approvalHistory.setOperationType(ApprovalOperationTypeEnum.SELF.getId());
-        approvalHistory.setOperation(ApprovalOperationEnum.SUBMIT_FOR_APPROVAL.getId());
-        approvalHistory.setOperatorOid(userOid);
-        approvalHistory.setApprovalNodeName(ApprovalNodeEnum.SUBMIT_NODE.getName());// 第一个节点名为 提交
-        approvalHistoryService.save(approvalHistory);
-        try {
-            // 审批流
-            BuildApprovalChainResult buildApprovalChainResult = null;
-            //判断是否是自定义审批流
-            if (brmsService.isEnableRule( workFlowDocumentRef.getFormOid())) {
-                buildApprovalChainResult = buildNewApprovalChainResultByRuleOrApproverOids(workFlowDocumentRef.getDocumentCategory(), null, ApprovalNodeEnum.SUBMIT_NODE.getName(), workFlowDocumentRef);
-            } else {
-                List<String> approverList = null;
-                UUID companyOid = baseClient.getCompanyByUserOid(userOid).getCompanyOid();
-                ApprovalPathModeEnum companyApprovalPathMode = defaultWorkflowIntegrationService.getCompanyApprovalPathMode(companyOid);
-                if (companyApprovalPathMode == ApprovalPathModeEnum.FULL) {
-                    approverList = defaultWorkflowIntegrationService.getWorkflowApprovalPath(userOid, documentOid, workFlowDocumentRef.getDocumentCategory());
-                } else {
-                    approverList = defaultWorkflowIntegrationService.getWorkflowNextApprovalPath(userOid, documentOid, null, workFlowDocumentRef.getDocumentCategory());
-                }
-                buildApprovalChain(documentOid, workFlowDocumentRef.getDocumentCategory(), approverList, false);
-            }
-            /**
-             * 满足自审批要求
-             * 申请人自审批
-             */
-            if (buildApprovalChainResult != null && buildApprovalChainResult.getAutoSelfApproval()) {
-                logger.debug("submitApplication param entityOid : {} , entityType : {} , self approval ", documentOid, workFlowDocumentRef.getDocumentCategory());
-                this.selfApproval(userOid, "", workFlowDocumentRef);
-            }
-            if (buildApprovalChainResult != null && buildApprovalChainResult.getApprovalChains().size() > 0) {
-                // 修改各单据的审批状态
-                workflowEventPublishService.publishEvent(workFlowDocumentRef);
-            }
-        } catch (ValidationException e) {
-            e.printStackTrace();
-
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BizException(RespCode.SYS_APPROVAL_CHAIN_IS_NULL, e.getMessage());
-        }
-    }
 }

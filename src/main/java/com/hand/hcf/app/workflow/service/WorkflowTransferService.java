@@ -7,11 +7,12 @@ import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkflowTransfer;
 import com.hand.hcf.app.workflow.dto.WorkflowTransferDTO;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkflowTransferMapper;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.util.TypeConversionUtils;
@@ -55,7 +56,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
                         .eq("workflow_id",workflowTransfer.getWorkflowId())
                         .eq("start_date",workflowTransfer.getStartDate()))
                 .size() > 0){
-            throw new BizException(RespCode.WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT);
+            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT);
         };
         workflowTransfer.setAuthorizerId(OrgInformationUtil.getCurrentUserId());
         workflowTransfer.setTenantId(OrgInformationUtil.getCurrentTenantId());
@@ -147,7 +148,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
      */
     public WorkflowTransfer updateWorkflowTransfer(WorkflowTransfer workflowTransfer) {
         if(baseMapper.selectById(workflowTransfer.getId()) == null){
-            throw new BizException(RespCode.WORKFLOW_TRANSFER_NOT_EXIST);
+            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_NOT_EXIST);
         }
         baseMapper.updateAllColumnById(workflowTransfer);
         return workflowTransfer;

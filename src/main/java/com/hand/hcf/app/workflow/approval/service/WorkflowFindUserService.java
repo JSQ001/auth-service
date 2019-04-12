@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
 import java.util.*;
 
 /**
- * 找人规则
+ * 工作流找人逻辑
  * @author mh.z
  * @date 2019/04/07
  */
@@ -57,7 +57,7 @@ public class WorkflowFindUserService {
 
         //
         Map<String, Set<UUID>> userOidSetMap = defaultWorkflowIntegrationService.getApproverUserOids(
-                ruleApproverDTOList, formValueDTOList, applicantOid, ruleApprovalNodeOid, droolsRuleApprovalNodeDTO, entityType);
+                ruleApproverDTOList, formValueDTOList, applicantOid, droolsRuleApprovalNodeDTO);
         //
         Set<UUID> userOidSet = userOidSetMap.get(WorkflowConstants.COUNTERSIGN_APPROVER);
         //

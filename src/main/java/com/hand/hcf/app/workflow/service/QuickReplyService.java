@@ -1,9 +1,9 @@
 package com.hand.hcf.app.workflow.service;
 
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.QuickReply;
 import com.hand.hcf.app.workflow.enums.QuickReplyStatusEnum;
 import com.hand.hcf.app.workflow.persistence.QuickReplyMapper;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
@@ -22,7 +22,7 @@ import java.util.UUID;
  */
 @Transactional
 @Service
-public class QuickReplyService extends BaseService<QuickReplyMapper,QuickReply>{
+public class QuickReplyService extends BaseService<QuickReplyMapper, QuickReply>{
     @Autowired
     private QuickReplyMapper quickReplyMapper;
 
@@ -32,7 +32,7 @@ public class QuickReplyService extends BaseService<QuickReplyMapper,QuickReply>{
 
     public QuickReply createOrUpdateQuickReply (QuickReply quickReply,UUID userOid) {
         if (quickReply.getReply().length() > 500) {
-            throw new BizException(RespCode.QUICK_REPLY_REPLY_MORE_THAN_500);
+            throw new BizException(ExceptionCode.QUICK_REPLY_REPLY_MORE_THAN_500);
         }
 //        QuickReply quickReply = new QuickReply();
 //        BeanUtils.copyProperties(quickReplyDTO, quickReply);

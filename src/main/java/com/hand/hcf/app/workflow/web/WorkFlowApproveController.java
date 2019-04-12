@@ -10,6 +10,10 @@ import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalReqDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalResDTO;
+import com.hand.hcf.app.workflow.dto.CounterSignDTO;
+import com.hand.hcf.app.workflow.dto.NotifyDTO;
+import com.hand.hcf.app.workflow.dto.SendBackDTO;
+import com.hand.hcf.app.workflow.dto.TransferDTO;
 import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
@@ -18,6 +22,9 @@ import com.hand.hcf.app.workflow.service.WorkFlowApprovalService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.core.util.DateUtil;
 import com.hand.hcf.core.util.PageUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +45,7 @@ import java.util.UUID;
  * 工作流方法调用 统一入口方法
  */
 @RestController
+@Api(value = "审批api")
 @RequestMapping("/api/workflow")
 public class WorkFlowApproveController {
     @Autowired
@@ -58,67 +66,89 @@ public class WorkFlowApproveController {
     @Autowired
     private WorkflowWithdrawService approvalWithdrawService;
 
-    /**
-     * @api {post} /pass    审批通过
-     * @apiDescription 审批通过
-     * @apiName passWorkflow
-     * @apiGroup Approval
-     * @apiParamExample {json} Request-Example:
-     * {"entities":[{"entityOid":"73173029-83c9-4d91-904f-ca241866d4b7","entityType":1001}]}
-     * @apiSuccessExample {json} Success-Result
-     * {"successNum":1,"failNum":0,"failReason":{}}
-     */
+
+    @ApiOperation(value = "审批通过", notes = "通过待审批单据", tags = {"approval"})
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
-    public ResponseEntity passWorkflow(@Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
+    public ResponseEntity<ApprovalResDTO> passWorkflow(
+            @ApiParam(value = "待审批单据") @Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = approvalPassService.passWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
 
-    /**
-     * @api {post} /rejectWorkflow 审批驳回
-     * @apiDescription 审批驳回
-     * @apiName rejectWorkflow
-     * @apiGroup Approval
-     * @apiParamExample {json} Request-Example:
-     * {"entities":[{"entityOid":"73173029-83c9-4d91-904f-ca241866d4b7","entityType":1001}]}
-     * @apiSuccessExample {json} Success-Result
-     * {"successNum":1,"failNum":0,"failReason":{}}
-     */
+
+    @ApiOperation(value = "审批驳回", notes = "驳回待审批单据", tags = {"approval"})
     @RequestMapping(value = "/reject", method = RequestMethod.POST)
-    public ResponseEntity rejectWorkflow(@Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
+    public ResponseEntity<ApprovalResDTO> rejectWorkflow(
+            @ApiParam(value = "待驳回单据") @Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = approvalRejectService.rejectWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
-    /**
-     * @api {post} /withdraw    申请人撤回单据
-     * @apiDescription 申请人撤回单据
-     * @apiName withdrawWorkflow
-     * @apiGroup Approval
-     * @apiParamExample {json} Request-Example:
-     * {"entities":[{"entityOid":"73173029-83c9-4d91-904f-ca241866d4b7","entityType":1001}]}
-     * @apiSuccessExample {json} Success-Result
-     * {"successNum":1,"failNum":0,"failReason":{}}
-     */
+
+    @ApiOperation(value = "申请人撤回单据", notes = "申请人撤回待审批单据", tags = {"approval"})
     @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
-    public ResponseEntity withdrawWorkflow(@Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
+    public ResponseEntity<ApprovalResDTO> withdrawWorkflow(
+            @ApiParam(value = "待撤回单据")  @Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = approvalWithdrawService.withdrawWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
 
+    @ApiOperation(value = "审批加签", notes = "审批加签", tags = {"approval"})
+    @RequestMapping(value = "/countersign", method = RequestMethod.POST)
+    public ResponseEntity<ApprovalResDTO> counterSign(
+            @ApiParam(value = "单据加签信息") @Valid @RequestBody CounterSignDTO counterSignDTO) {
+        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
+        approvalResDTO.setSuccessNum(0);
+        //todo
+        return ResponseEntity.ok(approvalResDTO);
+    }
+
+    @ApiOperation(value = "审批转交", notes = "审批转交", tags = {"approval"})
+    @RequestMapping(value = "/deliver", method = RequestMethod.POST)
+    public ResponseEntity<ApprovalResDTO> deliver(
+            @ApiParam(value = "单据转交信息") @Valid @RequestBody TransferDTO transferDTO) {
+        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
+        approvalResDTO.setSuccessNum(0);
+        //todo
+        return ResponseEntity.ok(approvalResDTO);
+    }
+
+
+    @ApiOperation(value = "审批退回指定节点", notes = "审批退回指定节点", tags = {"approval"})
+    @RequestMapping(value = "/back", method = RequestMethod.POST)
+    public ResponseEntity<ApprovalResDTO> sendBack(
+            @ApiParam(value = "单据退回节点") @Valid @RequestBody SendBackDTO sendBackDTO) {
+        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
+        approvalResDTO.setSuccessNum(0);
+        //todo
+        return ResponseEntity.ok(approvalResDTO);
+    }
+
+
+    @ApiOperation(value = "审批节点通知", notes = "审批节点通知", tags = {"approval"})
+    @RequestMapping(value = "/notify", method = RequestMethod.POST)
+    public ResponseEntity<ApprovalResDTO> notify(
+            @ApiParam(value = "节点通知信息") @Valid @RequestBody NotifyDTO notifyDTO) {
+        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
+        approvalResDTO.setSuccessNum(0);
+        //todo
+        return ResponseEntity.ok(approvalResDTO);
+    }
 
     /**
      * 【仪表盘】-我的单据
+     *
      * @param tabNumber
      * @return
      */
     @RequestMapping(value = "/my/document/{tabNumber}", method = RequestMethod.GET)
-    public ResponseEntity<List<WorkflowDocumentDTO>> listMyDocument(@PathVariable Integer tabNumber){
+    public ResponseEntity<List<WorkflowDocumentDTO>> listMyDocument(@PathVariable Integer tabNumber) {
         return ResponseEntity.ok(workFlowApprovalService.listMyDocument(tabNumber));
     }
 
 
     /**
      * 【仪表盘-】获取当前用户所有待审批的单据
+     *
      * @return
      */
     @RequestMapping(value = "/approvals/batchfilters", method = RequestMethod.GET)
@@ -127,6 +157,9 @@ public class WorkFlowApproveController {
     }
 
     /**
+     * @param entityType 单据类型
+     * @param entityOid  单据Oid
+     * @return
      * @api {get} /api/workflow/approval/history
      * @apiDescription 获取审批历史
      * @apiName listApprovalHistory
@@ -145,14 +178,9 @@ public class WorkFlowApproveController {
      * "approvalNodeName": null
      * }
      * ]
-     *
      * @Author mh.z
      * @Date 2019/01/23
      * @Description 获取审批历史
-     *
-     * @param entityType 单据类型
-     * @param entityOid 单据Oid
-     * @return
      */
     @RequestMapping(value = "/approval/history", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<WebApprovalHistoryDTO>> listApprovalHistory(@RequestParam("entityType") Integer entityType, @RequestParam("entityOid") UUID entityOid) {
@@ -184,7 +212,6 @@ public class WorkFlowApproveController {
      * @apiParam {String} [applicantDateTo] 最大申请日期
      * @apiParam {String} [description] 备注
      * @apiParam {boolean} finished true已审批，false未审批
-     *
      * @author mh.z
      * @date 2019/03/06
      * @description 获取已审批未审批的单据
@@ -258,15 +285,16 @@ public class WorkFlowApproveController {
 
     /**
      * 待办事项-待审批单据-单据列表
+     *
      * @param documentCategory 单据大类
-     * @param documentTypeId 单据类型id
-     * @param beginDateStr 提交日期从
-     * @param endDateStr 提交日期至
-     * @param amountFrom 本币金额从
-     * @param amountTo 本币金额至
-     * @param remark 备注
-     * @param documentNumber 单据编号
-     * @param pageable 分页信息
+     * @param documentTypeId   单据类型id
+     * @param beginDateStr     提交日期从
+     * @param endDateStr       提交日期至
+     * @param amountFrom       本币金额从
+     * @param amountTo         本币金额至
+     * @param remark           备注
+     * @param documentNumber   单据编号
+     * @param pageable         分页信息
      * @return
      */
     @GetMapping("/getApprovalToPendList")
@@ -296,7 +324,7 @@ public class WorkFlowApproveController {
 
         Page mybatisPage = PageUtil.getPage(pageable);
         //获取待审批列表
-        List<WorkFlowDocumentRefDTO> workFlowDocumentRefDTOListList = workFlowApprovalService.getApprovalToPendDeatil(documentCategory,documentTypeId,applicantName,beginDate,endDate,amountFrom, amountTo,remark,documentNumber,mybatisPage);
+        List<WorkFlowDocumentRefDTO> workFlowDocumentRefDTOListList = workFlowApprovalService.getApprovalToPendDeatil(documentCategory, documentTypeId, applicantName, beginDate, endDate, amountFrom, amountTo, remark, documentNumber, mybatisPage);
 
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(mybatisPage);
         return new ResponseEntity<>(workFlowDocumentRefDTOListList, httpHeaders, HttpStatus.OK);
@@ -304,14 +332,15 @@ public class WorkFlowApproveController {
 
     /**
      * 待办事项-待审批单据-分类信息
+     *
      * @param documentCategory 单据大类
-     * @param documentTypeId 单据类型id
-     * @param beginDateStr 提交日期从
-     * @param endDateStr 提交日期至
-     * @param amountFrom 本币金额从
-     * @param amountTo 本币金额至
-     * @param remark 备注
-     * @param documentNumber 单据编号
+     * @param documentTypeId   单据类型id
+     * @param beginDateStr     提交日期从
+     * @param endDateStr       提交日期至
+     * @param amountFrom       本币金额从
+     * @param amountTo         本币金额至
+     * @param remark           备注
+     * @param documentNumber   单据编号
      * @return
      */
     @GetMapping("/getApprovalToPendTotal")
@@ -339,24 +368,25 @@ public class WorkFlowApproveController {
         }
 
         //获取单据类别和数量列表
-        List<ApprovalDashboardDetailDTO> approvalDashboardDetailDTOList = workFlowApprovalService.getApprovalToPendTotal(documentCategory,documentTypeId,applicantName,beginDate,endDate,amountFrom, amountTo,remark,documentNumber);
+        List<ApprovalDashboardDetailDTO> approvalDashboardDetailDTOList = workFlowApprovalService.getApprovalToPendTotal(documentCategory, documentTypeId, applicantName, beginDate, endDate, amountFrom, amountTo, remark, documentNumber);
         return approvalDashboardDetailDTOList;
     }
 
 
     /**
      * 待办事项-被退回单据/未完成单据
-     * @param tabNumber tabNumber=1(被退回的单据) tabNumber=2(未完成的单据)
-     * @param documentCategory 单据大类
-     * @param documentTypeId 单据类型id
-     * @param beginDateStr 提交日期从
-     * @param endDateStr 提交日期至
-     * @param amountFrom 本币金额从
-     * @param amountTo 本币金额至
+     *
+     * @param tabNumber          tabNumber=1(被退回的单据) tabNumber=2(未完成的单据)
+     * @param documentCategory   单据大类
+     * @param documentTypeId     单据类型id
+     * @param beginDateStr       提交日期从
+     * @param endDateStr         提交日期至
+     * @param amountFrom         本币金额从
+     * @param amountTo           本币金额至
      * @param lastApproverOidStr 当前审批人oid
-     * @param approvalNodeName 当前审批节点名称
-     * @param remark 备注
-     * @param documentNumber 单据编号
+     * @param approvalNodeName   当前审批节点名称
+     * @param remark             备注
+     * @param documentNumber     单据编号
      * @return
      */
     @GetMapping("/my/document/detail/{tabNumber}")
@@ -372,8 +402,8 @@ public class WorkFlowApproveController {
                                                                              @RequestParam(value = "approvalNodeName", required = false) String approvalNodeName,
                                                                              @RequestParam(value = "remark", required = false) String remark,
                                                                              @RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                                             @RequestParam(value = "page",defaultValue = "0") int page,
-                                                                             @RequestParam(value = "size",defaultValue = "10") int size){
+                                                                             @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
 
 
         // 最小提交日期
@@ -398,7 +428,7 @@ public class WorkFlowApproveController {
         Page mybatisPage = PageUtil.getPage(page, size);
 
         //获取待审批列表
-        List<WorkFlowDocumentRefDTO> list = workFlowApprovalService.listMyDocumentDetail(tabNumber,documentCategory,documentTypeId,applicantName,beginDate,endDate,amountFrom, amountTo,lastApproverOid,approvalNodeName,remark,documentNumber,mybatisPage);
+        List<WorkFlowDocumentRefDTO> list = workFlowApprovalService.listMyDocumentDetail(tabNumber, documentCategory, documentTypeId, applicantName, beginDate, endDate, amountFrom, amountTo, lastApproverOid, approvalNodeName, remark, documentNumber, mybatisPage);
 
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(mybatisPage);
         return new ResponseEntity<>(list, httpHeaders, HttpStatus.OK);

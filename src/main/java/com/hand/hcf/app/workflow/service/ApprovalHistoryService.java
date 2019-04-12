@@ -10,11 +10,11 @@ import com.hand.hcf.app.workflow.dto.CheckAuditNoticeDTO;
 import com.hand.hcf.app.workflow.dto.PDFApprovalHistory;
 import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
-import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationTypeEnum;
 import com.hand.hcf.app.workflow.enums.CounterSignTypeEnum;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.ApprovalHistoryMapper;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.service.MessageService;
@@ -649,7 +649,7 @@ public class ApprovalHistoryService extends BaseService<ApprovalHistoryMapper, A
         return approvalHistoryDTOList;
     }
 
-    public static void approvalAction(List<WebApprovalHistoryDTO> list, List<ApprovalHistoryDTO> approvalHistoryDtoList, ApprovalHistoryService approvalHistoryService) {
+    public void approvalAction(List<WebApprovalHistoryDTO> list, List<ApprovalHistoryDTO> approvalHistoryDtoList, ApprovalHistoryService approvalHistoryService) {
         approvalHistoryDtoList.stream().forEach(u -> {
             WebApprovalHistoryDTO webApprovalHistoryDTO = new WebApprovalHistoryDTO();
             //审批动作

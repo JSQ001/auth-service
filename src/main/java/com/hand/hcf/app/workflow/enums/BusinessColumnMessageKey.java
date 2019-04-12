@@ -22,7 +22,6 @@ public enum BusinessColumnMessageKey implements BusinessEnum {
     SELECT_APPROVER("select_approver"),//选人审批（根据配置动态生成
     SELECT_APPLICANT("applicant"),//选择申请人
     SELECT_USER("select_user"),//普通控件，选择一个用户
-    SELECT_COST_CENTER("select_cost_center"),//成本中心
     SELECT_DEPARTMENT("select_department"),//部门
     DESTINATION("destination"),//目的地
     OUT_PARTICIPANT_NUM("out_participant_num"),//（原外部乘机人数）2017-05-24 更新为外部参与人数量

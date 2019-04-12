@@ -2,12 +2,12 @@ package com.hand.hcf.app.workflow.approval.service;
 
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.workflow.constant.SyncLockPrefix;
-import com.hand.hcf.app.workflow.util.RespCode;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalReqDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalResDTO;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.exception.core.ServiceUnavailableException;
 import com.hand.hcf.core.redisLock.annotations.SyncLock;
@@ -58,7 +58,7 @@ public class ApprovalPassService {
                     WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(UUID.fromString(entity.getEntityOid()), entity.getEntityType());
                     // 只有提交状态的单据才可以审批通过和拒绝和撤回
                     if (!DocumentOperationEnum.APPROVAL.getId().equals(workFlowDocumentRef.getStatus())) {
-                        throw new BizException(RespCode.STATUS_ERROR_200003);
+                        throw new BizException(ExceptionCode.STATUS_ERROR_200003);
                     }
                     approvalRuleService.passWorkflow(approverOid, entity.getApproverOid() == null ? null : UUID.fromString(entity.getApproverOid()), approvalReqDTO.getApprovalTxt(), false, entity.isPriceAuditor(), approvalResDTO, workFlowDocumentRef);
                     approvalResDTO.setSuccessNum(approvalResDTO.getSuccessNum() + 1);
@@ -79,7 +79,7 @@ public class ApprovalPassService {
                             approvalResDTO.getFailReason().put(entity.getEntityOid(), messageDetailByCode);
                         }
                     } else if (e instanceof ServiceUnavailableException) {
-                        approvalResDTO.getFailReason().put(entity.getEntityOid(), messageService.getMessageDetailByCode(RespCode.SERVICE_6001, e.getMessage()));
+                        approvalResDTO.getFailReason().put(entity.getEntityOid(), messageService.getMessageDetailByCode(ExceptionCode.SERVICE_6001, e.getMessage()));
                     } else {
                         approvalResDTO.getFailReason().put(entity.getEntityOid(), e.getMessage());
                     }

@@ -3,18 +3,16 @@
 <mapper namespace="com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper">
 
     <select id="getApprovalListDashboard" resultType="com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO">
-        SELECT
-        r.DOCUMENT_CATEGORY type,
-        count(r.ID) count
-        FROM
-        SYS_WFL_DOCUMENT_REF r
-        WHERE
-        EXISTS ( SELECT swra.workflow_document_ref_id
-        FROM sys_wfl_ref_approvers swra
-        WHERE swra.approver_oid = #{userOid}
-        AND r.id = swra.workflow_document_ref_id )
-        GROUP BY
-        r.DOCUMENT_CATEGORY
+        SELECT dr.document_category type, count(1) count
+        FROM sys_wfl_document_ref dr
+        WHERE EXISTS (
+            SELECT 1 FROM sys_approval_chain ac
+            WHERE ac.approver_oid = #{userOid}
+            AND ac.status = 1000
+            AND ac.current_flag = 1
+            AND ac.entity_oid = dr.document_oid
+            AND ac.entity_type = dr.document_category
+        ) GROUP BY dr.document_category
     </select>
 
     <!-- 查询未审批/已审批的单据 -->

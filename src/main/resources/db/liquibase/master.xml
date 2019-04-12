@@ -30,6 +30,7 @@
     <!--  加载BRMS 工作流相关的表 -->
     <include file="classpath:db/liquibase/workflow/initTable/initBrmsTable.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/workflow/version1.0.0/release20190118.xml" relativeToChangelogFile="false"/>
+    <include file="classpath:db/liquibase/workflow/v1.1.0/release20190501.xml" relativeToChangelogFile="false"/>
 
     <!-- prepayment表初始化 -->
     <include file="classpath:db/liquibase/prepayment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>

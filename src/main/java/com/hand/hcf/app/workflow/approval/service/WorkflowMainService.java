@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
  */
 @Service
 public class WorkflowMainService {
-    public static Logger logger = LoggerFactory.getLogger(WorkflowMainService.class);
+    public static final Logger logger = LoggerFactory.getLogger(WorkflowMainService.class);
 
     /**
      * 运行工作流

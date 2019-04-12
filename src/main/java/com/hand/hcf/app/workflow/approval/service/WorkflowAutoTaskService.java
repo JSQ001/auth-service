@@ -106,9 +106,9 @@ public class WorkflowAutoTaskService {
         String detail = null;
 
         if (Constants.DEFAULT_LANGUAGE.equals(OrgInformationUtil.getCurrentLanguage())) {
-            detail = RuleConstants.APPROVER_ROBOT_PASS_Detail;
+            detail = RuleConstants.APPROVER_ROBOT_PASS_DETAIL;
         } else {
-            detail = RuleConstants.APPROVER_ROBOT_PASS_Detail_ENGLISH;
+            detail = RuleConstants.APPROVER_ROBOT_PASS_DETAIL_ENGLISH;
         }
 
         return detail;
@@ -125,9 +125,9 @@ public class WorkflowAutoTaskService {
         String detail = null;
 
         if (Constants.DEFAULT_LANGUAGE.equals(OrgInformationUtil.getCurrentLanguage())) {
-            detail = RuleConstants.APPROVER_ROBOT_REJECT_Detail;
+            detail = RuleConstants.APPROVER_ROBOT_REJECT_DETAIL;
         } else {
-            detail = RuleConstants.APPROVER_ROBOT_REJECT_Detail_ENGLISH;
+            detail = RuleConstants.APPROVER_ROBOT_REJECT_DETAIL_ENGLISH;
         }
 
         return detail;

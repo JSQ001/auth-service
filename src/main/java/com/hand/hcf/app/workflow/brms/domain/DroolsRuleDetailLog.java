@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 /**
- *
+ * @author polus
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class DroolsRuleDetailLog extends Domain {
-    private Long id;
 
     private UUID droolsRuleDetailOid;
 

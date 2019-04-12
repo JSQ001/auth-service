@@ -6,8 +6,10 @@ import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.brms.domain.*;
 import com.hand.hcf.app.workflow.brms.dto.*;
+import com.hand.hcf.app.workflow.brms.enums.FieldType;
 import com.hand.hcf.app.workflow.brms.enums.OperationEntityTypeEnum;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
+import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
 import com.hand.hcf.app.workflow.brms.persistence.ApprovalFormApprovalModeMapper;
 import com.hand.hcf.app.workflow.brms.util.cache.CacheNames;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
@@ -16,11 +18,10 @@ import com.hand.hcf.app.workflow.dto.ApprovalFormQO;
 import com.hand.hcf.app.workflow.dto.FormFieldDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalFormEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
-import com.hand.hcf.app.workflow.enums.FieldType;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalFormPropertyService;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
-import com.hand.hcf.app.workflow.util.RespCode;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.util.LoginInformationUtil;
@@ -123,7 +124,7 @@ public class RuleService {
                 RuleCondition.builder()
                         .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                         .typeNumber(RuleConstants.CONDITION_TYPE_FORM)
-                        .symbol(RuleConstants.SYMBOL_EQ)
+                        .symbol(SymbolEnum.EQUAL.getId())
                         .ruleValue(ruleApprovalChainDTO.getFormOid().toString())
                         .build()
         );
@@ -263,7 +264,7 @@ public class RuleService {
                             .batchCode(RuleConstants.RULE_BATCH_CODE_DEFAULT)
                             //.field(RuleApprovalEnum.CONDITION_TYPE_FORM.getId().toString())
                             .typeNumber(RuleConstants.CONDITION_TYPE_FORM)
-                            .symbol(RuleConstants.SYMBOL_EQ)
+                            .symbol(SymbolEnum.EQUAL.getId())
                             .ruleValue(targetFormOid.toString())
                             .build()
             );
@@ -852,9 +853,9 @@ public class RuleService {
         existRuleApprover.setName(ruleApproverDTO.getName());
         existRuleApprover.setRemark(ruleApproverDTO.getRemark());
         existRuleApprover.setLevelNumber(ruleApproverDTO.getLevelNumber());
-        existRuleApprover.setContainsApportionmentCostCenterManager(ruleApproverDTO.getContainsApportionmentCostCenterManager());
-        existRuleApprover.setContainsApportionmentDepartmentManager(ruleApproverDTO.getContainsApportionmentDepartmentManager());
-        existRuleApprover.setContainsApportionmentCostCenterPrimaryDepartmentManager(ruleApproverDTO.getContainsApportionmentCostCenterPrimaryDepartmentManager());
+        existRuleApprover.setContainsAppoCenterManger(ruleApproverDTO.getContainsApportionmentCostCenterManager());
+        existRuleApprover.setContainsAppoDepartManager(ruleApproverDTO.getContainsApportionmentDepartmentManager());
+        existRuleApprover.setContainsAppoPriDeptManager(ruleApproverDTO.getContainsApportionmentCostCenterPrimaryDepartmentManager());
         //TODO 增加可修改字段时需增加
         existRuleApprover = ruleApproverService.save(existRuleApprover);
         BeanUtils.copyProperties(existRuleApprover, newruleApprover);
@@ -1101,9 +1102,9 @@ public class RuleService {
                     || droolsRuleApprovalNodeDTO.getApplicantOid() == null
             ) {
                 //throw new ValidationException(new ValidationError("getNextApprovalNode", "CustFormValues is null"));
-                log.error("invoke getNextApprovalNode param error , code : {} , msg : {} ", RespCode.SYS_APPROVAL_CHAIN_GET_ERROR);
+                log.error("invoke getNextApprovalNode param error , code : {} ", ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR);
                 return RuleNextApproverResult.builder()
-                        .returnCode(RespCode.SYS_APPROVAL_CHAIN_GET_ERROR)
+                        .returnCode(ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR)
                         .returnMsg("param is null ")
                         .build();
             }
@@ -1131,9 +1132,9 @@ public class RuleService {
                 return result;
             }
         } catch (Exception e) {
-            log.error("invoke getNextApprovalNode error , code : {} , msg : {}, {} ", RespCode.SYS_APPROVAL_CHAIN_GET_ERROR, e.getMessage(), e);
+            log.error("invoke getNextApprovalNode error , code : {} , msg : {}, {} ", ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR, e.getMessage(), e);
             return RuleNextApproverResult.builder()
-                    .returnCode(RespCode.SYS_APPROVAL_CHAIN_GET_ERROR)
+                    .returnCode(ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR)
                     .returnMsg(e.getMessage())
                     .build();
         }
@@ -1200,7 +1201,7 @@ public class RuleService {
                         UUID managerOid=userService.getUserDepartmentManager(droolsRuleApprovalNodeDTO.getApplicantOid());
                         if(managerOid==null){
                             log.info("SELFAPPROVAL ,replace approver error ,applicantOid : {} ",droolsRuleApprovalNodeDTO.getApplicantOid());
-                            throw new RuntimeException(RespCode.RES_2003);
+                            throw new RuntimeException(ExceptionCode.RES_2003);
                         }
                         approvers.set(approvers.indexOf(droolsRuleApprovalNodeDTO.getApplicantOid()),managerOid);
                         log.info("SELFAPPROVAL ,replace approver from {} to {} ",droolsRuleApprovalNodeDTO.getApplicantOid(),managerOid);
@@ -1419,8 +1420,6 @@ public class RuleService {
         result.put(RuleConstants.CUSTOM_FILED_TYPE_ID_DEFAULT, defaultCustomFieldTypeList);
         result.put(RuleConstants.CUSTOM_FILED_TYPE_ID_CONTROL, controlCustomFieldTypeList);
 
-       /* result.put(RuleConstants.CUSTOM_FILED_TYPE_ID_COST_CENTER_CUSTOMED_LIST, costCenterCustomFieldTypeList);
-        result.put(RuleConstants.APPLICATION_COST_CENTER_CUSTOMED_LIST, applicationCostCenterCustomList);*/
         return result;
     }
 
@@ -1439,10 +1438,10 @@ public class RuleService {
     }
 
 
-    public CustomFormApprovalModeDTO getCustomFormApproverMode() {
-        CustomFormApprovalModeDTO customFormApprovalModeDTO = new CustomFormApprovalModeDTO();
-        customFormApprovalModeDTO.setApprovalFormOidAndApprovalModeDTOList(approvalFormApprovalModeMapper.getCustomFormApproverMode());
-        return customFormApprovalModeDTO;
+    public FormApprovalModeListDTO getCustomFormApproverMode() {
+        FormApprovalModeListDTO formApprovalModeListDTO = new FormApprovalModeListDTO();
+        formApprovalModeListDTO.setFormApprovalModeDTOList(approvalFormApprovalModeMapper.getCustomFormApproverMode());
+        return formApprovalModeListDTO;
     }
 
 

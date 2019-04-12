@@ -28,7 +28,6 @@ public class RuleCondition extends Domain implements Serializable {
     private String name;
     private String remark;
     private Integer typeNumber;
-    //RuleConstants.CONDITION_TYPE_TRAVEL_STANDARD 10005表示是差标类型的条件
     private String ruleField;
     private Integer symbol;
     @JsonProperty("valueDetail")
@@ -36,8 +35,5 @@ public class RuleCondition extends Domain implements Serializable {
     private String ruleValue;
     private Long batchCode;
     private Integer fieldTypeId;
-    private UUID customEnumerationOid;
     private String fieldContent;
-    private UUID refCostCenterOid;
-    private String costCenterName;
 }

@@ -1,95 +1,46 @@
 package com.hand.hcf.app.workflow.dto;
 
+import com.hand.hcf.app.workflow.enums.BackTypeEnum;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
+@Data
+@ApiModel(description = "工作流提交数据")
 public class ApprovalReqDTO {
 
     @NotNull
+    @ApiModelProperty(value = "单据实体数组")
     private List<Entity> entities;
+    @ApiModelProperty(value = "审批备注")
     private String approvalTxt;
+    @ApiModelProperty(value = "审批OID")
     private UUID approvalOid;
-    private UUID formOid; //2018-11-20 增加
+    @ApiModelProperty(value = "审批表单类型OID")
+    private UUID formOid;
 
-    public UUID getFormOid() {
-        return formOid;
-    }
+    @ApiModelProperty(value = "驳回类型")
+    private BackTypeEnum backTypeEnum;
 
-    public void setFormOid(UUID formOid) {
-        this.formOid = formOid;
-    }
-
-    public List<Entity> getEntities() {
-        return entities;
-    }
-
-    public void setEntities(List<Entity> entities) {
-        this.entities = entities;
-    }
-
-    public String getApprovalTxt() {
-        return approvalTxt;
-    }
-
-    public void setApprovalTxt(String approvalTxt) {
-        this.approvalTxt = approvalTxt;
-    }
-
-    public UUID getApprovalOid() {
-        return approvalOid;
-    }
-
-    public void setApprovalOid(UUID approvalOid) {
-        this.approvalOid = approvalOid;
-    }
-
+    @Data
+    @ApiModel(description = "单据实体")
     public static class Entity {
+        @ApiModelProperty(value = "单据OID")
         private String entityOid;
+        @ApiModelProperty(value = "审批流类型")
         private Integer entityType;
+        @ApiModelProperty(value = "加签人员OID列表")
         private List<UUID> countersignApproverOids;
-        private boolean priceAuditor = false; //是否进行机票价格审核（针对订票申请单）
+        //是否进行机票价格审核（针对订票申请单）
+        private boolean priceAuditor = false;
         //chain上的审批人
+        @ApiModelProperty(value = "审批人OID")
         private String approverOid;
 
-        public List<UUID> getCountersignApproverOids() {
-            return countersignApproverOids;
-        }
 
-        public void setCountersignApproverOids(List<UUID> countersignApproverOids) {
-            this.countersignApproverOids = countersignApproverOids;
-        }
-
-        public String getEntityOid() {
-            return entityOid;
-        }
-
-        public void setEntityOid(String entityOid) {
-            this.entityOid = entityOid;
-        }
-
-        public Integer getEntityType() {
-            return entityType;
-        }
-
-        public void setEntityType(Integer entityType) {
-            this.entityType = entityType;
-        }
-
-        public boolean isPriceAuditor() {
-            return priceAuditor;
-        }
-
-        public void setPriceAuditor(boolean priceAuditor) {
-            this.priceAuditor = priceAuditor;
-        }
-
-        public String getApproverOid() {
-            return approverOid;
-        }
-
-        public void setApproverOid(String approverOid) {
-            this.approverOid = approverOid;
-        }
     }
 }
