@@ -1,10 +1,7 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.ApplicationAmountCO;
-import com.hand.hcf.app.common.co.ApplicationTypeCO;
-import com.hand.hcf.app.common.co.ApplicationTypeForOtherCO;
-import com.hand.hcf.app.common.co.PrepaymentRequisitionReleaseCO;
+import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.application.implement.web.ApplicationControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +22,12 @@ public class ExpenseModuleInterface {
 
     /**
      * 根据所选范围查询账套下符合条件的费用申请单类型
+     *
      * @param applicationTypeForOtherCO
      * @param page
      * @return
      */
-    public Page<ApplicationTypeCO> queryApplicationTypeByCond(ApplicationTypeForOtherCO applicationTypeForOtherCO, Page page){
+    public Page<ApplicationTypeCO> queryApplicationTypeByCond(ApplicationTypeForOtherCO applicationTypeForOtherCO, Page page) {
         Page<ApplicationTypeCO> applicationTypeCOList = new Page<>();
         //jiu.zhao 修改三方接口 20190404
         //Page<ApplicationTypeCO> result = expenseApplicationClient.queryApplicationTypeByCond(applicationTypeForOtherCO, page);
@@ -51,4 +49,7 @@ public class ExpenseModuleInterface {
         expenseApplicationClient.createPrepaymentRequisitionRelease(prepaymentRequisitionReleaseCO);
     }
 
+    public ApplicationCO getApplicationByDocumentId(Long documentId) {
+        return expenseApplicationClient.getApplicationByDocumentId(documentId);
+    }
 }

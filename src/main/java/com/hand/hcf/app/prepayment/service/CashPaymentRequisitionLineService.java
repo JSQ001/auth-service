@@ -7,15 +7,18 @@ import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.application.implement.web.ApplicationControllerImpl;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
+import com.hand.hcf.app.prepayment.externalApi.ExpenseModuleInterface;
 import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
 import com.hand.hcf.app.prepayment.persistence.CashPaymentRequisitionLineMapper;
 import com.hand.hcf.app.prepayment.web.dto.CashPaymentRequisitionHeadDto;
+import com.hand.hcf.app.prepayment.web.dto.CashPaymentRequisitionLineAssoReqDTO;
 import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
@@ -36,6 +39,8 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
     private ApplicationControllerImpl expenseApplicationClient;
     @Autowired
     private PrepaymentHcfOrganizationInterface hcfOrganizationInterface;
+    @Autowired
+    private ExpenseModuleInterface expenseModuleInterface;
 
     @Transactional
     @Override
@@ -102,5 +107,42 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
 
         page.setRecords(cashPaymentRequisitionLineDtos);
         return page;
+    }
+
+    public List<CashPaymentRequisitionLineAssoReqDTO> pageCashPaymentRequisitionLineAssoReqByCond(Long prepaymentHeaderId,
+                                                                                                  String documentNumber,
+                                                                                                  String typeName,
+                                                                                                  Page page) {
+        List<CashPaymentRequisitionLine> lineList = baseMapper.selectPage(
+                page,
+                new EntityWrapper<CashPaymentRequisitionLine>()
+                        .eq("payment_requisition_header_id", prepaymentHeaderId)
+                        .like(StringUtils.hasText(documentNumber), "ref_document_code", documentNumber)
+        );
+        List<CashPaymentRequisitionLineAssoReqDTO> result = new ArrayList<>();
+        lineList.stream().forEach(line -> {
+            CashPaymentRequisitionLineAssoReqDTO dto = mapper.map(line, CashPaymentRequisitionLineAssoReqDTO.class);
+            ApplicationCO applicationCO = expenseModuleInterface.getApplicationByDocumentId(line.getRefDocumentId());
+            if (applicationCO != null && applicationCO.getApplicationHeader() != null) {
+                if (applicationCO.getApplicationHeader().getEmployeeId() != null) {
+                    ContactCO contactCO = hcfOrganizationInterface.getUserById(applicationCO.getApplicationHeader().getEmployeeId());
+                    if (contactCO != null) {
+                        dto.setApplyName(contactCO.getFullName());
+                    }
+                }
+                dto.setTypeName(applicationCO.getApplicationHeader().getTypeName());
+                dto.setRequisitionDate(applicationCO.getApplicationHeader().getRequisitionDate());
+                dto.setCurrencyCode(applicationCO.getApplicationHeader().getCurrencyCode());
+                dto.setReqAmount(applicationCO.getApplicationHeader().getAmount());
+            }
+            if (StringUtils.hasText(typeName)) {
+                if (dto.getTypeName().contains(typeName)) {
+                    result.add(dto);
+                }
+            } else {
+                result.add(dto);
+            }
+        });
+        return result;
     }
 }
