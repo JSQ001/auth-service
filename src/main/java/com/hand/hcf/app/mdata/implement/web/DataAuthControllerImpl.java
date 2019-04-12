@@ -1,7 +1,6 @@
 package com.hand.hcf.app.mdata.implement.web;
 
-import com.hand.hcf.app.base.system.DataAuthTablePropertyCO;
-
+import com.hand.hcf.app.common.co.DataAuthTablePropertyCO;
 import com.hand.hcf.app.mdata.dataAuthority.adapter.DataAuthTablePropertyAdapter;
 import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthTableProperty;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthTablePropertyService;

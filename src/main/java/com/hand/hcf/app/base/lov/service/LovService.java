@@ -198,7 +198,7 @@ public class LovService extends BaseService<LovMapper, Lov> {
         return lov;
     }
 
-    //jiu.zhao TODO
+    //jiu.zhao TODO 暂时不知道用途
     /*public Object getObjectByLovCode(String code, String id) {
         List<Interface> apiInfos = baseMapper.getLovApiInfoByCode(code);
         if (CollectionUtils.isEmpty(apiInfos)) {

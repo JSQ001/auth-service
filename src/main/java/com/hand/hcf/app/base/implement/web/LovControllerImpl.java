@@ -19,10 +19,9 @@ public class LovControllerImpl {
     private LovService service;
 
 
-    public Object getObjectByLovCode(@RequestParam("code") String code,
+    //jiu.zhao TODO
+    /*public Object getObjectByLovCode(@RequestParam("code") String code,
                                      @RequestParam("id") String id) {
-        //return service.getObjectByLovCode(code,id);
-        //jiu.zhao TODO
-        return null;
-    }
+        return service.getObjectByLovCode(code,id);
+    }*/
 }
