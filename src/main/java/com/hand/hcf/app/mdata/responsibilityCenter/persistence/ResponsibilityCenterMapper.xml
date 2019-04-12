@@ -65,5 +65,89 @@
         AND rs.deleted = FALSE
         ORDER BY enabled DESC, rs.responsibility_center_code
     </select>
+    <select id="pageByCompanyAndDepartment"
+            resultType="com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov">
+        select
+            temp.id,
+            temp.code,
+            temp.name,
+            concat(concat(temp.code,
+            '-'),
+            temp.name) as codeName
+            from
+            (select
+            t.id ,
+            t.code ,
+            t.name
+            from
+            (SELECT
+            rc.id,
+            rc.responsibility_center_code as code,
+            rc.responsibility_center_name as name
+            FROM
+            sys_department_sob_res    a,
+            sys_department_res_center b,
+            sys_res_center            rc,
+            sys_company c
+            WHERE
+            a.id = b.relation_id
+            AND a.all_responsibility_center = 'N'
+            AND b.responsibility_center_id = rc.id
+            AND rc.deleted = 0
+            AND rc.enabled = 1
+            and c.id = #{companyId}
+            and    (
+            (
+            a.set_of_books_id = c.set_of_books_id
+            and a.company_id is null
+            )
+            or c.id = a.company_id
+            )
+            AND a.department_id = #{departmentId}
+            union
+            SELECT
+            rc.id,
+            rc.responsibility_center_code as code,
+            rc.responsibility_center_name as name
+            FROM
+            sys_department_sob_res    a,
+            sys_res_center_company_assign rcca,
+            sys_res_center            rc,
+            sys_company c
+            WHERE
+            a.all_responsibility_center = 'Y'
+            AND rc.deleted = 0
+            AND rc.enabled = 1
+            and c.id = #{companyId}
+            and rcca.deleted = 0
+            and rcca.enabled = 1
+            AND (
+            (
+            c.set_of_books_id = a.set_of_books_id
+            and a.company_id is null
+            )
+            or c.id = a.company_id
+            )
+            AND a.department_id = #{departmentId}
+            and rcca.company_id = c.id
+            and rcca.responsibility_center_id = rc.id
+            ) t
+            group by
+            t.id,
+            t.code,
+            t.name         ) temp
+        <trim prefix="WHERE" prefixOverrides="AND | OR" >
+            <if test="code != null and code !=''">
+                AND temp.code like concat(concat('%', #{code}), '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND tmp.name like concat(concat('%', #{name}), '%')
+            </if>
+            <if test="id != null">
+                AND tmp.id  = #{id}
+            </if>
+        </trim>
+        order by temp.code
+    </select>
 
 </mapper>

@@ -10,10 +10,12 @@
                        dimension_item_name,
                        enabled,
                        version_number,
+                       start_date,
                        created_date,
                        last_updated_date,
                        created_by,
-                       last_updated_by)
+                       last_updated_by,
+                       start_date)
                       SELECT t.id,
                              t.dimension_id,
                              t.dimension_item_code,
@@ -22,8 +24,10 @@
                              1,
                              #{currentDate},
                              #{currentDate},
+                             #{currentDate},
                              #{userId},
-                             #{userId}
+                             #{userId},
+                             #{currentDate}
                         FROM sys_dimension_item_temp t
                        WHERE t.batch_number = #{transactionID}
                          AND t.error_flag = 0

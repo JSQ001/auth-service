@@ -5,6 +5,8 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityAssignCompany;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.enums.ResponsibilityCenterImportCode;
+
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityAssignCompanyService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterService;
 import com.hand.hcf.app.mdata.utils.RespCode;
@@ -13,6 +15,9 @@ import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.core.web.dto.ImportResultDTO;
 import com.itextpdf.text.io.StreamUtil;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -610,5 +616,32 @@ public class ResponsibilityCenterResource {
         responsibilityCenterService.exportResponsibilityCenterData(setOfBooksId, request, response, exportConfig);
     }
 
+    @ApiOperation(value = "责任中心LOV查询", notes = "根据部门、公司查询可用的责任中心")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType="query", name = "code", value = "责任中心代码",
+                    required = true, dataType = "String"),
+            @ApiImplicitParam(paramType="query", name = "name", value = "责任中心名称",
+                    required = true, dataType = "String"),
+            @ApiImplicitParam(paramType="query", name = "companyId", value = "公司id",
+                    required = true, dataType = "Long"),
+            @ApiImplicitParam(paramType="query", name = "departmentId", value = "部门id",
+                    required = true, dataType = "Long"),
+            @ApiImplicitParam(paramType="query", name = "page", value = "第几页", required = true, dataType = "int"),
+            @ApiImplicitParam(paramType="query", name = "size", value = "页数", required = true, dataType = "int")
+    })
+    @GetMapping("/query/by/company/department")
+    public ResponseEntity<List<ResponsibilityLov>> queryByCompanyAndDepartment(
+            @RequestParam("companyId") Long companyId,
+            @RequestParam("departmentId") Long departmentId,
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "id", required = false) Long id,
+            @ApiIgnore Pageable pageable){
+        Page page = PageUtil.getPage(pageable);
+        List<ResponsibilityLov> result = responsibilityCenterService.pageByCompanyAndDepartment(page,
+                companyId, departmentId, code, name, id);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, totalHeader, HttpStatus.OK);
+    }
 
 }

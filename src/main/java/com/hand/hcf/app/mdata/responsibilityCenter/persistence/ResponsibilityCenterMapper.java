@@ -3,7 +3,9 @@ package com.hand.hcf.app.mdata.responsibilityCenter.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -47,4 +49,21 @@ public interface ResponsibilityCenterMapper extends BaseMapper<ResponsibilityCen
                                                                       @Param("responsibilityCenterName") String responsibilityCenterName,
                                                                       @Param("enabled") Boolean enabled,
                                                                       Page page);
+
+    /**
+     * 根据部门和公司查询可用的责任中心
+     * @param rowBounds 分页参数
+     * @param companyId 公司id
+     * @param departmentId 部门id
+     * @param code 代码
+     * @param name 名称
+     * @param id id
+     * @return List<ResponsibilityLov>
+     */
+    List<ResponsibilityLov> pageByCompanyAndDepartment(RowBounds rowBounds,
+                                                       @Param("companyId") Long companyId,
+                                                       @Param("departmentId")Long departmentId,
+                                                       @Param("code") String code,
+                                                       @Param("name") String name,
+                                                       @Param("id") Long id);
 }

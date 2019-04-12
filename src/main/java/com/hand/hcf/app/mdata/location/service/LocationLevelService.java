@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.location.domain.LocationLevel;
 
+import com.hand.hcf.app.mdata.location.domain.LocationLevelAssign;
 import com.hand.hcf.app.mdata.parameter.persistence.LocationLevelMapper;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
@@ -18,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -113,6 +115,29 @@ public class LocationLevelService extends BaseService<LocationLevelMapper, Locat
         if(setOfBooks != null){
             locationLevel.setSetOfBooksName(setOfBooks.getSetOfBooksName());
         }
+        return locationLevel;
+    }
+
+    /**
+     * 根据地点id或级别ID或级别代码获取地点级别
+     * @param locationId
+     * @param levelId
+     * @param levelCode
+     * @return
+     */
+    public LocationLevel getLocationLevelByLocationIdOrLevelIdOrLevelCode(Long locationId, Long levelId, String levelCode) {
+        List<Long> levelIds = null;
+        if (locationId != null) {
+            levelIds = locationLevelAssignService.selectList(
+                    new EntityWrapper<LocationLevelAssign>().eq("location_id", locationId)
+            ).stream().map(LocationLevelAssign::getLevelId).collect(Collectors.toList());
+        }
+        LocationLevel locationLevel = this.selectOne(
+                new EntityWrapper<LocationLevel>()
+                        .in(!CollectionUtils.isEmpty(levelIds), "id", levelIds)
+                        .eq(levelId != null, "id", levelId)
+                        .eq(levelCode != null, "code", levelCode)
+        );
         return locationLevel;
     }
 }

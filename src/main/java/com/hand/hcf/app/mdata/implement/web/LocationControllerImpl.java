@@ -4,15 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.github.stuxuhai.jpinyin.PinyinException;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
+import com.hand.hcf.app.common.co.LocationLevelCO;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.common.dto.VendorAliasDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.adapter.Adapter;
 import com.hand.hcf.app.mdata.location.adapter.LocationAdapter;
-import com.hand.hcf.app.mdata.location.domain.AirportCode;
-import com.hand.hcf.app.mdata.location.domain.Location;
-import com.hand.hcf.app.mdata.location.domain.LocationDetail;
-import com.hand.hcf.app.mdata.location.domain.VendorAlias;
+import com.hand.hcf.app.mdata.location.domain.*;
 import com.hand.hcf.app.mdata.location.dto.*;
 import com.hand.hcf.app.mdata.location.enums.LocationType;
 import com.hand.hcf.app.mdata.location.enums.VendorTypeEnum;
@@ -21,6 +19,7 @@ import com.hand.hcf.app.mdata.location.persistence.LocationDetailMapper;
 import com.hand.hcf.app.mdata.location.service.*;
 import com.hand.hcf.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.core.util.PageUtil;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -71,6 +70,11 @@ public class LocationControllerImpl {
     AirportCodeMapper airportCodeMapper;
     @Autowired
     LocalizationDTOService localizationDTOService;
+
+    @Autowired
+    private LocationLevelService locationLevelService;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     @RequestMapping(value = "/one/location", method = RequestMethod.GET)
     public ResponseEntity<Location> getOneLocation(@RequestParam("code") String code) {
@@ -476,5 +480,25 @@ public class LocationControllerImpl {
     public List<LocationDTO> listCityByIds(@RequestBody List<Long> cityIds,
                                            @RequestParam(value = "vendorType", defaultValue = "standard") String vendorType) {
         return localizationDTOService.listCityByIds(cityIds,vendorType);
+    }
+
+    /**
+     * 根据地点id或级别ID或级别代码获取地点级别
+     *
+     * @param locationId
+     * @param levelId
+     * @param levelCode
+     * @return
+     */
+    //@Override
+    public LocationLevelCO getLocationLevelByLocationIdOrLevelIdOrLevelCode(
+            @RequestParam(value = "locationId", required = false) Long locationId,
+            @RequestParam(value = "levelId", required = false) Long levelId,
+            @RequestParam(value = "levelCode", required = false) String levelCode) {
+        if (locationId == null && levelId == null && levelCode == null) {
+            return null;
+        }
+        LocationLevel locationLevel = locationLevelService.getLocationLevelByLocationIdOrLevelIdOrLevelCode(locationId, levelId, levelCode);
+        return mapperFacade.map(locationLevel, LocationLevelCO.class);
     }
 }

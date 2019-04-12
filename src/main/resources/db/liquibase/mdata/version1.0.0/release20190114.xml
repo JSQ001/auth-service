@@ -761,6 +761,7 @@
     </changeSet>
 
     <changeSet id="201901251538003" author="yuan.liu">
+        <validCheckSum>8:e1caf60c25b325367b7dcefe22999d63</validCheckSum>
         <comment>初始化sys_location_detail</comment>
         <loadData encoding="UTF-8"
                   file="db/liquibase/mdata/init/csv/sys_location_detail.csv"
@@ -986,6 +987,45 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="2019031910461001" author="jiaxing.che">
+        <addColumn tableName="ven_vendor_info">
+            <column name="vendor_status" type="VARCHAR(20)" remarks="供应商状态（编辑中, 审批中,审批拒绝, 审批通过,禁止）方正启用">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="ven_vendor_bank_account">
+            <column name="vendor_bank_status" type="VARCHAR(20)" remarks="供应商银行账号状态（编辑中, 审批中,审批拒绝, 审批通过,禁止）方正启用">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="20190320151255" author="jiaxing.che">
+        <createTable tableName="ven_vendor_industry_info" remarks="用户表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_ven_vendor_industry_info"/>
+            </column>
+            <column name="vendor_id" type="bigint" remarks="供应商标识id(供应商表id)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="industry_id" type="bigint" remarks="供应商类别id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新人">
+            </column>
+        </createTable>
+    </changeSet>
     <changeSet id="201812261726001" author="zhipeng.chen">
         <createTable tableName="sys_parameter_setting" remarks="参数设置明细值表">
             <column name="id" type="bigint">
@@ -1189,28 +1229,128 @@
         </sql>
     </changeSet>
     <changeSet id="201901081700001" author="zhipeng.chen">
+       <!-- <validCheckSum>8:606598e687dc0491bfdc2caaa9118225</validCheckSum>-->
+       <validCheckSum>8:f1dbc645b8de63225504204aba0abe27</validCheckSum>
         <sql>
-            insert into SYS_PARAMETER_SETTING(
+            insert into sys_parameter_setting(
             id,
-            PARAMETER_LEVEL,
-            TENANT_ID,
-            PARAMETER_ID,
-            PARAMETER_VALUE_ID,
-            CREATED_DATE,
-            LAST_UPDATED_DATE)
+            parameter_level,
+            tenant_id,
+            parameter_id,
+            parameter_value_id,
+            created_date,
+            last_updated_date)
             select
             p.id,
             '2001',
             0,
             p.id,
-            pv.ID,
+            pv.id,
             ${now},
             ${now}
-            from SYS_PARAMETER p
-            LEFT JOIN SYS_PARAMETER_VALUES pv on pv.PARAMETER_CODE = p.PARAMETER_CODE and pv.PARAMETE_DEFAULT_VALUE = '1'
-            LEFT JOIN SYS_PARAMETER_MODULE pm on p.MODULE_CODE = pm.MODULE_CODE
-            LEFT JOIN SYS_PARA_MODULE_STATUS pms on pm.MODULE_CODE = pms.MODULE_CODE
+            from sys_parameter p
+            LEFT JOIN sys_parameter_values pv on pv.parameter_code = p.parameter_code and pv.paramete_default_value = '1'
+            left join sys_parameter_module pm on p.module_code = pm.module_code
+            left join sys_para_module_status pms on pm.module_code = pms.module_code
         </sql>
     </changeSet>
+    
+    
+    <changeSet id="201903261725001" author="bin.xie">
+        <createTable tableName="sys_location_level" remarks="地点定义级别表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_location_level"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id"/>
+            <column name="set_of_books_id" type="bigint" remarks="账套id"/>
+            <column name="code" type="varchar(100)" remarks="地点级别代码"/>
+            <column name="name" type="varchar(255)" remarks="地点级别名称"/>
+            <column name="remarks" type="varchar(255)" remarks="备注"/>
+            <column name="enabled" type="tinyint" remarks="是否启用"/>
+            <column name="deleted" type="tinyint" defaultValue="0" remarks="是否删除 1：删除 0：未删除">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="bigint"/>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_updated_by" type="bigint"/>
+            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
+    <changeSet id="201903261729001" author="bin.xie">
+        <createTable tableName="sys_location_level_assign" remarks="地点定义级别分配地点表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_location_level_assign"/>
+            </column>
+            <column name="level_id" type="bigint" remarks="地点级别id"/>
+            <column name="location_id" type="bigint" remarks="地点id"/>
+            <column name="created_by" type="bigint"/>
+            <column name="created_date" type="timestamp" defaultValue="${now}"/>
+            <column name="last_updated_by" type="bigint"/>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201903261754001" author="bin.xie">
+        <createTable tableName="sys_location_level_i18n" remarks="地点定义级别多语言表">
+            <column name="id" type="bigint"/>
+            <column name="name" type="varchar(255)" remarks="地点级别名称"/>
+            <column name="language" type="varchar(20)" remarks="语言"/>
+        </createTable>
+        <addUniqueConstraint tableName="sys_location_level_i18n" columnNames="language,name" constraintName="uk_sys_location_level_i18n"/>
+    </changeSet>
+
+    <changeSet id="201903271029001" author="bin.xie">
+        <addUniqueConstraint tableName="sys_location_level" columnNames="set_of_books_id,code" constraintName="uk_sys_location_level"/>
+    </changeSet>
+    
+    <changeSet id="201903281658001" author="zhu.zhao">
+        <addColumn tableName="sys_dimension_item">
+            <column name="start_date" type="timestamp"  remarks="启用日期">
+                <constraints nullable="true"/>
+            </column>
+            <column name="end_date" type="timestamp"  remarks="停用日期">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201903281658002" author="zhu.zhao">
+        <createTable tableName="sys_dimension_item_ass_emp" remarks="维值关联人员表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_dimension_item_ass_emp"/>
+            </column>
+            <column name="dimension_item_id" type="bigint" remarks="维值ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_id" type="bigint" remarks="员工表主键ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}"/>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}"/>
+            <column name="created_by" type="bigint" remarks="创建人">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后修改人">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201904031732001" author="zhu.zhao">
+        <addColumn tableName="sys_dimension_item">
+            <column name="all_company_flag" type="tinyint"  remarks="分配全部公司标识">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
