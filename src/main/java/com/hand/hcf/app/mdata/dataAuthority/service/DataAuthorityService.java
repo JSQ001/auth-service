@@ -13,6 +13,7 @@ import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthorityRuleDetailValue;
 import com.hand.hcf.app.mdata.dataAuthority.persistence.DataAuthorityMapper;
 import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
+import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.service.BaseI18nService;
@@ -57,6 +58,8 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
 
     @Autowired
     private UserRoleControllerImpl userRoleClient;
+    @Autowired
+    private HcfOrganizationInterface hcfOrganizationInterface;
 
     /**
      * 保存数据权限
@@ -86,11 +89,11 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * @param id
      */
     @Transactional
-    public void deleteDataAuthorityById(Long id){
-        // ... 校验是否被引用
-        boolean isCited = false;
+    public void deleteDataAuthorityById(Long id) {
+        //校验数据权限是否被引用
+        boolean isCited = hcfOrganizationInterface.dataAuthHasUsed(id);
 
-        if(isCited){
+            if(isCited){
             throw new BizException(RespCode.AUTH_DATA_AUTHORITY_CITED);
         }
         DataAuthority dataAuthority = dataAuthorityMapper.selectById(id);

@@ -290,7 +290,9 @@ public class ContactControllerImpl {
         Contact contactByUserId = contactService.getContactByUserId(userId);
         if(contactByUserId != null){
             ContactBankAccount oneByUserOidAndIsPrimary = contactBankAccountService.findOneByUserOidAndIsPrimary(contactByUserId.getUserOid(), true);
-            return contactBankAccountService.toUserBankAccountCO(userId, oneByUserOidAndIsPrimary);
+            if(oneByUserOidAndIsPrimary != null){
+                return contactBankAccountService.toUserBankAccountCO(userId, oneByUserOidAndIsPrimary);
+            }
         }
         return null;
     }

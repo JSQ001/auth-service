@@ -496,7 +496,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         UserBankAccountCO result = new UserBankAccountCO();
         result.setAccountLocation(contactBankAccount.getAccountLocation());
         result.setBankAccountName(contactBankAccount.getBankAccountName());
-        result.setBankAccountNo(contactBankAccount.getBankAccountNo());
+        result.setBankAccountNo(UserInfoEncryptUtil.detrypt(contactBankAccount.getBankAccountNo()));
         result.setBankCode(contactBankAccount.getBankCode());
         result.setBankName(contactBankAccount.getBankName());
         result.setBankAccountName(contactBankAccount.getBankAccountName());

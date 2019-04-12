@@ -126,5 +126,13 @@ public class CommonControllerImpl {
         List<SysCodeValueCO> sysCodeValueCOS = listSysValueByCodeConditionByEnabled(code, (Boolean)null);
         return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
     }
+
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+        List<SysCodeValueCO> sysCodeValueCOS = listSysValueByCodeConditionByEnabled(code, true);
+        return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
+    }
+
+
+
 }
 

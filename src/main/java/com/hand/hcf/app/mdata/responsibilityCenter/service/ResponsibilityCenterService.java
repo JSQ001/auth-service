@@ -7,20 +7,22 @@ import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.common.enums.RangeEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+
 import com.hand.hcf.app.mdata.dimension.domain.enums.DimensionItemImportCode;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.GroupCenterRelationship;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityAssignCompany;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
-import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.enums.ResponsibilityCenterImportCode;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.temp.ResponsibilityCenterTemp;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityCenterExportDTO;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityCenterMapper;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.mdata.utils.StringUtil;
+
 import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.exception.BizException;
 import com.hand.hcf.core.handler.ExcelExportHandler;
@@ -28,7 +30,6 @@ import com.hand.hcf.core.handler.ExcelImportHandler;
 import com.hand.hcf.core.service.BaseService;
 import com.hand.hcf.core.service.ExcelExportService;
 import com.hand.hcf.core.service.ExcelImportService;
-import com.hand.hcf.core.service.MessageService;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import com.hand.hcf.core.web.dto.ImportResultDTO;
 import com.itextpdf.text.io.StreamUtil;
@@ -51,7 +52,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -697,4 +697,15 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
         return queryPage;
     }
 
+    public List<ResponsibilityLov> pageByCompanyAndDepartment(Page page,
+                                                              Long companyId,
+                                                              Long departmentId,
+                                                              String code,
+                                                              String name,
+                                                              Long id) {
+        if (id != null){
+            page.setSearchCount(Boolean.FALSE);
+        }
+        return baseMapper.pageByCompanyAndDepartment(page, companyId, departmentId, code, name, id);
+    }
 }

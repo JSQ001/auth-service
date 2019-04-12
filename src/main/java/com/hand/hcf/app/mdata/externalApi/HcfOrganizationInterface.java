@@ -3,10 +3,12 @@ package com.hand.hcf.app.mdata.externalApi;
 import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.base.implement.web.UserControllerImpl;
+import com.hand.hcf.app.base.implement.web.UserRoleControllerImpl;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.common.co.UserCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.mdata.implement.web.CompanyControllerImpl;
 import com.hand.hcf.app.mdata.system.enums.AttachmentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,10 @@ public class HcfOrganizationInterface {
 
     @Autowired
     private AttchmentControllerImpl attachmentClient;
-
+    @Autowired
+    private CompanyControllerImpl companyClient;
+    @Autowired
+    private UserRoleControllerImpl userRoleClient;
 
     public OrderNumberCO getVendorCode (String companyCode, Long tenantId) {
         return orgClient.getOrderNumberCO("VENDER",companyCode,"");
@@ -45,6 +50,11 @@ public class HcfOrganizationInterface {
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
         return orgClient.listAllSysCodeValueByCode(code);
     }
+
+//jiancheng.li TODO
+    /*public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+        return orgClient.listEnabledSysCodeValueByCode(code);
+    }*/
 
     public AttachmentCO getAttachmentByOid(String oid){
         return attachmentClient.getByOid(oid);
@@ -121,5 +131,14 @@ public class HcfOrganizationInterface {
     public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
         List<SysCodeValueCO> sysCodeValueCOS = orgClient.listSysValueByCodeConditionByEnabled(code, true);
         return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
+    }
+    /**
+     * 校验数据权限规则是否被使用
+     *
+     * @param id 用户权限id
+     * @return 是否被启用
+     */
+    public Boolean dataAuthHasUsed(Long id) {
+        return userRoleClient.dataAuthHasUsed(id);
     }
 }
