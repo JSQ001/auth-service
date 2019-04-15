@@ -193,6 +193,9 @@ public class OrganizationService {
         return departmentClient.getDepartmentByEmpOid(userOid);
     }
 
+    public DepartmentCO getDepartmentByEmployeeId(Long userId){
+        return departmentClient.getDepartmentByEmployeeId(userId);
+    }
     public Boolean judgeUserInUserGroups(JudgeUserCO judgeUserCO) {
         return userClient.judgeUserInUserGroups(judgeUserCO);
     }

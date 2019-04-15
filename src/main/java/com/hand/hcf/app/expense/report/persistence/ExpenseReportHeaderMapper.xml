@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.report.persistence.ExpenseReportHeaderMapper">
+
+    <select id="queryReportHeaderByids" resultType="com.hand.hcf.app.expense.report.dto.ExpenseReportHeaderDTO">
+		select eh.*,0 writeOffAmount,0 paidAmount,1 reversedFlag, from
+			exp_report_header eh
+ 	    where
+ 	    	1=1
+	   <if test="ew!=null">
+		   ${ew.sqlSegment}
+	   </if>
+	</select>
+	<select id="getCountByCondition" resultType="java.lang.Integer">
+		select count(1) from
+		exp_report_header eh
+		where
+		1=1
+		<if test="ew!=null">
+			${ew.sqlSegment}
+		</if>
+	</select>
+</mapper>

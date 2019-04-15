@@ -15,11 +15,13 @@
                             FROM EXP_REPORT_HEADER erh
                             WHERE erh.id = t.EXP_REPORT_HEADER_ID) applicantId,
                         t.EXPENSE_TYPE_ID,
+                        (select et.name from exp_expense_type et
+                        where et.id = t.EXPENSE_TYPE_ID) expenseTypeName,
                         t.EXPENSE_DATE,
                         t.CURRENCY_CODE,
                         t.EXCHANGE_RATE rate,
                         t.AMOUNT reportAmount,
-                        (select t.amount - coalesce(sum(coalesce(BASE_AMOUNT, 0)), 0)
+                        (select t.amount - coalesce(sum(BASE_AMOUNT), 0)
                                 from EXP_INPUT_TAX_LINE eitl
                                 where eitl.EXP_REPORT_LINE_ID = t.id
                                 and eitl.INPUT_TAX_HEADER_ID != #{headerId}
@@ -55,11 +57,13 @@
                             FROM EXP_REPORT_HEADER erh
                             WHERE erh.id = t4.EXP_REPORT_HEADER_ID) applicantId,
                         t4.EXPENSE_TYPE_ID,
+                        (select et.name from exp_expense_type et
+                        where et.id = t4.EXPENSE_TYPE_ID) expenseTypeName,
                         t4.EXPENSE_DATE,
                         t4.CURRENCY_CODE,
                         t4.EXCHANGE_RATE rate,
                         t4.AMOUNT reportAmount,
-                        (select t4.amount - coalesce(sum(coalesce(BASE_AMOUNT, 0)), 0)
+                        (select t4.amount - coalesce(sum(BASE_AMOUNT), 0)
                             from EXP_INPUT_TAX_LINE eitl
                             where eitl.EXP_REPORT_LINE_ID = t4.id
                                 and eitl.INPUT_TAX_HEADER_ID != #{headerId}
@@ -91,10 +95,10 @@
     </select>
     <select id="getSumAmount" resultType="com.hand.hcf.app.expense.input.dto.ExpInputTaxSumAmountDTO">
 		select
-	SUM(t.BASE_AMOUNT),
-	SUM(t.BASE_FUNCTION_AMOUNT),
-	SUM(t.AMOUNT),
-	SUM(T.FUNCTION_AMOUNT)
+	coalesce(SUM(t.BASE_AMOUNT),0) baseAmount,
+	coalesce(SUM(t.BASE_FUNCTION_AMOUNT),0) baseFunctionAmount,
+	coalesce(SUM(t.AMOUNT),0) amount,
+	coalesce(SUM(t.FUNCTION_AMOUNT),0) functionAmount
 	 from EXP_INPUT_TAX_LINE t where t.input_tax_header_id = #{inputTaxHeaderId}
 	</select>
 

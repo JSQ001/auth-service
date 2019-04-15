@@ -20,10 +20,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @TableName("exp_adjust_type")
 public class ExpenseAdjustType extends Domain {
-    //id
-    @JsonSerialize(using = ToStringSerializer.class)
-    @TableId("id")
-    private Long id;
 
     //租户id
     @JsonSerialize(using = ToStringSerializer.class)

@@ -800,7 +800,11 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         //设置typeName
         ApplicationType applicationType = typeService.selectById(dto.getTypeId());
-        dto.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
+        if (null != applicationType){
+            dto.setTypeName(applicationType.getTypeName());
+            dto.setPrePaymentFlag(applicationType.getPrePaymentFlag());
+        }
+
         commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId(),dto.getDepartmentId(),
                 dto.getEmployeeId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(dto), true);
@@ -1106,6 +1110,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             }
             // 更改行金额和释放预算
             updateLinesClosedAmount(applicationHeaders, appAssociateMap);
+            // 更改申请单分摊行为已关闭
+            distService.updateClosedByHeaders(applicationHeaders);
             // 插入日志
             List<CommonApprovalHistoryCO> collect = applicationHeaders.stream().map(e -> {
                 CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
@@ -1175,7 +1181,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     /**
      * 申请单关闭时释放预算
      */
-    private void releaseBudgetByClose(ApplicationHeader header, Long lineDistId) {
+    private void releaseBudgetByClose(ApplicationHeader header, List<Long> lineDistIds) {
         ZonedDateTime periodDate = ZonedDateTime.now();
         String parameterValue = organizationService.getParameterValue(header.getCompanyId(),
                 header.getSetOfBooksId(), ParameterConstant.BGT_CLOSED_PERIOD);
@@ -1186,8 +1192,13 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         if (period == null) {
             throw new BizException(RespCode.EXPENSE_PERIODS_ERROR);
         }
-        //jiu.zhao 预算
-        //budgetClient.closeRequisition(period, "EXP_REQUISITION", header.getId(), lineDistId);
+		//jiu.zhao 预算
+        //BudgetCloseCO budgetCloseCO = new BudgetCloseCO();
+        //budgetCloseCO.setBusinessType("EXP_REQUISITION");
+        //budgetCloseCO.setDocumentId(header.getId());
+        //budgetCloseCO.setDocumentDistLineIds(lineDistIds);
+        //budgetCloseCO.setPeriod(period);
+        //budgetClient.closeRequisition(budgetCloseCO);
     }
 
     /**
@@ -1254,8 +1265,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                                          BigDecimal associatedAmountFrom,
                                                                          BigDecimal associatedAmountTo,
                                                                          BigDecimal relevanceAmountFrom,
-                                                                         BigDecimal relevanceAmountTo
-    ){
+                                                                         BigDecimal relevanceAmountTo,
+                                                                         Long tenantId){
 
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 //.eq("t.created_by", OrgInformationUtil.getCurrentUserId())
@@ -1272,6 +1283,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .lt(requisitionDateTo != null, "t.requisition_date", requisitionDateTo)
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
+                .eq(tenantId!=null,"t.tenant_id",tenantId)
                 .orderBy("t.id", false);
         List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo);
 
@@ -1356,7 +1368,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                             String currencyCode,
                                                             String remarks,
                                                             Long employeeId,
-                                                            Long companyId) {
+                                                            Long companyId, Long tenantId) {
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 .eq(typeId != null, "t.type_id", typeId)
                 .eq(closedFlag != null, "t.closed_flag", closedFlag)
@@ -1369,6 +1381,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
                 .eq(companyId!=null, "t.company_id", companyId)
+                .eq(tenantId!=null,"t.tenant_id",tenantId)
                 .orderBy("t.id", false);
         log.debug("申请单财务查询的查询条件为：{}", wrapper.getSqlSegment());
         return wrapper;
@@ -1433,12 +1446,12 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                 BigDecimal associatedAmountTo,
                                 BigDecimal relevanceAmountFrom,
                                 BigDecimal relevanceAmountTo,
-                                HttpServletResponse response,
+                                Long tenantId, HttpServletResponse response,
                                 HttpServletRequest request,
                                 ExportConfig exportConfig) throws IOException {
         // 获取查询条件SQL
         Wrapper<ApplicationHeader> wrapper = getFDformQueryWrapper(documentNumber, typeId, requisitionDateFrom,
-                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId);
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId,tenantId);
 
         int total = baseMapper.getCountByCondition(wrapper);
 
@@ -1511,8 +1524,11 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         if (null != header.getBudgetFlag() && header.getBudgetFlag()) {
             // 预算释放
-            releaseBudgetByClose(header, line.getId());
+            List<ApplicationLineDist> distList = distService.selectList(new EntityWrapper<ApplicationLineDist>().eq("line_id", line.getId()));
+            releaseBudgetByClose(header, distList.stream().map(ApplicationLineDist::getId).collect(Collectors.toList()));
         }
+        // 更改分摊行状态
+        distService.updateClosedByLineId(line.getId());
         CommonApprovalHistoryCO historyCO = new CommonApprovalHistoryCO();
         historyCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
         historyCO.setEntityType(ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey());
@@ -1739,5 +1755,23 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         applicationCO.setApplicationHeader(header);
         applicationCO.setApplicationLines(lines);
         return applicationCO;
+    }
+
+    public List<ApplicationHeaderWebDTO> queryReleaseByReport(String reportNumber, Page pageable) {
+        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS =baseMapper.queryReleaseByReport(reportNumber,pageable);
+        List<Long> employeeIds = applicationHeaderWebDTOS.stream().map(ApplicationHeaderWebDTO::getEmployeeId).collect(Collectors.toList());
+        Map<Long, ContactCO> employeeNames = organizationService.getUserMapByUserIds(employeeIds);
+        applicationHeaderWebDTOS.stream().forEach(e->{
+            //费用类型
+            ExpenseType expenseType = expenseTypeService.selectById(e.getExpenseType());
+            e.setExpenseTypeName(expenseType.getName());
+            // 单据类型
+            ApplicationType applicationType = typeService.selectById(e.getTypeId());
+            e.setTypeName(null != applicationType ? applicationType.getTypeName() : null);
+            e.setEmployeeName(employeeNames.get(e.getEmployeeId()).getFullName());
+        });
+
+       return applicationHeaderWebDTOS ;
+
     }
 }

@@ -46,4 +46,16 @@ public class ApplicationHeaderWebDTO extends ApplicationHeader {
      */
     private BigDecimal canCloseAmount;
 
+    /**
+     * 关联金额
+     */
+    private  BigDecimal releaseAmount;
+    /**
+     * 报销单费用类型
+     */
+    private  Long expenseType;
+    private  String expenseTypeName;
+
+    //是否可同时发起预付款标志（true：可发起，false：不可发起）
+    private Boolean prePaymentFlag;
 }

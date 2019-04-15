@@ -27,7 +27,7 @@ import java.util.Map;
 public class PaymentService {
     //jiu.zhao 支付
     /*@Autowired
-    private PaymentClient paymentClient;
+    private PaymentClient paymentClient;paymentClient
 
     *//**
      * 获取某个报账单类型下，当前账套下、启用的、PAYMENT类型的 已分配的、未分配的、全部的 付款用途(现金事物分类)
@@ -151,6 +151,14 @@ public class PaymentService {
      *//*
     public String saveWriteOffJournalLines(CashWriteOffAccountCO co){
         return paymentClient.saveWriteOffJournalLines(co);
-    }*/
+    }
 
+    *//**
+     *根据 根据已付金额来确定报销单数据
+     *//*
+    public  List<CashTransactionDetailCO> queryCashTransactionDetailByReport(BigDecimal paidAmountFrom,
+                                                                             BigDecimal paidAmountTo,
+                                                                             String backlashFlag){
+        return paymentClient.queryCashTransactionDetailByReport(paidAmountFrom,paidAmountTo,backlashFlag);
+    }*/
 }

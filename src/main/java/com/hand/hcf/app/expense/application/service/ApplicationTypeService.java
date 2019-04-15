@@ -14,9 +14,11 @@ import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.common.utils.StringUtil;
+import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.domain.enums.FieldType;
+import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
@@ -60,14 +62,14 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
     @Autowired
     private ApplicationTypeDimensionService dimensionService;
 
-    @Autowired
-    private CommonService commonService;
 
     @Autowired
     private OrganizationService organizationService;
 
     @Autowired
     private AuthorizeControllerImpl authorizeClient;
+	@Autowired
+    private ExpenseTypeService expenseTypeService;
     /**
      *  创建一个申请单类型
      * @param typeDTO
@@ -108,7 +110,7 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
             }
         }
         // 2、如果适用人员不是全部类型，则必须要有关联的人员
-        if (!AssignUserEnum.USER_ALL.getKey().equals(applicationType.getApplyEmployee())){
+        if (!AssignUserEnum.USER_ALL.getKey().equals(Integer.valueOf(applicationType.getApplyEmployee()))){
             if (CollectionUtils.isEmpty(userInfos)){
                 throw new BizException(RespCode.EXPENSE_ASSOICATE_USER_NOT_EXISTS1);
             }
@@ -178,7 +180,7 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
             assignTypeService.insertBatch(expenseTypeInfos);
         }
         // 2、如果适用人员不是全部类型，则必须要有关联的人员
-        if (!AssignUserEnum.USER_ALL.getKey().equals(applicationType.getApplyEmployee())){
+        if (!AssignUserEnum.USER_ALL.getKey().equals(Integer.valueOf(applicationType.getApplyEmployee()))){
             userInfos.forEach(e -> {
                 if (e.getUserTypeId() == null){
                     throw new BizException(RespCode.EXPENSE_ASSIGN_USER_IS_NULL);
@@ -746,53 +748,32 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
     public List<ExpenseTypeWebDTO> queryExpenseTypeByApplicationTypeId(Long applicationTypeId,
                                                                        Long categoryId,
                                                                        String expenseTypeName,
-                                                                       Page page) {
+                                                                       Long companyId,
+                                                                       Long employeeId,
+                                                                       Long departmentId,
+                                                                       Page<ExpenseTypeWebDTO> page) {
         ApplicationType applicationType = this.selectById(applicationTypeId);
-
-        List<ExpenseTypeWebDTO> expenseTypeWebDTOS = assignTypeService.queryExpenseTypeByApplicationTypeId(applicationType, categoryId, expenseTypeName, page);
-
-        expenseTypeWebDTOS.forEach(field -> {
-            if (CollectionUtils.isEmpty(field.getFieldList())){
-                field.setFields(new ArrayList<>());
-            }else{
-                List<ExpenseFieldDTO> fieldDTOS = field.getFieldList().stream().map(e -> {
-                    ExpenseFieldDTO fieldDTO = ExpenseFieldDTO.builder()
-                            .commonField(e.getCommonField())
-                            .customEnumerationOid(e.getCustomEnumerationOid())
-                            .defaultValueConfigurable(e.getDefaultValueConfigurable())
-                            .defaultValueKey(e.getDefaultValueKey())
-                            .defaultValueMode(e.getDefaultValueMode())
-                            .fieldDataType(e.getFieldDataType())
-                            .fieldOid(e.getFieldOid())
-                            .fieldType(e.getFieldType())
-                            .i18n(e.getI18n())
-                            .mappedColumnId(e.getMappedColumnId())
-                            .messageKey(e.getMessageKey())
-                            .name(e.getName())
-                            .id(e.getId())
-                            .printHide(e.getPrintHide())
-                            .reportKey(e.getReportKey())
-                            .required(e.getRequired())
-                            .sequence(e.getSequence())
-                            .value(null)
-                            .editable(e.getEditable())
-                            .showOnList(e.getShowOnList())
-                            .showValue(null)
-                            .build();
-                    if (FieldType.CUSTOM_ENUMERATION.getId().equals(e.getFieldTypeId())){
-                        // 为值列表，则设置值列表的相关值
-                        List<SysCodeValueCO> sysCodeValueCOS = organizationService.listSysCodeValueCOByOid(e.getCustomEnumerationOid());
-
-                        List<OptionDTO> options = sysCodeValueCOS.stream().map(OptionDTO::createOption).collect(toList());
-                        fieldDTO.setOptions(options);
-                    }
-                    return fieldDTO;
-                }).collect(Collectors.toList());
-                field.setFields(fieldDTOS);
-            }
-        });
-
-        return expenseTypeWebDTOS;
+        List<Long> assignTypeIds = new ArrayList<>();
+        if (applicationType.getAllFlag() != null && !applicationType.getAllFlag()){
+            List<ApplicationTypeAssignType> assignTypes = assignTypeService.selectList(
+                    new EntityWrapper<ApplicationTypeAssignType>().eq("application_type_id", applicationType.getId()));
+            assignTypeIds = assignTypes
+                    .stream()
+                    .map(ApplicationTypeAssignType::getExpenseTypeId)
+                    .collect(toList());
+        }
+        ExpenseBO expenseBO = ExpenseBO.builder()
+                .allFlag(applicationType.getAllFlag())
+                .assignTypeIds(assignTypeIds)
+                .categoryId(categoryId)
+                .expenseTypeName(expenseTypeName)
+                .companyId(companyId)
+                .setOfBooksId(applicationType.getSetOfBooksId())
+                .employeeId(employeeId)
+                .departmentId(departmentId)
+                .typeFlag(0)
+                .build();
+        return expenseTypeService.lovExpenseType(expenseBO, page);
     }
 
     //typeflag标识0为申请单,1为报销单

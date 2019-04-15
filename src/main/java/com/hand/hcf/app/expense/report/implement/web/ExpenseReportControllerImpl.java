@@ -1,11 +1,17 @@
 package com.hand.hcf.app.expense.report.implement.web;
 
+import com.hand.hcf.app.common.co.ExpensePaymentScheduleCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
+import com.hand.hcf.app.expense.report.service.ExpenseReportPaymentScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -18,6 +24,9 @@ public class ExpenseReportControllerImpl {
 
     @Autowired
     private ExpenseReportHeaderService expenseReportHeaderService;
+
+    @Autowired
+    private ExpenseReportPaymentScheduleService expenseReportPaymentScheduleService;
 
     /**
      * 更新报账单状态
@@ -37,4 +46,9 @@ public class ExpenseReportControllerImpl {
         }
         return expenseReportHeader.getJeCreationStatus() == null ? false : expenseReportHeader.getJeCreationStatus();
     }
+
+    public List<ExpensePaymentScheduleCO> getExpPublicReportScheduleByIds(@RequestBody List<Long> ids){
+        return expenseReportPaymentScheduleService.getExpPublicReportScheduleByIds(ids);
+    }
+
 }

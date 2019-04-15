@@ -30,4 +30,14 @@ public class ExpInputTaxLineDTO extends ExpInputTaxLine {
 
     private String expenseTypeName;
 
+    /**
+     * 选择标志 Y 全部 P部分 N没有选择
+     */
+    private String selectFlag;
+
+    /**
+     * 分摊行信息
+     */
+    List<ExpInputForReportDistDTO> expInputForReportDistDTOS;
+
 }

@@ -543,4 +543,17 @@ public class ApplicationDocumentController {
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity(applicationHeaderAbbreviateDTOS,totalHeader,HttpStatus.OK);
     }
+
+    @RequestMapping("get/release/by/reportId")
+    public ResponseEntity<List<ApplicationHeaderWebDTO>>  queryReleaseByReport(@RequestParam(value = "businessCode") String reportNumber,
+                                                                               @RequestParam (required = false)String formName,
+                                                                                @RequestParam(required = false)String releaseCode,
+                                                                                @RequestParam(required = false)String expenseTypeName,
+                                                                                Pageable pageable){
+
+        Page page = PageUtil.getPage(pageable);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS = service.queryReleaseByReport(reportNumber,page);
+        return new ResponseEntity(applicationHeaderWebDTOS,totalHeader,HttpStatus.OK);
+    }
 }

@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.report.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.common.co.ExpensePaymentScheduleCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportPaymentSchedule;
 import org.apache.ibatis.annotations.Param;
 
@@ -19,4 +20,7 @@ public interface ExpenseReportPaymentScheduleMapper extends BaseMapper<ExpenseRe
      * @return
      */
     List<ExpenseReportPaymentSchedule> getExpenseReportPaymentScheduleAmountMax(@Param(value = "expReportHeaderId") Long expReportHeaderId);
+
+    List<ExpensePaymentScheduleCO> getExpPublicReportScheduleByIds(@Param("ids") List<Long> ids);
+
 }

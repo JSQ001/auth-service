@@ -73,4 +73,7 @@ public class ExpenseReportDistDTO extends ExpenseReportDist{
     private String  reportDocumentNumber;
 
     private  Long reportId;
+
+    //备注
+    private String description;
 }

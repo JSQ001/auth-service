@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface InvoiceHeadMapper extends BaseMapper<InvoiceHead>{
     /**
-     *  ·ÖÒ³²éÑ¯Î´¹ØÁªµÄ·¢Æ±Í·
+     *  åˆ†é¡µæŸ¥è¯¢æœªå…³è”çš„å‘ç¥¨å¤´
      * @param queryPage
      * @param wrapper
      * @return

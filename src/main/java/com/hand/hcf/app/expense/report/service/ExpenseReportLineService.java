@@ -142,11 +142,14 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                                                                 String auditFlag,
                                                                 ZonedDateTime auditDate){
         List<ExpenseReportLine> lines = selectList(new EntityWrapper<ExpenseReportLine>().eq("exp_report_header_id", headerId));
-        lines.stream().forEach(e -> {
-           e.setAuditFlag(auditFlag);
-           e.setAuditDate(auditDate);
-        });
-        return updateAllColumnBatchById(lines);
+        if(CollectionUtils.isNotEmpty(lines)){
+            lines.stream().forEach(e -> {
+                e.setAuditFlag(auditFlag);
+                e.setAuditDate(auditDate);
+            });
+            return updateAllColumnBatchById(lines);
+        }
+        return true;
     }
 
     /**

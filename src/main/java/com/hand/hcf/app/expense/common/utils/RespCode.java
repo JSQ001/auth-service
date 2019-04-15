@@ -256,4 +256,29 @@ public interface RespCode {
 
     //已有差旅类的申请大类!
     String EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE = "EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE";
+
+    /**
+     * AuditFlag审批标志-审批中
+     */
+    String EXPENSE_REPORT_DIST_APPROVING = "expense.report.approving";
+
+    /**
+     * AuditFlag审批标志-审核通过
+     */
+    String EXPENSE_REPORT_DIST_APPROVED = "expense.report.approved";
+
+    /**
+     * ReverseFlag反冲标志-未反冲
+     */
+    String EXPENSE_REPORT_DIST_NOT_REVERSE = "expense.report.not.reverse";
+
+    /**
+     * ReverseFlag反冲标志-已反冲
+     */
+    String EXPENSE_REPORT_DIST_REVERSED = "expense.report.reversed";
+
+    /**
+     * ReverseFlag反冲标志-反冲提交未审批
+     */
+    String EXPENSE_REPORT_DIST_NOT_APPROVE = "expense.report.not.approve";
 }

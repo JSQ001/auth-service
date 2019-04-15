@@ -5,15 +5,15 @@
 <mapper namespace="com.hand.hcf.app.expense.report.persistence.ExpenseReportDistMapper">
 
     <select id="queryExpenseReportDistFromApplication" resultType="com.hand.hcf.app.expense.report.dto.ExpenseReportDistDTO">
-		select ed.*,eh.requisition_number reportDocumentNumber,eh.id reportId from
+		select ed.*,eh.requisition_number reportDocumentNumber,eh.id reportId,eh.description from
 			exp_report_dist ed,exp_report_header eh
  	    where
  	    	1=1
  	      and ed.source_document_id = (select ah.id from exp_application_header ah where ah.document_number = #{documentNumber})
  	      and eh.id = ed.exp_report_header_id
  	      and eh.status in (1002,1004,2002)
- 	   <if test="reportDocumentNumber!=null">
-		  and   ed.exp_report_header_id =(select h.id  from exp_report_header h where h.requisition_number = #{reportDocumentNumber})
+ 	   <if test="reportDocumentNumber!=null and reportDocumentNumber != '' ">
+		  and   ed.exp_report_header_id in(select h.id  from exp_report_header h where h.requisition_number like #{reportDocumentNumber})
 	   </if>
 	   <if test="ew!=null">
 		   ${ew.sqlSegment}

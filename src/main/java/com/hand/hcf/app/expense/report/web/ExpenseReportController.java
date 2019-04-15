@@ -14,6 +14,7 @@ import com.hand.hcf.app.expense.report.dto.ExpenseReportLineDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportPaymentScheduleDTO;
 import com.hand.hcf.app.expense.report.service.*;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
+import com.hand.hcf.core.domain.ExportConfig;
 import com.hand.hcf.core.util.PageUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -1389,5 +1393,122 @@ public class ExpenseReportController {
         String reuslt = expenseReportHeaderService.saveInitializeExpReportGeneralLedgerJournalLine(reportHeaderId,accountingDate);
         return ResponseEntity.ok(reuslt);
     }
+    /**
+     * 报账单财务查询
+     * * @apiParam (请求参数){Long} [documentTypeId] 报账单类型ID
+     *      * @apiParam (请求参数){String} [requisitionDateFrom] 申请日期从(YYYY-MM-DD格式)
+     *      * @apiParam (请求参数){String} [requisitionDateTo] 申请日期至(YYYY-MM-DD格式)
+     *      * @apiParam (请求参数){Long} [applicantId] 申请人ID
+     *      * @apiParam (请求参数){Integer} [status] 状态
+     *      * @apiParam (请求参数){String} [currencyCode] 币种
+     *      * @apiParam (请求参数){BigDecimal} [amountFrom] 金额从
+     *      * @apiParam (请求参数){BigDecimal} [amountTo] 金额至
+     *      * @apiParam (请求参数){String} [remark] 备注
+     *      * @apiParam (请求参数){int} [page] 页数
+     *      * @apiParam (请求参数){int} [size] 每页大小
+     */
+    @GetMapping("/get/expenseReport/by/query")
+    public ResponseEntity<List<ExpenseReportHeaderDTO>> MyExpenseReportsFinanceQuery(
+                                                                                    @RequestParam(required = false)Long companyId,
+                                                                                    @RequestParam(required = false) Long documentTypeId,
+                                                                                    @RequestParam(required = false,value = "applyId") Long applicantId,
+                                                                                    @RequestParam(required = false) Integer status,
+                                                                                    @RequestParam(required = false)Long unitId,
+                                                                                    @RequestParam(required = false,value = "applyDateFrom") String requisitionDateFrom,
+                                                                                    @RequestParam(required = false,value = "applyDateTo") String requisitionDateTo,
+                                                                                    @RequestParam(required = false,value = "currency") String currencyCode,
+                                                                                    @RequestParam(required = false) BigDecimal amountFrom,
+                                                                                    @RequestParam(required = false) BigDecimal amountTo,
+                                                                                    @RequestParam(required = false) BigDecimal paidAmountFrom,
+                                                                                    @RequestParam(required = false) BigDecimal paidAmountTo,
+                                                                                    @RequestParam(required = false) String backlashFlag,
+                                                                                    @RequestParam(required = false,value = "checkDateFrom") String checkDateFrom,
+                                                                                    @RequestParam(required = false,value = "checkDateTo") String checkDateTo,
+                                                                                    @RequestParam(required = false) String remark,
+                                                                                    @RequestParam(required = false) String requisitionNumber,
+                                                                                    @RequestParam(required = false)Long tenantId,
+                                                                                    Pageable pageable){
+        Page page =PageUtil.getPage(pageable);
+        ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
+        ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
+        ZonedDateTime cDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(checkDateFrom);
+        ZonedDateTime cDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(checkDateTo);
 
+        //首先在费用模块根据条件全部查询出来， 然后再将符合条件的单据编号单据id输出至支付模块， 再信息返回回来。然后在进行比对筛选
+        List<ExpenseReportHeaderDTO> list =expenseReportHeaderService.queryExpenseReportsFinance(
+                companyId,
+                documentTypeId,
+                reqDateFrom,
+                reqDateTo,
+                applicantId,
+                status,
+                currencyCode,
+                amountFrom,
+                amountTo,
+                remark,
+                requisitionNumber,
+                unitId,
+                paidAmountFrom,
+                paidAmountTo,
+                cDateFrom,
+                cDateTo,
+                backlashFlag,
+                tenantId,
+                page);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(list,totalHeader,HttpStatus.OK);
+    }
+    /**
+     * 报账单财务查询导出功能
+     */
+   @RequestMapping("/export")
+    public  void MyExpenseReportsFinanceExport(@RequestParam(required = false)Long companyId,
+                                               @RequestParam(required = false) Long documentTypeId,
+                                               @RequestParam(required = false,value = "applyId") Long applicantId,
+                                               @RequestParam(required = false) Integer status,
+                                               @RequestParam(required = false)Long unitId,
+                                               @RequestParam(required = false,value = "applyDateFrom") String requisitionDateFrom,
+                                               @RequestParam(required = false,value = "applyDateTo") String requisitionDateTo,
+                                               @RequestParam(required = false,value = "currency") String currencyCode,
+                                               @RequestParam(required = false) BigDecimal amountFrom,
+                                               @RequestParam(required = false) BigDecimal amountTo,
+                                               @RequestParam(required = false) BigDecimal paidAmountFrom,
+                                               @RequestParam(required = false) BigDecimal paidAmountTo,
+                                               @RequestParam(required = false) String backlashFlag,
+                                               @RequestParam(required = false,value = "checkDateFrom") String checkDateFrom,
+                                               @RequestParam(required = false,value = "checkDateTo") String checkDateTo,
+                                               @RequestParam(required = false) String remark,
+                                               @RequestParam(required = false) String requisitionNumber,
+                                               @RequestParam(required = false)Long tenantId,
+                                               Pageable pageable,
+                                               @RequestBody ExportConfig exportConfig,
+                                               HttpServletResponse response,
+                                               HttpServletRequest request) throws IOException {
+
+        ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
+        ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
+        ZonedDateTime cDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(checkDateFrom);
+        ZonedDateTime cDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(checkDateTo);
+        expenseReportHeaderService.exportFormExcel(companyId,
+                                                    documentTypeId,
+                                                    reqDateFrom,
+                                                    reqDateTo,
+                                                    applicantId,
+                                                    status,
+                                                    currencyCode,
+                                                    amountFrom,
+                                                    amountTo,
+                                                    remark,
+                                                    requisitionNumber,
+                                                    unitId,
+                                                    paidAmountFrom,
+                                                    paidAmountTo,
+                                                    cDateFrom,
+                                                    cDateTo,
+                                                    backlashFlag,
+                                                    tenantId,
+                                                    response,
+                                                    request,
+                                                    exportConfig);
+    }
 }

@@ -10,4 +10,45 @@
 		  	select max(s.function_amount) from exp_report_payment_schedule s where t.exp_report_header_id = s.exp_report_header_id)
 		  	and t.exp_report_header_id = #{expReportHeaderId}
 	</select>
+
+	<resultMap id="ExpensePaymentScheduleResult" type="com.hand.hcf.app.common.co.ExpensePaymentScheduleCO">
+		<id property="id" column="id" />
+		<result property="expReportHeaderId" column="exp_report_header_id" />
+		<result property="tenantId" column="telnant_id" />
+		<result property="setOfBooksId" column="set_of_books_id" />
+		<result property="companyId" column="company_id" />
+		<result property="departmentId" column="department_id" />
+		<result property="applicantId" column="applicant_id" />
+		<result property="exchangeRate" column="exchange_rate" />
+		<result property="currencyCode" column="currency_code" />
+		<result property="amount" column="amount" />
+		<result property="functionAmount" column="function_amount" />
+		<result property="description" column="description" />
+		<result property="paymentMethod" column="payment_method" />
+		<result property="cshTransactionClassId" column="csh_transaction_class_id" />
+		<result property="cashFlowItemId" column="cash_flow_item_id" />
+		<result property="paymentScheduleDate" column="payment_schedule_date" />
+		<result property="conPaymentScheduleLineId" column="con_payment_schedule_line_id" />
+		<result property="payeeCategory" column="payee_category" />
+		<result property="payeeId" column="payee_id" />
+		<result property="accountNumber" column="account_number" />
+		<result property="accountName" column="account_name" />
+		<result property="frozenFlag" column="frozen_flag" />
+		<result property="writeOffAmount" column="write_off_amount" />
+		<result property="auditFlag" column="audit_flag" />
+		<result property="auditDate" column="audit_date" />
+ 		<result property="requisitionDate" column="requisition_date" />
+		<result property="reportTypeName" column="report_type_name" />
+	</resultMap>
+
+	<select id="getExpPublicReportScheduleByIds" resultMap="ExpensePaymentScheduleResult" >
+		SELECT t.requisition_date, v.*, rt.report_type_name
+		FROM exp_report_header t, exp_report_payment_schedule v, exp_report_type rt
+		WHERE t.id = v.exp_report_header_id
+		  and t.document_type_id = rt.id
+		  and v.id in
+			  <foreach collection="ids" item="id" open="(" separator="," close=")" >
+				  #{id}
+			  </foreach>
+	</select>
 </mapper>

@@ -2436,4 +2436,8 @@
             <column name="audit_date" type="timestamp" remarks="审核日期"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="201904101819001" author="zhu.zhao">
+        <dropNotNullConstraint tableName="exp_input_tax_dist" columnName="responsibility_center_id" columnDataType="bigint"/>
+    </changeSet>
 </databaseChangeLog>

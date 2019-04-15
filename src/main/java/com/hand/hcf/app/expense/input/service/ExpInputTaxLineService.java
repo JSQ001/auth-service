@@ -3,7 +3,9 @@ package com.hand.hcf.app.expense.input.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.ContactCO;
+import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
@@ -12,12 +14,14 @@ import com.hand.hcf.app.expense.input.dto.*;
 import com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.core.util.StringUtil;
 import com.hand.hcf.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -56,6 +60,25 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             if (sysCodeValueCO1 != null) {
                 line.setUseTypeName(sysCodeValueCO1.getName());
             }
+            List<ExpInputForReportDistDTO> expInputForReportDistDTOS = expInputTaxDistService.listDistByLineId(line.getExpReportLineId(), line.getId());
+            int x = 0;
+            for (ExpInputForReportDistDTO dist : expInputForReportDistDTOS) {
+                CompanyCO companyCO = organizationService.getCompanyById(dist.getCompanyId());
+                dist.setCompanyName(companyCO == null ? null : companyCO.getName());
+                DepartmentCO departmentCO = organizationService.getDepartmentById(dist.getDepartmentId());
+                dist.setDepartmentName(departmentCO == null ? null : departmentCO.getName());
+                if (dist.getSelectFlag().equals("Y")) {
+                    x++;
+                }
+                if (x == expInputForReportDistDTOS.size()) {
+                    line.setSelectFlag("Y");
+                } else if (x == 0) {
+                    line.setSelectFlag("N");
+                } else {
+                    line.setSelectFlag("P");
+                }
+            }
+            line.setExpInputForReportDistDTOS(expInputForReportDistDTOS);
         }
         return page.setRecords(expInputTaxLines);
     }
@@ -88,15 +111,16 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             //日志信息
             expInputTaxLine.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
             expInputTaxLine.setLastUpdatedDate(ZonedDateTime.now());
+            String lineSelectFlag = line.getSelectFlag() == null ? "N":line.getSelectFlag();
             //新增
-            if (line.getId() == null && !line.getSelectFlag().equals("N")) {
+            if (TypeConversionUtils.isEmpty(line.getId()) && !lineSelectFlag.equals("N")) {
                 expInputTaxLine.setCreatedBy(OrgInformationUtil.getUser().getId());
                 expInputTaxLine.setCreatedDate(ZonedDateTime.now());
                 expInputTaxLineMapper.insert(expInputTaxLine);
-            } else if (line.getId() != null && !line.getSelectFlag().equals("N")) {
+            } else if (line.getId() != null && !lineSelectFlag.equals("N")) {
                 //更新
                 expInputTaxLineMapper.updateById(expInputTaxLine);
-            } else if (line.getId() != null && line.getSelectFlag().equals("N")) {
+            } else if (line.getId() != null && lineSelectFlag.equals("N")) {
                 //删除
                 expInputTaxLineMapper.deleteById(line.getId());
             }
@@ -130,7 +154,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             }
 
             //更新行金额
-            if(!line.getSelectFlag().equals("N")) {
+            if(!lineSelectFlag.equals("N")) {
                 ExpInputTaxLine l = expInputTaxLineMapper.selectById(expInputTaxLine.getId());
                 if(l != null) {
                     ExpInputTaxSumAmountDTO sumAmount = expInputTaxDistService.getSumAmount(expInputTaxLine.getId());
@@ -143,7 +167,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             }
 
             //最后需要更新头的金额
-            ExpInputTaxSumAmountDTO sumLineAmount = getSumAmount(expInputTaxLine.getId());
+            ExpInputTaxSumAmountDTO sumLineAmount = getSumAmount(line.getInputTaxHeaderId());
             header.setBaseAmount(sumLineAmount.getBaseAmount());
             header.setBaseFunctionAmount(sumLineAmount.getBaseFunctionAmount());
             header.setAmount(sumLineAmount.getAmount());
@@ -169,14 +193,14 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                               String description,
                               Long headerId,
                               Page page) {
-        Wrapper<ExpInputTaxLine> wrapper = new EntityWrapper<ExpInputTaxLine>().eq(documentNumber != null, "documentNumber", documentNumber)
+        Wrapper<ExpInputTaxLine> wrapper = new EntityWrapper<ExpInputTaxLine>().like(StringUtils.hasText(documentNumber), "documentNumber", documentNumber)
                 .eq(applicantId != null, "applicantId", applicantId)
                 .eq(expenseTypeId != null, "expenseTypeId", expenseTypeId)
                 .ge(amountFrom != null, "ableAmount", amountFrom)
                 .le(amountTo != null, "ableAmount", amountTo)
                 .eq(companyId != null, "company_id", companyId)
                 .eq(departmentId != null, "department_id", departmentId)
-                .like(description != null, "description", description)
+                .like(StringUtils.hasText(description), "description", description)
                 .ge(transferDateFrom != null, "transferDate", TypeConversionUtils.getStartTimeForDayYYMMDD(transferDateFrom))
                 .le(transferDateTo != null, "transferDate", TypeConversionUtils.getEndTimeForDayYYMMDD(transferDateTo));
 
@@ -186,6 +210,10 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             List<ExpInputForReportDistDTO> expInputForReportDistDTOS = expInputTaxDistService.listDistByLineId(line.getExpReportLineId(), line.getId());
             int x = 0;
             for (ExpInputForReportDistDTO dist : expInputForReportDistDTOS) {
+                CompanyCO companyCO = organizationService.getCompanyById(dist.getCompanyId());
+                dist.setCompanyName(companyCO == null ? null : companyCO.getName());
+                DepartmentCO departmentCO = organizationService.getDepartmentById(dist.getDepartmentId());
+                dist.setDepartmentName(departmentCO == null ? null : departmentCO.getName());
                 if (dist.getSelectFlag().equals("Y")) {
                     x++;
                 }

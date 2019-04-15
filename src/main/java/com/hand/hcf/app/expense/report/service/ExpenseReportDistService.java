@@ -12,6 +12,7 @@ import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.common.utils.StringUtil;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineDist;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineDistService;
@@ -118,11 +119,14 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                                                                 String auditFlag,
                                                                 ZonedDateTime auditDate){
         List<ExpenseReportDist> dists = selectList(new EntityWrapper<ExpenseReportDist>().eq("exp_report_header_id", headerId));
-        dists.stream().forEach(e -> {
-            e.setAuditFlag(auditFlag);
-            e.setAuditDate(auditDate);
-        });
-        return updateAllColumnBatchById(dists);
+        if(CollectionUtils.isNotEmpty(dists)){
+            dists.stream().forEach(e -> {
+                e.setAuditFlag(auditFlag);
+                e.setAuditDate(auditDate);
+            });
+            return updateAllColumnBatchById(dists);
+        }
+        return true;
     }
 
     /**
@@ -433,12 +437,38 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
      */
 
     public List<ExpenseReportDistDTO> queryExpenseReportDistFromApplication(Page page, String documentNumber, String reportDocumentNumber, Long companyId, Long unitId) {
-
+        //单据编号模糊查询
+        if (!StringUtil.isNullOrEmpty(reportDocumentNumber)){
+            reportDocumentNumber = "%" + reportDocumentNumber + "%";
+        }
         Wrapper<ExpenseReportDist> wrapper = new EntityWrapper<ExpenseReportDist>()
                     .eq(companyId!=null,"ed.company_id",companyId)
                     .eq(unitId!=null,"ed.department_id",unitId)
                     .eq("ed.source_document_category", ExpenseDocumentTypeEnum.EXP_REQUISITION.name());
         List<ExpenseReportDistDTO>reportDistDTOList =baseMapper.queryExpenseReportDistFromApplication(page,wrapper,documentNumber,reportDocumentNumber);
+        //设置dto相关属性
+        for (ExpenseReportDistDTO expenseReportDistDTO : reportDistDTOList) {
+            CompanyCO company = organizationService.getCompanyById(expenseReportDistDTO.getCompanyId());
+            DepartmentCO department = organizationService.getDepartmentById(expenseReportDistDTO.getDepartmentId());
+            expenseReportDistDTO.setCompanyName(company.getName());
+            expenseReportDistDTO.setDepartmentName(department.getName());
+            String auditFlag = expenseReportDistDTO.getAuditFlag();
+            if (auditFlag.equals("N")){
+                auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVING);
+            }else{
+                auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVED);
+            }
+            expenseReportDistDTO.setAuditFlag(auditFlag);
+            String reverseFlag = expenseReportDistDTO.getReverseFlag();
+            if (reverseFlag.equals("N")){
+                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_REVERSE);
+            }else if(reverseFlag.equals("Y")){
+                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_REVERSED);
+            }else {
+                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_APPROVE);
+            }
+            expenseReportDistDTO.setReverseFlag(reverseFlag);
+        }
         return  reportDistDTOList;
     }
 

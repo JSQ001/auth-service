@@ -35,7 +35,11 @@ public class ExpInputForReportDistDTO {
 
   private Long companyId;
 
+  private String companyName;
+
   private Long departmentId;
+
+  private String departmentName;
 
   private Long responsibilityCenterId;
 

@@ -30,6 +30,7 @@ import org.springframework.util.ObjectUtils;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -104,11 +105,14 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                                                                    String auditFlag,
                                                                    ZonedDateTime auditDate){
         List<ExpenseReportPaymentSchedule> schedules = selectList(new EntityWrapper<ExpenseReportPaymentSchedule>().eq("exp_report_header_id", headerId));
-        schedules.stream().forEach(e -> {
-            e.setAuditFlag(auditFlag);
-            e.setAuditDate(auditDate);
-        });
-        return updateAllColumnBatchById(schedules);
+        if(! CollectionUtils.isEmpty(schedules)){
+            schedules.stream().forEach(e -> {
+                e.setAuditFlag(auditFlag);
+                e.setAuditDate(auditDate);
+            });
+            return updateAllColumnBatchById(schedules);
+        }
+        return true;
     }
 
     /**
@@ -383,4 +387,10 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         return this.selectList(new EntityWrapper<ExpenseReportPaymentSchedule>()
                 .eq("exp_report_header_id",reportHeaderId));
     }
+
+    public List<ExpensePaymentScheduleCO> getExpPublicReportScheduleByIds(List<Long> ids) {
+        List<ExpensePaymentScheduleCO> result = CollectionUtils.isEmpty(ids) ? Arrays.asList() : baseMapper.getExpPublicReportScheduleByIds(ids);
+        return result;
+    }
+
 }

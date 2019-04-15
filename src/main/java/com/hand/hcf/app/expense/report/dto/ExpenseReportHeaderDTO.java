@@ -6,6 +6,7 @@ import lombok.Data;
 import org.apache.ibatis.reflection.Reflector;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -76,4 +77,19 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      * 税金分摊方式
      */
     private String expTaxDist;
+
+    /**
+     * 已付金额
+     */
+    private BigDecimal paidAmount;
+
+    /**
+     * 核销金额
+     */
+    private  Double writeOffAmount;
+
+    /**
+     * 反冲标志
+     */
+    private  String reversedFlag;
 }

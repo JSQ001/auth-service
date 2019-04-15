@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTaxDist;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTaxDistMapper;
 import com.hand.hcf.core.service.BaseService;
@@ -70,11 +71,14 @@ public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDis
                                                                 String auditFlag,
                                                                 ZonedDateTime auditDate){
         List<ExpenseReportTaxDist> dists = selectList(new EntityWrapper<ExpenseReportTaxDist>().eq("exp_report_header_id", headerId));
-        dists.stream().forEach(e -> {
-            e.setAuditFlag(auditFlag);
-            e.setAuditDate(auditDate);
-        });
-        return updateAllColumnBatchById(dists);
+        if(CollectionUtils.isNotEmpty(dists)){
+            dists.stream().forEach(e -> {
+                e.setAuditFlag(auditFlag);
+                e.setAuditDate(auditDate);
+            });
+            return updateAllColumnBatchById(dists);
+        }
+        return true;
     }
 
 }

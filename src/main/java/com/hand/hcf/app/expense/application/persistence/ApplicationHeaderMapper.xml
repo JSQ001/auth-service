@@ -352,4 +352,14 @@
                 ${ew.sqlSegment}
             </if>
     </select>
+    <select id="queryReleaseByReport" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
+        select eh.*,r.amount releaseAmount,l.expense_type_id
+        from
+            exp_report_header h,exp_requisition_release r,exp_application_header eh,exp_report_line l
+        where
+            h.requisition_number = #{businessCode}
+          and r.related_doc_id = h.id
+          and r.source_doc_line_id = l.id
+          and r.source_doc_id = eh.id
+    </select>
 </mapper>

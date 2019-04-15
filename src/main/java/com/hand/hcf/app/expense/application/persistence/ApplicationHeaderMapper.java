@@ -155,4 +155,9 @@ public interface ApplicationHeaderMapper extends BaseMapper<ApplicationHeader> {
      */
     List<PrepaymentRequisitionReleaseCO> getPrepaymentBydocumentNumber(@Param("documentNumber") String documentNumber,
                                                          @Param("ew") Wrapper<ExpenseRequisitionReqRelease> eq);
+
+    /**
+     * 获取报账单关联申请单信息
+     */
+    List<ApplicationHeaderWebDTO>queryReleaseByReport(@Param("documentNumber") String businessCode, RowBounds pageable);
 }

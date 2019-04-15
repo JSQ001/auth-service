@@ -56,10 +56,10 @@ WHERE
     </select>
     <select id="getSumAmount" resultType="com.hand.hcf.app.expense.input.dto.ExpInputTaxSumAmountDTO">
 		select
-	SUM(t.BASE_AMOUNT),
-	SUM(t.BASE_FUNCTION_AMOUNT),
-	SUM(t.AMOUNT),
-	SUM(T.FUNCTION_AMOUNT)
+	coalesce(SUM(t.BASE_AMOUNT),0) baseAmount,
+	coalesce(SUM(t.BASE_FUNCTION_AMOUNT),0) baseFunctionAmount,
+	coalesce(SUM(t.AMOUNT),0) amount,
+	coalesce(SUM(t.FUNCTION_AMOUNT),0) functionAmount
 	 from EXP_INPUT_TAX_DIST t where t.input_tax_line_id= #{inputTaxLineId}
 	</select>
 </mapper>
