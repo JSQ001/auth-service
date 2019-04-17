@@ -1,0 +1,13 @@
+:global{
+  .currency-edit-notBase,.currency-edit-base{
+    .title-container{
+      line-height: 32px;
+      position: relative;
+      .back-button{
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    }
+  }
+}

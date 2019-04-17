@@ -1,0 +1,38 @@
+:global {
+  .workbench-approve-bar {
+    z-index: 2;
+    position: fixed;
+    left: 220px;
+    right: 0;
+    bottom: 0;
+    line-height: 40px;
+    padding: 20px 0;
+    background-color: #fff;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+    .suggestion-input {
+      padding-left: 40px;
+      .ant-form-item {
+        padding-bottom: 0;
+        margin-bottom: 0;
+        .ant-form-item-label {
+          padding-bottom: 0;
+        }
+      }
+    }
+    .btn-bar {
+      padding-left: 60px;
+      .ant-btn {
+        margin-right: 15px;
+        &.reject-btn {
+          background: #f04134;
+          border-color: #f04134;
+          color: #fff;
+        }
+      }
+    }
+    &.ant-form-vertical .ant-form-item-control,
+    &.ant-form-vertical .ant-form-item-label {
+      line-height: 40px;
+    }
+  }
+}

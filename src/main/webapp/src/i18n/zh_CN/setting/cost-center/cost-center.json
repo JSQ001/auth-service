@@ -1,0 +1,18 @@
+{
+  "dimension.title": "维度名称",
+
+  "dimension.code": "编码",
+  "dimension.status": "状态",
+  "dimension.dep": "部门",
+  "dimension.disabled": "禁用中",
+
+  "dimension.enabled": "启用中",
+  "dimension.sdisabled": "设为禁用",
+  "dimension.senabled": "设为启用",
+
+  "dimension.goto": "（部门为企业默认维度，部门维护请前往",
+  "dimension.enterprise.org": "企业管理-组织架构",
+  "dimension.page": "）页面",
+
+  "dimension.extend.field": "维度项扩展字段"
+}

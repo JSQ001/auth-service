@@ -1,0 +1,64 @@
+:global{
+  .admin-skip-wrap {
+    .info {
+      color: #1890ff;
+      margin-right: 5px;
+    }
+    .admin-skip {
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-top: 10px;
+      .node-wrap {
+        position: relative;
+        display: inline;
+        .node-img {
+          width: 90px;
+          height: 90px;
+          padding: 5px;
+        }
+        .node-current {
+          position: absolute;
+          color: #1890ff;
+          border: 2px solid #1890ff;
+          background: #fff;
+          border-radius: 3px;
+          font-size: 12px;
+          padding: 0 1px;
+        }
+        .node-selected {
+          position: absolute;
+          background: red;
+          border-radius: 50%;
+          right: 50px;
+          width: 24px;
+          height: 24px;
+          text-align: center;
+        }
+        .selected-icon{
+          color: #fff;
+          margin-top: 5px
+        }
+        .node-text{
+          position: absolute;
+          bottom: -60px;
+          left: -15px;
+          text-align: center;
+          width: 120px;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          white-space: nowrap;
+        }
+        .right-arrow {
+          color: #ccc9c9;
+          font-size: 30px;
+          padding: 10px;
+        }
+      }
+      .node-wrap:last-child{
+        .node-selected {
+          right: 0;
+        }
+      }
+    }
+  }
+}

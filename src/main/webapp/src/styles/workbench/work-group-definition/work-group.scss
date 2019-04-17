@@ -1,0 +1,42 @@
+:global{
+  .work-group-define{
+    .f-left{
+      float: left;
+    }
+    .f-right{
+      float: right;
+      padding-right: 5px
+    }
+    .clear::after{
+      content: '';
+      display: block;
+      clear: both;
+    }
+    .work-group-define-left{
+      width: 480px;
+      overflow: hidden;
+    }
+    .work-group-define-right{
+      height: calc(100vh - 130px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      border: solid 1px #eeeeee;
+      padding: 8px;
+      margin-left: 500px;
+      .details{
+        background-color: #fafafa;
+        border-radius: 5px;
+        padding: 0 10px 20px;
+        .work-team-details{
+          .details-name-style{
+            text-align: right;
+            padding-right: 10px;
+          }
+        }
+      }
+      .operation{
+        margin: 10px 0;
+      }
+    }
+  }
+}

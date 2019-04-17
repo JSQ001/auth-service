@@ -1,0 +1,20 @@
+:global{
+  .my-account{
+    height: 100%;
+    .operate-area{
+      margin: 12px 0;
+    }
+    .expanded-row{
+      font-size: 12px;
+      .warning-expanded-row{
+        color: #2e6cf2;
+      }
+      .error-expand-row{
+        color: #CB5091;
+      }
+      .expanded-title{
+        font-weight: 500;
+      }
+    }
+  }
+}

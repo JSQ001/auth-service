@@ -1,0 +1,29 @@
+:global {
+  .workbench-detail {
+    padding-bottom: 90px;
+    .workbench-card {
+      margin-bottom: 20px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.20);
+      &.workbench-basic {
+        padding: 1px 32px 15px;
+      }
+    }
+    .credential-table {
+      margin: 10px 0 20px;
+      .credential-table-card {
+        .ant-card-body {
+          padding-top: 15px;
+        }
+        .credential-operations {
+          margin-bottom: 15px;
+          .del-btn {
+            background-color: rgb(255, 77, 79);
+            border: 1px solid rgb(255, 77, 79);
+            margin: 0 10px;
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+}

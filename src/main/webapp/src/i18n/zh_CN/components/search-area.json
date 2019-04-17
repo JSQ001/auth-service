@@ -1,0 +1,14 @@
+{
+  "components.search.timeMoreLimit":"开始日期不能大于结束日期",
+  "components.search.timeLessLimit":"结束时间小于开始时间",
+  "components.search.upload.fold": "折叠",
+  "components.search.upload.open": "展开",
+  "components.search.dimension.name": "维度名称",
+  "components.search.dimension.all.items": "全部项",
+  "components.search.dimension.item.from": "维度项从",
+  "components.search.dimension.item.to": "维度项至",
+  "components.search.dimension.tip1": "1: 请先选择维度名称",
+  "components.search.dimension.tip2": "2: 维度项从的序号需 ≤ 维度项至的序号,否则搜索无结果",
+  "components.search.dimension.please.enter.item": "请输入代码or名称",
+  "components.search.upload.more": "展开"
+}

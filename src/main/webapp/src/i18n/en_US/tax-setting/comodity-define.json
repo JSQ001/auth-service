@@ -1,0 +1,8 @@
+{
+  "commodityDefine.commodityCode":"Commodity Code",
+  "commodityDefine.commodityName":"Commodity Name",
+  "commodityDefine.commodityAbb":"Commodity Abb",
+  "commodityDefine.isEnabled":"Status",
+  "commodityDefine.newCommodityDefine":"New Commodity",
+  "commodityDefine.editCommodityDefine":"Edit Commodity"
+}

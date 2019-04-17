@@ -1,0 +1,28 @@
+{
+  "dimension.detail.title": "Details of the dimension",
+
+  "dimension.detail.name": "Name of dimension item",
+  "dimension.detail.code": "code",
+  "dimension.detail.manager": "manager",
+  "dimension.detail.no": "No",
+  "dimension.detail.showall": "Full visibility",
+
+  "dimension.detail.status": "status",
+  "dimension.detail.name1": "Dimension name",
+  "dimension.detail.sobName": "Account name",
+
+  "dimension.detail.index": "Serial number",
+  "dimension.detail.please.selecy": "Please select person",
+  "dimension.detail.success": "Success",
+  "dimension.detail.temp": "Dimension term template",
+  "dimension.detail.temp.person": "Dimension term template and person",
+
+  "dimension.detail.error": "Dimension entry to import error information",
+  "dimension.detail.import": "Import dimension item",
+  "dimension.detail.import.person": "Import dimension item with person",
+  "dimension.detail.batchadd": "Batch adding staff",
+  "dimension.detail.new": "New dimension item",
+  "dimension.detail.inp.search": "The name or code of the input dimension name",
+  "dimension.detail.has": "Selected",
+  "dimension.detail.items": "items of data"
+}

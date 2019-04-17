@@ -1,0 +1,1116 @@
+import React from 'react';
+import { connect } from 'dva';
+import { routerRedux } from 'dva/router';
+import { Button, Icon, Menu, Dropdown, Input, Modal, Popover } from 'antd';
+import Table from 'widget/table';
+
+const confirm = Modal.confirm;
+const Search = Input.Search;
+// 组织架构
+import OrgTree from 'containers/enterprise-manage/org-structure/org-component/org-tree';
+//搜索结果列表
+import OrgSearchList from 'containers/enterprise-manage/org-structure/org-component/org-search-list';
+//搜索结果中人员信息详情
+import OrgPersonInfo from 'containers/enterprise-manage/org-structure/org-component/org-person-info';
+// 部门角色
+import OrgRoles from 'containers/enterprise-manage/org-structure/org-component/org-roles';
+import 'styles/enterprise-manage/org-structure/org-structure.scss';
+import OrgService from 'containers/enterprise-manage/org-structure/org-structure.service';
+import { SelectDepOrPerson } from 'components/Widget/index';
+
+import { getErrorMessage } from 'share/errorMessage';
+import SlideFrame from 'components/Widget/slide-frame';
+import OrgNewDep from 'containers/enterprise-manage/org-structure/org-component/org-new-dep';
+import { superThrottle, hasAuthority } from 'utils/extend';
+
+const treeData = [];
+
+class OrgStructure extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ROLE_TENANT_ADMIN: false,
+      CREATE_DATA_TYPE: false,
+      //新增部门，编辑部门
+      slideFrame: {
+        title: '',
+        visible: false,
+        params: {},
+      },
+      change: 0,
+      visibleBatchAdjustment: false, //批量调整的模态框：是否显示
+      batchAdjustmentFrom: [], //批量调整的数据：源
+      batchAdjustmentTo: [], //批量调整的数据：目标
+      loadingBatchAdjustment: false, //批量调整点击确认
+      disabledBatchAdjustment: true, //批量调整 确认按钮 disabled
+      userDepName: '', //搜索关键字：员工姓名与部门编码，部门名称
+      userName: '', //搜索关键字：员工工号与姓名
+      treeData: treeData, //部门树数据
+      selectedKeys: [], //当前被选中的部门，默认展示第一个
+      selectedKeysDepData: {}, //当前被选中的部门的数据
+      selectedKeysDepDataByApi: {}, //当前被选中的部门通过api查询的详情
+      roleIsEdit: false, //部门角色是否正在编辑
+      loading: false,
+      expandedKeys: [],
+      autoExpandParent: true,
+      pagination: {
+        current: 1,
+        page: 0,
+        total: 0,
+        pageSize: 10,
+        showSizeChanger: true,
+        showQuickJumper: true,
+      },
+      // 部门人员数据
+      depUserData: [],
+      // 表格
+      columns: [
+        {
+          /*工号*/
+          title: this.$t('org.employeeID'),
+          key: 'employeeId',
+          dataIndex: 'employeeId',
+          width: '15%',
+        },
+        {
+          /*姓名*/
+          width: '15%',
+          title: this.$t('org.name'),
+          key: 'fullName',
+          dataIndex: 'fullName',
+          render: text => (
+            <span>
+              {text ? (
+                <Popover placement="topLeft" content={text}>
+                  {text}
+                </Popover>
+              ) : (
+                '-'
+              )}
+            </span>
+          ),
+        },
+        {
+          /*联系方式*/
+          title: this.$t('org.contact-way'),
+          key: 'mobile',
+          dataIndex: 'mobile',
+          render: text => (
+            <span>
+              {text ? (
+                <Popover placement="topLeft" content={text}>
+                  {text}
+                </Popover>
+              ) : (
+                '-'
+              )}
+            </span>
+          ),
+        },
+        {
+          /*邮箱*/
+          title: this.$t('org.email'),
+          key: 'email',
+          dataIndex: 'email',
+          render: text => (
+            <span>
+              {text ? (
+                <Popover placement="topLeft" content={text}>
+                  {text}
+                </Popover>
+              ) : (
+                '-'
+              )}
+            </span>
+          ),
+        },
+        //这个列下期把人员信息详情做好之后才显示
+        {
+          //操作
+          title: this.$t('org.operation'),
+          key: 'operation',
+          dataIndex: 'operation',
+          width: '10%',
+          render: (text, record) => (
+            <span>
+              <a onClick={e => this.useDetail(e, record)}>{this.$t('common.detail')}</a>
+            </span>
+          ),
+        },
+      ],
+      isSearchOver: false, //是否正在搜索
+      //被选择了的人:要移除的人的key,用来翻页
+      selectedRowKeys: [],
+      //组织架构搜索结果
+      searchList: {
+        depList: [],
+        personList: [],
+      },
+      searchActiveUser: {}, //搜索部门树部门与成员，被选中的成员
+      depNeedMoveOut: [], //当前部门要移除的人
+    };
+  }
+
+  componentDidMount() {
+    let ROLE_TENANT_ADMIN = this.props.tenantMode;
+    //人员导入方式：this.props.company.createDataType如果是 1002，属于接口导入
+    //新增部门,批量调整,部门编辑,部门停用启用, 子部门加减 都要禁止
+    let CREATE_DATA_TYPE = parseInt(this.props.company.createDataType) != 1002;
+    this.setState({
+      ROLE_TENANT_ADMIN,
+      CREATE_DATA_TYPE,
+    });
+
+    //不然账号切换之后还存在
+    OrgService.resetTreeList();
+    this.getTenantAllDep();
+  }
+
+  //用户详情页面
+  useDetail = (e, record) => {
+    this.props.dispatch(
+      routerRedux.replace({
+        pathname: `/enterprise-manage/org-structure/person-detail/${record.userOid}`,
+      })
+    );
+    // let path = menuRoute
+    //   .getRouteItem('person-detail', 'key')
+    //   .url.replace(':userOid', record.userOid);
+    // this.context.router.push(path);
+  };
+  //角色设置页面
+  goToRolesList = () => {
+    this.props.dispatch(
+      routerRedux.replace({
+        pathname: `/enterprise-manage/org-structure/org-roles-list`,
+      })
+    );
+    // this.context.router.push(
+    //   menuRoute.getMenuItemByAttr('org-structure', 'key').children.orgStructureRolesList.url
+    // );
+  };
+
+  // 查询所有集团部门
+  //是否是删除操作
+  getTenantAllDep(isDelete) {
+    //let expandedKeys = this.state.expandedKeys;
+    //把展开的都收起
+    // this.setState({
+    //   expandedKeys:[],
+    //   autoExpandParent: false,
+    // });
+    // 要点击开
+    // expandedKeys.forEach(function (item) {
+    //
+    // })
+    //老接口，先获取顶级部门，然后点击一个部门获取下面的部门
+    // OrgService.getTenantAllDep()
+    //新接口获取全部部门，子部门
+    OrgService.getTenantAllDepV2(this.state.expandedKeys).then(response => {
+      this.setState(
+        {
+          treeData: response,
+          selectedKeysDepData:
+            this.state.selectedKeys.length > 0
+              ? this.state.selectedKeysDepData
+              : response[0]
+                ? response[0].originData
+                : {},
+          selectedKeys:
+            this.state.selectedKeys.length > 0
+              ? this.state.selectedKeys
+              : response[0]
+                ? [response[0].key]
+                : [],
+        },
+        () => {
+          //如果删除了激活的节点，重新激活第一个节点
+          if (
+            isDelete &&
+            this.state.selectedKeysDepData.departmentOid ===
+              this.state.selectedKeysDepDataByApi.departmentOid
+          ) {
+            this.setState(
+              {
+                treeData: response,
+                selectedKeysDepData: response[0].originData,
+                selectedKeys: [response[0].key],
+              },
+              () => {
+                this.getDepDetailByDepOid(this.state.selectedKeysDepData);
+                this.getDepUserByDepOid(this.state.selectedKeysDepData);
+              }
+            );
+          } else {
+            if (
+              this.state.selectedKeysDepData.departmentOid ===
+              this.state.selectedKeysDepDataByApi.departmentOid
+            ) {
+              //如果已经查询了，就不用查询了
+            } else {
+              this.getDepDetailByDepOid(this.state.selectedKeysDepData);
+              this.getDepUserByDepOid(this.state.selectedKeysDepData);
+            }
+          }
+        }
+      );
+    });
+  }
+
+  // 通过部门oid查询子部门
+  _getChildDepByDepOid(Dep, parentNode) {
+    OrgService._getChildDepByDepOid(Dep, parentNode).then(response => {
+      this.setState({
+        treeData: response,
+      });
+    });
+  }
+
+  // 通过部门oid查询部门详情
+  getDepDetailByDepOid(Dep) {
+    OrgService.getDepDetailByDepOid(Dep).then(response => {
+      let data = response.data;
+      data.departmentPositionDTOList = OrgService.sortDepartmentPositionDTOList(
+        data.departmentPositionDTOList
+      );
+      this.setState({
+        selectedKeysDepDataByApi: data,
+      });
+    });
+  }
+
+  // 通过部门oid查询部门下面的员工
+  getDepUserByDepOid(Dep) {
+    this.setState({ loading: true });
+    const { pagination } = this.state;
+    let params = {
+      departmentOid: Dep.departmentOid,
+      size: this.state.pagination.pageSize,
+      page: this.state.pagination.page,
+      // status: 1001,
+      keyword: '',
+    };
+    OrgService.searchPersonInDep(params).then(response => {
+      pagination.total = Number(response.headers['x-total-count']);
+      this.setState(
+        {
+          pagination,
+          loading: false,
+          depUserData: response.data,
+        },
+        () => {
+          this.refreshRowSelection();
+        }
+      );
+    });
+  }
+
+  //只搜部门：这个没有异步
+  onlySearchDep = e => {
+    const value = e.target.value;
+    //这个搜索可以不用节流函数
+    if (value && value.length > 0) {
+      OrgService.onlySearchDep(value).then(res => {
+        this.setState({
+          treeData: res,
+        });
+      });
+    } else {
+      this.getTenantAllDep();
+    }
+  };
+  // 点击被选择
+  onSelect = (selectedKeys, info) => {
+    let _this = this;
+    if (this.state.roleIsEdit) {
+      confirm({
+        title: this.$t('org.tips'), //提示
+        content: this.$t('org.tip-role-is-edit'), //部门正在编辑没有保存，是否跳转?
+        onOk() {
+          _this.onSelectConfrim(selectedKeys, info);
+        },
+        onCancel() {},
+      });
+    } else {
+      this.onSelectConfrim(selectedKeys, info);
+    }
+  };
+  onSelectConfrim = (selectedKeys, info) => {
+    const { pagination } = this.state;
+    pagination.page = 0;
+    pagination.current = 1;
+    this.setState({
+      pagination,
+      depNeedMoveOut: [],
+      selectedRowKeys: [],
+    });
+    if (info.selectedNodes.length > 0) {
+      let selectedKeysDepData = info.selectedNodes[0].props.dataRef.originData;
+      this.setState({
+        selectedKeys: selectedKeys,
+        selectedKeysDepData: selectedKeysDepData,
+      });
+      //这个东西可以查询一次就缓存起来
+      // todo
+      this.getDepDetailByDepOid(selectedKeysDepData);
+      this.getDepUserByDepOid(selectedKeysDepData);
+    }
+  };
+  // 点击展开的时候
+  onExpand = (expandedKeys, { expanded, node }) => {
+    // if not set autoExpandParent to false, if children expanded, parent can not collapse.
+    // or, you can remove all expanded children keys.
+    // 检测一下这节点的字节点是不是已经被加载
+    // 如果没有被加载才去加载，或者创建了新的子节点才去加载
+    // if (expanded && !OrgService.checkChildHasLoad(node.props.dataRef)) {
+    //  这是通过接口获取
+    //   this.getChildDepByDepOid(node.props.dataRef.originData, node.props.dataRef)
+    // }
+    //这是从前端获取
+    //部门树已经构建好，所以不比每次去请求
+    //this._getChildDepByDepOid(node.props.dataRef.originData, node.props.dataRef)
+    this.setState({
+      expandedKeys,
+      autoExpandParent: false,
+    });
+  };
+
+  // 部门树上节点的菜单------start---
+  //组织架构树顶部的meun
+  renderOrgMoreMeun = () => {
+    return (
+      <Menu>
+        <Menu.Item key="0">
+          <div
+            onClick={event => {
+              this.goToRolesList();
+            }}
+          >
+            {/*设置部门角色*/}
+            {this.$t('org.set-role')}
+          </div>
+        </Menu.Item>
+        <Menu.Item key="1">
+          <div
+            onClick={event => {
+              this.showBatchAdjustment();
+            }}
+          >
+            {/*批量调整*/}
+            {this.$t('org.batch-move')}
+          </div>
+        </Menu.Item>
+        <Menu.Item key="2">
+          <div
+            onClick={event => {
+              this.clickMeunNewDep(event, {}, {});
+            }}
+          >
+            {/*创建部门*/}
+            {this.$t('org.create-dep')}
+          </div>
+        </Menu.Item>
+      </Menu>
+    );
+  };
+
+  //部门操作菜单
+  treeNodeSettingClick = e => {
+    e.stopPropagation();
+  };
+  // 停用该部门
+  disabledDep = item => {
+    let oid = item.departmentOid;
+    OrgService.disabledDep(oid)
+      .then(res => {
+        this.setState({ change: this.state.change + 1 }, this.getTenantAllDep);
+      })
+      .catch(res => {
+        let message = getErrorMessage(res.response);
+
+        Modal.warning({
+          title: this.$t('org.tips'), //提示
+          content: message,
+        });
+      });
+  };
+  // 启用该部门
+  enabledDep = (item, node) => {
+    let oid = item.departmentOid;
+    OrgService.enabledDep(oid).then(res => {
+      this.setState({ change: this.state.change + 1 }, this.getTenantAllDep);
+    });
+  };
+  //创建平级部门
+  clickMeunNewDep = (e, item, node) => {
+    item.c_type = 'C_DEP';
+    item.treeNode = node;
+
+    let slideFrame = {
+      title: this.$t('org.create-dep'), //创建部门"",
+      visible: true,
+      params: item,
+    };
+    this.setState({
+      slideFrame,
+    });
+  };
+  //创建子部门
+  clickMeunNewChildDep = (e, item, node) => {
+    item.treeNode = node;
+    //传入的部门
+    item.c_type = 'C_CHILD';
+    let slideFrame = {
+      title: this.$t('org.create-child-dep'), //创建子部门"",
+      visible: true,
+      params: item,
+    };
+    this.setState({
+      slideFrame,
+    });
+  };
+  //删除部门
+  clickMeunDeleteDep = item => {
+    let oid = item.departmentOid;
+    OrgService.deleteDep(oid)
+      .then(res => {
+        //删除成功
+        this.getTenantAllDep(true);
+      })
+      .catch(res => {
+        //删除失败
+        let message = getErrorMessage(res.response);
+
+        Modal.warning({
+          title: this.$t('org.tips'), //提示
+          content: message,
+        });
+      });
+  };
+  updateDepSuccess = () => {
+    this.getTenantAllDep();
+  };
+  // 部门树上节点的菜单------end---
+
+  // 批量调整---start-----
+  //调出批量调整的模态框
+  showBatchAdjustment() {
+    this.setState({ visibleBatchAdjustment: true });
+  }
+
+  handleBatchAdjustmentOk = () => {
+    let userOids = [];
+    let oldDepartmentList = [];
+    for (let i = 0; i < this.state.batchAdjustmentFrom.length; i++) {
+      if (this.state.batchAdjustmentFrom[i].userOid) {
+        userOids.push(this.state.batchAdjustmentFrom[i].userOid);
+      } else {
+        oldDepartmentList.push(this.state.batchAdjustmentFrom[i].departmentOid);
+      }
+    }
+    let params = {
+      departmentOid: this.state.batchAdjustmentTo[0].departmentOid,
+      userOids: userOids,
+      oldDepartmentList: oldDepartmentList,
+    };
+    this.setState({ loadingBatchAdjustment: true });
+    OrgService.batchMovePerson(params)
+      .then(response => {
+        this.setState({
+          visibleBatchAdjustment: false,
+          loadingBatchAdjustment: false,
+        });
+        this.callbackBatchAdjustmentFrom([]);
+        this.callbackBatchAdjustmentTo([]);
+        //批量调整之后查询
+        this.getDepDetailByDepOid(this.state.selectedKeysDepData);
+        this.getDepUserByDepOid(this.state.selectedKeysDepData);
+      })
+      .catch(() => {
+        this.setState({ loadingBatchAdjustment: false });
+      });
+  };
+  handleBatchAdjustmentCancel = () => {
+    this.setState({ visibleBatchAdjustment: false });
+  };
+  //批量调整部门：目标部门
+  callbackBatchAdjustmentTo = arr => {
+    this.setState(
+      {
+        batchAdjustmentTo: arr,
+      },
+      () => {
+        this.setBatchAdjustmentBtnEnabled();
+      }
+    );
+  };
+  renderBatchAdjustmentTo = arr => {
+    if (arr.length < 1) {
+      return (
+        <span>
+          {/*还未选择*/}
+          {this.$t('org.no-select')}
+        </span>
+      );
+    } else {
+      return (
+        <span>
+          {/*已选*/}
+          {this.$t('org.selected')}
+          {arr[0].name}
+        </span>
+      );
+    }
+  };
+  //批量调整部门：源部门与人
+  callbackBatchAdjustmentFrom = arr => {
+    this.setState(
+      {
+        batchAdjustmentFrom: arr,
+      },
+      () => {
+        this.setBatchAdjustmentBtnEnabled();
+      }
+    );
+  };
+  setBatchAdjustmentBtnEnabled = () => {
+    let disabledBatchAdjustment = true;
+    if (this.state.batchAdjustmentFrom.length > 0 && this.state.batchAdjustmentTo.length > 0) {
+      disabledBatchAdjustment = false;
+    }
+    this.setState({
+      disabledBatchAdjustment,
+    });
+  };
+  // 批量调整---end-----
+
+  // 当前部门人员------start------
+  // 部门：移入员工
+  moveInPerson = arr => {
+    let userOids = [];
+    let oldDepartmentList = [];
+    //这个地方原则上只有移动员工，但是不排除以后加上部门下的员工
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].userOid) {
+        userOids.push(arr[i].userOid);
+      } else {
+        oldDepartmentList.push(arr[i].departmentOid);
+      }
+    }
+    let params = {
+      departmentOid: this.state.selectedKeysDepData.departmentOid,
+      userOids: userOids,
+      oldDepartmentList: oldDepartmentList,
+    };
+    OrgService.batchMovePerson(params).then(response => {
+      this.setState({ visibleBatchAdjustment: false });
+      this.getDepDetailByDepOid(this.state.selectedKeysDepData);
+      this.getDepUserByDepOid(this.state.selectedKeysDepData);
+    });
+  };
+  // 部门：移除员工
+  moveOutPerson = arr => {
+    let params = {
+      departmentOid: arr[0].departmentOid,
+      userOids: this.state.depNeedMoveOut,
+      oldDepartmentList: [],
+    };
+    OrgService.batchMovePerson(params).then(response => {
+      this.clearRowSelection();
+      this.getDepUserByDepOid(this.state.selectedKeysDepData);
+      this.getDepDetailByDepOid(this.state.selectedKeysDepData);
+    });
+  };
+  // 部门人员翻页
+  onUserChangePager = (pagination, filters, sorter) => {
+    this.setState(
+      {
+        pagination: {
+          current: pagination.current,
+          page: pagination.current - 1,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+        },
+      },
+      () => {
+        this.getDepUserByDepOid(this.state.selectedKeysDepData);
+      }
+    );
+  };
+  //选中项发生变化的时的回调
+  onSelectChange = selectedRowKeys => {
+    this.setState({ selectedRowKeys: selectedRowKeys });
+  };
+  //选择/取消选择某行的回调
+  handleSelectRow = (record, selected) => {
+    let depNeedMoveOut = this.state.depNeedMoveOut;
+    if (selected) {
+      depNeedMoveOut.push(record.userOid);
+    } else {
+      depNeedMoveOut.delete(record.userOid);
+    }
+    this.setState({ depNeedMoveOut });
+  };
+  //选择/取消选择所有行的回调
+  handleSelectAllRow = (selected, selectedRows, changeRows) => {
+    let depNeedMoveOut = this.state.depNeedMoveOut;
+    if (selected) {
+      changeRows.map(item => {
+        depNeedMoveOut.push(item.userOid);
+      });
+    } else {
+      changeRows.map(item => {
+        depNeedMoveOut.delete(item.userOid);
+      });
+    }
+    this.setState({ depNeedMoveOut });
+  };
+
+  //换页后根据Oids刷新选择框
+  refreshRowSelection() {
+    let selectedRowKeys = [];
+    this.state.depNeedMoveOut.map(userOid => {
+      this.state.depUserData.map((item, index) => {
+        if (item.userOid === userOid) selectedRowKeys.push(index);
+      });
+    });
+    this.setState({ selectedRowKeys });
+  }
+
+  //清空选择框：选了的人
+  clearRowSelection() {
+    this.setState({ depNeedMoveOut: [], selectedRowKeys: [] });
+  }
+
+  //搜索部门下的人
+  emitEmptyForDep = () => {
+    this.userNameInput.focus();
+    this.setState({ userName: '' }, () => {
+      this.onChangeUserName();
+    });
+  };
+
+  //搜索人名或者工号
+  onChangeUserName = e => {
+    const { pagination } = this.state;
+    let useName = '';
+    if (e) {
+      useName = e.target.value;
+    }
+    this.setState(
+      {
+        userName: useName,
+        loading: true,
+      },
+      () => {
+        let params = {
+          departmentOid: this.state.selectedKeysDepData.departmentOid,
+          size: this.state.pagination.pageSize,
+          page: this.state.pagination.page,
+          // status: 1001,
+          roleType: 'TENANT',
+          keyword: this.state.userName,
+        };
+        OrgService.searchPersonInDep(params).then(response => {
+          pagination.total = Number(response.headers['x-total-count']);
+          this.setState({
+            pagination,
+            depUserData: response.data,
+          });
+          this.setState({ loading: false });
+        });
+      }
+    );
+  };
+  // 当前部门人员------end------
+
+  // 搜索整个部门树与搜索结果----start
+  //搜索整个部门树下面的部门与人
+  //搜索人或者部门编码或部门名称
+  onChangeUserDepName = val => {
+    this.setState({
+      isSearchOver: false,
+    });
+    //val不用设置了，在oninput设置过了
+    OrgService.searchDepOrPersonV2(this.state.userDepName).then(response => {
+      let searchList = {
+        depList: response.data.departments,
+        personList: response.data.users,
+      };
+      this.setState({
+        isSearchOver: true,
+        searchList: searchList,
+      });
+    });
+  };
+  emitEmpty = () => {
+    this.setState({ userDepName: '' });
+  };
+  //搜索整个部门树下面的部门与人
+  //为了节流函数
+  onChangeSetUserDepName = superThrottle(
+    () => {
+      this.onChangeUserDepName();
+    },
+    500,
+    3000
+  );
+  //为了节流函数
+  onInputUserDepName = e => {
+    //这句是为了使用节流函数，不然onChangeSetUserDepName函数中只能使用上一次的输入
+    this.state.userDepName = e.target.value;
+    this.setState({ userDepName: e.target.value });
+  };
+
+  //部门树搜索结果点击目标
+  selectItemHandle = item => {
+    if (item.userOid) {
+      this.setState({
+        searchActiveUser: item,
+      });
+    } else {
+      this.setState({
+        searchActiveUser: item,
+        // userDepName: '',
+        selectedKeys: [item.departmentOid],
+        selectedKeysDepData: item,
+      });
+
+      this.getDepDetailByDepOid(item);
+      this.getDepUserByDepOid(item);
+    }
+  };
+  //渲染部门树或者搜索结果
+  renderOrgTreeOrSearchList = e => {
+    if (this.state.userDepName.length > 0) {
+      return (
+        <div>
+          <OrgSearchList
+            isSearchOver={this.state.isSearchOver}
+            searchList={this.state.searchList}
+            selectItemHandle={this.selectItemHandle}
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <OrgTree
+            ROLE_TENANT_ADMIN={this.state.ROLE_TENANT_ADMIN}
+            CREATE_DATA_TYPE={this.state.CREATE_DATA_TYPE}
+            onlySearchDep={this.onlySearchDep}
+            enabledDep={this.enabledDep}
+            disabledDep={this.disabledDep}
+            treeData={this.state.treeData}
+            selectedKeys={this.state.selectedKeys}
+            expandedKeys={this.state.expandedKeys}
+            autoExpandParent={this.state.autoExpandParent}
+            onSelect={this.onSelect}
+            onExpand={this.onExpand}
+            treeNodeSettingClick={this.treeNodeSettingClick}
+            clickMeunDeleteDep={this.clickMeunDeleteDep}
+            clickMeunNewDep={this.clickMeunNewDep}
+            clickMeunNewChildDep={this.clickMeunNewChildDep}
+          />
+        </div>
+      );
+    }
+  };
+
+  // 搜索整个部门树与搜索结果----end
+
+  //获取角色是否在编辑
+  getRoleIsEdit = (isEdit, obj) => {
+    this.setState({
+      roleIsEdit: isEdit,
+    });
+    if (obj && obj.departmentOid) {
+      this.getDepDetailByDepOid(obj);
+    }
+  };
+
+  //渲染部门详情获取人员详情
+  renderDepOrPersonInfo = () => {
+    let rowSelection = '';
+    if (this.state.ROLE_TENANT_ADMIN && this.state.CREATE_DATA_TYPE) {
+      rowSelection = {
+        selectedRowKeys: this.state.selectedRowKeys,
+        onChange: this.onSelectChange,
+        onSelect: this.handleSelectRow,
+        onSelectAll: this.handleSelectAllRow,
+      };
+    } else {
+      rowSelection = {};
+    }
+    //如果是搜索结果还有选择的人员，如果选择的部门也需要展示部门详情
+    if (this.state.userDepName.length > 0 && this.state.searchActiveUser.userOid) {
+      return <OrgPersonInfo user={this.state.searchActiveUser} />;
+    } else {
+      //TODO
+      const { userName, change } = this.state;
+      const suffix = userName ? <Icon type="close-circle" onClick={this.emitEmptyForDep} /> : null;
+
+      return (
+        <div>
+          <div className="role-pannel">
+            <OrgRoles
+              ROLE_TENANT_ADMIN={this.state.ROLE_TENANT_ADMIN}
+              CREATE_DATA_TYPE={this.state.CREATE_DATA_TYPE}
+              managerIsRequired={!true}
+              // managerIsRequired={!this.props.profile["department.manager.required.disable"]}
+              enabledDep={this.enabledDep}
+              disabledDep={this.disabledDep}
+              clickMeunNewChildDep={this.clickMeunNewChildDep}
+              updateDepSuccess={this.updateDepSuccess}
+              emitIsEdit={this.getRoleIsEdit}
+              selectedKeysDepDataByApi={this.state.selectedKeysDepDataByApi}
+              selectedKeysDepData={this.state.selectedKeysDepData}
+              change={change}
+              selectedKeys={this.state.selectedKeys}
+            />
+          </div>
+          <div className="dep-users">
+            <div className="table-header-wrap">
+              <div className="table-header-buttons">
+                {/*移入员工*/}
+                <div className="f-left">
+                  <SelectDepOrPerson
+                    buttonType={'primary'}
+                    buttonDisabled={!this.state.ROLE_TENANT_ADMIN || !this.state.CREATE_DATA_TYPE}
+                    title={this.$t('org.movein-person')}
+                    onlyPerson={true}
+                    onConfirm={this.moveInPerson}
+                  />
+                </div>
+                <div className="f-left">
+                  {/*移出员工*/}
+                  <SelectDepOrPerson
+                    buttonType={'primary'}
+                    buttonDisabled={
+                      this.state.depNeedMoveOut.length < 1 ||
+                      !this.state.ROLE_TENANT_ADMIN ||
+                      !this.state.CREATE_DATA_TYPE
+                    }
+                    title={this.$t('org.moveout-person')}
+                    multiple={false}
+                    onlyDep={true}
+                    onConfirm={this.moveOutPerson}
+                  />
+                </div>
+                <div className="clear" />
+              </div>
+              <div className="table-header-inp">
+                {/*员工名称/工号/邮箱/手机*/}
+                <Input
+                  key={'depsearch'}
+                  placeholder={this.$t('org.employeeId-name-email-phone')}
+                  prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                  suffix={suffix}
+                  value={userName}
+                  onChange={this.onChangeUserName}
+                  ref={node => (this.userNameInput = node)}
+                />
+              </div>
+              <div className="clear" />
+            </div>
+            <Table
+              dataSource={this.state.depUserData}
+              loading={this.state.loading}
+              pagination={this.state.pagination}
+              onChange={this.onUserChangePager}
+              columns={this.state.columns}
+              rowSelection={rowSelection}
+              size="middle"
+              bordered
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+  //关闭侧边导航：部门编辑\新增子部门\新增平级部门
+  handleCloseSlide = () => {
+    let slideFrame = this.state.slideFrame;
+    slideFrame.visible = false;
+    this.getTenantAllDep();
+    this.setState({
+      slideFrame,
+    });
+  };
+
+  renderOrgMoreMeunByRole = () => {
+    if (this.state.ROLE_TENANT_ADMIN && this.state.CREATE_DATA_TYPE) {
+      return (
+        <div className="f-right org-structure-tree-title-setting">
+          <Dropdown overlay={this.renderOrgMoreMeun()} trigger={['click']}>
+            <a className="ant-dropdown-link" href="#">
+              <Icon type="setting" />
+            </a>
+          </Dropdown>
+        </div>
+      );
+    } else {
+      return <div />;
+    }
+  };
+
+  //渲染入口
+  render() {
+    const { userDepName } = this.state;
+    const suffix = userDepName ? (
+      <span className="org-search-icon">
+        <Icon type="close-circle" onClick={this.emitEmpty} />
+      </span>
+    ) : null;
+
+    return (
+      <div className="org-structure">
+        <div className="f-left org-structure-left">
+          <div className="org-structure-tree-title-wrap">
+            <div className="f-left org-structure-tree-title">
+              {/*组织架构*/}
+              {this.$t('org.org-structure')}
+            </div>
+            {this.renderOrgMoreMeunByRole()}
+            <div className="clear" />
+            {/*部门名称/部门编码/员工名称*/}
+            <Search
+              placeholder={this.$t('org.dep-name-code-name')}
+              enterButton={
+                <span>
+                  {/*搜索*/}
+                  {this.$t('org.search')}
+                </span>
+              }
+              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              suffix={suffix}
+              value={userDepName}
+              key={'search-user-dep-name'}
+              onInput={this.onInputUserDepName}
+              onChange={this.onChangeSetUserDepName}
+              onSearch={this.onChangeUserDepName}
+            />
+          </div>
+          {this.renderOrgTreeOrSearchList()}
+        </div>
+        <div className="org-structure-right">
+          {// 这个根据搜索结果来判断
+          this.renderDepOrPersonInfo()}
+        </div>
+        <div className="clear" />
+
+        {/*批量调整的模态框，先选择部门与人，再选择目标部门*/}
+        <Modal
+          className="org-batch-adjustment-model"
+          title={this.$t('org.batch-move')} //批量调整
+          width={400}
+          onCancel={this.handleBatchAdjustmentCancel}
+          visible={this.state.visibleBatchAdjustment}
+          footer={[
+            <Button key="back" onClick={this.handleBatchAdjustmentCancel}>
+              {/*取消*/}
+              {this.$t('org.cancel')}
+            </Button>,
+            <Button
+              key="submit"
+              disabled={this.state.disabledBatchAdjustment}
+              type="primary"
+              loading={this.state.loadingBatchAdjustment}
+              onClick={this.handleBatchAdjustmentOk}
+            >
+              {/*确定*/}
+              {this.$t('org.ok')}
+            </Button>,
+          ]}
+        >
+          <h3>
+            {/*请选择*/}
+            {this.$t('org.please-select')}
+            <b>
+              {/*部门或人*/}
+              {this.$t('org.dep-or-person')}
+            </b>
+            {/*移到*/}
+            {this.$t('org.move')}
+            <b>
+              {/*另一个部门*/}
+              {this.$t('org.other-dep')}
+            </b>
+          </h3>
+
+          <div>
+            <div className="f-left batch-adjustment-from">
+              <div>
+                <SelectDepOrPerson
+                  // depResList={['departmentOid']}
+                  // personResList={['userOid']}
+                  title={this.$t('org.select-dep-or-person')} //选择部门或人
+                  onConfirm={this.callbackBatchAdjustmentFrom}
+                />
+              </div>
+              <div className="tips-box">
+                {/*已选择*/}
+                {this.$t('org.has-select')}
+                {this.state.batchAdjustmentFrom.length}
+                {/*条数据*/}
+                {this.$t('org.item-data')}
+              </div>
+            </div>
+            <div className="f-left middle-text">
+              {/*移入到*/}
+              {this.$t('org.move-to')}
+            </div>
+            <div className="f-left batch-adjustment-to">
+              <div>
+                <SelectDepOrPerson
+                  title={this.$t('org.select-target')} //选择目标部门
+                  multiple={false}
+                  onlyDep={true}
+                  onConfirm={this.callbackBatchAdjustmentTo}
+                />
+              </div>
+              <div className="tips-box">
+                {this.renderBatchAdjustmentTo(this.state.batchAdjustmentTo)}
+              </div>
+            </div>
+            <div className="clear" />
+          </div>
+        </Modal>
+
+        {/*新增部门，编辑部门*/}
+        <SlideFrame
+          title={this.state.slideFrame.title}
+          show={this.state.slideFrame.visible}
+          // content={OrgNewDep}
+          onClose={() => this.setState({ slideFrame: { visible: false } })}
+          params={{ ...this.state.slideFrame.params, flag: this.state.slideFrame.visible }}
+        >
+          <OrgNewDep
+            onClose={this.handleCloseSlide}
+            params={{
+              ...this.state.slideFrame.params,
+              flag: this.state.slideFrame.visible,
+            }}
+          />
+        </SlideFrame>
+      </div>
+    );
+  }
+}
+
+function mapStateToProps(state) {
+  return {
+    // profile: state.user.profile,
+    user: state.user.currentUser,
+    company: state.user.company,
+    tenantMode: true,
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  null,
+  null,
+  { withRef: true }
+)(OrgStructure);

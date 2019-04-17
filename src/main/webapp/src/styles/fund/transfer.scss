@@ -1,0 +1,15 @@
+:global {
+  .train{
+    .tableHeight{
+        td {
+          padding: 0px 5px;
+          form {
+            justify-items: center;
+            .ant-form-item {
+              margin-bottom: 0px;
+            }
+          }
+        }
+    }
+  }
+}

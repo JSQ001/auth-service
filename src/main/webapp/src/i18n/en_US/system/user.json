@@ -1,0 +1,7 @@
+{
+    "user.info.code":"login",
+    "user.info.name":"full name",
+    "user.info.remark":"remark",
+    "user.info.email":"email",
+    "user.info.mobile":"mobile"
+}

@@ -1,0 +1,8 @@
+{
+  "commodityDefine.commodityCode":"商品编码",
+  "commodityDefine.commodityName":"货物或劳务名称",
+  "commodityDefine.commodityAbb":"商品和服务分类简称",
+  "commodityDefine.isEnabled":"是否启用",
+  "commodityDefine.newCommodityDefine":"新建商品编码",
+  "commodityDefine.editCommodityDefine":"编辑商品编码"
+}

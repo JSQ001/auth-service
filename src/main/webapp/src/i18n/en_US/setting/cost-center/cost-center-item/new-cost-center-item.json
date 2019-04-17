@@ -1,0 +1,20 @@
+{
+  "new.dimension.item": "New dimension item",
+  "new.dimension.item.tip1": "After adding, you can get into the edit extension field",
+  "new.dimension.item.code": "Cost center item code",
+  "new.dimension.item.max36": "Up to 36 characters, letters and numbers",
+
+  "new.dimension.item.tip2": "Note: the dimension code will not be modified after it is saved",
+  "new.dimension.item.name": "Name of dimension item",
+  "new.dimension.item.index": "Sequence Number",
+  "new.dimension.item.index_tip1": "Please enter a positive integer",
+  "new.dimension.item.index_tip": "To maintain a certain step size between the serial numbers, it is convenient for subsequent adjustment, such as the first 10, interval 10",
+  "new.dimension.item.manager": "manager",
+
+  "new.dimension.item.main": "Main departments: ",
+  "new.dimension.item.sec": "Subordinate department: ",
+  "new.dimension.item.showall": "All can be seen",
+
+  "new.dimension.item.extend": "Extend field",
+  "new.dimension.item.tips3": "The dimension item extension field can be edited in the dimension cost field extension field."
+}

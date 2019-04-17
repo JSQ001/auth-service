@@ -1,0 +1,68 @@
+:global{
+  .booking-details{
+    .ant-card>.ant-card-head{
+      background-color: #ffffff;
+      border-bottom: none;
+      line-height: 40px;
+      height: 40px;
+    }
+    .ant-card>.ant-card-body{
+      padding: 34px 32px 24px;
+    }
+    .ant-card>.ant-card-head .ant-card-head-title{
+      font-size: 16px;
+      color: #666;
+      border-bottom: 1px solid #ececec;
+    }
+    .ant-collapse-content{
+      padding: 20px;
+    }
+    a.disabled{
+      color: #cccccc;
+      cursor: not-allowed;
+    }
+    .booking-content{
+      margin: 0 -20px;
+      overflow-x: hidden;
+      .amount{
+        font-size: 20px;
+        color: #666;
+        margin-top: 10px;
+        font-weight: bolder;
+        margin-right: 10px;
+      }
+      .headerType{
+        color: #1890ff;
+      }
+      button{
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+    }
+    .text-ellipsis{
+      //overflow: hidden;
+      //white-space: nowrap;
+      //text-overflow: ellipsis;
+      //display: inline-block;
+      //width: 100%;
+    }
+  }
+
+  .booking-details-maintain{
+    .slide-footer{
+      .ant-btn-danger{
+        background-color: #f5222d;
+        color: #ffffff;
+      }
+      .ant-btn-danger:hover{
+        background-color: #ff4d4f;
+        color: #ffffff;
+
+      }
+    }
+    .hide{
+      display: none;
+    }
+  }
+
+}
