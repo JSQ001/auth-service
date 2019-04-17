@@ -54,7 +54,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
     @Autowired
     private HcfOrganizationInterface hcfOrganizationInterface;
 
-    @Cacheable(key = "#tenantId.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString()")
     public List<DepartmentPosition> listByTenantId(long tenantId) {
         Map<String, Object> map = new HashMap<>();
         map.put("tenant_id", tenantId);
@@ -64,7 +65,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPositionList;
     }
 
-    @Cacheable(key = "#tenantId.toString().concat(#enabled)")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString().concat(#enabled)")
     public List<DepartmentPosition> listByTenantIdAndEnabled(long tenantId, boolean enabled) {
         Map<String, Object> map = new HashMap<>();
         map.put("tenant_id", tenantId);
@@ -89,7 +91,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         }
     }
 
-    @Cacheable(key = "#tenantId.toString().concat(#name)")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString().concat(#name)")
     public DepartmentPosition getPostionByName(long tenantId, String name) {
         Map<String, Object> map = new HashMap<>();
         map.put("position_name", name);
@@ -103,7 +106,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         }
     }
 
-    @Cacheable(key = "#tenantId.toString().concat(#code)")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString().concat(#code)")
     public DepartmentPosition getPostionByCode(long tenantId, String code) {
         Map<String, Object> map = new HashMap<>();
         map.put("position_code", code);
@@ -211,7 +215,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPosition;
     }
 
-    @Cacheable(key = "#companyOid.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#companyOid.toString()")
     public List<DepartmentPosition> listByCompanyOid(UUID companyOid) {
         Company company = companyService.getByCompanyOidCache(companyOid);
         if (company == null) {
@@ -271,7 +276,8 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPositionMapper.selectDepartmentPositionByUserAndDepartment(departmentId, userOid);
     }
 
-    @Cacheable(key = "#tenantId.toString().concat(#enabled.toString()).concat(#mybatisPage.getCurrent()).concat(':').concat(#mybatisPage.getSize())")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString().concat(#enabled.toString()).concat(#mybatisPage.getCurrent()).concat(':').concat(#mybatisPage.getSize())")
     public com.baomidou.mybatisplus.plugins.Page<DepartmentPosition> pageByTenantId(long tenantId, boolean enabled, com.baomidou.mybatisplus.plugins.Page mybatisPage) {
         List<DepartmentPosition> departmentPositionList = departmentPositionMapper.getDepartmentPositionList(mybatisPage, tenantId, enabled);
         mybatisPage.setRecords(departmentPositionList);

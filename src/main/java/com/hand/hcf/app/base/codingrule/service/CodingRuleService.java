@@ -162,7 +162,8 @@ public class CodingRuleService extends ServiceImpl<CodingRuleMapper, CodingRule>
      * @param codingObjectId 编码规则定义id
      * @return
      */
-    @Cacheable(key = "#codingObjectId.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#codingObjectId.toString()")
     public CodingRule getCodingRuleByCond(Long codingObjectId) {
         List<CodingRule> codingRuleObjects =
             this.selectList(new EntityWrapper<CodingRule>()

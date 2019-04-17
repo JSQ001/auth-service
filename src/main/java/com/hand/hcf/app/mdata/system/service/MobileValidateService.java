@@ -100,7 +100,7 @@ public class MobileValidateService {
 //       return mobileValidateMapper.selectById(id);
         return baseI18nService.selectOneBaseTableInfoWithI18n(id,MobileValidate.class);
     }
-    @Cacheable(keyGenerator = "wiselyKeyGenerator")
+    //@Cacheable(keyGenerator = "wiselyKeyGenerator")
     public List<MobileValidate> findAll(boolean isEnabled,String language) {
         //参数language 做多语言缓存作用
         List<MobileValidate> all = mobileValidateMapper.findAll(isEnabled);

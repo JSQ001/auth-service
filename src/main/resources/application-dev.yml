@@ -24,24 +24,24 @@ spring:
     cache-names: HCF_TOKEN
     type: caffeine
 
-j2cache:
-  open-spring-cache: true
-  allow-null-values: true
-  cache-clean-mode: passive
-  serialization: com.hand.hcf.core.j2cache.support.util.KryoSerializer
-  sync_ttl_to_redis: true
-  broadcast:
-    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisPubSubPolicy
-  L1:
-    provider: caffeine
-    region:
-      HCF_TOKEN: 3000,24h
-      default: 3000,24h
-  L2:
-    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisProvider
-    database: 0
-    channel: j2cache
-    storage: generic
+#j2cache:
+#  open-spring-cache: true
+#  allow-null-values: true
+#  cache-clean-mode: passive
+#  serialization: com.hand.hcf.core.j2cache.support.util.KryoSerializer
+#  sync_ttl_to_redis: true
+#  broadcast:
+#    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisPubSubPolicy
+#  L1:
+#    provider: caffeine
+#    region:
+#      HCF_TOKEN: 3000,24h
+#      default: 3000,24h
+#  L2:
+#    provider: com.hand.hcf.core.j2cache.support.redis.SpringRedisProvider
+#    database: 0
+#    channel: j2cache
+#    storage: generic
 
 mybatis-plus:
   mapper-locations: com/hand/hcf/app/base/persistence/*Mapper.xml

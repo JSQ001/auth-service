@@ -27,7 +27,8 @@ public class LegalEntityCacheService {
     @Autowired
     private BaseI18nService baseI18nService;
 
-    @Cacheable(key = "#legalEntityOid.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#legalEntityOid.toString()")
     public LegalEntity getLegalEntityByOid(UUID legalEntityOid) {
         LegalEntity param = new LegalEntity();
         param.setLegalEntityOid(legalEntityOid);

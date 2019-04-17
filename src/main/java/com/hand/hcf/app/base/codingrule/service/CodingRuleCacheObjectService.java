@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
 @CacheConfig(cacheNames = {CacheConstants.CODING_RULE_OBJECT})
 public class CodingRuleCacheObjectService extends ServiceImpl<CodingRuleObjectMapper, CodingRuleObject> {
 
-    @Cacheable(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode)")
+    //jiu.zhao redis
+    //@Cacheable(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode)")
     public boolean findByTenantIdAndDocumentType(String documentTypeCode, Long tenantId) {
         CodingRuleObject codingRuleObject =
             this.selectOne(new EntityWrapper<CodingRuleObject>()
@@ -31,7 +32,8 @@ public class CodingRuleCacheObjectService extends ServiceImpl<CodingRuleObjectMa
         return codingRuleObject != null;
     }
 
-    @Cacheable(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode).concat(#companyCode)")
+    //jiu.zhao redis
+    //@Cacheable(key = "':ENABLE:'.concat(#tenantId.toString()).concat(#documentTypeCode).concat(#companyCode)")
     public boolean findByCompanyCodeAndDocumentType(String companyCode, String documentTypeCode, Long tenantId) {
         CodingRuleObject codingRuleObject =
             this.selectOne(new EntityWrapper<CodingRuleObject>()

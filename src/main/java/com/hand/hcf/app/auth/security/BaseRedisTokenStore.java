@@ -24,7 +24,8 @@ public class BaseRedisTokenStore extends BaseTokenStore {
     }
 
     @Override
-    @Cacheable(key = "#tokenValue")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tokenValue")
     public OAuth2AccessToken readAccessToken(String tokenValue) {
         return super.readAccessToken(tokenValue);
     }
@@ -36,7 +37,8 @@ public class BaseRedisTokenStore extends BaseTokenStore {
     }
 
     @Override
-    @Cacheable(key = "'Authentication'.concat(#token.value)")
+    //jiu.zhao redis
+    //@Cacheable(key = "'Authentication'.concat(#token.value)")
     public OAuth2Authentication readAuthentication(OAuth2AccessToken token) {
         return super.readAuthentication(token);
     }

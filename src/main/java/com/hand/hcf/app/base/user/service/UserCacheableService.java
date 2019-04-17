@@ -26,7 +26,8 @@ public class UserCacheableService {
     @Autowired
     private UserMapper userMapper;
 
-    @Cacheable(key="#userOid.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key="#userOid.toString()")
     public User getByUserOid(UUID userOid) {
         List<User> users= userMapper.selectList(new EntityWrapper<User>().eq("user_oid",userOid));
         if (users.size()>0){
@@ -35,7 +36,8 @@ public class UserCacheableService {
         return null;
     }
 
-    @Cacheable(key="#userOid.toString().concat(#tenantId.toString())")
+    //jiu.zhao redis
+    //@Cacheable(key="#userOid.toString().concat(#tenantId.toString())")
     public User getByTenantIdAndUserOid(Long tenantId, UUID userOid) {
         List<User> users=  userMapper.listByQO(UserQO.builder().tenantId(tenantId).userOid(userOid).build());
         if (users.size()>0){
@@ -44,7 +46,8 @@ public class UserCacheableService {
         return null;
     }
 
-    @Cacheable(key = "#id.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#id.toString()")
     public User getById(Long id) {
         return userMapper.selectById(id);
     }

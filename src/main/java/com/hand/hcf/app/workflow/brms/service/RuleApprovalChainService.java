@@ -58,7 +58,7 @@ public class RuleApprovalChainService extends BaseService<RuleApprovalChainMappe
      * @return the entity
      */
     @Transactional(readOnly = true)
-    @Cacheable(key = "#ruleApprovalChainOid.toString()")
+    //@Cacheable(key = "#ruleApprovalChainOid.toString()")
     public RuleApprovalChain getByOid(UUID ruleApprovalChainOid) {
         Optional<RuleApprovalChain> opt = getByRuleApprovalChainOid(ruleApprovalChainOid);
         if (opt.isPresent()) {

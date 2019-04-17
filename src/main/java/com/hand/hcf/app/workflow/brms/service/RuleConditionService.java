@@ -66,7 +66,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
      * @return the entity
      */
     @Transactional(readOnly = true)
-    @Cacheable(key = "#ruleConditionOid.toString()")
+    //@Cacheable(key = "#ruleConditionOid.toString()")
     public RuleCondition getRuleCondition(UUID ruleConditionOid) {
 
         return selectOne(new EntityWrapper<RuleCondition>()

@@ -354,7 +354,8 @@ public class LegalEntityService extends BaseService<LegalEntityMapper,LegalEntit
      * @param tenantId：租户id //     * @param companyId：公司id
      * @return
      */
-    @Cacheable(key = "#tenantId.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#tenantId.toString()")
     public List<LegalEntityDTO> findByCompanyId(Long tenantId) {
         List<LegalEntityDTO> legalEntityDTOs = new ArrayList<>();
         EntityWrapper ew = new EntityWrapper();

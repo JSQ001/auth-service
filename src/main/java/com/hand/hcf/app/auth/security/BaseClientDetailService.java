@@ -16,7 +16,8 @@ public class BaseClientDetailService
     JdbcClientDetailsService clientDetailsService;
 
     @Override
-    @Cacheable(value = "clientCache", keyGenerator = "wiselyKeyGenerator")
+    //jiu.zhao redis
+    //@Cacheable(value = "clientCache", keyGenerator = "wiselyKeyGenerator")
     public ClientDetails loadClientByClientId(String clientId)  {
         return clientDetailsService.loadClientByClientId(clientId);
     }

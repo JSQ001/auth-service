@@ -152,6 +152,26 @@
         </dependency>
 
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.6</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>2.14.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--begin蚂蚁内部依赖 需要配置setting.xml-->
+        <dependency>
             <groupId>com.alipay.fc.buservice</groupId>
             <artifactId>fcbuservice-common-service-open</artifactId>
             <version>1.0.0.20171214</version>
@@ -168,6 +188,7 @@
             <artifactId>toolkit-common-logging</artifactId>
             <version>1.15</version>
         </dependency>
+        <!--end蚂蚁内部依赖 需要配置setting.xml-->
 
         <!-- add app-parent start-->
         <dependency>

@@ -118,7 +118,7 @@ public class RuleConditionRelationService extends BaseService<RuleConditionRelat
         return ruleSceneRelation;
     }
 
-    @Cacheable(key = "#ruleConditionOid.toString()")
+    //@Cacheable(key = "#ruleConditionOid.toString()")
     public RuleConditionRelation findByRuleConditionOid(UUID ruleConditionOid) {
         if (ruleConditionOid == null) {
             return null;
