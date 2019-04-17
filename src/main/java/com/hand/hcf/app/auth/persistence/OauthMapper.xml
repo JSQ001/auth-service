@@ -9,7 +9,7 @@
         <result column="client_secret" property="clientSecret"/>
         <result column="additional_information" property="additionalInformation" jdbcType="VARCHAR"
                 javaType="java.util.Map"
-                typeHandler="com.hand.hcf.core.persistence.typehandler.MapTypeHandler"/>
+                typeHandler="com.hand.hcf.app.core.persistence.typehandler.MapTypeHandler"/>
     </resultMap>
 
     <select id="getClientDetailWithAddition" resultMap="clientMap">

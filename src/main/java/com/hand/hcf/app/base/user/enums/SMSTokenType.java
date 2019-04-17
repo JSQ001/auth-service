@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.user.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum SMSTokenType implements SysEnum {
     ACTIVATE_USER(1001), CHANGE_PASSWORD(1002), RESET_PASSWORD(1003), EXPORT_DATA(1004), REGISTER_COMPANY(1005), ADD_MOBILE(1006), REGISTER_PERSONAL(1007),

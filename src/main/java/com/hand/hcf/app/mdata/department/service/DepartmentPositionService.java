@@ -2,6 +2,8 @@ package com.hand.hcf.app.mdata.department.service;
 
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
@@ -11,8 +13,6 @@ import com.hand.hcf.app.mdata.department.persistence.DepartmentPositionMapper;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseI18nService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

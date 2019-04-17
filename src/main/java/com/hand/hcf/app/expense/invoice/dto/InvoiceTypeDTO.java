@@ -2,10 +2,10 @@ package com.hand.hcf.app.expense.invoice.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.domain.DomainI18nEnable;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceTypeMouldHeadColumn;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceTypeMouldLineColumn;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.domain.DomainI18nEnable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

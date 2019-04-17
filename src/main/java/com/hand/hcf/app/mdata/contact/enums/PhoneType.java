@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.contact.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum PhoneType implements SysEnum {
     MOBILE_PHONE(1001), LAND_PHONE(1002);

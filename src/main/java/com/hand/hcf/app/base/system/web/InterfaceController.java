@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.Interface;
 import com.hand.hcf.app.base.system.dto.InterfaceTreeDTO;
 import com.hand.hcf.app.base.system.service.InterfaceService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("exp_report_type_dimension")
-public class ExpenseReportTypeDimension extends Domain{
+public class ExpenseReportTypeDimension extends Domain {
     //报账单类型ID
     @NotNull
     @JsonSerialize(using = ToStringSerializer.class)

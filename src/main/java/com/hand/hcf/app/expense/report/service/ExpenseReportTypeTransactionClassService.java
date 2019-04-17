@@ -1,12 +1,11 @@
 package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeTransactionClass;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeTransactionClassMapper;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,7 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class ExpenseReportTypeTransactionClassService extends BaseService<ExpenseReportTypeTransactionClassMapper,ExpenseReportTypeTransactionClass>{
+public class ExpenseReportTypeTransactionClassService extends BaseService<ExpenseReportTypeTransactionClassMapper,ExpenseReportTypeTransactionClass> {
 
     @Autowired
     private ExpenseReportTypeTransactionClassMapper expenseReportTypeTransactionClassMapper;

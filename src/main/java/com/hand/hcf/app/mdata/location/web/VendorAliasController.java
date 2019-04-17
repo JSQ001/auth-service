@@ -13,7 +13,7 @@ import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.LocationService;
 import com.hand.hcf.app.mdata.location.service.VendorAliasDetailService;
 import com.hand.hcf.app.mdata.location.service.VendorAliasService;
-import com.hand.hcf.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustTypeService;
 import com.hand.hcf.app.expense.invoice.service.InvoiceTypeService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;

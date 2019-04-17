@@ -2,9 +2,9 @@ package com.hand.hcf.app.base.system.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.annotation.UniqueField;
-import com.hand.hcf.core.domain.DomainI18n;
-import com.hand.hcf.core.domain.DomainLogic;
+import com.hand.hcf.app.core.annotation.UniqueField;
+import com.hand.hcf.app.core.domain.DomainI18n;
+import com.hand.hcf.app.core.domain.DomainLogic;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

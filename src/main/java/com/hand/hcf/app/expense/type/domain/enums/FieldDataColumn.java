@@ -1,6 +1,6 @@
 package com.hand.hcf.app.expense.type.domain.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;

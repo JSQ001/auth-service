@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.system.web;
 
 import com.hand.hcf.app.base.user.domain.UserDevice;
 import com.hand.hcf.app.base.user.service.UserDeviceService;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

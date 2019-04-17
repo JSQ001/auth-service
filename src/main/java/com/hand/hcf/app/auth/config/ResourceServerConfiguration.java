@@ -2,7 +2,7 @@
 
 package com.hand.hcf.app.auth.config;
 
-import com.hand.hcf.core.config.AuthExceptionEntryPoint;
+import com.hand.hcf.app.core.config.AuthExceptionEntryPoint;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;

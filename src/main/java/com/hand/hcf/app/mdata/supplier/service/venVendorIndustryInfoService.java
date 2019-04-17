@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.supplier.service;
 
 import com.hand.hcf.app.mdata.supplier.domain.VendorIndustryInfo;
 import com.hand.hcf.app.mdata.supplier.persistence.VenVendorIndustryInfoMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

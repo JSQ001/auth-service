@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.util;
 
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

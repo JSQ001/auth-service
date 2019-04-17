@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.annotation.UniqueField;
-import com.hand.hcf.core.domain.DomainI18n;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.annotation.UniqueField;
+import com.hand.hcf.app.core.domain.DomainI18n;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

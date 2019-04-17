@@ -15,10 +15,10 @@ import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.util.DataFilteringUtil;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.core.redisLock.annotations.SyncLock;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
+import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -53,7 +53,7 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      */
     @CacheEvict(key = "#codingRuleDetail.codingRuleId.toString()")
     @SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
-    public CodingRuleDetail insertCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) {
+    public CodingRuleDetail insertCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) throws BizException {
         if (codingRuleDetail.getId() != null) {
             //创建数据不允许有ID
             throw new BizException(RespCode.ID_NOT_ALLOWED_21001);

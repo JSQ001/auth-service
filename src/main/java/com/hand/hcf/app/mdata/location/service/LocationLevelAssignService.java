@@ -3,11 +3,11 @@ package com.hand.hcf.app.mdata.location.service;
 import com.baomidou.mybatisplus.plugins.Page;
 
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.location.domain.LocationLevelAssign;
 import com.hand.hcf.app.mdata.location.dto.LocationLevelAssignDTO;
 import com.hand.hcf.app.mdata.location.persistence.LocationLevelAssignMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

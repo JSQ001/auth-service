@@ -1,7 +1,7 @@
 package com.hand.hcf.app.workflow.brms.impl;
 
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.exception.core.ValidationError;
+import com.hand.hcf.app.core.exception.core.ValidationException;
 import liquibase.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -3,6 +3,8 @@ package com.hand.hcf.app.workflow.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.constant.ApprovalFormPropertyConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalFormProperty;
 import com.hand.hcf.app.workflow.dto.ApprovalAddSignScopeDTO;
@@ -12,8 +14,6 @@ import com.hand.hcf.app.workflow.enums.FilterRuleEnum;
 import com.hand.hcf.app.workflow.enums.FilterTypeRuleEnum;
 import com.hand.hcf.app.workflow.enums.ProxyStrategyEnum;
 import com.hand.hcf.app.workflow.persistence.ApprovalFormPropertyMapper;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ApprovalFormPropertyService extends BaseService<ApprovalFormPropertyMapper, ApprovalFormProperty>  {
+public class ApprovalFormPropertyService extends BaseService<ApprovalFormPropertyMapper, ApprovalFormProperty> {
 
     public ApprovalFormPropertyRuleDTO selectByFormOid(UUID formOid) {
         List<ApprovalFormProperty> approvalFormPropertyList = listByOid(formOid);

@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.application.web.dto;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
-import com.hand.hcf.core.annotation.ExcelDomainField;
+import com.hand.hcf.app.core.annotation.ExcelDomainField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

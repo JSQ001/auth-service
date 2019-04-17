@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hcf.app.base.system.domain.Language;
 import com.hand.hcf.app.base.system.dto.LovDTO;
 import com.hand.hcf.app.base.system.service.LanguageService;
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

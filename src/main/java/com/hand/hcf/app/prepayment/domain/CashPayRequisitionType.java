@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeEmployeeEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeTypeEnum;
-import com.hand.hcf.core.domain.DomainLogicEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

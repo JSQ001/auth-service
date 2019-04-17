@@ -4,7 +4,7 @@ import com.hand.hcf.app.base.system.domain.FrontKey;
 import com.hand.hcf.app.base.system.domain.ServeLocale;
 import com.hand.hcf.app.base.system.service.FrontKeyService;
 import com.hand.hcf.app.base.system.service.ServeLocaleService;
-import com.hand.hcf.core.web.dto.MessageDTO;
+import com.hand.hcf.app.core.web.dto.MessageDTO;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -5,16 +5,14 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.DimensionCO;
 import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDimension;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeDimensionMapper;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import jdk.internal.dynalink.linker.LinkerServices;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-public class ExpenseReportTypeDimensionService extends BaseService<ExpenseReportTypeDimensionMapper,ExpenseReportTypeDimension>{
+public class ExpenseReportTypeDimensionService extends BaseService<ExpenseReportTypeDimensionMapper,ExpenseReportTypeDimension> {
 
     @Autowired
     private ExpenseReportTypeDimensionMapper expenseReportTypeDimensionMapper;

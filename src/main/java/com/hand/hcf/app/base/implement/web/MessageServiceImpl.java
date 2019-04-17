@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.implement.web;
 
-import com.hand.hcf.core.handler.MessageHandler;
-import com.hand.hcf.core.web.dto.MessageDTO;
+import com.hand.hcf.app.core.handler.MessageHandler;
+import com.hand.hcf.app.core.web.dto.MessageDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

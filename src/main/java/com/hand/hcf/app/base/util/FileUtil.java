@@ -5,8 +5,8 @@
 
 package com.hand.hcf.app.base.util;
 
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.itextpdf.text.io.StreamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

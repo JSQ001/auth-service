@@ -5,7 +5,7 @@ import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
-import com.hand.hcf.core.component.ApplicationContextProvider;
+import com.hand.hcf.app.core.component.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 
 import java.time.ZonedDateTime;

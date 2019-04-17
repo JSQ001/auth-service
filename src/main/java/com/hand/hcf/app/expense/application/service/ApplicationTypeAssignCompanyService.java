@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.application.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.application.domain.ApplicationTypeAssignCompany;
 import com.hand.hcf.app.expense.application.persistence.ApplicationTypeAssignCompanyMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 /**

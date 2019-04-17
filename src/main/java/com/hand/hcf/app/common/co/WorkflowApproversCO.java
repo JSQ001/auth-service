@@ -1,6 +1,6 @@
 package com.hand.hcf.app.common.co;
 
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.util.UUID;

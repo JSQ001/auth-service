@@ -1,9 +1,8 @@
 package com.hand.hcf.app.expense.application.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -15,7 +14,7 @@ import java.math.BigDecimal;
  */
 @Data
 @TableName("exp_requisition_release")
-public class ExpenseRequisitionRelease extends Domain{
+public class ExpenseRequisitionRelease extends Domain {
 
     /**
      * 租户

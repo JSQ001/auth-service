@@ -8,7 +8,7 @@ import com.hand.hcf.app.base.codingrule.service.CodingRuleObjectService;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleService;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleValueService;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

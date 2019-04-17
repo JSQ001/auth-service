@@ -3,7 +3,7 @@
 package com.hand.hcf.app.auth.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.core.exception.core.UserNotActivatedException;
+import com.hand.hcf.app.core.exception.core.UserNotActivatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

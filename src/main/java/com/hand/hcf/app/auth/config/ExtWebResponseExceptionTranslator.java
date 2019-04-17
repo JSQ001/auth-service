@@ -2,7 +2,7 @@ package com.hand.hcf.app.auth.config;
 
 import com.hand.hcf.app.auth.constant.Constants;
 import com.hand.hcf.app.auth.exception.ExtOAuthException;
-import com.hand.hcf.core.service.MessageService;
+import com.hand.hcf.app.core.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;

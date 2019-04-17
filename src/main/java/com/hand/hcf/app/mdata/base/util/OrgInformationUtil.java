@@ -1,11 +1,10 @@
 package com.hand.hcf.app.mdata.base.util;
 
 import com.hand.hcf.app.common.co.OrganizationUserCO;
+import com.hand.hcf.app.core.component.ApplicationContextProvider;
+import com.hand.hcf.app.core.security.domain.PrincipalLite;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
-import com.hand.hcf.core.component.ApplicationContextProvider;
-import com.hand.hcf.core.security.domain.PrincipalLite;
-import com.hand.hcf.core.util.LoginInformationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.UUID;

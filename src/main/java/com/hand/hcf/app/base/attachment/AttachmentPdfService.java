@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.attachment;
 
 import com.hand.hcf.app.base.attachment.domain.AttachmentPdf;
 import com.hand.hcf.app.base.attachment.persistence.AttachmentPdfMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

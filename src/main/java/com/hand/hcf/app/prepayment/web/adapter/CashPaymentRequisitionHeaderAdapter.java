@@ -15,7 +15,7 @@ import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionLineService;
 import com.hand.hcf.app.prepayment.service.PrepaymentAttachmentService;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.app.prepayment.web.dto.CashPayRequisitionTypeDTO;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

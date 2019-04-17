@@ -5,6 +5,10 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.service.MessageService;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
@@ -16,10 +20,6 @@ import com.hand.hcf.app.mdata.responsibilityCenter.persistence.DepartmentSobResp
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.service.MessageService;
-import com.hand.hcf.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DepartmentSobResponsibilityService extends BaseService<DepartmentSobResponsibilityMapper,DepartmentSobResponsibility>{
+public class DepartmentSobResponsibilityService extends BaseService<DepartmentSobResponsibilityMapper,DepartmentSobResponsibility> {
 
     @Autowired
     private DepartmentSobResponsibilityMapper departmentSobResMapper;

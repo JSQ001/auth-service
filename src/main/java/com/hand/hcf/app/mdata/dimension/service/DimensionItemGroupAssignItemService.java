@@ -1,8 +1,8 @@
 package com.hand.hcf.app.mdata.dimension.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItemGroupAssignItem;
 import com.hand.hcf.app.mdata.dimension.persistence.DimensionItemGroupAssignItemMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.userRole.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * 菜单类型的枚举

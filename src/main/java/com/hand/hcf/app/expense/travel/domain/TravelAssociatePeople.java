@@ -3,7 +3,7 @@ package com.hand.hcf.app.expense.travel.domain;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.domain.BaseObject;
+import com.hand.hcf.app.core.domain.BaseObject;
 import lombok.Data;
 
 /**

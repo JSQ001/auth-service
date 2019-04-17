@@ -11,7 +11,7 @@ import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.travel.domain.TravelApplicationLineDetail;
 import com.hand.hcf.app.expense.travel.persistence.TravelApplicationLineDetailMapper;
 import com.hand.hcf.app.expense.travel.web.dto.TravelApplicationLineDetailWebDTO;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;

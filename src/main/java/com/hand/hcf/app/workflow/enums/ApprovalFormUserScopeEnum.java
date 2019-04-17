@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum ApprovalFormUserScopeEnum implements SysEnum {
     ALL_PEOPLE(1001),//所有公司员工

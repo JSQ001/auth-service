@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.VendorTypeCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.supplier.service.VendorTypeService;
-import com.hand.hcf.core.util.PaginationUtil;
+import com.hand.hcf.app.core.util.PaginationUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

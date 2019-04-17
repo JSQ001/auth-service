@@ -1,10 +1,10 @@
 package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
 import com.hand.hcf.app.workflow.persistence.ApprovalChainMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

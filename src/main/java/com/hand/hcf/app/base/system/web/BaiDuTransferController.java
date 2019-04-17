@@ -4,7 +4,7 @@ import com.hand.hcf.app.base.config.BaiDuTransferConfig;
 import com.hand.hcf.app.base.system.dto.TransferDTO;
 import com.hand.hcf.app.base.util.HttpGet;
 import com.hand.hcf.app.base.util.TransferMd5;
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import net.sf.json.JSONArray;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

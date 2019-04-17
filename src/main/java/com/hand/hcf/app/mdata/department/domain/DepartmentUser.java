@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.department.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.DomainEnable;
+import com.hand.hcf.app.core.domain.DomainEnable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -5,7 +5,7 @@ package com.hand.hcf.app.workflow.util;
  * @author houyin.zhang@hand-china.com
  * @date 2018/8/13
  */
-public class ExceptionCode implements com.hand.hcf.core.util.RespCode {
+public class ExceptionCode implements com.hand.hcf.app.core.util.RespCode {
     public static final String SYS_PARAM_CANT_BE_NULL="SYS_PARAM_CAN_NOT_BE_NULL";
 
 

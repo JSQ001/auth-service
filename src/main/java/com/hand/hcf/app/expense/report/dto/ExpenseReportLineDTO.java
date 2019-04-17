@@ -1,12 +1,8 @@
 package com.hand.hcf.app.expense.report.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportDist;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportLine;
-import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
-import com.hand.hcf.core.serializer.CollectionToStringSerializer;
 import lombok.Data;
 
 import javax.validation.Valid;

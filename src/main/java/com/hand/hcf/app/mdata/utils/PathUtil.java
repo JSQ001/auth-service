@@ -1,8 +1,8 @@
 package com.hand.hcf.app.mdata.utils;
 
 
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.exception.core.ValidationError;
+import com.hand.hcf.app.core.exception.core.ValidationException;
 import org.springframework.util.Assert;
 
 import java.util.Collections;

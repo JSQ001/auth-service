@@ -7,7 +7,7 @@ import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocationDetailService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

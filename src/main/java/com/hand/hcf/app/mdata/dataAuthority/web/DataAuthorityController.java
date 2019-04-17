@@ -5,7 +5,7 @@ import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthority;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthorityService;
 import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthority;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthorityService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

@@ -3,8 +3,8 @@ package com.hand.hcf.app.mdata.department.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.domain.DomainI18nEnable;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.domain.DomainI18nEnable;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

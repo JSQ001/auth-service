@@ -1,9 +1,9 @@
 package com.hand.hcf.app.mdata.parameter.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.parameter.domain.ParameterModule;
 import com.hand.hcf.app.mdata.parameter.dto.ParameterModuleDTO;
 import com.hand.hcf.app.mdata.parameter.persistence.ParameterModuleMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

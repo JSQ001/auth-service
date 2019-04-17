@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.domain.enumeration.BusinessEnum;
+import com.hand.hcf.app.core.domain.enumeration.BusinessEnum;
 
 /**
  * 表单控件定义

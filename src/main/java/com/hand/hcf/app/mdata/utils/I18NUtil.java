@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.utils;
 
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.MessageService;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

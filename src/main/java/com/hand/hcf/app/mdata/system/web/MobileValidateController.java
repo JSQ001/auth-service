@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.system.web;
 import com.hand.hcf.app.mdata.system.domain.MobileValidate;
 import com.hand.hcf.app.mdata.system.service.MobileValidateService;
 import com.hand.hcf.app.mdata.utils.HeaderUtil;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.dimension.domain.temp;
 
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.DomainEnable;
+import com.hand.hcf.app.core.domain.DomainEnable;
 import lombok.Data;
 
 @Data

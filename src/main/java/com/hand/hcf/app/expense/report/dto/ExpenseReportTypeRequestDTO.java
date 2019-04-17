@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.report.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hand.hcf.app.core.serializer.CollectionToStringSerializer;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
-import com.hand.hcf.core.serializer.CollectionToStringSerializer;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

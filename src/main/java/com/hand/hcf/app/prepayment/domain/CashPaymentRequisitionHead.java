@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.annotation.ExcelDomainField;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.annotation.ExcelDomainField;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

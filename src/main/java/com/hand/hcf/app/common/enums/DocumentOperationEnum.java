@@ -1,6 +1,6 @@
 package com.hand.hcf.app.common.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * @description: 单据操作状态

@@ -5,10 +5,10 @@
 
 package com.hand.hcf.app.mdata.legalEntity.service;
 
+import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.persistence.LegalEntityMapper;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
-import com.hand.hcf.core.service.BaseI18nService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;

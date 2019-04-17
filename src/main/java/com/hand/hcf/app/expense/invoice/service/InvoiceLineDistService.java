@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.invoice.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineDist;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceLineDistMapper;
-import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @AllArgsConstructor
 @Transactional
-public class InvoiceLineDistService extends BaseService<InvoiceLineDistMapper,InvoiceLineDist>{
+public class InvoiceLineDistService extends BaseService<InvoiceLineDistMapper,InvoiceLineDist> {
     private final InvoiceLineDistMapper invoiceLineDistMapper;
 }

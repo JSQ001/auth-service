@@ -1,9 +1,9 @@
 package com.hand.hcf.app.mdata.contact.enums;
 
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
-import com.hand.hcf.core.enums.SysEnum;
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
+import com.hand.hcf.app.core.exception.core.ValidationError;
+import com.hand.hcf.app.core.exception.core.ValidationException;
 import org.springframework.util.StringUtils;
 
 /**

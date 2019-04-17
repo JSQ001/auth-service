@@ -1,7 +1,7 @@
 package com.hand.hcf.app.expense.policy.domain;
 
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.DomainLogic;
+import com.hand.hcf.app.core.domain.DomainLogic;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

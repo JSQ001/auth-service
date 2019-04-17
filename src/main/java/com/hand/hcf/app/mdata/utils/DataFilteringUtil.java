@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.utils;
 
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import org.apache.commons.lang.StringEscapeUtils;
 
 /**

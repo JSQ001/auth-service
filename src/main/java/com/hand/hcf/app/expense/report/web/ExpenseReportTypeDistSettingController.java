@@ -7,7 +7,7 @@ import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistSetting;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDistSettingRequestDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeDistSettingService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

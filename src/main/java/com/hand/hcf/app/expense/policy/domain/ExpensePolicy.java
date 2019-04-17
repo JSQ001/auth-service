@@ -3,8 +3,8 @@ package com.hand.hcf.app.expense.policy.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
-import com.hand.hcf.core.annotation.UniqueField;
-import com.hand.hcf.core.domain.DomainLogicEnable;
+import com.hand.hcf.app.core.annotation.UniqueField;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

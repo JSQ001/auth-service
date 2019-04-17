@@ -3,7 +3,7 @@ package com.hand.hcf.app.common.co;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.math.BigDecimal;

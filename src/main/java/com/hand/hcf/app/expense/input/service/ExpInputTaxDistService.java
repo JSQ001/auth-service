@@ -5,7 +5,7 @@ import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
 import com.hand.hcf.app.expense.input.dto.ExpInputForReportDistDTO;
 import com.hand.hcf.app.expense.input.dto.ExpInputTaxSumAmountDTO;
 import com.hand.hcf.app.expense.input.persistence.ExpInputTaxDistMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

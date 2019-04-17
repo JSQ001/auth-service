@@ -2,7 +2,7 @@
 
 package com.hand.hcf.app.auth.security;
 
-import com.hand.hcf.core.security.domain.PrincipalLite;
+import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 
 import java.util.Map;

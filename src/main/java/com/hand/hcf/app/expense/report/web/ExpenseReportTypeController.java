@@ -10,7 +10,7 @@ import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

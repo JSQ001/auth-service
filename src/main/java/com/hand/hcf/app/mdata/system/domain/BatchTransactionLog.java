@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.mdata.system.enums.BatchOperationTypeEnum;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

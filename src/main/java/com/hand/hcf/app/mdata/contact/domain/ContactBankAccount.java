@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.DomainLogicEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
 import javax.persistence.Transient;

@@ -1,7 +1,7 @@
 package com.hand.hcf.app.common.co;
 
-import com.hand.hcf.core.enums.DataAuthFilterMethodEnum;
-import com.hand.hcf.core.web.dto.DomainObjectDTO;
+import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
+import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.Data;
 
 /**

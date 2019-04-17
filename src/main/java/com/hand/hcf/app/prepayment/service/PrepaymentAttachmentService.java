@@ -8,7 +8,7 @@ import com.hand.hcf.app.prepayment.domain.PrepaymentAttachment;
 import com.hand.hcf.app.prepayment.persistence.CashPaymentRequisitionHeadMapper;
 import com.hand.hcf.app.prepayment.persistence.PrepaymentAttachmentMapper;
 import com.hand.hcf.app.prepayment.web.adapter.CashPaymentRequisitionHeaderAdapter;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

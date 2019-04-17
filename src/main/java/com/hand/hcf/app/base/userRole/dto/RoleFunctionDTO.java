@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.userRole.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.hand.hcf.core.serializer.CollectionToStringSerializer;
+import com.hand.hcf.app.core.serializer.CollectionToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

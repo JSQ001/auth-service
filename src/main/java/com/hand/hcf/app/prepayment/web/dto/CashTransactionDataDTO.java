@@ -2,7 +2,7 @@ package com.hand.hcf.app.prepayment.web.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.web.dto.DomainObjectDTO;
+import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

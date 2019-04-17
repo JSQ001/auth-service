@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.supplier.domain;
 
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 /**
@@ -46,6 +46,6 @@ public class VendorBankAccount extends Domain {
     private String importCode;
 
     private String remark;
-    //   add by cjx ÉóÅú×´Ì¬
+    //   add by cjx ï¿½ï¿½ï¿½ï¿½×´Ì¬
     private String vendorBankStatus;
 }

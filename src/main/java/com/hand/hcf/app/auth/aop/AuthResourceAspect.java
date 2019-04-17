@@ -3,8 +3,8 @@
 package com.hand.hcf.app.auth.aop;
 
 
-import com.hand.hcf.core.web.util.HttpRequestUtil;
-import com.hand.hcf.core.web.util.RequestContext;
+import com.hand.hcf.app.core.web.util.HttpRequestUtil;
+import com.hand.hcf.app.core.web.util.RequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

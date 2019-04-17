@@ -7,7 +7,7 @@ import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterfac
 import com.hand.hcf.app.prepayment.persistence.PrepaymentLogMapper;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.app.prepayment.web.dto.PrePaymentLogDTO;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

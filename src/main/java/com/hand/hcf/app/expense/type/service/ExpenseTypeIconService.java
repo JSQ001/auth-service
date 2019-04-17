@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.type.service;
 
 import com.hand.hcf.app.expense.type.domain.ExpenseTypeIcon;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeIconMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 /**

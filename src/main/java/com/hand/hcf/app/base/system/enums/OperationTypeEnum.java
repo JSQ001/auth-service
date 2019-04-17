@@ -5,7 +5,7 @@
 
 package com.hand.hcf.app.base.system.enums;
 
-import com.hand.hcf.core.domain.enumeration.BusinessEnum;
+import com.hand.hcf.app.core.domain.enumeration.BusinessEnum;
 
 public enum OperationTypeEnum implements BusinessEnum {
     ADD("ADD"),

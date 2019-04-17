@@ -25,7 +25,7 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

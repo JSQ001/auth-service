@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.bank.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.domain.DomainLogic;
+import com.hand.hcf.app.core.domain.DomainLogic;
 import lombok.Data;
 
 import java.math.BigDecimal;

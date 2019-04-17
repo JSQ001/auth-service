@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ContactCO;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceLineExpenceMapper;
-import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Transactional
-public class InvoiceLineExpenceService extends BaseService<InvoiceLineExpenceMapper,InvoiceLineExpence>{
+public class InvoiceLineExpenceService extends BaseService<InvoiceLineExpenceMapper,InvoiceLineExpence> {
     private final InvoiceLineExpenceMapper invoiceLineExpenceMapper;
 
     @Autowired

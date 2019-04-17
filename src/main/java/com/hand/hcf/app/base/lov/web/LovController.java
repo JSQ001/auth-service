@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.lov.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.lov.domain.Lov;
 import com.hand.hcf.app.base.lov.service.LovService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

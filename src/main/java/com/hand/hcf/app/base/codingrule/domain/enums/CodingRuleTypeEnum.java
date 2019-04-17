@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.codingrule.domain.enums;
 
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * Date:2018/1/30

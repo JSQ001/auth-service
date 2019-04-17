@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.DepartmentSobResponsibility;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.DepartmentSobResponsibilityDTO;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.DepartmentSobResponsibilityService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

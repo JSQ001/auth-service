@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.system.constant;
 
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

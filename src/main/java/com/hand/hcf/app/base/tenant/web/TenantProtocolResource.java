@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.tenant.web;
 
 import com.hand.hcf.app.base.tenant.domain.TenantProtocol;
 import com.hand.hcf.app.base.tenant.service.TenantProtocolService;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -12,7 +12,7 @@ import com.hand.hcf.app.workflow.brms.impl.RuleManagerImpl;
 import com.hand.hcf.app.workflow.brms.impl.TrackingAgendaEventListener;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.core.util.AsciiUtil;
+import com.hand.hcf.app.core.util.AsciiUtil;
 import org.drools.compiler.compiler.DrlParser;
 import org.drools.compiler.compiler.DroolsParserException;
 import org.drools.compiler.lang.descr.PackageDescr;

@@ -16,7 +16,7 @@
     </update>
 
 
-    <resultMap id="queryInfoMap" type="com.hand.hcf.core.web.dto.ImportResultDTO">
+    <resultMap id="queryInfoMap" type="com.hand.hcf.app.core.web.dto.ImportResultDTO">
         <result column="successEntities" property="successEntities"/>
         <result column="failureEntities" property="failureEntities"/>
         <collection property="errorData" select="queryErrorData"
@@ -43,7 +43,7 @@
     </select>
 
 
-    <resultMap id="errorDataMap" type="com.hand.hcf.core.web.dto.ImportErrorDTO">
+    <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
         <result column="row_index" property="index"/>
         <result column="error_msg" property="error"/>
     </resultMap>

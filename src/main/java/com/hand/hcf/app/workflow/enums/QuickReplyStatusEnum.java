@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * Created By 魏建 ON 2017/12/25.

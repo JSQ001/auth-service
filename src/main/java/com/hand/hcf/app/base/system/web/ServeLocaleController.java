@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.ServeLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.service.ServeLocaleService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
