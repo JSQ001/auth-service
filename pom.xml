@@ -257,6 +257,28 @@
                 </executions>
             </plugin>
 
+            <!-- copy前先清除文件内容-->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>mkdir</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <tasks>
+                                <mkdir dir="${project.build.sourceDirectory}/../resources/public/"/>
+                                <delete failonerror="false">
+                                    <fileset dir="${project.build.sourceDirectory}/../resources/public/"  />
+                                </delete>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- 将前端打包生成的dist文件移到resource/public目录-->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
