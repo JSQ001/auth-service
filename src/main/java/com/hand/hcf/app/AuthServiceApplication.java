@@ -2,7 +2,8 @@
 package com.hand.hcf.app;
 
 import com.hand.hcf.app.auth.config.AppCenterProperties;
-import com.hand.hcf.core.annotation.EnableHcfCache;
+//jiu.zhao redis
+//import com.hand.hcf.core.annotation.EnableHcfCache;
 import com.hand.hcf.app.core.annotation.I18nDomainScan;
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
@@ -21,7 +22,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
-@EnableHcfCache
+//jiu.zhao redis
+//@EnableHcfCache
 @EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class, DataSourceProperties.class, MybatisProperties.class})
 @ComponentScan(value = {"com.hand.hcf"})
 @I18nDomainScan(value = {"com.hand.hcf"})
