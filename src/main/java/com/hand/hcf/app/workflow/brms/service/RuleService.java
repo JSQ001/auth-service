@@ -1300,7 +1300,7 @@ public class RuleService {
         return approvalTypes;
     }
 
-    @Cacheable(key = "#a0", cacheNames = CacheNames.BRMS_CONSTANTS_RULE_APPROVAL_MODE)
+    //@Cacheable(key = "#a0", cacheNames = CacheNames.BRMS_CONSTANTS_RULE_APPROVAL_MODE)
     public List<RuleEnumDTO> getApprovalModesByLanguage(String language) {
         List<RuleEnumDTO> approvalModes = RuleConstants.approvalModes;
         if (Locale.ENGLISH.getLanguage().equalsIgnoreCase(language)) {

@@ -1237,7 +1237,8 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return companySecurityService.listCompanySecuritysByTenant(tenantId);
     }
 
-    @Cacheable(keyGenerator = "wiselyKeyGenerator")
+    //jiu.zhao redis
+    //@Cacheable(keyGenerator = "wiselyKeyGenerator")
     public Long findTenantIdByCompanyOid(UUID companyOid) {
         return baseMapper.findTenantIdByCompanyOid(companyOid);
     }

@@ -64,7 +64,8 @@ public class RefactorCompanyResource {
         Boolean locked = false;
         try {
             //check
-            locked = (Boolean) redisTemplate.execute(new RedisCallback() {
+            //jiu.zhao redis
+            /*locked = (Boolean) redisTemplate.execute(new RedisCallback() {
                 @Override
                 public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                     Boolean result = connection.setNX(lockKey, "TRUE".getBytes(Charset.forName("utf8")));
@@ -79,13 +80,13 @@ public class RefactorCompanyResource {
                     e.printStackTrace();
                 }
                 throw new BizException(RespCode.SYS_REQUEST_SPEED_IS_TOO_FAST, "请求速度过快");
-            }
+            }*/
             Long tenantId = OrgInformationUtil.getCurrentTenantId();
             companyDTO.setTenantId(tenantId);
             result = companyService.createCompanyNew(companyDTO);
         } finally {
             //clean
-            if (locked) {
+            /*if (locked) {
                 redisTemplate.execute(new RedisCallback() {
                     @Override
                     public Object doInRedis(RedisConnection connection) throws DataAccessException {
@@ -93,7 +94,7 @@ public class RefactorCompanyResource {
                         return null;
                     }
                 });
-            }
+            }*/
         }
         return ResponseEntity.created(new URI("/tenant/companyId/register" + result.getCompanyOid()))
                 .headers(HeaderUtil.createEntityCreationAlert("company", result.getCompanyOid().toString()))

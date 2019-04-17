@@ -28,7 +28,8 @@ public class CompanyCacheService {
 
     }
 
-    @Cacheable(key = "#companyOid.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#companyOid.toString()")
     public Company getByCompanyOid(UUID companyOid) {
         return companyMapper.getByQO(CompanyQO.builder().companyOid(companyOid).build()).get(0);
     }

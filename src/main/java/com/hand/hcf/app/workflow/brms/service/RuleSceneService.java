@@ -53,7 +53,7 @@ private MapperFacade mapper;
      * @return the entity
      */
     @Transactional(readOnly = true)
-    @Cacheable(key = "#ruleSceneOid.toString()")
+    //@Cacheable(key = "#ruleSceneOid.toString()")
     public RuleSceneDTO getRuleScene(UUID ruleSceneOid) {
         RuleScene opt = getByOid(ruleSceneOid);
         if (opt!=null) {

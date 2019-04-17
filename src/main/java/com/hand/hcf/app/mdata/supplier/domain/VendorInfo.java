@@ -66,6 +66,6 @@ public class VendorInfo extends Domain {
     private ZonedDateTime effectiveDate;
 
     private SourceEnum source;
-    //   add by cjx ÉóÅú×´Ì¬
+    //   add by cjx å®¡æ‰¹çŠ¶æ€
     private String vendorStatus;
 }

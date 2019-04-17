@@ -125,7 +125,8 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      * @param codingRuleId 编码规则id
      * @return
      */
-    @Cacheable(key = "#codingRuleId.toString()")
+    //jiu.zhao redis
+    //@Cacheable(key = "#codingRuleId.toString()")
     public List<CodingRuleDetail> getCodingRuleDetailByCond(Long codingRuleId) {
         return baseMapper.selectList(new EntityWrapper<CodingRuleDetail>()
             .where("deleted = false")
