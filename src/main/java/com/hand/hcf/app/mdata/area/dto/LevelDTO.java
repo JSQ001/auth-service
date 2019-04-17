@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.area.dto;
 
 import com.hand.hcf.app.mdata.area.domain.Area;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.util.List;

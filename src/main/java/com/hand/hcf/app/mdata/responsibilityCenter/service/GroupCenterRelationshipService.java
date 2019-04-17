@@ -1,9 +1,9 @@
 package com.hand.hcf.app.mdata.responsibilityCenter.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.GroupCenterRelationship;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.GroupCenterRelationshipMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

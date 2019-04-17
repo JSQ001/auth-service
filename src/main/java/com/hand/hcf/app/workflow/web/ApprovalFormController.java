@@ -2,6 +2,7 @@ package com.hand.hcf.app.workflow.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.constant.Constants;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.ApprovalFormProperty;
@@ -14,7 +15,6 @@ import com.hand.hcf.app.workflow.enums.ApprovalFormEnum;
 import com.hand.hcf.app.workflow.service.ApprovalFormPropertyService;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
 import com.hand.hcf.app.workflow.util.HeaderUtil;
-import com.hand.hcf.core.util.PageUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;

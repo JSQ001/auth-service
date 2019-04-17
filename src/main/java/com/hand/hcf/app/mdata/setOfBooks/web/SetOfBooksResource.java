@@ -7,7 +7,7 @@ import com.hand.hcf.app.mdata.setOfBooks.dto.SetOfBooksDTO;
 import com.hand.hcf.app.mdata.setOfBooks.dto.SetOfBooksPeriodDTO;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
-import com.hand.hcf.core.service.BaseI18nService;
+import com.hand.hcf.app.core.service.BaseI18nService;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

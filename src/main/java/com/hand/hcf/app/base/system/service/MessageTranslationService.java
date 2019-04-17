@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.system.service;
 
 import com.hand.hcf.app.base.user.domain.User;
 import com.hand.hcf.app.base.user.service.UserService;
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;

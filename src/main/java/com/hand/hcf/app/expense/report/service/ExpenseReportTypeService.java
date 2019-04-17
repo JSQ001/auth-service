@@ -6,6 +6,10 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
+import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
@@ -18,18 +22,11 @@ import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
 import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
-import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
-import com.hand.hcf.core.domain.SystemCustomEnumerationType;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseI18nService;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.util.PageUtil;
-import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +51,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Service
 @Transactional
-public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMapper,ExpenseReportType>{
+public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMapper,ExpenseReportType> {
 
     @Autowired
     private ExpenseReportTypeMapper expenseReportTypeMapper;

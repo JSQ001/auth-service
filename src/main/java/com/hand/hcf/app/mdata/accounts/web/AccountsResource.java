@@ -5,7 +5,7 @@ import com.hand.hcf.app.mdata.accounts.domain.Accounts;
 import com.hand.hcf.app.mdata.accounts.dto.AccountsDTO;
 import com.hand.hcf.app.mdata.accounts.service.AccountsService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.invoice.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceTypeMouldLineColumn;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceTypeMouldLineColumnMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 /**

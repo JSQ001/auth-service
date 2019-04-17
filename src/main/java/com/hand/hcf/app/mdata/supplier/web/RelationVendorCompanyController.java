@@ -5,7 +5,7 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.RelationVendorCompanyCO;
 import com.hand.hcf.app.mdata.supplier.service.RelationVendorCompanyService;
 import com.hand.hcf.app.mdata.supplier.web.dto.CompanyDTO;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

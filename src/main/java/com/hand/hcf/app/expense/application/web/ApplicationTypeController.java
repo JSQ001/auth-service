@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.application.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.application.domain.ApplicationType;
 import com.hand.hcf.app.expense.application.domain.ApplicationTypeAssignCompany;
 import com.hand.hcf.app.expense.application.domain.ApplicationTypeDimension;
@@ -9,7 +10,6 @@ import com.hand.hcf.app.expense.application.service.ApplicationTypeService;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDTO;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDimensionDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
-import com.hand.hcf.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

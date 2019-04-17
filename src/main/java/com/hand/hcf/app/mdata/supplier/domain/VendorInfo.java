@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.common.enums.SourceEnum;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -66,6 +66,6 @@ public class VendorInfo extends Domain {
     private ZonedDateTime effectiveDate;
 
     private SourceEnum source;
-    //   add by cjx 审批状态
+    //   add by cjx ����״̬
     private String vendorStatus;
 }

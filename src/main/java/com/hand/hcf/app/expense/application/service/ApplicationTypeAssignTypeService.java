@@ -1,12 +1,12 @@
 package com.hand.hcf.app.expense.application.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.application.domain.ApplicationType;
 import com.hand.hcf.app.expense.application.domain.ApplicationTypeAssignType;
 import com.hand.hcf.app.expense.application.persistence.ApplicationTypeAssignTypeMapper;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

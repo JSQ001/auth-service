@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.user.service;
 
 import com.hand.hcf.app.base.system.constant.Constants;
-import com.hand.hcf.core.util.RedisHelper;
+import com.hand.hcf.app.core.util.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

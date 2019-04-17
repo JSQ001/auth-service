@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.user.domain.User;
 import com.hand.hcf.app.base.user.dto.UserQO;
-import com.hand.hcf.core.security.domain.Authority;
+import com.hand.hcf.app.core.security.domain.Authority;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

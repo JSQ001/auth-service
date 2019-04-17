@@ -2,6 +2,8 @@ package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.base.system.constant.Constants;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
@@ -16,8 +18,6 @@ import com.hand.hcf.app.workflow.enums.ApprovalOperationTypeEnum;
 import com.hand.hcf.app.workflow.enums.CounterSignTypeEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.ApprovalHistoryMapper;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.service.MessageService;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;

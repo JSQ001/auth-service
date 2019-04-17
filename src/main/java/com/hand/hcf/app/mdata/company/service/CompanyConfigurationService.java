@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.company.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.common.co.CompanyConfigurationCO;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.company.domain.CompanyConfiguration;
 import com.hand.hcf.app.mdata.company.domain.ConfigurationDetail;
 import com.hand.hcf.app.mdata.company.persistence.CompanyConfigurationMapper;
@@ -11,7 +12,6 @@ import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

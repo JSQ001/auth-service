@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.userRole.web;
 import com.hand.hcf.app.base.userRole.domain.RoleFunction;
 import com.hand.hcf.app.base.userRole.dto.RoleFunctionDTO;
 import com.hand.hcf.app.base.userRole.service.RoleFunctionService;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

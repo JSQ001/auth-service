@@ -97,7 +97,7 @@
 
 
 
-    <select id="listAuthorities" resultType="com.hand.hcf.core.security.domain.Authority">
+    <select id="listAuthorities" resultType="com.hand.hcf.app.core.security.domain.Authority">
         select ua.authority_name name from
          sys_user_authority  ua,
          sys_user u

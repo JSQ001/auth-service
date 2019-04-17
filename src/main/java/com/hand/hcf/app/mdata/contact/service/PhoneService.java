@@ -1,11 +1,11 @@
 package com.hand.hcf.app.mdata.contact.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.domain.Phone;
 import com.hand.hcf.app.mdata.contact.enums.PhoneType;
 import com.hand.hcf.app.mdata.contact.persistence.PhoneMapper;
-import com.hand.hcf.core.service.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

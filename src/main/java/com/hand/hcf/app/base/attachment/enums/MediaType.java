@@ -2,7 +2,7 @@ package com.hand.hcf.app.base.attachment.enums;
 
 
 import com.hand.hcf.app.base.attachment.constant.Constants;
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum MediaType implements SysEnum {
     IMAGE(1001), VIDEO(1002), PDF(1003), WORD(1004), OTHER(1005);

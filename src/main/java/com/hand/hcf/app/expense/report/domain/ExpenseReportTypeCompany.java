@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.domain.DomainEnable;
+import com.hand.hcf.app.core.domain.DomainEnable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("exp_report_type_company")
-public class ExpenseReportTypeCompany extends DomainEnable{
+public class ExpenseReportTypeCompany extends DomainEnable {
     //报账单类型ID
     @JsonSerialize(using = ToStringSerializer.class)
     @TableField(value = "report_type_id")

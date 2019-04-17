@@ -6,6 +6,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.core.exception.core.ValidationError;
+import com.hand.hcf.app.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
@@ -27,14 +34,6 @@ import com.hand.hcf.app.mdata.utils.PathUtil;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
 
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.exception.core.ObjectNotFoundException;
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
-import com.hand.hcf.core.service.BaseI18nService;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -2096,8 +2095,6 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
      * @param name
      * @param ids
      * @param keyWord
-     * @param page
-     * @param size
      * @return
      */
     public com.baomidou.mybatisplus.plugins.Page<DepartmentCO> pageDepartmentsByCond(String departmentCode,

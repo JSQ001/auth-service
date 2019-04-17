@@ -6,7 +6,7 @@ import com.hand.hcf.app.base.userRole.dto.MenuTreeDTO;
 import com.hand.hcf.app.base.userRole.dto.RoleMenuButtonDTO;
 import com.hand.hcf.app.base.userRole.dto.RoleMenuDTO;
 import com.hand.hcf.app.base.userRole.service.RoleMenuService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

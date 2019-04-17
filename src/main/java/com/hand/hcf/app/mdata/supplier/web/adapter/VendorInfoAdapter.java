@@ -8,7 +8,7 @@ import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
 import com.hand.hcf.app.mdata.supplier.domain.VendorType;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorTypeMapper;
 import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
-import com.hand.hcf.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;

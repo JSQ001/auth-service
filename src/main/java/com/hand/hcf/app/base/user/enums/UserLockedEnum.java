@@ -1,6 +1,6 @@
 package com.hand.hcf.app.base.user.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * Created by zhouhui on 2016/11/23.

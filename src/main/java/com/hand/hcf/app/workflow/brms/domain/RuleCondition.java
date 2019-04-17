@@ -2,7 +2,7 @@ package com.hand.hcf.app.workflow.brms.domain;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

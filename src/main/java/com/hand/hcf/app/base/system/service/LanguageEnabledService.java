@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.LanguageEnabled;
 import com.hand.hcf.app.base.system.persistence.LanguageEnabledMapper;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.contact.dto;
 
-import com.hand.hcf.core.domain.BaseI18nDomain;
+import com.hand.hcf.app.core.domain.BaseI18nDomain;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;

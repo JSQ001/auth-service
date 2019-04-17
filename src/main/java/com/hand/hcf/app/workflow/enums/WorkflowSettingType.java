@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum WorkflowSettingType implements SysEnum {
     NO_CONDITION(0, "无条件"), HAS_CONDITION(1, "有条件"), OWNER_CONDITION(2, "自审批");

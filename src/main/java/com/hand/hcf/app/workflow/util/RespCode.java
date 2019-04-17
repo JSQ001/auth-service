@@ -3,7 +3,7 @@ package com.hand.hcf.app.workflow.util;
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
  */
-public interface RespCode extends com.hand.hcf.core.util.RespCode {
+public interface RespCode extends com.hand.hcf.app.core.util.RespCode {
     String SUCESS = "0000";// 成功
     String FAILED = "0001";// 失败
     String SYS_PARAM_CANT_BE_NULL="SYS_PARAM_CAN_NOT_BE_NULL";

@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.department.domain.enums;
 
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * 部门状态枚举

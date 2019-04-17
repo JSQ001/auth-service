@@ -2,7 +2,7 @@ package com.hand.hcf.app.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hand.hcf.app.auth.enums.UserLockedEnum;
-import com.hand.hcf.core.security.domain.Authority;
+import com.hand.hcf.app.core.security.domain.Authority;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -8,7 +8,7 @@ import com.hand.hcf.app.mdata.area.dto.InternationalAreaDTO;
 import com.hand.hcf.app.mdata.area.dto.LevelDTO;
 import com.hand.hcf.app.mdata.location.service.LocalizationDTOService;
 import com.hand.hcf.app.mdata.location.service.LocationService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

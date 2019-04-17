@@ -8,7 +8,7 @@ package com.hand.hcf.app.workflow.enums;
  */
 
 
-import com.hand.hcf.core.domain.enumeration.BusinessEnum;
+import com.hand.hcf.app.core.domain.enumeration.BusinessEnum;
 
 /**
  * Created by lichao on 18/5/15.

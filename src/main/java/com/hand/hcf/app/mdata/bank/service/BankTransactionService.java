@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.bank.domain.BankTransaction;
 import com.hand.hcf.app.mdata.bank.dto.BanTranPoolDTO;
 import com.hand.hcf.app.mdata.bank.persistence.BankTransactionMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

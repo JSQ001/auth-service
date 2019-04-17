@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.department.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
@@ -11,7 +12,6 @@ import com.hand.hcf.app.mdata.department.dto.DepartmentAssignUserDTO;
 import com.hand.hcf.app.mdata.department.dto.DepartmentUserSummaryDTO;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentUserMapper;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
-import com.hand.hcf.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

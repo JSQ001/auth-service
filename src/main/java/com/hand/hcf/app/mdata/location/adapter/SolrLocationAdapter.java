@@ -4,7 +4,7 @@ import com.hand.hcf.app.mdata.location.domain.Location;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.domain.VendorAlias;
 import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
-import com.hand.hcf.core.domain.enumeration.LanguageEnum;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import lombok.AllArgsConstructor;
 import org.springframework.util.CollectionUtils;
 

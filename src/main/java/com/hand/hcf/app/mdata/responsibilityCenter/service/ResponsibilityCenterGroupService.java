@@ -4,15 +4,15 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ResponsibilityCenterGroupCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.GroupCenterRelationship;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityCenterGroupMapper;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.service.MessageService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ResponsibilityCenterGroupService extends BaseService<ResponsibilityCenterGroupMapper,ResponsibilityCenterGroup>{
+public class ResponsibilityCenterGroupService extends BaseService<ResponsibilityCenterGroupMapper,ResponsibilityCenterGroup> {
     @Autowired
     private ResponsibilityCenterGroupMapper resCenterGroupMapper;
 

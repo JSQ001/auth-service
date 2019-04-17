@@ -1,8 +1,8 @@
 package com.hand.hcf.app.mdata.period.service;
 
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.period.domain.PeriodStatus;
 import com.hand.hcf.app.mdata.period.persistence.PeriodStatusMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

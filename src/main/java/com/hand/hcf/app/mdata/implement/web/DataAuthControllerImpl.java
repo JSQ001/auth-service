@@ -1,11 +1,11 @@
 package com.hand.hcf.app.mdata.implement.web;
 
 import com.hand.hcf.app.common.co.DataAuthTablePropertyCO;
+import com.hand.hcf.app.core.web.dto.DataAuthValuePropertyDTO;
 import com.hand.hcf.app.mdata.dataAuthority.adapter.DataAuthTablePropertyAdapter;
 import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthTableProperty;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthTablePropertyService;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthorityService;
-import com.hand.hcf.core.web.dto.DataAuthValuePropertyDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

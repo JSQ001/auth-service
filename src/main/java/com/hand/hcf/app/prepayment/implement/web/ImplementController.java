@@ -10,7 +10,7 @@ import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeService;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionLineService;
 import com.hand.hcf.app.prepayment.web.dto.CashPrepaymentQueryDTO;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;

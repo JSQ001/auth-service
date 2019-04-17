@@ -3,7 +3,7 @@ package com.hand.hcf.app.expense.input.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.expense.input.dto.ExpInputForReportLineDTO;
 import com.hand.hcf.app.expense.input.service.ExpInputTaxLineService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

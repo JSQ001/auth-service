@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.common.domain.DimensionDomain;
-import com.hand.hcf.core.annotation.ExcelDomainField;
+import com.hand.hcf.app.core.annotation.ExcelDomainField;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

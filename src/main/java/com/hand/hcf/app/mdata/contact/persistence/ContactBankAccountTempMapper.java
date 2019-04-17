@@ -1,9 +1,9 @@
 package com.hand.hcf.app.mdata.contact.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.core.web.dto.ImportErrorDTO;
+import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.contact.domain.ContactBankAccountTempDomain;
-import com.hand.hcf.core.web.dto.ImportErrorDTO;
-import com.hand.hcf.core.web.dto.ImportResultDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.ZonedDateTime;

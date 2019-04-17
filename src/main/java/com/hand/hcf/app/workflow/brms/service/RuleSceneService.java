@@ -2,12 +2,12 @@ package com.hand.hcf.app.workflow.brms.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.brms.domain.RuleScene;
 import com.hand.hcf.app.workflow.brms.dto.RuleSceneDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.RuleSceneMapper;
 import com.hand.hcf.app.workflow.brms.util.cache.CacheNames;
-import com.hand.hcf.core.service.BaseService;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;

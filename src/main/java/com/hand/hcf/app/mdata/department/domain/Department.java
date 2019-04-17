@@ -3,10 +3,10 @@ package com.hand.hcf.app.mdata.department.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.domain.DomainI18n;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.domain.DomainI18n;
 import lombok.Data;
 
 import javax.persistence.Transient;

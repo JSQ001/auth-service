@@ -6,7 +6,7 @@ import com.hand.hcf.app.auth.security.BaseAuthorizationCodeServices;
 import com.hand.hcf.app.auth.security.BaseRedisTokenStore;
 import com.hand.hcf.app.auth.security.BaseTokenEnhancer;
 import com.hand.hcf.app.auth.security.BaseTokenService;
-import com.hand.hcf.core.config.AuthExceptionEntryPoint;
+import com.hand.hcf.app.core.config.AuthExceptionEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

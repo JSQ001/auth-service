@@ -9,7 +9,7 @@ import com.hand.hcf.app.mdata.location.dto.LocationLevelAssignDTO;
 import com.hand.hcf.app.mdata.location.service.LocationDTOService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelAssignService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

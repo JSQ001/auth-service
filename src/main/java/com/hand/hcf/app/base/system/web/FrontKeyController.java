@@ -5,7 +5,7 @@ import com.hand.hcf.app.base.system.domain.FrontKey;
 import com.hand.hcf.app.base.system.dto.FrontKeyDTO;
 import com.hand.hcf.app.base.system.service.FrontKeyService;
 import com.hand.hcf.app.base.user.service.UserService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

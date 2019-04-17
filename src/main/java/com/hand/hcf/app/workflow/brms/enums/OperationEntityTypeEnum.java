@@ -1,7 +1,7 @@
 package com.hand.hcf.app.workflow.brms.enums;
 
 
-import com.hand.hcf.core.domain.enumeration.BusinessEnum;
+import com.hand.hcf.app.core.domain.enumeration.BusinessEnum;
 
 public enum OperationEntityTypeEnum implements BusinessEnum {
     APPROVAL_CHAIN("APPROVAL_CHAIN"),

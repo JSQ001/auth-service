@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.period.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.period.domain.PeriodRules;
 import com.hand.hcf.app.mdata.period.service.PeriodRuleService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

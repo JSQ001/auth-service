@@ -2,8 +2,8 @@ package com.hand.hcf.app.mdata.system.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.domain.DomainI18nEnable;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.domain.DomainI18nEnable;
 import lombok.Data;
 
 /**
@@ -11,7 +11,7 @@ import lombok.Data;
 */
 @Data
 @TableName("sys_mobile_validate")
-public class MobileValidate extends DomainI18nEnable{
+public class MobileValidate extends DomainI18nEnable {
 
     @TableField(value = "country_name_en")
     private String countryNameEn;

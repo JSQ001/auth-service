@@ -8,7 +8,7 @@ import com.hand.hcf.app.expense.travel.domain.TravelApplicationHeader;
 import com.hand.hcf.app.expense.travel.domain.TravelAssociatePeople;
 import com.hand.hcf.app.expense.travel.persistence.TravelAssociatePeopleMapper;
 import com.hand.hcf.app.expense.travel.web.dto.TravelPeopleDTO;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

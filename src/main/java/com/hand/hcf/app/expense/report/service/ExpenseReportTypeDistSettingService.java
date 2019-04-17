@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistRange;
@@ -12,8 +14,6 @@ import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistSetting;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDistSettingRequestDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeDistSettingMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @AllArgsConstructor
-public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseReportTypeDistSettingMapper,ExpenseReportTypeDistSetting>{
+public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseReportTypeDistSettingMapper,ExpenseReportTypeDistSetting> {
     private final ExpenseReportTypeDistSettingMapper expenseReportTypeDistSettingMapper;
 
     private final ExpenseReportTypeDistRangeService expenseReportTypeDistRangeService;

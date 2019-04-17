@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum WorkflowRoleType implements SysEnum {
     USER(0, "用户"), COST_CENTER_ITEM_MANAGER(1, "成本中心主管"), DEPARTMENT_MANAGER(2, "部门主管"), URL(3, "外部接口"), OWNER(4, "自审批"), USER_PICK(5, "选人审批");

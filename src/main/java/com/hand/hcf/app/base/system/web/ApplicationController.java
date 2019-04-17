@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.system.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.Application;
 import com.hand.hcf.app.base.system.service.ApplicationService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.Pageable;

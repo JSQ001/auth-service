@@ -4,7 +4,7 @@ package com.hand.hcf.app.base.codingrule.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.codingrule.domain.CodingRule;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

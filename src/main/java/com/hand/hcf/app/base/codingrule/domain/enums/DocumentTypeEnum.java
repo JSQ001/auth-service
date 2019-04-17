@@ -1,7 +1,7 @@
 package com.hand.hcf.app.base.codingrule.domain.enums;
 
 
-import com.hand.hcf.core.domain.enumeration.BusinessEnum;
+import com.hand.hcf.app.core.domain.enumeration.BusinessEnum;
 
 /**
  * 编码规则单据类型枚举

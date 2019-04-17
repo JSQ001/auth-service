@@ -1,5 +1,6 @@
 package com.hand.hcf.app.workflow.approval.service;
 
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
@@ -11,7 +12,6 @@ import com.hand.hcf.app.workflow.approval.implement.WorkflowNextNodeAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowPassInstanceAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
-import com.hand.hcf.core.exception.BizException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;

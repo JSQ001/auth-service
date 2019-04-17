@@ -1,6 +1,6 @@
 package com.hand.hcf.app.mdata.authorize.dto;
 
-import com.hand.hcf.core.web.dto.DomainObjectDTO;
+import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

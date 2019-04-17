@@ -2,7 +2,7 @@
 
 package com.hand.hcf.app.auth.security;
 
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;

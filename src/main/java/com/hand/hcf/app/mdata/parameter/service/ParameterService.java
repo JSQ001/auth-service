@@ -2,10 +2,10 @@ package com.hand.hcf.app.mdata.parameter.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.parameter.domain.Parameter;
 import com.hand.hcf.app.mdata.parameter.enums.ParameterLevel;
 import com.hand.hcf.app.mdata.parameter.persistence.ParameterMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.travel.service;
 
 import com.hand.hcf.app.expense.travel.domain.TravelApplicationTypeAssignDepartment;
 import com.hand.hcf.app.expense.travel.persistence.TravelApplicationTypeAssignDepartmentMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

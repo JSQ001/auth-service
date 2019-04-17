@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.user.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.base.user.enums.SMSTokenType;
-import com.hand.hcf.core.domain.BaseObject;
+import com.hand.hcf.app.core.domain.BaseObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

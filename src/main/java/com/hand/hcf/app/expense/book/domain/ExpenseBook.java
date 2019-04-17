@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.co.AttachmentCO;
+import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
-import com.hand.hcf.core.domain.Domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +29,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @TableName("exp_expense_book")
-public class ExpenseBook extends Domain{
+public class ExpenseBook extends Domain {
 
     //费用类型ID
     @TableField("expense_type_id")

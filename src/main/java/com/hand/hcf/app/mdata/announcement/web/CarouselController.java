@@ -7,7 +7,7 @@ import com.hand.hcf.app.mdata.announcement.service.CarouselService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.system.constant.Constants;
-import com.hand.hcf.core.util.PaginationUtil;
+import com.hand.hcf.app.core.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

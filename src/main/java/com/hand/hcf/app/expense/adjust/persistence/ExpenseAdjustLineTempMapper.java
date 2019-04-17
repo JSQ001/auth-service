@@ -1,8 +1,8 @@
 package com.hand.hcf.app.expense.adjust.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustLineTemp;
-import com.hand.hcf.core.web.dto.ImportResultDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

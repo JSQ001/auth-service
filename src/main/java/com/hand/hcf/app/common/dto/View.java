@@ -2,7 +2,7 @@ package com.hand.hcf.app.common.dto;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.hand.hcf.core.web.filter.CustomDateTimeSerializer;
+import com.hand.hcf.app.core.web.filter.CustomDateTimeSerializer;
 
 import java.time.ZonedDateTime;
 

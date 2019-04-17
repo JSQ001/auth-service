@@ -3,8 +3,8 @@ package com.hand.hcf.app.base.system.service;
 import com.hand.hcf.app.base.system.domain.ErrorMessage;
 import com.hand.hcf.app.base.system.persistence.ErrorMessageMapper;
 import com.hand.hcf.app.base.util.RespCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 /**

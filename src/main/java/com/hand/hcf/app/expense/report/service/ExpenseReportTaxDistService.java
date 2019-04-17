@@ -2,9 +2,9 @@ package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTaxDist;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTaxDistMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * @remark
  */
 @Service
-public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDistMapper,ExpenseReportTaxDist>{
+public class ExpenseReportTaxDistService extends BaseService<ExpenseReportTaxDistMapper,ExpenseReportTaxDist> {
 
 
     /**

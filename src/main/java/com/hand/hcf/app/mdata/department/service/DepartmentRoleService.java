@@ -1,6 +1,9 @@
 package com.hand.hcf.app.mdata.department.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.exception.core.ValidationError;
+import com.hand.hcf.app.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
@@ -12,9 +15,6 @@ import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;
 import com.hand.hcf.app.mdata.department.dto.DepartmentRoleDTO;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentRoleMapper;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
-import com.hand.hcf.core.exception.core.ValidationError;
-import com.hand.hcf.core.exception.core.ValidationException;
-import com.hand.hcf.core.service.BaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

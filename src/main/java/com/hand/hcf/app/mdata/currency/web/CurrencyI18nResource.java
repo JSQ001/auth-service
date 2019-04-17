@@ -7,7 +7,7 @@ import com.hand.hcf.app.mdata.currency.dto.CurrencyI18nDTO;
 import com.hand.hcf.app.mdata.currency.service.CurrencyI18nService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;

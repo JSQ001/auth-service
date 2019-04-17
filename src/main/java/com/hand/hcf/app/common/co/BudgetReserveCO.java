@@ -2,7 +2,7 @@ package com.hand.hcf.app.common.co;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.web.dto.DomainObjectDTO;
+import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.Data;
 
 import javax.validation.Valid;
@@ -17,7 +17,7 @@ import java.math.BigDecimal;
  * @date: 2018/12/21
  */
 @Data
-public class BudgetReserveCO extends DomainObjectDTO{
+public class BudgetReserveCO extends DomainObjectDTO {
     @JsonSerialize(using = ToStringSerializer.class)
     @NotNull
     private Long companyId;         //预算公司ID

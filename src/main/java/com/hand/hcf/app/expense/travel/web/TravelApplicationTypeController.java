@@ -6,7 +6,7 @@ import com.hand.hcf.app.expense.travel.dto.TravelApplicationTypeDTO;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationTypeService;
 import com.hand.hcf.app.expense.travel.web.dto.TravelApplicationTypeDimensionDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

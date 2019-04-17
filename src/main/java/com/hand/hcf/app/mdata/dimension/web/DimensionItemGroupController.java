@@ -5,7 +5,7 @@ import com.hand.hcf.app.mdata.dimension.domain.DimensionItem;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItemGroup;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItemGroupAssignItem;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemGroupService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

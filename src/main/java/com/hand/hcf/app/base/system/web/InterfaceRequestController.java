@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.system.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.InterfaceRequest;
 import com.hand.hcf.app.base.system.service.InterfaceRequestService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

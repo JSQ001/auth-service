@@ -3,7 +3,7 @@ package com.hand.hcf.app.expense.policy.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.expense.policy.domain.ExpensePolicyControlDimension;
 import com.hand.hcf.app.expense.policy.persistence.ExpensePolicyControlDimensionMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

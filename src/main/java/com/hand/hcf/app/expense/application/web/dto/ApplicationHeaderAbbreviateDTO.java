@@ -3,7 +3,7 @@ package com.hand.hcf.app.expense.application.web.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.core.annotation.ExcelDomainField;
+import com.hand.hcf.app.core.annotation.ExcelDomainField;
 import lombok.Data;
 
 import java.math.BigDecimal;

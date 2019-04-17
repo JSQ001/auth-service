@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.department.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hand.hcf.core.domain.DomainLogicEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

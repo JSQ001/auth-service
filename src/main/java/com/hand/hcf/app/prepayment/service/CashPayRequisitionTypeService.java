@@ -17,10 +17,10 @@ import com.hand.hcf.app.prepayment.persistence.CashPayRequisitionTypeAssignCompa
 import com.hand.hcf.app.prepayment.persistence.CashPayRequisitionTypeMapper;
 import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.app.prepayment.web.dto.CashPayRequisitionTypeDTO;
-import com.hand.hcf.core.domain.SystemCustomEnumerationType;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.PageUtil;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

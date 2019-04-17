@@ -1,7 +1,7 @@
 package com.hand.hcf.app.prepayment.domain.enumeration;
 
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
  * Created by lichao on 2016/9/23.

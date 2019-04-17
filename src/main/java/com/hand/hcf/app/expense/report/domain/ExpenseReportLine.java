@@ -3,7 +3,7 @@ package com.hand.hcf.app.expense.report.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.common.co.AttachmentCO;
-import com.hand.hcf.core.domain.Domain;
+import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @TableName("exp_report_line")
-public class ExpenseReportLine extends Domain{
+public class ExpenseReportLine extends Domain {
 
     /**
      * 对公报账头ID

@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.util;
 /**
  * Created by houyin.zhang@hand-china.com on 2018/8/13.
  */
-public interface RespCode extends com.hand.hcf.core.util.RespCode {
+public interface RespCode extends com.hand.hcf.app.core.util.RespCode {
     String ROLE_CODE_NULL = "ROLE_CODE_NULL";//角色代码不允许为空
     String ROLE_NAME_NULL = "ROLE_NAME_NULL";// 角色名称不允许为空
     String CODE_NOT_UNION_IN_TENANT = "10012";// 当前租户已存在该角色代码

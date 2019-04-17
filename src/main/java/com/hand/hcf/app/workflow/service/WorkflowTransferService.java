@@ -5,17 +5,16 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkflowTransfer;
 import com.hand.hcf.app.workflow.dto.WorkflowTransferDTO;
-import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkflowTransferMapper;
 import com.hand.hcf.app.workflow.util.ExceptionCode;
-import com.hand.hcf.core.exception.BizException;
-import com.hand.hcf.core.service.BaseService;
-import com.hand.hcf.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
                 .eq(StringUtils.isNotEmpty(documentCategory),"document_category",documentCategory)
                 .eq(workflowId != null, "workflow_id",workflowId)
                 .ge(StringUtils.isNotEmpty(startDate),"start_date", TypeConversionUtils.getStartTimeForDayYYMMDD(startDate))
-                .le(StringUtils.isNotEmpty(endDate),"end_date",TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
+                .le(StringUtils.isNotEmpty(endDate),"end_date", TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
                 .like(StringUtils.isNotEmpty(authorizationNotes),"authorization_notes",authorizationNotes)
                 .orderBy("start_date");
         if(tab.equals("agent")){

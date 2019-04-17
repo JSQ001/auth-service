@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.enums;
 
-import com.hand.hcf.core.enums.SysEnum;
+import com.hand.hcf.app.core.enums.SysEnum;
 
 public enum ApprovalChainStatusEnum implements SysEnum {
     NORMAL(1000), INVALID(1001) ,CHANGED(1003);

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.common.co.AttachmentCO;
-import com.hand.hcf.core.domain.DomainEnable;
+import com.hand.hcf.app.core.domain.DomainEnable;
 import lombok.Data;
 
 import java.time.ZonedDateTime;

@@ -5,7 +5,7 @@ import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.service.OrderNumberService;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
-import com.hand.hcf.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;

@@ -1,10 +1,10 @@
 package com.hand.hcf.app.workflow.brms.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprover;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.RuleApproverMapper;
-import com.hand.hcf.core.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;

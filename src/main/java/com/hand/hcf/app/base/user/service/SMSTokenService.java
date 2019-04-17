@@ -3,7 +3,7 @@ package com.hand.hcf.app.base.user.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.base.user.domain.SMSToken;
 import com.hand.hcf.app.base.user.persistence.SMSTokenMapper;
-import com.hand.hcf.core.service.BaseService;
+import com.hand.hcf.app.core.service.BaseService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

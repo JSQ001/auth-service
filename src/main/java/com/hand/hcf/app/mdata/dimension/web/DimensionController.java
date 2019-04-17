@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.dimension.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.service.DimensionService;
-import com.hand.hcf.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

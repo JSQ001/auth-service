@@ -2,9 +2,9 @@ package com.hand.hcf.app.mdata.parameter.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.hand.hcf.app.core.annotation.I18nField;
+import com.hand.hcf.app.core.domain.DomainI18n;
 import com.hand.hcf.app.mdata.parameter.enums.ParameterValueTypeEnum;
-import com.hand.hcf.core.annotation.I18nField;
-import com.hand.hcf.core.domain.DomainI18n;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
