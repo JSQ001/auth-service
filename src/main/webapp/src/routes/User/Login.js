@@ -582,8 +582,8 @@ export default class Login extends React.Component {
       moment(new Date()).format('YYYY-MM-DD hh:mm:ss')
     );
     axios({
-      /** jiu.zhao TODO 不同环境需要修改IP */
-      url: 'http://30.50.48.85:9082/oauth/token',
+      /** jiu.zhao 环境IP */
+      url: 'http://127.0.0.1:9082/oauth/token',
       method: 'POST',
       headers: {
         'x-helios-client': 'web',
