@@ -46,6 +46,6 @@ public class VendorBankAccount extends Domain {
     private String importCode;
 
     private String remark;
-    //   add by cjx ����״̬
+
     private String vendorBankStatus;
 }
