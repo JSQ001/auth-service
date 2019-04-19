@@ -37,7 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ContactCardImportService extends BaseService<ContactCardTempMapper, ContactCardTempDomain> {
+public class ContactCardImportService extends BaseService<ContactCardTempMapper,ContactCardTempDomain> {
 
 
     @Autowired
@@ -216,9 +216,9 @@ public class ContactCardImportService extends BaseService<ContactCardTempMapper,
                         tempDomain.setErrorFlag(true);
                         tempDomain.setErrorDetail(tempDomain.getErrorDetail() + "该员工下已有默认证件!");
                     }
-                    tempDomain.setPrimary(true);
+                    tempDomain.setPrimaryFlag(true);
                 }else if("N".equals(primaryStr)){
-                    tempDomain.setPrimary(false);
+                    tempDomain.setPrimaryFlag(false);
                 }else{
                     tempDomain.setErrorFlag(true);
                     tempDomain.setErrorDetail(tempDomain.getErrorDetail() + "是否默认输入有误!");
@@ -248,13 +248,13 @@ public class ContactCardImportService extends BaseService<ContactCardTempMapper,
             Integer typeExists = 0;
             for(ContactCardTempDomain item:list1){
                 if(exists){
-                    if(item.isPrimary()) {
+                    if(item.isPrimaryFlag()) {
                         item.setErrorFlag(true);
                         item.setErrorDetail(item.getErrorDetail() + "该员工下已有默认证件!");
                         updateById(item);
                     }
                 }else {
-                    if(item.isPrimary()){
+                    if(item.isPrimaryFlag()){
                         exists = true;
                     }
                 }
@@ -270,7 +270,7 @@ public class ContactCardImportService extends BaseService<ContactCardTempMapper,
 
             }
             if(!exists){
-                list1.get(0).setPrimary(true);
+                list1.get(0).setPrimaryFlag(true);
                 updateById(list1.get(0));
             }
         });
@@ -325,7 +325,7 @@ public class ContactCardImportService extends BaseService<ContactCardTempMapper,
                 cell = row.createCell(ContactCardImportCode.CARD_TYPE_CODE_ERROR);
                 cell.setCellValue(bankAccountTempDomain.getCardTypeCode());
                 cell = row.createCell(ContactCardImportCode.CARD_NO_ERROR);
-                cell.setCellValue(bankAccountTempDomain.getCardNo());
+                cell.setCellValue(UserInfoEncryptUtil.detrypt(bankAccountTempDomain.getCardNo()));
                 cell = row.createCell(ContactCardImportCode.CARD_EXPIRED_TIME_ERROR);
                 cell.setCellValue(bankAccountTempDomain.getCardExpiredTimeStr());
                 cell = row.createCell(ContactCardImportCode.ENABLED_STR_ERROR);

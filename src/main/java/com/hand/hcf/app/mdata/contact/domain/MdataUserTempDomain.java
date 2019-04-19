@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -110,5 +111,11 @@ public class MdataUserTempDomain extends Domain {
 
     @TableField("error_flag")
     private Boolean errorFlag;
+
+    @TableField("rank_info")
+    @JsonProperty(value = "rank")
+    private String rankInfo;
+
+
 
 }

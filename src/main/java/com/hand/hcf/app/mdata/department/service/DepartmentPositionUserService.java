@@ -2,6 +2,8 @@ package com.hand.hcf.app.mdata.department.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.hand.hcf.app.common.co.ContactCO;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
@@ -10,13 +12,13 @@ import com.hand.hcf.app.mdata.department.domain.DepartmentPositionUser;
 import com.hand.hcf.app.mdata.department.domain.DepartmentRole;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionUserImportCode;
-import com.hand.hcf.app.mdata.department.dto.DepartmentPositionDTO;
-import com.hand.hcf.app.mdata.department.dto.DepartmentPositionUserDTO;
-import com.hand.hcf.app.mdata.department.dto.DepartmentPositionUserImportDTO;
-import com.hand.hcf.app.mdata.department.dto.DepartmentRoleDTO;
+import com.hand.hcf.app.mdata.department.dto.*;
+import com.hand.hcf.app.mdata.department.persistence.DepartmentMapper;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentPositionUserMapper;
-import com.hand.hcf.app.mdata.system.domain.BatchTransactionLog;
+import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
+//import com.hand.hcf.app.mdata.system.domain.BatchTransactionLog;
 import com.hand.hcf.app.mdata.utils.FileUtil;
+//import com.hand.hcf.core.util.TypeConversionUtils;
 import com.itextpdf.text.io.StreamUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,10 +47,7 @@ import java.util.concurrent.FutureTask;
 
 @Service
 @Transactional
-public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositionUserMapper, DepartmentPositionUser> {
-    public static final Map<UUID, BatchTransactionLog> transactions = new HashMap<>();
-    public static final Map<UUID, List<DepartmentPositionUserImportDTO>> departmentPositionUserImportMap = new HashMap<>();
-
+public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositionUserMapper,DepartmentPositionUser> {
     private final Logger log = LoggerFactory.getLogger(DepartmentPositionUserService.class);
 
 
@@ -59,11 +59,11 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
     private DepartmentPositionService departmentPositionService;
 
     @Autowired
-    private DepartmentService departmentService;
+    private DepartmentMapper departmentMapper;
     @Autowired
     private ContactService contactService;
-
-
+    @Autowired
+    private ContactControllerImpl contactClient;
 
 
     @Autowired
@@ -131,14 +131,14 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
     }
 
     public void saveOrUpdateDepartmentPositionUser(DepartmentRole departmentRole, Long departmentId){
-        Department department = departmentService.findOneByDepartmentId(departmentId);
+        Department department = departmentMapper.selectById(departmentId);
         if(department == null){
             throw new RuntimeException("部门不存在,部门id:"+departmentId);
         }
         long tenantId = department.getTenantId();
         UserDTO user = null;
         for (int i = 0; i< DepartmentPositionCode.codes.length; i++){
-            long positionId = departmentPositionService.getPostionId(tenantId, DepartmentPositionCode.codes[i]);
+            long positionId = departmentPositionService.getPostionId(tenantId,DepartmentPositionCode.codes[i]);
 
             long userId = getUserId(departmentRole, DepartmentPositionCode.codes[i], tenantId);
             if(userId <= 0){
@@ -205,7 +205,7 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
         switch (code){
             case "6101":
                 //需要使用部门上的部门经理
-                Department department=departmentService.findOneByDepartmentId(departmentRole.getDepartmentId());
+                Department department=departmentMapper.selectById(departmentRole.getDepartmentId());
                 if(department!=null){
                     UserDTO manager=department.getManager();
                     if(manager!=null){
@@ -324,7 +324,7 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
         return departmentRole;
     }
 
-    public DepartmentRole convertPositionUserToRole(DepartmentPositionUser positionUser, DepartmentRole departmentRole){
+    public DepartmentRole convertPositionUserToRole(DepartmentPositionUser positionUser,DepartmentRole departmentRole){
         departmentRole = convert(positionUser,departmentRole);
         return departmentRole;
     }
@@ -408,7 +408,7 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
         });
     }
 
-    public UserDTO getUser(long tenantId, long departmentId, String positionCode){
+    public UserDTO getUser(long tenantId,long departmentId, String positionCode){
         Long userId = departmentPositionUserMapper.selectUser(tenantId,departmentId,positionCode);
         if(userId != null && userId > 0){
             return contactService.getUserDTOByUserId(userId);
@@ -418,7 +418,6 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
     }
 
     public UserDTO getUser(String departmentOid, String positionCode) {
-//        Department department=departmentService.getByDepartmentOid(UUID.fromString(departmentOid));
 
         Long userId = departmentPositionUserMapper.selectUserByDepartmentOidAndPositionCode(departmentOid,positionCode);
         if(userId != null && userId > 0){
@@ -529,18 +528,64 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
         return null;
     }
 
-    /**
-     * 导入部门角色用户信息
-     * @param inputStream：文件流
-     * @param tenantId：租户id
-     * @param currentUserOid：当前登录用户Oid
-     * @return
-     */
-    @Transactional
-    public UUID importDepartmentPositionUser(InputStream inputStream,Long tenantId,UUID currentUserOid){
-        log.info("Start Importing Department Position User");
-        //to do
-        return null;
-    }
+    public String importDepartmentPositionUser(List<DepartmentPositionUserBeginningImportDTO> list) {
+        StringBuilder errorMessage = new StringBuilder();
+        list.forEach(item -> {
+            Long tenantId = TypeConversionUtils.parseLong(item.getTenantId());
+            // 校验部门角色是否存在
+            DepartmentPosition departmentPosition = departmentPositionService.getPostionByCode(
+                    tenantId, item.getPositionCode());
+            if (ObjectUtils.isEmpty(departmentPosition)) {
+                errorMessage.append("账套下不存在该部门角色").append(item.getPositionCode());
+            } else {
+                Department department = departmentMapper.findByDepartmentCodeAndTenantId(item.getDepartmentCode(),
+                        tenantId, null);
+                if (ObjectUtils.isEmpty(department)) {
+                    errorMessage.append("租户下不存在该部门").append(item.getDepartmentCode());
+                } else {
+                    ContactCO userCO = contactClient.getByUserCode(item.getUserCode());
 
+                    if (ObjectUtils.isEmpty(userCO)) {
+                        errorMessage.append("账套下不存在该用户").append(item.getUserCode());
+                    } else {
+                        int count = baseMapper.selectCount(
+                                new EntityWrapper<DepartmentPositionUser>()
+                                        .eq("tenant_id", tenantId)
+                                        .eq("position_id", departmentPosition.getId())
+                                        .eq("department_id", department.getId())
+                        );
+                        // 当前部门角色尚未分配人员，则插入一条数据
+                        if (count == 0) {
+                            DepartmentPositionUser departmentPositionUser = new DepartmentPositionUser();
+                            departmentPositionUser.setTenantId(tenantId);
+                            departmentPositionUser.setPositionId(departmentPosition.getId());
+                            departmentPositionUser.setDepartmentId(department.getId());
+                            departmentPositionUser.setUserId(
+                                    contactService.getUserDTOByUserOid(userCO.getUserOid()).getId());
+                            departmentPositionUser.setEnabled("Y".equals(item.getEnabled()));
+                            baseMapper.insert(departmentPositionUser);
+                        }
+                        // 当前部门角色已分配人员，则更新该条数据
+                        else if (count == 1) {
+                            DepartmentPositionUser departmentPositionUser = baseMapper.selectList(
+                                    new EntityWrapper<DepartmentPositionUser>()
+                                            .eq("tenant_id", tenantId)
+                                            .eq("position_id", departmentPosition.getId())
+                                            .eq("department_id", department.getId())
+                            ).get(0);
+                            departmentPositionUser.setUserId(
+                                    contactService.getUserDTOByUserOid(userCO.getUserOid()).getId());
+                            departmentPositionUser.setEnabled("Y".equals(item.getEnabled()));
+                            this.updateById(departmentPositionUser);
+                        }
+                    }
+                }
+            }
+        });
+        if ("".equals(errorMessage.toString())) {
+            return "导入成功！";
+        } else {
+            return "导入失败！"+errorMessage.toString();
+        }
+    }
 }

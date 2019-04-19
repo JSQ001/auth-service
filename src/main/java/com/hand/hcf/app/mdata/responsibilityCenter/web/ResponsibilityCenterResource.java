@@ -7,7 +7,8 @@ import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityAssignCo
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.enums.ResponsibilityCenterImportCode;
 
-import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
+//import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityAssignCompanyService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterService;
 import com.hand.hcf.app.mdata.utils.RespCode;
@@ -631,7 +632,7 @@ public class ResponsibilityCenterResource {
             @ApiImplicitParam(paramType="query", name = "size", value = "页数", required = true, dataType = "int")
     })
     @GetMapping("/query/by/company/department")
-    public ResponseEntity<List<ResponsibilityLov>> queryByCompanyAndDepartment(
+    public ResponseEntity<List<ResponsibilityLovDTO>> queryByCompanyAndDepartment(
             @RequestParam("companyId") Long companyId,
             @RequestParam("departmentId") Long departmentId,
             @RequestParam(value = "code", required = false) String code,
@@ -639,8 +640,8 @@ public class ResponsibilityCenterResource {
             @RequestParam(value = "id", required = false) Long id,
             @ApiIgnore Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        List<ResponsibilityLov> result = responsibilityCenterService.pageByCompanyAndDepartment(page,
-                companyId, departmentId, code, name, id);
+        List<ResponsibilityLovDTO> result = responsibilityCenterService. pageByCompanyAndDepartment(page,
+                companyId, departmentId, code, name, true, null, id);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, totalHeader, HttpStatus.OK);
     }

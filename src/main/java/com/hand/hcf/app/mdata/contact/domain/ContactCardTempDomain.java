@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
@@ -60,8 +61,9 @@ public class ContactCardTempDomain extends Domain {
     @TableField("primary_str")
     private String primaryStr;
 
-    @TableField("primary")
-    private boolean primary;
+    @TableField("primary_flag")
+    @JsonProperty(value = "primary")
+    private boolean primaryFlag;
 
     @TableField("has_primary")
     private boolean hasPrimary;

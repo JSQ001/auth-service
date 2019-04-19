@@ -167,7 +167,7 @@
             then d.name
             else i18n.name
         end as name,
-        ifnull(d.DEPARTMENT_CODE, 'ZZZZ9999'),/**jiu.zhao 修复mysql兼容性问题**/
+        coalesce(d.department_code, 'ZZZZ9999'),
         d.path,
         d.department_code,
         d.department_oid,
@@ -196,7 +196,7 @@
         <if test="name != null and name != ''">
            AND d.name like concat(concat('%',#{name}),'%')
         </if>
-        order by d.DEPARTMENT_CODE
+        order by d.department_code
     </select>
 
     <select id="selectByDepartmentOidAndStatus" resultMap="DepartmentAssociationResultMap">
@@ -340,8 +340,8 @@
 
     <update id="updateChildrenDepartmentPath">
         UPDATE sys_department
-         SET path = CONCAT(#{newPath}, substr(path, #{oldPathLength}))
-        WHERE path LIKE CONCAT(#{oldPath}, '%')
+         SET path = concat(#{newPath}, substr(path, #{oldPathLength}))
+        WHERE path LIKE concat(#{oldPath}, '%')
         AND tenant_id = #{tenantId}
     </update>
 

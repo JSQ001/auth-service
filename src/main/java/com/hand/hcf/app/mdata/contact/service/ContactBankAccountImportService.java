@@ -182,9 +182,9 @@ public class ContactBankAccountImportService extends BaseService<ContactBankAcco
                         tempDomain.setErrorFlag(true);
                         tempDomain.setErrorDetail(tempDomain.getErrorDetail() + "该员工下已有默认银行卡!");
                     }
-                    tempDomain.setPrimary(true);
+                    tempDomain.setPrimaryFlag(true);
                 }else if("N".equals(primaryStr)){
-                    tempDomain.setPrimary(false);
+                    tempDomain.setPrimaryFlag(false);
                 }else{
                     tempDomain.setErrorFlag(true);
                     tempDomain.setErrorDetail(tempDomain.getErrorDetail() + "是否默认输入有误!");
@@ -212,17 +212,17 @@ public class ContactBankAccountImportService extends BaseService<ContactBankAcco
         map.forEach((u,list1) ->{
             boolean exists = false;
             for(ContactBankAccountTempDomain item:list1){
-                if(exists && item.isPrimary()){
+                if(exists && item.isPrimaryFlag()){
                     item.setErrorFlag(true);
                     item.setErrorDetail(item.getErrorDetail() + "该员工下已有默认银行卡!");
                     updateById(item);
                 }
-                if(item.isPrimary()){
+                if(item.isPrimaryFlag()){
                     exists = true;
                 }
             }
             if(!exists){
-                list1.get(0).setPrimary(true);
+                list1.get(0).setPrimaryFlag(true);
                 updateById(list1.get(0));
             }
         });
@@ -271,7 +271,7 @@ public class ContactBankAccountImportService extends BaseService<ContactBankAcco
                 cell = row.createCell(ContactBankAccountImportCode.BANK_ACCOUNT_NAME_ERROR);
                 cell.setCellValue(bankAccountTempDomain.getBankAccountName());
                 cell = row.createCell(ContactBankAccountImportCode.BANK_ACCOUNT_NO_ERROR);
-                cell.setCellValue(bankAccountTempDomain.getBankAccountNo());
+                cell.setCellValue(UserInfoEncryptUtil.detrypt(bankAccountTempDomain.getBankAccountNo()));
                 cell = row.createCell(ContactBankAccountImportCode.ACCOUNT_LOCATION_ERROR);
                 cell.setCellValue(bankAccountTempDomain.getAccountLocation());
                 cell = row.createCell(ContactBankAccountImportCode.BRANCH_NAME_ERROR);

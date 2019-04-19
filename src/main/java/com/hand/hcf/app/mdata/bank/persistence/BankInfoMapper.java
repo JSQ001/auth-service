@@ -32,7 +32,7 @@ public interface BankInfoMapper extends BaseMapper<BankInfo> {
      * @param page：分页对象
      * @return
      */
-    List<BankInfo> findByTenantIdAndBankBranchNameContaining(@Param("isAll") Boolean isAll, @Param("tenantId") Long tenantId, @Param("systemTenantId") Long systemTenantId, @Param("keyword") String keyword, @Param("bankCode") String bankCode,
+    List<BankInfo> findByTenantIdAndBankBranchNameContaining(@Param("bankHead") String bankHead,@Param("isAll") Boolean isAll, @Param("tenantId") Long tenantId, @Param("systemTenantId") Long systemTenantId, @Param("keyword") String keyword, @Param("bankCode") String bankCode,
                                                              @Param("countryCode") String countryCode, @Param("openAccount") String openAccount, @Param("cityCode") String cityCode, @Param("swiftCode") String swiftCode, @Param("enable") Boolean enable, Pagination page);
 
     /**

@@ -14,8 +14,7 @@
                        created_date,
                        last_updated_date,
                        created_by,
-                       last_updated_by,
-                       start_date)
+                       last_updated_by)
                       SELECT t.id,
                              t.dimension_id,
                              t.dimension_item_code,
@@ -26,8 +25,7 @@
                              #{currentDate},
                              #{currentDate},
                              #{userId},
-                             #{userId},
-                             #{currentDate}
+                             #{userId}
                         FROM sys_dimension_item_temp t
                        WHERE t.batch_number = #{transactionID}
                          AND t.error_flag = 0
@@ -39,7 +37,7 @@
                 t.error_detail = concat(error_detail,
                                         '  维度代码已经存在，不允许重复导入！')
           WHERE 1 &lt; (SELECT 1
-                    FROM sys_dimension_item_temp temp
+                    FROM (select b.* from sys_dimension_item_temp b) temp
                    WHERE temp.dimension_id = t.dimension_id
                     AND temp.batch_number = #{batchNumber}
                     AND temp.dimension_item_code = t.dimension_item_code)
@@ -69,7 +67,7 @@
                     column="{transactionID=transaction_id}"/>
     </resultMap>
     <select id="queryErrorData" resultMap="errorDataMap">
-           select t.row_number AS row_number,
+           select t.row_number AS rowNumber,
                    t.error_detail AS error
               FROM sys_dimension_item_temp t
 
@@ -77,7 +75,7 @@
                and t.error_flag = 1
     </select>
     <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
-        <result column="row_number" property="index"/>
+        <result column="rowNumber" property="index"/>
         <result column="error" property="error"/>
     </resultMap>
 

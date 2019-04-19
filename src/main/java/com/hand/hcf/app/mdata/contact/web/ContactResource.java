@@ -24,6 +24,10 @@ import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +50,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/*import com.hand.hcf.app.client.attachment.AttachmentCO;*/
-
 /**
  * REST controller for managing Contact.
  */
 @RestController
 @RequestMapping("/api")
+@Api(tags = "员工")
 public class ContactResource {
 
     private final Logger log = LoggerFactory.getLogger(ContactResource.class);
@@ -782,11 +785,13 @@ public class ContactResource {
      * }
      */
     @RequestMapping(value = "/users/v3/search", method = RequestMethod.GET)
-    public ResponseEntity<List<UserDTO>> ControlSearchUserV3(@RequestParam(required = false) String keyword,
+    public ResponseEntity<List<UserDTO>> controlSearchUserV3(@RequestParam(required = false) String keyword,
                                                              @RequestParam(required = false) String status,
+                                                             @RequestParam(required = false) String keyContact,
+                                                             @RequestParam(required = false) String keyCompany,
+                                                             @RequestParam(required = false) String keyDepartment,
                                                              @RequestParam(required = false) List<UUID> departmentOid,
                                                              @RequestParam(required = false) List<UUID> corporationOid,
-                                                             @RequestParam(required = false, defaultValue = "false") Boolean isInactiveSearch,
                                                              @RequestParam(required = false) UUID currentUserOid,
                                                              Pageable pageable)  {
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
@@ -795,6 +800,9 @@ public class ContactResource {
                 tenantId,departmentOid,
                 status,corporationOid,
                 currentUserOid,
+                keyContact,
+                keyCompany,
+                keyDepartment,
                 page);
         return new ResponseEntity<>(list, PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
@@ -991,4 +999,12 @@ public class ContactResource {
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "查询员工信息", notes = "根据用户ID批量查询员工信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userIds", value = "用户ID", dataType = "List"),
+    })
+    @PostMapping(value = "/list/user/batch/ids")
+    public ResponseEntity<List<UserDTO>> listUserDTOByUserIds(@RequestBody List<Long> userIds){
+        return ResponseEntity.ok(contactService.listUserDTOByUserId(userIds));
+    }
 }

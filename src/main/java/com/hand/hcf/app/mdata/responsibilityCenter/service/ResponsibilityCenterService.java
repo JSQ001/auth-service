@@ -24,9 +24,13 @@ import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.enums.ResponsibilityCenterImportCode;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.temp.ResponsibilityCenterTemp;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityCenterExportDTO;
-import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityDefaultDTO;
+
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO;
+import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityAssignCompanyMapper;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityCenterMapper;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
+import com.hand.hcf.app.mdata.setOfBooks.persistence.SetOfBooksMapper;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
 import com.hand.hcf.app.mdata.utils.RespCode;
@@ -51,9 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -68,9 +70,9 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
     private GroupCenterRelationshipService groupCenterRelationshipService;
 
     @Autowired
-    private ResponsibilityAssignCompanyService resAssginCompanyService;
+    private ResponsibilityAssignCompanyMapper assignCompanyMapper;
     @Autowired
-    private SetOfBooksService setOfBooksService;
+    private SetOfBooksMapper setOfBooksMapper;
 
     @Autowired
     private ExcelImportService excelImportService;
@@ -220,7 +222,7 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
      */
     public UUID importResponsibilityCenters(InputStream in, Long setOfBooksId) throws Exception {
         UUID batchNumber = UUID.randomUUID();
-        SetOfBooks setOfBooks = setOfBooksService.getSetOfBooksById(setOfBooksId);
+        SetOfBooks setOfBooks = setOfBooksMapper.selectById(setOfBooksId);
         if(setOfBooks == null){
             throw new BizException(RespCode.SETOFBOOKS_NOT_EXIST);
         }
@@ -338,7 +340,7 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
      * @param exportConfig
      */
     public void exportResponsibilityCenterData(Long setOfBooksId, HttpServletRequest request, HttpServletResponse response, ExportConfig exportConfig) throws IOException {
-        SetOfBooks setOfBooks = setOfBooksService.getSetOfBooksById(setOfBooksId);
+        SetOfBooks setOfBooks = setOfBooksMapper.selectById(setOfBooksId);
         if(setOfBooks == null){
             throw new BizException(RespCode.DIMENSION_SETOFBOOKS_NOT_EXIST);
         }
@@ -473,9 +475,10 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                                                                       Page page) {
         List<ResponsibilityCenter> resCenterList ;
         if(companyId != null){
-            ids = resAssginCompanyService.selectList(
+            ids = assignCompanyMapper.selectList(
                     new EntityWrapper<ResponsibilityAssignCompany>()
                             .eq("company_id", companyId)
+                            .eq("enabled",true)
             ).stream().map(ResponsibilityAssignCompany::getResponsibilityCenterId).collect(Collectors.toList());
             if(CollectionUtils.isEmpty(ids)){
                 return page;
@@ -515,7 +518,7 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                     .append("-")
                     .append(responsibilityCenter.getResponsibilityCenterName());
             responsibilityCenter.setResponsibilityCenterCodeName(strBuilder.toString());
-            SetOfBooks setOfBooks =  setOfBooksService.getSetOfBooksById(responsibilityCenter.getSetOfBooksId());
+            SetOfBooks setOfBooks =  setOfBooksMapper.selectById(responsibilityCenter.getSetOfBooksId());
             if(StringUtils.isNotEmpty(setOfBooks.toString())){
                 responsibilityCenter.setSetOfBooksName(setOfBooks.getSetOfBooksName());
             }
@@ -548,7 +551,7 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                     .append(responsibilityCenter.getResponsibilityCenterName());
             responsibilityCenter.setResponsibilityCenterCodeName(strBuilder.toString());
             if (responsibilityCenter.getSetOfBooksId() != null) {
-                SetOfBooks setOfBooks = setOfBooksService.getSetOfBooksById(responsibilityCenter.getSetOfBooksId());
+                SetOfBooks setOfBooks = setOfBooksMapper.selectById(responsibilityCenter.getSetOfBooksId());
                 if (setOfBooks != null) {
                     responsibilityCenter.setSetOfBooksName(setOfBooks.getSetOfBooksName());
                 }
@@ -697,15 +700,50 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
         return queryPage;
     }
 
-    public List<ResponsibilityLov> pageByCompanyAndDepartment(Page page,
-                                                              Long companyId,
-                                                              Long departmentId,
-                                                              String code,
-                                                              String name,
-                                                              Long id) {
+    public List<ResponsibilityLovDTO> pageByCompanyAndDepartment(Page page,
+                                                                 Long companyId,
+                                                                 Long departmentId,
+                                                                 String code,
+                                                                 String name,
+                                                                 Boolean enabled,
+                                                                 String codeName,
+                                                                 Long id) {
         if (id != null){
             page.setSearchCount(Boolean.FALSE);
         }
-        return baseMapper.pageByCompanyAndDepartment(page, companyId, departmentId, code, name, id);
+        return baseMapper.pageByCompanyAndDepartment(page, companyId, departmentId, code, name,enabled,  codeName, id);
+    }
+
+    public Map<Long, ResponsibilityDefaultDTO> getDefaultCenterByCompanyAndDepartment(Long companyId,
+                                                                                      List<Long> departmentId){
+        if (CollectionUtils.isEmpty(departmentId)){
+            return new HashMap<>(1);
+        }
+        if (companyId == null){
+            return new HashMap<>(1);
+        }
+        List<ResponsibilityDefaultDTO> defaultCenter = baseMapper.listCompanyDepartmentDefaultCenter(
+                companyId, departmentId);
+
+        if (CollectionUtils.isEmpty(defaultCenter)){
+            return new HashMap<>(1);
+        }
+        Map<Long, ResponsibilityDefaultDTO> result = new HashMap<>(16);
+        Map<Long, List<ResponsibilityDefaultDTO>> collect = defaultCenter
+                .stream()
+                .collect(Collectors.groupingBy(ResponsibilityDefaultDTO::getDepartmentId));
+        collect.forEach((e, item)-> {
+            ResponsibilityDefaultDTO dto = item.stream().reduce((k, v) -> {
+                if (v.getCompanyId() != null) {
+                    return v;
+                } else {
+                    return k;
+                }
+            }).orElse(null);
+
+            result.put(e, dto);
+        });
+
+        return result;
     }
 }

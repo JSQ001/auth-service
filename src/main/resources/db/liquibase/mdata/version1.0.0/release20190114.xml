@@ -586,13 +586,9 @@
             <column name="cor_num" type="varchar(60)" remarks="成本中心号"/>
         </createTable>
     </changeSet>
-    <changeSet id="2019011022500011" author="bin.xie">
-        <comment>初始化银行信息</comment>
-        <loadData encoding="UTF-8"
-                  file="db/liquibase/mdata/init/csv/bank.csv"
-                  separator=","
-                  tableName="sys_bank_info"/>
-    </changeSet>
+
+
+
 
     <changeSet id="201901281133001" author="zhu.zhao">
         <createTable tableName="sys_currency" remarks="">

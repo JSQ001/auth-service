@@ -98,14 +98,14 @@
                     column="{transactionId=transaction_id}"/>
     </resultMap>
     <select id="queryErrorData" resultMap="errorDataMap">
-        select t.row_number AS row_number,
+        select t.row_number AS rowNumber,
         t.error_detail AS error
         FROM sys_bank_info_temp t
         WHERE t.batch_number = #{transactionId}
         and t.error_flag = 1
     </select>
     <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
-        <result column="row_number" property="index"/>
+        <result column="rowNumber" property="index"/>
         <result column="error" property="error"/>
     </resultMap>
 

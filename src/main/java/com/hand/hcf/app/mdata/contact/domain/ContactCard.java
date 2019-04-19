@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
@@ -30,8 +31,10 @@ public class ContactCard extends DomainLogicEnable {
     private String lastName;        //姓
     @TableField(strategy = FieldStrategy.IGNORED)
     private String nationality;     //国籍
+    @TableField(strategy = FieldStrategy.IGNORED)
     private ZonedDateTime cardExpiredTime;       //证件过期时间
-    private Boolean primary = false;         //是否默认
+    @JsonProperty(value = "primary")
+    private Boolean primaryFlag = false;         //是否默认
 
     /**
      * 国籍编码

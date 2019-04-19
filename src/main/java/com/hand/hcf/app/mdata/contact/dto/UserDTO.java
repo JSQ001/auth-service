@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.contact.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.mdata.contact.domain.Phone;
 import lombok.Data;
 
@@ -77,7 +78,8 @@ public class UserDTO implements Serializable {
     private String genderCode;
     private String employeeType;    //人员类型
     private String employeeTypeCode;
-    private String rank;    //职级
+    @JsonProperty(value = "rank")
+    private String rankInfo;    //职级
     private String rankCode;
 
     private String duty;

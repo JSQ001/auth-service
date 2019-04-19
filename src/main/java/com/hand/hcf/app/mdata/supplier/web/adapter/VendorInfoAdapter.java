@@ -7,8 +7,8 @@ import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
 import com.hand.hcf.app.mdata.supplier.domain.VendorType;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorTypeMapper;
-import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.mdata.supplier.service.dto.VendorInfoforStatusDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -67,12 +67,12 @@ public class VendorInfoAdapter {
         return vendorInfo;
     }
 
-    public static vendorInfoforStatusDTO vendorInfoToVendorInfoCO(VendorInfo vendorInfo) {
+    public static VendorInfoforStatusDTO vendorInfoToVendorInfoCO(VendorInfo vendorInfo) {
         if (vendorInfo == null) {
             return null;
         }
         Long vendorTypeId = vendorInfo.getVendorTypeId();
-        vendorInfoforStatusDTO vendorInfoCO = new vendorInfoforStatusDTO();
+        VendorInfoforStatusDTO vendorInfoCO = new VendorInfoforStatusDTO();
         BeanUtils.copyProperties(vendorInfo, vendorInfoCO);
         vendorInfoCO.setVenNickOid(vendorInfo.getVendorCode());
         vendorInfoCO.setVenNickname(vendorInfo.getVendorName());

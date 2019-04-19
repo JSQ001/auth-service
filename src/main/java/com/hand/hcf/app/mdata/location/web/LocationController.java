@@ -3,21 +3,25 @@ package com.hand.hcf.app.mdata.location.web;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocationDetailService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.PageUtil;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +97,19 @@ public class LocationController {
                                                              @RequestParam(required = false) String code,
                                                              Pageable pageable){
         com.baomidou.mybatisplus.plugins.Page page = PageUtil.getPage(pageable);
-        page.setSearchCount(false);
-        return ResponseEntity.ok(locationDetailService.listCityByDescription(description, id, code, page));
+        List<LocationInfoDTO> result = locationDetailService.listCityByDescription(description, id, code, page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "查询城市", notes = "根据id集合查询城市")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType="query", name = "ids", value = "城市ID集合", required = true, dataType = "List")
+    })
+    @PostMapping("/location/city/ids")
+    public List<LocationDetail> listLocationCityByIds(@RequestBody List<Long> ids){
+
+        List<LocationDetail> cityList = locationDetailService.selectBatchIds(ids);
+        return cityList;
     }
 }

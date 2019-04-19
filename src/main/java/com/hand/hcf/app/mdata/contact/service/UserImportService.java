@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.contact.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
@@ -181,6 +182,6 @@ public class UserImportService extends BaseService<MdataUserTempMapper, MdataUse
     }
 
     public Boolean varifyBatchNumberExsits(String transactionID){
-        return baseMapper.varifyBatchNumberExsits(transactionID);
+        return SqlHelper.retBool(baseMapper.varifyBatchNumberExsits(transactionID));
     }
 }

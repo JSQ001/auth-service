@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+    <changeSet id="201904111631001" author="bin.xie">
+        <renameColumn tableName="sys_contact"
+                      oldColumnName="rank"
+                      newColumnName="rank_info"
+                      columnDataType="varchar(100)"/>
+        <renameColumn tableName="sys_user_import_temp"
+                      oldColumnName="rank"
+                      newColumnName="rank_info"
+                      columnDataType="varchar(100)"/>
+    </changeSet>
+
+    <changeSet id="201904112018001" author="bin.xie">
+        <renameColumn tableName="sys_contact_card_info"
+                      oldColumnName="primary"
+                      newColumnName="primary_flag"
+                      columnDataType="tinyint"/>
+        <renameColumn tableName="sys_contact_card_import"
+                      oldColumnName="primary"
+                      newColumnName="primary_flag"
+                      columnDataType="tinyint"/>
+        <renameColumn tableName="sys_contact_bank_account"
+                      oldColumnName="primary"
+                      newColumnName="primary_flag"
+                      columnDataType="tinyint"/>
+        <renameColumn tableName="sys_contact_bank_import"
+                      oldColumnName="primary"
+                      newColumnName="primary_flag"
+                      columnDataType="tinyint"/>
+    </changeSet>
+
+
+    <changeSet id="201904151702001" author="bin.xie">
+        <createTable tableName="sys_company_associate_unit" remarks="公司部门关联表">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_company_associate_unit"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司id"/>
+            <column name="department_id" type="bigint" remarks="部门id"/>
+            <column name="enabled" type="tinyint" remarks="是否启用"/>
+            <column name="created_by" type="bigint"/>
+            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_updated_by" type="bigint"/>
+            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="version_number" type="int" defaultValue="1" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201904161748001" author="bin.xie">
+        <comment>初始化银行数据</comment>
+        <sql>truncate table sys_bank_info</sql>
+        <loadData tableName="sys_bank_info"
+                  separator="|"
+                  encoding="UTF-8"
+                  file="classpath:db/liquibase/mdata/version1.1.0/csv/bank_info.csv"/>
+    </changeSet>
+    <changeSet id="201904162106001" author="shouting.cheng">
+        <addColumn tableName="sys_dimension_item">
+            <column name="from_project_flag" type="tinyint" defaultValue="0" remarks="是否来自项目申请单（1 是，0 不是）"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

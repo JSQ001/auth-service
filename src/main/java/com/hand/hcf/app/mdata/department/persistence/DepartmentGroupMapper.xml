@@ -511,6 +511,9 @@
         <if test="leafEnable != null and leafEnable == 1">
             AND (SELECT COUNT(1) FROM sys_department dd WHERE dd.parent_id = ad.id and dd.status!=103) = 0
         </if>
+        <if test="departmentId != null ">
+            AND ad.id = #{departmentId}
+        </if>
         ORDER BY
             ad.department_code
     </select>

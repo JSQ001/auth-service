@@ -252,4 +252,24 @@ public class ResponsibilityCenterControllerImpl {
         return departmentSobResponsibilityService.getDefaultResponsibilityCenterByUnit(tenantId, setOfBooksId, unitId, companyId);
     }
 
+    /**
+     * 根据公司部门获取默认责任中心及其可用责任中心范围
+     * @param unitId 部门ID
+     * @param companyId 公司ID
+     * @param page 分页
+     * @return
+     */
+   // @Override
+    public Page<ResponsibilityCenterCO> pageDepartmentAvailableResCenterByCond(Long unitId,
+                                                                      Long companyId,
+                                                                      int page,
+                                                                      int size) {
+        Page<ResponsibilityCenterCO> mybatisPage = PageUtil.getPage(page, size);
+        List<ResponsibilityCenter> responsibilityCenterList = departmentSobResponsibilityService.listDepartmentAvailableResCenterByCond(unitId,companyId);
+        List<ResponsibilityCenterCO> responsibilityCenterCOS = mapperFacade.mapAsList(responsibilityCenterList,ResponsibilityCenterCO.class);
+        mybatisPage.setRecords(responsibilityCenterCOS);
+        return mybatisPage;
+    }
+
+
 }

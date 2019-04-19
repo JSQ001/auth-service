@@ -130,17 +130,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return selectList(null);
     }
 
-    public CompanyDTO createCompany(CompanyDTO companyDTO) {
-        Company company = companyDTOToCompany(companyDTO);
-        company.setGroupCompanyOid(companyDTO.getGroupCompanyOid());
-        company.setCompanyOid(UUID.randomUUID());
-        company.setCreatedDate(ZonedDateTime.now());
-        insert(company);
-        baseI18nService.insertOrUpdateI18n(company.getI18n(), company.getClass(), company.getId());
-        companySecurityService.createDefaultComapnySecutiry(company.getCompanyOid());
 
-        return companyToCompanyDTO(company);
-    }
 
     public void checkCompanyName(Long setOfbooksId, String companyName, Long companyId) {
         if (StringUtils.isEmpty(companyName)) {
@@ -201,10 +191,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
             throw new BizException(RespCode.E_121302);
         }
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
-//        Tenant tenant = userService.findCurrentTenantByUSerOid(currentUserOid);
-//        if (tenant == null) {
-//            throw new BizException(RespCode.TENANT_NOT_EXIST);
-//        }
+
         // 验证当前法人实体是否为启用状态
         boolean legalEntityState = legalEntityService.getLegalEntityState(companyDTO.getLegalEntityId());
         if (!legalEntityState) {  // 禁用状态
@@ -215,15 +202,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         company.setTenantId(tenantId);
         company.setName(companyDTO.getName());
         company.setCompanyCode(companyDTO.getCompanyCode());
-        //拿取租户的公司类型
 
-//        SysCode sysCode = sysCodeValueService.getByCode(SystemCustomEnumerationTypeEnum.COMPANY_TYPE.getId().toString());
-//
-//        if (sysCode != null) {
-//            List<SysCodeValue> items = sysCodeValueService.listValueBySysCodeIdConditionEnabled(sysCode.getId(), true);
-//            Long id = items.stream().filter(u -> "业务实体".equals(u.getName())).findFirst().get().getId();
-//            company.setCompanyTypeId(id);
-//        }
         company.setCompanyTypeCode("1");
         company.setCompanyLevelId(companyDTO.getCompanyLevelId());
         company.setParentCompanyId(companyDTO.getParentCompanyId());
@@ -256,23 +235,6 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         companyDTO.setCompanyOid(company.getCompanyOid());
         companyDTO.setPath(company.getPath());
         companyDTO.setDepth(company.getDepth());
-        //创建公司默认币种汇率
-        //exchangeRateService.createDefaultExchangeRate(companyId.getCompanyOid(), setOfBooks.getFunctionalCurrencyCode(), companyDTO.getBaseCurrencyName(), tenant.getId());
-
-//        registerGuideService.init(currentUserOid, companyId.getCompanyOid());//记录注册配置
-//        //创建默认表单
-//        customFormService.initTenantCompanyDefaultForms(companyId.getCompanyOid(), tenant.getId(), currentUserOid);
-//        registerGuideService.openDefaultService(companyId.getCompanyOid());
-//
-//        //关闭注册公司引导项,导入提示项
-//        registerGuideService.finished(companyId.getCompanyOid());
-//        registerGuideService.imported(companyId.getCompanyOid());
-//        //初始化公司差旅行程标准
-//        travelItineraryStandService.initCompanyDataByCompanyOid(Arrays.asList(companyId.getCompanyOid()));
-//        //创建公司添加日志
-//        dataOperationService.save(OrgInformationUtil.getCurrentUserOid(), companyToCompanyDTO(companyId),
-//                messageTranslationService.getMessageDetailByCode(OrgInformationUtil.getCurrentLanguage(), DataOperationMessageKey.ADD_COMPANY_INFO,
-//                        companyId.getName(), companyId.getId()), OperationEntityTypeEnum.COMPANY.getKey(), OperationTypeEnum.ADD.getKey(), tenant.getId());
         companyCacheService.evictTenantCompany(company.getTenantId());//失效租户列表缓存
         return companyDTO;
     }
@@ -299,7 +261,6 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
 
         checkCompanyName(companyDTO.getSetOfBooksId(), companyDTO.getName(), companyDTO.getId());
 
-        updateCompanySecurity(companyDTO);
 
         company.setName(!StringUtils.isEmpty(companyDTO.getName()) ? companyDTO.getName() : company.getName());
         company.setTaxId(!StringUtils.isEmpty(companyDTO.getTaxId()) ? companyDTO.getTaxId() : company.getTaxId());
@@ -349,42 +310,9 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         updateById(company);
         baseI18nService.insertOrUpdateI18n(company.getI18n(), company.getClass(), company.getId());
         CompanyDTO dto = companyToCompanyDTO(company);
-//        if (esCompanyIndexSerivce.isElasticSearchEnable()) {
-//            esCompanyIndexSerivce.saveUserIndex(companyDTOtoCompanyInfo(dto));
-//        }
         return dto;
 
 
-    }
-
-    private CompanySecurity updateCompanySecurity(CompanyDTO companyDTO) {
-        CompanySecurity oldCompanySecurity = new CompanySecurity();
-        CompanySecurity newCompanySecurity = new CompanySecurity();
-        CompanySecurity companySecurity = companySecurityService.getTenantCompanySecurity(companyDTO.getTenantId());
-        BeanUtils.copyProperties(companySecurity, oldCompanySecurity);
-        if (companyDTO.getCreateDataType() != 0) {
-            companySecurity.setCreateDataType(companyDTO.getCreateDataType());
-            if (companyDTO.getNoticeType() != 0) {
-                companySecurity.setNoticeType(companyDTO.getNoticeType());
-            }
-            companySecurity.setDimissionDelayDays(companyDTO.getDimissionDelayDays());
-            companySecurity.setPasswordExpireDays(companyDTO.getPasswordExpireDays());
-            companySecurity.setPasswordLengthMax(companyDTO.getPasswordLengthMax());
-            companySecurity.setPasswordLengthMin(companyDTO.getPasswordLengthMin());
-            companySecurity.setPasswordRepeatTimes(companyDTO.getPasswordRepeatTimes());
-            companySecurity.setPasswordAttemptTimes(companyDTO.getPasswordAttemptTimes());
-            companySecurity.setAutoUnlockDuration(companyDTO.getAutoUnlockDuration());
-            companySecurity.setEnableEmailModify(companyDTO.getEnableEmailModify());
-            companySecurity.setEnableMobileModify(companyDTO.getEnableMobileModify());
-            companySecurity.setEnableEmailModify(companyDTO.getEnablePasswordModify());
-            if (!StringUtils.isEmpty(companyDTO.getPasswordRule())) {
-                companySecurity.setPasswordRule(companyDTO.getPasswordRule());
-            }
-            BeanUtils.copyProperties(companySecurity, newCompanySecurity);
-            companySecurityService.updateById(companySecurity);
-//            dataOperationService.save(OrgInformationUtil.getCurrentUserOid(),oldCompanySecurity,newCompanySecurity, OperationEntityTypeEnum.COMPANY_SECURITY.getKey(), OperationTypeEnum.UPDATE.getKey(),companyDTO.getTenantId(),newCompanySecurity.getTenantId().toString());
-        }
-        return companySecurity;
     }
 
 
@@ -1038,6 +966,32 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return companyDTOs;
     }
 
+    /**
+     *  公司权限查询 companayCode Name 模糊查询
+     * @param tenantId  租户id
+     * @param keyWord   关键词
+     * @param page      分页
+     * @return          公司list
+     */
+    public List<CompanyDTO> getCompaniesByTenantId(Long tenantId, String keyWord,Page page) {
+        Wrapper<Company> companiesWrapper = new EntityWrapper<Company>()
+                .eq("tenant_id", tenantId);
+        if (!StringUtils.isEmpty(keyWord)) {
+            companiesWrapper.andNew()
+                    .like("company_code", keyWord)
+                    .or()
+                    .like("name", keyWord);
+        }
+        List<Company> companies = baseMapper.selectPage(page, companiesWrapper);
+        List<CompanyDTO> companyDTOs = new ArrayList<>();
+        CompanyDTO companyDTO;
+        for (Company company : companies) {
+            companyDTO = companyToCompanyDTO(company);
+            companyDTOs.add(quoteAttributeAssignment(companyDTO));
+        }
+        return companyDTOs;
+    }
+
     public List<CompanySobDTO> getCompaniesByTenantIdNotPage(Long tenantId) {
         List<Company> companies = baseMapper.getByQO(CompanyQO.builder().tenantId(tenantId).build());
         List<CompanySobDTO> companySobDTOS = new ArrayList<>();
@@ -1062,12 +1016,12 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @return
      */
     public Page<CompanyDTO> getCompanyChildrenAndOwnByCondition(Long companyId,
-                                                                String companyCode,
-                                                                String companyName,
-                                                                String companyCodeFrom,
-                                                                String companyCodeTo,
-                                                                String keyWord,
-                                                                Page page) {
+                                                                                                 String companyCode,
+                                                                                                 String companyName,
+                                                                                                 String companyCodeFrom,
+                                                                                                 String companyCodeTo,
+                                                                                                 String keyWord,
+                                                                                                 Page page) {
         List<CompanyDTO> companyByCond = getCompanyByCond(companyId, false, companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord, page);
         page.setRecords(companyByCond);
         return page;
@@ -1205,9 +1159,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return baseMapper.getCompaniesByTenantIdAndCondition(tenantId, setOfBooksId, enabled, keyword, page);
     }
 
-    public List<CompanySecurity> getTenantCompanySecurity(Long tenantId) {
-        return companySecurityService.listCompanySecuritysByTenant(tenantId);
-    }
+
 
     //jiu.zhao redis
     //@Cacheable(keyGenerator = "wiselyKeyGenerator")
@@ -1604,11 +1556,12 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
     public Page<CompanyCO> pageConditionKeyWordAndEnabled(String keyWord, Boolean enabled, Page<CompanyCO> mybatisPage) {
         Long currentTenantId = OrgInformationUtil.getCurrentTenantId();
         Wrapper<CompanyCO> wrapper = new EntityWrapper<CompanyCO>().eq("t.tenant_id", currentTenantId)
-                .eq(enabled != null, "t.enabled", enabled)
-                .andNew()
-                .like(StringUtils.hasText(keyWord), "t.name", keyWord)
-                .or(StringUtils.hasText(keyWord), "t.company_code like concat(concat('%',{0}),'%')", keyWord);
-
+                .eq(enabled != null, "t.enabled", enabled);
+        if(StringUtils.hasText(keyWord)){
+            wrapper.andNew()
+                    .like(StringUtils.hasText(keyWord), "t.name", keyWord)
+                    .or(StringUtils.hasText(keyWord), "t.company_code like concat(concat('%',{0}),'%')", keyWord);
+        }
         List<CompanyCO> companyCOS = listCompanyCO(wrapper, mybatisPage);
         setSetOfBooksName(companyCOS);
 

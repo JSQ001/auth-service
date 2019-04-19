@@ -214,14 +214,14 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             // 全部
             case "1001": {
                 if (DataAuthorityUtil.SOB_COLUMN.equals(dataType)) {
-                    Page<SetOfBooks> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantId(), null, null, null, null, page);
+                    Page<SetOfBooks> setOfBooksListByTenantId = sobService.getSetOfBooksListByTenantId(LoginInformationUtil.getCurrentTenantId(), null, null, keyWord, null, page);
                     page.setTotal(setOfBooksListByTenantId.getTotal());
                     return setOfBooksToDetailValueDTO(setOfBooksListByTenantId.getRecords(), getFiltrateMethodDescription(filtrateMethodMap, dataAuthorityRuleDetail.getFiltrateMethod()));
                 } else if (DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)) {
-                    List<CompanyDTO> companiesByTenantId = companyService.getCompaniesByTenantId(LoginInformationUtil.getCurrentTenantId(), page);
+                    List<CompanyDTO> companiesByTenantId = companyService.getCompaniesByTenantId(LoginInformationUtil.getCurrentTenantId(),keyWord ,page);
                     return companyToDetailValueDTO(companiesByTenantId, getFiltrateMethodDescription(filtrateMethodMap, dataAuthorityRuleDetail.getFiltrateMethod()));
                 } else if (DataAuthorityUtil.UNIT_COLUMN.equals(dataType)) {
-                    List<Department> departmentInfoByTenantId = departmentService.getDepartmentInfoByTenantId(LoginInformationUtil.getCurrentTenantId(), null, page);
+                    List<Department> departmentInfoByTenantId = departmentService.getDepartmentInfoByTenantId(LoginInformationUtil.getCurrentTenantId(), keyWord, page);
                     return departmentToDetailValueDTO(departmentInfoByTenantId, getFiltrateMethodDescription(filtrateMethodMap, dataAuthorityRuleDetail.getFiltrateMethod()));
                 } else if (DataAuthorityUtil.EMPLOYEE_COLUMN.equals(dataType)) {
                     List<ContactDTO> contactDTOS = contactService.listDtoByQO(

@@ -3,7 +3,9 @@ package com.hand.hcf.app.mdata.responsibilityCenter.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
-import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityDefaultDTO;
+
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.stereotype.Component;
@@ -58,12 +60,25 @@ public interface ResponsibilityCenterMapper extends BaseMapper<ResponsibilityCen
      * @param code 代码
      * @param name 名称
      * @param id id
+     * @param enabled 是否启用
+     * @param codeName 代码/名称
      * @return List<ResponsibilityLov>
      */
-    List<ResponsibilityLov> pageByCompanyAndDepartment(RowBounds rowBounds,
-                                                       @Param("companyId") Long companyId,
-                                                       @Param("departmentId")Long departmentId,
-                                                       @Param("code") String code,
-                                                       @Param("name") String name,
-                                                       @Param("id") Long id);
+    List<ResponsibilityLovDTO> pageByCompanyAndDepartment(RowBounds rowBounds,
+                                                          @Param("companyId") Long companyId,
+                                                          @Param("departmentId")Long departmentId,
+                                                          @Param("code") String code,
+                                                          @Param("name") String name,
+                                                          @Param("enabled") Boolean enabled,
+                                                          @Param("codeName") String codeName,
+                                                          @Param("id") Long id);
+
+    /**
+     * 获取公司部门默认的责任中心
+     * @param companyId 公司id
+     * @param departmentIds
+     * @return List<ResponsibilityDefaultDTO>
+     */
+    List<ResponsibilityDefaultDTO> listCompanyDepartmentDefaultCenter(@Param("companyId") Long companyId,
+                                                                      @Param("departmentIds") List<Long> departmentIds);
 }

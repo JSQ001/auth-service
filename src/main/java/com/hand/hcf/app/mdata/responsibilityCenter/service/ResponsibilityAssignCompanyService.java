@@ -9,6 +9,7 @@ import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityAssignCompany;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityAssignCompanyMapper;
+import com.hand.hcf.app.mdata.responsibilityCenter.persistence.ResponsibilityCenterMapper;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class ResponsibilityAssignCompanyService extends BaseService<Responsibili
     private CompanyService companyService;
 
     @Autowired
-    private ResponsibilityCenterService responsibilityCenterService;
+    private ResponsibilityCenterMapper responsibilityCenterMapper;
 
     /**
      * 分页获取分配公司
@@ -64,7 +65,7 @@ public class ResponsibilityAssignCompanyService extends BaseService<Responsibili
     public List<ResponsibilityAssignCompany> insertResponsibilityAssignCompanyBatch(List<ResponsibilityAssignCompany> list) {
         list.stream().forEach(assignCompany->{
             Long responsibilityCenterId = assignCompany.getResponsibilityCenterId();
-            ResponsibilityCenter responsibilityCenter =responsibilityCenterService.selectById(responsibilityCenterId);
+            ResponsibilityCenter responsibilityCenter =responsibilityCenterMapper.selectById(responsibilityCenterId);
             if(responsibilityCenter == null){
                 throw new BizException(RespCode.RESPONSIBILITY_CENTER_NOT_EXIST);
             }
@@ -116,7 +117,7 @@ public class ResponsibilityAssignCompanyService extends BaseService<Responsibili
                 new EntityWrapper<ResponsibilityAssignCompany>()
                         .eq("responsibility_center_id", responsibilityCenterId)
         ).stream().map(ResponsibilityAssignCompany::getCompanyId).collect(Collectors.toList());
-        ResponsibilityCenter responsibilityCenter = responsibilityCenterService.selectById(responsibilityCenterId);
+        ResponsibilityCenter responsibilityCenter = responsibilityCenterMapper.selectById(responsibilityCenterId);
         if (responsibilityCenter != null){
             List<CompanyCO> companyList = companyService.pageBySetOfBooksIdConditionByIgnoreIds(responsibilityCenter.getSetOfBooksId(),
                     companyCode,

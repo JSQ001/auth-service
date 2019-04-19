@@ -19,6 +19,8 @@ public interface RespCode {
 
     String SUPPLIER_NAME_EXISTS = "SUPPLIER_NAME_EXISTS";
 
+    String SUPPLIER_TAX_ID_EXISTS = "SUPPLIER_TAX_ID_EXISTS";
+
     String SUPPLIER_BANK_ACCOUNT_REPEAT = "SUPPLIER_BANK_ACCOUNT_REPEAT";
 
     String SUPPLIER_BANK_ACCOUNT_WAS_OCCUPIED = "SUPPLIER_BANK_ACCOUNT_WAS_OCCUPIED";
@@ -421,4 +423,33 @@ public interface RespCode {
     //地点级别
     String LOCATION_LEVEL_CODE_REPEAT = "LOCATION_LEVEL_CODE_REPEAT";//账套下地点级别重复
     String LOCATION_LEVEL_NOT_EXIST = "LOCATION_LEVEL_NOT_EXIST";//地点级别不存在
+    /**
+     * 当前禁用的公司部门下，存在在职的员工不可禁用！
+     */
+    String MDATA_COMPANY_UNIT_ASSOICATE_NOT_ALLOW_DISABLED = "MDATA_COMPANY_UNIT_ASSOCIATE_NOT_ALLOW_DISABLED";
+
+    /**
+     * 当前公司未启用，不可入职该员工！
+     */
+    String MAIN_DATA_COMPANY_IS_DISABLED = "MAIN_DATA_COMPANY_IS_DISABLED";
+    /**
+     * 当前部门未启用，不可入职该员工！
+     */
+    String MAIN_DATA_DEPARTMENT_IS_DISABLED = "MAIN_DATA_DEPARTMENT_IS_DISABLED";
+    /**
+     * 当前公司下，该部门未启用，不可入职该员工！！
+     */
+    String MAIN_DATA_COMPANY_DEPARTMENT_ASSOCIATE_IS_DISABLED = "MAIN_DATA_COMPANY_DEPARTMENT_ASSOCIATE_IS_DISABLED";
+    /**
+     * 该租户下不存在供应商类型
+     */
+    String NO_EXIST_VENDOR_TYPE = "NO_EXIST_VENDOR_TYPE";
+    /**
+     * 租户下不存在供应商类别
+     */
+    String NO_EXIST_VENDOR_INDUSTRY_INFO = "NO_EXIST_VENDOR_INDUSTRY_INFO";
+    /**
+     * 时间转换异常
+     */
+    String TIME_CONVERSION_ANOMALY = "TIME_CONVERSION_ANOMALY";
 }

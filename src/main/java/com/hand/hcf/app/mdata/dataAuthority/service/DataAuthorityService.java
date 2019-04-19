@@ -23,6 +23,7 @@ import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.utils.RespCode;
+
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -121,11 +122,13 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * @param page
      * @return
      */
-    public List<DataAuthority> getDataAuthorityByCond(String dataAuthorityCode,
+    public List<DataAuthority> getDataAuthorityByCond(Long id,
+                                                      String dataAuthorityCode,
                                                       String dataAuthorityName,
-                                                      Page page){
-        return dataAuthorityMapper.selectPage(page, new EntityWrapper<DataAuthority>()
+                                                      Page pageable) {
+        return dataAuthorityMapper.selectPage(pageable, new EntityWrapper<DataAuthority>()
                 .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
+                .eq(TypeConversionUtils.isNotEmpty(id), "id", id)
                 .like(TypeConversionUtils.isNotEmpty(dataAuthorityCode), "data_authority_code", dataAuthorityCode)
                 .like(TypeConversionUtils.isNotEmpty(dataAuthorityName), "data_authority_name", dataAuthorityName)
                 .eq("deleted", false)

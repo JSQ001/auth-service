@@ -1,7 +1,8 @@
 package com.hand.hcf.app.mdata.responsibilityCenter.dto;
 
-import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.core.domain.Domain;
+import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
+
 import lombok.Data;
 
 import java.util.List;

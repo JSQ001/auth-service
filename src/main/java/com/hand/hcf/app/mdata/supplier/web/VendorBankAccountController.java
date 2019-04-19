@@ -7,6 +7,10 @@ import com.hand.hcf.app.mdata.supplier.service.VendorBankAccountService;
 import com.hand.hcf.app.mdata.supplier.web.dto.VendorAccountDTO;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,6 +25,7 @@ import java.util.List;
  * @Description:
  * @Date: 2018/4/4 17:19
  */
+@Api(tags = "供应商银行账户")
 @RestController
 @RequestMapping("/api")
 public class VendorBankAccountController {
@@ -108,7 +113,7 @@ public class VendorBankAccountController {
 
     /**
      * 根据公司id和供应商名称,代码【模糊】分页查询 获取供应商银行信息
-     * 获取供应商及银行信息（查询某公司下的、启用状态为启用的、审核状态为审核通过的租户下的供应商）
+     * 获取供应商及银行信息（审核状态为审核通过的租户下的供应商）
      * @param companyId
      * @param name
      * @param code
@@ -116,15 +121,26 @@ public class VendorBankAccountController {
      * @param size
      * @return
      */
+    @ApiOperation(value = "分页查询供应商银行信息", notes = "分页查询获取供应商银行信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "companyId", value = "公司ID", dataType = "Long"),
+            @ApiImplicitParam(name = "enabled", value = "是否启用", dataType = "Boolean"),
+            @ApiImplicitParam(name = "name", value = "名称", dataType = "String"),
+            @ApiImplicitParam(name = "code", value = "代码", dataType = "String"),
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @RequestMapping(value = "/vendor/account/by/companyId/name/code", method = RequestMethod.GET)
     public ResponseEntity<List<VendorAccountDTO>> getVendorByCompanyIdAndNameAndCode(
-            @RequestParam(value = "companyId") Long companyId,
+            @RequestParam(value = "companyId",required = false) Long companyId,
+            @RequestParam(value = "enabled",required = false) Boolean enabled,
             @RequestParam(value = "name",required = false) String name,
             @RequestParam(value = "code",required = false) String code,
             @RequestParam(value = "page",defaultValue = "0") int page,
             @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
-        List<VendorAccountDTO> result = vendorBankAccountService.getVendorByCompanyIdAndNameAndCode(companyId,name, code, queryPage);
+        List<VendorAccountDTO> result = vendorBankAccountService.getVendorByCompanyIdAndNameAndCode(
+                companyId, enabled, name, code, queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
     }

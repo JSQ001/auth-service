@@ -15,6 +15,9 @@
                 OR tenant_id = #{systemTenantId}
             </if>
         )
+        <if test="null != bankHead and '' != bankHead">
+            AND bank_head = #{bankHead}
+        </if>
         <if test="isAll == false and enable == null">
             AND enabled = 1
         </if>

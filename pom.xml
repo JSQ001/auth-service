@@ -344,7 +344,6 @@
         <!-- add core end-->
     </dependencies>
 
-
     <repositories>
         <repository>
             <id>hec.snapshots</id>

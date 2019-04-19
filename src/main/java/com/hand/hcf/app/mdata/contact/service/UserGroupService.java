@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserGroupService extends BaseService<UserGroupMapper, UserGroup> {
+public class UserGroupService extends BaseService<UserGroupMapper,UserGroup> {
 
     //名称通用长度限制
     public static final int NAME_SIZE = 50;
@@ -1223,6 +1223,9 @@ public class UserGroupService extends BaseService<UserGroupMapper, UserGroup> {
                 tenantId,
                 null,
                 status,
+                null,
+                null,
+                null,
                 null,
                 null,
                 page).stream()

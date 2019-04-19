@@ -9,6 +9,9 @@ import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +30,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/setOfBooks")
+@Api(tags = "账套Controller")
 public class SetOfBooksResource {
 
     @Autowired
@@ -382,14 +386,18 @@ public class SetOfBooksResource {
         return ResponseEntity.ok(baseI18nService.getI18nInfo(id, SetOfBooks.class));
     }
 
-    @RequestMapping(value = "/by/tenant", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<SetOfBooks>> getTenantAllSetOfBooks(@RequestParam(value = "roleType", required = false) String roleType) {
-        List<SetOfBooks> result = null;
-        if (roleType != null && Constants.ROLE_TENANT.equals(roleType)) {
-            result = setOfBooksService.getListByTenantId(OrgInformationUtil.getCurrentTenantId());
-        } else {
-            result = setOfBooksService.getCompanyAvailableSetOfBooksId(OrgInformationUtil.getCurrentTenantId(), OrgInformationUtil.getCurrentCompanyId());
-        }
+    @ApiOperation(value = "查询当前租户下启用的账套", notes = "查询当前租户下启用的账套 开发 谢宾")
+    @GetMapping(value = "/by/tenant")
+    public ResponseEntity<List<SetOfBooks>> getTenantAllSetOfBooks() {
+        List<SetOfBooks> result = setOfBooksService.getListByTenantId(OrgInformationUtil.getCurrentTenantId());
+        return ResponseEntity.ok(result);
+    }
+
+    @ApiOperation(value = "根据部门查询可用的账套", notes = "根据部门查询可用的账套 开发 谢宾")
+    @GetMapping(value = "/by/department")
+    public ResponseEntity<List<SetOfBooks>> listByDepartmentId(@ApiParam("部门id") @RequestParam Long departmentId) {
+        List<SetOfBooks> result = setOfBooksService.listByDepartmentId(departmentId,
+                OrgInformationUtil.getCurrentTenantId());
         return ResponseEntity.ok(result);
     }
 
