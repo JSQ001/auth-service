@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.annotation.I18nField;
 import com.hand.hcf.app.core.domain.DomainI18n;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Transient;
@@ -37,4 +38,11 @@ public class ApprovalForm extends DomainI18n {
     @TableField(exist = false)
     private String iconUrl;
 
+    @ApiModelProperty(value = "允许撤回")
+    @TableField("withdraw_flag")
+    private Boolean withdrawFlag;
+
+    @ApiModelProperty(value = "撤回模式")
+    @TableField("withdraw_rule")
+    private Integer withdrawRule;
 }

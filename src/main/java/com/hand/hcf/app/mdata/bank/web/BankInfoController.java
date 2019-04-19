@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.bank.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.BankInfoDTO;
 import com.hand.hcf.app.mdata.bank.dto.ReceivablesDTO;
@@ -13,7 +14,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.service.MessageService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;

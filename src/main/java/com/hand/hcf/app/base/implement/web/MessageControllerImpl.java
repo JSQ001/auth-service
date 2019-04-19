@@ -7,6 +7,7 @@ import com.hand.hcf.app.base.system.service.ServeLocaleService;
 import com.hand.hcf.app.core.web.dto.MessageDTO;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,11 +21,23 @@ import java.util.List;
  */
 //@RequestMapping(value = "/api/implement")
 //// @PreAuthorize("hasRole('" + AuthoritiesConstants.INTEGRATION_CLIENTS + "')")
-@AllArgsConstructor
+// update by chenxu
+/*@AllArgsConstructor*/
 @RestController
 public class MessageControllerImpl {
-    private final ServeLocaleService serveLocaleService;
-    private final MapperFacade mapper;
+
+   // private final ServeLocaleService serveLocaleService;
+
+    //private final MapperFacade mapper;
+
+    // update by chenxu error:dependence cycle
+    @Autowired
+    private  ServeLocaleService serveLocaleService;
+
+    @Autowired
+    private  MapperFacade mapper;
+
+
 
 //    @GetMapping("/serve/locale/byKeyAndLanguage")
     public MessageDTO getServeLocaleByKeyAndLanguage(@RequestParam("keyCode") String keyCode,

@@ -62,6 +62,7 @@ public class TenantDTO {
     private String title;
 
     private String taxId;       //税务证件号
+    private Boolean systemFlag;
 
 
 }

@@ -12,6 +12,10 @@ public class RuleApproverEvent implements Event {
 
     @Override
     public String getKey() {
+        if (ruleApprover == null) {
+            return null;
+        }
+
         return ruleApprover.getRemark();
     }
 

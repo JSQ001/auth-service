@@ -8,7 +8,7 @@ import com.hand.hcf.app.base.userRole.persistence.FunctionPageRelationMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,18 +22,18 @@ import java.util.List;
  * @date: 2019/1/29
  */
 @Service
-@AllArgsConstructor
 @Transactional
 public class FunctionPageRelationService extends BaseService<FunctionPageRelationMapper,FunctionPageRelation>{
-    private final FunctionPageRelationMapper functionPageRelationMapper;
-
-    private final PageListService pageListService;
-
-    private final FunctionListService functionListService;
-
-    private final ContentListService contentListService;
-
-    private final ContentFunctionRelationMapper contentFunctionRelationMapper;
+    @Autowired
+    private  FunctionPageRelationMapper functionPageRelationMapper;
+    @Autowired
+    private  PageListService pageListService;
+    @Autowired
+    private  FunctionListService functionListService;
+    @Autowired
+    private  ContentListService contentListService;
+    @Autowired
+    private  ContentFunctionRelationMapper contentFunctionRelationMapper;
 
     /**
      * 批量新增 功能页面关联
@@ -136,6 +136,15 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
             });
         }
         return result;
+    }
+
+    /**
+     * 条件查询 获取租户来源功能页面关联关系
+     * @param tenantId
+     * @return
+     */
+    public List<FunctionPageRelation> listRelationByTenant(Long tenantId){
+      return baseMapper.listRelationByTenant(tenantId);
     }
 
     /**

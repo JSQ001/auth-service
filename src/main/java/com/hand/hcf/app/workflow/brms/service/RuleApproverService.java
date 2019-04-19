@@ -90,4 +90,21 @@ public class RuleApproverService extends BaseService<RuleApproverMapper,RuleAppr
                 .eq("status",RuleApprovalEnum.VALID.getId())
                 .orderBy("id"));
     }
+
+    /**
+     * 返回跟指定审批流通知关联的通知人员
+     * @author mh.z
+     * @date 2019/04/17
+     *
+     * @param ruleNoticeId
+     * @return
+     */
+    public List<RuleApprover> listByNoticeId(Long ruleNoticeId) {
+        EntityWrapper<RuleApprover> wrapper = new EntityWrapper<RuleApprover>();
+        wrapper.eq("rule_notice_id", ruleNoticeId);
+        wrapper.eq("status",RuleApprovalEnum.VALID.getId());
+        List<RuleApprover> ruleApproverList = selectList(wrapper);
+        return ruleApproverList;
+    }
+
 }

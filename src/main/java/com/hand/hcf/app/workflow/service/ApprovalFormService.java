@@ -402,7 +402,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         if (CollectionUtils.isNotEmpty(allList)) {
             List<ApprovalForm> list = new ArrayList<>();
             allList.forEach(c -> {
-                    list.add(c);
+                list.add(c);
             });
             return list;
         }

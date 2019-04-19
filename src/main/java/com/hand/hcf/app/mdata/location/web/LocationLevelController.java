@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.location.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.LocationLevel;
 import com.hand.hcf.app.mdata.location.domain.LocationLevelAssign;
@@ -9,7 +10,7 @@ import com.hand.hcf.app.mdata.location.dto.LocationLevelAssignDTO;
 import com.hand.hcf.app.mdata.location.service.LocationDTOService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelAssignService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

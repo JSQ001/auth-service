@@ -1,5 +1,6 @@
 package com.hand.hcf.app.mdata.implement.web;
 
+import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.common.co.DataAuthTablePropertyCO;
 import com.hand.hcf.app.core.web.dto.DataAuthValuePropertyDTO;
 import com.hand.hcf.app.mdata.dataAuthority.adapter.DataAuthTablePropertyAdapter;
@@ -25,6 +26,9 @@ public class DataAuthControllerImpl  {
     private final DataAuthTablePropertyService dataAuthTablePropertyService;
     private final DataAuthorityService dataAuthorityService;
 
+    //add by chenxu
+    private final UserRoleService userRoleService;
+
 
     //@GetMapping(value = "/data/auth/table/properties/get/by/tableName")
     public List<DataAuthTablePropertyCO> getDataAuthTablePropertiesByTableName(@RequestParam("tableName") String tableName) {
@@ -36,6 +40,13 @@ public class DataAuthControllerImpl  {
     //@GetMapping(value = "/data/auth/value/properties/get/by/request")
     public List<Map<String, List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest() {
         return dataAuthorityService.getDataAuthValuePropertiesByRequest();
+    }
+
+
+    // add by chenxu
+    //@GetMapping(value = "/user/has/role")
+    public Boolean userHasRole(@RequestParam("userId")Long userId) {
+        return userRoleService.userHasRole(userId);
     }
 
 }

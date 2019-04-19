@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
+import com.hand.hcf.app.workflow.dto.BackNodesDTO;
+import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.persistence.ApprovalChainMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -250,5 +252,12 @@ public class ApprovalChainService extends BaseService<ApprovalChainMapper, Appro
 
     public void updateAllFinshTrueById(Long id) {
         baseMapper.updateAllFinshTrueById(id);
+    }
+
+    public BackNodesDTO listApprovalNodeByBack(Integer entityType, UUID entityOid){
+        BackNodesDTO backNodesDTO=new BackNodesDTO();
+        backNodesDTO.setApprovalNodeDTOList(baseMapper.listApprovalNodeByBack(entityType,entityOid));
+        backNodesDTO.setBackFlag(Boolean.TRUE);
+        return backNodesDTO;
     }
 }

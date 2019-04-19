@@ -1,6 +1,8 @@
 package com.hand.hcf.app.workflow.dto;
 
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,55 +17,56 @@ import java.util.UUID;
  */
 @Getter
 @Setter
+@ApiModel(value="未审批已审批的单据记录")
 public class ApprovalDocumentDTO {
-    // 单据oid
+    @ApiModelProperty(value="单据oid")
     private UUID entityOid;
 
-    // 单据大类
+    @ApiModelProperty(value="单据大类")
     private Integer entityType;
 
-    // 单据id
+    @ApiModelProperty(value="单据id")
     private Long documentId;
 
-    // 单据编号
+    @ApiModelProperty(value="单据编号")
     private String documentNumber;
 
-    // 单据名称
+    @ApiModelProperty(value="单据名称")
     private String documentName;
 
-    // 单据类型id
+    @ApiModelProperty(value="单据类型id")
     private Long documentTypeId;
 
-    // 单据类型代码
+    @ApiModelProperty(value="单据类型代码")
     private String documentTypeCode;
 
-    // 单据类型名称
+    @ApiModelProperty(value="单据类型名称")
     private String documentTypeName;
 
-    // 币种
+    @ApiModelProperty(value="币种")
     private String currencyCode;
 
-    // 金额
+    @ApiModelProperty(value="金额")
     private BigDecimal amount;
 
-    // 本币金额
+    @ApiModelProperty(value="本币金额")
     private BigDecimal functionAmount;
 
-    // 申请人oid
+    @ApiModelProperty(value="申请人oid")
     private UUID applicantOid;
 
-    // 申请人名称
+    @ApiModelProperty(value="单据人名称")
     private String applicantName;
 
-    // 提交日期
+    @ApiModelProperty(value="提交日期")
     private ZonedDateTime submittedDate;
 
-    // 申请日期
+    @ApiModelProperty(value="申请日期")
     private ZonedDateTime applicantDate;
 
-    // 单据状态
+    @ApiModelProperty(value="单据状态")
     private Integer status;
 
-    // 备注
+    @ApiModelProperty(value="备注")
     private String remark;
 }

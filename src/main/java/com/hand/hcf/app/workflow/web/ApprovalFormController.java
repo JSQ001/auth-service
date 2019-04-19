@@ -2,6 +2,7 @@ package com.hand.hcf.app.workflow.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.constant.Constants;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
@@ -121,7 +122,7 @@ public class ApprovalFormController {
                                                                     @RequestParam(name = "valid", required = false) Boolean valid,
                                                                     Pageable pageable) {
         List<ApprovalForm> lists = null;
-        Page page=PageUtil.getPage(pageable);
+        Page page= PageUtil.getPage(pageable);
         if (roleType != null && Constants.ROLE_TENANT.equals(roleType) && StringUtils.isNotEmpty(booksId)) {
             lists = approvalFormService.listDTOByTenantAndCondition(OrgInformationUtil.getCurrentTenantId(), formTypeId,formName,remark,valid,page);
             return new ResponseEntity<>(lists, PageUtil.getTotalHeader(page), HttpStatus.OK);

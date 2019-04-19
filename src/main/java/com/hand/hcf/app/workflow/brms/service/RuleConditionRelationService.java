@@ -128,4 +128,22 @@ public class RuleConditionRelationService extends BaseService<RuleConditionRelat
         );
     }
 
+    /**
+     * @author mh.z
+     * @date 2019/04/17
+     *
+     * @param entityType
+     * @param entityOid
+     * @return
+     */
+    public List<RuleConditionRelation> listByEntityTypeAndEntityOid(Integer entityType, UUID entityOid) {
+        EntityWrapper<RuleConditionRelation> wrapper = new EntityWrapper<RuleConditionRelation>();
+        wrapper.eq("status", RuleApprovalEnum.VALID.getId());
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+
+        List<RuleConditionRelation> ruleConditionRelationList = selectList(wrapper);
+        return ruleConditionRelationList;
+    }
+
 }

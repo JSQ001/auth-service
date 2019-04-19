@@ -3,14 +3,18 @@ package com.hand.hcf.app.workflow.brms.web;
 import com.google.gson.Gson;
 import com.hand.hcf.app.base.system.constant.Constants;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.dto.*;
 import com.hand.hcf.app.workflow.brms.service.DroolsService;
+import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
 import com.hand.hcf.app.workflow.brms.service.RuleConditionService;
 import com.hand.hcf.app.workflow.brms.service.RuleService;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
 import com.hand.hcf.app.workflow.dto.FormFieldDTO;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,6 +44,9 @@ public class RuleController {
 
     @Inject
     DroolsService droolsService;
+
+    @Autowired
+    private RuleApprovalNodeService ruleApprovalNodeService;
 
     //TODO 初始化现有公司审批链
 
@@ -509,4 +517,55 @@ public class RuleController {
     public ResponseEntity<FormApprovalModeListDTO> getCustomFormApproverMode() {
         return ResponseEntity.ok().body(ruleService.getCustomFormApproverMode());
     }
+
+    @ApiOperation(value = "查询可退回节点", notes = "查询可退回节点 开发：庄茂辉")
+    @RequestMapping(value = "/custom/form/return/node", method = RequestMethod.GET)
+    public ResponseEntity<List<ReturnNode>> listReturnNode(@ApiParam(value = "节点oid") @RequestParam("ruleApprovalNodeOid") UUID ruleApprovalNodeOid) {
+        List<RuleApprovalNode> ruleApprovalNodeList = ruleApprovalNodeService.listReturnNode(ruleApprovalNodeOid);
+        List<ReturnNode> returnNodeList = new ArrayList<ReturnNode>();
+        ReturnNode returnNode = null;
+
+        for (RuleApprovalNode ruleApprovalNode : ruleApprovalNodeList) {
+            returnNode = new ReturnNode();
+            returnNode.setRuleApprovalNodeOid(ruleApprovalNode.getRuleApprovalNodeOid());
+            returnNode.setRemark(ruleApprovalNode.getRemark());
+            returnNodeList.add(returnNode);
+        }
+
+        return ResponseEntity.ok(returnNodeList);
+    }
+
+    @ApiOperation(value = "新增审批流通知", notes = "新增审批流通知 开发：庄茂辉")
+    @RequestMapping(value = "/notice", method = RequestMethod.POST)
+    public ResponseEntity<RuleNoticeDTO> createRuleNotice(@ApiParam(value = "新增的审批流通知") @RequestBody RuleNoticeDTO ruleNoticeDTO) {
+        ruleNoticeDTO =  ruleService.createRuleNotice(ruleNoticeDTO);
+        return ResponseEntity.ok(ruleNoticeDTO);
+    }
+
+    @ApiOperation(value = "删除审批流通知", notes = "删除审批流通知 开发：庄茂辉")
+    @RequestMapping(value = "/notice/{ruleNoticeOid}", method = RequestMethod.DELETE)
+    public ResponseEntity<Boolean> deleteRuleNotice(@ApiParam(value = "审批流通知oid") @PathVariable("ruleNoticeOid") UUID ruleNoticeOid) {
+        return ResponseEntity.ok(ruleService.deleteRuleNotice(ruleNoticeOid));
+    }
+
+    @ApiOperation(value = "修改审批流通知动作", notes = "修改审批流通知动作 开发：庄茂辉")
+    @RequestMapping(value = "/notice/actions/batch", method = RequestMethod.PUT)
+    public ResponseEntity<RuleNoticeDTO> updateRuleNoticeActions(@ApiParam(value = "修改的审批流通知动作") @RequestBody RuleNoticeDTO ruleNoticeDTO) {
+        ruleNoticeDTO = ruleService.updateRuleNoticeActions(ruleNoticeDTO);
+        return ResponseEntity.ok(ruleNoticeDTO);
+    }
+
+    @ApiOperation(value = "修改审批流通知人员", notes = "修改审批流通知人员 开发：庄茂辉")
+    @RequestMapping(value = "/notice/users/batch", method = RequestMethod.PUT)
+    public ResponseEntity<List<RuleApproverDTO>> createRuleNoticeUsers(@ApiParam(value = "修改的审批流通知人员") @RequestBody RuleNoticeDTO ruleNoticeDTO) {
+        List<RuleApproverDTO> ruleApproverDTOList = ruleService.updateRuleNoticeUsers(ruleNoticeDTO);
+        return ResponseEntity.ok(ruleApproverDTOList);
+    }
+
+    @ApiOperation(value = "删除审批流通知人员", notes = "删除审批流通知人员 开发：庄茂辉")
+    @RequestMapping(value = "/notice/users/batch", method = RequestMethod.DELETE)
+    public ResponseEntity<Boolean> deleteRuleNoticeUsers(@ApiParam(value = "删除的审批流通知人员") @RequestBody RuleNoticeDTO ruleNoticeDTO) {
+        return ResponseEntity.ok(ruleService.deleteRuleNoticeUsers(ruleNoticeDTO));
+    }
+
 }

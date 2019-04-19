@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.contact.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.domain.UserGroup;
 import com.hand.hcf.app.mdata.contact.dto.ConditionViewDTO;
@@ -9,7 +10,7 @@ import com.hand.hcf.app.mdata.contact.dto.UserGroupDTO;
 import com.hand.hcf.app.mdata.contact.dto.UserGroupMappingDTO;
 import com.hand.hcf.app.mdata.contact.service.UserGroupService;
 import com.hand.hcf.app.core.security.AuthoritiesConstants;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

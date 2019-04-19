@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.annotation.UniqueField;
 import com.hand.hcf.app.core.domain.DomainI18n;
 import com.hand.hcf.app.core.domain.DomainLogic;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,41 +24,47 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel(description = "服务端多语言表")
 @TableName("sys_serve_locale")
 public class ServeLocale extends DomainLogic {
-    //应用ID
+
     @NotNull
+    @ApiModelProperty(value = "应用ID")
     @TableField("application_id")
     private Long applicationId;
 
-    //应用代码
     @NotNull
+    @ApiModelProperty(value = "应用代码")
     @TableField("application_code")
     private String applicationCode;
 
-    //界面key值
     @NotNull
     @UniqueField
+    @ApiModelProperty(value = "界面key值")
     @TableField("key_code")
     private String keyCode;
 
-    //key描述
     @NotNull
+    @ApiModelProperty(value = "key描述")
     @TableField("key_description")
     private String keyDescription;
 
-    //多语言类型
     @NotNull
+    @ApiModelProperty(value = "多语言类型")
     @TableField("category")
     private String category;
 
-    //语言
     @NotNull
     @UniqueField
+    @ApiModelProperty(value = "语言")
     @TableField("language")
     private String language;
 
-    //多语言类型名称
+    @ApiModelProperty(value = "多语言类型名称")
     @TableField(exist = false)
     private String categoryName;
+
+    @ApiModelProperty(value = "租户id")
+    @TableField("tenant_id")
+    private Long tenantId;
 }

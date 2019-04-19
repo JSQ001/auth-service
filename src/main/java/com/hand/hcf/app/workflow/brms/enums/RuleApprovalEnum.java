@@ -68,7 +68,9 @@ public enum RuleApprovalEnum implements SysEnum {
     //审批者
     CONDITION_RELATION_TYPE_APPROVER(7002),
     //转交
-    CONDITION_RELATION_TYPE_TRANSFER(7003),;
+    CONDITION_RELATION_TYPE_TRANSFER(7003),
+    //通知
+    CONDITION_RELATION_TYPE_NOTICE(7004);
 
     private Integer id;
 

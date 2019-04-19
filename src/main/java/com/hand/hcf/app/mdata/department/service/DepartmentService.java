@@ -13,6 +13,7 @@ import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;

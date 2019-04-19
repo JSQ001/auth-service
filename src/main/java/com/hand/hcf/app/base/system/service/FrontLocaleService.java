@@ -5,9 +5,12 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.system.domain.FrontLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.persistence.FrontLocaleMapper;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,17 +29,18 @@ import java.util.Map;
  */
 @Service
 @AllArgsConstructor
-@Transactional
 public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocale>{
     private final FrontLocaleMapper frontLocaleMapper;
-
+    private final TenantService tenantService;
     /**
-     * 单个新增 中控多语言
+     * 单个新增 前端多语言
      * @param frontLocale
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public FrontLocale createFrontLocale(FrontLocale frontLocale){
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
+        Tenant tenant = tenantService.getTenantById(tenantId);
         if (frontLocale.getId() != null){
             throw new BizException(RespCode.FRONT_LOCALE_EXIST);
         }
@@ -44,19 +48,31 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
                 new EntityWrapper<FrontLocale>()
                         .eq("key_code",frontLocale.getKeyCode())
                         .eq("language",frontLocale.getLanguage())
+                        .eq("tenant_id",tenantId)
         ).size() > 0 ){
             throw new BizException(RespCode.FRONT_LOCALE_KEY_CODE_NOT_ALLOWED_TO_REPEAT);
         }
-        frontLocaleMapper.insert(frontLocale);
-        return frontLocaleMapper.selectById(frontLocale);
+        //如果是系统级租户添加前端多语言则同时插入所有租户
+        if (tenant.getSystemFlag()){
+            List<Tenant> tenants = tenantService.findAll();
+            tenants.stream().forEach(domain -> {
+                frontLocale.setId(null);
+                frontLocale.setTenantId(domain.getId());
+                frontLocaleMapper.insert(frontLocale);
+            });
+        }else{
+            frontLocale.setTenantId(tenantId);
+            frontLocaleMapper.insert(frontLocale);
+        }
+        return frontLocale;
     }
 
     /**
-     * 批量新增 中控多语言
+     * 批量新增 前端多语言
      * @param list
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<FrontLocale> createFrontLocaleBatch(List<FrontLocale> list){
         List<FrontLocale> result = new ArrayList<>();
         list.stream().forEach(frontLocale -> {
@@ -67,25 +83,25 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     }
 
     /**
-     * 单个编辑 中控多语言
+     * 单个编辑 前端多语言
      * @param frontLocale
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public FrontLocale updateFrontLocale(FrontLocale frontLocale){
         if (frontLocale.getId() == null){
             throw new BizException(RespCode.FRONT_LOCALE_NOT_EXIST);
         }
         frontLocaleMapper.updateAllColumnById(frontLocale);
-        return frontLocaleMapper.selectById(frontLocale);
+        return frontLocale;
     }
 
     /**
-     * 批量编辑 中控多语言
+     * 批量编辑 前端多语言
      * @param list
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<FrontLocale> updateFrontLocaleBatch(List<FrontLocale> list){
         List<FrontLocale> result = new ArrayList<>();
         list.stream().forEach(frontLocale -> {
@@ -96,9 +112,10 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     }
 
     /**
-     * 单个删除 中控多语言
+     * 单个删除 前端多语言
      * @param id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFrontLocaleById(Long id){
         FrontLocale frontLocale = frontLocaleMapper.selectById(id);
         if (frontLocale == null){
@@ -108,7 +125,7 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     }
 
     /**
-     * 单个查询 中控多语言
+     * 单个查询 前端多语言
      * @param id
      * @return
      */
@@ -121,7 +138,7 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     }
 
     /**
-     * 分页查询 中控多语言
+     * 分页查询 前端多语言
      * @param language 语言
      * @param applicationId 应用ID
      * @param keyCode 界面key值
@@ -130,30 +147,33 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
      * @return
      */
     public List<FrontLocale> getFrontLocaleByCond(String language, Long applicationId, String keyCode, String keyDescription, Page page) {
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
         List<FrontLocale> result = frontLocaleMapper.selectPage(page,
                 new EntityWrapper<FrontLocale>()
                         .eq(language != null,"language",language)
                         .eq(applicationId != null,"application_id",applicationId)
                         .like(keyCode != null,"key_code",keyCode)
                         .like(keyDescription != null,"key_description",keyDescription)
+                        .eq(tenantId != null,"tenant_id",tenantId)
                         .orderBy("key_code")
         );
         return result;
     }
 
     /**
-     * 不分页查询 map形式的中控多语言
+     * 不分页查询 map形式的前端多语言
      * @param language
      * @param applicationId
      * @return
      */
     public Map<String,String> mapFrontLocaleByCond(String language,Long applicationId){
         Map<String,String> mapFrontLocale = new HashMap<>();
-
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
         List<FrontLocale> frontLocaleList = frontLocaleMapper.selectList(
                 new EntityWrapper<FrontLocale>()
                         .eq(language != null,"language",language)
                         .eq(applicationId != null,"application_id",applicationId)
+                        .eq(tenantId != null,"tenant_id",tenantId)
                         .orderBy("key_code")
         );
         if (!CollectionUtils.isEmpty(frontLocaleList)){
@@ -166,7 +186,7 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     }
 
     /**
-     * 分页查询 中控多语言(返回外文描述信息)
+     * 分页查询 前端多语言(返回外文描述信息)
      * @param applicationId
      * @param sourceLanguage
      * @param targetLanguage
@@ -176,12 +196,13 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
      */
     public List<LocaleDTO> getOtherFrontLocaleByCond(Long applicationId, String sourceLanguage, String targetLanguage, String keyCode, Page page) {
         List<LocaleDTO> localeDTOList = new ArrayList<>();
-
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
         List<FrontLocale> frontLocaleList = frontLocaleMapper.selectPage(page,
                 new EntityWrapper<FrontLocale>()
                         .eq(applicationId != null, "application_id", applicationId)
                         .eq(sourceLanguage != null, "language", sourceLanguage)
                         .like(keyCode != null, "key_code", keyCode)
+                        .eq(tenantId != null,"tenant_id",tenantId)
         );
 
         if (!CollectionUtils.isEmpty(frontLocaleList)){
@@ -192,6 +213,7 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
                                 .eq("application_code", sourceFrontLocale.getApplicationCode())
                                 .eq("key_code", sourceFrontLocale.getKeyCode())
                                 .eq("language", targetLanguage)
+                                .eq(tenantId != null,"tenant_id",tenantId)
                 );
 
                 LocaleDTO localeDTO = LocaleDTO.builder()
@@ -213,4 +235,27 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
         }
         return localeDTOList;
     }
+
+    /**
+     * 前端多语言数据初始化
+     * @param tenantId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void initFrontLocale(Long tenantId){
+        Tenant tenant = tenantService.findTenantById(tenantId);
+        // 传入的是系统级租户的id
+        if(tenant.getSystemFlag()){
+            List<FrontLocale> frontLocaleList = frontLocaleMapper.selectList(
+                    new EntityWrapper<FrontLocale>()
+                            .eq(tenantId != null,"tenant_id",tenant.getId())
+            );
+            frontLocaleList.stream().forEach(frontLocale -> {
+                // 排除系统级租户
+                frontLocale.setId(null);
+                frontLocale.setTenantId(tenantId);
+                frontLocaleMapper.insert(frontLocale);
+            });
+        }
+    }
+
 }

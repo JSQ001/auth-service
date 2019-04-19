@@ -8,6 +8,7 @@ import com.hand.hcf.app.common.co.LocationLevelCO;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.common.dto.VendorAliasDTO;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.adapter.Adapter;

@@ -51,4 +51,9 @@ public class ContentList extends DomainI18n {
     //是否有子目录
     @TableField("has_son_content")
     private Boolean hasSonContent;
+
+
+    private Long tenantId;
+
+    private Long sourceId;
 }

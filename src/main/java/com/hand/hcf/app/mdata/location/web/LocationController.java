@@ -1,13 +1,14 @@
 package com.hand.hcf.app.mdata.location.web;
 
 import com.hand.hcf.app.common.dto.LocationDTO;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
 import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocationDetailService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

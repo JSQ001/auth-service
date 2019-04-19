@@ -5,11 +5,13 @@ import com.hand.hcf.app.base.system.domain.ServeLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.service.ServeLocaleService;
 import com.hand.hcf.app.core.util.PageUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Map;
  * @author: xue.han@hand-china.com
  * @date: 2019/3/11
  */
+@Api(tags = "服务端多语言")
 @RestController
 @RequestMapping("/api/serve/locale")
 public class ServeLocaleController {
@@ -30,124 +33,92 @@ public class ServeLocaleController {
         this.serveLocaleService = serveLocaleService;
     }
 
-    /**
-     * 单个新增 服务端多语言
-     * @param serveLocale
-     * @return
-     */
     @PostMapping
-    public ResponseEntity<ServeLocale> createServeLocale(@RequestBody ServeLocale serveLocale){
+    @ApiOperation(value = "新增服务端多语言", notes = "单个新增服务端多语言 开发:韩雪")
+    public ResponseEntity<ServeLocale> createServeLocale(@ApiParam(value = "服务端多语言") @RequestBody ServeLocale serveLocale){
         return ResponseEntity.ok(serveLocaleService.createServeLocale(serveLocale));
     }
 
-    /**
-     * 批量新增 服务端多语言
-     * @param list
-     * @return
-     */
     @PostMapping("/batch")
-    public ResponseEntity<List<ServeLocale>> createServeLocaleBatch(@RequestBody List<ServeLocale> list){
+    @ApiOperation(value = "批量新增服务端多语言", notes = "批量新增服务端多语言 开发:韩雪")
+    public ResponseEntity<List<ServeLocale>> createServeLocaleBatch(@ApiParam(value = "服务端多语言") @RequestBody List<ServeLocale> list){
         return ResponseEntity.ok(serveLocaleService.createServeLocaleBatch(list));
     }
 
-    /**
-     * 单个编辑 服务端多语言
-     * @param serveLocale
-     * @return
-     */
     @PutMapping
-    public ResponseEntity<ServeLocale> updateServeLocale(@RequestBody ServeLocale serveLocale){
+    @ApiOperation(value = "编辑服务端多语言", notes = "单个编辑服务端多语言 开发:韩雪")
+    public ResponseEntity<ServeLocale> updateServeLocale(@ApiParam(value = "服务端多语言") @RequestBody ServeLocale serveLocale){
         return ResponseEntity.ok(serveLocaleService.updateServeLocale(serveLocale));
     }
 
-    /**
-     * 批量编辑 服务端多语言
-     * @param list
-     * @return
-     */
     @PutMapping("/batch")
-    public ResponseEntity<List<ServeLocale>> updateServeLocaleBatch(@RequestBody List<ServeLocale> list){
+    @ApiOperation(value = "批量编辑服务端多语言", notes = "批量编辑服务端多语言 开发:韩雪")
+    public ResponseEntity<List<ServeLocale>> updateServeLocaleBatch(@ApiParam(value = "服务端多语言") @RequestBody List<ServeLocale> list){
         return ResponseEntity.ok(serveLocaleService.updateServeLocaleBatch(list));
     }
 
-    /**
-     * 单个删除 服务端多语言
-     * @param id
-     * @return
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteServeLocaleById(@PathVariable Long id){
+    @ApiOperation(value = "删除服务端多语言", notes = "单个删除服务端多语言 开发:韩雪")
+    public ResponseEntity deleteServeLocaleById(@ApiParam(value = "主键id") @PathVariable Long id){
         serveLocaleService.deleteServeLocaleById(id);
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * 单个查询 服务端语言
-     * @param id
-     * @return
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<ServeLocale> getServeLocaleById(@PathVariable Long id){
+    @ApiOperation(value = "查询服务端多语言", notes = "单个查询服务端多语言 开发:韩雪")
+    public ResponseEntity<ServeLocale> getServeLocaleById(@ApiParam(value = "主键id") @PathVariable Long id){
         return ResponseEntity.ok(serveLocaleService.getServeLocaleById(id));
     }
 
-    /**
-     * 分页查询 服务端多语言
-     * @param language 语言
-     * @param applicationId 应用ID
-     * @param keyCode 界面key值
-     * @param keyDescription key描述
-     * @param pageable
-     * @return
-     * @throws URISyntaxException
-     */
     @GetMapping("/query/by/cond")
+    @ApiOperation(value = "分页查询服务端多语言", notes = "分页查询服务端多语言 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<ServeLocale>> getServeLocaleByCond(
-            @RequestParam(value = "lang",required = false) String language,
-            @RequestParam(value = "applicationId",required = false) Long applicationId,
-            @RequestParam(value = "keyCode",required = false) String keyCode,
-            @RequestParam(value = "keyDescription",required = false) String keyDescription,
-            @RequestParam(value = "category",required = false) String category,
-            Pageable pageable) throws URISyntaxException{
+            @ApiParam(value = "语言") @RequestParam(value = "lang",required = false) String language,
+            @ApiParam(value = "应用ID") @RequestParam(value = "applicationId",required = false) Long applicationId,
+            @ApiParam(value = "key值") @RequestParam(value = "keyCode",required = false) String keyCode,
+            @ApiParam(value = "key描述") @RequestParam(value = "keyDescription",required = false) String keyDescription,
+            @ApiParam(value = "多语言类型") @RequestParam(value = "category",required = false) String category,
+            @ApiIgnore Pageable pageable) throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
         List<ServeLocale> result = serveLocaleService.getServeLocaleByCond(language,applicationId,keyCode,keyDescription,category,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
     }
 
-    /**
-     * 不分页查询 map形式的服务端多语言
-     * @param language
-     * @param applicationId
-     * @return
-     */
     @GetMapping("/query/map/by/cond")
+    @ApiOperation(value = "不分页查询map形式的服务端多语言", notes = "不分页查询map形式的服务端多语言 开发:韩雪")
     public ResponseEntity<Map<String,String>> mapServeLocaleByCond(
-            @RequestParam(value = "lang") String language,
-            @RequestParam(value = "applicationId") Long applicationId){
+            @ApiParam(value = "语言") @RequestParam(value = "lang") String language,
+            @ApiParam(value = "应用ID")@RequestParam(value = "applicationId") Long applicationId){
         return ResponseEntity.ok(serveLocaleService.mapServeLocaleByCond(language,applicationId));
     }
 
-    /**
-     * 分页查询 服务端多语言(返回外文描述信息)
-     * @param applicationId 应用ID
-     * @param sourceLanguage 源语言
-     * @param targetLanguage 目标语言
-     * @param keyCode 界面key值
-     * @param pageable
-     * @return
-     * @throws URISyntaxException
-     */
     @GetMapping("/query/other/serve/locale/by/cond")
+    @ApiOperation(value = "分页查询 服务端多语言(返回外文描述信息)", notes = "分页查询 服务端多语言(返回外文描述信息) 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<LocaleDTO>> getOtherServeLocaleByCond(
-            @RequestParam(value = "applicationId") Long applicationId,
-            @RequestParam(value = "sourceLanguage") String sourceLanguage,
-            @RequestParam(value = "targetLanguage") String targetLanguage,
-            @RequestParam(value = "keyCode",required = false) String keyCode,
-            Pageable pageable) throws URISyntaxException{
+            @ApiParam(value = "应用ID") @RequestParam(value = "applicationId") Long applicationId,
+            @ApiParam(value = "源语言") @RequestParam(value = "sourceLanguage") String sourceLanguage,
+            @ApiParam(value = "目标语言") @RequestParam(value = "targetLanguage") String targetLanguage,
+            @ApiParam(value = "key值") @RequestParam(value = "keyCode",required = false) String keyCode,
+            @ApiIgnore Pageable pageable) throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
         List<LocaleDTO> result = serveLocaleService.getOtherServeLocaleByCond(applicationId,sourceLanguage,targetLanguage,keyCode,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result,httpHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/init/{tenantId}")
+    @ApiOperation(value = "初始化后端多语言表", notes = "初始化后端多语言表 开发:程占华")
+    public ResponseEntity initServeLocale(@ApiParam(value = "租户id") @PathVariable Long tenantId){
+        serveLocaleService.initServeLocale(tenantId);
+        return ResponseEntity.ok().build();
     }
 }

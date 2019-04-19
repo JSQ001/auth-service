@@ -2,9 +2,10 @@ package com.hand.hcf.app.mdata.supplier.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.supplier.service.VendorBankAccountService;
 import com.hand.hcf.app.mdata.supplier.web.dto.VendorAccountDTO;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -133,7 +134,7 @@ public class VendorBankAccountController {
     /**
      * 对供应商下银行状态进行操作
      *提交，审批和拒绝
-     * @param VendorBankAccountCO
+     * @param vendorBankAccountCO
      * @return
      * @throws URISyntaxException
      */
