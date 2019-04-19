@@ -2440,4 +2440,20 @@
     <changeSet id="201904101819001" author="zhu.zhao">
         <dropNotNullConstraint tableName="exp_input_tax_dist" columnName="responsibility_center_id" columnDataType="bigint"/>
     </changeSet>
+
+    <changeSet id="201904141216001" author="zhu.zhao">
+        <addColumn tableName="exp_input_tax_header">
+            <column name="je_creation_status" type="tinyint" remarks="创建凭证标志"></column>
+            <column name="je_creation_date" type="timestamp" remarks="创建凭证日期"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904171713001" author="xiaoji.li">
+        <addColumn tableName="exp_report_header">
+            <column name="reverse_flag" type="varchar(50)" defaultValue="N" remarks="反冲状态(未反冲：N 部分反冲：PART 全部反冲：ALL)"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904171713002" author="xiaoji.li">
+        <addNotNullConstraint tableName="exp_report_header" columnName="reverse_flag" columnDataType="varchar(50)"/>
+    </changeSet>
 </databaseChangeLog>

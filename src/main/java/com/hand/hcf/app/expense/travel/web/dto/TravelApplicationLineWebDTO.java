@@ -32,6 +32,11 @@ public class TravelApplicationLineWebDTO extends TravelApplicationLine {
      */
     private String travelPeopleStr;
 
+    /**
+     * 责任中心名称
+     */
+    private String responsibilityCenterCodeName;
+
     private List<ExpenseFieldDTO> fields;
 
     private String expenseTypeName;

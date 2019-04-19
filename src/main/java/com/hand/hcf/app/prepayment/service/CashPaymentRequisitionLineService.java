@@ -44,24 +44,24 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
 
     @Transactional
     @Override
-    public boolean updateAllColumnById(CashPaymentRequisitionLine entity) {
+    public boolean updateAllColumnById(CashPaymentRequisitionLine entity){
 
         return super.updateAllColumnById(entity);
     }
 
-    public List<CashPaymentRequisitionLineCO> getLineByHeadID(@RequestParam(value = "headId") Long headId) {
+    public List<CashPaymentRequisitionLineCO> getLineByHeadID(@RequestParam(value = "headId") Long headId){
         List<CashPaymentRequisitionLine> list = baseMapper.selectList(new EntityWrapper<CashPaymentRequisitionLine>()
                 .eq("payment_requisition_header_id", headId)
                 .orderBy("created_date")
         );
         List<CashPaymentRequisitionLineCO> lineDTOS = new ArrayList<>();
         list.stream().forEach(cashPaymentRequisitionLine -> {
-            lineDTOS.add(mapper.map(cashPaymentRequisitionLine, CashPaymentRequisitionLineCO.class));
+            lineDTOS.add(mapper.map(cashPaymentRequisitionLine,CashPaymentRequisitionLineCO.class));
         });
         return lineDTOS;
     }
 
-    public List<CashPaymentRequisitionLine> getLinesByHeadID(@RequestParam(value = "headId") Long headId) {
+    public List<CashPaymentRequisitionLine> getLinesByHeadID(@RequestParam(value = "headId") Long headId){
         return baseMapper.selectList(new EntityWrapper<CashPaymentRequisitionLine>()
                 .eq("payment_requisition_header_id", headId)
         );
@@ -70,13 +70,13 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
     public Page<CashPaymentRequisitionHeadDto> getLineByQueryfromApplication(Page page, String requisitionNumber, String documentNumber, Long typeId, Long reptypeId) {
 
         // 首先 先去 费用模块查询出来 该对应的申请单相关联的预付款单号。 getPrepaymentByDocumentNumber
-        List<PrepaymentRequisitionReleaseCO> prepaymentRequisitionReleaseCOS = expenseApplicationClient.getPrepaymentByDocumentNumber(requisitionNumber);
+        List<PrepaymentRequisitionReleaseCO> prepaymentRequisitionReleaseCOS = expenseApplicationClient.getPrepaymentByDocumentNumber(documentNumber) ;
 
-        List<Long> hids = prepaymentRequisitionReleaseCOS.stream().map(PrepaymentRequisitionReleaseCO::getRelatedDocumentId).collect(Collectors.toList());
-        List<CashPaymentRequisitionHeadDto> cashPaymentRequisitionLineDtos = baseMapper.getLineByQueryfromApplication(page, new EntityWrapper<CashPaymentRequisitionLine>()
-                        .eq(reptypeId != null, "l.csh_transaction_class_id", reptypeId)
-                        .in(hids != null, "l.payment_requisition_header_id", hids)
-                , documentNumber, typeId);
+        List<Long> hids = prepaymentRequisitionReleaseCOS.stream().map(PrepaymentRequisitionReleaseCO ::getRelatedDocumentId).collect(Collectors.toList());
+         List<CashPaymentRequisitionHeadDto> cashPaymentRequisitionLineDtos=  baseMapper.getLineByQueryfromApplication(page,new EntityWrapper<CashPaymentRequisitionLine>()
+                                                        .eq(reptypeId!=null,"l.csh_transaction_class_id",reptypeId)
+                                                        .in(hids!=null,"l.payment_requisition_header_id",hids)
+                                                    ,documentNumber,typeId);
 
 
         // 公司
@@ -92,13 +92,13 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
         Set<Long> empIds = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHeadDto::getEmployeeId).collect(Collectors.toSet());
         ids = cashPaymentRequisitionLineDtos.stream().map(CashPaymentRequisitionHead::getCreatedBy).collect(Collectors.toSet());
         ids.addAll(empIds);
-        List<ContactCO> users = hcfOrganizationInterface.listByUserIdsConditionByKeyWord(new ArrayList<>(ids), null);
+        List<ContactCO> users = hcfOrganizationInterface.listByUserIdsConditionByKeyWord(new ArrayList<>(ids),null);
         Map<Long, String> empMap = users.stream().collect(Collectors.toMap(ContactCO::getId, ContactCO::getFullName, (k1, k2) -> k1));
 
-        for (CashPaymentRequisitionHeadDto cashPaymentRequisitionLineDto : cashPaymentRequisitionLineDtos
-        ) {
-            prepaymentRequisitionReleaseCOS.stream().forEach(e -> {
-                if (cashPaymentRequisitionLineDto.getLineId() == e.getRelatedDocumentLineId()) {
+        for (CashPaymentRequisitionHeadDto cashPaymentRequisitionLineDto:cashPaymentRequisitionLineDtos
+             ) {
+            prepaymentRequisitionReleaseCOS.stream().forEach(e->{
+                if(cashPaymentRequisitionLineDto.getLineId()==e.getRelatedDocumentLineId()){
                     cashPaymentRequisitionLineDto.setRelevancyAmount(e.getAmount());
                 }
             });
@@ -106,7 +106,7 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
         }
 
         page.setRecords(cashPaymentRequisitionLineDtos);
-        return page;
+        return  page;
     }
 
     public List<CashPaymentRequisitionLineAssoReqDTO> pageCashPaymentRequisitionLineAssoReqByCond(Long prepaymentHeaderId,
@@ -116,33 +116,35 @@ public class CashPaymentRequisitionLineService extends BaseService<CashPaymentRe
         List<CashPaymentRequisitionLine> lineList = baseMapper.selectPage(
                 page,
                 new EntityWrapper<CashPaymentRequisitionLine>()
-                        .eq("payment_requisition_header_id", prepaymentHeaderId)
-                        .like(StringUtils.hasText(documentNumber), "ref_document_code", documentNumber)
+                        .eq("payment_requisition_header_id",prepaymentHeaderId)
+                        .like(StringUtils.hasText(documentNumber),"ref_document_code",documentNumber)
         );
         List<CashPaymentRequisitionLineAssoReqDTO> result = new ArrayList<>();
-        lineList.stream().forEach(line -> {
-            CashPaymentRequisitionLineAssoReqDTO dto = mapper.map(line, CashPaymentRequisitionLineAssoReqDTO.class);
-            ApplicationCO applicationCO = expenseModuleInterface.getApplicationByDocumentId(line.getRefDocumentId());
-            if (applicationCO != null && applicationCO.getApplicationHeader() != null) {
-                if (applicationCO.getApplicationHeader().getEmployeeId() != null) {
-                    ContactCO contactCO = hcfOrganizationInterface.getUserById(applicationCO.getApplicationHeader().getEmployeeId());
-                    if (contactCO != null) {
-                        dto.setApplyName(contactCO.getFullName());
+        lineList.stream().forEach(line->{
+            CashPaymentRequisitionLineAssoReqDTO dto = mapper.map(line,CashPaymentRequisitionLineAssoReqDTO.class);
+            if(line.getRefDocumentId() != null) {
+                ApplicationCO applicationCO = expenseModuleInterface.getApplicationByDocumentId(line.getRefDocumentId());
+                if (applicationCO != null && applicationCO.getApplicationHeader() != null) {
+                    if (applicationCO.getApplicationHeader().getEmployeeId() != null) {
+                        ContactCO contactCO = hcfOrganizationInterface.getUserById(applicationCO.getApplicationHeader().getEmployeeId());
+                        if (contactCO != null) {
+                            dto.setApplyName(contactCO.getFullName());
+                        }
+                    }
+                    dto.setTypeName(applicationCO.getApplicationHeader().getTypeName());
+                    dto.setRequisitionDate(applicationCO.getApplicationHeader().getRequisitionDate());
+                    dto.setCurrencyCode(applicationCO.getApplicationHeader().getCurrencyCode());
+                    dto.setReqAmount(applicationCO.getApplicationHeader().getAmount());
+                    if(StringUtils.hasText(typeName)){
+                        if(dto.getTypeName().contains(typeName)){
+                            result.add(dto);
+                        }
+                    }else{
+                        result.add(dto);
                     }
                 }
-                dto.setTypeName(applicationCO.getApplicationHeader().getTypeName());
-                dto.setRequisitionDate(applicationCO.getApplicationHeader().getRequisitionDate());
-                dto.setCurrencyCode(applicationCO.getApplicationHeader().getCurrencyCode());
-                dto.setReqAmount(applicationCO.getApplicationHeader().getAmount());
-            }
-            if (StringUtils.hasText(typeName)) {
-                if (dto.getTypeName().contains(typeName)) {
-                    result.add(dto);
-                }
-            } else {
-                result.add(dto);
             }
         });
-        return result;
+        return  result;
     }
 }

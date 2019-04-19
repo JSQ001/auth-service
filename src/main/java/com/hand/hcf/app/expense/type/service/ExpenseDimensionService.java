@@ -1,6 +1,7 @@
 package com.hand.hcf.app.expense.type.service;
 
 import com.hand.hcf.app.common.co.DimensionCO;
+import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
@@ -37,6 +38,10 @@ public class ExpenseDimensionService extends BaseService<ExpenseDimensionMapper,
             DimensionCO dimensionCO = orgService.getDimensionById(dimension.getDimensionId());
             dimension.setName(dimensionCO.getDimensionName());
             dimension.setSequence(dimensionCO.getDimensionSequence());
+            if(dimension.getValue() != null){
+                DimensionItemCO dimensionItemCO = orgService.getDimensionItemById(dimension.getValue());
+                dimension.setValueName(dimensionItemCO.getDimensionItemName());
+            }
         });
         return dimensions;
     }

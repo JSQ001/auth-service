@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.common.externalApi;
 
 import com.hand.hcf.app.common.co.CashPayRequisitionTypeCO;
 import com.hand.hcf.app.common.co.CashPayRequisitionTypeSummaryCO;
+import com.hand.hcf.app.common.co.CashPaymentRequisitionHeaderCO;
 import com.hand.hcf.app.prepayment.implement.web.ImplementController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,4 +34,32 @@ public class PrepaymentService {
         return prepaymentClient.getCashPayRequisitionTypeById(id);
     }
 
+    /**
+     * 根据单据头ID提交预付款单
+     * @param requisitionHeaderId
+     * @param status
+     * @return
+     */
+    public Boolean submitCashPaymentRequisition(Long requisitionHeaderId, Integer status){
+        return prepaymentClient.submitCashPaymentRequisition(requisitionHeaderId, status);
+    }
+
+    /**
+     * 更新预付款单单据状态
+     * @param requisitionHeaderId
+     * @param status
+     * @return
+     */
+    public Boolean updateCashPaymentRequisitionStatus(Long requisitionHeaderId, Integer status){
+        return prepaymentClient.updateCashPaymentRequisitionStatus(requisitionHeaderId, status);
+    }
+
+    /**
+     * 根据申请单头ID获取关联的预付款单头
+     * @param applicationHeadId
+     * @return
+     */
+    public CashPaymentRequisitionHeaderCO getCashPaymentRequisitionHeaderByApplicationHeaderId(Long applicationHeadId){
+        return prepaymentClient.getCashPaymentRequisitionHeaderByApplicationHeaderId(applicationHeadId);
+    }
 }

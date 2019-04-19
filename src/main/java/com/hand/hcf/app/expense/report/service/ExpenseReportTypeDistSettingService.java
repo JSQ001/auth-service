@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @AllArgsConstructor
-public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseReportTypeDistSettingMapper,ExpenseReportTypeDistSetting> {
+public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseReportTypeDistSettingMapper,ExpenseReportTypeDistSetting>{
     private final ExpenseReportTypeDistSettingMapper expenseReportTypeDistSettingMapper;
 
     private final ExpenseReportTypeDistRangeService expenseReportTypeDistRangeService;
@@ -493,11 +493,13 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
             // 部门对应的责任中心
             }else if ("DEP_RES_CENTER".equals(respCenterDistRange)){
                 if(companyId != null && departmentId != null){
-                    ResponsibilityCenterCO defaultResponsibilityCenter = organizationService.getDefaultResponsibilityCenter(companyId, departmentId);
-                    if(defaultResponsibilityCenter != null){
-                        page.setTotal(1);
-                        page.setRecords(Arrays.asList(defaultResponsibilityCenter));
-                        return page;
+                    Page<ResponsibilityCenterCO> resCenters = organizationService.pageDepartmentResCenterByCond(
+                            departmentId,
+                            companyId,
+                            page
+                            );
+                    if(resCenters != null){
+                        return resCenters;
                     }
                 }
             // 自定义范围

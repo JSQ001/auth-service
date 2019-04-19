@@ -52,5 +52,13 @@
 
     </select>
 
+    <select id="pagePrepaymentLineByRefDocumentId" resultType="com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine">
+        SELECT cprl.*
+        FROM csh_payment_requisition_line cprl ,csh_payment_requisition_head cprh
+        WHERE cprl.payment_requisition_header_id = cprh.id
+        AND cprl.ref_document_id = #{refDocumentId}
+        AND cprh.req_in = 1
+        ORDER BY cprl.created_date
+    </select>
 
 </mapper>

@@ -5,11 +5,50 @@
 <mapper namespace="com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper">
     <select id="listExpInputTaxLine" resultType="com.hand.hcf.app.expense.input.dto.ExpInputForReportLineDTO">
         select *
-              from (SELECT null id,
+              from (select t3.id,
+                            t3.INPUT_TAX_HEADER_ID inputTaxHeaderId,
+                            (SELECT erh.REQUISITION_NUMBER
+                            FROM EXP_REPORT_HEADER erh
+                            WHERE erh.id = t4.EXP_REPORT_HEADER_ID) documentNumber,
+                            t4.EXP_REPORT_HEADER_ID expReportHeaderId,
+                            t4.id expReportLineId,
+                            (SELECT erh.APPLICANT_ID
+                            FROM EXP_REPORT_HEADER erh
+                            WHERE erh.id = t4.EXP_REPORT_HEADER_ID) applicantId,
+                            t4.EXPENSE_TYPE_ID,
+                            (select et.name from exp_expense_type et
+                            where et.id = t4.EXPENSE_TYPE_ID) expenseTypeName,
+                            t4.EXPENSE_DATE,
+                            t4.CURRENCY_CODE,
+                            t4.EXCHANGE_RATE rate,
+                            t4.AMOUNT reportAmount,
+                            (select t4.amount - coalesce(sum(BASE_AMOUNT), 0)
+                            from EXP_INPUT_TAX_LINE eitl
+                            where eitl.EXP_REPORT_LINE_ID = t4.id
+                            and eitl.INPUT_TAX_HEADER_ID != #{headerId}
+                            and exists
+                            (select 1
+                            from EXP_INPUT_TAX_LINE tl, EXP_INPUT_TAX_HEADER th
+                            where tl.input_tax_header_id = th.id
+                            and tl.id = eitl.id
+                            and th.status in (1002, 1004))) ableAmount,
+                            t3.base_amount,
+                            t4.EXPENSE_DATE transferDate,
+                            t4.COMPANY_ID,
+                            t3.DEPARTMENT_ID,
+                            t4.TENANT_ID,
+                            t4.SET_OF_BOOKS_ID,
+                            t4.DESCRIPTION
+                    from EXP_INPUT_TAX_LINE t3, EXP_REPORT_LINE t4
+                    where t3.EXP_REPORT_LINE_ID = t4.id
+                            and t3.INPUT_TAX_HEADER_ID = #{headerId}
+                    union all
+                    SELECT null id,
                         #{headerId} inputTaxHeaderId,
                         (SELECT erh.REQUISITION_NUMBER
                             FROM EXP_REPORT_HEADER erh
                             WHERE erh.id = t.EXP_REPORT_HEADER_ID) documentNumber,
+                        t.EXP_REPORT_HEADER_ID expReportHeaderId,
                         id expReportLineId,
                         (SELECT erh.APPLICANT_ID
                             FROM EXP_REPORT_HEADER erh
@@ -46,43 +85,7 @@
                         (select t2.EXP_REPORT_LINE_ID
                             from EXP_INPUT_TAX_LINE t2
                             where t2.INPUT_TAX_HEADER_ID = #{headerId})
-                union all
-                    select t3.id,
-                        t3.INPUT_TAX_HEADER_ID inputTaxHeaderId,
-                        (SELECT erh.REQUISITION_NUMBER
-                            FROM EXP_REPORT_HEADER erh
-                            WHERE erh.id = t4.EXP_REPORT_HEADER_ID) documentNumber,
-                        t4.id expReportLineId,
-                        (SELECT erh.APPLICANT_ID
-                            FROM EXP_REPORT_HEADER erh
-                            WHERE erh.id = t4.EXP_REPORT_HEADER_ID) applicantId,
-                        t4.EXPENSE_TYPE_ID,
-                        (select et.name from exp_expense_type et
-                        where et.id = t4.EXPENSE_TYPE_ID) expenseTypeName,
-                        t4.EXPENSE_DATE,
-                        t4.CURRENCY_CODE,
-                        t4.EXCHANGE_RATE rate,
-                        t4.AMOUNT reportAmount,
-                        (select t4.amount - coalesce(sum(BASE_AMOUNT), 0)
-                            from EXP_INPUT_TAX_LINE eitl
-                            where eitl.EXP_REPORT_LINE_ID = t4.id
-                                and eitl.INPUT_TAX_HEADER_ID != #{headerId}
-                                and exists
-                                (select 1
-                                    from EXP_INPUT_TAX_LINE tl, EXP_INPUT_TAX_HEADER th
-                                    where tl.input_tax_header_id = th.id
-                                    and tl.id = eitl.id
-                                    and th.status in (1002, 1004))) ableAmount,
-                        t3.base_amount,
-                        t4.EXPENSE_DATE transferDate,
-                        t4.COMPANY_ID,
-                        t3.DEPARTMENT_ID,
-                        t4.TENANT_ID,
-                        t4.SET_OF_BOOKS_ID,
-                        t4.DESCRIPTION
-                    from EXP_INPUT_TAX_LINE t3, EXP_REPORT_LINE t4
-                    where t3.EXP_REPORT_LINE_ID = t4.id
-                      and t3.INPUT_TAX_HEADER_ID = #{headerId})
+                    )
             where ableAmount > 0
                 and exists (select 1
                             from exp_report_header h, exp_report_line l
@@ -104,6 +107,7 @@
 
     <select id="listLineById" resultType="com.hand.hcf.app.expense.input.dto.ExpInputTaxLineDTO">
 		select t.*,
+		       t2.EXP_REPORT_HEADER_ID expReportHeaderId,
                t2.EXPENSE_TYPE_ID,
                t3.name expenseTypeName,
                (SELECT erh.REQUISITION_NUMBER

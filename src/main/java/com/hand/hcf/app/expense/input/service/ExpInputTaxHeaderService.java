@@ -3,22 +3,28 @@ package com.hand.hcf.app.expense.input.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
-import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
-import com.hand.hcf.app.expense.common.service.CommonService;
-import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
-import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
-import com.hand.hcf.app.expense.input.dto.ExpInputTaxHeaderDTO;
-import com.hand.hcf.app.expense.input.persistence.ExpInputTaxHeaderMapper;
-import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.DateUtil;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
+import com.hand.hcf.app.expense.common.externalApi.AccountingService;
+import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
+import com.hand.hcf.app.expense.common.service.CommonService;
+import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
+import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
+import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
+import com.hand.hcf.app.expense.input.dto.ExpInputTaxHeaderDTO;
+import com.hand.hcf.app.expense.input.dto.ExpInputTaxLineDTO;
+import com.hand.hcf.app.expense.input.persistence.ExpInputTaxHeaderMapper;
+import com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper;
+import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +38,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+
+;
 
 /**
  * @description:
@@ -43,6 +52,9 @@ import java.util.*;
 public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMapper, ExpInputTaxHeader> {
     @Autowired
     private ExpInputTaxHeaderMapper expInputTaxHeaderMapper;
+
+    @Autowired
+    private ExpInputTaxLineMapper expInputTaxLineMapper;
 
     @Autowired
     private ExpInputTaxLineService expInputTaxLineService;
@@ -57,6 +69,10 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private AccountingService accountingService;
+
 
     public Page<ExpInputTaxHeaderDTO> queryHeader(Long applicantId, String transferType, String useType, String transferDateFrom, String transferDateTo, String status, BigDecimal amountFrom, BigDecimal amountTo, String description, String documentNumber, Long companyId, Long departmentId, Page page) {
         List<ExpInputTaxHeader> expInputTaxHeaders = expInputTaxHeaderMapper.selectPage(page, new EntityWrapper<ExpInputTaxHeader>()
@@ -254,9 +270,9 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                                                            ZonedDateTime creatDateFrom, ZonedDateTime creatDateTo, ZonedDateTime auditDateFrom,
                                                            ZonedDateTime auditDateTo, Long tenantId, String documentNumber) {
 
-        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId,unitId,applyId,status,transferType,useType,currencyCode,amountFrom,amountTo,
-                reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber);
-        List<ExpInputTaxHeaderDTO> expInputFinances=baseMapper.queryExpInputFinance(page,wrapper);
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
+                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber);
+        List<ExpInputTaxHeaderDTO> expInputFinances = baseMapper.queryExpInputFinance(page, wrapper);
         setDesc(expInputFinances);
         setSysCodeValue(expInputFinances);
         /*for (ExpInputTaxHeaderDTO header : expInputFinances) {
@@ -271,37 +287,39 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             }
         }*/
         //setCompanyAndDepartmentAndEmployee1(expInputFinances);
-        return  expInputFinances;
+        return expInputFinances;
     }
+
     //获取业务大类和用途类型值列表
-    public void setSysCodeValue(List<ExpInputTaxHeaderDTO> headerDTOS){
-        if(!CollectionUtils.isEmpty(headerDTOS)){
-            headerDTOS.stream().forEach(e->{
+    public void setSysCodeValue(List<ExpInputTaxHeaderDTO> headerDTOS) {
+        if (!CollectionUtils.isEmpty(headerDTOS)) {
+            headerDTOS.stream().forEach(e -> {
                 setSysCodeValue(e);
             });
         }
     }
-    public void setSysCodeValue(ExpInputTaxHeaderDTO headerDTO){
-        if(headerDTO!=null){
-                SysCodeValueCO sysCodeValueCO = getSysCodeValueByCodeAndValue("transferType",headerDTO.getTransferType());
-                if (sysCodeValueCO != null) {
-                    headerDTO.setTransferTypeName(sysCodeValueCO.getName());
-                }
 
-                SysCodeValueCO sysCodeValueCO1 =getSysCodeValueByCodeAndValue("useType",headerDTO.getUseType());
-                if (sysCodeValueCO1 != null) {
-                    headerDTO.setUseTypeName(sysCodeValueCO1.getName());
-                }
+    public void setSysCodeValue(ExpInputTaxHeaderDTO headerDTO) {
+        if (headerDTO != null) {
+            SysCodeValueCO sysCodeValueCO = getSysCodeValueByCodeAndValue("transferType", headerDTO.getTransferType());
+            if (sysCodeValueCO != null) {
+                headerDTO.setTransferTypeName(sysCodeValueCO.getName());
+            }
+
+            SysCodeValueCO sysCodeValueCO1 = getSysCodeValueByCodeAndValue("useType", headerDTO.getUseType());
+            if (sysCodeValueCO1 != null) {
+                headerDTO.setUseTypeName(sysCodeValueCO1.getName());
+            }
 
         }
     }
 
 
     //获取系统代码值列表
-    public SysCodeValueCO getSysCodeValueByCodeAndValue(String code,String type){
+    public SysCodeValueCO getSysCodeValueByCodeAndValue(String code, String type) {
         SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(code, type);
 
-        return sysCodeValueCO ;
+        return sysCodeValueCO;
 
     }
 
@@ -324,14 +342,14 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                                 String documentNumber,
                                 HttpServletResponse response,
                                 HttpServletRequest request,
-                                ExportConfig exportConfig)throws IOException {
+                                ExportConfig exportConfig) throws IOException {
         //获取查询的Sql
-        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId,unitId,applyId,status,transferType,useType,currencyCode,amountFrom,amountTo,
-                reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber);
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
+                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber);
         //获取 查询的总数
         int total = baseMapper.getCountByCondition(wrapper);
         int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
-        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpInputTaxHeaderDTO,ExpInputTaxHeaderDTO>(){
+        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpInputTaxHeaderDTO, ExpInputTaxHeaderDTO>() {
             @Override
             public int getTotal() {
                 return total;
@@ -339,7 +357,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
 
             @Override
             public List<ExpInputTaxHeaderDTO> queryDataByPage(Page page) {
-                return ListExpInputTaxHeaderFianicen(page,wrapper);
+                return ListExpInputTaxHeaderFianicen(page, wrapper);
             }
 
             @Override
@@ -353,49 +371,179 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             }
         }, availProcessors, request, response);
     }
+
     public List<ExpInputTaxHeaderDTO> ListExpInputTaxHeaderFianicen(Page page,
-                                                                    Wrapper<ExpInputTaxHeader> wrapper){
-        List<ExpInputTaxHeaderDTO>headers = baseMapper.queryExpInputFinance(page,wrapper);
+                                                                    Wrapper<ExpInputTaxHeader> wrapper) {
+        List<ExpInputTaxHeaderDTO> headers = baseMapper.queryExpInputFinance(page, wrapper);
         setDesc(headers);
         setSysCodeValue(headers);
         return headers;
     }
-    public  Wrapper<ExpInputTaxHeader> getQueryExpInputFinance (Long companyId,
-                                                                Long unitId,
-                                                                Long applyId,
-                                                                Long status,
-                                                                String transferType,
-                                                                String useType,
-                                                                String currencyCode,
-                                                                BigDecimal amountFrom,
-                                                                BigDecimal amountTo,
-                                                                String reverseFlag,
-                                                                String remark,
-                                                                ZonedDateTime creatDateFrom,
-                                                                ZonedDateTime creatDateTo,
-                                                                ZonedDateTime auditDateFrom,
-                                                                ZonedDateTime auditDateTo,
-                                                                Long tenantId,
-                                                                String documentNumber){
+
+    public Wrapper<ExpInputTaxHeader> getQueryExpInputFinance(Long companyId,
+                                                              Long unitId,
+                                                              Long applyId,
+                                                              Long status,
+                                                              String transferType,
+                                                              String useType,
+                                                              String currencyCode,
+                                                              BigDecimal amountFrom,
+                                                              BigDecimal amountTo,
+                                                              String reverseFlag,
+                                                              String remark,
+                                                              ZonedDateTime creatDateFrom,
+                                                              ZonedDateTime creatDateTo,
+                                                              ZonedDateTime auditDateFrom,
+                                                              ZonedDateTime auditDateTo,
+                                                              Long tenantId,
+                                                              String documentNumber) {
         Wrapper<ExpInputTaxHeader> wrapper = new EntityWrapper<ExpInputTaxHeader>()
-                .eq(companyId!=null,"t.company_id",companyId)
-                .eq(unitId!=null,"t.department_id",unitId)
-                .eq(applyId!=null,"t.applicant_id",applyId)
-                .eq(status!=null,"t.status",status)
-                .eq(StringUtils.hasText(transferType),"t.transfer_type",transferType)
-                .eq(StringUtils.hasText(useType),"t.use_type",useType)
-                .eq(StringUtils.hasText(currencyCode),"t.currency_code",currencyCode)
-                .gt(amountFrom!=null,"t.amount",amountFrom)
-                .lt(amountTo!=null,"t.amount",amountTo)
-                .eq(StringUtils.hasText(reverseFlag),"t.reverse_flag",reverseFlag)
-                .like(StringUtils.hasText(remark),"t.description",remark)
-                .gt(creatDateFrom!=null,"t.created_date",creatDateFrom)
-                .lt(creatDateTo!=null,"t.created_date",creatDateTo)
-                .gt(auditDateFrom!=null,"t.audit_date",auditDateFrom)
-                .lt(auditDateTo!=null,"t.audit_date",auditDateTo)
-                .eq(tenantId!=null,"t.tenant_id",tenantId)
-                .like(StringUtils.hasText(documentNumber),"t.document_number",documentNumber)
-                .orderBy("t.document_number",false);
-        return wrapper ;
+                .eq(companyId != null, "t.company_id", companyId)
+                .eq(unitId != null, "t.department_id", unitId)
+                .eq(applyId != null, "t.applicant_id", applyId)
+                .eq(status != null, "t.status", status)
+                .eq(StringUtils.hasText(transferType), "t.transfer_type", transferType)
+                .eq(StringUtils.hasText(useType), "t.use_type", useType)
+                .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
+                .gt(amountFrom != null, "t.amount", amountFrom)
+                .lt(amountTo != null, "t.amount", amountTo)
+                .eq(StringUtils.hasText(reverseFlag), "t.reverse_flag", reverseFlag)
+                .like(StringUtils.hasText(remark), "t.description", remark)
+                .gt(creatDateFrom != null, "t.created_date", creatDateFrom)
+                .lt(creatDateTo != null, "t.created_date", creatDateTo)
+                .gt(auditDateFrom != null, "t.audit_date", auditDateFrom)
+                .lt(auditDateTo != null, "t.audit_date", auditDateTo)
+                .eq(tenantId != null, "t.tenant_id", tenantId)
+                .like(StringUtils.hasText(documentNumber), "t.document_number", documentNumber)
+                .orderBy("t.document_number", false);
+        return wrapper;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    //@LcnTransaction
+    public String saveInitializeExpInputTaxGeneralLedgerJournalLine(Long inputTaxHeaderId, String accountingDate) {
+        ExpenseInputTaxCO inputTaxCO = new ExpenseInputTaxCO();
+        //报销单头
+        ExpInputTaxHeader inputTaxHeader = this.selectById(inputTaxHeaderId);
+        //报销单行
+        List<ExpInputTaxLineDTO> lineDTOS = expInputTaxLineMapper.listLineById(inputTaxHeaderId);
+        List<Long> lineIds = lineDTOS.stream().map(ExpInputTaxLine::getId).collect(Collectors.toList());
+        //分摊行
+        List<ExpInputTaxDist> expenseReportDists = expInputTaxDistService.getExpInputTaxDistByHeaderId(lineIds);
+
+        //转换
+        ExpenseInputTaxHeaderCO expenseInputTaxHeader = inputTaxHeaderToInputTaxHeaderCO(inputTaxHeader, accountingDate);
+        List<ExpenseInputTaxLineCO> expenseInputTaxLineCOS = inputTaxLineToInputTaxLineCO(lineDTOS, inputTaxHeader);
+        List<ExpenseInputTaxDistCO> expenseInputTaxDistCOS = inputTaxDistToInputTaxDistCO(expenseReportDists, inputTaxHeader);
+
+        inputTaxCO.setExpenseInputTaxHeader(expenseInputTaxHeader);
+        inputTaxCO.setExpenseReportLines(expenseInputTaxLineCOS);
+        inputTaxCO.setExpenseReportDists(expenseInputTaxDistCOS);
+        //bo.liu 核算
+        /*accountingService.saveInitializeExpInputTaxGeneralLedgerJournalLine(inputTaxCO);*/
+        inputTaxHeader.setJeCreationStatus(true);
+        inputTaxHeader.setJeCreationDate(ZonedDateTime.now());
+        updateById(inputTaxHeader);
+        return "SUCCESS";
+    }
+
+    private ExpenseInputTaxHeaderCO inputTaxHeaderToInputTaxHeaderCO(ExpInputTaxHeader inputTaxHeader,
+                                                                     String accountingDate) {
+        ZonedDateTime accountDate = TypeConversionUtils.getStartTimeForDayYYMMDD(accountingDate);
+        PeriodCO period = organizationService.getPeriodsByIDAndTime(inputTaxHeader.getSetOfBooksId(), DateUtil.ZonedDateTimeToString(accountDate));
+        return ExpenseInputTaxHeaderCO.builder()
+                .id(inputTaxHeader.getId())
+                .tenantId(inputTaxHeader.getTenantId())
+                .setOfBooksId(inputTaxHeader.getSetOfBooksId())
+                .currencyCode(inputTaxHeader.getCurrencyCode())
+                .rate(inputTaxHeader.getRate().doubleValue())
+                .documentNumber(inputTaxHeader.getDocumentNumber())
+                .companyId(inputTaxHeader.getCompanyId())
+                .departmentId(inputTaxHeader.getDepartmentId())
+                .applicationId(inputTaxHeader.getApplicantId())
+                //.formId(inputTaxHeader.getFormId())
+                .description(inputTaxHeader.getDescription())
+                .transferDate(inputTaxHeader.getTransferDate())
+                .amount(inputTaxHeader.getAmount())
+                .functionAmount(inputTaxHeader.getFunctionAmount())
+                .baseAmount(inputTaxHeader.getBaseAmount())
+                .baseFunctionAmount(inputTaxHeader.getBaseFunctionAmount())
+                .status(inputTaxHeader.getStatus().toString())
+                .accountDate(accountDate)
+                .accountPeriod(period.getPeriodName()).build();
+    }
+
+    private List<ExpenseInputTaxLineCO> inputTaxLineToInputTaxLineCO(List<ExpInputTaxLineDTO> inputTaxLines, ExpInputTaxHeader expInputTaxHeader) {
+        List<ExpenseInputTaxLineCO> expenseReportLines = new ArrayList<>();
+        inputTaxLines.forEach(inputTaxLine -> {
+
+            ExpenseInputTaxLineCO inputTaxLineCO = ExpenseInputTaxLineCO.builder()
+                    .id(inputTaxLine.getId())
+                    .headerId(expInputTaxHeader.getId())
+                    .companyId(inputTaxLine.getCompanyId())
+                    //.expenseTypeId(inputTaxLine.getExpenseTypeId())
+                    //.quantity(inputTaxLine.getQuantity())
+                    //.price(inputTaxLine.getPrice())
+                    //.uom(inputTaxLine.getUom())
+                    .currencyCode(inputTaxLine.getCurrencyCode())
+                    .rate(inputTaxLine.getRate().doubleValue())
+                    .amount(inputTaxLine.getAmount())
+                    .functionAmount(inputTaxLine.getFunctionAmount())
+                    .baseFunctionAmount(inputTaxLine.getBaseAmount())
+                    .baseFunctionAmount(inputTaxLine.getBaseFunctionAmount())
+                    //.taxAmount()
+                    //.taxFunctionAmount(inputTaxLine.getTaxFunctionAmount())
+                    //.installmentDeductionFlag(inputTaxLine.getInstallmentDeductionFlag())
+                    //.inputTaxFlag(inputTaxLine.getInputTaxFlag())
+                    .useType(inputTaxLine.getUseType())
+                    .description(inputTaxLine.getDescription())
+                    .build();
+            expenseReportLines.add(inputTaxLineCO);
+        });
+        return expenseReportLines;
+    }
+
+    private List<ExpenseInputTaxDistCO> inputTaxDistToInputTaxDistCO(List<ExpInputTaxDist> inputTaxDists, ExpInputTaxHeader expInputTaxHeader) {
+        List<ExpenseInputTaxDistCO> expenseReportDists = new ArrayList<>();
+        inputTaxDists.forEach(inputTaxDist -> {
+            ExpenseInputTaxDistCO expenseReportDist = ExpenseInputTaxDistCO.builder().companyId(inputTaxDist.getCompanyId())
+                    .currencyCode(inputTaxDist.getCurrencyCode())
+                    .dimension1Id(inputTaxDist.getDimension1Id())
+                    .dimension2Id(inputTaxDist.getDimension2Id())
+                    .dimension3Id(inputTaxDist.getDimension3Id())
+                    .dimension4Id(inputTaxDist.getDimension4Id())
+                    .dimension5Id(inputTaxDist.getDimension5Id())
+                    .dimension6Id(inputTaxDist.getDimension6Id())
+                    .dimension7Id(inputTaxDist.getDimension7Id())
+                    .dimension8Id(inputTaxDist.getDimension8Id())
+                    .dimension9Id(inputTaxDist.getDimension9Id())
+                    .dimension10Id(inputTaxDist.getDimension10Id())
+                    .dimension11Id(inputTaxDist.getDimension11Id())
+                    .dimension12Id(inputTaxDist.getDimension12Id())
+                    .dimension13Id(inputTaxDist.getDimension13Id())
+                    .dimension14Id(inputTaxDist.getDimension14Id())
+                    .dimension15Id(inputTaxDist.getDimension15Id())
+                    .dimension16Id(inputTaxDist.getDimension16Id())
+                    .dimension17Id(inputTaxDist.getDimension17Id())
+                    .dimension18Id(inputTaxDist.getDimension18Id())
+                    .dimension19Id(inputTaxDist.getDimension19Id())
+                    .dimension20Id(inputTaxDist.getDimension20Id())
+                    //.expenseTypeId(inputTaxDist.getExpenseTypeId())
+                    //.taxFunctionAmount(inputTaxDist.getTaxDistFunctionAmount())
+                    .id(inputTaxDist.getId())
+                    .lineId(inputTaxDist.getInputTaxLineId())
+                    .headerId(expInputTaxHeader.getId())
+                    .resCenterId(inputTaxDist.getResponsibilityCenterId())
+                    //.noTaxFunctionAmount(inputTaxDist.getNoTaxDistFunctionAmount())
+                    //.noTaxAmount(inputTaxDist.getNoTaxDistAmount())
+                    //.taxAmount(inputTaxDist.getTaxDistAmount())
+                    .amount(inputTaxDist.getAmount())
+                    .functionAmount(inputTaxDist.getFunctionAmount())
+                    .baseAmount(inputTaxDist.getBaseAmount())
+                    .baseFunctionAmount(inputTaxDist.getBaseFunctionAmount())
+                    .departmentId(inputTaxDist.getDepartmentId()).build();
+            expenseReportDists.add(expenseReportDist);
+        });
+        return expenseReportDists;
     }
 }

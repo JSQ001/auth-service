@@ -22,5 +22,17 @@
 
     </select>
 
+    <select id="queryCashPaymentReqLinePara" resultType="com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine">
+      select l.*
+          from csh_payment_requisition_line l, csh_payment_requisition_head h
+        where l.PAYMENT_REQUISITION_HEADER_ID = h.ID
+        and h.STATUS not in (1001, 1003, 1005)
+        <if test="contractId!=null">
+            and l.CONTRACT_ID = #{contractId}
+        </if>
+
+        order by l.PAYMENT_REQUISITION_HEADER_ID
+    </select>
+
 
 </mapper>

@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.adjust.web.dto;
 
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
+import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import lombok.Data;
 
 import java.util.List;
@@ -32,4 +33,9 @@ public class ExpenseAdjustHeaderWebDTO extends ExpenseAdjustHeader {
     private String typeName;
 
     private Integer entityType;
+
+    /**
+     * 维度信息
+     */
+    private List<ExpenseDimension> dimensions;
 }

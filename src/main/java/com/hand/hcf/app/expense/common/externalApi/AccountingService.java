@@ -32,4 +32,14 @@ public class AccountingService {
     public void deleteExpReportGeneralLedgerJournalDataByHeaderId(Long headerId){
         accountingClient.deleteExpReportGeneralLedgerJournalDataByHeaderId(headerId);
     }*/
+
+/**
+ * 进项税单生成凭证
+ * @param inputTaxCO 进项税单数据
+ * @return 返回"SUCCESS"表示报账单数据凭证生成成功
+ */
+    //bo.liu 核算
+//    public String saveInitializeExpInputTaxGeneralLedgerJournalLine(ExpenseInputTaxCO inputTaxCO){
+//        return accountingClient.saveInitializeExpInputTaxGeneralLedgerJournalLine(inputTaxCO);
+//    }
 }

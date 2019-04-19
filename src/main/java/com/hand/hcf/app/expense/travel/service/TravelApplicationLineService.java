@@ -130,9 +130,15 @@ public class TravelApplicationLineService extends BaseService<TravelApplicationL
                         if (usersMap.containsKey(e.getBookerId())) {
                             e.setBookerName(usersMap.get(e.getBookerId()).getFullName());
                         }
+                        if(e.getResponsibilityCenterId() != null){
+                           ResponsibilityCenterCO responsibilityCenterCO = organizationService
+                                   .getResponsibilityCenterById(e.getResponsibilityCenterId());
+                           if(responsibilityCenterCO != null) {
+                               e.setResponsibilityCenterCodeName(responsibilityCenterCO.getResponsibilityCenterCodeName());
+                           }
+                        }
                     });
         }
-
     }
 
     private List<ExpenseFieldDTO> adaptExpenseDocumentField(List<ExpenseDocumentField> fields){
@@ -209,6 +215,7 @@ public class TravelApplicationLineService extends BaseService<TravelApplicationL
         line.setRequisitonTypeId(expenseType.getId());
         line.setRequisitionDate(dto.getRequisitionDate());
         line.setDescription(dto.getDescription());
+        line.setResponsibilityCenterId(dto.getResponsibilityCenterId());
         //订票状态-未订票
         line.setUseFlag("N");
         if ("1".equals(header.getOrderMode())) {

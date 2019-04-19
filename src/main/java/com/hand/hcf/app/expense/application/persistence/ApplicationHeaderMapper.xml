@@ -8,8 +8,18 @@
     </select>
 
     <select id="listByCondition" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
-        select t.*, eat.type_name from exp_application_header t, exp_application_type eat
-        where t.type_id = eat.id
+        SELECT t.*,
+        eat.type_name,
+        (t.amount - coalesce(t.closed_amount, 0) -
+        (SELECT coalesce(SUM(v.amount), 0) AS associateamount
+        FROM exp_requisition_release v, exp_report_header rh
+        WHERE v.source_doc_category = 'EXP_REQUISITION'
+        AND v.related_doc_id = rh.id
+        AND v.source_doc_id = t.id
+        AND v.related_doc_category = 'PUBLIC_REPORT'
+        AND rh.audit_flag = 'Y')) canCloseAmount
+        FROM exp_application_header t, exp_application_type eat
+        WHERE t.type_id = eat.id
         <if test="ew != null">
             ${ew.sqlSegment}
         </if>
@@ -258,7 +268,7 @@
                 and t.department_id = #{headerDepartmentId}
             </if>
             <if test="documentNumber != null">
-                AND t.document_number LIKE  concat('%',#{documentNumber},'%')
+                AND t.document_number LIKE  concat('%',concat(#{documentNumber},'%'))
             </if>
             <if test="employeeId != null">
                 and t.employee_id = #{employeeId}
@@ -353,13 +363,20 @@
             </if>
     </select>
     <select id="queryReleaseByReport" resultType="com.hand.hcf.app.expense.application.web.dto.ApplicationHeaderWebDTO">
-        select eh.*,r.amount releaseAmount,l.expense_type_id
+        select eh.*,r.amount releaseAmount,l.expense_type_id expenseType
         from
-            exp_report_header h,exp_requisition_release r,exp_application_header eh,exp_report_line l
+            exp_report_header h,exp_requisition_release r,exp_application_header eh,exp_application_line l,exp_expense_type t
         where
-            h.requisition_number = #{businessCode}
+            h.requisition_number = #{documentNumber}
           and r.related_doc_id = h.id
-          and r.source_doc_line_id = l.id
+          and r.source_doc_dist_id = l.id
           and r.source_doc_id = eh.id
+          and t.id = l.expense_type_id
+          <if test="releaseCode!=null">
+            and   eh.document_number = #{releaseCode}
+          </if>
+        <if test="expenseTypeName!=null">
+           and  t.name like concat('%',concat(#{expenseTypeName},'%'))
+        </if>
     </select>
 </mapper>

@@ -85,6 +85,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
 
     public List<ExpInputTaxLine> queryByHeaderId(Long headerId) {
         List<ExpInputTaxLine> expInputTaxLines = expInputTaxLineMapper.selectList(new EntityWrapper<ExpInputTaxLine>().eq("input_tax_header_id", headerId));
+
         return expInputTaxLines;
     }
 
@@ -101,7 +102,9 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
             expInputTaxLine.setStatus(header.getStatus());
             expInputTaxLine.setAuditStatus(header.getAuditStatus());
             expInputTaxLine.setReverseFlag(header.getReverseFlag());
-            expInputTaxLine.setUseType(header.getUseType());
+            if(!StringUtils.hasText(expInputTaxLine.getUseType())) {
+                expInputTaxLine.setUseType(header.getUseType());
+            }
             expInputTaxLine.setTransferProportion(header.getTransferProportion());
             //这里必须采用累加才能避免尾差
             expInputTaxLine.setBaseAmount(BigDecimal.ZERO);
@@ -235,11 +238,12 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
         return expInputTaxLineMapper.getSumAmount(inputTaxHeaderId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Boolean delete(Long id) {
+        ExpInputTaxHeaderDTO header = expInputTaxHeaderService.queryById(expInputTaxLineMapper.selectById(id).getInputTaxHeaderId());
         expInputTaxDistService.deleteByLineId(id);
         expInputTaxLineMapper.deleteById(id);
         //更新头的金额和相关信息
-        ExpInputTaxHeaderDTO header = expInputTaxHeaderService.queryById(expInputTaxLineMapper.selectById(id).getInputTaxHeaderId());
         ExpInputTaxSumAmountDTO sumLineAmount = getSumAmount(id);
         header.setBaseAmount(sumLineAmount.getBaseAmount());
         header.setBaseFunctionAmount(sumLineAmount.getBaseFunctionAmount());
@@ -247,6 +251,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
         header.setFunctionAmount(sumLineAmount.getFunctionAmount());
         header.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
         header.setLastUpdatedDate(ZonedDateTime.now());
+        expInputTaxHeaderService.updateById(header);
         return true;
     }
 

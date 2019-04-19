@@ -3,15 +3,20 @@ package com.hand.hcf.app.expense.adjust.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.security.domain.PrincipalLite;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustLine;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustType;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustHeaderMapper;
+import com.hand.hcf.app.expense.adjust.web.dto.ExpAdjustTypeDimensionDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustDimensionDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustDimensionItemDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustHeaderWebDTO;
-import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustTypeWebDTO;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
@@ -23,10 +28,6 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.security.domain.PrincipalLite;
-import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -198,7 +199,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
     @Transactional(rollbackFor = Exception.class)
     public ExpenseAdjustHeader createHeader(ExpenseAdjustHeaderWebDTO dto){
         // 查询单据类型和相关维度， 单据保存后维度不以单据类型分配的维度的增减而增减
-        ExpenseAdjustTypeWebDTO adjustTypeWebDTO = expenseAdjustTypeService.getTypeAndDimensions(dto.getExpAdjustTypeId());
+        ExpAdjustTypeDimensionDTO adjustTypeWebDTO = expenseAdjustTypeService.queryTypeAndDimensionById(dto.getExpAdjustTypeId(),false);
         // 获取当前登陆信息
         PrincipalLite userBean = OrgInformationUtil.getUser();
         // 校验
@@ -252,6 +253,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
             adjustTypeWebDTO.getDimensions().forEach(e -> {
                 e.setHeaderId(expenseAdjustHeader.getId());
                 e.setId(null);
+                e.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
             });
             dimensionService.insertBatch(adjustTypeWebDTO.getDimensions());
         }

@@ -9,6 +9,38 @@
     <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
     <property name="amount" value="decimal(20,2)"/>
 
+    <changeSet id="201904091700001" author="zhanhua.cheng">
+        <createTable tableName="exp_adjust_type_dimension" remarks="费用调整单关联维度">
+            <column name="id" type="bigint" >
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_adjust_type_dimension"/>
+            </column>
+            <column type="bigint" name="exp_adjust_type_id" remarks="费用调整单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column type="bigint" name="dimension_id" remarks="维度ID">
+                <constraints nullable="false"/>
+            </column>
+            <column type="int" remarks="排序" name="sequence" defaultValue="0"/>
+            <column type="bigint" name="default_value" remarks="默认值"/>
+            <column type="tinyint" remarks="布局位置" name="header_flag"/>
+            <column name="required_flag" remarks="是否必输" type="tinyint" defaultValue="1"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
     <changeSet id="201904101133001" author="xue.han">
         <addColumn tableName="exp_application_type">
             <column name="pre_payment_flag" type="tinyint" defaultValue="0" remarks="是否可同时发起预付款标志">
@@ -16,6 +48,12 @@
             </column>
         </addColumn>
     </changeSet>
-    
-    
+
+    <changeSet id="201904161500001" author="shaofeng.zheng">
+        <addColumn tableName="exp_travel_app_line">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id">
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

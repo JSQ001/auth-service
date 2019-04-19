@@ -185,5 +185,16 @@ public class ExpInputTaxHeader extends Domain {
     @TableField("audit_date")
     private ZonedDateTime auditDate;
 
+    /**
+     * 创建凭证标志
+     */
+    @TableField("je_creation_status")
+    private Boolean jeCreationStatus;
+
+    /**
+     * 创建凭证日期
+     */
+    @TableField("je_creation_date")
+    private ZonedDateTime jeCreationDate;
 
 }

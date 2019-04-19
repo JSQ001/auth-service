@@ -96,6 +96,7 @@ public class CashPaymentRequisitionLineAdapter {
             //根据合同行id查询合同头行信息
             try{
                 //jiu.zhao 合同
+				//通过合同服务对外接口获取合同行信息
                 /*ContractHeaderLineCO headerLineDTO = ContractModuleInterface.getContractInfoById(dto.getContractId(), dto.getContractLineId());
                 dto.setContractId(headerLineDTO.getHeaderId());
                 dto.setContractNumber(headerLineDTO.getContractNumber());
@@ -110,7 +111,7 @@ public class CashPaymentRequisitionLineAdapter {
             CashPaymentRequisitionHead head = cashPaymentRequisitionHeadService.selectById(line.getPaymentRequisitionHeaderId());
             //查询申请单信息
             if(line.getRefDocumentId()!=null){
-//                ApplicationDTO applicationDTO = hcfOrganizationInterface.getApplicationById(line.getRefDocumentId());
+//                ApplicationDTO applicationDTO = hcfOrganizationInterface.getApplicapayCurrency = nulltionById(line.getRefDocumentId());
 //                dto.setRefDocumentTotalAmount(BigDecimal.valueOf(applicationDTO.getTotalAmount()));
             }
         }

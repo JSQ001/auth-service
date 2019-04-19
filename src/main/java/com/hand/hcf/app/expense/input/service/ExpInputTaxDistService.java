@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,5 +47,17 @@ public class ExpInputTaxDistService extends BaseService<ExpInputTaxDistMapper, E
 
     public void deleteByLineId(Long id){
         expInputTaxDistMapper.delete(new EntityWrapper<ExpInputTaxDist>().eq("input_tax_line_id",id));
+    }
+
+    /**
+     * 根据报账单id获取分摊行
+     */
+    public List<ExpInputTaxDist> getExpInputTaxDistByHeaderId(List<Long> lineIds) {
+        if(CollectionUtils.isEmpty(lineIds)) {
+            return baseMapper.selectList(new EntityWrapper<ExpInputTaxDist>()
+                    .in("input_tax_line_id", lineIds));
+        }else{
+            return new ArrayList<>();
+        }
     }
 }

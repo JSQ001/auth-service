@@ -241,6 +241,7 @@ public class ExpenseReportController {
      * @param amountFrom
      * @param amountTo
      * @param remark
+     * @param editor 默认为false，true时可以查询编辑中的数据
      * @param pageable
      * @return
      */
@@ -361,6 +362,7 @@ public class ExpenseReportController {
                                                                    @RequestParam(required = false) BigDecimal amountTo,
                                                                    @RequestParam(required = false) String remark,
                                                                    @RequestParam(required = false) String requisitionNumber,
+                                                                   @RequestParam(required = false,defaultValue = "false") Boolean editor,
                                                                    Pageable pageable){
         Page page =PageUtil.getPage(pageable);
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
@@ -375,6 +377,7 @@ public class ExpenseReportController {
                 amountTo,
                 remark,
                 requisitionNumber,
+                editor,
                 page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(myExpenseReports,totalHeader,HttpStatus.OK);
@@ -1426,7 +1429,7 @@ public class ExpenseReportController {
                                                                                     @RequestParam(required = false,value = "checkDateFrom") String checkDateFrom,
                                                                                     @RequestParam(required = false,value = "checkDateTo") String checkDateTo,
                                                                                     @RequestParam(required = false) String remark,
-                                                                                    @RequestParam(required = false) String requisitionNumber,
+                                                                                    @RequestParam(required = false,value = "documentCode") String requisitionNumber,
                                                                                     @RequestParam(required = false)Long tenantId,
                                                                                     Pageable pageable){
         Page page =PageUtil.getPage(pageable);
@@ -1479,7 +1482,7 @@ public class ExpenseReportController {
                                                @RequestParam(required = false,value = "checkDateFrom") String checkDateFrom,
                                                @RequestParam(required = false,value = "checkDateTo") String checkDateTo,
                                                @RequestParam(required = false) String remark,
-                                               @RequestParam(required = false) String requisitionNumber,
+                                               @RequestParam(required = false,value = "documentCode") String requisitionNumber,
                                                @RequestParam(required = false)Long tenantId,
                                                Pageable pageable,
                                                @RequestBody ExportConfig exportConfig,

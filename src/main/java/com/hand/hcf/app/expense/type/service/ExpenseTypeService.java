@@ -10,8 +10,10 @@ import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.init.dto.ExpenseTypeInitDTO;
 import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.*;
 import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
@@ -25,6 +27,7 @@ import com.hand.hcf.app.expense.type.web.mapper.ExpenseFieldMapper;
 import com.hand.hcf.app.expense.type.web.mapper.FieldMappedColumn;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +64,8 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
 
     @Autowired
     private ExpenseTypeCategoryMapper expenseTypeCategoryMapper;
+    @Autowired
+    private ExpenseTypeIconService expenseTypeIconService;
 
     @Transactional(rollbackFor = Exception.class)
     public ExpenseType createType(ExpenseType dto) {
@@ -119,6 +124,7 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
         if (!expenseType.getTypeFlag().equals(dto.getTypeFlag())){
             throw new BizException(RespCode.EXPENSE_TYPE_ERROR);
         }
+        dto.setVersionNumber(expenseType.getVersionNumber());
         checkType(dto);
         dto.setDeleted(Boolean.FALSE);
         this.updateById(dto);
@@ -422,6 +428,12 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     .showOnList(e.getShowOnList())
                     .showValue(null)
                     .build();
+            if (FieldType.CUSTOM_ENUMERATION.getId().equals(e.getFieldTypeId())){
+                List<SysCodeValueCO> sysCodeValueCOS = organizationService.listSysCodeValueCOByOid(e.getCustomEnumerationOid());
+                // 为值列表，则设置值列表的相关值
+                List<OptionDTO> options = sysCodeValueCOS.stream().map(OptionDTO::createOption).collect(Collectors.toList());
+                fieldDTO.setOptions(options);
+            }
             return fieldDTO;
         }).collect(Collectors.toList());
         return fieldDTOS;
@@ -606,5 +618,122 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
             }
         });
         return expenseTypeWebDTOS;
+    }
+
+    public void checkExpenseTypeInitData(ExpenseTypeInitDTO dto){
+        StringBuilder errorMessage = new StringBuilder();
+        if(TypeConversionUtils.isEmpty(dto.getCode()) || TypeConversionUtils.isEmpty(dto.getName())){
+            errorMessage.append(dto.getCode()+":必输字段为空！");
+        }else {
+            //默认当前租户
+            dto.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            //todo 应该根据账套code去查询id,暂时没有这样的三方接口
+            Long setOfBooksId =  OrgInformationUtil.getCurrentSetOfBookId();
+            dto.setSetOfBooksId(setOfBooksId);
+            ExpenseTypeIcon expenseTypeIcon = expenseTypeIconService.selectOne(
+                    new EntityWrapper<ExpenseTypeIcon>()
+                            .eq("icon_name",dto.getIconName())
+                            .eq("enabled",true)
+            );
+            if(expenseTypeIcon != null) {
+                dto.setIconUrl(expenseTypeIcon.getIconURL());
+            }else{
+                errorMessage.append(dto.getCode()+":图标名称未找到！");
+            }
+            String y = "Y";
+            String n = "N";
+            if (y.equals(dto.getEnabledStr())) {
+                dto.setEnabled(Boolean.TRUE);
+            } else if (n.equals(dto.getEnabledStr())) {
+                dto.setEnabled(Boolean.FALSE);
+            }
+            List<ExpenseTypeCategory> categoryList = expenseTypeCategoryMapper.selectList(
+                    new EntityWrapper<ExpenseTypeCategory>()
+                        .eq("set_of_books_id",setOfBooksId)
+                        .eq("name",dto.getTypeCategoryName())
+            );
+            if(categoryList.size() == 0){
+                errorMessage.append(dto.getCode()+":分类名称未找到！");
+            }else if(categoryList.size() == 1){
+                dto.setTypeCategoryId(categoryList.get(0).getId());
+            }else{
+                errorMessage.append(dto.getCode()+":分类名称存在多个！");
+            }
+            if(y.equals(dto.getEntryModeStr())){
+                dto.setEntryMode(Boolean.TRUE);
+            }else if(n.equals(dto.getEntryModeStr())){
+                dto.setEntryMode(Boolean.FALSE);
+            }
+            // 判断是不是申请类型
+            if (null == dto.getTypeFlag() || TypeEnum.APPLICATION_TYPE.getKey().compareTo(dto.getTypeFlag()) == 0){
+                dto.setSourceTypeId(null);
+                dto.setTypeFlag(TypeEnum.APPLICATION_TYPE.getKey());
+                dto.setAttachmentFlag(null);
+            }else{
+                dto.setTypeFlag(TypeEnum.COST_TYPE.getKey());
+            }
+            // 如果金额录入模式 为总金额
+            if (dto.getEntryMode() == null || !dto.getEntryMode()){
+                dto.setPriceUnit(null);
+            }else{
+                if (dto.getPriceUnit() == null){
+                    errorMessage.append(dto.getCode()+":金额录入模式为单价*数量，请输入单位！");
+                }
+            }
+            if(Integer.valueOf(1).equals(dto.getTypeFlag())){
+                List<ExpenseType> list = baseMapper.selectList(new EntityWrapper<ExpenseType>()
+                        .eq("code", dto.getSourceTypeCode())
+                        .eq("set_of_books_id",dto.getSetOfBooksId())
+                        .eq("type_flag", Integer.valueOf(0)));
+                if(list.size() == 0){
+                    errorMessage.append(dto.getCode()+":费用类型的申请类型代码找不到！");
+                }else if(list.size() == 1){
+                    dto.setSourceTypeId(list.get(0).getId());
+                }else if(list.size() > 1){
+                    errorMessage.append(dto.getCode()+":费用类型的申请类型代码存在多个！");
+                }
+
+            }
+        }
+        dto.setErrorMessage(errorMessage);
+    }
+
+    public String initExpenseType(List<ExpenseTypeInitDTO> expenseTypeInitDTOS){
+        StringBuilder errorMessage = new StringBuilder();
+        expenseTypeInitDTOS.forEach(item -> {
+            checkExpenseTypeInitData(item);
+            if("".equals(item.getErrorMessage().toString())){
+                List<ExpenseType> temp = baseMapper.selectList(new EntityWrapper<ExpenseType>()
+                        .eq("code", item.getCode())
+                        .eq("set_of_books_id",item.getSetOfBooksId())
+                        .eq("type_flag", item.getTypeFlag()));
+
+                if (temp.size() == 0) {
+                    ExpenseType expenseType = new ExpenseType();
+                    BeanUtils.copyProperties(item,expenseType);
+                    baseMapper.insert(expenseType);
+                }else  if (temp.size() == 1) {
+                    ExpenseType expenseTypeTemp = temp.get(0);
+                    StringBuilder updateErrorMessage = new StringBuilder();
+                    // 校验数据存不存在
+                    if (null == expenseTypeTemp || expenseTypeTemp.getDeleted()){
+                        updateErrorMessage.append(item.getCode()+":校验数据存不存在或者已删除！");
+                    }
+                    if("".equals(updateErrorMessage.toString())){
+                        BeanUtils.copyProperties(item,expenseTypeTemp);
+                        baseMapper.updateById(expenseTypeTemp);
+                    }else{
+                        errorMessage.append(updateErrorMessage);
+                    }
+                }
+            }else{
+                errorMessage.append(item.getErrorMessage());
+            }
+        });
+        if ("".equals(errorMessage.toString())) {
+            return "导入成功!";
+        } else {
+            return errorMessage.toString();
+        }
     }
 }

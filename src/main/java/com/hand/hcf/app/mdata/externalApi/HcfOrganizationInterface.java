@@ -1,9 +1,6 @@
 package com.hand.hcf.app.mdata.externalApi;
 
-import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
-import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
-import com.hand.hcf.app.base.implement.web.UserControllerImpl;
-import com.hand.hcf.app.base.implement.web.UserRoleControllerImpl;
+import com.hand.hcf.app.base.implement.web.*;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.common.co.UserCO;
@@ -39,9 +36,8 @@ public class HcfOrganizationInterface {
     @Autowired
     private UserRoleControllerImpl userRoleClient;
 
-    //jiancheng.li TODO
-   /* @Autowired
-    private LovClient lovClient;*/
+    @Autowired
+    private LovControllerImpl lovClient;
 
     public OrderNumberCO getVendorCode(String companyCode, Long tenantId) {
         return orgClient.getOrderNumberCO("VENDER", companyCode, "");
@@ -55,11 +51,6 @@ public class HcfOrganizationInterface {
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
         return orgClient.listAllSysCodeValueByCode(code);
     }
-
-
-/*    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
-        return orgClient.listEnabledSysCodeValueByCode(code);
-    }*/
 
     public AttachmentCO getAttachmentByOid(String oid){
         return attachmentClient.getByOid(oid);

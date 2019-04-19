@@ -28,10 +28,11 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -147,8 +148,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         }
         //有修改费用行金额，重置计划付款行第一行金额
         if (paymentScheduleList.size() == 1) {
-            ExpenseReportPaymentSchedule expensePaymentSchedule = new ExpenseReportPaymentSchedule();
-            expensePaymentSchedule.setId(paymentScheduleList.get(0).getId());
+            Long paymentScheduleId = paymentScheduleList.get(0).getId();
+            ExpenseReportPaymentSchedule expensePaymentSchedule = this.selectById(paymentScheduleId);
             expensePaymentSchedule.setAmount(expenseReportHeader.getTotalAmount());
             expensePaymentSchedule.setCurrencyCode(expenseReportHeader.getCurrencyCode());
             expensePaymentSchedule.setExchangeRate(expenseReportHeader.getExchangeRate());
@@ -392,4 +393,32 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         return result;
     }
 
+    public Page<ExpensePaymentScheduleCO> getExpPublicReportScheduleByContractHeaderId(List<Long> ids, Page page) {
+            Page<ExpensePaymentScheduleCO> result= new Page<>();
+            List<ExpensePaymentScheduleCO> expensePaymentScheduleCOS =  baseMapper.getExpPublicReportScheduleByContractHeaderId(ids,page);
+                 // 将查询出来的单据 根据头id在一次进行查询。
+            List<Long>headerIds=expensePaymentScheduleCOS.stream().map(ExpensePaymentScheduleCO::getExpReportHeaderId).collect(Collectors.toList());
+            Map<Long,Integer> map = new HashMap<>();
+            headerIds.stream().forEach(e->{
+                    List<ExpenseReportPaymentSchedule> list = baseMapper.getExpPublicReportScheduleByHeaderId(e);
+                    for (int i = 0;i<list.size();i++) {
+                        map.put(list.get(i).getId(),i+1);
+                    }
+                });
+                expensePaymentScheduleCOS.stream().forEach(e ->{
+                    e.setLineNumber(map.get(e.getId()));
+                });
+            result.setRecords(expensePaymentScheduleCOS);
+            result.setTotal(page.getTotal());
+            return  result;
+        }
+
+    public Map<Long,Integer> getExpPublicReportScheduleMapByHeaderId(Long headerId)    {
+        Map<Long,Integer> map = new HashMap<>();
+        List<ExpenseReportPaymentSchedule> list = baseMapper.getExpPublicReportScheduleByHeaderId(headerId);
+        for (int i = 0;i<list.size();i++) {
+            map.put(list.get(i).getId(),i+1);
+        }
+        return map;
+    }
 }

@@ -58,4 +58,6 @@ public class ApplicationLineWebDTO extends ApplicationLine {
     private Boolean entryMode;
 
     private BigDecimal canCloseAmount;
+
+    private String iconUrl;
 }

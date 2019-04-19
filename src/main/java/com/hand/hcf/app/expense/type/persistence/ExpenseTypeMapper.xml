@@ -105,7 +105,7 @@
     </select>
     <select id="listByDocumentLov" resultMap="ExpenseTypeWebMap" parameterType="com.hand.hcf.app.expense.type.bo.ExpenseBO">
         SELECT
-            temp.*
+            temp.*,(select name  from exp_expense_type_category eetc where eetc.id = temp.type_category_id) type_category_name
         FROM
             (SELECT
                 v.*,
@@ -243,6 +243,7 @@
         <result property="amount" column="amount"/>
         <result property="travelTypeCode" column="travel_type_code"/>
         <result property="userGroupFlag" column="user_group_flag"/>
+        <result property="typeCategoryName" column="type_category_name"/>
         <collection property="userGroupIds" ofType="java.lang.Long">
             <result column="user_type_id"/>
         </collection>
