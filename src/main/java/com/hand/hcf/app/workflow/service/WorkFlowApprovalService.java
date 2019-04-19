@@ -56,9 +56,9 @@ public class WorkFlowApprovalService {
 
     public Map<String, Set<UUID>> getRuleApproverUserOIDs(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
         return defaultWorkflowIntegrationService.getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(),
-                        droolsRuleApprovalNodeDTO.getFormValues(),
-                        droolsRuleApprovalNodeDTO.getApplicantOid(),
-                        droolsRuleApprovalNodeDTO);
+                droolsRuleApprovalNodeDTO.getFormValues(),
+                droolsRuleApprovalNodeDTO.getApplicantOid(),
+                droolsRuleApprovalNodeDTO);
     }
 
 
@@ -365,7 +365,7 @@ public class WorkFlowApprovalService {
         workFlowDocumentRefDTO.setApplicantOid(applicantOid);
 
         workFlowDocumentRefList = workFlowDocumentRefMapper
-        .getRejectORUnFinishedList(workFlowDocumentRefDTO,beginDate,endDate,amountFrom, amountTo,tabNumber,mybatisPage);
+                .getRejectORUnFinishedList(workFlowDocumentRefDTO,beginDate,endDate,amountFrom, amountTo,tabNumber,mybatisPage);
 
         //封装数据
         if(workFlowDocumentRefList.size() > 0){

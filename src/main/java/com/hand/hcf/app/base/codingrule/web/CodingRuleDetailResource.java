@@ -2,22 +2,18 @@ package com.hand.hcf.app.base.codingrule.web;
 
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.codingrule.domain.CodingRule;
 import com.hand.hcf.app.base.codingrule.domain.CodingRuleDetail;
-import com.hand.hcf.app.base.codingrule.domain.CodingRuleObject;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleDetailService;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleObjectService;
 import com.hand.hcf.app.base.codingrule.service.CodingRuleService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.PageUtil;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

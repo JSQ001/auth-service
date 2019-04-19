@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.brms.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,4 +45,7 @@ public class RuleApprover extends Domain implements Serializable {
     @TableField("contains_appo_pri_dept_manager")
     private Boolean containsAppoPriDeptManager;
 
+    @ApiModelProperty(value = "审批流通知id")
+    @TableField("rule_notice_id")
+    private Long ruleNoticeId;
 }

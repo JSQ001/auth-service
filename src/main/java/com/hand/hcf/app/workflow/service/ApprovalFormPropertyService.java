@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ApprovalFormPropertyService extends BaseService<ApprovalFormPropertyMapper, ApprovalFormProperty> {
+public class ApprovalFormPropertyService extends BaseService<ApprovalFormPropertyMapper, ApprovalFormProperty>  {
 
     public ApprovalFormPropertyRuleDTO selectByFormOid(UUID formOid) {
         List<ApprovalFormProperty> approvalFormPropertyList = listByOid(formOid);

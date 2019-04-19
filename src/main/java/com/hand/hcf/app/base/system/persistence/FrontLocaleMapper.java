@@ -17,6 +17,7 @@ public interface FrontLocaleMapper extends BaseMapper<FrontLocale>{
     List<FrontLocale> getFrontLocaleByCond(@Param("applicationId") Long applicationId,
                                   @Param("targetLanguage") String targetLanguage,
                                   @Param("keyCode") String keyCode,
+                                  @Param("tenantId") String tenantId,
                                   Page page);
 
 }

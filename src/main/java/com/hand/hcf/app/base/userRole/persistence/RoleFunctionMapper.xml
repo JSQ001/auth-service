@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.base.userRole.persistence.RoleFunctionMapper">
+
+
+    <update id="updateRoleFunction" >
+        update sys_role_function rf set rf.function_id=
+            (select fl.id from sys_function_list fl
+                where fl.tenant_id=${tenantId}
+                  and fl.source_id=rf.function_id)
+        where exists (select 1 from sys_role r
+                      where r.tenant_id=${tenantId}
+                        and rf.role_id=r.id)
+               and exists (select 1
+          from sys_function_list a
+         where a.source_id = rf.function_id
+           and a.tenant_id = ${tenantId})
+    </update>
+
+    <select id="getRoleFunctionByAdminRoleIdAndTenantId" resultType="com.hand.hcf.app.base.userRole.domain.RoleFunction">
+        select #{roleId} as role_id,
+               t.id as function_id
+          from sys_function_list t
+         where t.tenant_id = #{tenantId}
+           and exists (select 'X'
+                  from sys_role_function srf
+                 where srf.role_id = #{adminRoleId}
+                   and srf.function_id = t.source_id)
+    </select>
+</mapper>

@@ -2,13 +2,14 @@ package com.hand.hcf.app.mdata.department.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.ContactBankAccountDTO;
 import com.hand.hcf.app.mdata.contact.dto.UserInfoDTO;
 import com.hand.hcf.app.mdata.department.domain.DepartmentGroup;
 import com.hand.hcf.app.mdata.department.dto.DepartmentDTO;
 import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

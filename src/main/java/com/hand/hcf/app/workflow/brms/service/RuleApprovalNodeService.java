@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.brms.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
+import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.persistence.RuleApprovalNodeMapper;
 import org.springframework.stereotype.Service;
@@ -122,4 +123,33 @@ public class RuleApprovalNodeService extends BaseService<RuleApprovalNodeMapper,
         );
 
     }
+
+    /**
+     * 返回指定节点前可退回的节点
+     * @author mh.z
+     * @date 2019/04/15
+     *
+     * @param ruleApprovalNodeOid
+     * @return
+     */
+    public List<RuleApprovalNode> listReturnNode(UUID ruleApprovalNodeOid) {
+        if (ruleApprovalNodeOid == null) {
+            throw new IllegalArgumentException("ruleApprovalNodeOid null");
+        }
+
+        RuleApprovalNode ruleApprovalNode = getRuleApprovalNode(ruleApprovalNodeOid);
+        UUID ruleApprovalChainOid = ruleApprovalNode.getRuleApprovalChainOid();
+        Integer sequenceNumber = ruleApprovalNode.getSequenceNumber();
+
+        EntityWrapper<RuleApprovalNode> wrapper = new EntityWrapper<RuleApprovalNode>();
+        wrapper.eq("type_number", RuleApprovalEnum.NODE_TYPE_APPROVAL.getId());
+        wrapper.le("sequence_number", sequenceNumber);
+        wrapper.eq("status",  RuleApprovalEnum.VALID.getId());
+        wrapper.eq("rule_approval_chain_oid", ruleApprovalChainOid);
+        wrapper.orderBy("sequence_number", true);
+
+        List<RuleApprovalNode> ruleApprovalNodeList = selectList(wrapper);
+        return ruleApprovalNodeList;
+    }
+
 }

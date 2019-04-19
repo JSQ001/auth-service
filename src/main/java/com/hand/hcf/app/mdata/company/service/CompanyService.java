@@ -14,6 +14,7 @@ import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.RandomUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;

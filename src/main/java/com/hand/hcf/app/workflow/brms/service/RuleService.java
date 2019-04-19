@@ -1,6 +1,7 @@
 package com.hand.hcf.app.workflow.brms.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
@@ -38,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -78,6 +80,11 @@ public class RuleService {
     @Autowired
     private MapperFacade mapper;
 
+    @Autowired
+    private RuleNoticeService ruleNoticeService;
+
+    @Autowired
+    private RuleNoticeActionService ruleNoticeActionService;
 
     /**
      * 审批链相关接口 ***********************
@@ -636,13 +643,30 @@ public class RuleService {
             }
         }
         RuleApprovalNode newRuleApprovalNode = mapper.map(ruleApprovalNodeDTO, RuleApprovalNode.class);
+        setRuleApprovalNodeNotifyMethods(newRuleApprovalNode, ruleApprovalNodeDTO.getNotifyMethod());
         newRuleApprovalNode.setSequenceNumber(newSequence);
         newRuleApprovalNode.setRuleApprovalNodeOid(null);
         newRuleApprovalNode.setCreatedDate(ZonedDateTime.now());
         newRuleApprovalNode.setLastUpdatedDate(ZonedDateTime.now());
+        // 默认不允许加签
+        newRuleApprovalNode.setAddsignFlag(false);
+        // 默认不允许转交
+        newRuleApprovalNode.setTransferFlag(false);
+        // 默认驳回后再次提交重新全部审批
+        newRuleApprovalNode.setRejectRule(RuleConstants.RULE_REJECT_SUBMIT_RESTART);
+        // 默认不允许退回指定节点
+        newRuleApprovalNode.setReturnFlag(false);
+        newRuleApprovalNode.setReturnRule(null);
+        // 默认不开启审批流通知
+        newRuleApprovalNode.setNotifyFlag(false);
+        newRuleApprovalNode.setPcNotifyMethod(false);
+        newRuleApprovalNode.setAppNotifyMethod(false);
+        newRuleApprovalNode.setEmailNotifyMethod(false);
         newRuleApprovalNode = ruleApprovalNodeService.save(newRuleApprovalNode);
 
-        return mapper.map(newRuleApprovalNode, RuleApprovalNodeDTO.class);
+        ruleApprovalNodeDTO = mapper.map(newRuleApprovalNode, RuleApprovalNodeDTO.class);
+        ruleApprovalNodeDTO.setNotifyMethod(getRuleApprovalNodeNotifyMethods(newRuleApprovalNode));
+        return ruleApprovalNodeDTO;
     }
 
     public RuleApprovalNodeDTO getRuleApprovalNode(UUID ruleApprovalNodeOid, UUID userOid, boolean cascadeApprover, boolean cascadeCondition) {
@@ -686,6 +710,18 @@ public class RuleService {
                 deleteRuleApprover(ruleApproverOids, userOid, cascadeCondition);
             }
         }
+
+        // 删除审批流通知
+        for (UUID ruleApprovalNodeOid : ruleApprovalNodeOids) {
+            RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getRuleApprovalNode(ruleApprovalNodeOid);
+            Long ruleApprovalNodeId = ruleApprovalNode.getId();
+            List<RuleNotice> ruleNoticeList = ruleNoticeService.listByNodeId(ruleApprovalNodeId);
+
+            for (RuleNotice ruleNotice : ruleNoticeList) {
+                ruleNoticeService.deleteRuleNoticeOnCascade(ruleNotice.getId());
+            }
+        }
+
         return ruleApprovalNodeOids.stream().map(ruleApprovalNodeOid -> ruleApprovalNodeService.delete(ruleApprovalNodeOid)).reduce(0, Integer::sum);
     }
 
@@ -715,6 +751,47 @@ public class RuleService {
         existRuleApprovalNode.setRepeatRule(ruleApprovalNodeDTO.getRepeatRule());
         existRuleApprovalNode.setSelfApprovalRule(ruleApprovalNodeDTO.getSelfApprovalRule());
         existRuleApprovalNode.setPrintFlag(ruleApprovalNodeDTO.getPrintFlag());
+
+        if (ruleApprovalNodeDTO.getPageId() != null) {
+            existRuleApprovalNode.setPageId(ruleApprovalNodeDTO.getPageId());
+        }
+
+        if (ruleApprovalNodeDTO.getAddsignFlag() != null) {
+            existRuleApprovalNode.setAddsignFlag(ruleApprovalNodeDTO.getAddsignFlag());
+        }
+
+        if (ruleApprovalNodeDTO.getTransferFlag() != null) {
+            existRuleApprovalNode.setTransferFlag(ruleApprovalNodeDTO.getTransferFlag());
+        }
+
+        if (ruleApprovalNodeDTO.getRejectRule() != null) {
+            existRuleApprovalNode.setRejectRule(ruleApprovalNodeDTO.getRejectRule());
+        }
+
+        if (ruleApprovalNodeDTO.getReturnFlag() != null) {
+            existRuleApprovalNode.setReturnFlag(ruleApprovalNodeDTO.getReturnFlag());
+        }
+
+        if (ruleApprovalNodeDTO.getReturnType() != null) {
+            existRuleApprovalNode.setReturnType(ruleApprovalNodeDTO.getReturnType());
+        }
+
+        if (ruleApprovalNodeDTO.getReturnRule() != null) {
+            existRuleApprovalNode.setReturnRule(ruleApprovalNodeDTO.getReturnRule());
+        }
+
+        if (ruleApprovalNodeDTO.getNotifyFlag() != null) {
+            existRuleApprovalNode.setNotifyFlag(ruleApprovalNodeDTO.getNotifyFlag());
+        }
+
+        if (ruleApprovalNodeDTO.getNotifyMethod() != null) {
+            setRuleApprovalNodeNotifyMethods(existRuleApprovalNode, ruleApprovalNodeDTO.getNotifyMethod());
+        }
+
+        if (ruleApprovalNodeDTO.getCustomNodes() != null) {
+            setRuleApprovalNodeReturnNodes(existRuleApprovalNode, ruleApprovalNodeDTO.getCustomNodes());
+        }
+
         //将知会配置转成字节，该审批节点为知会节点，同时知会配置不为空，做序列化处理
         String notifyInfo = null;
         if (RuleApprovalEnum.parse(ruleApprovalNodeDTO.getTypeNumber()).equals(RuleApprovalEnum.NODE_TYPE_NOTICE) && ruleApprovalNodeDTO.getNotifyInfo() != null) {
@@ -752,6 +829,8 @@ public class RuleService {
         BeanUtils.copyProperties(existRuleApprovalNode, newRuleApprovalNode);
         RuleApprovalNodeDTO ruleApprovalNodeDTOResult = mapper.map(existRuleApprovalNode, RuleApprovalNodeDTO.class);
         ruleApprovalNodeDTOResult.setNotifyInfo(ruleApprovalNodeDTO.getNotifyInfo());
+        ruleApprovalNodeDTOResult.setNotifyMethod(getRuleApprovalNodeNotifyMethods(existRuleApprovalNode));
+        ruleApprovalNodeDTOResult.setCustomNodes(getRuleApprovalNodeReturnNodes(existRuleApprovalNode));
         this.updateLog(oldRuleApprovalNode, newRuleApprovalNode, OperationEntityTypeEnum.APPROVAL_NODE.getKey());
         return ruleApprovalNodeDTOResult;
     }
@@ -1488,4 +1567,330 @@ public class RuleService {
             log.error("updateLog,error:",e);
         }*/
     }
+
+    /**
+     * 创建审批流通知
+     * @author mh.z
+     * @date 2019/04/16
+     *
+     * @param ruleNoticeDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public RuleNoticeDTO createRuleNotice(RuleNoticeDTO ruleNoticeDTO) {
+        if (ruleNoticeDTO == null) {
+            throw new IllegalArgumentException("ruleNoticeDTO null");
+        }
+
+        if (ruleNoticeDTO.getRuleApprovalNodeOid() == null) {
+            throw new IllegalArgumentException("ruleNoticeDTO.ruleApprovalNodeOid null");
+        }
+
+        UUID ruleApprovalNodeOid = ruleNoticeDTO.getRuleApprovalNodeOid();
+        RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getRuleApprovalNode(ruleApprovalNodeOid);
+        Long ruleApprovalNodeId = ruleApprovalNode.getId();
+        RuleNotice ruleNotice = new RuleNotice();
+        // 节点id
+        ruleNotice.setRuleApprovalNodeId(ruleApprovalNodeId);
+        // 审批流通知oid
+        ruleNotice.setRuleNoticeOid(UUID.randomUUID());
+
+        // 保存新增的审批流通知
+        ruleNoticeService.insert(ruleNotice);
+        Long ruleNoticeId = ruleNotice.getId();
+
+        List<Integer> actions = ruleNoticeDTO.getActions();
+        List<RuleNoticeAction> ruleNoticeActionList = new ArrayList<RuleNoticeAction>();
+        RuleNoticeAction ruleNoticeAction = null;
+
+        // 创建审批流通知动作对象
+        if (actions != null) {
+            for (Integer action : actions) {
+                ruleNoticeAction = new RuleNoticeAction();
+                ruleNoticeAction.setRuleNoticeId(ruleNoticeId);
+                ruleNoticeAction.setRuleApprovalNodeId(ruleApprovalNodeId);
+                ruleNoticeAction.setActionType(action);
+                ruleNoticeActionList.add(ruleNoticeAction);
+            }
+        }
+
+        // 保存新增的审批流通知动作
+        ruleNoticeActionService.insertBatch(ruleNoticeActionList);
+
+        ruleNoticeDTO.setRuleNoticeOid(ruleNotice.getRuleNoticeOid());
+        return ruleNoticeDTO;
+    }
+
+    /**
+     * 更新审批流通知动作
+     * @author mh.z
+     * @date 2019/04/16
+     *
+     * @param ruleNoticeDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public RuleNoticeDTO updateRuleNoticeActions(RuleNoticeDTO ruleNoticeDTO) {
+        if (ruleNoticeDTO == null) {
+            throw new IllegalArgumentException("ruleNoticeDTO null");
+        }
+
+        UUID ruleNoticeOid = ruleNoticeDTO.getRuleNoticeOid();
+        RuleNotice ruleNotice = ruleNoticeService.getByNodeOid(ruleNoticeOid);
+        Long ruleNoticeId = ruleNotice.getId();
+        Long ruleApprovalNodeId = ruleNotice.getRuleApprovalNodeId();
+        List<Integer> actions = ruleNoticeDTO.getActions();
+
+        // 先删除跟该审批流通知关联的动作
+        ruleNoticeActionService.batchDeleteByNoticeId(ruleNoticeId);
+
+        List<RuleNoticeAction> ruleNoticeActionList = new ArrayList<RuleNoticeAction>();
+        RuleNoticeAction ruleNoticeAction = null;
+
+        // 创建审批流通知动作对象
+        if (actions != null) {
+            for (Integer action : actions) {
+                ruleNoticeAction = new RuleNoticeAction();
+                ruleNoticeAction.setRuleNoticeId(ruleNoticeId);
+                ruleNoticeAction.setRuleApprovalNodeId(ruleApprovalNodeId);
+                ruleNoticeAction.setActionType(action);
+                ruleNoticeActionList.add(ruleNoticeAction);
+            }
+        }
+
+        // 保存新增的审批流通知动作
+        ruleNoticeActionService.insertBatch(ruleNoticeActionList);
+
+        return ruleNoticeDTO;
+    }
+
+    /**
+     * 删除审批流通知
+     * @author mh.z
+     * @date 2019/04/16
+     *
+     * @param ruleNoticeOid
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteRuleNotice(UUID ruleNoticeOid) {
+        if (ruleNoticeOid == null) {
+            throw new IllegalArgumentException("ruleNoticeOid null");
+        }
+
+        // 获取审批流通知
+        RuleNotice ruleNotice = ruleNoticeService.getByNodeOid(ruleNoticeOid);
+        Long ruleNoticeId = ruleNotice.getId();
+
+        // 级联删除审批流通知
+        ruleNoticeService.deleteRuleNoticeOnCascade(ruleNoticeId);
+        return true;
+    }
+
+    /**
+     * 修改审批流通知人员
+     * @author mh.z
+     * @date 2019/04/17
+     *
+     * @param ruleNoticeDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public List<RuleApproverDTO> updateRuleNoticeUsers(RuleNoticeDTO ruleNoticeDTO) {
+        if (ruleNoticeDTO == null) {
+            throw new IllegalArgumentException("ruleNoticeDTO null");
+        }
+
+        UUID ruleNoticeOid = ruleNoticeDTO.getRuleNoticeOid();
+        RuleNotice ruleNotice = ruleNoticeService.getByNodeOid(ruleNoticeOid);
+        Long ruleNoticeId = ruleNotice.getId();
+
+        // 先删除跟该审批流通知关联的通知人员
+        List<RuleApprover> ruleApproverList = ruleApproverService.listByNoticeId(ruleNoticeId);
+        if (ruleApproverList.size() > 0) {
+            for (RuleApprover ruleApprover : ruleApproverList) {
+                ruleApprover.setStatus(RuleApprovalEnum.DELETED.getId());
+            }
+            ruleApproverService.updateBatchById(ruleApproverList);
+        }
+
+        List<RuleApproverDTO> newRuleApproverDTOList = new ArrayList<RuleApproverDTO>();
+        List<RuleApproverDTO> ruleApproverDTOList = ruleNoticeDTO.getUsers();
+        RuleApproverDTO newRuleApproverDTO = null;
+        RuleApprover ruleApprover = null;
+
+        // 保存通知人员
+        for (RuleApproverDTO ruleApproverDTO : ruleApproverDTOList) {
+            ruleApprover = mapper.map(ruleApproverDTO, RuleApprover.class);
+            ruleApprover.setRuleNoticeId(ruleNoticeId);
+            ruleApprover =  ruleApproverService.save(ruleApprover);
+
+            newRuleApproverDTO = mapper.map(ruleApprover, RuleApproverDTO.class);
+            newRuleApproverDTOList.add(newRuleApproverDTO);
+        }
+
+        return newRuleApproverDTOList;
+    }
+
+    /**
+     * 删除审批流通知人员
+     * @author mh.z
+     * @date 2019/04/17
+     *
+     * @param ruleNoticeDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteRuleNoticeUsers(RuleNoticeDTO ruleNoticeDTO) {
+        if (ruleNoticeDTO == null) {
+            throw new IllegalArgumentException("ruleNoticeDTO null");
+        }
+
+        UUID ruleNoticeOid = ruleNoticeDTO.getRuleNoticeOid();
+        RuleNotice ruleNotice = ruleNoticeService.getByNodeOid(ruleNoticeOid);
+        Long ruleNoticeId = ruleNotice.getId();
+
+        ruleNoticeService.deleteRuleNoticeUsersOnCascade(ruleNoticeId);
+        return true;
+    }
+
+    /**
+     * 设置节点的通知方式
+     * @author mh.z
+     * @date 2019/04/15
+     *
+     * @param ruleApprovalNode
+     */
+    protected void setRuleApprovalNodeNotifyMethods(RuleApprovalNode ruleApprovalNode, List<Integer> notifyMethods) {
+        if (ruleApprovalNode == null) {
+            throw new IllegalArgumentException("ruleApprovalNode null");
+        }
+
+        ruleApprovalNode.setPcNotifyMethod(false);
+        ruleApprovalNode.setAppNotifyMethod(false);
+        ruleApprovalNode.setEmailNotifyMethod(false);
+
+        if (notifyMethods != null) {
+            for (Integer notifyMethod : notifyMethods) {
+                if (RuleConstants.NOTICE_METHOD_PC.equals(notifyMethod)) {
+                    ruleApprovalNode.setPcNotifyMethod(true);
+                } else if (RuleConstants.NOTICE_METHOD_APP.equals(notifyMethod)) {
+                    ruleApprovalNode.setAppNotifyMethod(true);
+                } else if (RuleConstants.NOTICE_METHOD_EMAIL.equals(notifyMethod)) {
+                    ruleApprovalNode.setEmailNotifyMethod(true);
+                }
+            }
+        }
+    }
+
+    /**
+     * 返回节点的通知方式
+     * @author mh.z
+     * @date 2019/04/15
+     *
+     * @param ruleApprovalNode
+     * @return
+     */
+    protected List<Integer> getRuleApprovalNodeNotifyMethods(RuleApprovalNode ruleApprovalNode) {
+        if (ruleApprovalNode == null) {
+            throw new IllegalArgumentException("ruleApprovalNode null");
+        }
+
+        List<Integer> notifyMethodList = new ArrayList<Integer>();
+
+        if (Boolean.TRUE.equals(ruleApprovalNode.getPcNotifyMethod())) {
+            notifyMethodList.add(RuleConstants.NOTICE_METHOD_PC);
+        }
+
+        if (Boolean.TRUE.equals(ruleApprovalNode.getAppNotifyMethod())) {
+            notifyMethodList.add(RuleConstants.NOTICE_METHOD_APP);
+        }
+
+        if (Boolean.TRUE.equals(ruleApprovalNode.getEmailNotifyMethod())) {
+            notifyMethodList.add(RuleConstants.NOTICE_METHOD_EMAIL);
+        }
+
+        return notifyMethodList;
+    }
+
+    /**
+     * @author mh.z
+     * @date 2019/04/16
+     *
+     * @param ruleApprovalNode
+     * @param returnNodeList
+     */
+   protected void setRuleApprovalNodeReturnNodes(RuleApprovalNode ruleApprovalNode, List<ReturnNode> returnNodeList) {
+       if (ruleApprovalNode == null) {
+           throw new IllegalArgumentException("ruleApprovalNode null");
+       }
+
+       String jsonString = null;
+
+       if (returnNodeList != null) {
+           try {
+               ObjectMapper mapper = new ObjectMapper();
+               jsonString = mapper.writeValueAsString(returnNodeList);
+           } catch (JsonProcessingException e) {
+               throw new RuntimeException(e);
+           }
+       }
+
+       ruleApprovalNode.setReturnNodes(jsonString);
+   }
+
+    /**
+     * @author mh.z
+     * @date 2019/04/16
+     *
+     * @param ruleApprovalNode
+     * @return
+     */
+    protected List<ReturnNode> getRuleApprovalNodeReturnNodes(RuleApprovalNode ruleApprovalNode) {
+        if (ruleApprovalNode == null) {
+            throw new IllegalArgumentException("ruleApprovalNode null");
+        }
+
+        String jsonString = ruleApprovalNode.getReturnNodes();
+        List<ReturnNode> customNodeList = new ArrayList<ReturnNode>();
+
+        // 解析JSON字符串
+        if (jsonString != null && jsonString.length() > 0) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                customNodeList = mapper.readValue(jsonString, new TypeReference<List<ReturnNode>>() {});
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (customNodeList.isEmpty()) {
+            return customNodeList;
+        }
+
+        List<RuleApprovalNode> returnNodeList = ruleApprovalNodeService.listReturnNode(ruleApprovalNode.getRuleApprovalNodeOid());
+        Set<UUID> customNodeOidSet = new HashSet<UUID>();
+        List<ReturnNode> newCustomNodeList = new ArrayList<ReturnNode>();
+        ReturnNode newCustomNode = null;
+
+        // 获取自定义节点的oid
+        for (ReturnNode customNode : customNodeList) {
+            customNodeOidSet.add(customNode.getRuleApprovalNodeOid());
+        }
+
+        // 保证返回的自定义节点是有效并且名称最新
+        for (RuleApprovalNode returnNode : returnNodeList) {
+            if (customNodeOidSet.contains(returnNode.getRuleApprovalNodeOid())) {
+                newCustomNode = new ReturnNode();
+                newCustomNode.setRuleApprovalNodeOid(returnNode.getRuleApprovalNodeOid());
+                newCustomNode.setRemark(returnNode.getRemark());
+                newCustomNodeList.add(newCustomNode);
+            }
+        }
+
+        return newCustomNodeList;
+    }
+
 }

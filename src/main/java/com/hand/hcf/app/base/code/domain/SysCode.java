@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @TableName("sys_code")
-public class SysCode extends DomainI18nEnable {
+public class SysCode extends DomainI18nEnable{
 
     @NotNull
     @TableField("code_oid")

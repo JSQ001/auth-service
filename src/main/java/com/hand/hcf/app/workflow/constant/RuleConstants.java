@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.constant;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.workflow.brms.dto.RuleEnumDTO;
 import com.hand.hcf.app.workflow.brms.enums.FieldType;
 import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
@@ -10,6 +9,7 @@ import com.hand.hcf.app.workflow.dto.FormFieldDTO;
 import com.hand.hcf.app.workflow.dto.FormValueDTO;
 import com.hand.hcf.app.workflow.dto.FormValueI18nDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 
 import java.util.*;
 
@@ -163,6 +163,54 @@ public final class RuleConstants {
     public static final Integer RULE_NULLABLE_SKIP = 2001;
     //为空规则-报错
     public static final Integer RULE_NULLABLE_THROW = 2002;
+
+    /** 驳回后再次提交处理-重新全部审批 */
+    public static final Integer RULE_REJECT_SUBMIT_RESTART = 1001;
+    /** 驳回后再次提交处理-直接跳回本节点 */
+    public static final Integer RULE_REJECT_SUBMIT_SKIP = 1002;
+    /** 驳回后再次提交处理-驳回人自主判断 */
+    public static final Integer RULE_REJECT_USER_DECIDE = 1003;
+
+    /** 可退回节点-本节点前任意审批节点 */
+    public static final Integer RULE_RETURN_ANY_NODE = 1001;
+    /** 可退回节点-自选节点 */
+    public static final Integer RULE_RETURN_CUSTOM_NODE = 1002;
+
+    /** 退回审批通过后处理-继续原审批流程 */
+    public static final Integer RULE_RETURN_PASS_CONTINUE = 1001;
+    /** 退回审批通过后处理-直接跳回本节点 */
+    public static final Integer RULE_RETURN_PASS_SKIP = 1002;
+    /** 退回审批通过后处理-退回人自主判断 */
+    public static final Integer RULE_RETURN_USER_DECIDE = 1003;
+
+    /** 撤回模式-无审批记录时可撤回 */
+    public static final Integer RULE_WITHDRAW_NONE_APPROVAL_HISTORY = 1001;
+    /** 撤回模式-审批流未结束均可撤回 */
+    public static final Integer RULE_WITHDRAW_BEFORE_APPROVAL_END = 1002;
+
+    /** 通知方式-PC消息 */
+    public static final Integer NOTICE_METHOD_PC = 1001;
+    /** 通知方式-APP消息 */
+    public static final Integer NOTICE_METHOD_APP = 1002;
+    /** 通知方式-邮件通知 */
+    public static final Integer NOTICE_METHOD_EMAIL = 1003;
+
+    /** 通知的动作-审批人手动通知 */
+    public static final Integer NOTICE_ACTION_MANUAL = 1001;
+    /** 通知的动作-节点到达 */
+    public static final Integer NOTICE_ACTION_ARRIVAL = 1002;
+    /** 通知的动作-审批通过 */
+    public static final Integer NOTICE_ACTION_PASS = 1003;
+    /** 通知的动作-审批驳回 */
+    public static final Integer NOTICE_ACTION_REJECT = 1004;
+    /** 通知的动作-转交 */
+    public static final Integer NOTICE_ACTION_TRANSFER = 1005;
+    /** 通知的动作-加签 */
+    public static final Integer NOTICE_ACTION_ADDSIGN = 1006;
+    /** 通知的动作-退回指定节点 */
+    public static final Integer NOTICE_ACTION_RETURN = 1007;
+    /** 通知的动作-撤回 */
+    public static final Integer NOTICE_ACTION_WITHDRAW = 1008;
 
     /**
      * 多语言与账号语言对应

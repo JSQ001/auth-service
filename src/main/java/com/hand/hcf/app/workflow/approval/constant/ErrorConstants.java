@@ -23,4 +23,7 @@ public class ErrorConstants {
 
     /** 找不到实例 */
     public static final String NOT_FIND_THE_INSTANCE = "NOT_FIND_THE_INSTANCE";
+
+    /** 通过类型获取表单出错（没有或者多余一个都不行） */
+    public static final String FAIL_TO_GET_FORM_BY_TYPE = "FAIL_TO_GET_FORM_BY_TYPE";
 }

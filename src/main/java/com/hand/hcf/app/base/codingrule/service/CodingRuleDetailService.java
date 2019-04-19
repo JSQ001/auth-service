@@ -53,7 +53,7 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      */
     @CacheEvict(key = "#codingRuleDetail.codingRuleId.toString()")
     @SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
-    public CodingRuleDetail insertCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) throws BizException {
+    public CodingRuleDetail insertCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) {
         if (codingRuleDetail.getId() != null) {
             //创建数据不允许有ID
             throw new BizException(RespCode.ID_NOT_ALLOWED_21001);

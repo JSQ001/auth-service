@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.company.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.conver.CompanyGroupCover;
 import com.hand.hcf.app.mdata.company.domain.CompanyGroup;
@@ -8,7 +9,7 @@ import com.hand.hcf.app.mdata.company.dto.CompanyGroupDTO;
 import com.hand.hcf.app.mdata.company.service.CompanyGroupService;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
