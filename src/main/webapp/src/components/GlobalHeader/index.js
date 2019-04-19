@@ -1,8 +1,6 @@
 import React from 'react';
 import config from 'config';
 import { Menu, Icon, Tag, Dropdown, Avatar, Divider, Select, message, Modal } from 'antd';
-import moment from 'moment';
-import groupBy from 'lodash/groupBy';
 import NoticeIcon from '../NoticeIcon';
 import Debounce from 'lodash-decorators/debounce';
 import { Link } from 'dva/router';
@@ -33,8 +31,11 @@ export default class GlobalHeader extends React.Component {
     super(props);
     this.state = {
       theme: '',
-      messageList: [],
-      messagesTotal: 0,
+      total: 0,
+      messagesList: [],
+      messageTotal: 0,
+      noticeTotal: 0,
+      noticeList: [],
     };
   }
 
@@ -49,8 +50,7 @@ export default class GlobalHeader extends React.Component {
       window.localStorage.setItem('theme', colors[0].color);
       this.setState({ theme: colors[0].color });
     }
-
-    // this.getNoticeData();
+    this.getNoticeData();
   }
 
   componentWillUnmount() {
@@ -63,16 +63,23 @@ export default class GlobalHeader extends React.Component {
         size: 9999,
         page: 0,
       })
-      .then(res => {
-        const messagesTotal = Number(res.headers['x-total-count']) || 0;
+      .then(({ data }) => {
         this.setState({
-          messageList: res.data.map(o => ({
+          messagesList: data.messagesList.map(o => ({
             ...o,
             description: o.messageContent,
             avatar: 'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
             read: o.readFlag,
           })),
-          messagesTotal,
+          noticeList: data.noticeList.map(o => ({
+            ...o,
+            description: o.messageContent,
+            avatar: 'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png',
+            read: o.readFlag,
+          })),
+          messageTotal: data.total.messageTotal,
+          noticeTotal: data.total.noticeTotal,
+          total: data.total.total,
         });
       })
       .catch(err => {
@@ -217,20 +224,36 @@ export default class GlobalHeader extends React.Component {
     }
   };
 
-  changeReadState = clickedItem => {
-    const { messageList } = this.state;
-    const { id } = clickedItem;
+  // 标记已读
+  changeReadState = (clickedItem, tabProps) => {
+    const { messagesList, noticeList } = this.state;
+    let { noticeTotal, total, messageTotal } = this.state;
+    const { id, read } = clickedItem;
+
+    if (read) return;
+
     fetch.post(`${config.peripheralUrl}/api/messages/read/` + id).then(() => {
-      const record = messageList.find(o => o.id === id);
-      if (record) {
-        record.read = true;
-        this.setState({ messageList });
+      if (tabProps.title === '消息') {
+        const record = messagesList.find(o => o.id === id);
+        if (record) {
+          record.read = true;
+          messageTotal -= 1;
+          total -= 1;
+          this.setState({ messagesList, messageTotal, total });
+        }
+      } else {
+        const record = noticeList.find(o => o.id === id);
+        if (record) {
+          record.read = true;
+          noticeTotal -= 1;
+          total -= 1;
+          this.setState({ noticeList, noticeTotal, total });
+        }
       }
     });
   };
 
-  clearMessages = tab => {
-    console.log(tab);
+  clearMessages = () => {
     fetch.post(`${config.peripheralUrl}/api/messages/read/all`).then(res => {
       this.getNoticeData();
     });
@@ -247,7 +270,7 @@ export default class GlobalHeader extends React.Component {
       navTheme,
     } = this.props;
 
-    const { messageList, messagesTotal } = this.state;
+    const { messagesList, messageTotal, total, noticeTotal, noticeList } = this.state;
 
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
@@ -312,25 +335,28 @@ export default class GlobalHeader extends React.Component {
           </Select>
           <NoticeIcon
             className={styles.action}
-            count={messagesTotal}
-            onViewMore={() => message.info('Click on view more')}
+            count={total}
+            onViewMore={() => message.info('该功能正在开发...')}
             clearClose
             onItemClick={this.changeReadState}
             onClear={this.clearMessages}
+            locale={{ emptyText: '没有消息', clear: '清除', viewMore: '显示更多' }}
           >
             <NoticeIcon.Tab
-              count={0}
-              list={[]}
+              count={noticeTotal}
+              list={noticeList}
               title="通知"
               emptyImage="https://gw.alipayobjects.com/zos/rmsportal/wAhyIChODzsoKIOBHcBk.svg"
               showViewMore
+              emptyText="你已查看所有通知"
             />
             <NoticeIcon.Tab
-              count={messagesTotal}
-              list={messageList}
+              count={messageTotal}
+              list={messagesList}
               title="消息"
               emptyImage="https://gw.alipayobjects.com/zos/rmsportal/sAuJeJzSKbUmHfBQRzmZ.svg"
               showViewMore
+              emptyText="您已读完所有消息"
             />
           </NoticeIcon>
           <Dropdown overlay={menu}>

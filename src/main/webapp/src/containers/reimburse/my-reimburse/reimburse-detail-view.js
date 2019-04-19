@@ -483,7 +483,7 @@ class ContractDetailCommon extends React.Component {
           disabled
         />
         <div style={{ marginTop: 20, marginBottom: 0, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
-          <ApproveHistory type="801001" oid={headerData.formOid} />
+          <ApproveHistory type="801001" oid={headerData.documentOid} />
         </div>
       </div>
     );

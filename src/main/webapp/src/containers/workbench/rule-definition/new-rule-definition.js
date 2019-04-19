@@ -49,7 +49,9 @@ class NewRuleDefinition extends Component {
           businessTypeId: values.businessTypeId.key,
           endProcedureId: values.endProcedureId.key,
           id: params.id,
+          versionNumber: params.versionNumber,
         };
+        console.log(data);
         this.setState({ saveLoading: true });
         service
           .saveRuleDefinition(data)

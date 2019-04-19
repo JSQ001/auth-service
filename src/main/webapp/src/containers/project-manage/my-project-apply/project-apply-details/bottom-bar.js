@@ -98,12 +98,14 @@ class BottomBar extends Component {
               {/* 提交 */}
               {this.$t('common.submit')}
             </Button>
-            <Button style={{ marginLeft: '20px' }} onClick={this.onBack}>
-              {this.$t('budgetJournal.return')}
-            </Button>
+
             <Popconfirm title="确定删除?" onConfirm={this.onDelete}>
               <Button style={{ marginLeft: '20px' }}>{this.$t('common.delete')}</Button>
             </Popconfirm>
+
+            <Button style={{ marginLeft: '20px' }} onClick={this.onBack}>
+              {this.$t('budgetJournal.return')}
+            </Button>
           </Row>
         ) : (
           <Row style={{ marginLeft: '30px' }}>

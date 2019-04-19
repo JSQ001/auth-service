@@ -50,28 +50,24 @@ class BudgetParameterSetting extends React.Component {
         {
           /*参数代码*/
           title: this.$t({ id: 'budget.parameterCode' }),
-          align: 'center',
           key: 'parameterCode',
           dataIndex: 'parameterCode',
         },
         {
           /*参数名称*/
           title: this.$t({ id: 'budget.parameterName' }),
-          align: 'center',
           key: 'parameterName',
           dataIndex: 'parameterName',
         },
         {
           /*参数值代码*/
           title: this.$t({ id: 'budget.parameterValueCode' }),
-          align: 'center',
           key: 'parameterValueCode',
           dataIndex: 'parameterValueCode',
         },
         {
           /*参数值名称*/
           title: this.$t({ id: 'budget.parameterValueName' }),
-          align: 'center',
           key: 'parameterValueName',
           dataIndex: 'parameterValueName',
         },

@@ -202,8 +202,7 @@ class CompanyDistribution extends React.Component {
   handleBack = () => {
     this.props.dispatch(
       routerRedux.push({
-        pathname:
-          '/fund-setting/direct-link-parameter-definition/direct-link-parameter-definition/',
+        pathname: '/payment-management/automatic-payment-rules/automatic-payment-rules/',
       })
     );
   };

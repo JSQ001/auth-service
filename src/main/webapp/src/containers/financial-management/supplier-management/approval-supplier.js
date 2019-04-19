@@ -218,7 +218,7 @@ class SupplierManagement extends React.Component {
           title: '提交日期',
           key: 'updateTime',
           dataIndex: 'updateTime',
-          width: '17%',
+          width: '10%',
           render: (value, record, index) => {
             let date = moment(new Date(value)).format('YYYY-MM-DD');
             return <Popover content={date}>{date ? date : '-'}</Popover>;
@@ -265,7 +265,7 @@ class SupplierManagement extends React.Component {
         {
           title: this.$t('common.operation'),
           key: 'operation',
-          width: '10%',
+          width: '15%',
           align: 'center',
           render: (text, record, index) => (
             <span>

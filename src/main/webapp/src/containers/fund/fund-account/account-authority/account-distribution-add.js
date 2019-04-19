@@ -27,22 +27,23 @@ class accountDistributionAdd extends React.Component {
           this.$t('common.show.total', {
             range0: `${range[0]}`,
             range1: `${range[1]}`,
-            total: total,
+            total,
           }),
       },
       // 列表头
       columns: [
         {
-          title: this.$t('fund.bank.account') /*银行账号*/,
+          title: this.$t('fund.bank.account') /* 银行账号 */,
           dataIndex: 'accountNumber',
           width: 170,
         },
         {
-          title: this.$t('fund.account.name') /*账户名称*/,
+          title: this.$t('fund.account.name') /* 账户名称 */,
           dataIndex: 'accountName',
+          width: 170,
         },
         {
-          title: this.$t('fund.currency.code') /*币种*/,
+          title: this.$t('fund.currency.code') /* 币种 */,
           dataIndex: 'currencyCode',
           width: 100,
         },
@@ -245,7 +246,7 @@ class accountDistributionAdd extends React.Component {
     };
     const formItemLayout2 = {
       labelCol: {
-        span: 4,
+        span: 3,
       },
       wrapperCol: {
         span: 5,
@@ -253,7 +254,7 @@ class accountDistributionAdd extends React.Component {
     };
     const rowRadioSelection = {
       type: 'radio',
-      columnTitle: this.$t('fund.choose') /*选择*/,
+      columnTitle: this.$t('fund.choose') /* 选择 */,
       onSelect: selectedRowKeys => {
         this.setState({ selectDate: selectedRowKeys });
         this.setState({ updateDate: selectedRowKeys });
@@ -266,23 +267,24 @@ class accountDistributionAdd extends React.Component {
           visible={visible}
           onOk={this.onClose}
           onCancel={this.onBack}
+          width={800}
         >
-          {/*银行账号选择*/}
+          {/* 银行账号选择 */}
           {/* 搜索区域 */}
           <div>
-            <Form>
+            <Form style={{ padding: '10px' }}>
               <FormItem label={this.$t('fund.bank.account')} {...formItemLayout2}>
-                {/*银行账号*/}
+                {/* 银行账号 */}
                 {getFieldDecorator('account', {
                   initialValue: '',
                 })(<Input AUTOCOMPLETE="off" onPressEnter={this.search} />)}
               </FormItem>
-              <div style={{ position: 'relative', left: '60%' }}>
+              <div style={{ position: 'relative', left: '80%' }}>
                 <Button type="primary" onClick={this.search}>
                   {this.$t('fund.search')}
                 </Button>&nbsp;&nbsp;&nbsp;
                 <Button onClick={this.searchClear}>{this.$t('fund.reset')}</Button>
-                {/*重置*/}
+                {/* 重置 */}
               </div>
             </Form>
           </div>
@@ -300,7 +302,7 @@ class accountDistributionAdd extends React.Component {
         </Modal>
         <Form>
           <FormItem label={this.$t('fund.bank.account')} {...formItemLayout}>
-            {/*银行账号*/}
+            {/* 银行账号 */}
             {getFieldDecorator('accountNumber', {
               initialValue: selectDate.accountNumber
                 ? updateDate.accountNumber
@@ -310,7 +312,7 @@ class accountDistributionAdd extends React.Component {
             })(<Input onClick={this.showDrawer} AUTOCOMPLETE="off" />)}
           </FormItem>
           <FormItem label={this.$t('fund.account.name')} {...formItemLayout}>
-            {/*账户名称*/}
+            {/* 账户名称 */}
             {getFieldDecorator('accountName', {
               rules: [{ required: false }],
               initialValue: selectDate.id
@@ -321,7 +323,7 @@ class accountDistributionAdd extends React.Component {
             })(<Input disabled onChange />)}
           </FormItem>
           <FormItem label={this.$t('fund.currency.code')} {...formItemLayout}>
-            {/*币种*/}
+            {/* 币种 */}
             {getFieldDecorator('currencyCode', {
               rules: [{ required: false, message: this.$t('common.please.select') }],
               initialValue: selectDate.id
@@ -332,7 +334,7 @@ class accountDistributionAdd extends React.Component {
             })(<Input disabled onChange />)}
           </FormItem>
           <FormItem label={this.$t('fund.query.permissions')} {...formItemLayout1}>
-            {/*查询权限*/}
+            {/* 查询权限 */}
             {getFieldDecorator('queryFlag', {
               valuePropName: 'checked',
               initialValue: typeof updateDateU.id === 'undefined' ? true : updateDateU.queryFlag,
@@ -344,7 +346,7 @@ class accountDistributionAdd extends React.Component {
             )}
           </FormItem>
           <FormItem label={this.$t('fund.payment.permissions')} {...formItemLayout1}>
-            {/*付款权限*/}
+            {/* 付款权限 */}
             {getFieldDecorator('payFlag', {
               valuePropName: 'checked',
               initialValue: typeof updateDateU.id === 'undefined' ? true : updateDateU.payFlag,
@@ -356,7 +358,7 @@ class accountDistributionAdd extends React.Component {
             )}
           </FormItem>
           <FormItem label={this.$t('fund.receiving.permissions')} {...formItemLayout1}>
-            {/*收款权限*/}
+            {/* 收款权限 */}
             {getFieldDecorator('gatherFlag', {
               valuePropName: 'checked',
               initialValue: typeof updateDateU.id === 'undefined' ? true : updateDateU.gatherFlag,
@@ -368,7 +370,7 @@ class accountDistributionAdd extends React.Component {
             )}
           </FormItem>
           <FormItem label={this.$t('fund.check.permissions')} {...formItemLayout1}>
-            {/*对账权限*/}
+            {/* 对账权限 */}
             {getFieldDecorator('checkFlag', {
               valuePropName: 'checked',
               initialValue: typeof updateDateU.id === 'undefined' ? true : updateDateU.checkFlag,
@@ -388,10 +390,10 @@ class accountDistributionAdd extends React.Component {
               onClick={this.handleSave}
             >
               {this.$t('fund.save')}
-              {/*保存*/}
+              {/* 保存 */}
             </Button>
             <Button onClick={this.handleCancel}>{this.$t('fund.cancel')}</Button>
-            {/*取消*/}
+            {/* 取消 */}
           </div>
         </Form>
       </div>

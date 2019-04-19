@@ -17,13 +17,11 @@ class BudgetGroup extends React.Component {
       columns: [
         {
           title: this.$t('budgetGroup.code') /*'预算项目组代码'*/,
-          align: 'center',
           dataIndex: 'itemGroupCode',
           width: '35%',
         },
         {
           title: this.$t('budgetGroup.name') /*'预算项目组名称'*/,
-          align: 'center',
           dataIndex: 'itemGroupName',
           width: '50%',
         },

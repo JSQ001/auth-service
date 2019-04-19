@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Button, Alert, message, Modal, Input, DatePicker, Form } from 'antd';
+import { Row, Col, Button, Alert, message, Modal, Input, DatePicker, Form, Popover } from 'antd';
 import { connect } from 'dva';
 import Table from 'widget/table';
 import moment from 'moment';
@@ -31,7 +31,7 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '系统来源',
+          label: this.$t('fund.system.source') /* 系统来源 */,
           id: 'sourceSystem',
           options: [],
           valueListCode: 'ZJ_SOURCE',
@@ -39,7 +39,7 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'modalList',
-          label: '单据公司',
+          label: this.$t('fund.documentary.company') /* 单据公司 */,
           id: 'documentCompany',
           listType: 'company',
           labelKey: 'name',
@@ -50,7 +50,7 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '公私标志',
+          label: this.$t('fund.public.private.signs') /* 公私标志 */,
           id: 'propFlag',
           options: [],
           valueListCode: 'ZJ_BATCH_PAY_ACCOUNT_TYPE',
@@ -58,7 +58,7 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '付款方式',
+          label: this.$t('fund.payment.method') /* 付款方式 */,
           id: 'paymentPurpose',
           options: [],
           valueListCode: 'ZJ_PAYMENT_TYPE',
@@ -66,7 +66,7 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '收款银行',
+          label: this.$t('fund.receiving.bank') /* 收款银行 */,
           id: 'gatherBankNum',
           options: [],
           valueListCode: 'ZJ_OPEN_BANK',
@@ -74,37 +74,37 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'input',
-          label: '收款账户',
+          label: this.$t('fund.collection.account') /* 收款账户 */,
           id: 'gatherAccountName',
         },
         {
           colSpan: 6,
           type: 'input',
-          label: '收款账号',
+          label: this.$t('fund.receiving.account') /* 收款账号 */,
           id: 'gatherAccount',
         },
         {
           colSpan: 6,
           type: 'input',
-          label: '制单人',
+          label: this.$t('fund.single.person') /* 制单人 */,
           id: 'createdBy',
         },
         {
           colSpan: 6,
           type: 'input',
-          label: '来源单据号',
+          label: this.$t('fund.source.document.no.') /* 来源单据号 */,
           id: 'sourceDocumentNum',
         },
         {
           colSpan: 6,
           type: 'intervalInput',
-          label: '信用分区间',
+          label: this.$t('fund.credit.zone') /* 信用分区间 */,
           id: 'creditScore',
         },
         {
           colSpan: 6,
           type: 'valueList',
-          label: '预警状态',
+          label: this.$t('fund.early.warning.state') /* 预警状态 */,
           id: 'warningStatus',
           options: [],
           valueListCode: 'ZJ_WARNING_TYPE',
@@ -112,100 +112,114 @@ class PaymentWorkbench extends React.Component {
         {
           colSpan: 6,
           type: 'checkBox',
-          label: '包含子公司',
+          label: this.$t('fund.including.subsidiary') /* 包含子公司 */,
           id: 'childCompanyFlag',
         },
       ],
       columns: [
         {
-          title: '预警状态',
+          title: this.$t('fund.early.warning.state') /* 预警状态 */,
           dataIndex: 'warningStatusDesc',
           width: 100,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '预警信息',
+          title: this.$t('fund.early.warning.information') /* 预警信息 */,
           dataIndex: 'warningData',
-          width: 200,
-          align: 'center',
+          width: 150,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '来源系统',
+          title: this.$t('fund.source.system') /* 来源系统 */,
           dataIndex: 'sourceSystemDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '来源单据编号',
+          title: this.$t('fund.source.document.number') /* 来源单据编号 */,
           dataIndex: 'sourceDocumentNum',
           width: 200,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '付款用途',
+          title: this.$t('fund.payment.purpose') /* 付款用途 */,
           dataIndex: 'paymentAccountName',
           width: 100,
-          align: 'center',
         },
         {
-          title: '所属公司',
+          title: this.$t('fund.affiliated.company') /* 所属公司 */,
           dataIndex: 'companyName',
-          width: 100,
-          align: 'center',
+          width: 150,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款账户',
+          title: this.$t('fund.collection.account') /* 收款账户 */,
           dataIndex: 'gatherAccountName',
-          width: 100,
-          align: 'center',
+          width: 150,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款银行',
+          title: this.$t('fund.receiving.bank') /* 收款银行 */,
           dataIndex: 'gatherBankName',
-          width: 200,
-          align: 'center',
+          width: 230,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款分行',
+          title: this.$t('fund.collection.branch') /* 收款分行 */,
           dataIndex: 'gatherBranchBankName',
           width: 200,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款账号',
+          title: this.$t('fund.receiving.account') /* 收款账号 */,
           dataIndex: 'gatherAccount',
-          width: 200,
-          align: 'center',
+          width: 160,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
-          width: 100,
-          align: 'center',
+          width: 140,
+          render: amount => this.filterMoney(amount),
         },
         {
-          title: '付款方式',
+          title: this.$t('fund.payment.method') /* 付款方式 */,
           dataIndex: 'paymentMethodDesc',
-          width: 150,
-          align: 'center',
+          width: 120,
         },
         {
-          title: '摘要',
+          title: this.$t('fund.abstract') /* 摘要 */,
           dataIndex: 'summary',
-          width: 100,
-          align: 'center',
+          width: 200,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '公私标志',
+          title: this.$t('fund.public.private.signs') /* 公私标志 */,
           dataIndex: 'propFlagDesc',
-          width: 150,
+          width: 80,
           align: 'center',
         },
         {
-          title: '制单人',
+          title: this.$t('fund.single.person') /* 制单人 */,
           dataIndex: 'createdByFk',
-          width: 150,
-          align: 'center',
+          width: 120,
         },
       ],
     };
@@ -226,9 +240,13 @@ class PaymentWorkbench extends React.Component {
     );
     const noticeAlert = (
       <span>
-        已选择
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项 |共
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>元
+        {this.$t('fund.selected')}
+        {/* 已选择 */}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.desc.code7')}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>
+        {this.$t('fund.yuan')}
+        {/* 元 */}
       </span>
     );
     this.setState({
@@ -307,7 +325,7 @@ class PaymentWorkbench extends React.Component {
               : 0,
             current: pagination.page + 1,
             pageSize: pagination.pageSize,
-            onChange: this.onChangePaper,
+            onChange: this.onChangePager,
             onShowSizeChange: this.onShowSizeChange,
             showSizeChanger: true,
             showQuickJumper: true,
@@ -319,6 +337,42 @@ class PaymentWorkbench extends React.Component {
       .catch(error => {
         message.error(error.response.data.message);
       });
+  };
+
+  /**
+   * 分页点击
+   */
+  onChangePager = pagination => {
+    const temp = {};
+    console.log(pagination);
+    temp.page = pagination.current - 1;
+    temp.current = pagination.current;
+    temp.pageSize = pagination.pageSize;
+    this.setState(
+      {
+        pagination: temp,
+      },
+      () => {
+        this.getPaymentWorkbenchList();
+      }
+    );
+  };
+
+  /**
+   * 改变每页显示的条数
+   */
+  onShowSizeChange = (current, pageSize) => {
+    const temp = {};
+    temp.page = current - 1;
+    temp.pageSize = pageSize;
+    this.setState(
+      {
+        pagination: temp,
+      },
+      () => {
+        this.getPaymentWorkbenchList();
+      }
+    );
   };
 
   /**
@@ -347,8 +401,25 @@ class PaymentWorkbench extends React.Component {
           message.error(error.response.data.message);
         });
     } else {
-      message.error('你所选择的单据包含锁定状态的单据,不能创建批！');
+      message.error(this.$t('fund.desc.code9')); // 你所选择的单据包含锁定状态的单据,不能创建批！
     }
+  };
+
+  /**
+   * 根据规则创建批
+   */
+  allCreate = () => {
+    const { searchParams } = this.state;
+    paymentWorkbenchService
+      .allCreate(searchParams)
+      .then(res => {
+        if (res.status === 200) {
+          message.success('创建成功');
+        }
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
   };
 
   /**
@@ -360,7 +431,7 @@ class PaymentWorkbench extends React.Component {
       .documentLock(selectedRowKeys)
       .then(response => {
         if (response.data === true) {
-          message.success('锁定成功');
+          message.success(this.$t('fund.lock.success')); /* 锁定成功 */
           this.getPaymentWorkbenchList();
         }
       })
@@ -378,7 +449,7 @@ class PaymentWorkbench extends React.Component {
       .documentUnlock(selectedRowKeys)
       .then(response => {
         if (response.data === true) {
-          message.success('解锁成功');
+          message.success(this.$t('fund.unlock.success')); /* 解锁成功 */
           this.getPaymentWorkbenchList();
         }
       })
@@ -425,7 +496,7 @@ class PaymentWorkbench extends React.Component {
       .documentBack(selectedRowKeys, reason)
       .then(response => {
         if (response.data === true) {
-          message.success('退回成功');
+          message.success(this.$t('fund.return.success')); /* 退回成功 */
           this.getPaymentWorkbenchList();
         }
       })
@@ -478,9 +549,20 @@ class PaymentWorkbench extends React.Component {
                   this.createBatch();
                 }}
               >
-                创建批
+                {this.$t('fund.create.batch')}
+                {/* 创建批 */}
               </Button>
-              <Button type="primary">根据规则创建批</Button>
+              <Button
+                type="primary"
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  this.allCreate();
+                }}
+              >
+                {this.$t('fund.create.batches.according.rules')}
+              </Button>
+              {/* 根据规则创建批 */}
               <Button
                 type="primary"
                 disabled={buttonsDisableClick}
@@ -490,7 +572,8 @@ class PaymentWorkbench extends React.Component {
                   this.documentLock();
                 }}
               >
-                单据锁定
+                {this.$t('fund.document.locked')}
+                {/* 单据锁定 */}
               </Button>
               <Button
                 type="primary"
@@ -501,7 +584,8 @@ class PaymentWorkbench extends React.Component {
                   this.documentUnlock();
                 }}
               >
-                锁定解除
+                {this.$t('fund.locking.relieve')}
+                {/* 锁定解除 */}
               </Button>
               <Button
                 type="danger"
@@ -514,7 +598,8 @@ class PaymentWorkbench extends React.Component {
                   });
                 }}
               >
-                退回
+                {this.$t('fund.return')}
+                {/* 退回 */}
               </Button>
             </Row>
           </div>
@@ -525,15 +610,22 @@ class PaymentWorkbench extends React.Component {
           )}
           <Table
             rowKey={record => record.id}
+            rowClassName={record => {
+              if (record.warningStatus === 'LOCKED') {
+                return 'danger';
+              }
+            }}
+            bordered
             dataSource={tableData}
             loading={loading}
             columns={columns}
             pagination={pagination}
+            onChange={this.onChangePager}
             scroll={{ x: 1500 }}
             rowSelection={rowSelection}
           />
           <Modal
-            title="单据退回"
+            title={this.$t('fund.return.documents')} /* 单据退回 */
             visible={documentBackVisible}
             onOk={this.handleOk}
             onCancel={this.handleCancel}
@@ -541,7 +633,8 @@ class PaymentWorkbench extends React.Component {
             <Form>
               <Row>
                 <Col span={4}>
-                  <span>退回时间：</span>
+                  <span>{this.$t('fund.back.to.the.time:')}</span>
+                  {/* 退回时间： */}
                 </Col>
                 <Col span={20}>
                   <Form.Item>
@@ -553,7 +646,8 @@ class PaymentWorkbench extends React.Component {
               </Row>
               <Row style={{ marginTop: '20px' }}>
                 <Col span={4}>
-                  <span>退回原因：</span>
+                  <span>{this.$t('fund.return.reason:')}</span>
+                  {/* 退回原因： */}
                 </Col>
                 <Col span={20}>
                   <Form.Item>
@@ -561,7 +655,7 @@ class PaymentWorkbench extends React.Component {
                       initialValue: '',
                     })(
                       <TextArea
-                        placeholder="请输入退回原因"
+                        placeholder={this.$t('fund.input.return.cause')} /* 请输入退回原因 */
                         autosize={{ minRows: 4, maxRows: 6 }}
                       />
                     )}

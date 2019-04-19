@@ -37,6 +37,12 @@ class AutomaticPaymentRules extends React.Component {
           align: 'center',
         },
         {
+          title: '系统来源',
+          dataIndex: 'systemSourceDesc',
+          width: 130,
+          align: 'center',
+        },
+        {
           title: '付款公司',
           dataIndex: 'companyName',
           width: 130,
@@ -106,13 +112,7 @@ class AutomaticPaymentRules extends React.Component {
           ),
         },
         {
-          title: '系统来源',
-          dataIndex: 'systemSourceDesc',
-          width: 130,
-          align: 'center',
-        },
-        {
-          title: '对公对私',
+          title: '公私标志',
           dataIndex: 'propFlagDesc',
           width: 130,
           align: 'center',

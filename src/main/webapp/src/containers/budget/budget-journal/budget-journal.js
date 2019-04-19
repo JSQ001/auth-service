@@ -69,8 +69,7 @@ class BudgetJournal extends React.Component {
           title: this.$t({ id: 'budgetJournal.journalCode' }),
           key: 'journalCode',
           dataIndex: 'journalCode',
-          align: 'left',
-          width: 150,
+          width: 157,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -78,32 +77,29 @@ class BudgetJournal extends React.Component {
           title: this.$t({ id: 'budgetJournal.journalTypeId' }),
           key: 'journalTypeName',
           dataIndex: 'journalTypeName',
-          align: 'left',
-          width: 150,
+          width: 157,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*编制期段*/
           title: this.$t({ id: 'budgetJournal.periodStrategy' }),
           key: 'periodStrategyName',
-          align: 'left',
           dataIndex: 'periodStrategyName',
-          width: 100,
+          width: 90,
+          align: 'center',
         },
         {
           /*预算表*/
           title: this.$t({ id: 'budgetJournal.structureId' }),
           key: 'structureName',
           dataIndex: 'structureName',
-          align: 'left',
-          width: 80,
+          width: 110,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*预算场景*/
           title: this.$t({ id: 'budgetJournal.scenarioId' }),
           key: 'scenario',
-          align: 'left',
           dataIndex: 'scenario',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
@@ -112,7 +108,6 @@ class BudgetJournal extends React.Component {
           /*预算版本*/
           title: this.$t({ id: 'budgetJournal.versionId' }),
           key: 'versionName',
-          align: 'left',
           dataIndex: 'versionName',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
@@ -121,9 +116,9 @@ class BudgetJournal extends React.Component {
           /*创建时间*/
           title: this.$t({ id: 'budgetJournal.createdDate' }),
           key: 'createdDate',
-          align: 'left',
-          width: 130,
+          width: 140,
           dataIndex: 'createdDate',
+          align: 'center',
           render: recode => (
             <Popover content={String(recode).substring(0, 10)}>
               {String(recode).substring(0, 10)}
@@ -134,9 +129,9 @@ class BudgetJournal extends React.Component {
           /*状态*/
           title: this.$t({ id: 'budgetJournal.status' }),
           key: 'status',
-          align: 'left',
           dataIndex: 'status',
           tooltips: true,
+          width: 110,
           render: (recode, text) => {
             switch (recode) {
               case 1001: {
@@ -176,9 +171,6 @@ class BudgetJournal extends React.Component {
           },
         },
       ],
-      // newBudgetJournalDetailPage: menuRoute.getRouteItem('new-budget-journal', 'key'),    //新建预算日记账的页面项
-      // budgetJournalDetailPage: menuRoute.getRouteItem('budget-journal-detail', 'key'),    //预算日记账详情
-      // budgetJournalDetailSubmit: menuRoute.getRouteItem('budget-journal-detail-submit', 'key'),
       selectedEntityOids: [], //已选择的列表项的Oids
     };
   }

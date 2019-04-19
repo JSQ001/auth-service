@@ -4,10 +4,10 @@ import {
   Input,
   Row,
   Col,
-  Button,
   DatePicker,
   Select,
   InputNumber,
+  Button,
   message,
   Spin,
   TimePicker,
@@ -78,7 +78,31 @@ class NewExpenseApplicationFromLine extends Component {
           name: res.data.expenseTypeName,
         };
         expenseTypeInfo.fields = res.data.fields;
-        this.setState({ model: res.data, pageLoading: false, isNew: false, expenseTypeInfo });
+        this.setState(
+          { model: res.data, pageLoading: false, isNew: false, expenseTypeInfo },
+          () => {
+            expenseTypeInfo.fields.map(o => {
+              if (o.fieldType === 'GPS' && o.value) {
+                service.getLocalizationCityById(o.value).then(reso => {
+                  const description = reso.data.length > 0 ? reso.data[0].description : '';
+                  this.props.form.setFieldsValue({
+                    [`field-${o.id}`]: [{ id: o.value, description }],
+                  });
+                });
+              } else if (o.fieldType == 'PARTICIPANTS' || o.fieldType == 'PARTICIPANT') {
+                const userIdList = o.value ? o.value.split(',') : [];
+                service.getUserByIds(userIdList).then(reso => {
+                  let userList = reso.data ? reso.data : [];
+                  userList.map(user => {
+                    user.userId = user.id;
+                    user.userName = user.fullName;
+                  });
+                  this.props.form.setFieldsValue({ [`field-${o.id}`]: userList });
+                });
+              }
+            });
+          }
+        );
       })
       .catch(err => {
         message.error(err.response.data.message);
@@ -102,7 +126,6 @@ class NewExpenseApplicationFromLine extends Component {
       },
     };
 
-    const { isNew } = this.state;
     const { getFieldDecorator } = this.props.form;
 
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
@@ -175,6 +198,103 @@ class NewExpenseApplicationFromLine extends Component {
                       })}
                   </Select>
                 )}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'GPS':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                })(
+                  <Chooser
+                    type="select_city"
+                    labelKey="description"
+                    valueKey="id"
+                    single
+                    showClear={false}
+                    disabled
+                  />
+                )}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'START_DATE_AND_END_DATE':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value
+                    ? [moment(field.value.split(',')[0]), moment(field.value.split(',')[1])]
+                    : '',
+                })(<DatePicker.RangePicker disabled />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'PARTICIPANTS':
+      case 'PARTICIPANT':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                })(
+                  <Chooser
+                    type="select_authorization_user"
+                    labelKey="userName"
+                    valueKey="userId"
+                    listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                    showClear={false}
+                    disabled
+                  />
+                )}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'LONG':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber disabled precision={0} style={{ width: '100%' }} />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'DOUBLE':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<CustomAmount disabled />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'POSITIVE_INTEGER':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber disabled min={0} precision={0} style={{ width: '100%' }} />)}
               </FormItem>
             </Col>
           </Row>
@@ -406,6 +526,21 @@ class NewExpenseApplicationFromLine extends Component {
                 </FormItem>
               </Col>
             </Row>
+            <div
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                marginLeft: '-15px',
+                width: '100%',
+                height: '50px',
+                boxShadow: '0px -5px 5px rgba(0, 0, 0, 0.067)',
+                background: '#fff',
+                lineHeight: '50px',
+                textAlign: 'center',
+              }}
+            >
+              <Button onClick={this.props.close}>{this.$t('expense.cancel')}</Button>
+            </div>
           </Form>
         )}
       </div>

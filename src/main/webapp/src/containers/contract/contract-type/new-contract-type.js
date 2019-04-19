@@ -34,6 +34,8 @@ class NewContractType extends React.Component {
         type: 'all',
         values: [],
       },
+      isDisabled: true,
+      stampTaxType: [],
     };
   }
 
@@ -42,6 +44,11 @@ class NewContractType extends React.Component {
       //合同大类
       let contractCategory = res.data.values;
       this.setState({ contractCategory, enabled: true });
+    });
+    this.getSystemValueList('STAMP_TAX_TYPE').then(res => {
+      //印花税目
+      let stampTaxType = res.data.values;
+      this.setState({ stampTaxType, enabled: true });
     });
     httpFetch.get(`${config.mdataUrl}/api/setOfBooks/by/tenant?roleType=TENANT`).then(res => {
       let setOfBooksId = this.state.data.setOfBooksId || this.props.params.setOfBooksId;
@@ -283,6 +290,17 @@ class NewContractType extends React.Component {
     this.props.onClose();
   };
 
+  textChange = record => {
+    if (!record) {
+      this.setState({
+        isDisabled: true,
+      });
+    } else {
+      this.setState({
+        isDisabled: false,
+      });
+    }
+  };
   render() {
     const { getFieldDecorator } = this.props.form;
     const {
@@ -299,6 +317,8 @@ class NewContractType extends React.Component {
       showSelectEmployeeGroup,
       chosenEmployeeIDs,
       enabled,
+      isDisabled,
+      stampTaxType,
     } = this.state;
     const formItemLayout = {
       labelCol: { span: 8 },
@@ -378,6 +398,30 @@ class NewContractType extends React.Component {
               ],
               initialValue: data.contractTypeName,
             })(<Input placeholder={this.$t('common.please.enter')} />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label={this.$t('contract.type.stampTaxType')}>
+            {getFieldDecorator('stampTaxType', {
+              rules: [
+                {
+                  message: this.$t('common.please.select'),
+                },
+              ],
+              initialValue: data.stampTaxType,
+            })(
+              <Select placeholder={this.$t('common.please.select')} onChange={this.textChange}>
+                {stampTaxType.map(option => <Option key={option.value}>{option.name}</Option>)}
+              </Select>
+            )}
+          </FormItem>
+          <FormItem {...formItemLayout} label={this.$t('contract.type.stampTax')}>
+            {getFieldDecorator('stampTax', {
+              rules: [
+                {
+                  message: this.$t('common.please.enter'),
+                },
+              ],
+              initialValue: data.stampTax,
+            })(<Input placeholder={this.$t('common.please.enter')} disabled={isDisabled} />)}
           </FormItem>
           <FormItem {...formItemLayout} label={form_label}>
             {getFieldDecorator('formOid', {

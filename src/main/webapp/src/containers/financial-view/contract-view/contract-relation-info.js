@@ -7,7 +7,8 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import ExpenseApplicationForm from 'containers/expense-application-form/detail-readonly';
 import PrepaymentDetail from 'containers/pre-payment/my-pre-payment/detail-readonly';
-
+import ExpenseReportDetail from 'containers/reimburse/my-reimburse/reimburse-detail-finance';
+import { routerRedux } from 'dva/router';
 const { TabPane } = Tabs;
 
 class relationInfo extends React.Component {
@@ -56,7 +57,10 @@ class relationInfo extends React.Component {
       expenseApplicationShow: false,
       expenseApplicationId: 0,
       prePaymentShow: false,
+      reportShow: false,
       prepaymentId: 0,
+      reportId: '',
+      params: {},
       columns1: [
         {
           title: this.$t('my.contract.line.number'),
@@ -178,7 +182,7 @@ class relationInfo extends React.Component {
           align: 'center',
           render: (documentNumber, record) => (
             <Popover content={documentNumber}>
-              <a onClick={() => this.skipToDocumentDetail(record)}>{documentNumber}</a>
+              <a onClick={() => this.handleLinkReport(record)}>{documentNumber}</a>
             </Popover>
           ),
         },
@@ -191,7 +195,7 @@ class relationInfo extends React.Component {
         {
           /* 提交日期 */
           title: this.$t('acp.requisitionDate'),
-          dataIndex: 'createdDate',
+          dataIndex: 'requisitionDate',
           width: 100,
           align: 'center',
           render: value => (
@@ -229,7 +233,7 @@ class relationInfo extends React.Component {
           key: 'status',
           width: '10%',
           align: 'center',
-          dataIndex: 'accountStatus',
+          dataIndex: 'status',
           render: accountStatus => (
             <Badge
               status={this.$statusList[accountStatus].state}
@@ -334,7 +338,9 @@ class relationInfo extends React.Component {
         showQuickJumper: true,
         pageSize: 5,
         current: 1,
-        pageSizeOptions: ['5', '10', '20', '30', '40'],
+        onChange: this.onChangeAccountPage,
+        onShowSizeChange: this.onShowSizeAccount,
+        //pageSizeOptions: ['5', '10', '20', '30', '40'],
       },
       prepaymentPagination: {
         total: 0,
@@ -350,6 +356,24 @@ class relationInfo extends React.Component {
         page: 0,
         pageSizeOptions: ['5', '10', '20', '30', '40'],
       },
+      pagination1: {
+        total: 0,
+        showTotal: (total, range) =>
+          this.$t(
+            { id: 'common.show.total' },
+            { range0: `${range[0]}`, range1: `${range[1]}`, total }
+          ),
+        showSizeChanger: true,
+        showQuickJumper: true,
+        pageSize: 5,
+        current: 1,
+        page: 0,
+        pageSizeOptions: ['5', '10', '20', '30', '40'],
+      },
+      accountPage: 0,
+      prepaymentPage: 0,
+      applyPage: 0,
+      page: 0,
     };
   }
 
@@ -360,6 +384,36 @@ class relationInfo extends React.Component {
       tabName: 'prepayment',
     });
   }
+  //accountPagination
+  //accountPage:0,
+  //prepaymentPage:0,
+  //applyPage:0,
+  //page:0,
+  onChangeAccountPage = page => {
+    console.log(page);
+    if (page - 1 !== this.state.accountPage) {
+      this.setState(
+        {
+          accountPage: page - 1,
+        },
+        () => {
+          this.getAccountHeadByContract();
+        }
+      );
+    }
+  };
+  onShowSizeAccount = (current, pageSize) => {
+    this.setState(
+      {
+        loading: true,
+        accountPage: current - 1,
+        accountPagination: { pageSize: pageSize },
+      },
+      () => {
+        this.getAccountHeadByContract();
+      }
+    );
+  };
 
   // 显示费用申请单
   showExpenseApplication = record => {
@@ -376,10 +430,16 @@ class relationInfo extends React.Component {
       prepaymentId: record.headerId,
     });
   };
-
+  handleLinkReport(record) {
+    this.setState({
+      reportShow: true,
+      reportId: record.expReportHeaderId,
+      params: { id: record.expReportHeaderId },
+    });
+  }
   // 获取合同关联的预付款单
   getPrepaymentHeadByContract = () => {
-    const { prepaymentPagination } = this.state;
+    const { prepaymentPagination, prepaymentPage } = this.state;
     contractService
       .getPrepaymentHeadByContractNumber(this.props.headerData.contractNumber)
       .then(res => {
@@ -398,6 +458,13 @@ class relationInfo extends React.Component {
         this.setState(
           {
             prepaymentData: data,
+            pagination1: {
+              total: Number(res.headers['x-total-count'])
+                ? Number(res.headers['x-total-count'])
+                : 0,
+              current: prepaymentPage + 1,
+              onChange: this.onChangePrepaymentPage,
+            },
           },
           () => {}
         );
@@ -409,7 +476,7 @@ class relationInfo extends React.Component {
 
   // 获取合同关联申请单
   getApplyHeadByContrcat = () => {
-    const { applyPagination } = this.state;
+    const { applyPagination, applyPage } = this.state;
     contractService
       .getApplyHeadByContrcat(this.props.headerData.id)
       .then(res => {
@@ -424,6 +491,13 @@ class relationInfo extends React.Component {
         this.setState(
           {
             applymentData: data,
+            pagination1: {
+              total: Number(res.headers['x-total-count'])
+                ? Number(res.headers['x-total-count'])
+                : 0,
+              current: applyPage + 1,
+              onChange: this.onChangeApplytPage,
+            },
           },
           () => {}
         );
@@ -435,31 +509,43 @@ class relationInfo extends React.Component {
 
   // 获取合同关联的报账单
   getAccountHeadByContract = () => {
-    contractService.getAccountHeadByContract(this.props.headerData.id).then(res => {
-      const data = [];
+    const { accountPage, accountPagination } = this.state;
+    console.log(accountPagination);
+    contractService
+      .getAccountHeadByContract(this.props.headerData.id, accountPage, accountPagination.pageSize)
+      .then(res => {
+        /*const data = [];
       res.data.map(item => {
         item.expensePaymentScheduleList.map(i => {
           data.push({ ...item.expenseaccountHeader, ...i });
         });
+      });*/
+        this.setState({
+          accountData: res.data,
+          accountPagination: {
+            total: Number(res.headers['x-total-count']) ? Number(res.headers['x-total-count']) : 0,
+            current: accountPage + 1,
+            accountPagination,
+            pageSize: accountPagination.pageSize,
+            onChange: this.onChangeAccountPage,
+            onShowSizeChange: this.onShowSizeAccount,
+            showTotal: total => `共搜到 ${total} 条数据`,
+          },
+        });
       });
-
-      this.setState({
-        accountData: data,
-      });
-    });
   };
 
   // 获取支付明细数据payData
   getPayDetailByContractHeaderId = () => {
-    const { page1, pageSize1 } = this.state;
+    const { page, pageSize1 } = this.state;
     contractService
-      .getPayDetailByContractHeaderId(this.props.headerData.id, page1, pageSize1)
+      .getPayDetailByContractHeaderId(this.props.headerData.id, page, pageSize1)
       .then(res => {
         this.setState({
           payDetailData: res.data,
           pagination1: {
             total: Number(res.headers['x-total-count']) ? Number(res.headers['x-total-count']) : 0,
-            current: page1 + 1,
+            current: page + 1,
             onChange: this.onChangePaper1,
           },
         });
@@ -559,17 +645,26 @@ class relationInfo extends React.Component {
   };
 
   handleTabsChange = value => {
-    this.setState({ tabName: value }, () => {
-      if (value === 'prepayment') {
-        this.getPrepaymentHeadByContract();
-      } else if (value === 'account') {
-        this.getAccountHeadByContract();
-      } else if (value === 'apply') {
-        this.getApplyHeadByContrcat();
-      } else if (value === 'payDetail') {
-        this.getPayDetailByContractHeaderId();
+    this.setState(
+      {
+        tabName: value,
+        accountPage: 0,
+        prepaymentPage: 0,
+        applyPage: 0,
+        page: 0,
+      },
+      () => {
+        if (value === 'prepayment') {
+          this.getPrepaymentHeadByContract();
+        } else if (value === 'account') {
+          this.getAccountHeadByContract();
+        } else if (value === 'apply') {
+          this.getApplyHeadByContrcat();
+        } else if (value === 'payDetail') {
+          this.getPayDetailByContractHeaderId();
+        }
       }
-    });
+    );
   };
 
   render() {
@@ -578,7 +673,10 @@ class relationInfo extends React.Component {
       expenseApplicationShow,
       expenseApplicationId,
       prePaymentShow,
+      reportShow,
       prepaymentId,
+      reportId,
+      params,
     } = this.state;
     return (
       <div>
@@ -622,6 +720,23 @@ class relationInfo extends React.Component {
           destroyOnClose
         >
           <PrepaymentDetail id={prepaymentId} />
+        </Modal>
+        <Modal
+          title="报账单详情"
+          visible={reportShow}
+          onCancel={() => {
+            this.setState({ reportShow: false });
+          }}
+          width="90%"
+          bodyStyle={{
+            maxHeight: '70vh',
+            overflow: 'auto',
+            padding: '0 10px',
+          }}
+          footer={null}
+          destroyOnClose
+        >
+          <ExpenseReportDetail params={params} />
         </Modal>
       </div>
     );

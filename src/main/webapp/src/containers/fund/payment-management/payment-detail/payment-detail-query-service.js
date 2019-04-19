@@ -1,4 +1,4 @@
-// import config from 'config';
+import config from 'config';
 import httpFetch from 'share/httpFetch';
 
 export default {
@@ -7,10 +7,10 @@ export default {
    */
   getPaymentDetailList(page, size, searchParams, queryType) {
     // console.log(searchParams);
-    let url = `http://10.211.97.86:9099/api/payment/lineInfo/queryAllLine?page=${page}&size=${size}&queryType=${queryType}`;
-    // let url = `${
-    //   config.fundUrl
-    // }/api/payment/lineInfo/queryAllLine?page=${page}&size=${size}&queryType=${queryType}`;
+    // let url = `http://10.211.97.86:9099/api/payment/lineInfo/queryAllLine?page=${page}&size=${size}&queryType=${queryType}`;
+    let url = `${
+      config.fundUrl
+    }/api/payment/lineInfo/queryAllLine?page=${page}&size=${size}&queryType=${queryType}`;
     const params = searchParams;
     for (const paramsName in params) {
       if (Object.prototype.hasOwnProperty.call(params, paramsName)) {

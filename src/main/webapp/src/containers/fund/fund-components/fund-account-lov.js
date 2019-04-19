@@ -90,25 +90,21 @@ class FundAccountLov extends React.Component {
   };
 
   render() {
-    const { onChange, defaultValue } = this.props;
+    const { onChange, value } = this.props;
     const { data, fetching } = this.state;
-    const options = data.map(d => (
-      <Option key={d.id}>
-        {d.accountNumber}--{d.openBankName}
-      </Option>
-    ));
+    const options = data.map(d => <Option key={d.id}>{d.accountNumber}</Option>);
     return (
       <Select
         labelInValue
-        defaultValue={defaultValue || ''}
+        value={value}
         showSearch
         allowClear
         placeholder="请选择"
         filterOption={false}
         defaultActiveFirstOption={false}
         notFoundContent={fetching ? <Spin size="small" /> : null}
-        onChange={value => {
-          onChange(value, selectDataByKey('id', value.key, data));
+        onChange={changeValue => {
+          onChange(changeValue, selectDataByKey('id', changeValue.key, data));
         }}
         onSearch={this.handleSearch}
       >

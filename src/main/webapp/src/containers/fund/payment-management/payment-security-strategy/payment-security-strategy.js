@@ -26,9 +26,6 @@ class PaymentSecurityStrategy extends React.Component {
     this.setState({ loading: true });
     paySecurityService.getPaymentSecurityQuery().then(response => {
       const { data } = response;
-
-      console.log('data');
-      console.log(data);
       this.setState({
         responseData: data,
         loading: false,
@@ -43,7 +40,6 @@ class PaymentSecurityStrategy extends React.Component {
     const { form } = this.props;
     e.preventDefault();
     form.resetFields();
-    // this.getPaymentSecurity()
   };
 
   /**
@@ -59,7 +55,7 @@ class PaymentSecurityStrategy extends React.Component {
           .savePaymentSecurity(values)
           .then(response => {
             if (response.data) {
-              message.success('保存成功');
+              message.success(this.$t('fund.save.successful')); /* 保存成功 */
               this.getPaymentSecurity();
             }
           })
@@ -99,17 +95,23 @@ class PaymentSecurityStrategy extends React.Component {
             <section>
               <Row>
                 <Col span={6} offset={2}>
-                  <FormItem label="消息" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.the.message')} {...formItemLayout}>
+                    {/* 消息 */}
                     {getFieldDecorator('news', {
                       rules: [{ required: true }],
                       initialValue: responseData.news ? responseData.news : '',
-                    })(<Input placeholder="请维护" disabled={isReadOnly} />)}
+                    })(
+                      <Input placeholder={this.$t('fund.please.maintain')} disabled={isReadOnly} />
+                    )}
+                    {/* 请维护 */}
                   </FormItem>
                 </Col>
                 <Col span={6} offset={2}>
-                  <FormItem label="期限" {...formItemLayout}>
+                  <FormItem label="期限(天)" {...formItemLayout}>
                     {getFieldDecorator('term', {
-                      rules: [{ required: true, message: '请输入数字' }],
+                      rules: [
+                        { required: true, message: this.$t('fund.please.enter.the.numbers') },
+                      ] /* 请输入数字 */,
                       initialValue: responseData.term ? Number(responseData.term) : '',
                     })(
                       <InputNumber
@@ -120,7 +122,6 @@ class PaymentSecurityStrategy extends React.Component {
                         precision="0"
                       />
                     )}
-                    <span style={{ paddingLeft: '20px' }}>天</span>
                   </FormItem>
                 </Col>
               </Row>
@@ -137,91 +138,157 @@ class PaymentSecurityStrategy extends React.Component {
             <section style={{ padding: '50px 150px' }}>
               <Row gutter={100}>
                 <Col span={8}>
-                  <FormItem label="来源单据编号" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.source.document.number')} {...formItemLayout}>
+                    {/* 来源单据编号 */}
                     {getFieldDecorator('tradeCodeSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.tradeCodeSign ? responseData.tradeCodeSign : true,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" disabled />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                        disabled
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="收款账号" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.receiving.account')} {...formItemLayout}>
+                    {/* 收款账号 */}
                     {getFieldDecorator('gatherAccountSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.gatherAccountSign
                         ? responseData.tradeCodeSign
                         : true,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" disabled />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                        disabled
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="金额" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.amount')} {...formItemLayout}>
+                    {/* 金额 */}
                     {getFieldDecorator('amountSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.amountSign ? responseData.amountSign : true,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" disabled />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                        disabled
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
               </Row>
               <Row gutter={100}>
                 <Col span={8}>
-                  <FormItem label="银行大类名称" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.name.of.bank.types')} {...formItemLayout}>
+                    {/* 银行大类名称 */}
                     {getFieldDecorator('gatherBankSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.gatherBankSign
                         ? responseData.gatherBankSign
                         : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用  */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="开户省" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.to.open.an.account.province')} {...formItemLayout}>
+                    {/* 开户省 */}
                     {getFieldDecorator('gatherProvinceCodeSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.gatherProvinceCodeSign
                         ? responseData.gatherProvinceCodeSign
                         : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="开户市" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.to.open.an.account')} {...formItemLayout}>
+                    {/* 开户市 */}
                     {getFieldDecorator('gatherCityCodeSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.gatherCityCodeSign
                         ? responseData.gatherCityCodeSign
                         : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
               </Row>
               <Row gutter={100}>
                 <Col span={8}>
-                  <FormItem label="业务类型" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.business.types')} {...formItemLayout}>
+                    {/* 业务类型 */}
                     {getFieldDecorator('businessTypeSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.businessTypeSign
                         ? responseData.businessTypeSign
                         : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="公私标志" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.public.private.signs')} {...formItemLayout}>
+                    {/* 公私标志 */}
                     {getFieldDecorator('propFlagSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.propFlagSign ? responseData.propFlagSign : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
                 <Col span={8}>
-                  <FormItem label="付款方式" {...formItemLayout}>
+                  <FormItem label={this.$t('fund.payment.method')} {...formItemLayout}>
+                    {/* 付款方式 */}
                     {getFieldDecorator('paymentMethodSign', {
                       valuePropName: 'checked',
                       initialValue: responseData.paymentMethodSign
                         ? responseData.paymentMethodSign
                         : false,
-                    })(<Switch checkedChildren="启用" unCheckedChildren="未启用" />)}
+                    })(
+                      <Switch
+                        checkedChildren={this.$t('fund.enable')}
+                        unCheckedChildren={this.$t('fund.enable.is.not.enabled')}
+                      />
+                    )}
+                    {/* 启用 未启用 */}
                   </FormItem>
                 </Col>
               </Row>
@@ -234,10 +301,12 @@ class PaymentSecurityStrategy extends React.Component {
                   style={{ margin: '0 20px' }}
                   onClick={this.saveInformation}
                 >
-                  保存
+                  {this.$t('fund.save')}
+                  {/* 保存 */}
                 </Button>
                 <Button style={{ margin: '0 20px' }} onClick={this.buttonClear}>
-                  取消
+                  {this.$t('fund.cancel')}
+                  {/* 取消 */}
                 </Button>
               </div>
             </div>

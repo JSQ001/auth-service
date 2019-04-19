@@ -67,4 +67,13 @@ export default {
     }
     return httpFetch.get(url);
   },
+
+  /**
+   * 获取期间数据
+   */
+  getPeriod() {
+    // const url = `http://localhost:8000/mdata/api/query/budget/periods?setOfBooksId=1083762150064451585`;
+    const url = `${config.mdataUrl}/api/query/budget/periods?setOfBooksId=1083762150064451585`;
+    return httpFetch.get(url);
+  },
 };

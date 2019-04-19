@@ -13,6 +13,7 @@ import ListSelector from 'widget/list-selector';
 import FileSaver from 'file-saver';
 import PayDetail from 'containers/pay/pay-workbench/payment-detail'; //支付详情
 import { routerRedux } from 'dva/router';
+import ExpenseReportDetail from 'containers/reimburse/my-reimburse/reimburse-detail-finance';
 //import costCenter from 'src/containers/setting/cost-center/cost-center';
 
 class PerPaymentView extends Component {
@@ -45,6 +46,7 @@ class PerPaymentView extends Component {
           valueKey: 'id',
           labelKey: 'name',
           single: true,
+          event: 'company',
         },
         {
           type: 'select',
@@ -90,6 +92,7 @@ class PerPaymentView extends Component {
           id: 'unitId',
           label: '单据部门',
           colSpan: '6',
+          listExtraParams: {},
           listType: 'department',
           labelKey: 'name',
           valueKey: 'departmentId',
@@ -120,7 +123,6 @@ class PerPaymentView extends Component {
           },
           valueKey: 'currencyCode',
           labelKey: 'currencyCodeAndName',
-          event: 'currencyCode',
         },
         {
           type: 'items',
@@ -359,6 +361,7 @@ class PerPaymentView extends Component {
           label: '单据公司',
           colSpan: '6',
           listType: 'available_company',
+          listExtraParams: { setOfBooksId: this.props.company.setOfBooksId },
           valueKey: 'id',
           labelKey: 'name',
           single: true,
@@ -377,33 +380,42 @@ class PerPaymentView extends Component {
       reportColumns: [
         {
           title: '报账单单号',
-          dataIndex: 'reportNumber',
-          render: (reportNumber, record) => {
+          dataIndex: 'reportDocumentNumber',
+          render: (reportDocumentNumber, record) => {
             return (
-              <Popover content={reportNumber}>
-                <a onClick={() => this.handleLinkReport(record)}>{reportNumber}</a>
+              <Popover content={reportDocumentNumber}>
+                {/* <a onClick={() => this.handleLinkReport(record)}>{reportDocumentNumber}</a> */}
+                <a onClick={() => this.handleLinkReport(record)}>{reportDocumentNumber}</a>
               </Popover>
             );
           },
         },
         { title: '公司', dataIndex: 'companyName' },
-        { title: '部门', dataIndex: 'unitName' },
+        { title: '部门', dataIndex: 'departmentName' },
         { title: '维度1', dataIndex: 'dimension1Name' },
         { title: '维度2', dataIndex: 'dimension2Name' },
-        { title: '币种', dataIndex: 'currency' },
+        { title: '币种', dataIndex: 'currencyCode' },
         {
           title: '关联金额',
-          dataIndex: 'releaseAmount',
-          render: releaseAmount => {
-            return <span>{this.filterMoney(releaseAmount, 2)}</span>;
+          dataIndex: 'functionAmount',
+          render: functionAmount => {
+            return <span>{this.filterMoney(functionAmount, 2)}</span>;
           },
         },
-        { title: '状态', dataIndex: 'statusName' },
-        { title: '反冲状态', dataIndex: 'statusName' },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          render: status => {
+            return <span>{this.state.status[status].label}</span>;
+          },
+        },
+        { title: '反冲状态', dataIndex: 'reverseFlag' },
         { title: '备注', dataIndex: 'description' },
       ],
       reportVisible: false,
       reportSearchParam: {},
+      params: {},
+      reportShow: false,
     };
   }
   //申请单的超链接,
@@ -435,12 +447,17 @@ class PerPaymentView extends Component {
   }
   // 报账单的超链接
   handleLinkReport(record) {
-    this.onCloser();
-    this.props.dispatch(
-      routerRedux.replace({
-        pathname: `/my-reimburse/my-reimburse/reimburse-detail/${record.id}`,
-      })
-    );
+    //this.onCloser();
+    // this.props.dispatch(
+    //   routerRedux.replace({
+    //     pathname: `/my-reimburse/my-reimburse/reimburse-detail/${record.expReportHeaderId}`,
+    //   })
+    // );
+    this.setState({
+      //reportVisible: false,
+      reportShow: true,
+      params: { id: record.expReportHeaderId },
+    });
   }
 
   // 报账单反冲的超链接
@@ -613,10 +630,16 @@ class PerPaymentView extends Component {
     //defauktValue 此时是放入主界面的申请单单号， 及需要将当前行的 documentNumber 作为查询条件。
     rform[0].defaultValue = record.documentNumber;
     //rform[0].defaultValue = '1';
-    this.setState({
-      reportVisible: true,
-      reportSearchForm: rform,
-    });
+    this.setState(
+      {
+        reportVisible: true,
+        reportSearchForm: rform,
+        reportSearchParam: { documentNumber: record.documentNumber },
+      },
+      () => {
+        this.getReportList();
+      }
+    );
   };
   /**
    * 获取费用申请单财务查询
@@ -677,14 +700,14 @@ class PerPaymentView extends Component {
   };
 
   getReportList = () => {
-    let { pager, pageSizer, reportSearchParam } = this.state;
+    let { pager, pageSizer, paginationr, reportSearchParam } = this.state;
     let params = {
-      page: pager,
-      size: pageSizer,
-      companyId: reportSearchParam.companyId ? reportSearchParam.companyId : '',
-      documentNumber: reportSearchParam.documentNumber ? reportSearchParam.documentNumber : '',
-      reportNumber: reportSearchParam.reportNumber ? reportSearchParam.reportNumber : '',
-      unitId: reportSearchParam.unitId ? reportSearchParam.unitId : '',
+      page: paginationr.current - 1,
+      size: paginationr.pageSize,
+      companyId: reportSearchParam.companyId ? reportSearchParam.companyId : null,
+      documentNumber: reportSearchParam.documentNumber ? reportSearchParam.documentNumber : null,
+      reportNumber: reportSearchParam.reportNumber ? reportSearchParam.reportNumber : null,
+      unitId: reportSearchParam.unitId ? reportSearchParam.unitId : null,
     };
     //采用的是费用申请单财务查询的， 后续报销单出来之后进行修改
     prePaymentService
@@ -704,8 +727,8 @@ class PerPaymentView extends Component {
               total: Number(res.headers['x-total-count'])
                 ? Number(res.headers['x-total-count'])
                 : 0,
-              current: pager + 1,
-              onChange: this.onChangeCheckedPager,
+              current: paginationr.current,
+              //onChange: this.onChangeCheckedPager,
               onShowSizeChange: this.onShowSizeChanger,
               showSizeChanger: true,
               showQuickJumper: true,
@@ -762,7 +785,7 @@ class PerPaymentView extends Component {
       );
     }
   };
-  onChangeCheckedPager = page => {
+  /* onChangeCheckedPager = page => {
     if (page - 1 !== this.state.pager) {
       this.setState(
         {
@@ -774,7 +797,7 @@ class PerPaymentView extends Component {
         }
       );
     }
-  };
+  };*/
   /**
    * 搜索
    */
@@ -821,11 +844,14 @@ class PerPaymentView extends Component {
    * 清空
    */
   clear = () => {
+    let { searchForm } = this.state;
+    searchForm[4].listExtraParams = {};
     this.setState(
       {
         loading: true,
         page: 0,
         searchParam: {},
+        searchForm,
       },
       () => {
         this.getList();
@@ -985,6 +1011,19 @@ class PerPaymentView extends Component {
     });
   };
 
+  tableChange = paginationr => {
+    this.setState({ paginationr }, () => {
+      this.getReportList();
+    });
+  };
+
+  formChange = (event, value) => {
+    let { searchForm } = this.state;
+    searchForm[4].listExtraParams = { companyId: value[0].id };
+    this.formRef.setValues({ unitId: '' });
+    this.setState({ searchForm });
+  };
+
   /**
    * 渲染函数
    */
@@ -994,7 +1033,15 @@ class PerPaymentView extends Component {
     //返回列表
     const { reportColumns, columns, pagination, loading, data, datar } = this.state;
     //弹窗
-    const { lsVisible, extraParams, selectorItem, reportVisible, paginationr } = this.state;
+    const {
+      lsVisible,
+      extraParams,
+      selectorItem,
+      reportVisible,
+      paginationr,
+      reportShow,
+      params,
+    } = this.state;
     //导出
     const { exportColumns, excelVisible, btLoading } = this.state;
     return (
@@ -1003,7 +1050,9 @@ class PerPaymentView extends Component {
           searchForm={searchForm}
           submitHandle={this.searh}
           clearHandle={this.clear}
+          eventHandle={this.formChange}
           maxLength={4}
+          wrappedComponentRef={inst => (this.formRef = inst)}
         />
         <div className="divider" />
         <div className="table-header">
@@ -1096,8 +1145,26 @@ class PerPaymentView extends Component {
               onExpand={this.expand}
               onExpandedRowsChange={this.onExpandedRowsChange}
               expandedRowKeys={this.state.keys}
+              onChange={this.tableChange}
             />
           </div>
+        </Modal>
+        <Modal
+          title="报账单详情"
+          visible={reportShow}
+          onCancel={() => {
+            this.setState({ reportShow: false });
+          }}
+          width="90%"
+          bodyStyle={{
+            maxHeight: '70vh',
+            overflow: 'auto',
+            padding: '0 10px',
+          }}
+          footer={null}
+          destroyOnClose
+        >
+          <ExpenseReportDetail params={params} />
         </Modal>
       </div>
     );

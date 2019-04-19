@@ -61,4 +61,16 @@
       }
     }
   }
+  .back-node {
+    .node-remark{
+      position: absolute;
+      top: 60px;
+      left: -15px;
+      text-align: center;
+      width: 120px;
+      overflow: hidden;
+      text-overflow:ellipsis;
+      white-space: nowrap;
+    }
+  }
 }

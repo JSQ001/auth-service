@@ -5,7 +5,6 @@ import {
   Spin,
   Popover,
   Button,
-  Collapse,
   Affix,
   message,
   Icon,
@@ -57,26 +56,23 @@ class BudgetJournalDetailSubmit extends React.Component {
           title: this.$t({ id: 'budgetJournal.companyId' }),
           key: 'companyName',
           dataIndex: 'companyName',
-          align: 'center',
-          width: '5%',
-          render: companyName => <Popover content={companyName}>{companyName}</Popover>,
+          width: 150,
+          //render: companyName => <Popover content={companyName}>{companyName}</Popover>,
         },
         {
           /*部门*/
           title: this.$t({ id: 'budgetJournal.unitId' }),
           key: 'departmentName',
-          align: 'center',
           dataIndex: 'departmentName',
-          width: '5%',
+          width: 100,
           render: departmentName => <Popover content={departmentName}>{departmentName}</Popover>,
         },
         {
           /*员工*/
           title: this.$t({ id: 'budgetJournal.employee' }),
           key: 'employeeName',
-          align: 'center',
           dataIndex: 'employeeName',
-          width: '5%',
+          width: 80,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -84,53 +80,54 @@ class BudgetJournalDetailSubmit extends React.Component {
           title: this.$t({ id: 'budgetJournal.item' }),
           key: 'itemName',
           dataIndex: 'itemName',
-          align: 'center',
-          width: '10%',
+          width: 150,
           render: itemName => <Popover content={itemName}>{itemName}</Popover>,
         },
         {
           /*期间*/
           title: this.$t({ id: 'budgetJournal.periodName' }),
           key: 'periodName',
-          align: 'center',
           dataIndex: 'periodName',
+          width: 80,
         },
         {
           /*季度*/
           title: this.$t({ id: 'budgetJournal.periodQuarter' }),
           key: 'periodQuarterName',
-          align: 'center',
           dataIndex: 'periodQuarterName',
+          align: 'center',
+          width: 80,
         },
         {
           /*年度*/
           title: this.$t({ id: 'budgetJournal.periodYear' }),
           key: 'periodYear',
-          align: 'center',
           dataIndex: 'periodYear',
+          align: 'center',
+          width: 80,
         },
         {
           /*币种*/
           title: this.$t({ id: 'budgetJournal.currency' }),
           key: 'currency',
-          align: 'center',
           dataIndex: 'currency',
+          width: 80,
         },
         {
           /*汇率*/
           title: this.$t({ id: 'budgetJournal.rate' }),
           key: 'rate',
-          align: 'center',
           dataIndex: 'rate',
-          render: rate => <Popover content={rate}>{rate}</Popover>,
+          width: 80,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
+          // render: rate => <Popover content={rate}>{rate}</Popover>,
         },
         {
           /*金额*/
           title: this.$t({ id: 'budgetJournal.amount' }),
           key: 'amount',
           dataIndex: 'amount',
-          align: 'center',
-          width: 180,
+          width: 150,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -139,9 +136,8 @@ class BudgetJournalDetailSubmit extends React.Component {
           /*本币今额*/
           title: this.$t({ id: 'budgetJournal.functionalAmount' }),
           key: 'functionalAmount',
-          align: 'center',
           dataIndex: 'functionalAmount',
-          width: 180,
+          width: 150,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -150,7 +146,6 @@ class BudgetJournalDetailSubmit extends React.Component {
           /*数字*/
           title: this.$t({ id: 'budgetJournal.quantity' }),
           key: 'quantity',
-          align: 'center',
           dataIndex: 'quantity',
         },
         {
@@ -158,7 +153,6 @@ class BudgetJournalDetailSubmit extends React.Component {
           title: this.$t({ id: 'budgetJournal.remark' }),
           key: 'remark',
           dataIndex: 'remark',
-          align: 'center',
           render: remark => <Popover content={remark}>{remark}</Popover>,
         },
       ],
@@ -328,6 +322,7 @@ class BudgetJournalDetailSubmit extends React.Component {
         title: `${item.dimensionName}`,
         key: `dimension${priority}ValueName`,
         dataIndex: `dimension${priority}ValueName`,
+        width: 100,
         render: recode => <Popover content={recode}>{recode}</Popover>,
       });
     }
@@ -354,28 +349,52 @@ class BudgetJournalDetailSubmit extends React.Component {
     const infoData = this.state.infoData;
     switch (infoData.status) {
       case 1001: {
-        return <Badge status="processing" text={'编辑中'} />;
+        return <Badge status="processing" text={this.$t('expense.editing')} />;
+        {
+          /*编辑中*/
+        }
       }
       case 1003: {
-        return <Badge status="default" text={'撤回'} />;
+        return <Badge status="default" text={this.$t('expense.taken.back.to.the')} />;
+        {
+          /*撤回*/
+        }
       }
       case 1005: {
-        return <Badge status="error" text={'审批驳回'} />;
+        return <Badge status="error" text={this.$t('expense.approval.to.dismiss')} />;
+        {
+          /*审批驳回*/
+        }
       }
       case 1004: {
-        return <Badge status="success" text={'审批通过'} />;
+        return <Badge status="success" text={this.$t('expense.the.examination.and.approval.by')} />;
+        {
+          /*审批通过*/
+        }
       }
       case 1002: {
-        return <Badge status="warning" text={'审批中'} />;
+        return <Badge status="warning" text={this.$t('expense.in.the.examination.and.approval')} />;
+        {
+          /*审批中*/
+        }
       }
       case 5001: {
-        return <Badge status="default" text={'复核'} />;
+        return <Badge status="default" text={this.$t('expense.review')} />;
+        {
+          /*复核*/
+        }
       }
       case 5002: {
-        return <Badge status="default" text={'反冲提交'} />;
+        return <Badge status="default" text={this.$t('expense.recoil.submitted')} />;
+        {
+          /*反冲提交*/
+        }
       }
       case 5003: {
-        return <Badge status="default" text={'反冲审核'} />;
+        return <Badge status="default" text={this.$t('expense.recoil.audit')} />;
+        {
+          /*反冲审核*/
+        }
       }
       default: {
         return <Badge status="default" text={infoData.statusName} />;

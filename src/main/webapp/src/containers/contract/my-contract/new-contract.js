@@ -38,7 +38,7 @@ class NewContract extends React.Component {
       contractInfo: {}, //编辑的合同信息
       partnerCategoryOptions: [], //合同方类型选项
       currencyOptions: [], //币种
-      userList: [],
+      defaultUser: {},
       companySelectorItem: {
         //公司  ${config.contractUrl}/api/contract/type/${setOfBooksId}/companies/query`
         title: this.$t({ id: 'my.contract.contractCompany' } /*合同公司*/),
@@ -281,7 +281,16 @@ class NewContract extends React.Component {
     contractService
       .listUserByTypeId(typeId)
       .then(res => {
-        this.setState({ userList: res.data });
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
+          }
+          this.setState({ defaultUser });
+        }
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -382,7 +391,7 @@ class NewContract extends React.Component {
       extraParams,
       currencyLoading,
       contractCategory,
-      userList,
+      defaultUser,
     } = this.state;
 
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
@@ -407,9 +416,7 @@ class NewContract extends React.Component {
                   {getFieldDecorator('user', {
                     rules: [{ required: true, message: '请选择' }],
                     initialValue: isNew
-                      ? userList.length > 0
-                        ? { id: userList[0].id, fullName: userList[0].fullName }
-                        : { id: this.props.user.id, fullName: this.props.user.fullName }
+                      ? { id: defaultUser.id, fullName: defaultUser.fullName }
                       : { id: record.employeeId, fullName: record.employeeName },
                   })(
                     <Lov

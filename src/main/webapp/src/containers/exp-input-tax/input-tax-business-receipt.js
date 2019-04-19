@@ -1,14 +1,18 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 import DocumentBasicInfo from 'widget/Template/document-basic-info';
 import ApproveHistory from 'widget/Template/approve-history-work-flow';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Spin, Affix, Row, Button, Popover, Divider, message, Tabs } from 'antd';
+import { Card, Spin, Row, Button, Popover, Divider, message, Tabs, Modal } from 'antd';
 import Table from 'widget/table';
 import SlideFrame from 'widget/slide-frame';
 import HeaderEdit from './header-edit';
 import EditLineFrame from './edit-line-frame';
 import service from './service';
+import DetailExpense from 'containers/reimburse/my-reimburse/expense-detail';
+import SelectSplitLineReadOnly from './selectSplitLineReadOnly';
+import reimburseService from 'containers/reimburse/my-reimburse/reimburse.service';
 
 class BusinessReceipt extends Component {
   constructor(props) {
@@ -25,8 +29,9 @@ class BusinessReceipt extends Component {
           dataIndex: 'num',
           align: 'center',
           width: 60,
-          render: (text, record) => {
-            return <span>{record.key}</span>;
+          render: (text, record, index) => {
+            const { page, size } = this.state;
+            return <span>{page * size + index + 1}</span>;
           },
         },
         {
@@ -118,15 +123,13 @@ class BusinessReceipt extends Component {
           title: this.$t('common.remark'),
           dataIndex: 'description',
           align: 'center',
-          width: 150,
           render: text => <Popover content={text}>{text}</Popover>,
         },
         {
           title: this.$t('tax.check.info'),
           dataIndex: 'checkInfo',
           align: 'center',
-          width: 150,
-          fixed: 'right',
+          width: 120,
           render: (text, record) => {
             return (
               <a
@@ -144,8 +147,7 @@ class BusinessReceipt extends Component {
           title: this.$t('common.operation'),
           dataIndex: 'operation',
           align: 'center',
-          width: 150,
-          fixed: 'right',
+          width: 120,
           render: (text, record) => {
             return (
               <div>
@@ -190,6 +192,10 @@ class BusinessReceipt extends Component {
       editFrameVisible: false,
       model: {}, // 行编辑数据record
       headerView: false,
+      detailVisible: false,
+      costRecord: {},
+      splitModalVisible: false,
+      reimburseData: {},
     };
   }
 
@@ -201,6 +207,15 @@ class BusinessReceipt extends Component {
 
   componentDidMount = () => {
     this.getLineList();
+    this.getReimburse();
+  };
+
+  getReimburse = () => {
+    reimburseService.getReimburseDetailById('1116600427716608002').then(res => {
+      this.setState({
+        reimburseData: res.data,
+      });
+    });
   };
 
   // 转换业务大类type
@@ -288,16 +303,13 @@ class BusinessReceipt extends Component {
 
   // 获取行信息
   getLineList = () => {
-    debugger;
     const {
       pagination: { pageSize, current },
-      pagination,
     } = this.state;
     let headerId = this.props.match.params.id;
     service
       .getBusinessReceiptList({ headerId: headerId, size: pageSize, page: current - 1 })
       .then(res => {
-        debugger;
         this.setState({ dataSources: res.data, pageLoading: false });
       })
       .catch(err => {
@@ -401,8 +413,11 @@ class BusinessReceipt extends Component {
 
   // 行编辑
   handleLineEdit = record => {
+    const {
+      docHeadData: { transferTypeName },
+    } = this.state;
     this.setState({
-      model: JSON.parse(JSON.stringify(record)),
+      model: { ...record, transferTypeName },
       editFrameVisible: true,
     });
   };
@@ -413,6 +428,8 @@ class BusinessReceipt extends Component {
       .deleteLineValue(record.id)
       .then(res => {
         if (res) message.success(this.$t('common.delete.success'));
+        this.getLineList();
+        this.getHeaderList();
       })
       .catch(err => {
         message.error(err.response.data.message);
@@ -421,12 +438,16 @@ class BusinessReceipt extends Component {
 
   // 原费用信息
   handleCheckInfo = record => {
-    console.log(record);
+    let costRecord = {
+      ...record,
+      id: record.expReportLineId,
+    };
+    this.setState({ detailVisible: true, costRecord });
   };
 
   // 分摊行视同销售/转出
   splitLineInfo = record => {
-    console.log(record);
+    this.setState({ splitModalVisible: true, model: record });
   };
 
   // 关闭侧换框
@@ -466,6 +487,7 @@ class BusinessReceipt extends Component {
       .then(res => {
         if (res) message.success(this.$t('pay.backlash.submitSuccess'));
         this.setState({ operationLoading: false });
+        this.onBack();
       })
       .catch(err => {
         message.error(err.response.data.message);
@@ -524,6 +546,17 @@ class BusinessReceipt extends Component {
   // 头编辑
   handelHeaderEdit = () => {
     this.setState({ headerView: true });
+    const {
+      match: {
+        params: { id },
+      },
+      dispatch,
+    } = this.props;
+    dispatch(
+      routerRedux.push({
+        pathname: `/exp-input-tax/exp-input-tax/header-edit/${id}`,
+      })
+    );
   };
 
   //  关闭编辑框
@@ -533,6 +566,11 @@ class BusinessReceipt extends Component {
         this.getHeaderList();
       }
     });
+  };
+
+  // 关闭模态框
+  onCloseModal = () => {
+    this.setState({ splitModalVisible: false, model: {} });
   };
 
   render() {
@@ -549,9 +587,14 @@ class BusinessReceipt extends Component {
       editFrameVisible,
       model,
       headerView,
+      detailVisible,
+      splitModalVisible,
+      reimburseData,
+      costRecord,
     } = this.state;
     const { match } = this.props;
     let status = null;
+
     if (Number(docHeadData.status) === 1001 || Number(docHeadData.status) === 1005) {
       status = (
         <h3 className="header-title">
@@ -616,19 +659,18 @@ class BusinessReceipt extends Component {
               pagination={pagination}
               loading={loading}
               onChange={this.tablePageChange}
-              scroll={{ x: 1000 }}
+              rowKey="id"
             />
           </Card>
         </Spin>
-        <div style={{ margin: '20px 0 50px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
+        <div style={{ margin: '20px 0 70px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
           <ApproveHistory
             type="9090"
             oid={docHeadData.documentOid || ''}
             headerId={docHeadData.id}
           />
         </div>
-        <Affix
-          offsetBottom={0}
+        <div
           className="bottom-bar bottom-bar-approve"
           style={{
             position: 'fixed',
@@ -638,7 +680,7 @@ class BusinessReceipt extends Component {
             boxShadow: '0px -5px 5px rgba(0, 0, 0, 0.15)',
             background: '#fff',
             lineHeight: '50px',
-            zIndex: 1,
+            zIndex: 99,
           }}
         >
           {Number(docHeadData.status) === 1001 || Number(docHeadData.status) === 1005 ? (
@@ -668,7 +710,7 @@ class BusinessReceipt extends Component {
               <Button onClick={this.onBack}>{this.$t('budgetJournal.return')}</Button>
             </Row>
           )}
-        </Affix>
+        </div>
         <SlideFrame
           title={
             match.params.type === 'FOR_SALE'
@@ -696,6 +738,42 @@ class BusinessReceipt extends Component {
             onClose={this.closeHeaderEdit}
           />
         </SlideFrame>
+
+        <SlideFrame
+          show={detailVisible}
+          title="费用详情"
+          width="800px"
+          afterClose={() => this.setState({ detailVisible: false })}
+          onClose={() => this.setState({ detailVisible: false })}
+        >
+          <DetailExpense
+            close={() => this.setState({ detailVisible: false })}
+            params={{
+              visible: this.state.detailVisible,
+              record: costRecord,
+              headerData: reimburseData,
+            }}
+          />
+        </SlideFrame>
+        <Modal
+          visible={splitModalVisible}
+          title={
+            docHeadData.transferType === 'FOR_SALE'
+              ? this.$t('tax.sale.share.row.select')
+              : this.$t('tax.turnOut.share.row.select')
+            // '选择需视同销售的分摊行' : '选择需转出的分摊行'
+          }
+          onCancel={this.onCloseModal}
+          width={800}
+          destroyOnClose
+          footer={null}
+        >
+          <SelectSplitLineReadOnly
+            splitParams={model}
+            type={docHeadData.transferType}
+            onCancel={this.onCloseModal}
+          />
+        </Modal>
       </div>
     );
   }

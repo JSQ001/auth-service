@@ -142,7 +142,7 @@ class BusinessProcedure extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getList();
   }
 

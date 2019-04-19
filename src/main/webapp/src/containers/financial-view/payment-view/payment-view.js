@@ -14,17 +14,17 @@ import FileSaver from 'file-saver';
 import paymentService from './payment-view.service';
 
 const { Search } = Input;
-const pamentRequisitionStatus = {
-  1001: { label: this.$t('acp.new' /* 编辑中 */), state: 'default' },
-  1002: { label: this.$t('acp.approving' /* 审批中 */), state: 'processing' },
-  1003: { label: this.$t('acp.returned' /* 已撤回 */), state: 'warning' },
-  1004: { label: this.$t('acp.approved' /* 审批通过 */), state: 'success' },
-  1005: { label: this.$t('acp.rejected' /* 审批驳回 */), state: 'error' },
-};
 
 class PaymentView extends React.Component {
   constructor(props) {
     super(props);
+    this.pamentRequisitionStatus = {
+      1001: { label: this.$t('acp.new' /* 编辑中 */), state: 'default' },
+      1002: { label: this.$t('acp.approving' /* 审批中 */), state: 'processing' },
+      1003: { label: this.$t('acp.returned' /* 已撤回 */), state: 'warning' },
+      1004: { label: this.$t('acp.approved' /* 审批通过 */), state: 'success' },
+      1005: { label: this.$t('acp.rejected' /* 审批驳回 */), state: 'error' },
+    };
     this.state = {
       /**
        * 查询条件
@@ -38,8 +38,9 @@ class PaymentView extends React.Component {
           listType: 'available_company',
           valueKey: 'id',
           labelKey: 'name',
-          listExtraParams: { setOfBooksId: props.organization.setOfBooksId },
+          listExtraParams: { setOfBooksId: props.company.setOfBooksId },
           single: true,
+          event: 'company',
         },
         {
           type: 'select',
@@ -83,6 +84,7 @@ class PaymentView extends React.Component {
           id: 'unitId',
           label: '单据部门',
           colSpan: 6,
+          listExtraParams: {},
           listType: 'department',
           labelKey: 'name',
           valueKey: 'departmentId',
@@ -229,8 +231,8 @@ class PaymentView extends React.Component {
           width: 110,
           render: value => (
             <Badge
-              status={pamentRequisitionStatus[value].state}
-              text={pamentRequisitionStatus[value].label}
+              status={this.pamentRequisitionStatus[value].state}
+              text={this.pamentRequisitionStatus[value].label}
             />
           ),
         },
@@ -357,11 +359,14 @@ class PaymentView extends React.Component {
    * 清空
    */
   clear = () => {
+    let { searchForm } = this.state;
+    searchForm[4].listExtraParams = {};
     this.setState(
       {
         loading: true,
         page: 0,
         searchParam: {},
+        searchForm,
       },
       () => {
         this.table.search({});
@@ -520,6 +525,14 @@ class PaymentView extends React.Component {
     });
   };
 
+  //公司与部门级联
+  formChange = (event, value) => {
+    let { searchForm } = this.state;
+    searchForm[4].listExtraParams = { companyId: value[0].id };
+    this.formRef.setValues({ unitId: '' });
+    this.setState({ searchForm });
+  };
+
   /**
    * 点击导出按钮
    */
@@ -571,9 +584,9 @@ class PaymentView extends React.Component {
   };
 
   wrapClose = content => {
-    const { id, showChild } = this.status;
+    const { detailId, showChild } = this.state;
     const newProps = {
-      params: { id, refund: true, flag: showChild },
+      params: { id: detailId, refund: true, flag: showChild },
     };
     return React.createElement(content, Object.assign({}, newProps.params, newProps));
   };
@@ -592,7 +605,9 @@ class PaymentView extends React.Component {
           searchForm={searchForm}
           submitHandle={this.searh}
           clearHandle={this.clear}
+          eventHandle={this.formChange}
           maxLength={4}
+          wrappedComponentRef={inst => (this.formRef = inst)}
         />
         <div className="divider" />
         <div className="table-header">

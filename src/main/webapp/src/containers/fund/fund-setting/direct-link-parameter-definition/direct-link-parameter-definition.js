@@ -130,6 +130,7 @@ class DirectLinkParameterDefinition extends React.Component {
     const { pagination, searchParams } = this.state;
     this.setState({ loading: true });
     service.getHead(pagination.page, pagination.pageSize, searchParams).then(response => {
+      console.log('>>>', response);
       this.setState({
         tableData: response.data,
         loading: false,

@@ -258,15 +258,7 @@ class TaxSubjectAllocation extends React.Component {
     });
   };
   render() {
-    let {
-      searchForm,
-      columns,
-      pagination,
-      exportColumns,
-      excelVisible,
-      tabValue,
-      model,
-    } = this.state;
+    let { searchForm, columns, exportColumns, excelVisible } = this.state;
     return (
       <div>
         <SearchArea

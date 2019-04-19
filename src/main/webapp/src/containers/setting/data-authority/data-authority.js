@@ -1,21 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import SearchArea from 'widget/search-area';
-import {
-  Button,
-  Badge,
-  Divider,
-  Form,
-  Icon,
-  message,
-  Checkbox,
-  Input,
-  Modal,
-  Alert,
-  Switch,
-  Popconfirm,
-} from 'antd';
-const FormItem = Form.Item;
+import { Button, Badge, Divider, Form, message, Popconfirm } from 'antd';
 import CustomTable from 'components/Widget/custom-table';
 import SlideFrame from 'widget/slide-frame';
 import NewDataAuthority from 'containers/setting/data-authority/new-data-authority';
@@ -110,19 +96,6 @@ class DataAuthority extends React.Component {
       updateParams: {},
     };
   }
-  /**搜索条件 */
-  onSearch = values => {
-    (values.dataAuthorityCode = values.dataAuthorityCode ? values.dataAuthorityCode : undefined),
-      (values.dataAuthorityName = values.dataAuthorityName ? values.dataAuthorityName : undefined),
-      this.setState(
-        {
-          searchParams: values,
-        },
-        () => {
-          this.table.search(this.state.searchParams);
-        }
-      );
-  };
   clear = () => {
     this.setState({ searchParams: {} });
   };
@@ -151,7 +124,6 @@ class DataAuthority extends React.Component {
   };
   /**删除数据权限 */
   deleteCost = record => {
-    console.log(record);
     DataAuthorityService.deleteDataAuthority(record.id)
       .then(res => {
         message.success(this.$t('base.deleted.successfully1')); /*删除成功！*/
@@ -172,6 +144,23 @@ class DataAuthority extends React.Component {
       }
     );
   };
+
+  handleCloseSlide = () => {
+    this.setState(
+      {
+        showSlideFrame: false,
+      },
+      () => {
+        this.table.search(this.state.searchParams);
+      }
+    );
+  };
+
+  onSearch = params => {
+    console.log(params);
+    this.table.search(params);
+  };
+
   render() {
     const { searchForm, columns, showSlideFrame, updateParams } = this.state;
     return (
@@ -190,7 +179,7 @@ class DataAuthority extends React.Component {
         <div style={{ marginTop: 10 }}>
           <CustomTable
             columns={columns}
-            url={`${config.baseUrl}/api/system/data/authority/query`}
+            url={`${config.mdataUrl}/api/system/data/authority/query`}
             ref={ref => (this.table = ref)}
           />
         </div>

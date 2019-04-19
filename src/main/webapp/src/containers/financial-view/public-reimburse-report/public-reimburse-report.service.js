@@ -12,8 +12,8 @@ export default {
    */
   getReimburseReport(searchParams, page, pageSize, setOfBooksId) {
     let url = `${
-      config.baseUrl
-    }/api/expReportHeader/get/expenseReport/by/query?page=${page}&size=${pageSize}&setOfBooksId=${setOfBooksId}`;
+      config.expenseUrl
+    }/api/expense/report/get/expenseReport/by/query?page=${page}&size=${pageSize}&setOfBooksId=${setOfBooksId}`;
     for (let searchName in searchParams) {
       url += searchParams[searchName] ? `&${searchName}=${searchParams[searchName]}` : '';
     }
@@ -24,7 +24,7 @@ export default {
    * @param params
    */
   exportExcel(params, setOfBooksId, exportParams) {
-    let url = `${config.baseUrl}/api/export?setOfBooksId=${setOfBooksId}`;
+    let url = `${config.expenseUrl}/api/expense/report/export?setOfBooksId=${setOfBooksId}`;
     for (let searchName in exportParams) {
       url += exportParams[searchName] ? `&${searchName}=${exportParams[searchName]}` : '';
     }

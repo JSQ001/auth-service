@@ -17,19 +17,9 @@ class BudgetJournalType extends React.Component {
       page: 0,
       pageSize: 10,
       columns: [
-        {
-          title: '预算日记账类型代码',
-          dataIndex: 'journalTypeCode',
-          align: 'center',
-          width: '30%',
-        },
-        {
-          title: '预算日记账类型名称',
-          dataIndex: 'journalTypeName',
-          align: 'center',
-          width: '30%',
-        },
-        { title: '预算业务类型', dataIndex: 'businessTypeName', align: 'center', width: '25%' },
+        { title: '预算日记账类型代码', dataIndex: 'journalTypeCode', width: '30%' },
+        { title: '预算日记账类型名称', dataIndex: 'journalTypeName', width: '30%' },
+        { title: '预算业务类型', dataIndex: 'businessTypeName', width: '25%' },
         { title: '关联表单', dataIndex: 'formName', width: '25%' },
         {
           title: '状态',

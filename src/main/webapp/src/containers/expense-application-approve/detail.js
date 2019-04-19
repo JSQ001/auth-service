@@ -54,7 +54,7 @@ class Detail extends React.Component {
       >
         {getLoading ? <Spin /> : <ExpenseApplicationCommon headerData={headerData} />}
         {this.props.match.params.status === 'unapproved' ? (
-          <div className="bottom-bar bottom-bar-approve">
+          <div style={{ width: '87%' }} className="bottom-bar bottom-bar-approve">
             <ApproveBar
               passLoading={loading}
               style={{ paddingLeft: 20 }}

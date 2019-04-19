@@ -4,9 +4,8 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Button, Popover, Select, Tag, Badge } from 'antd';
+import { Popover } from 'antd';
 import Table from 'widget/table';
-import httpFetch from 'share/httpFetch';
 import config from 'config';
 import SearchArea from 'widget/search-area.js';
 import budgetJournalService from 'containers/budget/budget-journal-re-check/budget-journal-re-check.service';
@@ -100,17 +99,6 @@ class BudgetJournalReCheck extends React.Component {
           labelKey: 'scenarioName',
           valueKey: 'id',
         },
-        // {
-        //   type: 'select',
-        //   id: 'empId',
-        //   label: this.$t({ id: 'budgetJournal.employeeId' }),
-        //   options: [],
-        //   method: 'get',
-        //   getUrl: `${config.budgetUrl}/api/budget/journals/selectCheckedEmp`,
-        //   getParams: { organizationId: this.props.organization.id },
-        //   labelKey: 'empName',
-        //   valueKey: 'empOid',
-        // },
         {
           type: 'list',
           id: 'empId',
@@ -123,15 +111,13 @@ class BudgetJournalReCheck extends React.Component {
         },
         { type: 'date', id: 'createDate', label: this.$t({ id: 'budgetJournal.submitDate' }) },
       ],
-
       columns: [
         {
           /*预算日记账编号*/
           title: this.$t({ id: 'budgetJournal.journalCode' }),
           key: 'journalCode',
           dataIndex: 'journalCode',
-          align: 'center',
-          width: '18%',
+          width: 190,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -139,47 +125,47 @@ class BudgetJournalReCheck extends React.Component {
           title: this.$t({ id: 'budgetJournal.journalTypeId' }),
           key: 'journalTypeName',
           dataIndex: 'journalTypeName',
-          align: 'center',
-          width: '12%',
+          width: 130,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*编制期段*/
           title: this.$t({ id: 'budgetJournal.periodStrategy' }),
           key: 'periodStrategyName',
-          align: 'center',
           dataIndex: 'periodStrategyName',
+          align: 'center',
+          width: 105,
         },
         {
           /*预算表*/
           title: this.$t({ id: 'budgetJournal.structureId' }),
           key: 'structureName',
-          align: 'center',
           dataIndex: 'structureName',
+          width: 105,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*预算场景*/
           title: this.$t({ id: 'budgetJournal.scenarioId' }),
           key: 'scenario',
-          align: 'center',
           dataIndex: 'scenario',
+          width: 110,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*预算版本*/
           title: this.$t({ id: 'budgetJournal.versionId' }),
           key: 'versionName',
-          align: 'center',
           dataIndex: 'versionName',
+          width: 110,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
           /*申请人*/
           title: this.$t({ id: 'budgetJournal.employeeId' }),
           key: 'employeeName',
-          align: 'center',
           dataIndex: 'employeeName',
+          width: 110,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -188,28 +174,17 @@ class BudgetJournalReCheck extends React.Component {
           key: 'submitDate',
           align: 'center',
           dataIndex: 'submitDate',
+          width: 110,
           render: recode => <Popover content={recode}>{String(recode).substring(0, 10)}</Popover>,
         },
         {
           /*状态*/
           title: this.$t({ id: 'budgetJournal.status' }),
           key: 'status',
-          align: 'center',
           dataIndex: 'status',
+          width: 110,
           render(recode, text) {
             return text.statusName;
-            /*  console.log(recode)
-              switch (recode) {
-                case 'NEW': { return <Badge status="processing" text={text.statusName} /> }
-                case 'SUBMIT': { return <Badge status="default" text={text.statusName} /> }
-                case 'SUBMIT_RETURN': { return <Badge status="default" text={text.statusName} /> }
-                case 'REJECT': { return <Badge status="error" text={text.statusName} /> }
-                case 'CHECKED': { return < Badge status="warning" text={text.statusName} /> }
-                case 'CHECKING': { return <Badge status="warning" text={text.statusName} /> }
-                case 'POSTED': { return <Badge status="success" text={text.statusName} /> }
-                case 'BACKLASH_SUBMIT': { return <Badge status="default" text={text.statusName} /> }
-                case 'BACKLASH_CHECKED': { return <Badge status="default" text={text.statusName} /> }
-              }*/
           },
         },
       ],

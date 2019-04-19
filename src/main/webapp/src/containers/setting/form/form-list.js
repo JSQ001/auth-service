@@ -23,7 +23,6 @@ const TabPane = Tabs.TabPane;
 import formService from 'containers/setting/form/form.service';
 import constants from 'share/constants';
 import BaseService from 'share/base.service';
-import Selector from 'widget/selector';
 
 import 'styles/setting/form/form-list.scss';
 import { routerRedux } from 'dva/router';
@@ -35,7 +34,6 @@ import aiApprovalImg from 'images/setting/workflow/aiapproval.svg';
 import mailImg from 'images/setting/workflow/mail.png';
 import auditImg from 'images/setting/workflow/audit.png';
 import endImg from 'images/setting/workflow/end.png';
-import noFormImg from 'images/setting/workflow/no-form.png';
 import debounce from 'lodash.debounce';
 
 class FormList extends React.Component {
@@ -45,11 +43,9 @@ class FormList extends React.Component {
       formList: [],
       formListForSob: [],
       setOfBooks: [], //账套list
-      // setOfBooksId: this.props.match.params.setOfBooksId || this.props.company.setOfBooksId,
       setOfBooksId: Number(props.match.params.setOfBooksId)
         ? props.match.params.setOfBooksId
         : props.company.setOfBooksId,
-      // setOfBooksName: this.props.company.setOfBooksName,
       setOfBooksName: Number(props.match.params.setOfBooksName)
         ? props.match.params.setOfBooksName
         : props.company.setOfBooksName,
@@ -60,13 +56,11 @@ class FormList extends React.Component {
       columnsForSobFrom: [
         {
           title: this.$t('common.sequence' /*序号*/),
-          align: 'center',
           dataIndex: 'sequence',
           width: '5%',
         },
         {
           title: this.$t('common.workflow.name' /*审批流名称*/),
-          align: 'center',
           dataIndex: 'formName',
           render: value =>
             value ? (
@@ -79,25 +73,16 @@ class FormList extends React.Component {
         },
         {
           title: this.$t('common.comment') /*备注*/,
-          align: 'center',
           dataIndex: 'remark',
           width: '30%',
         },
         {
-          title: this.$t('form.setting.applicable') /*'适用人员'*/,
-          align: 'center',
-          dataIndex: 'visibleUserScope',
-          render: text => constants.getTextByValue(text, 'visibleUserScope'),
-        },
-        {
-          title: this.$t('form.setting.include.fee.type') /*'包含费用类型'*/,
-          align: 'center',
-          dataIndex: 'visibleExpenseTypeScope',
-          render: text => constants.getTextByValue(text, 'visibleExpenseTypeScope'),
+          title: '单据大类',
+          dataIndex: 'formTypeName',
+          width: '30%',
         },
         {
           title: this.$t('common.column.status' /*状态*/),
-          align: 'center',
           dataIndex: 'valid',
           width: '15%',
           render: valid => (
@@ -107,24 +92,15 @@ class FormList extends React.Component {
             />
           ),
         },
-        /*{title: '操作', dataIndex: 'operate', width: '8%', render: record => (
-          <span>
-            <Popconfirm title="确认删除吗？" onConfirm={(e) => this.deleteExpense(e, record)}>
-              <a>{this.$t("common.delete")}</a>
-            </Popconfirm>
-          </span>
-        )}*/
       ], //公司模式下账套级表单columns
       columns: [
         {
           title: this.$t('common.sequence' /*序号*/),
-          align: 'center',
           dataIndex: 'sequence',
           width: '5%',
         },
         {
           title: this.$t('common.workflow.name' /*审批流名称*/),
-          align: 'center',
           dataIndex: 'formName',
           render: value =>
             value ? (
@@ -137,25 +113,16 @@ class FormList extends React.Component {
         },
         {
           title: this.$t('common.comment') /*备注*/,
-          align: 'center',
           dataIndex: 'remark',
           width: '30%',
         },
         {
-          title: this.$t('form.setting.applicable') /*'适用人员'*/,
-          align: 'center',
-          dataIndex: 'visibleUserScope',
-          render: text => constants.getTextByValue(text, 'visibleUserScope'),
-        },
-        {
-          title: this.$t('form.setting.include.fee.type') /*'包含费用类型'*/,
-          align: 'center',
-          dataIndex: 'visibleExpenseTypeScope',
-          render: text => constants.getTextByValue(text, 'visibleExpenseTypeScope'),
+          title: '单据大类',
+          dataIndex: 'formTypeName',
+          width: '30%',
         },
         {
           title: this.$t('common.column.status' /*状态*/),
-          align: 'center',
           dataIndex: 'valid',
           width: '15%',
           render: valid => (
@@ -191,14 +158,11 @@ class FormList extends React.Component {
       columnsTenant: [
         {
           title: this.$t('common.sequence' /*序号*/),
-          align: 'center',
           dataIndex: 'sequence',
-          width: '5%',
           render: (desc, value, index) => index + 1,
         },
         {
           title: this.$t('common.workflow.name' /*审批流名称*/),
-          align: 'center',
           dataIndex: 'formName',
           render: value =>
             value ? (
@@ -211,25 +175,15 @@ class FormList extends React.Component {
         },
         {
           title: this.$t('common.comment') /*备注*/,
-          align: 'center',
           dataIndex: 'remark',
           width: '30%',
         },
         {
-          title: this.$t('form.setting.applicable.company') /*'适用公司'*/,
-          align: 'center',
-          dataIndex: 'visibleCompanyScope',
-          render: text => constants.getTextByValue(text, 'visibleCompanyScope'),
-        },
-        {
-          title: this.$t('form.setting.include.fee.type') /*'包含费用类型'*/,
-          align: 'center',
-          dataIndex: 'visibleUserScope',
-          render: text => constants.getTextByValue(text, 'visibleExpenseTypeScope'),
+          title: '单据大类',
+          dataIndex: 'formTypeName',
         },
         {
           title: this.$t('common.column.status' /*状态*/),
-          align: 'center',
           dataIndex: 'valid',
           width: '15%',
           render: valid => (
@@ -241,7 +195,6 @@ class FormList extends React.Component {
         },
         {
           title: '审批流',
-          align: 'center',
           dataIndex: 'operate',
           width: '12%',
           render: (desc, record) => (
@@ -282,16 +235,6 @@ class FormList extends React.Component {
       });
     });
   }
-
-  /*  componentWillMount() {
-
-    if (!this.props.tenantMode) {
-      //this.getFormList();
-      this.getList();
-      //获取账套下表单
-     // this.getFormListForSob();
-    }
-  }*/
 
   handleCopy = (e, record) => {
     e.preventDefault();
@@ -448,24 +391,6 @@ class FormList extends React.Component {
     }
   };
 
-  /*  handleCatType = (value)=>{
-    this.setState({
-      params: {
-        ...this.state.params,
-        formTypeId: value
-      }
-    },()=>this.getFormList())
-  };
-
-  handleDocType = (value)=>{
-    this.setState({
-      params: {
-        ...this.state.params,
-        formName: value
-      }
-    },()=>this.getFormList())
-  };*/
-
   handleCatType = value => {
     this.setState(
       {
@@ -591,10 +516,7 @@ class FormList extends React.Component {
       columnsTenant,
       formList,
       loading,
-      columnsForSobFrom,
-      formListForSob,
       setOfBooksId,
-      setOfBooksName,
       documentType,
       setOfBooks,
     } = this.state;
@@ -603,12 +525,7 @@ class FormList extends React.Component {
         {documentType.map(item => <Menu.Item key={item.value}>{item.name}</Menu.Item>)}
       </Menu>
     );
-    /* const menuSetOfBooks = (
-      <Menu onClick={this.handleSearchList} >
-        {this.state.setOfBooks.map(item => <Menu.Item key={item.id}>{item.setOfBooksName}</Menu.Item>)}
-      </Menu>
-    );*/
-    const { tenantMode, language } = this.props;
+    const { language } = this.props;
     return (
       <div>
         {this.props.tenantMode && (
@@ -622,34 +539,6 @@ class FormList extends React.Component {
             }}
           >
             <Row className="setOfBooks-select">
-              <Col
-                span={language.local === 'zh_cn' ? 1 : 2}
-                style={{ lineHeight: 2, width: 43 }}
-                className="title"
-              >
-                {this.$t('setting.key1428' /*帐套*/)}：
-              </Col>
-              <Col span={3}>
-                {/* <Selector
-                  type="setOfBooksByTenant"
-                  allowClear={false}
-                  entity
-                  value={{ key: setOfBooksId }}
-                  onChange={this.handleSetOfBooksChange}
-                /> */}
-                <Select
-                  value={setOfBooksId}
-                  onChange={this.handleSetOfBooksChange}
-                  style={{ width: '100%' }}
-                  placeholder={this.$t('common.please.select')}
-                >
-                  {setOfBooks.map(item => (
-                    <Option key={item.id} value={item.id}>
-                      {item.setOfBooksName}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
               <Col
                 span={language.local === 'zh_cn' ? 2 : 3}
                 style={{ lineHeight: 2, width: 72 }}
@@ -692,7 +581,7 @@ class FormList extends React.Component {
             trigger={['click']}
           >
             <Button type="primary">
-              {this.$t('form.setting.new.form') /*新建表单*/} <Icon type="down" />
+              新建审批流 <Icon type="down" />
             </Button>
           </Dropdown>
         </div>
@@ -715,15 +604,7 @@ class FormList extends React.Component {
     );
   };
   renderSobTab = () => {
-    const {
-      columns,
-      columnsTenant,
-      formList,
-      loading,
-      columnsForSobFrom,
-      formListForSob,
-      currentSetOfBooksName,
-    } = this.state;
+    const { loading, columnsForSobFrom, formListForSob } = this.state;
     return (
       <div>
         <div className="condition-rule-icon-tips">
@@ -774,10 +655,6 @@ class FormList extends React.Component {
     return <div className="form-design-form-list">{this.renderCompanyTenant()}</div>;
   }
 }
-
-// FormList.contextTypes = {
-//   router: React.PropTypes.object
-// };
 
 function mapStateToProps(state) {
   return {

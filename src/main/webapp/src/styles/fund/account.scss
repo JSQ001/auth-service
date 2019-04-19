@@ -16,6 +16,9 @@
       .ant-form-item-label label::after{
         content: '';
       }
+      .danger{
+        background: #fbeeee
+      }
     }
     .ant-row-flex{
       .ant-form-item{

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Select } from 'antd';
 import { connect } from 'dva';
 import Chooser from 'widget/chooser';
 import 'styles/fund/account.scss';
@@ -10,6 +10,7 @@ import accountService from './cp-balance-maintain.service';
 
 // const { Option } = Select;
 const FormItem = Form.Item;
+const { Option } = Select;
 
 class BalanceMaintainDetail extends Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class BalanceMaintainDetail extends Component {
       isNew: true, // 是否为新建
       model: {}, // 保存数据
       currencyList: [], // 币种
+      periodList: [],
       banknumber: {
         key: '',
         label: '',
@@ -32,10 +34,16 @@ class BalanceMaintainDetail extends Component {
   }
 
   componentDidMount() {
+    this.getPeriod();
     const { params } = this.props;
     if (params.id) {
       this.setState({
         isNew: false,
+      });
+    }
+    if (params.reviewStatus === 'Y') {
+      this.setState({
+        isTrue: true,
       });
     }
     // if (params.approveStatus === 'ZJ_APPROVED' || params.approveStatus === 'ZJ_PENGDING') {
@@ -57,11 +65,12 @@ class BalanceMaintainDetail extends Component {
           bankAccount: values.accountnumber.accountNumber,
           bankAccountName: bankList.accountName,
           gatherBank: bankList.openBank,
-          period: values.period,
+          period: values.period.label,
           currency: bankList.currencyCode,
           periodInitAmountActual: values.amount,
           // ifDisplay :true,
           // reviewStatus :true,
+          versionNumber: params.id ? params.versionNumber : '',
         };
         save(saveData);
       }
@@ -115,6 +124,17 @@ class BalanceMaintainDetail extends Component {
   };
 
   /**
+   * 获取期间数据
+   */
+  getPeriod = () => {
+    accountService.getPeriod().then(res => {
+      this.setState({
+        periodList: res.data,
+      });
+    });
+  };
+
+  /**
    * 获取开户银行列表
    */
   getAccountBank = () => {
@@ -161,6 +181,7 @@ class BalanceMaintainDetail extends Component {
       approveStatus,
       bankList,
       isTrue,
+      periodList,
     } = this.state;
     const formItemLayout = {
       labelCol: {
@@ -204,6 +225,7 @@ class BalanceMaintainDetail extends Component {
                 labelKey="accountNumber"
                 single
                 onChange={this.onChange}
+                disabled={isTrue}
               />
             )}
           </FormItem>
@@ -229,8 +251,14 @@ class BalanceMaintainDetail extends Component {
           <FormItem label="期间" {...formItemLayout}>
             {getFieldDecorator('period', {
               rules: [{ required: true }],
-              initialValue: isNew ? '' : params.period,
-            })(<Input disabled={isTrue} />)}
+              initialValue: isNew ? [] : [{ key: params.period, label: params.period }],
+            })(
+              <Select labelInValue placeholder="请选择">
+                {periodList.map(option => {
+                  return <Option key={option.periodName}>{option.periodName}</Option>;
+                })}
+              </Select>
+            )}
           </FormItem>
 
           <FormItem label="余额" {...formItemLayout}>

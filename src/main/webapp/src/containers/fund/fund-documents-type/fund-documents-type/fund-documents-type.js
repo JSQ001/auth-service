@@ -10,17 +10,11 @@ import CustomTable from 'widget/custom-table';
 import baseService from 'share/base.service';
 import FundDocumentsAdd from './fund-documents-add';
 
-// const { Search } = Input;
-
 class FundDocumentsType extends React.Component {
   constructor(props) {
     super(props);
     const { company } = this.props;
     this.state = {
-      //   loading: true,
-      //   data: [],
-      //   page: 0,
-      //   pageSize: 10,
       columns: [
         {
           title: '账套',
@@ -39,7 +33,7 @@ class FundDocumentsType extends React.Component {
         },
         {
           title: '单据类型代码',
-          dataIndex: 'acpReqTypeCode',
+          dataIndex: 'cpReqTypeCode',
           width: '20%',
           align: 'center',
           render: record => (
@@ -90,7 +84,6 @@ class FundDocumentsType extends React.Component {
           ),
         }, // 操作
       ],
-      //   pagination: { total: 0 },
       searchForm: [
         // 账套
         {
@@ -105,18 +98,18 @@ class FundDocumentsType extends React.Component {
           defaultValue: company.setOfBooksId,
           colSpan: '6',
         },
-        { type: 'input', id: 'acpReqTypeCode', label: '单据类型代码', colSpan: '6' },
+        { type: 'input', id: 'cpReqTypeCode', label: '单据类型代码', colSpan: '6' },
         { type: 'input', id: 'description', label: '单据类型名称', colSpan: '6' },
       ],
       searchParams: {
         setOfBooksId: company.setOfBooksId,
-        acpReqTypeCode: '',
+        cpReqTypeCode: '',
         description: '',
       },
       showSlideFrame: false,
       slideParams: {}, // 点击编辑时，存放该行的数据
       companyDistribution:
-        '/document-type-manage/payment-requisition-type/distribution-company/:setOfBooksId/:id', // 公司分配
+        '/fund/fund-documents-type/fund-documents-type/company-distribution/:setOfBooksId/:id', // 公司分配的路由
     };
   }
 
@@ -162,7 +155,7 @@ class FundDocumentsType extends React.Component {
    * 编辑修改
    */
   editItem = (e, record) => {
-    console.log(record);
+    // console.log(record);
     const { slideParams } = this.state;
     slideParams.record = record;
     this.setState({ slideParams }, () => {
@@ -174,23 +167,28 @@ class FundDocumentsType extends React.Component {
    * 模糊搜索查询
    */
   search = result => {
+    // console.log('result>>>>>>', result);
     const { company } = this.props;
-    const { searchParams } = this.state;
     this.setState(
       {
         searchParams: {
           setOfBooksId: result.setOfBooksId ? result.setOfBooksId : company.setOfBooksId,
-          acpReqTypeCode: result.acpReqTypeCode ? result.acpReqTypeCode : '',
+          cpReqTypeCode: result.cpReqTypeCode ? result.cpReqTypeCode : '',
           description: result.description ? result.description : '',
         },
       },
       () => {
+        const { searchParams } = this.state;
+        // console.log(searchParams)
         // eslint-disable-next-line react/no-string-refs
         this.refs.table.search(searchParams);
       }
     );
   };
 
+  /**
+   * 模糊查询中-----搜索的事件处理函数
+   */
   searchEventHandle = (event, value) => {
     const { searchParams } = this.state;
     if (event === 'SETOFBOOKID') {
@@ -209,7 +207,7 @@ class FundDocumentsType extends React.Component {
   };
 
   /**
-   * 清空
+   * 模糊查询中-----清空
    */
   clear = () => {
     const { company } = this.props;
@@ -218,7 +216,7 @@ class FundDocumentsType extends React.Component {
       {
         searchParams: {
           setOfBooksId: company.setOfBooksId,
-          acpReqTypeCode: '',
+          cpReqTypeCode: '',
           description: '',
         },
         slideParams: { ...slideParams, setOfBooksId: company.setOfBooksId },
@@ -236,11 +234,10 @@ class FundDocumentsType extends React.Component {
   showSlide = flag => {
     const { searchParams } = this.state;
     this.setState({ showSlideFrame: flag }, () => {
-      if (flag) {
+      if (!flag) {
         // eslint-disable-next-line react/no-string-refs
         this.refs.table.search(searchParams);
       }
-      // !flag && this.refs.table.search(searchParams);
     });
   };
 
@@ -278,7 +275,6 @@ class FundDocumentsType extends React.Component {
           // eslint-disable-next-line react/no-string-refs
           this.refs.table.search(searchParams);
         }
-        // flag && this.refs.table.search(searchParams);
       }
     );
   };
@@ -287,17 +283,15 @@ class FundDocumentsType extends React.Component {
     const { columns, searchForm, showSlideFrame, slideParams, searchParams } = this.state;
     return (
       <div className="budget-organization">
-        {/* <h3 className="header-title">付款申请单类型定义</h3> */}
         <SearchArea
           searchForm={searchForm}
           submitHandle={this.search}
           clearHandle={this.clear}
-          eventHandle={this.searchEventHandle}
+          // eventHandle={this.searchEventHandle}
           maxLength={4}
         />
         <div className="divider" />
         <div className="table-header">
-          {/* <div className="table-header-title">{`共搜索到 ${pagination.total} 条数据`}</div> */}
           <Row>
             <Col span={18}>
               <div className="table-header-buttons">
@@ -307,16 +301,14 @@ class FundDocumentsType extends React.Component {
                 {/* 新建 */}
               </div>
             </Col>
-            {/* <Col span={6}>
-              <Search placeholder="请输入账套" onSearch={this.onDocumentSearch} enterButton />
-            </Col> */}
           </Row>
         </div>
         <CustomTable
           columns={columns}
           // eslint-disable-next-line react/no-string-refs
           ref="table"
-          url={`${config.payUrl}/api/acp/request/type/query`}
+          // url="http://10.211.110.100:9099/api/setting/request/type/query"
+          url={`${config.fundUrl}/api/setting/request/type/query`}
           params={searchParams}
         />
         <SlideFrame

@@ -216,7 +216,12 @@ class ContractDetailCommon extends React.Component {
               }
             : null,
         ],
-        customList: list,
+        // customList: list
+        customList: headerData.expenseDimensions
+          ? headerData.expenseDimensions
+              .filter(o => o.headerFlag)
+              .map(o => ({ label: o.name, value: o.valueName }))
+          : [],
       },
     });
   };

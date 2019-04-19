@@ -189,11 +189,15 @@ class AcpRequestTypeDetail extends React.Component {
           });
         }
         if (this.state.applyEmployee == 'BASIS_02' && !acpRequstTypesToUsers.length) {
-          message.warning('请至少选择一个部门');
+          message.warning(
+            this.$t('payment.please.select.at.least.one.department')
+          ); /*请至少选择一个部门*/
           return;
         }
         if (this.state.applyEmployee == 'BASIS_03' && !acpRequstTypesToUsers.length) {
-          message.warning('请至少选择一个员工组');
+          message.warning(
+            this.$t('payment.please.select.at.least.one.group.of.employees')
+          ); /*请至少选择一个员工组*/
           return;
         }
         let acpRequestTypesToRelateds = [];
@@ -210,7 +214,9 @@ class AcpRequestTypeDetail extends React.Component {
           });
         }
         if (values.relatedType == 'BASIS_02' && !acpRequestTypesToRelateds.length) {
-          message.warning('请至少选择一个可关联报账单类型');
+          message.warning(
+            this.$t('payment.please.select.at.least.one.type.can.be.associated.to.bill')
+          ); /*请至少选择一个可关联报账单类型*/
           return;
         }
 
@@ -245,7 +251,7 @@ class AcpRequestTypeDetail extends React.Component {
           })
           .catch(e => {
             if (e.response) {
-              message.error(`保存失败, ${e.response.data.message}`);
+              message.error(`${e.response.data.message}`);
             }
             this.setState({ loading: false });
           });
@@ -346,8 +352,9 @@ class AcpRequestTypeDetail extends React.Component {
     };
     const form_label = (
       <span>
-        关联表单类型
-        <Tooltip title="关联表单设计器中的单据类型，用来使用工作流" overlayStyle={{ width: 220 }}>
+        {this.$t('payment.associated.form.type')}
+        {/*关联表单类型*/}
+        <Tooltip title={this.$t('payment.desc.code1')} overlayStyle={{ width: 220 }}>
           <Icon type="info-circle-o" style={{ margin: '0 3px' }} />
         </Tooltip>
       </span>
@@ -356,13 +363,15 @@ class AcpRequestTypeDetail extends React.Component {
     return (
       <div>
         <Form onSubmit={this.handleSave}>
-          <div className="common-item-title">基本信息</div>
+          <div className="common-item-title">{this.$t('payment.the.basic.information')}</div>
+          {/*基本信息*/}
 
-          {/* <FormItem {...formItemLayout} label="类型">
-            <span>付款申请单</span>
+          {/* <FormItem {...formItemLayout} label={this.$t("payment.type")}>
+            <span>{this.$t("payment.this.payment.request")}</span>
           </FormItem> */}
 
-          <FormItem {...formItemLayout} label="账套">
+          <FormItem {...formItemLayout} label={this.$t('payment.zhang.set')}>
+            {/*账套*/}
             {getFieldDecorator('setOfBooksId', {
               rules: [
                 {
@@ -389,7 +398,8 @@ class AcpRequestTypeDetail extends React.Component {
             )}
           </FormItem>
 
-          <FormItem {...formItemLayout} label="付款申请单类型代码">
+          <FormItem {...formItemLayout} label={this.$t('payment.payment.requisition.type.code')}>
+            {/*付款申请单类型代码*/}
             {getFieldDecorator('acpReqTypeCode', {
               rules: [
                 {
@@ -406,7 +416,8 @@ class AcpRequestTypeDetail extends React.Component {
             )}
           </FormItem>
 
-          <FormItem {...formItemLayout} label="付款申请单类型名称">
+          <FormItem {...formItemLayout} label={this.$t('payment.payment.requisition.type.name')}>
+            {/*付款申请单类型名称*/}
             {getFieldDecorator('description', {
               rules: [
                 {
@@ -429,9 +440,11 @@ class AcpRequestTypeDetail extends React.Component {
               initialValue: nowType.formOid,
             })(
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('payment.please.select.a')} /*请选择*/
                 onFocus={this.getFormType}
-                notFoundContent={fetching ? <Spin size="small" /> : '无匹配结果'}
+                notFoundContent={
+                  fetching ? <Spin size="small" /> : this.$t('payment.no.matching.results')
+                }
               >
                 {formTypeOptions.map(option => {
                   return <Option key={option.formOid}>{option.formName}</Option>;
@@ -454,44 +467,58 @@ class AcpRequestTypeDetail extends React.Component {
               : this.$t({ id: 'common.status.disable' })}
           </FormItem>
 
-          <div className="common-item-title">关联报账单设置</div>
-          <FormItem {...formItemLayout} label="是否关联报账单">
+          <div className="common-item-title">{this.$t('payment.set.related.to.bill')}</div>
+          {/*关联报账单设置*/}
+          <FormItem {...formItemLayout} label={this.$t('payment.whether.related.to.the.bill')}>
+            {/*是否关联报账单*/}
             <RadioGroup value={isRelated}>
-              <RadioButton value={true}>关联</RadioButton>
+              <RadioButton value={true}>{this.$t('payment.associated')}</RadioButton>
+              {/*关联*/}
             </RadioGroup>
           </FormItem>
 
-          <FormItem {...formItemLayout} label="关联依据">
+          <FormItem {...formItemLayout} label={this.$t('payment.associated.basis')}>
+            {/*关联依据*/}
             <RadioGroup value={accordingAsRelated} disabled={!isRelated}>
               <Radio style={radioStyle} value="BASIS_01">
-                报账单头申请人=付款申请单头申请人
+                {this.$t('payment.desc.code2')}
               </Radio>
             </RadioGroup>
           </FormItem>
 
-          <FormItem {...formItemLayout} label="可关联报账单类型">
+          <FormItem
+            {...formItemLayout}
+            label={this.$t('payment.type.can.be.associated.with.the.bill')}
+          >
+            {/*可关联报账单类型*/}
             <div>
               <RadioGroup
                 value={relatedType}
                 disabled={!isRelated}
                 onChange={this.onrelatedTypeChange}
               >
-                <Radio value="BASIS_01">全部类型</Radio>
-                <Radio value="BASIS_02">部分类型</Radio>
+                <Radio value="BASIS_01">{this.$t('payment.all.types.of')}</Radio>
+                {/*全部类型*/}
+                <Radio value="BASIS_02">{this.$t('payment.part.of.the.type')}</Radio>
+                {/*部分类型*/}
               </RadioGroup>
               <Input
                 ref="SelectCheckSheetType"
                 onFocus={this.showSelectCheckSheetType}
                 disabled={relatedType === 'BASIS_01'}
                 placeholder={
-                  relatedType === 'BASIS_01' ? '全部类型' : `已选择了${relatedList.length}个类型`
+                  relatedType === 'BASIS_01'
+                    ? this.$t('payment.all.types.of')
+                    : this.$t('payment.desc.code3', { total: relatedList.length }) /*全部类型*/
                 }
               />
             </div>
           </FormItem>
 
-          <div className="common-item-title">权限设置</div>
-          <FormItem {...formItemLayout} label="适用人员">
+          <div className="common-item-title">{this.$t('payment.permissions')}</div>
+          {/*权限设置*/}
+          <FormItem {...formItemLayout} label={this.$t('payment.applicable.personnel')}>
+            {/*适用人员*/}
             {getFieldDecorator('employeeList', {
               initialValue: permissions,
             })(

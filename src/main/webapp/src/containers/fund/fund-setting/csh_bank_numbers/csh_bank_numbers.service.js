@@ -73,8 +73,8 @@ export default {
    * 根据市描述获取code
    */
   getCityCode() {
-    // return httpFetch.get(`${config.fundUrl}/api/regionDefines/getCity/${id}`);
-    return httpFetch.get(`http://10.211.98.2:9099/api/regionDefines/getProvinces`);
+    return httpFetch.get(`${config.fundUrl}/api/regionDefines/getProvinces`);
+    // return httpFetch.get(`http://10.211.98.2:9099/api/regionDefines/getProvinces`);
   },
 
   // 根据国家code获取国家名字

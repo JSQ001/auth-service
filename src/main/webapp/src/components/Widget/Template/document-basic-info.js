@@ -269,6 +269,20 @@ class DocumentBasicInfo extends Component {
             ) : null}
           </Col>
           <Col span={8}>
+            {/* 类型定义控制 项目申请单界面金额是否显示 */}
+            {data.amountFlag ? (
+              <div style={{ float: 'left', marginLeft: '60px', marginTop: '2px' }}>
+                <div style={{ textAlign: 'left', fontSize: 14 }} className="amount-title">
+                  {this.$t('common.amount')}
+                </div>
+                <div style={{ fontSize: '18px' }} className="amount-content">
+                  {data.currencyCode} {this.filterMoney(data.amount)}
+                </div>
+              </div>
+            ) : (
+              ' '
+            )}
+
             <div style={{ float: 'right' }}>
               <div style={{ textAlign: 'right', fontSize: 14 }} className="amount-title">
                 {this.props.isDiy && data.diyLabel ? data.diyLabel.label : this.$t('common.amount')}

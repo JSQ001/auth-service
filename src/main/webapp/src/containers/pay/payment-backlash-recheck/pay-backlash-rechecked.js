@@ -1,26 +1,10 @@
 import React from 'react';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
 import SlideFrame from 'widget/slide-frame';
-import config from 'config';
 import SearchArea from 'widget/search-area';
 import backlashService from './pay-backlash-recheck.service';
 import moment from 'moment';
-import {
-  Radio,
-  Badge,
-  Tabs,
-  Popover,
-  Pagination,
-  message,
-  Alert,
-  Icon,
-  Dropdown,
-  Menu,
-  Modal,
-  Form,
-  DatePicker,
-} from 'antd';
+import { Popover, Form } from 'antd';
 import ToBacklash from './to-backlash-rechecked';
 import Table from 'widget/table';
 const FormItem = Form.Item;
@@ -89,8 +73,7 @@ class BacklashRechecked extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.backlashCode' }),
           dataIndex: 'billcode',
-          width: 150,
-          align: 'left',
+          width: 200,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>
@@ -100,8 +83,7 @@ class BacklashRechecked extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.sourceBacklashCode' }),
           dataIndex: 'refBillCode',
-          width: 150,
-          align: 'left',
+          width: 200,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>
@@ -112,7 +94,7 @@ class BacklashRechecked extends React.Component {
           title: this.$t({ id: 'pay.backlash.backlashDate' }),
           dataIndex: 'refundDate',
           width: 150,
-          align: 'left',
+          align: 'center',
           render: desc => (
             <span>
               <Popover content={moment(desc).format('YYYY-MM-DD')}>
@@ -125,7 +107,6 @@ class BacklashRechecked extends React.Component {
           title: this.$t({ id: 'pay.backlash.submitBy' }),
           dataIndex: 'createdByName',
           width: 150,
-          align: 'left',
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>
@@ -133,12 +114,7 @@ class BacklashRechecked extends React.Component {
           ),
         },
 
-        {
-          title: this.$t({ id: 'pay.backlash.currency' }),
-          dataIndex: 'currency',
-          width: 80,
-          align: 'left',
-        },
+        { title: this.$t({ id: 'pay.backlash.currency' }), dataIndex: 'currency', width: 80 },
         {
           title: this.$t({ id: 'pay.backlash.backlashAmount' }),
           dataIndex: 'amount',
@@ -152,7 +128,6 @@ class BacklashRechecked extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.backlashRemark' }),
           dataIndex: 'remark',
-          align: 'left',
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>

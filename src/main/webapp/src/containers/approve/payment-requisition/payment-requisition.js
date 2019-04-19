@@ -20,18 +20,24 @@ class PaymentRequisitionApprove extends React.Component {
       loading1: false,
       loading2: false,
       status: {
-        1001: { label: '编辑中', state: 'default' },
-        1004: { label: '审批通过', state: 'success' },
-        1002: { label: '审批中', state: 'processing' },
-        1005: { label: '审批驳回', state: 'error' },
-        1003: { label: '撤回', state: 'warning' },
+        1001: { label: this.$t('payment.in.the.editor'), state: 'default' } /*编辑中*/,
+        1004: {
+          label: this.$t('payment.the.examination.and.approval.by'),
+          state: 'success',
+        } /*审批通过*/,
+        1002: {
+          label: this.$t('payment.in.the.examination.and.approval'),
+          state: 'processing',
+        } /*审批中*/,
+        1005: { label: this.$t('payment.approval.to.dismiss'), state: 'error' } /*审批驳回*/,
+        1003: { label: this.$t('payment.to.withdraw'), state: 'warning' } /*撤回*/,
       },
       SearchForm1: [
         {
           type: 'select',
           colSpan: '6',
           id: 'typeId',
-          label: '单据类型',
+          label: this.$t('paymentcompanysetting.ducumenttype') /*单据类型*/,
           options: [],
           getUrl: `${config.payUrl}/api/acp/request/type/query/${this.props.company.setOfBooksId}/${
             this.props.company.id
@@ -73,19 +79,27 @@ class PaymentRequisitionApprove extends React.Component {
           type: 'items',
           id: 'amountRange',
           items: [
-            { type: 'input', id: 'amountFrom', label: '本币金额从' },
-            { type: 'input', id: 'amountTo', label: '本币金额至' },
+            {
+              type: 'input',
+              id: 'amountFrom',
+              label: this.$t('payment.local.currency.amount.from'),
+            } /*本币金额从*/,
+            {
+              type: 'input',
+              id: 'amountTo',
+              label: this.$t('payment.local.currency.amount.to'),
+            } /*本币金额至*/,
           ],
           colSpan: '6',
         },
-        { type: 'input', id: 'description', label: '备注', colSpan: '6' },
+        { type: 'input', id: 'description', label: this.$t('payment.note'), colSpan: '6' } /*备注*/,
       ],
       SearchForm2: [
         {
           type: 'select',
           colSpan: '6',
           id: 'typeId',
-          label: '单据类型',
+          label: this.$t('paymentcompanysetting.ducumenttype') /*单据类型*/,
           options: [],
           getUrl: `${config.payUrl}/api/acp/request/type/query/${this.props.company.setOfBooksId}/${
             this.props.company.id
@@ -127,25 +141,33 @@ class PaymentRequisitionApprove extends React.Component {
           type: 'items',
           id: 'amountRange',
           items: [
-            { type: 'input', id: 'amountFrom', label: '本币金额从' },
-            { type: 'input', id: 'amountTo', label: '本币金额至' },
+            {
+              type: 'input',
+              id: 'amountFrom',
+              label: this.$t('payment.local.currency.amount.from'),
+            } /*本币金额从*/,
+            {
+              type: 'input',
+              id: 'amountTo',
+              label: this.$t('payment.local.currency.amount.to'),
+            } /*本币金额至*/,
           ],
           colSpan: '6',
         },
-        { type: 'input', id: 'description', label: '备注', colSpan: '6' },
+        { type: 'input', id: 'description', label: this.$t('payment.note'), colSpan: '6' } /*备注*/,
       ],
       unApproveSearchParams: {},
       approveSearchParams: {},
       columns: [
         {
-          title: '序号',
+          title: this.$t('payment.the.serial.number') /*序号*/,
           dataIndex: 'id',
           render: (value, record, index) => index + 1,
           width: 50,
           align: 'center',
         },
         {
-          title: '单据编号',
+          title: this.$t('payment.receipt.number') /*单据编号*/,
           dataIndex: 'acpPaymentCode',
           width: 200,
           render: value => {
@@ -153,32 +175,41 @@ class PaymentRequisitionApprove extends React.Component {
           },
         },
         {
-          title: '单据类型',
+          title: this.$t('paymentcompanysetting.ducumenttype') /*单据类型*/,
           dataIndex: 'typeName',
+          width: 90,
           render: value => {
             return <Popover content={value}>{value}</Popover>;
           },
         },
-        { title: '申请人', dataIndex: 'applicantName', width: 100 },
         {
-          title: '提交日期',
+          title: this.$t('payment.the.applicant'),
+          dataIndex: 'applicantName',
+          width: 100,
+        } /*申请人*/,
+        {
+          title: this.$t('payment.submission.date') /*提交日期*/,
           dataIndex: 'stringSubmitDate',
           width: 90,
           align: 'center',
           render: value => moment(value).format('YYYY-MM-DD'),
         },
         // {title: '币种', dataIndex: 'currency'},
-        { title: '本币金额', dataIndex: 'totalAmount', render: this.filterMoney },
+        {
+          title: this.$t('payment.local.currency.amount'),
+          dataIndex: 'totalAmount',
+          render: this.filterMoney,
+        } /*本币金额*/,
         // { title: '已核销金额', dataIndex: 'pppamount', render: this.filterMoney },
         {
-          title: '备注',
+          title: this.$t('payment.note') /*备注*/,
           dataIndex: 'description',
           render: value => {
             return <Popover content={value}>{value}</Popover>;
           },
         },
         {
-          title: '状态',
+          title: this.$t('paymentmethod.isenabled') /*状态*/,
           dataIndex: 'status',
           align: 'center',
           width: 100,
@@ -426,7 +457,8 @@ class PaymentRequisitionApprove extends React.Component {
     return (
       <div className="approve-contract">
         <Tabs defaultActiveKey={tabValue} onChange={this.handleTabsChange}>
-          <TabPane tab="未审批" key="unapproved">
+          <TabPane tab={this.$t('payment.no.approval')} key="unapproved">
+            {/*未审批*/}
             {tabValue === 'unapproved' && (
               <div>
                 <SearchArea
@@ -441,7 +473,9 @@ class PaymentRequisitionApprove extends React.Component {
                     <Col span={18} />
                     <Col span={6}>
                       <Search
-                        placeholder="请输入付款申请单单号"
+                        placeholder={this.$t(
+                          'payment.please.enter.a.payment.request.only'
+                        )} /*请输入付款申请单单号*/
                         onSearch={this.onDocumentSearch}
                         enterButton
                       />
@@ -465,7 +499,8 @@ class PaymentRequisitionApprove extends React.Component {
               </div>
             )}
           </TabPane>
-          <TabPane tab="已审批" key="approved">
+          <TabPane tab={this.$t('payment.have.been.approval')} key="approved">
+            {/*已审批*/}
             {tabValue === 'approved' && (
               <div>
                 <SearchArea
@@ -480,7 +515,9 @@ class PaymentRequisitionApprove extends React.Component {
                     <Col span={18} />
                     <Col span={6}>
                       <Search
-                        placeholder="请输入付款申请单单号"
+                        placeholder={this.$t(
+                          'payment.please.enter.a.payment.request.only'
+                        )} /*请输入付款申请单单号*/
                         onSearch={this.onApprovedSearch}
                         enterButton
                       />

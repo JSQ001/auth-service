@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Select, Modal, Row, Col, Input, Pagination, Spin, Icon, message } from 'antd';
+import { Select, Modal, Row, Col, Input, Pagination, Spin, Icon, message, Tooltip } from 'antd';
 import config from 'config';
 import httpFetch from 'share/httpFetch';
 import debounce from 'lodash.debounce';
@@ -218,7 +218,7 @@ class SelectApplcationType extends Component {
                               textOverflow: 'ellipsis',
                             }}
                           >
-                            {item.name}
+                            <Tooltip title={item.name}>{item.name}</Tooltip>
                           </span>
                         </div>
                       </Col>

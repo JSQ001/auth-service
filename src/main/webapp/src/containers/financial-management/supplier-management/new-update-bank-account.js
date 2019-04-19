@@ -298,7 +298,7 @@ class NewUpdateBankAccount extends React.Component {
         <Form onSubmit={this.handleSubmit}>
           <div className="basic-title">{this.$t('supplier.management.basicInfo')}</div>
           <Row gutter={24} className="new-update-bank-account-formItem1">
-            {/* <Col offset={4} span={7}>
+            <Col offset={4} span={7}>
               <FormItem {...formItemLayout} label={this.$t('common.column.status')} colon={true}>
                 {getFieldDecorator('enabled', {
                   valuePropName: 'checked',
@@ -315,9 +315,9 @@ class NewUpdateBankAccount extends React.Component {
                       {enabled ? this.$t('common.status.enable') : this.$t('common.disabled')}
                     </span>
                   </div>
-                  )}
+                )}
               </FormItem>
-            </Col> */}
+            </Col>
             <Col span={8} offset={1}>
               <FormItem {...formItemLayout} label={this.$t('supplier.main.account')} colon={true}>
                 {getFieldDecorator('primaryFlag', {

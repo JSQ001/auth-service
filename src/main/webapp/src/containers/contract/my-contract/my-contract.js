@@ -378,8 +378,6 @@ class MyContract extends React.Component {
         if (value) {
           searchForm[6].disabled = false;
           searchForm[6].listType = value === 'VENDER' ? 'select_ven' : 'select_payee_name_code';
-          value === 'VENDER' &&
-            (searchForm[6].listExtraParams = { companyId: this.props.company.id });
           this.formRef.setValues({ partnerId: [] });
         } else {
           this.formRef.setValues({ partnerId: [] });

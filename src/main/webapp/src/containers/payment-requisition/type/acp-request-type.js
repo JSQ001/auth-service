@@ -21,10 +21,9 @@ class AcpRequestType extends React.Component {
       pageSize: 10,
       columns: [
         {
-          title: '账套',
+          title: this.$t('payment.zhang.set') /*账套*/,
           dataIndex: 'setOfBooksName',
-          width: '20%',
-          align: 'center',
+          width: 196,
           render: (value, record) => {
             return (
               <span>
@@ -36,10 +35,9 @@ class AcpRequestType extends React.Component {
           },
         },
         {
-          title: '付款申请单类型代码',
+          title: this.$t('payment.payment.requisition.type.code') /*付款申请单类型代码*/,
           dataIndex: 'acpReqTypeCode',
-          width: '20%',
-          align: 'center',
+          width: 196,
           render: recode => (
             <span>
               <Popover content={recode}>{recode ? recode : '-'}</Popover>
@@ -47,20 +45,18 @@ class AcpRequestType extends React.Component {
           ),
         },
         {
-          title: '付款申请单类型名称',
+          title: this.$t('payment.payment.requisition.type.name') /*付款申请单类型名称*/,
           dataIndex: 'description',
-          width: '20%',
-          align: 'center',
+          width: 196,
           render: description => (
             <Popover content={description}>{description ? description : '-'}</Popover>
           ),
         },
 
         {
-          title: '关联表单类型',
+          title: this.$t('payment.associated.form.type') /*关联表单类型*/,
           dataIndex: 'formName',
-          width: '20%',
-          align: 'center',
+          width: 196,
           render: recode => (
             <span>
               <Popover content={recode}>{recode ? recode : '-'}</Popover>
@@ -68,24 +64,31 @@ class AcpRequestType extends React.Component {
           ),
         },
         {
-          title: '状态',
+          title: this.$t('paymentmethod.isenabled') /*状态*/,
           dataIndex: 'enabled',
-          width: '15%',
+          width: 100,
           align: 'center',
           render: isEnabled => (
-            <Badge status={isEnabled ? 'success' : 'error'} text={isEnabled ? '启用' : '禁用'} />
+            <Badge
+              status={isEnabled ? 'success' : 'error'}
+              text={isEnabled ? this.$t('payment.to.enable.the') : this.$t('payment.disable')}
+            />
           ),
         },
         {
-          title: '操作',
+          title: this.$t('payment.operation') /*操作*/,
           key: 'operation',
-          width: '15%',
+          width: 146,
           align: 'center',
           render: (text, record) => (
             <span>
-              <a onClick={e => this.editItem(e, record)}>编辑</a>
+              <a onClick={e => this.editItem(e, record)}>{this.$t('payment.the.editor')}</a>
+              {/*编辑*/}
               <span className="ant-divider" />
-              <a onClick={() => this.handleDistribute(record)}>公司分配</a>
+              <a onClick={() => this.handleDistribute(record)}>
+                {this.$t('payment.distribution.of.the.company')}
+              </a>
+              {/*公司分配*/}
             </span>
           ),
         }, //操作
@@ -95,7 +98,7 @@ class AcpRequestType extends React.Component {
         {
           type: 'select',
           id: 'setOfBooksId',
-          label: '账套',
+          label: this.$t('payment.zhang.set') /*账套*/,
           options: [],
           labelKey: 'name',
           valueKey: 'id',
@@ -104,8 +107,18 @@ class AcpRequestType extends React.Component {
           defaultValue: this.props.company.setOfBooksId,
           colSpan: '6',
         }, //账套
-        { type: 'input', id: 'acpReqTypeCode', label: '付款申请单类型代码', colSpan: '6' },
-        { type: 'input', id: 'description', label: '付款申请单类型名称', colSpan: '6' },
+        {
+          type: 'input',
+          id: 'acpReqTypeCode',
+          label: this.$t('payment.payment.requisition.type.code'),
+          colSpan: '6',
+        } /*付款申请单类型代码*/,
+        {
+          type: 'input',
+          id: 'description',
+          label: this.$t('payment.payment.requisition.type.name'),
+          colSpan: '6',
+        } /*付款申请单类型名称*/,
       ],
       searchParams: {
         setOfBooksId: this.props.company.setOfBooksId,
@@ -261,7 +274,7 @@ class AcpRequestType extends React.Component {
             </Col>
             {/* <Col span={6}>
                 <Search
-                 placeholder="请输入账套"
+                 placeholder={this.$t("payment.please.enter.the.account")}
                  onSearch={this.onDocumentSearch}
                  enterButton
                 />
@@ -275,7 +288,11 @@ class AcpRequestType extends React.Component {
           params={searchParams}
         />
         <SlideFrame
-          title={slideParams.record ? '编辑付款申请单类型' : '新建付款申请单类型'}
+          title={
+            slideParams.record
+              ? this.$t('payment.edit.this.payment.request.type')
+              : this.$t('payment.the.new.payment.application.type')
+          } /*新建付款申请单类型*/ /*编辑付款申请单类型*/
           show={showSlideFrame}
           afterClose={this.afterClose}
           onClose={() => this.showSlide(false)}

@@ -3,11 +3,13 @@ import DocumentBasicInfo from 'widget/Template/document-basic-info';
 import ApproveHistory from 'widget/Template/approve-history-work-flow';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, Spin, Affix, Row, Button, Popover, Divider, message, Tabs } from 'antd';
+import { Card, Spin, Row, Button, Popover, message, Tabs } from 'antd';
 import Table from 'widget/table';
 import SlideFrame from 'widget/slide-frame';
 import EditLineFrame from './edit-line-frame';
 import service from './service';
+import DetailExpense from 'containers/reimburse/my-reimburse/expense-detail';
+import reimburseService from 'containers/reimburse/my-reimburse/reimburse.service';
 
 class BusinessReceipt extends Component {
   constructor(props) {
@@ -15,7 +17,6 @@ class BusinessReceipt extends Component {
     this.state = {
       headerInfo: {}, // 部分头信息，用于头组件内
       docHeadData: {}, // 头信息
-      operationLoading: false, // btn loading
       totalAmount: 0, // 总金额
       totalTax: 0, // 总税额
       columns: [
@@ -24,8 +25,9 @@ class BusinessReceipt extends Component {
           dataIndex: 'num',
           align: 'center',
           width: 60,
-          render: (text, record) => {
-            return <span>{record.key}</span>;
+          render: (text, record, index) => {
+            const { page, size } = this.state;
+            return <span>{page * size + index + 1}</span>;
           },
         },
         {
@@ -117,7 +119,6 @@ class BusinessReceipt extends Component {
           title: this.$t('common.remark'),
           dataIndex: 'description',
           align: 'center',
-          width: 150,
           render: text => <Popover content={text}>{text}</Popover>,
         },
         {
@@ -167,6 +168,12 @@ class BusinessReceipt extends Component {
     this.getLineList();
   };
 
+  getReimburse = (id, callback) => {
+    reimburseService.getReimburseDetailById(id).then(res => {
+      callback(res.data);
+    });
+  };
+
   // 转换业务大类type
   transferTypeValue = (type, rate) => {
     let newType = '';
@@ -207,6 +214,16 @@ class BusinessReceipt extends Component {
         break;
     }
     return newStatus;
+  };
+
+  // 原费用信息
+  handleCheckInfo = record => {
+    console.log(record);
+    let costRecord = {
+      ...record,
+      id: record.expReportLineId,
+    };
+    this.setState({ detailVisible: true, costRecord });
   };
 
   // 获取头信息
@@ -252,7 +269,7 @@ class BusinessReceipt extends Component {
 
   // 获取行信息
   getLineList = () => {
-    this.setState({
+    /* this.setState({
       dataSources: [
         {
           key: 1,
@@ -263,38 +280,37 @@ class BusinessReceipt extends Component {
           amount: 200,
         },
       ],
-    });
-    // const { page, size, pagination } = this.state;
-    // let { totalAmount, totalTax } = this.state;
-    // const { match } = this.props;
-    // this.setState({ loading: true });
-    // service
-    //   .getBusinessReceiptList({ page, size, headerId: match.params.id })
-    //   .then(res => {
-    //     console.log(res.data);
-    //     pagination.total = Number(res.headers['x-total-count']);
-    //     // 设置序号
-    //     const data = res.data.map((item,index) => {
-    //       const tempItem = { ...item };
-    //       tempItem.key = (index + page * size) + 1;
-    //       tempItem.keyIndex = index;
-    //       totalAmount += tempItem.baseAmount;
-    //       totalTax += tempItem.amount.
-    //       return tempItem;
-    //     });
-    //     if(res.data.length < 1) return;
+    });*/
+    const { page, size, pagination } = this.state;
+    let { totalAmount, totalTax } = this.state;
+    const { match } = this.props;
+    this.setState({ loading: true });
+    service
+      .getBusinessReceiptList({ page, size, headerId: match.params.id })
+      .then(res => {
+        console.log(res.data);
+        pagination.total = Number(res.headers['x-total-count']);
+        // 设置序号
+        const data = res.data.map((item, index) => {
+          const tempItem = { ...item };
+          tempItem.key = index + page * size + 1;
+          tempItem.keyIndex = index;
+          totalAmount += tempItem.baseAmount;
+          totalTax += tempItem.amount;
+          return tempItem;
+        });
 
-    //     this.setState({
-    //       dataSources: data,
-    //       pagination,
-    //       loading: false,
-    //       totalAmount,
-    //       totalTax,
-    //     });
-    //   })
-    //   .catch(err => {
-    //     message.error(err.response.data.message);
-    //   });
+        this.setState({
+          dataSources: data,
+          pagination,
+          loading: false,
+          totalAmount,
+          totalTax,
+        });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
   };
 
   // 当为审核状态时，改变columns
@@ -369,7 +385,14 @@ class BusinessReceipt extends Component {
 
   // 原费用信息
   handleCheckInfo = record => {
-    console.log(record);
+    this.getReimburse(record.expReportHeaderId, value => {
+      console.log(value);
+      let costRecord = {
+        ...record,
+        id: record.expReportLineId,
+      };
+      this.setState({ reimburseData: value, detailVisible: true, costRecord });
+    });
   };
 
   // 分摊行视同销售/转出
@@ -436,7 +459,6 @@ class BusinessReceipt extends Component {
     const {
       headerInfo,
       docHeadData,
-      operationLoading,
       totalAmount,
       totalTax,
       columns,
@@ -445,6 +467,9 @@ class BusinessReceipt extends Component {
       loading,
       editFrameVisible,
       model,
+      detailVisible,
+      costRecord,
+      reimburseData,
     } = this.state;
     const { match } = this.props;
     let status = null;
@@ -505,19 +530,18 @@ class BusinessReceipt extends Component {
               pagination={pagination}
               loading={loading}
               onChange={this.tablePageChange}
-              scroll={{ x: 1000 }}
             />
           </Card>
         </Spin>
-        <div style={{ margin: '20px 0 50px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
+        <div style={{ margin: '20px 0 70px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
           <ApproveHistory
             type="9090"
             oid={docHeadData.documentOid || ''}
             headerId={docHeadData.id}
           />
         </div>
-        <Affix
-          offsetBottom={0}
+
+        <div
           className="bottom-bar bottom-bar-approve"
           style={{
             position: 'fixed',
@@ -541,7 +565,7 @@ class BusinessReceipt extends Component {
               <Button onClick={this.onBack}>{this.$t('budgetJournal.return')}</Button>
             </Row>
           )}
-        </Affix>
+        </div>
         <SlideFrame
           title={
             match.params.type === 'FOR_SALE'
@@ -554,6 +578,23 @@ class BusinessReceipt extends Component {
           }}
         >
           <EditLineFrame params={model} type={match.params.type} onClose={this.closeSlideForm} />
+        </SlideFrame>
+
+        <SlideFrame
+          show={detailVisible}
+          title="费用详情"
+          width="800px"
+          afterClose={() => this.setState({ detailVisible: false })}
+          onClose={() => this.setState({ detailVisible: false })}
+        >
+          <DetailExpense
+            close={() => this.setState({ detailVisible: false })}
+            params={{
+              visible: this.state.detailVisible,
+              record: costRecord,
+              headerData: reimburseData,
+            }}
+          />
         </SlideFrame>
       </div>
     );

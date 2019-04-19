@@ -38,26 +38,27 @@ class BudgetVersions extends React.Component {
           title: this.$t({ id: 'budgetVersion.versionCode' }),
           dataIndex: 'versionCode',
           key: 'versionCode',
-          align: 'center',
+          width: 172,
         },
         {
           title: this.$t({ id: 'budgetVersion.versionName' }),
           dataIndex: 'versionName',
           key: 'versionName',
-          align: 'center',
+          width: 276,
         },
         {
           title: this.$t({ id: 'budgetVersion.versionDate' }),
           dataIndex: 'versionDate',
           align: 'center',
           key: 'versionDate',
+          width: 135,
           render: desc => desc || '-',
         },
         {
           title: this.$t({ id: 'budgetVersion.versionDescription' }),
           dataIndex: 'description',
           key: 'description',
-          align: 'center',
+          width: 258,
           render: recode => {
             return <span>{recode ? recode : '-'}</span>;
           },
@@ -66,7 +67,7 @@ class BudgetVersions extends React.Component {
           title: this.$t({ id: 'budgetVersion.versionStatus' }),
           dataIndex: 'status',
           key: 'status',
-          align: 'center',
+          width: 126,
           render: recode => {
             return <div>{recode.label}</div>;
           },
@@ -76,6 +77,7 @@ class BudgetVersions extends React.Component {
           dataIndex: 'enabled',
           key: 'enabled',
           align: 'center',
+          width: 106,
           render: (recode, text) => {
             return (
               <div>

@@ -295,101 +295,109 @@ class AddApproveRuleModal extends React.Component {
                 </div>
               </ListItem>
               <ListItem>
-                <h4>{this.$t('setting.key1287' /*表单自定义条件(单据线条)*/)}</h4>
-                <TagSelect
-                  hideCheckAll={true}
-                  value={chosenRuleOids}
-                  onChange={value => {
-                    this.setState({ chosenRuleOids: value });
-                  }}
-                >
-                  {customFormFieldList.map(item => {
-                    let value =
-                      item.messageKey === 'default_user_department_extend' ||
-                      item.messageKey === 'custom_form_department_extend'
-                        ? `${item.fieldOid},${item.messageKey}`
-                        : item.fieldOid;
-                    return (
-                      <TagSelect.Option value={value} key={item.fieldOid}>
-                        {item.fieldName}
-                      </TagSelect.Option>
-                    );
-                  })}
-                </TagSelect>
+                <div>
+                  <h4>{this.$t('setting.key1287' /*表单自定义条件(单据线条)*/)}</h4>
+                  <TagSelect
+                    hideCheckAll={true}
+                    value={chosenRuleOids}
+                    onChange={value => {
+                      this.setState({ chosenRuleOids: value });
+                    }}
+                  >
+                    {customFormFieldList.map(item => {
+                      let value =
+                        item.messageKey === 'default_user_department_extend' ||
+                        item.messageKey === 'custom_form_department_extend'
+                          ? `${item.fieldOid},${item.messageKey}`
+                          : item.fieldOid;
+                      return (
+                        <TagSelect.Option value={value} key={item.fieldOid}>
+                          {item.fieldName}
+                        </TagSelect.Option>
+                      );
+                    })}
+                  </TagSelect>
+                </div>
               </ListItem>
               {formFieldList &&
                 formFieldList['200'] &&
                 !!formFieldList['200'].length && (
                   <ListItem>
-                    <h4>{this.$t('setting.key1288' /*管控条件*/)}</h4>
-                    <TagSelect
-                      hideCheckAll={true}
-                      value={chosenRuleOids}
-                      onChange={value => {
-                        this.setState({ chosenRuleOids: value });
-                      }}
-                    >
-                      {formFieldList['200'].map(item => {
-                        return (
-                          <TagSelect.Option value={item.fieldOid} key={item.fieldOid}>
-                            {item.fieldName}
-                          </TagSelect.Option>
-                        );
-                      })}
-                    </TagSelect>
+                    <div>
+                      <h4>{this.$t('setting.key1288' /*管控条件*/)}</h4>
+                      <TagSelect
+                        hideCheckAll={true}
+                        value={chosenRuleOids}
+                        onChange={value => {
+                          this.setState({ chosenRuleOids: value });
+                        }}
+                      >
+                        {formFieldList['200'].map(item => {
+                          return (
+                            <TagSelect.Option value={item.fieldOid} key={item.fieldOid}>
+                              {item.fieldName}
+                            </TagSelect.Option>
+                          );
+                        })}
+                      </TagSelect>
+                    </div>
                   </ListItem>
                 )}
               {formFieldCostCenterList &&
                 !!formFieldCostCenterList.length && (
                   <ListItem>
-                    <h4>{this.$t('setting.key1289' /*成本中心属性条件*/)}</h4>
-                    {formFieldCostCenterList.map(costCenter => {
-                      return (
-                        <div key={costCenter.refCostCenterOid}>
-                          <div>{costCenter.name}</div>
-                          <TagSelect
-                            hideCheckAll={true}
-                            value={chosenRuleOids}
-                            onChange={value => {
-                              this.setState({ chosenRuleOids: value });
-                            }}
-                          >
-                            {costCenter.propertyList.map(item => (
-                              <TagSelect.Option
-                                value={`${item.fieldOid}_${item.refCostCenterOid}`}
-                                key={`${item.fieldOid}_${item.refCostCenterOid}`}
-                              >
-                                {item.fieldName}
-                              </TagSelect.Option>
-                            ))}
-                          </TagSelect>
-                        </div>
-                      );
-                    })}
+                    <div>
+                      <h4>{this.$t('setting.key1289' /*成本中心属性条件*/)}</h4>
+                      {formFieldCostCenterList.map(costCenter => {
+                        return (
+                          <div key={costCenter.refCostCenterOid}>
+                            <div>{costCenter.name}</div>
+                            <TagSelect
+                              hideCheckAll={true}
+                              value={chosenRuleOids}
+                              onChange={value => {
+                                this.setState({ chosenRuleOids: value });
+                              }}
+                            >
+                              {costCenter.propertyList.map(item => (
+                                <TagSelect.Option
+                                  value={`${item.fieldOid}_${item.refCostCenterOid}`}
+                                  key={`${item.fieldOid}_${item.refCostCenterOid}`}
+                                >
+                                  {item.fieldName}
+                                </TagSelect.Option>
+                              ))}
+                            </TagSelect>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </ListItem>
                 )}
               {formFieldList &&
                 formFieldList['400'] &&
                 !!formFieldList['400'].length && (
                   <ListItem>
-                    <h4>{this.$t('setting.key1290' /*申请人=成本中心经理*/)}</h4>
-                    <TagSelect
-                      hideCheckAll={true}
-                      value={chosenRuleOids}
-                      onChange={value => {
-                        this.setState({ chosenRuleOids: value });
-                      }}
-                    >
-                      {/*由于【申请人=成本中心经理】和【表单自定义条件中的成本中心】的fieldOid一样，为了区分，在fieldOid后拼上remark*/}
-                      {formFieldList['400'].map(item => (
-                        <TagSelect.Option
-                          value={`${item.fieldOid}_${item.messageKey}`}
-                          key={`${item.fieldOid}_${item.messageKey}`}
-                        >
-                          {item.fieldName}
-                        </TagSelect.Option>
-                      ))}
-                    </TagSelect>
+                    <div>
+                      <h4>{this.$t('setting.key1290' /*申请人=成本中心经理*/)}</h4>
+                      <TagSelect
+                        hideCheckAll={true}
+                        value={chosenRuleOids}
+                        onChange={value => {
+                          this.setState({ chosenRuleOids: value });
+                        }}
+                      >
+                        {/*由于【申请人=成本中心经理】和【表单自定义条件中的成本中心】的fieldOid一样，为了区分，在fieldOid后拼上remark*/}
+                        {formFieldList['400'].map(item => (
+                          <TagSelect.Option
+                            value={`${item.fieldOid}_${item.messageKey}`}
+                            key={`${item.fieldOid}_${item.messageKey}`}
+                          >
+                            {item.fieldName}
+                          </TagSelect.Option>
+                        ))}
+                      </TagSelect>
+                    </div>
                   </ListItem>
                 )}
             </List>

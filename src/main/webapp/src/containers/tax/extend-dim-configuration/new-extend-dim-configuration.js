@@ -22,6 +22,7 @@ class NewExtendDimConfiguration extends React.Component {
       id: '',
       taxClientTypeOptions: [],
       defaultItemValueName: [],
+      sourceSystemMethodOptions: [],
     };
   }
   componentDidMount() {
@@ -30,6 +31,8 @@ class NewExtendDimConfiguration extends React.Component {
     });
     console.log(this.props.params);
     this.getDimensionName();
+    this.getTaxAccountingMethod();
+    this.getDefaultItemName();
   }
   // 获取维度下拉列表
   getDimensionName() {
@@ -70,6 +73,48 @@ class NewExtendDimConfiguration extends React.Component {
       });
     });
   }
+
+  /**
+   * 获取匹配字段下拉列表
+   */
+  getTaxAccountingMethod = () => {
+    // eslint-disable-next-line prefer-const
+    let sourceSystemMethodOptions = [];
+    this.getSystemValueList('TAX_MATCH_FIELD').then(res => {
+      console.log(res.data);
+      res.data.values.map(data => {
+        sourceSystemMethodOptions.push({
+          label: data.messageKey,
+          value: data.value,
+          key: data.value,
+        });
+      });
+      this.setState({
+        sourceSystemMethodOptions,
+      });
+    });
+  };
+
+  getDefaultItemName = () => {
+    const id = this.props.params.dimensionId;
+    console.log(id);
+    if (id != undefined) {
+      Service.getSystemValueList1(id).then(res => {
+        let defaultItemValueName = [];
+        res.data.map(data => {
+          defaultItemValueName.push({
+            label: data.dimensionItemName,
+            value: data.dimensionItemName,
+            key: data.dimensionItemName,
+            id: data.id,
+          });
+        });
+        this.setState({
+          defaultItemValueName,
+        });
+      });
+    }
+  };
   handleCreate = () => {
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (err) {
@@ -156,7 +201,12 @@ class NewExtendDimConfiguration extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { data, taxClientTypeOptions, defaultItemValueName } = this.state;
+    const {
+      data,
+      taxClientTypeOptions,
+      defaultItemValueName,
+      sourceSystemMethodOptions,
+    } = this.state;
     const formItemLayout = {
       labelCol: { span: 6, offset: 1 },
       wrapperCol: { span: 14, offset: 1 },
@@ -169,15 +219,27 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('ruleCode', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
               initialValue: data.ruleCode,
             })(
-              <Select placeholder="请选择" style={{ width: '100%' }} onChange={value => {}}>
-                <Option value="VAT_INVOICE_RULE">开票规则</Option>
-                <Option value="VAT_SEPARATE_RULE">价税分离规则</Option>
+              <Select
+                placeholder="请选择"
+                style={{ width: '100%' }}
+                onChange={value => {
+                  if (value === 'VAT_INVOICE_RULE') {
+                    value = '开票规则';
+                  }
+                  if (value === 'VAT_SEPARATE_RULE') {
+                    value = '价税分离规则';
+                  }
+                  this.props.form.setFieldsValue({ ruleName: value });
+                }}
+              >
+                <Option value="VAT_INVOICE_RULE">VAT_INVOICE_RULE</Option>
+                <Option value="VAT_SEPARATE_RULE">VAT_SEPARATE_RULE</Option>
               </Select>
             )}
           </FormItem>
@@ -197,16 +259,17 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('dimensionId', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
-              initialValue: data.dimensionName || data.dimensionId,
+              initialValue: data.dimensionId,
             })(
               <Select
                 placeholder="请选择"
                 style={{ width: '100%' }}
                 onChange={id => {
+                  console.log(id);
                   Service.getSystemValueList1(id).then(res => {
                     let defaultItemValueName = [];
                     res.data.map(data => {
@@ -242,7 +305,7 @@ class NewExtendDimConfiguration extends React.Component {
                   message: this.$t('common.please.enter'),
                 },
               ],
-              initialValue: data.defaultItemValueName || data.defaultItemId,
+              initialValue: data.defaultItemId,
             })(
               <Select placeholder="请选择">
                 {defaultItemValueName.map(option => {
@@ -260,7 +323,7 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('essentialFlag', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
@@ -277,7 +340,7 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('priority', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
@@ -295,7 +358,7 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('tabName', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
@@ -306,12 +369,18 @@ class NewExtendDimConfiguration extends React.Component {
             {getFieldDecorator('colName', {
               rules: [
                 {
-                  required: false,
+                  required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
               initialValue: data.colName,
-            })(<Input placeholder={this.$t({ id: 'common.please.enter' })} disabled={false} />)}
+            })(
+              <Select placeholder="请选择" style={{ width: '100%' }}>
+                {sourceSystemMethodOptions.map(option => {
+                  return <Option key={option.value}>{option.label}</Option>;
+                })}
+              </Select>
+            )}
           </FormItem>
           <div className="slide-footer">
             <Button type="primary" htmlType="submit" loading={this.state.loading}>

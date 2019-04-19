@@ -104,6 +104,7 @@ class SelectContract extends React.Component {
       .get(url)
       .then(response => {
         if (response.status == 200) {
+          console.log(response.data.length);
           if (response.data.length) {
             this.setState(
               {
@@ -120,6 +121,8 @@ class SelectContract extends React.Component {
                 this.refreshSelected(); // 刷新当页选择器
               }
             );
+          } else {
+            this.setState({ loading: false });
           }
         }
       })

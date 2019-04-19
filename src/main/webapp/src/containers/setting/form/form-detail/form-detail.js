@@ -4,13 +4,11 @@ import { Tabs, Spin } from 'antd';
 const TabPane = Tabs.TabPane;
 import FormDetailBase from 'containers/setting/form/form-detail/form-detail-base';
 import WorkFlowDetail from 'containers/setting/form/form-detail/workflow-detail';
-import FormDetailCustom from 'containers/setting/form/form-detail/form-detail-custom/form-detail-custom';
 import FormPermission from 'containers/setting/form/form-detail/form-permission/form-permission';
 import FormSetting from 'containers/setting/form/form-detail/form-setting/form-setting';
 import FormMatch from 'containers/setting/form/form-detail/form-match/form-match';
 import 'styles/setting/form/form-detail.scss';
 import formService from 'containers/setting/form/form.service';
-import { routerRedux } from 'dva/router';
 import PropTypes from 'prop-types';
 
 class FormDetail extends React.Component {
@@ -31,7 +29,6 @@ class FormDetail extends React.Component {
   }
 
   componentWillMount() {
-    console.log(this.props);
     const { formType, formOid, booksID } = this.props.match.params;
     if (formType) {
       this.setState({
@@ -101,7 +98,6 @@ class FormDetail extends React.Component {
     });
   };
   renderTabs() {
-    console.log(this.state.form);
     let tabs = [
       { key: 'base', name: this.$t('form.setting.base.info') /*基本信息*/ },
       { key: 'approve', name: this.$t('menu.workflow'), disabled: !this.state.form },
@@ -116,7 +112,6 @@ class FormDetail extends React.Component {
   }
 
   handleNew = form => {
-    console.log(form);
     this.setState(
       {
         nowTab: 'approve',
@@ -185,11 +180,10 @@ class FormDetail extends React.Component {
   };
 
   render() {
-    const { nowTab, loading, matchFormData } = this.state;
+    const { nowTab, loading } = this.state;
     const { formOid } = this.props.match.params;
-    console.log(nowTab);
     return (
-      <div className="form-detail" style={{ paddingBottom: 40 }}>
+      <div className="form-detail">
         {loading ? (
           <Spin />
         ) : (

@@ -4,25 +4,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import {
-  Form,
-  Spin,
-  Timeline,
-  Popover,
-  Button,
-  Collapse,
-  Select,
-  Affix,
-  message,
-  Popconfirm,
-  notification,
-  Icon,
-  Badge,
-  Row,
-  Col,
-  Input,
-  Steps,
-} from 'antd';
+import { Form, Spin, Popover, Button, message, Icon, Badge, Row, Col, Steps } from 'antd';
 import Table from 'widget/table';
 const Step = Steps.Step;
 const FormItem = Form.Item;
@@ -68,8 +50,7 @@ class BudgetJournalCheckDetail extends React.Component {
           title: this.$t('budgetJournal.companyId'),
           key: 'companyName',
           dataIndex: 'companyName',
-          width: '8%',
-          align: 'center',
+          width: 170,
           render: companyName => <Popover content={companyName}>{companyName}</Popover>,
         },
         {
@@ -77,17 +58,15 @@ class BudgetJournalCheckDetail extends React.Component {
           title: this.$t('budgetJournal.unitId'),
           key: 'departmentName',
           dataIndex: 'departmentName',
-          width: '8%',
-          align: 'center',
+          width: 130,
           render: unitName => <Popover content={unitName}>{unitName}</Popover>,
         },
         {
           /*责任中心 */
-          title: '责任中心',
-          align: 'center',
+          title: this.$t('budget.balance.responsibility.center'), // 责任中心
           key: 'responsibilityCenterCodeName',
           dataIndex: 'responsibilityCenterCodeName',
-          width: '5%',
+          width: 120,
           render: responsibilityCenterCodeName => (
             <Popover content={responsibilityCenterCodeName}>{responsibilityCenterCodeName}</Popover>
           ),
@@ -96,8 +75,8 @@ class BudgetJournalCheckDetail extends React.Component {
           /*人员*/
           title: this.$t('budgetJournal.employeeId'),
           key: 'employeeName',
-          align: 'center',
           dataIndex: 'employeeName',
+          width: 90,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -105,8 +84,7 @@ class BudgetJournalCheckDetail extends React.Component {
           title: this.$t('budgetJournal.item'),
           key: 'itemName',
           dataIndex: 'itemName',
-          align: 'center',
-          width: '16%',
+          width: 155,
           render: itemName => <Popover content={itemName}>{itemName}</Popover>,
         },
         {
@@ -115,12 +93,12 @@ class BudgetJournalCheckDetail extends React.Component {
           key: 'periodName',
           dataIndex: 'periodName',
           align: 'center',
-          width: '6%',
+          width: 96,
         },
         {
           /*季度*/
           title: this.$t('budgetJournal.periodQuarter'),
-          width: '6%',
+          width: 96,
           key: 'periodQuarterName',
           align: 'center',
           dataIndex: 'periodQuarterName',
@@ -131,30 +109,29 @@ class BudgetJournalCheckDetail extends React.Component {
           key: 'periodYear',
           dataIndex: 'periodYear',
           align: 'center',
-          width: '8%',
+          width: 96,
         },
         {
           /*币种*/
           title: this.$t('budgetJournal.currency'),
           key: 'currency',
           dataIndex: 'currency',
-          align: 'center',
-          width: '8%',
+          width: 70,
         },
         {
           /*汇率*/
           title: this.$t('budgetJournal.rate'),
           key: 'rate',
           dataIndex: 'rate',
-          align: 'center',
-          width: '8%',
+          width: 60,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
           /*金额*/
           title: this.$t('budgetJournal.amount'),
           key: 'amount',
           dataIndex: 'amount',
-          align: 'center',
+          width: 140,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -164,7 +141,7 @@ class BudgetJournalCheckDetail extends React.Component {
           title: this.$t('budgetJournal.functionalAmount'),
           key: 'functionalAmount',
           dataIndex: 'functionalAmount',
-          align: 'center',
+          width: 140,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -174,14 +151,13 @@ class BudgetJournalCheckDetail extends React.Component {
           title: this.$t('budgetJournal.quantity'),
           key: 'quantity',
           dataIndex: 'quantity',
-          align: 'center',
-          with: '8%',
+          with: 70,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
           /*备注*/
           title: this.$t('budgetJournal.remark'),
           key: 'remark',
-          align: 'center',
           dataIndex: 'remark',
           render: remark => <Popover content={remark}>{remark}</Popover>,
         },

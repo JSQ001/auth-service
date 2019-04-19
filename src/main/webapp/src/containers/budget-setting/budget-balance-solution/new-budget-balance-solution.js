@@ -138,6 +138,7 @@ class NewBudgetBalanceSolution extends Component {
         {
           title: this.$t('common.operation'),
           dataIndex: 'operator',
+          align: 'center',
           render: (value, record) => {
             return (
               <a

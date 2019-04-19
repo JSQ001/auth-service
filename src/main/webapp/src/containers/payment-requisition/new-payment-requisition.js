@@ -43,7 +43,7 @@ class NewPaymentRequisition extends React.Component {
       myPaymentRequisitionDetail: '/my-payment-requisition/payment-requisition-detail/:id', //付款申请单详情
       uploadOids: [], //上传附件的Oids
       fileList: [],
-      userList: [],
+      defaultUser: {},
     };
   }
 
@@ -204,12 +204,17 @@ class NewPaymentRequisition extends React.Component {
     paymentRequisitionService
       .listUserByTypeId(typeId)
       .then(res => {
-        this.setState({ userList: res.data }, () => {
-          if (res.data) {
-            let user = res.data[0];
-            this.userChange(user);
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
           }
-        });
+          this.setState({ defaultUser });
+          this.userChange(defaultUser);
+        }
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -225,7 +230,7 @@ class NewPaymentRequisition extends React.Component {
       isNew,
       headerData,
       fileList,
-      userList,
+      defaultUser,
       unitId,
     } = this.state;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
@@ -249,9 +254,7 @@ class NewPaymentRequisition extends React.Component {
                   {getFieldDecorator('user', {
                     rules: [{ required: true, message: '请选择' }],
                     initialValue: isNew
-                      ? userList.length > 0
-                        ? { id: userList[0].id, fullName: userList[0].fullName }
-                        : { id: this.props.user.id, fullName: this.props.user.fullName }
+                      ? { id: defaultUser.id, fullName: defaultUser.fullName }
                       : { id: headerData.employeeId, fullName: headerData.employeeName },
                   })(
                     <Lov

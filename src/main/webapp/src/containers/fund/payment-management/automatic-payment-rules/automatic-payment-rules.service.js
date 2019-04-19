@@ -46,13 +46,15 @@ export default {
   },
 
   /**
-   * 根据id获得详情
+   * 根据id获得详情------跳到各种分配页面
    * @param {*} id
    */
   getInfoById(id) {
     return httpFetch.get(`${config.fundUrl}/api/payment/rule/head/${id}`);
+    // return httpFetch.get(`http://10.211.110.57:8080/api/payment/rule/head/${id}`);
   },
 
+  // ===============分配公司===============
   /**
    * 获取分配的公司
    * @param {*} id
@@ -88,13 +90,14 @@ export default {
     );
   },
 
+  // ==========分配员工=============
   /**
    * 获取分配的员工级别
    * @param {*} id
    */
-  getDistributiveEmploy(id, params = {}) {
+  getDistributiveEmploy(page, size, id, params = {}) {
     return httpFetch.get(
-      `${config.fundUrl}/api/payment/rule/employee/pageByCondition/${id}`,
+      `${config.fundUrl}/api/payment/rule/employee/pageByCondition/${id}?page=${page}&size=${size}`,
       params
     );
   },
@@ -112,6 +115,47 @@ export default {
    */
   saveEmployValue(params) {
     return httpFetch.put(`${config.fundUrl}/api/payment/rule/employee`, params);
+  },
+
+  // ===========分配业务=============
+
+  /**
+   * 获取分配的业务级别
+   * @param {*} id
+   */
+  getDistributiveBusiness(page, size, id, params = {}) {
+    return httpFetch.get(
+      `${config.fundUrl}/api/payment/rule/busType/pageByCondition/${id}?page=${page}&size=${size}`,
+      params
+    );
+    // return httpFetch.get(
+    //   `http://10.211.110.57:8080/api/payment/rule/busType/pageByCondition/${id}?page=${page}&size=${size}`,
+    //   params
+    // );
+  },
+
+  /**
+   * 更改保存业务分配状态-------自动付款规则业务类型创建与更新
+   * @param {*} parmas
+   */
+  updateAssignBusiness(params) {
+    return httpFetch.post(`${config.fundUrl}/api/payment/rule/busType`, params);
+    // return httpFetch.post(`http://10.211.110.57:8080/api/payment/rule/busType`, params);
+  },
+
+  // /**
+  //  * 保存业务代码
+  //  */
+  // saveEmployValue(params) {
+  //   return httpFetch.put(`${config.fundUrl}/api/payment/rule/employee`, params);
+  // },
+
+  /**
+   * 批量分配业务
+   * @param {*} parmas
+   */
+  batchDistributeBusiness(parmas) {
+    return httpFetch.put(`${config.fundUrl}/api/payment/rule/company/batchInsert`, parmas);
   },
 
   /**

@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import SearchArea from 'widget/search-area';
-import { Button, Divider, Popconfirm } from 'antd';
+import { Button, Table, Divider, message, Popconfirm } from 'antd';
+import SlideFrame from 'widget/slide-frame';
+import NewParamsSetting from './new-params-setting';
+import service from './service';
 import config from 'config';
+
 import CustomTable from 'widget/custom-table';
+
+import 'styles/setting/params-setting/params-setting.scss';
+import { Object } from 'core-js';
 
 class ParamsSetting extends Component {
   constructor(props) {
@@ -96,8 +103,68 @@ class ParamsSetting extends Component {
     };
   }
 
+  //新建
+  create = () => {
+    this.setState({
+      visibel: true,
+    });
+  };
+
+  //编辑
+  edit = record => {
+    this.setState({ model: JSON.parse(JSON.stringify(record)), visibel: true });
+  };
+
+  //删除
+  delete = id => {
+    service
+      .deleteParamsSetting(id)
+      .then(res => {
+        message.success('删除成功！');
+        this.setState({ page: 0 }, () => {
+          this.getList();
+        });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
+  };
+
+  //新建
+  create = () => {
+    this.setState({
+      visibel: true,
+    });
+  };
+
+  //编辑
+  edit = record => {
+    this.setState({ model: JSON.parse(JSON.stringify(record)), visibel: true });
+  };
+
+  //删除
+  delete = id => {
+    service
+      .deleteParamsSetting(id)
+      .then(res => {
+        message.success('删除成功！');
+        this.setState({ page: 0 }, () => {
+          this.getList();
+        });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
+  };
+
   //搜索
   search = values => {
+    Object.keys(values).map(key => {
+      if (!values[key]) {
+        delete values[key];
+      }
+    });
+
     this.setState({ searchParams: values, page: 0 }, () => {
       this.getList();
     });
@@ -109,13 +176,30 @@ class ParamsSetting extends Component {
     this.table.search(searchParams);
   };
 
-  // 清除搜索条件
+  //关闭侧拉框回调
+  close = flag => {
+    this.setState({ visibel: false, model: {} }, () => {
+      if (flag) {
+        this.getList();
+      }
+    });
+  };
+
+  //关闭侧拉框回调
+  close = flag => {
+    this.setState({ visibel: false, model: {} }, () => {
+      if (flag) {
+        this.getList();
+      }
+    });
+  };
+
   empty = () => {
     this.search({});
   };
 
   render() {
-    const { searchForm, columns, data, loading, visibel, pagination, model } = this.state;
+    const { searchForm, columns, visibel, model } = this.state;
 
     return (
       <div className="params-setting">
@@ -130,9 +214,21 @@ class ParamsSetting extends Component {
         </Button>
         <CustomTable
           columns={columns}
-          url={`${config.baseUrl}/api/data/auth/table/properties/query`}
+          url={`${config.mdataUrl}/api/data/auth/table/properties/query`}
           ref={ref => (this.table = ref)}
         />
+        <SlideFrame
+          title={model.id ? '编辑参数配置' : '新建参数配置'}
+          show={visibel}
+          onClose={() => {
+            this.setState({
+              visibel: false,
+              model: {},
+            });
+          }}
+        >
+          <NewParamsSetting params={model} close={this.close} />
+        </SlideFrame>
       </div>
     );
   }

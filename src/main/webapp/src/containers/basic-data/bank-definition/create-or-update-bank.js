@@ -13,6 +13,7 @@ class CreateOrUpdateBank extends React.Component {
     this.state = {
       loading: false,
       enabled: true,
+      openBankList: [], // 开户银行值列表
       bankTypeHelp: '',
       bank: {},
       isEditor: false,
@@ -69,11 +70,23 @@ class CreateOrUpdateBank extends React.Component {
         countryData: params.countryData ? params.countryData : [],
       });
     }
+    // 获取开户银行
+    this.getSystemValueList('ZJ_OPEN_BANK')
+      .then(res => {
+        this.setState({
+          openBankList: res.data.values,
+        });
+      })
+      .catch(err => {
+        message.error(err.message);
+      });
   }
 
   //上传之前，表单的值需要处理
   getRequestValue = values => {
     if (this.state.isChina) {
+      values.bankHead = values.bankName.key;
+      values.bankName = values.bankName.label;
       values.countryCode = values.country;
       values.countryName = BSService.getCountryNameByCode(
         values.countryCode,
@@ -99,6 +112,8 @@ class CreateOrUpdateBank extends React.Component {
       values.openAccount = values.province + values.city;
       return values;
     } else {
+      values.bankHead = values.bankName.key;
+      values.bankName = values.bankName.label;
       values.countryCode = values.country;
       values.countryName = BSService.getCountryNameByCode(
         values.countryCode,
@@ -224,6 +239,7 @@ class CreateOrUpdateBank extends React.Component {
       {
         /*省市:只有中国时才联动*/
       }
+      console.log(BSService.getCountryDataByCode('CHN000000000', this.state.countryData));
       openAccountDom = (
         <FormItem {...formItemLayout} label={this.$t('bank.openAccount')} help={bankTypeHelp}>
           {getFieldDecorator('openAccount', {
@@ -255,7 +271,7 @@ class CreateOrUpdateBank extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { enabled, loading, bankTypeHelp, bank, country, isEditor } = this.state;
+    const { enabled, loading, bankTypeHelp, bank, country, isEditor, openBankList } = this.state;
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 14, offset: 1 },
@@ -288,8 +304,8 @@ class CreateOrUpdateBank extends React.Component {
               </div>
             )}
           </FormItem>
-          {/*银行代码*/}
-          <FormItem {...formItemLayout} label={this.$t('bank.bankCode')}>
+          {/*联行号*/}
+          <FormItem {...formItemLayout} label="联行号">
             {getFieldDecorator('bankCode', {
               initialValue: bank.bankCode,
               rules: [
@@ -315,18 +331,24 @@ class CreateOrUpdateBank extends React.Component {
           {/*银行名称*/}
           <FormItem {...formItemLayout} label={this.$t('bank.bankName')}>
             {getFieldDecorator('bankName', {
-              initialValue: bank.bankName,
+              initialValue: { key: bank.bankCode, label: bank.bankName },
               rules: [
                 {
                   required: true,
                   message: this.$t('common.please.enter'),
                 },
               ],
-            })(<Input placeholder={this.$t('common.please.enter')} />)}
+            })(
+              <Select labelInValue placeholder="请选择" allowClear>
+                {openBankList.map(option => {
+                  return <Option key={option.value}>{option.name}</Option>;
+                })}
+              </Select>
+            )}
           </FormItem>
 
-          {/*支行名称*/}
-          <FormItem {...formItemLayout} label={this.$t('bank.bankBranchName')}>
+          {/*分支行名称*/}
+          <FormItem {...formItemLayout} label="分支行名称">
             {getFieldDecorator('bankBranchName', {
               initialValue: bank.bankBranchName,
               rules: [

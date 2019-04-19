@@ -129,19 +129,16 @@ class ToRechecked extends React.Component {
     }
     // remark = remark == 'undefined'?'':remark;
     return;
-    backlashService
-      .updateBacklashStatusByDetailId(id, remark, 'S')
-      .then(res => {
-        if (res.status === 200) {
-          message.success(this.$t({ id: 'pay.backlash.passSuccess' }));
-          this.setState({ loading: false });
-          this.onCancel(true);
-        }
-      })
-      .catch(e => {
-        this.setState({ loading: false });
-        message.error(`${e.response.data.message}`);
-      });
+    // backlashService.updateBacklashStatusByDetailId(id, remark, "S").then(res => {
+    //     if (res.status === 200) {
+    //         message.success(this.$t({ id: 'pay.backlash.passSuccess' }));
+    //         this.setState({ loading: false });
+    //         this.onCancel(true)
+    //     }
+    // }).catch(e => {
+    //     this.setState({ loading: false });
+    //     message.error(`${e.response.data.message}`)
+    // })
   };
 
   //上传附件

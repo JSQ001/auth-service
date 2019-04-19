@@ -1,22 +1,24 @@
 import React from 'react';
-import { Table, Row, Col, Button, Form, Input } from 'antd';
-// import { routerRedux } from 'dva/router';
+import {
+  // Table,
+  Row,
+  Col,
+  Button,
+  Form,
+  message,
+} from 'antd';
 import { connect } from 'dva';
 // import { messages } from 'utils/utils';
-// import moment from 'moment';
-// import FundEditablTable from '../../fund-components/fund-editable-table';
+import FundEditablTable from '../../fund-components/fund-editable-table';
 import FundSearchForm from '../../fund-components/fund-search-form';
 import FundAreaDefinitionService from './fund-area-definition.service';
-
-const selectWidth = { width: '100%' };
+import 'styles/fund/fund-area.scss';
 
 class FundAreaDefinition extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      //   copyDataSource: '',
-      // >>>>>>>>>>>
-      loading: false, // loading状态
+      updateTableData: false, // 触发子组件的条件，模糊搜索时重新渲染页面
       searchParams: {}, // 模糊查询数据搜索参数
       pagination: {
         total: 0,
@@ -43,63 +45,11 @@ class FundAreaDefinition extends React.Component {
           title: '行政区域代码',
           dataIndex: 'regionCode',
           editable: true,
-          render: (value, record, index) => {
-            // const { status } = this.state;
-            console.log('record', record);
-            return record.status === 'new' ? (
-              <Input
-                placeholder="请输入"
-                defaultValue={record.regionCode ? record.regionCode : value}
-                onChange={e => this.onDescChange(e, index, 'regionCode')}
-                // style={{ textAlign: 'center' }}
-                style={selectWidth}
-              />
-            ) : (
-              <span>{record.regionCode}</span>
-            );
-          },
         },
         {
           title: '地区名称',
           dataIndex: 'description',
           editable: true,
-          // render: (value, record, index) => {
-          //     // const { status } = this.state;
-          //     return (
-          //       <Input
-          //         placeholder="请输入"
-          //         defaultValue={record.description ? record.description : value}
-          //         onChange={e => this.onDescChange(e, index, 'description')}
-          //         // style={{ textAlign: 'center' }}
-          //         style={selectWidth}
-          //       />
-          //     )
-          //     // : (
-          //     //   <span>{record.regionCode}</span>
-          //     // );
-          // },
-          // render: (enabled, record) => {
-          //   const { employNameList } = this.state;
-          //   return record.status === 'new' ? (
-          //     <Select
-          //       placeholder="请选择"
-          //       style={selectWidth}
-          //       labelInValue
-          //       onChange={this.changeVllue}
-          //     >
-          //       {employNameList.length > 0 &&
-          //         employNameList.map(empItem => {
-          //           return (
-          //             <Option key={empItem.value}>
-          //               {empItem.name}-{empItem.value}
-          //             </Option>
-          //           );
-          //         })}
-          //     </Select>
-          //   ) : (
-          //     <span>{record.employeeLevelDesc}</span>
-          //   );
-          // },
         },
       ],
     };
@@ -114,13 +64,11 @@ class FundAreaDefinition extends React.Component {
    */
   getList() {
     const { pagination, searchParams } = this.state;
-    this.setState({ loading: true });
     FundAreaDefinitionService.getHead(pagination.page, pagination.pageSize, searchParams).then(
       response => {
         const { data } = response;
         this.setState({
           tableData: data,
-          loading: false,
           pagination: {
             ...pagination,
             total: Number(response.headers['x-total-count'])
@@ -128,6 +76,7 @@ class FundAreaDefinition extends React.Component {
               : 0,
             onChange: this.onChangePager,
             current: pagination.page + 1,
+            pageSize: pagination.pageSize,
             onShowSizeChange: this.onShowSizeChange,
             showSizeChanger: true,
             showQuickJumper: true,
@@ -143,7 +92,7 @@ class FundAreaDefinition extends React.Component {
   }
 
   /**
-   * 更多展示中的搜索
+   * 模糊查询中的搜索按钮
    */
   handleSearch = values => {
     const { searchParams } = this.state;
@@ -156,6 +105,7 @@ class FundAreaDefinition extends React.Component {
         },
       },
       () => {
+        this.setState({ updateTableData: true });
         this.getList();
       }
     );
@@ -169,11 +119,13 @@ class FundAreaDefinition extends React.Component {
     temp.page = pagination.current - 1;
     temp.current = pagination.current;
     temp.pageSize = pagination.pageSize;
+    // console.log(temp);
     this.setState(
       {
         pagination: temp,
       },
       () => {
+        this.setState({ updateTableData: true }); // 为了触发FundEditablTable组件，重新渲染刷新数据
         this.getList();
       }
     );
@@ -191,94 +143,99 @@ class FundAreaDefinition extends React.Component {
         pagination: temp,
       },
       () => {
+        this.setState({ updateTableData: true });
         this.getList();
       }
     );
   };
 
   /**
-   * 新建
+   * 新增
    */
-  handleCreateClick = () => {};
+  handleAdd = () => {
+    this.child.handleAdd();
+  };
+
+  /**
+   * onRef调用子组件方法
+   */
+  onRef = ref => {
+    this.child = ref;
+  };
+
+  /**
+   * 保存saveTable
+   */
+  save = () => {
+    this.child.saveTable();
+  };
 
   /**
    * 保存数据
    */
-  //   saveTable = value => {
-  //     const { tableData, parameterConfigurationData } = this.state;
-  //     const saveValue = value.map((item, index) => {
-  //       let resItem = {};
-  //       if (tableData[index]) {
-  //         resItem = {
-  //           ...tableData[index],
-  //           ...item,
-  //         };
-  //       } else {
-  //         resItem = {
-  //           ...item,
-  //           headId: parameterConfigurationData.id,
-  //         };
-  //       }
-  //       return resItem;
-  //     });
-  //     FundAreaDefinitionService.updateSave(saveValue).then(response => {
-  //       if (response.status === 200) {
-  //         message.success('保存成功');
-  //       } else {
-  //         // message.error(response.data.error.message);
-  //         message.error('保存失败！');
-  //       }
-  //     });
-  //   };
+  saveTable = value => {
+    // value --> 选中所有行的值({regionCode、description})
+    const { tableData } = this.state;
+    const saveValue = value.map((item, index) => {
+      let resItem = {};
+      if (tableData[index]) {
+        // 选中index行，并修改该行数据的保存
+        resItem = {
+          ...tableData[index],
+          ...item,
+        };
+      } else {
+        // 新增行数据的保存(无id，只有{regionCode、description})
+        resItem = {
+          ...item,
+        };
+      }
+      return resItem;
+    });
+    // console.log('保存数据>>>>>>', saveValue);
+    FundAreaDefinitionService.updateSave(saveValue).then(response => {
+      if (response.status === 200) {
+        message.success('保存成功');
+        this.getList();
+      } else {
+        // message.error(response.data.error.message);
+        message.error('保存失败！');
+      }
+    });
+  };
 
   render() {
-    const { loading, columns, searchForm, pagination, tableData } = this.state;
+    const { columns, searchForm, pagination, tableData, updateTableData } = this.state;
     return (
-      <div className="account-transfer-setting">
+      <div className="fund-area-definition">
         <div className="common-top-area">
           <Row>
-            <FundSearchForm
-              submitHandle={this.handleSearch}
-              searchForm={searchForm}
-              //   maxLength={4}
-            />
+            <FundSearchForm submitHandle={this.handleSearch} searchForm={searchForm} />
           </Row>
         </div>
         <div>
           <div style={{ margin: '10px 0' }}>
             <Row>
               <Col span={10}>
-                <Button
-                  onClick={this.handleCreateClick}
-                  style={{ marginRight: '10px' }}
-                  type="primary"
-                >
+                <Button onClick={this.handleAdd} style={{ marginRight: '10px' }} type="primary">
                   {this.$t('common.create')}
                 </Button>
-                <Button onClick={this.handleSave} type="primary">
+                <Button onClick={this.save} type="primary">
                   {this.$t('common.save')}
                 </Button>
               </Col>
             </Row>
           </div>
-          {/* <FundEditablTable
+          <FundEditablTable
             columns={columns}
             dataSource={tableData}
             pagination={pagination}
+            onRef={this.onRef}
             saveTable={this.saveTable}
-            // cancel={this.cancel}
+            onTableChange={this.onChangePager}
+            updateTableData={updateTableData}
             needTopButton
             needBottomButton
-          /> */}
-          <Table
-            rowKey={record => record.id}
-            columns={columns}
-            dataSource={tableData}
-            bordered
-            size="middle"
-            pagination={pagination}
-            loading={loading}
-            onChange={this.onChangePager}
           />
         </div>
       </div>

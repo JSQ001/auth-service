@@ -41,24 +41,14 @@ class CustomApproveNode extends React.Component {
           approvalActions: '8001', //8001 通过 8002 驳回
         },
         {
-          type: 1002,
-          name: this.$t('setting.key1250' /*知会*/),
-          remark: this.$t('setting.key1250' /*知会*/),
+          type: 1004,
+          name: this.$t('setting.key1251' /*打印*/),
+          remark: this.$t('setting.key1251' /*打印*/),
           code: null,
           level: 1,
           ruleApprovalChainOid: this.props.ruleApprovalChainOid,
           ruleApprovalNodeOid: null,
           nextRuleApprovalNodeOid: null,
-          notifyInfo: {
-            isApp: true,
-            isWeChat: true,
-            isWeb: true,
-            isName: true,
-            isMoney: true,
-            isReason: true,
-            title: '',
-            content: '',
-          },
         },
       ],
       nowWidget: deepCopy(this.props.ruleApprovalNodes),
@@ -84,30 +74,6 @@ class CustomApproveNode extends React.Component {
       nowWidget[index].counterFlag = index;
     });
     this.setState({ nowWidget, counter: nowWidget.length });
-
-    //只有报销单和借款单显示打印节点
-    if (
-      nextProps.formInfo &&
-      (String(nextProps.formInfo.formType).charAt(0) === '3' ||
-        nextProps.formInfo.formType === 2005)
-    ) {
-      let customWidget = this.state.customWidget;
-      let hasPrint = false;
-      customWidget.map(item => {
-        item.type === 1004 && (hasPrint = true);
-      });
-      !hasPrint &&
-        customWidget.push({
-          type: 1004,
-          name: this.$t('setting.key1251' /*打印*/),
-          remark: this.$t('setting.key1251' /*打印*/),
-          code: null,
-          level: 1,
-          ruleApprovalChainOid: this.props.ruleApprovalChainOid,
-          ruleApprovalNodeOid: null,
-          nextRuleApprovalNodeOid: null,
-        });
-    }
 
     //获取结束节点
     let endNodeWidget = this.state.endNodeWidget;

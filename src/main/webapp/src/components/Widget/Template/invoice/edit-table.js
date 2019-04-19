@@ -121,7 +121,7 @@ class EditTable extends Component {
               valueKey={col.valueKey}
               listExtraParams={col.listExtraParams}
               single={true}
-              placeholder={this.$t('common.please.enter')}
+              placeholder={this.$t('common.please.select')}
             />
           );
         }
@@ -137,7 +137,6 @@ class EditTable extends Component {
           );
         }
         case 'inputNumber': {
-          // col.dataIndex ==='detailAmount'&&console.log(value)
           return (
             <InputNumber
               step={0.01}
@@ -152,7 +151,6 @@ class EditTable extends Component {
           );
         }
         case 'select': {
-          console.log(value);
           return (
             <Select
               onChange={value => this.handleChange(col.dataIndex, value, index)}
@@ -198,10 +196,15 @@ class EditTable extends Component {
           value.length &&
           col.type === 'chooser' &&
           (value = value[0][col.showName || 'name']);
-        if (value && col.type === 'select' && col.options) {
-          value = col.options.find(
-            item => item[col.valueKey || 'key'].toString() === value.toString()
-          )[col.labelKey || 'label'];
+        if (value && col.type === 'select') {
+          value = record[col.visibleKey];
+          //编辑时给默认值
+          if (col.options && col.options.length) {
+            value =
+              (col.options.find(
+                item => item[col.valueKey || 'key'].toString() === value.toString()
+              ) || {})[col.labelKey || 'label'] || value;
+          }
         }
         return <Popover content={value}>{value}</Popover>;
       }
@@ -258,23 +261,37 @@ class EditTable extends Component {
         dataSource.splice(finalIndex, 1);
         dataCache.splice(finalIndex, 1);
       }
-      lineEvent && lineEvent();
     }
+    lineEvent && lineEvent(flag, record);
     this.setState({ dataSource, dataCache });
   };
 
   validateRow = (index, record) => {
-    let requireItem = this.state.columns.map(item => {
-      console.log(item);
+    let { columns } = this.state;
+    let tips = '';
+    columns.map(item => {
+      let hasValue = Array.isArray(record[item.dataIndex])
+        ? record[item.dataIndex].length
+        : record[item.dataIndex];
+      if (item.required && !hasValue) {
+        tips += !tips ? item.title : `、${item.title}`;
+      }
     });
+    if (!!tips) {
+      tips = `第${index + 1}行${tips}不能为空`;
+      message.error(tips);
+      return false;
+    }
+    return true;
   };
 
   // 行保存
   save = (index, record) => {
-    this.validateRow(index, record);
-    const { dataSource } = this.state;
-    const { lineSave } = this.props;
-    dataSource[this.getFinalIndex(index)].isEdit = false;
+    let validate = this.validateRow(index, record);
+    const { dataSource, columns } = this.state;
+    const { lineSave, lineSaveValidate } = this.props;
+
+    validate && (dataSource[this.getFinalIndex(index)].isEdit = false);
     this.setState({ dataSource });
 
     // todo lineSave

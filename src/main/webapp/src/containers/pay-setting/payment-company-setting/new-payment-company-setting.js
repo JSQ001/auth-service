@@ -8,8 +8,6 @@ import { connect } from 'dva';
 import { Button, Form, Switch, Input, message, Icon, Select, InputNumber } from 'antd';
 const FormItem = Form.Item;
 const Option = Select.Option;
-
-import httpFetch from 'share/httpFetch';
 import Chooser from 'widget/chooser';
 import paymentCompanySettingService from './payment-company-setting.service';
 

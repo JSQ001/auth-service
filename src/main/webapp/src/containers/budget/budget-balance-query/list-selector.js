@@ -68,7 +68,7 @@ class BudgetListSelector extends React.Component {
 
   search = params => {
     let data = [];
-    let result = [];
+    // let result = [];
 
     this.state.dataSource.map(o => {
       let flag = true;
@@ -85,14 +85,6 @@ class BudgetListSelector extends React.Component {
     this.setState({
       data,
     });
-
-    // this.setState({
-    //   page: 0,
-    //   searchParams: params,
-    //   loading: true
-    // }, () => {
-    //   this.getList();
-    // })
   };
 
   clear = () => {
@@ -116,57 +108,46 @@ class BudgetListSelector extends React.Component {
     this.setState({ data: this.props.dataSource, loading: false });
     return;
 
-    let selectorItem = this.state.selectorItem;
-    let searchParams = Object.assign({}, this.state.searchParams, this.props.extraParams);
-    let url = `${selectorItem.url}?&page=${this.state.page}&size=${this.state.pageSize}`;
-    for (let paramsName in searchParams) {
-      url +=
-        searchParams[paramsName] !== undefined ? `&${paramsName}=${searchParams[paramsName]}` : ''; //遍历searchParams，如果该处有值，则填入url
-    }
-    return httpFetch
-      .get(url)
-      .then(response => {
-        let data = [];
-        if (selectorItem.isValue) {
-          response.data.map(item => {
-            let option = {};
-            option[selectorItem.key] = item;
-            data.push(option);
-          });
-        } else {
-          data = selectorItem.listKey
-            ? response.data[selectorItem.listKey]
-            : selectorItem.isValueList
-              ? response.data.values
-              : response.data;
-        }
-        data.map(item => {
-          item.key = item[selectorItem.key];
-        });
+    // let selectorItem = this.state.selectorItem;
+    // let searchParams = Object.assign({}, this.state.searchParams, this.props.extraParams);
+    // let url = `${selectorItem.url}?&page=${this.state.page}&size=${this.state.pageSize}`;
+    // for (let paramsName in searchParams) {
+    //   url += searchParams[paramsName] !== undefined ? `&${paramsName}=${searchParams[paramsName]}` : '';  //遍历searchParams，如果该处有值，则填入url
+    // }
+    // return httpFetch.get(url).then((response) => {
+    //   let data = [];
+    //   if (selectorItem.isValue) {
+    //     response.data.map((item) => {
+    //       let option = {};
+    //       option[selectorItem.key] = item;
+    //       data.push(option)
+    //     });
+    //   } else {
+    //     data = selectorItem.listKey ? response.data[selectorItem.listKey] : selectorItem.isValueList ? response.data.values : response.data;
+    //   }
+    //   data.map((item) => {
+    //     item.key = item[selectorItem.key];
+    //   });
 
-        let pagination = {
-          total: Number(response.headers['x-total-count']),
-          onChange: this.onChangePager,
-          current: this.state.page + 1,
-        };
-        if (typeof selectorItem.listKey !== 'undefined') {
-          pagination.total = response.data[selectorItem.listKey].length;
-        }
-        this.setState(
-          {
-            data: data,
-            loading: false,
-            pagination,
-          },
-          () => {
-            this.refreshSelected(); //刷新当页选择器
-          }
-        );
-      })
-      .catch(e => {
-        message.error('获取数据失败，请稍后重试或联系管理员');
-        this.setState({ loading: false });
-      });
+    //   let pagination = {
+    //     total: Number(response.headers['x-total-count']),
+    //     onChange: this.onChangePager,
+    //     current: this.state.page + 1
+    //   };
+    //   if (typeof selectorItem.listKey !== 'undefined') {
+    //     pagination.total = response.data[selectorItem.listKey].length
+    //   }
+    //   this.setState({
+    //     data: data,
+    //     loading: false,
+    //     pagination
+    //   }, () => {
+    //     this.refreshSelected();  //刷新当页选择器
+    //   })
+    // }).catch(e => {
+    //   message.error('获取数据失败，请稍后重试或联系管理员');
+    //   this.setState({ loading: false })
+    // });
   }
 
   onChangePager = page => {
@@ -318,15 +299,7 @@ class BudgetListSelector extends React.Component {
 
   render() {
     const { visible, onCancel, afterClose } = this.props;
-    const {
-      data,
-      pagination,
-      loading,
-      selectorItem,
-      selectedData,
-      rowSelection,
-      inputValue,
-    } = this.state;
+    const { data, loading, selectorItem, selectedData, rowSelection } = this.state;
     const { searchForm, columns, title, key } = selectorItem;
     return (
       <Modal

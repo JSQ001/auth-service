@@ -8,6 +8,8 @@ import config from 'config';
 import httpFetch from 'share/httpFetch';
 import 'styles/setting/params-setting/params-setting.scss';
 import service from './centralized-authorization-servce';
+import Lov from 'widget/Template/lov';
+
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -20,8 +22,33 @@ class NewCentralized extends Component {
       isDisable: true,
       formList: [],
       setOfBooksId: this.props.company.setOfBooksId,
+      lov: {
+        departmentId: null,
+        companyId: null,
+      },
     };
   }
+  // 公司变化更改
+  changeCompanyLov = e => {
+    if (this.props.company.companyUnitFlag) {
+      let { lov } = this.state;
+      lov.companyId = e.id;
+      this.setState({ lov });
+    }
+  };
+  setCompanyAndDepartmentNull = () => {
+    let { lov } = this.state;
+    lov.companyId = null;
+    (lov.departmentId = null), this.setState({ lov });
+  };
+  // 公司变化更改
+  changeDepartmentLov = e => {
+    if (this.props.company.companyUnitFlag) {
+      let { lov } = this.state;
+      lov.departmentId = e.id;
+      this.setState({ lov });
+    }
+  };
 
   // 生命周期
   componentDidMount() {
@@ -127,14 +154,28 @@ class NewCentralized extends Component {
         .catch(err => {
           message.error(err.response.message);
         });
+    } else if (documentCategory === '801001') {
+      //报账单
+      httpFetch
+        .get(
+          `${config.expenseUrl}/api/expense/report/type/query?page=0&size=1000&setOfBooksId=` +
+            this.state.setOfBooksId
+        )
+        .then(({ data }) => {
+          data.map(item => {
+            list.push({ value: item.id, label: `${item.formName}` });
+          });
+          this.setState({ formList: list });
+        })
+        .catch(err => {
+          message.error(err.response.message);
+        });
     } else if (documentCategory === '801002') {
       //预算日记账
       httpFetch
         .get(
-          `${
-            config.budgetUrl
-          }/api/budget/journals/query/headers/byInput?journalTypeId=&journalCode=&periodStrategy=&status=&page=0&size=1000&journalTypeId=` +
-            this.props.organization.id
+          `${config.budgetUrl}/api/budget/journal/types/query/setOfBooksId?setOfBooksId=` +
+            this.state.setOfBooksId
         )
         .then(({ data }) => {
           data.map(item => {
@@ -156,13 +197,21 @@ class NewCentralized extends Component {
     let { params } = this.props;
     this.props.form.validateFields((err, value) => {
       if (err) return;
+      if (value.endDate !== null) {
+        let end = moment(value.endDate).format('YYYY-MM-DD');
+        let start = moment(value.startDate).format('YYYY-MM-DD');
+        if (end < start) {
+          message.warn('有效日期至不能小于有效日期从！');
+          return;
+        }
+      }
       this.setState({ saveLoading: true });
       let param = {
         ...value,
         baileeId: value.baileeId[0].userId,
         formId: value.formId ? value.formId.key : '',
-        companyId: value.companyId ? value.companyId[0].id : '',
-        unitId: value.unitId ? value.unitId[0].departmentId : '',
+        companyId: value.companyId ? value.companyId.id : '',
+        unitId: value.unitId ? value.unitId.id : '',
         mandatorId: value.mandatorId ? value.mandatorId[0].userId : '',
         tenantId: params.tenantId,
         versionNumber: params.versionNumber,
@@ -309,14 +358,28 @@ class NewCentralized extends Component {
           .catch(err => {
             message.error(err.response.message);
           });
-      } else if (value === '801002') {
-        //预算日记账
+      } else if (value === '801001') {
+        //报账单
         httpFetch
           .get(
-            `${
-              config.budgetUrl
-            }/api/budget/journals/query/headers/byInput?journalTypeId=&journalCode=&periodStrategy=&status=&page=0&size=1000&journalTypeId=` +
-              this.props.organization.id
+            `${config.expenseUrl}/api/expense/report/type/query?page=0&size=1000&setOfBooksId=` +
+              this.state.setOfBooksId
+          )
+          .then(({ data }) => {
+            data.map(item => {
+              list.push({ value: item.id, label: `${item.formName}` });
+            });
+            this.setState({ formList: list, loading: false });
+          })
+          .catch(err => {
+            message.error(err.response.message);
+          });
+      } else if (value === '801002') {
+        //报账单
+        httpFetch
+          .get(
+            `${config.budgetUrl}/api/budget/journal/types/query/setOfBooksId?setOfBooksId=` +
+              this.state.setOfBooksId
           )
           .then(({ data }) => {
             data.map(item => {
@@ -348,6 +411,8 @@ class NewCentralized extends Component {
       startDate: '',
       endDate: '',
     });
+    this.setState({ setOfBooksId: value });
+    this.setCompanyAndDepartmentNull();
   };
 
   render() {
@@ -417,6 +482,7 @@ class NewCentralized extends Component {
               <Select
                 disabled={isDisable && (params.id ? false : true)}
                 labelInValue
+                allowClear
                 notFoundContent={
                   loading ? <Spin size="small" /> : messages('agency.setting.no.result')
                 }
@@ -441,17 +507,21 @@ class NewCentralized extends Component {
               ],
               initialValue:
                 params.companyId && params.id
-                  ? [{ id: params.companyId, name: params.companyName }]
-                  : '',
+                  ? { id: params.companyId, companyName: params.companyName }
+                  : {},
             })(
-              <Chooser
-                placeholder={this.$t('common.please.select')}
-                type="company"
-                labelKey="name"
-                // labelKey="${companyCode}-${name}"
+              <Lov
+                code="company_lov"
                 valueKey="id"
-                listExtraParams={{ setOfBooksId: form.getFieldValue('setOfBooksId') || '' }}
-                single={true}
+                labelKey="companyName"
+                allowClear={true}
+                onChange={this.changeCompanyLov}
+                single
+                extraParams={{
+                  enbaled: true,
+                  departmentId: this.state.lov.departmentId,
+                  setOfBooksId: form.getFieldValue('setOfBooksId') || '',
+                }}
               />
             )}
           </FormItem>
@@ -465,16 +535,23 @@ class NewCentralized extends Component {
               ],
               initialValue:
                 params.id && params.unitId
-                  ? [{ departmentOid: params.unitId, name: params.unitName }]
-                  : '',
+                  ? { departmentOid: params.unitId, departmentName: params.unitName }
+                  : {},
             })(
-              <Chooser
-                type="department"
-                labelKey="name"
-                // labelKey="${departmentCode}-${name}"
+              <Lov
+                code="department_lov"
                 valueKey="departmentOid"
-                single={true}
-                listExtraParams={{ setOfBooksId: form.getFieldValue('setOfBooksId') || '' }}
+                labelKey="departmentName"
+                allowClear={true}
+                onChange={this.changeDepartmentLov}
+                single
+                extraParams={{
+                  status: 101,
+                  companyId: this.state.lov.companyId,
+                  setOfBooksId: this.props.company.companyUnitFlag
+                    ? form.getFieldValue('setOfBooksId') || ''
+                    : null,
+                }}
               />
             )}
           </FormItem>
@@ -542,7 +619,7 @@ class NewCentralized extends Component {
                   message: this.$t({ id: 'common.please.enter' }),
                 },
               ],
-              initialValue: params.startDate ? moment(params.stateDate) : '',
+              initialValue: params.startDate ? moment(params.startDate) : '',
             })(<DatePicker style={{ width: '100%' }} />)}
           </FormItem>
           <FormItem {...formItemLayout} label="有效日期至">

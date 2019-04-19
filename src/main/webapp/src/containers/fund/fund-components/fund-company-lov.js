@@ -67,13 +67,13 @@ class FundCompanyLov extends React.Component {
   };
 
   render() {
-    const { onChange, defaultValue } = this.props;
+    const { onChange, value } = this.props;
     const { data, fetching } = this.state;
     const options = data.map(d => <Option key={d.id}>{d.name}</Option>);
     return (
       <Select
         labelInValue
-        defaultValue={defaultValue || ''}
+        value={value}
         showSearch
         allowClear
         placeholder="请选择"

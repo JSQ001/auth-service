@@ -14,14 +14,21 @@ class CapitalTransactionReport extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      payFlag: true,
       noticeAlert: null, // 提示信息
       tableData: [], // 数据列表
       buttonLoading: false, // 按钮loading状态
       batchDelete: true, // 批量删除标志
       loading: false,
       slideVisible: false,
+      isGatherRate1: false, //
+      isautoshow1: false,
+      isNew: true,
+      isNew2: true,
+      ationRateValue: '',
+      ationRateValue1: false,
       editModel: {}, // 点击行时的编辑数据
+      handMsg: {},
+      searchParams: {},
       pagination: {
         total: 0,
         page: 0,
@@ -94,7 +101,7 @@ class CapitalTransactionReport extends React.Component {
         },
         {
           title: '最后修改人',
-          dataIndex: 'warningData',
+          dataIndex: 'lastUpdateName',
           width: 100,
           align: 'center',
         },
@@ -115,16 +122,44 @@ class CapitalTransactionReport extends React.Component {
       headId: match.params.id,
     });
     this.getList(match.params.id);
+    this.getHeader(match.params.id);
   }
+
+  /**
+   * 获取头展示数据
+   */
+  getHeader = id => {
+    const { pagination } = this.state;
+    this.setState({ loading: true });
+    distributionService
+      .getDistributionHeader(pagination.page, pagination.pageSize, id)
+      .then(response => {
+        const { data } = response;
+        console.log('head message');
+        console.log(data[0]);
+        this.setState({
+          handMsg: data[0],
+          loading: false,
+          pagination: {
+            ...pagination,
+            total: Number(response.headers['x-total-count'])
+              ? Number(response.headers['x-total-count'])
+              : 0,
+            onChange: this.onChangePager,
+            current: pagination.page + 1,
+          },
+        });
+      });
+  };
 
   /**
    * 获取列表数据
    */
   getList = id => {
-    const { pagination } = this.state;
+    const { pagination, searchParams } = this.state;
     this.setState({ loading: true });
     distributionService
-      .getDistributionList(pagination.page, pagination.pageSize, id)
+      .getDistributionList(pagination.page, pagination.pageSize, id, searchParams)
       .then(response => {
         const { data } = response;
         this.setState({
@@ -138,7 +173,7 @@ class CapitalTransactionReport extends React.Component {
             onChange: this.onChangePager,
             current: pagination.page + 1,
           },
-          // searchParams: {},
+          searchParams: {},
         });
       });
   };
@@ -158,6 +193,8 @@ class CapitalTransactionReport extends React.Component {
   showDeleteConfirm = () => {
     const { selectedRowKeys } = this.state;
     const { match } = this.props;
+    console.log('selectedRowKeys');
+    console.log(selectedRowKeys);
     distributionService
       .deleteDistributionList(selectedRowKeys)
       .then(res => {
@@ -165,7 +202,7 @@ class CapitalTransactionReport extends React.Component {
           message.success('删除成功！');
           this.getList(match.params.id);
           this.setState({
-            selectedRowKeys: {},
+            noticeAlert: null,
           });
         }
       })
@@ -179,13 +216,67 @@ class CapitalTransactionReport extends React.Component {
    */
   handleRowClick = record => {
     let record1 = record;
+    console.log('record1');
+    console.log(record1);
+
     record1 = {
       ...record1,
       /* eslint-disable */
       gatherTime: '2019-04-08T' + record.gatherTime + ':00+08:00',
       /* eslint-enable */
     };
-    this.setState({ editModel: record1, slideVisible: true });
+    this.setState({ editModel: record1, slideVisible: true, isNew: false, isNew2: false });
+    if (record.gatherTypeDesc === '固定余额') {
+      console.log('1211111111111111');
+      this.setState({
+        isGatherRate1: false,
+        isautoshow1: false,
+      });
+    }
+    if (record.gatherTypeDesc === '固定比例') {
+      console.log('sssyy');
+      this.setState({
+        isGatherRate1: true,
+        isautoshow1: true,
+      });
+    }
+    if (record.gatherTypeDesc === '固定金额') {
+      this.setState({
+        isGatherRate1: false,
+        isautoshow1: true,
+      });
+    }
+    if (record.gatherFrequency === 'EVERYDAY') {
+      this.setState({
+        ationRateValue: 'EVERYDAY',
+      });
+    }
+    if (record.gatherFrequency === 'EVERYMONTH') {
+      this.setState({
+        ationRateValue: 'EVERYMONTH',
+      });
+    }
+    if (record.gatherFrequency === 'EVERYWEEK') {
+      this.setState({
+        ationRateValue: 'EVERYWEEK',
+      });
+    }
+    if (record.gatherFrequency === 'TRADING_DAY') {
+      this.setState({
+        ationRateValue: 'TRADING_DAY',
+      });
+    }
+    if (record.gatherFrequency === 'WORKING_DAY') {
+      this.setState({
+        ationRateValue: 'WORKING_DAY',
+      });
+    }
+    if (record.gatherFrequency) {
+      console.log('come in');
+      this.setState({
+        ationRateValue1: true,
+      });
+    }
   };
 
   /**
@@ -218,6 +309,21 @@ class CapitalTransactionReport extends React.Component {
     );
   };
 
+  // 子账号搜索
+  searchNumber = value => {
+    const { match } = this.props;
+    // let { searchParams } = this.state;
+    // searchParams = {};
+    this.setState(
+      {
+        searchParams: { bankAccount: value },
+      },
+      () => {
+        this.getList(match.params.id);
+      }
+    );
+  };
+
   /**
    * 提示框显示
    */
@@ -230,6 +336,18 @@ class CapitalTransactionReport extends React.Component {
     this.setState({
       noticeAlert: rows.length ? noticeAlert : null,
       batchDelete: !rows.length,
+    });
+  };
+
+  onNew = () => {
+    this.setState({
+      isNew: true,
+    });
+  };
+
+  onNew2 = () => {
+    this.setState({
+      isNew2: true,
     });
   };
 
@@ -274,7 +392,6 @@ class CapitalTransactionReport extends React.Component {
       columns,
       pagination,
       loading,
-      payFlag,
       selectedRow,
       selectedRowKeys,
       batchDelete,
@@ -282,6 +399,13 @@ class CapitalTransactionReport extends React.Component {
       slideVisible,
       editModel,
       headId,
+      isGatherRate1,
+      isautoshow1,
+      isNew,
+      isNew2,
+      ationRateValue,
+      ationRateValue1,
+      handMsg,
     } = this.state;
     const rowSelection = {
       selectedRowKeys,
@@ -301,19 +425,21 @@ class CapitalTransactionReport extends React.Component {
             <h3>明细信息:</h3>
           </div>
           <Row style={{ marginTop: '15px' }}>
-            <Col span={7}>母账号：</Col>
-            <Col span={6}>母账户：</Col>
-            <Col span={6}>所属银行：</Col>
-            <Col span={5}>所属公司：</Col>
+            <Col span={7}>母账号：{handMsg.bankAccount}</Col>
+            <Col span={6}>母账户：{handMsg.bankAccountName}</Col>
+            <Col span={6}>所属银行：{handMsg.bankName}</Col>
+            <Col span={5}>所属公司：{handMsg.companyName}</Col>
           </Row>
           <Row style={{ marginTop: '15px' }}>
-            <Col span={7}>状态：</Col>
+            {/* <Col span={7}>状态：{handMsg.enabled}</Col> */}
             <Col span={6}>
               状态：
               <Badge
-                status={payFlag ? 'success' : 'error'}
+                status={handMsg.enabled ? 'success' : 'error'}
                 text={
-                  payFlag ? messages('common.status.enable') : messages('common.status.disable')
+                  handMsg.enabled
+                    ? messages('common.status.enable')
+                    : messages('common.status.disable')
                 }
               />
             </Col>
@@ -357,7 +483,19 @@ class CapitalTransactionReport extends React.Component {
             show={slideVisible}
             onClose={() => this.handleClose()}
           >
-            <DistributionAdd onClose={this.handleClose} params={editModel} addId={headId} />
+            <DistributionAdd
+              onClose={this.handleClose}
+              ationRateValue2={ationRateValue}
+              ationRateValue3={ationRateValue1}
+              onNew={this.onNew}
+              onNew2={this.onNew2}
+              isNew2={isNew2}
+              params={editModel}
+              isNew={isNew}
+              addId={headId}
+              isGatherRate1={isGatherRate1}
+              isautoshow1={isautoshow1}
+            />
           </SlideFrame>
           {/* 提示信息 */}
           {noticeAlert ? (

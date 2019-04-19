@@ -31,16 +31,15 @@ class NewBudgetJournalDetail extends React.Component {
       journalTypeId: null,
       currencys: [],
       selectorItem: {
-        title: '选择责任中心',
-        url: `${config.budgetUrl}/api/budget/structures/assign/responsibility/query`,
+        title: this.$t('budget.selection.responsibility.centres'), // 选择责任中心
+        url: `${config.mdataUrl}/api/responsibilityCenter/query/by/company/department`,
         searchForm: [
-          { type: 'input', id: 'info', label: '责任中心', placeholder: '请输入代码或名称' },
-          { type: 'input', id: 'codeFrom', label: '责任中心代码从' },
-          { type: 'input', id: 'codeTo', label: '责任中心代码至' },
+          { type: 'input', id: 'code', label: this.$t('budget.responsibility.center.code') }, // '责任中心代码'
+          { type: 'input', id: 'name', label: this.$t('budget.responsibility.center.name') }, // '责任中心名称'
         ],
         columns: [
-          { title: '责任中心代码', dataIndex: 'responsibilityCenterCode' },
-          { title: '责任中心名称', dataIndex: 'responsibilityCenterName' },
+          { title: this.$t('budget.responsibility.center.code'), dataIndex: 'code' }, // '责任中心代码'
+          { title: this.$t('budget.responsibility.center.name'), dataIndex: 'name' }, // '责任中心名称'
         ],
         key: 'id',
       },
@@ -132,6 +131,7 @@ class NewBudgetJournalDetail extends React.Component {
           employee: [],
         });
         this.companyOrUnitChange(value[0].id, 'oldId');
+        this.props.form.setFieldsValue({ responsibilityCenterId: undefined });
       }
       if (e === 'unit') {
         this.setUntilId(value[0].id);
@@ -139,6 +139,7 @@ class NewBudgetJournalDetail extends React.Component {
           employee: [],
         });
         this.companyOrUnitChange('oldId', value[0].id);
+        this.props.form.setFieldsValue({ responsibilityCenterId: undefined });
       }
     } else {
       if (e === 'unit') {
@@ -355,8 +356,8 @@ class NewBudgetJournalDetail extends React.Component {
         id: 'responsibilityCenterId',
         type: 'selectResponse',
         key: 'id',
-        label: '责任中心',
-        labelKey: 'responsibilityCenterCodeName',
+        label: this.$t('expense.responsibility.center') /*责任中心*/,
+        labelKey: 'codeName',
         valueKey: 'id',
       },
       {
@@ -374,15 +375,28 @@ class NewBudgetJournalDetail extends React.Component {
         columnLabel: 'employeeName',
         columnValue: 'employeeId',
         selectorItem: {
-          title: '选择员工',
+          title: this.$t('expense.select.the.employee') /*选择员工*/,
           url: `${config.mdataUrl}/api/select/user/by/company/and/department`,
           searchForm: [
-            { type: 'input', id: 'employeeId', label: '用户工号', defaultValue: '' },
-            { type: 'input', id: 'fullName', label: '姓名', defaultValue: '' },
+            {
+              type: 'input',
+              id: 'employeeId',
+              label: this.$t('expense.the.user.work.number'),
+              defaultValue: '',
+            } /*用户工号*/,
+            {
+              type: 'input',
+              id: 'fullName',
+              label: this.$t('expense.the.name'),
+              defaultValue: '',
+            } /*姓名*/,
           ],
           columns: [
-            { title: '用户工号', dataIndex: 'employeeId' },
-            { title: '姓名', dataIndex: 'fullName' },
+            {
+              title: this.$t('expense.the.user.work.number'),
+              dataIndex: 'employeeId',
+            } /*用户工号*/,
+            { title: this.$t('expense.the.name'), dataIndex: 'fullName' } /*姓名*/,
           ],
           key: 'employeeId',
         },
@@ -589,7 +603,6 @@ class NewBudgetJournalDetail extends React.Component {
           this.props.form.resetFields();
           this.props.form.setFieldsValue({
             currency: JSON.stringify(this.state.currencys[0]),
-            //rate: this.state.currencys[0].rate,
           });
         }
       });
@@ -884,27 +897,6 @@ class NewBudgetJournalDetail extends React.Component {
             style={{ width: '100%' }}
           />
         );
-        /*if (item.precision) {
-          return (
-            <InputNumber
-              disabled={item.disabled}
-              min={item.min ? item.min : -Infinity}
-              step={item.step}
-              precision={item.precision}
-              onChange={handle}
-              style={{ width: 200 }}
-            />
-          );
-        } else {
-          return (
-            <InputNumber
-              disabled={item.disabled}
-              min={item.min ? item.min : -Infinity}
-              step={item.step}
-              onChange={handle}
-              style={{ width: 200 }}
-            />
-          );*/
       }
       case 'selectResponse': {
         //责任中心
@@ -914,7 +906,7 @@ class NewBudgetJournalDetail extends React.Component {
             dropdownStyle={{ display: 'none' }}
             onFocus={this.selectFocus}
             ref={ref => (this.selectRef = ref)}
-            placeholder="请选择"
+            placeholder={this.$t('budget.select')} //"请选择"
             mode="tags"
           />
         );
@@ -926,7 +918,10 @@ class NewBudgetJournalDetail extends React.Component {
   selectFocus = () => {
     const companyId = this.props.form.getFieldValue('company');
     const unitId = this.props.form.getFieldValue('unitId');
-    const selectedData = this.props.form.getFieldValue('responsibilityCenterId');
+    let selectedData = this.props.form.getFieldValue('responsibilityCenterId');
+    if (JSON.stringify(selectedData) === '[]') {
+      selectedData = undefined;
+    }
     if (companyId && companyId.length && unitId && unitId.length) {
       this.selectRef.blur();
       this.setState({
@@ -936,7 +931,7 @@ class NewBudgetJournalDetail extends React.Component {
         selectedData: selectedData ? [selectedData] : undefined,
       });
     } else {
-      message.warning('请先选择公司和部门！');
+      message.warning(this.$t('budget.desc.code1')); // 请先选择公司和部门！
     }
   };
   // 责任中心 弹框
@@ -945,7 +940,7 @@ class NewBudgetJournalDetail extends React.Component {
       this.props.form.setFieldsValue({
         responsibilityCenterId: {
           ...value.result[0],
-          label: value.result[0].responsibilityCenterCodeName,
+          label: value.result[0].codeName,
         },
       });
     }
@@ -1236,7 +1231,6 @@ class NewBudgetJournalDetail extends React.Component {
         <ListSelector
           visible={responseVisible}
           extraParams={{
-            structureId: this.props.params.structureId,
             departmentId: departmentId,
             companyId: companyId,
           }}
@@ -1245,7 +1239,7 @@ class NewBudgetJournalDetail extends React.Component {
           onOk={this.handleListOk}
           onCancel={this.handleListCancel}
           valueKey="id"
-          labelKey="responsibilityCenterCodeName"
+          labelKey="codeName"
           single={true}
         />
       </div>

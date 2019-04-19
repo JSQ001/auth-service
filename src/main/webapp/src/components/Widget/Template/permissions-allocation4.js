@@ -41,8 +41,10 @@ class PermissionsAllocation extends React.Component {
     let model = nextProps.value;
     let selectedList = [];
     model.values.map(item => {
-      let temp = {};
+      let temp = { ...item };
       temp.contactId = item.key;
+      temp.fullName = item.label;
+
       selectedList.push(temp);
     });
     model &&
@@ -174,7 +176,6 @@ class PermissionsAllocation extends React.Component {
       selectedList,
     } = this.state;
     const { disabled } = this.props;
-
     const textStyle = {
       position: 'absolute',
       top: 3,
@@ -274,7 +275,7 @@ class PermissionsAllocation extends React.Component {
           extraParams={{ roleType: 'TENANT' }}
           selectedData={[...selectedList]}
           onOk={this.handleListOk}
-          labelKey={'选择人员'}
+          labelKey="fullName"
           valueKey="contactId"
         />
       </div>

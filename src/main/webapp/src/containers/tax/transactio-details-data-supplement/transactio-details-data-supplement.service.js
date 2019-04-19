@@ -8,16 +8,25 @@ export default {
   },
   // 分页查询方法
   getCangeRecord(params) {
-    return httpFetch.get(`${config.taxUrl}/api/tax/vat/trans/interface/pageByCondition`, params);
+    return httpFetch.get(
+      `${config.taxUrl}/api/tax/vat/trans/interface/pageByCondition?errorFlag=E`,
+      params
+    );
   },
-  // 新增开票点
-  insertInvoicingSite(params) {
-    return httpFetch.post(`${config.taxUrl}/api/invoicing/site`, params);
+  // 提交方法
+  submitData(params) {
+    return httpFetch.post(`${config.taxUrl}/api/tax/vat/trans/interface/submit`, params);
+  },
+  // 获取动态列
+  getColumns() {
+    return httpFetch.get(
+      `${config.taxUrl}/api/tax/vat/rule/dimension/query/condition?ruleCode=VAT_SEPARATE_RULE`
+    );
   },
 
   // 修改开票点
   updateInvoicingSite(params) {
-    return httpFetch.put(`${config.taxUrl}/api/invoicing/site`, params);
+    return httpFetch.put(`${config.taxUrl}/api/tax/vat/trans/interface`, params);
   },
 
   // 条件查询开票点信息
@@ -29,16 +38,12 @@ export default {
   getInvoicingSiteById(id) {
     return httpFetch.get(`${config.taxUrl}/api/invoicing/site/${id}`);
   },
-
-  // 根据税种ID查询税率详情
-  // pageTaxRateByTaxCategoryId(taxCategoryId) {
-  //   return httpFetch.get(`${config.taxUrl}/api/tax/rate/pageTaxRateByTaxCategoryId/${taxCategoryId}`);
-  // },
-
-  // 根据税种ID查询税率详情
-  //   getTaxCategory(taxCategoryId) {
-  //     return httpFetch.get(`${config.taxUrl}/api/tax/rate/details/${taxCategoryId}`);
-  //   },
+  // 获取币种下拉列表
+  getSystemValueList1(id) {
+    return httpFetch.get(
+      `${config.mdataUrl}/api/currency/rate/company/standard/currency/getAll?setOfBooksId=${id}`
+    );
+  },
   // 导出价税分离数据查询信息
   exportSelfTax(result) {
     const url = `${config.taxUrl}/api/invoicing/site/export/data`;

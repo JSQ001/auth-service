@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { connect } from 'dva';
-import { Modal, message, Button, Input, Row, Col, Card, Checkbox, Tree, Spin } from 'antd';
+import { Modal, Input, Checkbox, Tree, Spin } from 'antd';
 
 const Search = Input.Search;
 const CheckboxGroup = Checkbox.Group;
@@ -155,7 +155,7 @@ class SelectEmployeeGroup extends React.Component {
     const { treeData, checkedKeys } = this.state;
     return (
       <Modal
-        title={'选择人员组'}
+        title={this.$t('payment.select.personnel.group')}
         visible={visible}
         onCancel={onCancel}
         afterClose={afterClose}
@@ -163,6 +163,7 @@ class SelectEmployeeGroup extends React.Component {
         onOk={this.handleOk}
         className="list-selector select-department"
       >
+        {/*选择人员组*/}
         <Spin spinning={this.state.loading}>
           <Search
             ref="search"

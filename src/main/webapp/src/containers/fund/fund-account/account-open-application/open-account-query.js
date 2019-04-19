@@ -171,6 +171,9 @@ class OpenAccountList extends React.Component {
               this.$t('common.show.total', { range0: `${range[0]}`, range1: `${range[1]}`, total }),
           },
         });
+      })
+      .catch(error => {
+        message.error(error.response.data.message);
       });
   }
 
@@ -179,6 +182,7 @@ class OpenAccountList extends React.Component {
    */
   onChangePager = pagination => {
     const temp = {};
+    console.log(pagination);
     temp.page = pagination.current - 1;
     temp.current = pagination.current;
     temp.pageSize = pagination.pageSize;

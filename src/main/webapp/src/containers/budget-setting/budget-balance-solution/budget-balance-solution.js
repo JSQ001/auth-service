@@ -39,23 +39,12 @@ class BudgetBalanceSolution extends Component {
         total: 0,
       },
       columns: [
-        {
-          title: this.$t('budget.balance.condition.code'),
-          dataIndex: 'conditionCode',
-          align: 'center',
-          width: '25%',
-        },
-        {
-          title: this.$t('budget.balance.condition.name'),
-          align: 'center',
-          dataIndex: 'conditionName',
-          width: '25%',
-        },
+        { title: this.$t('budget.balance.condition.code'), dataIndex: 'conditionCode', width: 264 },
+        { title: this.$t('budget.balance.condition.name'), dataIndex: 'conditionName', width: 470 },
         {
           title: this.$t('common.column.status'),
-          align: 'center',
           dataIndex: 'enabled',
-          width: '25%',
+          width: 170,
           render: text => {
             return (
               <Badge
@@ -69,7 +58,7 @@ class BudgetBalanceSolution extends Component {
           title: this.$t('common.operation'),
           align: 'center',
           dataIndex: 'operation',
-          width: '25%',
+          width: 170,
           render: (text, record, index) => {
             return (
               <div>

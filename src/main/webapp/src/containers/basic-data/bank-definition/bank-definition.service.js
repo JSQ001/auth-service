@@ -35,9 +35,10 @@ export default {
         break;
       }
     }
+    console.log(country);
     for (let i = 0; i < country.length; i++) {
-      if (country[i].code + '' === stateCode) {
-        return country[i].state;
+      if (country[i].value + '' === stateCode) {
+        return country[i].label;
       }
     }
     return '';
@@ -53,14 +54,14 @@ export default {
       }
     }
     for (let i = 0; i < country.length; i++) {
-      if (country[i].code + '' === stateCode) {
+      if (country[i].value + '' === stateCode) {
         state = country[i].children;
         break;
       }
     }
     for (let i = 0; i < state.length; i++) {
-      if (state[i].code + '' === cityCode) {
-        return state[i].city;
+      if (state[i].value + '' === cityCode) {
+        return state[i].label;
       }
     }
     return '';
@@ -159,6 +160,7 @@ export default {
     return new Promise(function(resolve, reject) {
       httpFetch
         .get(config.mdataUrl + '/api/bank/infos', param)
+        // .get('http://10.211.108.69:9098/api/bank/infos', param)
         .then(function(response) {
           response.data.map(item => {
             item.key = item.id;
@@ -195,6 +197,14 @@ export default {
             '&isAll=true',
           params
         )
+        // .post(
+        //   'http://10.211.108.69:9098/api/bank/infos/custom/search?page=' +
+        //     ps.page +
+        //     '&size=' +
+        //     ps.size +
+        //     '&isAll=true',
+        //   params
+        // )
         .then(function(response) {
           response.data.map(item => {
             //如果国家名字字段没有,设置为空
@@ -232,6 +242,7 @@ export default {
     return new Promise(function(resolve, reject) {
       httpFetch
         .post(config.mdataUrl + '/api/bank/infos/custom/create', params)
+        // .post('http://10.211.108.69:9098/api/bank/infos/custom/create', params)
         .then(function(res) {
           resolve(res);
         })
@@ -244,8 +255,9 @@ export default {
   //修改自定义银行
   updateSelfBank(params) {
     return new Promise(function(resolve, reject) {
-      httpFetch
+      httpFetch //http://10.211.108.69:9098
         .put(config.mdataUrl + '/api/bank/infos/custom/modify', params)
+        // .put('http://10.211.108.69:9098/api/bank/infos/custom/modify', params)
         .then(function(res) {
           resolve(res);
         })
@@ -260,6 +272,7 @@ export default {
     return new Promise(function(resolve, reject) {
       httpFetch
         .delete(config.mdataUrl + '/api/bank/infos/custom/remove/' + id)
+        // .delete('http://10.211.108.69:9098/api/bank/infos/custom/remove/' + id)
         .then(function(res) {
           resolve(res);
         })
@@ -357,5 +370,12 @@ export default {
           reject(err);
         });
     });
+  },
+  /**
+   * 根据市描述获取code
+   */
+  getProvincesAndCity() {
+    return httpFetch.get(`${config.fundUrl}/api/regionDefines/getProvinces`);
+    // return httpFetch.get(`http://10.211.98.2:9099/api/regionDefines/getProvinces`);
   },
 };

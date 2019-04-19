@@ -150,6 +150,17 @@ class ExpAdjustType extends Component {
           ),
         },
         {
+          title: this.$t({ id: 'expense.the.dimension' }) /*维度*/,
+          dataIndex: 'id',
+          width: 120,
+          align: 'center',
+          render: value => (
+            <a onClick={() => this.dimensionSetting(value)}>
+              {this.$t('expense.dimension.setting')}
+            </a>
+          ) /*维度设置*/,
+        },
+        {
           title: this.$t({ id: 'common.operation' }),
           key: 'operation',
           render: (text, record) => (
@@ -363,6 +374,16 @@ class ExpAdjustType extends Component {
   onSlideFrameClose = () => {
     this.setState({ showSlideFrame: false });
   };
+
+  //维度设置
+  dimensionSetting = id => {
+    this.props.dispatch(
+      routerRedux.push({
+        pathname: '/document-type-manage/exp-adjust-type/dimension-setting/' + id,
+      })
+    );
+  };
+
   //渲染函数，每个Component必须要有的方法
   render() {
     const {

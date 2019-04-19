@@ -1,77 +1,41 @@
 import React from 'react';
 import { connect } from 'dva';
-// import { routerRedux } from 'dva/router';
-
-import {
-  Form,
-  Switch,
-  Icon,
-  Input,
-  Select,
-  Button,
-  //   Row,
-  //   Col,
-  message,
-  Spin,
-  //   Radio,
-  Tooltip,
-} from 'antd';
-
+import { Form, Switch, Icon, Input, Select, Button, message, Spin, Tooltip } from 'antd';
 import httpFetch from 'share/httpFetch';
 import config from 'config';
-
 import PermissionsAllocation from 'widget/Template/permissions-allocation';
-// import FundDocumentsService from './fund-documents.service';
-
-// import SelectCheckSheetType from './select-check-sheet-type';
 
 const FormItem = Form.Item;
 const { Option } = Select;
-// const RadioButton = Radio.Button;
-// const RadioGroup = Radio.Group;
 
 class FundDocumentsAdd extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      //   options: [],
       fetching: false,
       nowType: {},
       setOfBooks: [], // 账套
       relatedType: 'BASIS_01', // 关联报账单的类型
-      //   isRelated: true, // 是否关联报账单
-      //   accordingAsRelated: 'BASIS_01',
-      // showSelectDepartment: false,
+      isRelated: true, // 是否关联报账单
+      accordingAsRelated: 'BASIS_01',
       employeeList: [],
-      // selectEmployeeText: '',
       applyEmployee: 'BASIS_01',
-      // defaultApplyEmployee: 'BASIS_01',
-      // isNew: false,
-      // editTag: false,
       formTypeOptions: [],
-      // showSelectRelated: false,
       relatedList: [],
-      // acpReqTypeDefine: '/document-type-manage/payment-requisition-type',
-      // relatedListOptions: [],
-      // queryFlag: true,
       permissions: {
         type: 'all',
         values: [],
       },
-      // list: [],
     };
   }
 
   componentWillMount() {
+    const { params } = this.props;
     httpFetch.get(`${config.mdataUrl}/api/setOfBooks/by/tenant?roleType=TENANT`).then(res => {
       this.setState({ setOfBooks: res.data });
     });
-    // this.getSystemValueList(2105).then(res => {
-    //   this.setState({ options: res.data.values });
-    // });
-    const { params } = this.props;
-    console.log(params);
+    this.getSystemValueList(2105).then(() => {});
     httpFetch
       .get(
         `${
@@ -85,30 +49,31 @@ class FundDocumentsAdd extends React.Component {
       .then(res => {
         this.setState({ formTypeOptions: res.data, fetching: false });
       });
-    // this.getFormType();
   }
 
   componentDidMount() {
     const { params } = this.props;
-    const {
-      applyEmployee,
-      // applyEmployee,
-      relatedType,
-    } = this.state;
+    const { relatedType } = this.state;
     if (params.record.record !== undefined) {
-      // eslint-disable-next-line react/no-unused-state
-      this.setState({ nowType: params.record.record, editTag: true });
+      this.setState({
+        nowType: params.record.record,
+      });
       if (params.record.record !== undefined) {
         httpFetch
-          .get(`${config.payUrl}/api/acp/request/type/query/${params.record.record.id}`)
+          // .get(
+          //   `http://10.211.110.100:9099/api/setting/request/type/query/${params.record.record.id}`
+          // )
+          .get(`${config.fundUrl}/api/setting/request/type/query/${params.record.record.id}`)
           .then(res => {
             const temp = res.data;
             const relatedLists = [];
-            if (temp.paymentRequisitionTypes.relatedType !== 'BASIS_01') {
-              // eslint-disable-next-line array-callback-return
-              temp.paymentRequisitionTypesToRelateds.map(item => {
-                relatedLists.push(item.typeId);
-              });
+            if (temp.fundReqTypes && temp.fundReqTypes.relatedType !== 'BASIS_01') {
+              if (temp.fundReqTypesToRelateds) {
+                // eslint-disable-next-line array-callback-return
+                temp.fundReqTypesToRelateds.map(item => {
+                  relatedLists.push(item.typeId);
+                });
+              }
             }
             const applyEmployeeType = {
               BASIS_01: 'all',
@@ -116,24 +81,24 @@ class FundDocumentsAdd extends React.Component {
               BASIS_03: 'group',
             };
             const employeeLists = [];
-            if (temp.paymentRequisitionTypes.applyEmployee !== 'BASIS_01') {
-              // eslint-disable-next-line array-callback-return
-              temp.paymentRequisitionTypesToUsers.map(item => {
-                employeeLists.push(item.userGroupId);
-              });
+            if (temp.fundReqTypes && temp.fundReqTypes.applyEmployee !== 'BASIS_01') {
+              if (temp.fundReqTypesToUsers) {
+                // eslint-disable-next-line array-callback-return
+                temp.fundReqTypesToUsers.map(item => {
+                  employeeLists.push(item.userGroupId);
+                });
+              }
             }
             this.setState({
               employeeList: employeeLists,
-              applyEmployee: temp.paymentRequisitionTypes.applyEmployee,
-              relatedType: temp.paymentRequisitionTypes.relatedType,
-              //   isRelated: true,
-              // queryFlag: false,
-              // editTag: true,
+              applyEmployee: temp.fundReqTypes && temp.fundReqTypes.applyEmployee,
+              relatedType: temp.fundReqTypes && temp.fundReqTypes.relatedType,
+              isRelated: true,
               relatedList: relatedLists,
               permissions: {
-                type: applyEmployeeType[temp.paymentRequisitionTypes.applyEmployee],
-                values: temp.paymentRequisitionTypesToUsers
-                  ? temp.paymentRequisitionTypesToUsers.map(item => {
+                type: applyEmployeeType[temp.fundReqTypes && temp.fundReqTypes.applyEmployee],
+                values: temp.fundReqTypesToUsers
+                  ? temp.fundReqTypesToUsers.map(item => {
                       return {
                         label: item.pathOrName,
                         value: item.userGroupId,
@@ -148,69 +113,61 @@ class FundDocumentsAdd extends React.Component {
     } else {
       this.setState({
         nowType: {},
-        applyEmployee: applyEmployee || 'BASIS_01',
         relatedType: relatedType || 'BASIS_01',
-        // isRelated: true,
-        // editTag: false,
-        // accordingAsRelated: 'BASIS_01',
-        // showSelectRelated: false,
+        isRelated: true,
+        accordingAsRelated: 'BASIS_01',
       });
     }
   }
 
   /**
-   * 侧边栏form表单中的取消按钮
+   * form表单中的取消按钮
    */
   onCancel = () => {
-    const { form, onClose } = this.props;
+    const { onClose, form } = this.props;
     onClose(false);
     form.resetFields();
   };
 
   /**
-   * 侧边栏form表单中的保存按钮
+   * form表单中的保存按钮
    */
   handleSave = e => {
     e.preventDefault();
+    const { form, company, onClose } = this.props;
     const {
-      form,
-      // company,
-      onClose,
-    } = this.props;
-    const {
-      //   nowType,
-      //   formTypeOptions,
+      nowType,
+      formTypeOptions,
       relatedType,
       applyEmployee,
-      //   accordingAsRelated,
-      //   isRelated,
+      accordingAsRelated,
+      isRelated,
       employeeList,
-      //   applyEmployee,
       relatedList,
-      //   relatedType,
     } = this.state;
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        //     values = {
-        //       ...nowType,
-        //       ...values,
-        //     };
-        // formTypeOptions.map(item => {
-        //   if (item.formOid === values.formOid) {
-        //     values.formName = item.formName;
-        //     values.formType = item.formType;
-        //   }
-        // });
-        //     values.relatedType = relatedType;
-        //     values.applyEmployee = applyEmployee;
-        //     values.accordingAsRelated = accordingAsRelated;
-        //     values.related = isRelated;
-        //     values.tenantId = company.tenantId;
-        //     delete values.form;
+        let value = values;
+        value = {
+          ...nowType,
+          ...value,
+        };
+        // eslint-disable-next-line array-callback-return
+        formTypeOptions.map(item => {
+          if (item.formOid === value.formOid) {
+            value.formName = item.formName;
+            value.formType = item.formType;
+          }
+        });
+        value.relatedType = relatedType;
+        value.applyEmployee = applyEmployee;
+        value.accordingAsRelated = accordingAsRelated;
+        value.related = isRelated;
+        value.tenantId = company.tenantId;
+        delete value.form;
 
         const acpRequstTypesToUsers = [];
-
-        if (values.applyEmployee === 'BASIS_01') {
+        if (value.applyEmployee === 'BASIS_01') {
           const userList = {};
           userList.userType = 'BASIS_01';
           acpRequstTypesToUsers.push(userList);
@@ -220,7 +177,6 @@ class FundDocumentsAdd extends React.Component {
             const userList = {};
             userList.userType = applyEmployee;
             userList.userGroupId = item;
-            // userList["pathOrName"] = this.state.list[index].label;
             acpRequstTypesToUsers.push(userList);
           });
         }
@@ -233,7 +189,7 @@ class FundDocumentsAdd extends React.Component {
           return;
         }
         const acpRequestTypesToRelateds = [];
-        if (values.relatedType === 'BASIS_01') {
+        if (value.relatedType === 'BASIS_01') {
           const relatedLists = {};
           relatedLists.relatedType = 'BASIS_01';
           acpRequestTypesToRelateds.push(relatedLists);
@@ -246,38 +202,33 @@ class FundDocumentsAdd extends React.Component {
             acpRequestTypesToRelateds.push(relatedLists);
           });
         }
-        // if (values.relatedType === 'BASIS_02' && !acpRequestTypesToRelateds.length) {
-        //   message.warning('请至少选择一个可关联报账单类型');
-        //   return;
-        // }
-
+        if (value.relatedType === 'BASIS_02' && !acpRequestTypesToRelateds.length) {
+          message.warning('请至少选择一个可关联报账单类型');
+          return;
+        }
         const params = {
-          paymentRequisitionTypes: values,
-          paymentRequisitionTypesToRelateds: acpRequestTypesToRelateds,
-          paymentRequisitionTypesToUsers: acpRequstTypesToUsers,
+          fundReqTypes: value,
+          fundReqTypesToUsersList: acpRequstTypesToUsers,
         };
         httpFetch
-          .post(`${config.payUrl}/api/acp/request/type`, params)
+          // .post(`http://10.211.110.100:9099/api/setting/request/type`, params)
+          .post(`${config.fundUrl}/api/setting/request/type`, params)
           .then(res => {
             this.setState({ loading: false });
             message.success(
-              this.$t(
-                { id: 'common.save.success' },
-                { name: res.data.paymentRequisitionTypes.description }
-              )
+              this.$t({ id: 'common.save.success' }, { name: res.data.fundReqTypes.description })
             ); // 保存成功
             onClose(false);
             this.setState({
               nowType: {},
               applyEmployee: 'BASIS_01',
-              //   isRelated: true,
-              //   accordingAsRelated: 'BASIS_01',
-              // selectEmployeeText: '',
+              isRelated: true,
+              accordingAsRelated: 'BASIS_01',
               employeeList: [],
               relatedList: [],
               permissions: {
                 type: 'all',
-                values: [],
+                value: [],
               },
             });
           })
@@ -295,8 +246,8 @@ class FundDocumentsAdd extends React.Component {
    * 基本信息：获取关联表单类型
    */
   getFormType = () => {
-    const { formTypeOptions, nowType } = this.state;
     const { params } = this.props;
+    const { formTypeOptions, nowType } = this.state;
     if (formTypeOptions.length) return;
     this.setState({ fetching: true });
     let setOfBooksId = !nowType.id ? params.record.setOfBooksId : nowType.setOfBooksId;
@@ -360,6 +311,7 @@ class FundDocumentsAdd extends React.Component {
       <div>
         <Form onSubmit={this.handleSave}>
           <div className="common-item-title">基本信息</div>
+
           <FormItem {...formItemLayout} label="账套">
             {getFieldDecorator('setOfBooksId', {
               rules: [
@@ -386,18 +338,18 @@ class FundDocumentsAdd extends React.Component {
           </FormItem>
 
           <FormItem {...formItemLayout} label="单据类型代码">
-            {getFieldDecorator('acpReqTypeCode', {
+            {getFieldDecorator('cpReqTypeCode', {
               rules: [
                 {
                   required: true,
                   message: this.$t({ id: 'common.please.enter' }), // 请输入
                 },
               ],
-              initialValue: nowType.acpReqTypeCode,
+              initialValue: nowType.cpReqTypeCode,
             })(
               <Input
                 placeholder={this.$t({ id: 'common.please.enter' }) /* 请输入 */}
-                disabled={!!nowType.acpReqTypeCode}
+                disabled={!!nowType.cpReqTypeCode}
               />
             )}
           </FormItem>
@@ -418,7 +370,7 @@ class FundDocumentsAdd extends React.Component {
             {getFieldDecorator('formOid', {
               rules: [
                 {
-                  required: true,
+                  required: false,
                   message: this.$t({ id: 'common.please.select' }), // 请输入
                 },
               ],

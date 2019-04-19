@@ -5,6 +5,7 @@ import moment from 'moment';
 import Chooser from 'widget/chooser';
 import Upload from 'widget/upload-button';
 import 'styles/fund/account.scss';
+import Lov from 'widget/Template/lov';
 import config from 'config';
 import accountService from './account.service';
 
@@ -16,6 +17,7 @@ class OpenAccountMaintain extends Component {
     super(props);
     this.state = {
       loading: false, // 加载中
+      bankBranchList: [], // 银行分支所有信息
       isNew: true, // 是否为新建
       model: {}, // 保存数据
       currencyList: [], // 币种
@@ -38,7 +40,7 @@ class OpenAccountMaintain extends Component {
     if (params.id) {
       this.getAccountHead(params.id);
     }
-    // console.log(params.approveStatus)
+
     if (params.approveStatus === 'ZJ_APPROVED' || params.approveStatus === 'ZJ_PENGDING') {
       this.setState({
         isTrue: true,
@@ -55,7 +57,10 @@ class OpenAccountMaintain extends Component {
     accountService
       .getAccountHead(id)
       .then(res => {
-        const { attachmentOidList } = res.data;
+        let { attachmentOidList } = res.data;
+        if (attachmentOidList === null) {
+          attachmentOidList = [];
+        }
         const fileList = res.data.attachments
           ? res.data.attachments.map(item => ({
               ...item,
@@ -98,7 +103,7 @@ class OpenAccountMaintain extends Component {
       },
       */
     });
-    /* eslint-disable */
+    // /* eslint-disable */
   };
 
   /**
@@ -134,11 +139,36 @@ class OpenAccountMaintain extends Component {
         message.error(err.response.data.message);
       });
   };
+
   /**
    * 取消
    */
   handleCancel = value => {
     this.props.onClose(value);
+  };
+
+  onChange = values => {
+    const { form } = this.props;
+    this.setState({
+      bankBranchList: values,
+    });
+    form.setFields({
+      banknumber: {
+        value: values.bankCode,
+      },
+    });
+  };
+
+  onSelect = value => {
+    const { form } = this.props;
+    form.setFields({
+      bankBranch: {
+        value: {},
+      },
+      banknumber: {
+        value: '',
+      },
+    });
   };
 
   /**
@@ -155,11 +185,9 @@ class OpenAccountMaintain extends Component {
       }
     } else {
       let { uploadOIDs } = this.state;
-      console.log(uploadOIDs);
       OIDs.forEach(item => {
         uploadOIDs.push(item);
       });
-      console.log(uploadOIDs);
       this.setState({
         uploadOIDs: uploadOIDs,
       });
@@ -171,7 +199,7 @@ class OpenAccountMaintain extends Component {
    */
   handleSave = e => {
     const { form, user, params } = this.props;
-    const { isTrue } = this.state;
+    const { isTrue, bankBranchList } = this.state;
     e.preventDefault();
     if (isTrue) {
       if (params.approveStatus === 'ZJ_APPROVED') {
@@ -193,11 +221,11 @@ class OpenAccountMaintain extends Component {
             remarks: values.remarks,
             companyId: values.company[0].id,
             departmentId: values.company[0].departmentId || '1084803809249693697',
-            openProvince: values.bankBranch[0].provinceCode,
-            openCity: values.bankBranch[0].cityCode,
+            openProvince: bankBranchList.provinceCode,
+            openCity: bankBranchList.cityCode,
             openBank: values.opneBank.key,
-            branchBank: values.bankBranch[0].bankCode,
-            branchBankName: values.bankBranch[0].bankBranchName,
+            branchBank: values.bankBranch.bankCode,
+            branchBankName: values.bankBranch.bankBranchName,
             attachmentOid: uploadOIDs.join(','),
           };
         } else {
@@ -209,11 +237,11 @@ class OpenAccountMaintain extends Component {
             remarks: values.remarks,
             companyId: values.company[0].id,
             departmentId: values.company[0].departmentId || '1084803809249693697',
-            openProvince: values.bankBranch[0].provinceCode,
-            openCity: values.bankBranch[0].cityCode,
+            openProvince: bankBranchList.provinceCode,
+            openCity: bankBranchList.cityCode,
             openBank: values.opneBank.key,
-            branchBank: values.bankBranch[0].bankCode,
-            branchBankName: values.bankBranch[0].bankBranchName,
+            branchBank: values.bankBranch.bankCode,
+            branchBankName: values.bankBranch.bankBranchName,
             attachmentOid: uploadOIDs.join(','),
           };
         }
@@ -238,6 +266,7 @@ class OpenAccountMaintain extends Component {
   render() {
     const {
       form: { getFieldDecorator },
+      form,
       user,
       company,
     } = this.props;
@@ -253,8 +282,10 @@ class OpenAccountMaintain extends Component {
       banknumber,
       bankOptions,
       approveStatus,
+      bankBranchList,
       isTrue,
     } = this.state;
+    const bankCode1 = form.getFieldValue('opneBank') ? form.getFieldValue('opneBank').key : '';
     const formItemLayout = {
       labelCol: {
         span: 8,
@@ -314,9 +345,16 @@ class OpenAccountMaintain extends Component {
 
           <FormItem {...formItemLayout} label="开户银行">
             {getFieldDecorator('opneBank', {
+              rules: [{ required: true, message: this.$t('common.please.select') }],
               initialValue: isNew ? [] : [{ key: model.openBank, label: model.openBankName }],
             })(
-              <Select labelInValue placeholder="请选择" disabled={isTrue} allowClear>
+              <Select
+                labelInValue
+                placeholder="请选择"
+                disabled={isTrue}
+                allowClear
+                onSelect={this.onSelect}
+              >
                 {bankOptions.map(option => {
                   return <Option key={option.value}>{option.name}</Option>;
                 })}
@@ -328,18 +366,16 @@ class OpenAccountMaintain extends Component {
             {getFieldDecorator('bankBranch', {
               rules: [{ required: true, message: this.$t('common.please.select') }],
               initialValue: isNew
-                ? []
-                : [{ bankCode: model.branchBank, bankBranchName: model.branchBankName }],
+                ? {}
+                : { bankCode: model.branchBank, bankBranchName: model.branchBankName },
             })(
-              <Chooser
-                placeholder={this.$t('common.please.select')}
-                type="select_bank"
+              <Lov
+                code="bankbranch_choose"
+                valueKey="id"
                 labelKey="bankBranchName"
-                valueKey="bankCode"
-                onChange={this.chooseBank}
                 single
-                listExtraParams={{}}
-                disabled={isTrue}
+                onChange={this.onChange}
+                extraParams={{ bankHead: bankCode1 || model.openBank }}
               />
             )}
           </FormItem>
@@ -347,10 +383,8 @@ class OpenAccountMaintain extends Component {
           <FormItem label="联行号" {...formItemLayout}>
             {getFieldDecorator('banknumber', {
               rules: [{ required: true }],
-              initialValue: banknumber.key
-                ? banknumber
-                : { key: model.branchBank, label: model.branchBank },
-            })(<Select disabled labelInValue />)}
+              initialValue: isNew ? bankBranchList.bankCode : model.branchBank,
+            })(<Input disabled />)}
           </FormItem>
 
           <FormItem label="币种" {...formItemLayout}>
@@ -381,7 +415,7 @@ class OpenAccountMaintain extends Component {
             {getFieldDecorator('requisitionDate', {
               rules: [{ required: true }],
               initialValue: isNew ? moment() : moment(model.requisitionDate),
-            })(<DatePicker format="YYYY-MM-DD" disabled={isTrue} />)}
+            })(<DatePicker format="YYYY-MM-DD" disabled={true} />)}
           </FormItem>
 
           <FormItem label="备注" {...formItemLayout}>

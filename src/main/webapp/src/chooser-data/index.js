@@ -3,6 +3,7 @@ import config from 'config';
 import moment from 'moment';
 // import constants from 'share/constants'
 import { Badge, Popover, Avatar, Tooltip } from 'antd';
+import { messages } from 'utils/utils';
 
 const formatMoney = (number, decimals = 2, isString = false) => {
   number = (number + '').replace(/[^0-9+-Ee.]/g, '');
@@ -1667,7 +1668,7 @@ const chooserData = {
         render: enable => (
           <Badge
             status={enable ? 'success' : 'error'}
-            text={enable ? 'common.status.enable' : 'common.status.disable'}
+            text={enable ? messages('common.status.enable') : messages('common.status.disable')}
           />
         ),
       },
@@ -1693,7 +1694,7 @@ const chooserData = {
         render: isEnabled => (
           <Badge
             status={isEnabled ? 'success' : 'error'}
-            text={isEnabled ? 'common.status.enable' : 'common.status.disable'}
+            text={isEnabled ? messages('common.status.enable') : messages('common.status.disable')}
           />
         ),
       },
@@ -2813,7 +2814,7 @@ const chooserData = {
         render: isEnabled => (
           <Badge
             status={isEnabled ? 'success' : 'error'}
-            text={isEnabled ? 'common.status.enable' : 'common.status.disable'}
+            text={isEnabled ? messages('common.status.enable') : messages('common.status.disable')}
           />
         ),
       },
@@ -3322,7 +3323,7 @@ const chooserData = {
   },
   tax_company: {
     title: '添加公司',
-    url: `${config.mdataUrl}/api/company/by/term`,
+    url: `${config.taxUrl}/api/tax/taxRegister/basic/getCompany`,
     searchForm: [
       { type: 'input', id: 'companyCode', label: '公司代码' },
       { type: 'input', id: 'name', label: '公司名称' },
@@ -3739,9 +3740,12 @@ const chooserData = {
   },
   select_city: {
     title: '选择城市',
-    url: `${config.mdataUrl}/api/localization/city/query`,
-    searchForm: [{ type: 'input', id: 'city', label: '城市名称' }],
-    columns: [{ title: '城市代码', dataIndex: 'code' }, { title: '城市名称', dataIndex: 'city' }],
+    url: `${config.mdataUrl}/api/location/search/cities`,
+    searchForm: [{ type: 'input', id: 'description', label: '城市名称' }],
+    columns: [
+      { title: '城市代码', dataIndex: 'code' },
+      { title: '城市名称', dataIndex: 'description' },
+    ],
     key: 'id',
   },
   //报账单类型
@@ -3776,12 +3780,12 @@ const chooserData = {
     title: '科目',
     url: `${config.mdataUrl}/api/accounts/query/accounts/setOfBooksId`,
     searchForm: [
-      { type: 'input', id: 'segment3', label: '科目代码' },
-      { type: 'input', id: 'segment3_des', label: '科目名称' },
+      { type: 'input', id: 'accountCode', label: '科目代码' },
+      { type: 'input', id: 'accountName', label: '科目名称' },
     ],
     columns: [
-      { title: '科目代码', dataIndex: 'segment3' },
-      { title: '科目名称', dataIndex: 'segment3_des' },
+      { title: '科目代码', dataIndex: 'accountCode' },
+      { title: '科目名称', dataIndex: 'accountName' },
     ],
     key: 'id',
   },
@@ -3876,8 +3880,8 @@ const chooserData = {
     title: '客户信息查询',
     url: `${config.taxUrl}/api/tax/client/query/condition`,
     searchForm: [
-      { type: 'input', id: 'info', label: '客户编号' },
-      { type: 'input', id: 'info', label: '客户名称' },
+      { type: 'input', id: 'clientNumber', label: '客户编号' },
+      { type: 'input', id: 'clientName', label: '客户名称' },
     ],
     columns: [
       { title: '客户编号', dataIndex: 'clientNumber' },

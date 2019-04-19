@@ -688,7 +688,7 @@ class Employee extends React.Component {
           </div>
         </div>
 
-        <div style={{ margin: '24px 0' }}>
+        <div style={{ clear: 'both', paddingTop: '24px' }}>
           <CustomTable
             columns={columns}
             url={`${config.mdataUrl}/api/users/v3/search`}

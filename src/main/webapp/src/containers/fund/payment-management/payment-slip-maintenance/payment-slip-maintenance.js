@@ -1,9 +1,10 @@
 import React from 'react';
 import { routerRedux } from 'dva/router';
 import 'styles/fund/account.scss';
-import { Form, Table, Button, message, Input, Alert, Modal, Row, Col } from 'antd';
+import { Form, Button, message, Input, Alert, Modal, Row, Col, Popover } from 'antd';
 import { connect } from 'dva';
 import moment from 'moment';
+import Table from 'widget/table';
 import FundSearchForm from '../../fund-components/fund-search-form';
 import PaymentMaintenanceService from './payment-maintenance-service';
 
@@ -32,81 +33,88 @@ class PaymentSlipMaintenance extends React.Component {
         current: 1,
         showSizeChanger: true,
         showQuickJumper: true,
-        showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
+        showTotal: (total, range) =>
+          this.$t('common.show.total', {
+            range0: `${range[0]}`,
+            range1: `${range[1]}`,
+            total,
+          }),
       },
       columns: [
         {
-          title: '单据编号',
+          title: this.$t('fund.receipt.number') /* 单据编号 */,
           dataIndex: 'paymentBatchNumber',
           width: 150,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '单据类型',
+          title: this.$t('fund.type.of.document') /* 单据类型 */,
           dataIndex: 'billTypeDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '付款账户',
+          title: this.$t('fund.payment.account') /* 付款账户 */,
           dataIndex: 'paymentAccountName',
           width: 100,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '付款账号',
+          title: this.$t('fund.payment.account') /* 付款账号 */,
           dataIndex: 'paymentAccount',
-          width: 100,
-          align: 'center',
+          width: 140,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '付款方式',
+          title: this.$t('fund.payment.method') /* 付款方式 */,
           dataIndex: 'paymentMethodDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '笔数',
+          title: this.$t('fund.the.number') /* 笔数 */,
           dataIndex: 'lineCount',
-          width: 100,
-          align: 'center',
+          width: 80,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
           width: 100,
-          align: 'center',
+          render: value => <div style={{ textAlign: 'right' }}>{this.filterMoney(value)}</div>,
         },
         {
-          title: '币种',
+          title: this.$t('fund.currency.code') /* 币种 */,
           dataIndex: 'currencyCode',
           width: 100,
-          align: 'center',
         },
         {
-          title: '单据日期',
+          title: this.$t('fund.document.date') /* 单据日期 */,
           dataIndex: 'billDateDesc',
           width: 100,
           align: 'center',
         },
         {
-          title: '审批状态',
+          title: this.$t('fund.the.examination.and.approval.status') /* 审批状态 */,
           dataIndex: 'billStatusDesc',
           width: 100,
           align: 'center',
         },
         {
-          title: '制单人',
+          title: this.$t('fund.single.person') /* 制单人 */,
           dataIndex: 'employeeName',
-          width: 150,
-          align: 'center',
+          width: 100,
         },
       ],
       searchForm: [
         {
           colSpan: 6,
           type: 'valueList',
-          label: '单据类型',
+          label: this.$t('fund.type.of.document') /* 单据类型 */,
           id: 'billType',
           options: [],
           valueListCode: 'ZJ_FORM_TYPE',
@@ -114,7 +122,7 @@ class PaymentSlipMaintenance extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '付款方式',
+          label: this.$t('fund.payment.method') /* 付款方式 */,
           id: 'paymentType',
           options: [],
           valueListCode: 'ZJ_PAYMENT_TYPE',
@@ -122,25 +130,25 @@ class PaymentSlipMaintenance extends React.Component {
         {
           colSpan: 6,
           type: 'modalList',
-          label: '付款账号',
+          label: this.$t('fund.payment.account') /* 付款账号 */,
           id: 'accountNumber',
           listType: 'paymentAccount',
         },
         {
           colSpan: 6,
           type: 'valueList',
-          label: '单据状态',
+          label: this.$t('fund.the.documents.state') /* 单据状态 */,
           id: 'billStatus',
           options: [],
           valueListCode: 'ZJ_BILL_STATUS',
         },
         {
-          colSpan: 9,
+          colSpan: 6,
           type: 'intervalDate',
           id: 'intervalDate',
-          fromlabel: '日期从',
+          fromlabel: this.$t('fund.date.from') /* 日期从 */,
           fromId: 'dateFrom',
-          tolabel: '日期到',
+          tolabel: this.$t('fund.the.date.to') /* 日期到 */,
           toId: 'dateTo',
         },
       ],
@@ -217,7 +225,7 @@ class PaymentSlipMaintenance extends React.Component {
                 .format()
                 .slice(0, 10)
             : '',
-          paymentAccount: params.accountNumber || '',
+          paymentAccount: params.accountNumber ? params.accountNumber.accountNumber : '',
         },
       },
       () => {
@@ -286,12 +294,16 @@ class PaymentSlipMaintenance extends React.Component {
    * 展示删除弹框
    */
   showDeleteConfirm = () => {
+    const { selectedRow } = this.state;
     const aThis = this;
     confirm({
-      title: '您讲删除所选择的单据，删除后单据将退回至付款工作台，是否继续?',
+      title:
+        selectedRow[0].billType === 'MANUAL_PAYMENT'
+          ? '单据将永久删除'
+          : '所选择的单据将返回付款工作台，是否继续？',
       okText: '确定',
       okType: 'danger',
-      cancelText: '取消',
+      cancelText: this.$t('fund.cancel') /* 取消 */,
       onOk() {
         aThis.deleteItems();
       },
@@ -304,7 +316,11 @@ class PaymentSlipMaintenance extends React.Component {
   noticeAlert = rows => {
     const noticeAlert = (
       <span>
-        已选择<span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项
+        {this.$t('fund.selected')}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.item')}
+        {/* 已选择 */}
+        {/* 项 */}
       </span>
     );
     this.setState({
@@ -335,9 +351,10 @@ class PaymentSlipMaintenance extends React.Component {
    * 行选择
    */
   onSelectChange = (selectedRowKeys, selectedRow) => {
-    // console.log(selectedRow);
+    // console.log('Row', selectedRowKeys, selectedRow);
     if (selectedRowKeys.length > 0) {
       for (let i = 1; i <= selectedRow.length; i += 1) {
+        console.log(selectedRow[i - 1].lineCount);
         if (selectedRow[i - 1].lineCount === '0') {
           this.setState({
             noLine: true,
@@ -372,7 +389,7 @@ class PaymentSlipMaintenance extends React.Component {
     const { selectedRowKeys } = this.state;
     PaymentMaintenanceService.deleteAccount(selectedRowKeys).then(res => {
       if (res.status === 200) {
-        message.success('删除成功！');
+        message.success(this.$t('fund.delete.successful1')); /* 删除成功！ */
         this.getList();
         this.setState({
           selectedRowKeys: [],
@@ -391,11 +408,11 @@ class PaymentSlipMaintenance extends React.Component {
   submit = () => {
     const { selectedRowKeys, noLine } = this.state;
     if (noLine) {
-      message.error('金额不能为0');
+      message.error(this.$t('fund.desc.code11')); // '金额不能为0'
     } else {
       PaymentMaintenanceService.submitAll(selectedRowKeys)
         .then(() => {
-          message.success('提交成功');
+          message.success(this.$t('fund.submitted.successfully')); /* 提交成功 */
           this.getList();
           this.setState({
             selectedRowKeys: [],
@@ -470,11 +487,16 @@ class PaymentSlipMaintenance extends React.Component {
                   {this.$t('common.delete')}
                 </Button>
                 <Button style={{ marginLeft: '10px' }} type="primary" onClick={this.submit}>
-                  {this.$t('提交')}
+                  {this.$t(this.$t('fund.submit'))}
                 </Button>
               </Col>
               <Col span={6} offset={10}>
-                <Search placeholder="请输入单据编号" enterButton onSearch={this.searchNumber} />
+                <Search
+                  placeholder={this.$t('fund.please.enter.the.receipt.number')}
+                  enterButton
+                  onSearch={this.searchNumber}
+                />
+                {/* 请输入单据编号 */}
               </Col>
             </Row>
           </div>

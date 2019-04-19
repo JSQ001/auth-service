@@ -138,7 +138,7 @@ class CustomTable extends Component {
   };
   render() {
     const { dataSource, pagination, loading, tableColumns } = this.state;
-    const { onClick, tableKey, rowSelection, scroll } = this.props;
+    const { onClick, tableKey, rowSelection, scroll, tableSize } = this.props;
 
     return (
       <Table
@@ -147,7 +147,7 @@ class CustomTable extends Component {
         dataSource={dataSource}
         columns={tableColumns || []}
         pagination={pagination.total ? pagination : false}
-        size="middle"
+        size={tableSize ? tableSize : 'middle'}
         bordered
         onRow={record => {
           return {

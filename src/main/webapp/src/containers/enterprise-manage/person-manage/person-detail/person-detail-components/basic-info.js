@@ -34,6 +34,8 @@ import { personObjDefaultWithoutExtend } from 'containers/enterprise-manage/pers
 import 'styles/enterprise-manage/person-manage/person-detail/person-detail-components/basic-info.scss';
 import { ImageUpload } from 'components/Widget/index';
 import PropTypes from 'prop-types';
+import Lov from 'widget/Template/lov';
+
 const FormItem = Form.Item;
 const Option = Select.Option;
 const { TextArea } = Input;
@@ -49,6 +51,10 @@ class PersonBasicInfo extends React.Component {
       data: [],
       genderData: [],
       preFixList: [],
+      lov: {
+        departmentId: null,
+        companyId: null,
+      },
     };
   }
 
@@ -139,18 +145,18 @@ class PersonBasicInfo extends React.Component {
             {
               userOid: this.state.personObj.userOid,
 
-              companyOid: values.companyOid[0]
-                ? values.companyOid[0].companyOid
+              companyOid: values.companyOid
+                ? values.companyOid.companyOid
                 : this.state.personObj.companyOid,
-              companyName: values.companyOid[0]
-                ? values.companyOid[0].name
+              companyName: values.companyOid
+                ? values.companyOid.name
                 : this.state.personObj.companyName,
               //
-              departmentOid: values.departmentName[0]
-                ? values.departmentName[0].departmentOid
+              departmentOid: values.departmentName
+                ? values.departmentName.departmentOid
                 : this.state.personObj.departmentOid,
-              departmentName: values.departmentName[0]
-                ? values.departmentName[0].name
+              departmentName: values.departmentName
+                ? values.departmentName.name
                 : this.state.personObj.departmentName,
               //
               directManager: values.directManager[0] ? values.directManager[0].userOid : '',
@@ -206,18 +212,18 @@ class PersonBasicInfo extends React.Component {
             });
         } else {
           let personObj = Object.assign(personObjDefaultWithoutExtend, {
-            companyOid: values.companyOid[0]
-              ? values.companyOid[0].companyOid
+            companyOid: values.companyOid
+              ? values.companyOid.companyOid
               : this.state.personObj.companyOid,
-            companyName: values.companyOid[0]
-              ? values.companyOid[0].name
+            companyName: values.companyOid
+              ? values.companyOid.name
               : this.state.personObj.companyName,
             //
-            departmentOid: values.departmentName[0]
-              ? values.departmentName[0].departmentOid
+            departmentOid: values.departmentName
+              ? values.departmentName.departmentOid
               : this.state.personObj.departmentOid,
-            departmentName: values.departmentName[0]
-              ? values.departmentName[0].name
+            departmentName: values.departmentName
+              ? values.departmentName.name
               : this.state.personObj.departmentName,
             //
             directManager: values.directManager[0] ? values.directManager[0].userOid : '',
@@ -477,6 +483,24 @@ class PersonBasicInfo extends React.Component {
         {this.renderNoEditingForExtend()}*/}
       </div>
     );
+  };
+
+  changeCompanyLov = e => {
+    if (this.props.company.companyUnitFlag) {
+      let { lov } = this.state;
+      lov.companyId = e.id;
+      this.setState({ lov });
+    }
+    this.handleChange();
+  };
+
+  changeDepartmentLov = e => {
+    if (this.props.company.companyUnitFlag) {
+      let { lov } = this.state;
+      lov.departmentId = e.id;
+      this.setState({ lov });
+    }
+    this.handleChange();
   };
 
   //渲染非编辑状态
@@ -979,13 +1003,11 @@ class PersonBasicInfo extends React.Component {
               >
                 {getFieldDecorator('companyOid', {
                   initialValue: personObj.companyOid
-                    ? [
-                        {
-                          companyName: personObj.companyName,
-                          companyOid: personObj.companyOid,
-                        },
-                      ]
-                    : [],
+                    ? {
+                        companyName: personObj.companyName,
+                        companyOid: personObj.companyOid,
+                      }
+                    : {},
                   rules: [
                     {
                       required: true,
@@ -993,13 +1015,14 @@ class PersonBasicInfo extends React.Component {
                     },
                   ],
                 })(
-                  <Chooser
-                    single={true}
-                    type="all_company_with_legal_entity"
-                    labelKey="companyName"
+                  <Lov
+                    code="company_lov"
                     valueKey="companyOid"
-                    onChange={this.handleChange}
-                    listExtraParams={{ enabled: 1 }}
+                    labelKey="companyName"
+                    allowClear={true}
+                    onChange={this.changeCompanyLov}
+                    single
+                    extraParams={{ enabled: true, departmentId: this.state.lov.departmentId }}
                   />
                 )}
               </FormItem>
@@ -1013,13 +1036,11 @@ class PersonBasicInfo extends React.Component {
               >
                 {getFieldDecorator('departmentName', {
                   initialValue: personObj.departmentOid
-                    ? [
-                        {
-                          name: personObj.departmentName,
-                          departmentOid: personObj.departmentOid,
-                        },
-                      ]
-                    : [],
+                    ? {
+                        departmentName: personObj.departmentName,
+                        departmentOid: personObj.departmentOid,
+                      }
+                    : {},
                   rules: [
                     {
                       required: true,
@@ -1027,13 +1048,14 @@ class PersonBasicInfo extends React.Component {
                     },
                   ],
                 })(
-                  <Chooser
-                    single={true}
-                    type="department"
-                    labelKey="name"
+                  <Lov
+                    code="department_lov"
                     valueKey="departmentOid"
-                    onChange={this.handleChange}
-                    listExtraParams={{}}
+                    labelKey="departmentName"
+                    allowClear={true}
+                    onChange={this.changeDepartmentLov}
+                    single
+                    extraParams={{ status: 101, companyId: this.state.lov.companyId }}
                   />
                 )}
               </FormItem>
@@ -1339,6 +1361,7 @@ PersonBasicInfo.defaultProps = {
 function mapStateToProps(state) {
   return {
     isOldCompany: state.user.isOldCompany,
+    company: state.user.company,
   };
 }
 const WrappedPersonBasicInfo = Form.create()(PersonBasicInfo);

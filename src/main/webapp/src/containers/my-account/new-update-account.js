@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { DatePicker, Form, Button, Input, Select, message, Row, Col } from 'antd';
+import { DatePicker, Form, Button, Input, InputNumber, Select, message, Row, Col } from 'antd';
 const FormItem = Form.Item;
 import moment from 'moment';
 import CustomAmount from 'widget/custom-amount';
@@ -156,13 +156,7 @@ class NewUpdateAccount extends React.Component {
 
   disabledDate(current) {
     // Can not select days before today and today
-    return (
-      current &&
-      current <
-        moment()
-          .endOf('day')
-          .subtract(1, 'days')
-    );
+    return current && current > moment().endOf('day');
   }
 
   // 提交
@@ -228,6 +222,21 @@ class NewUpdateAccount extends React.Component {
     switch (item.fieldDataType) {
       case 'TEXT': {
         return <Input placeholder={this.$t('common.please.enter')} />;
+      }
+      case 'LONG': {
+        return (
+          <InputNumber style={{ width: '100%' }} placeholder={this.$t('common.please.enter')} />
+        );
+      }
+      case 'DATE': {
+        return (
+          <DatePicker
+            format="YYYY-MM-DD"
+            allowClear={false}
+            disabledDate={item.disabledDate}
+            style={{ width: '100%' }}
+          />
+        );
       }
       // case ""
     }
@@ -316,7 +325,8 @@ class NewUpdateAccount extends React.Component {
                         message: this.$t('common.please.select'),
                       },
                     ],
-                    initialValue: record.id ? item.value : item.defaultValueMode,
+                    // initialValue: record.id ? item.value : item.defaultValueMode,
+                    initialValue: record.id ? item.value : null,
                   })(this.renderItem(item))}
                 </FormItem>
               );

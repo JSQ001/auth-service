@@ -406,9 +406,9 @@ class NewPaymentRequisitionLine extends React.Component {
           <Row style={{ fontSize: '12px' }}>
             <Col span={6} className="ant-form-item-label" />
             <Col span={13} className="ant-col-offset-1" style={{ margin: '-20px 0px 10px 0px' }}>
-              付款计划序号&nbsp;:&nbsp;&nbsp;{lineData.scheduleLineNumber}&nbsp;&nbsp;|&nbsp;&nbsp;付款计划日期&nbsp;&nbsp;:&nbsp;&nbsp;{moment(
-                lineData.schedulePaymentDate
-              ).format('YYYY-MM-DD')}
+              付款计划日期&nbsp;&nbsp;:&nbsp;&nbsp;{moment(lineData.schedulePaymentDate).format(
+                'YYYY-MM-DD'
+              )}
             </Col>
           </Row>
           <div className="common-item-title">{this.$t({ id: 'acp.detail' } /* 详情*/)}</div>

@@ -20,6 +20,7 @@ module.exports = {
     'react/prop-types': [0],
     'react/prefer-stateless-function': [0],
     'react/jsx-one-expression-per-line': [0],
+    'linebreak-style': [0, 'error', 'windows'],
     'react/jsx-wrap-multilines': [
       'error',
       {

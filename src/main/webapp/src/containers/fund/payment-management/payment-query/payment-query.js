@@ -1,9 +1,10 @@
 import React from 'react';
 import 'styles/fund/account.scss';
 import { routerRedux } from 'dva/router';
-import { Form, Table, Input, Row, Col } from 'antd';
+import { Form, Input, Row, Col } from 'antd';
 import { connect } from 'dva';
 import moment from 'moment';
+import Table from 'widget/table';
 import FundSearchForm from '../../fund-components/fund-search-form';
 import PaymentMaintenanceService from '../payment-slip-maintenance/payment-maintenance-service';
 
@@ -25,30 +26,37 @@ class PaymentQuery extends React.Component {
         current: 1,
         showSizeChanger: true,
         showQuickJumper: true,
-        showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
+        showTotal: (total, range) =>
+          this.$t('common.show.total', {
+            range0: `${range[0]}`,
+            range1: `${range[1]}`,
+            total,
+          }),
       },
       columns: [
         {
-          title: '单据编号',
+          title: this.$t('fund.receipt.number') /* 单据编号 */,
           dataIndex: 'paymentBatchNumber',
           width: 150,
-          align: 'center',
         },
         {
-          title: '单据类型',
+          title: this.$t('fund.type.of.document') /* 单据类型 */,
           dataIndex: 'billTypeDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '付款户名',
+          title: this.$t('fund.payment.account') /* 付款户名 */,
           dataIndex: 'paymentAccountName',
           width: 100,
-          align: 'center',
         },
         {
-          title: '付款账号',
+          title: this.$t('fund.payment.account') /* 付款账号 */,
           dataIndex: 'paymentAccount',
+          width: 130,
+        },
+        {
+          title: '所属公司',
+          dataIndex: 'paymentCompanyName',
           width: 100,
           align: 'center',
         },
@@ -56,50 +64,52 @@ class PaymentQuery extends React.Component {
           title: '付款方式',
           dataIndex: 'paymentMethodDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
           width: 100,
-          align: 'center',
+          render: value => <div style={{ textAlign: 'right' }}>{this.filterMoney(value)}</div>,
         },
         {
-          title: '笔数',
+          title: this.$t('fund.the.number') /* 笔数 */,
           dataIndex: 'lineCount',
-          width: 100,
-          align: 'center',
+          width: 80,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
-          title: '币种',
+          title: this.$t('fund.currency.code') /* 币种 */,
           dataIndex: 'currencyCode',
+          width: 80,
+        },
+        {
+          title: '支付状态',
+          dataIndex: 'headStatusDesc',
           width: 100,
           align: 'center',
         },
         {
           title: '审批状态',
           dataIndex: 'billStatusDesc',
-          width: 100,
-          align: 'center',
+          width: 80,
         },
         {
-          title: '单据日期',
+          title: this.$t('fund.document.date') /* 单据日期 */,
           dataIndex: 'billDateDesc',
           width: 100,
           align: 'center',
         },
         {
-          title: '制单人',
+          title: this.$t('fund.single.person') /* 制单人 */,
           dataIndex: 'employeeName',
-          width: 150,
-          align: 'center',
+          width: 100,
         },
       ],
       searchForm: [
         {
           colSpan: 6,
           type: 'valueList',
-          label: '单据类型',
+          label: this.$t('fund.type.of.document') /* 单据类型 */,
           id: 'billType',
           options: [],
           valueListCode: 'ZJ_FORM_TYPE',
@@ -107,7 +117,7 @@ class PaymentQuery extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '付款方式',
+          label: this.$t('fund.payment.method') /* 付款方式 */,
           id: 'paymentType',
           options: [],
           valueListCode: 'ZJ_PAYMENT_TYPE',
@@ -115,25 +125,36 @@ class PaymentQuery extends React.Component {
         {
           colSpan: 6,
           type: 'modalList',
-          label: '付款账号',
+          label: this.$t('fund.payment.account') /* 付款账号 */,
           id: 'accountNumber',
           listType: 'paymentAccount',
         },
         {
           colSpan: 6,
+          type: 'modalList',
+          label: '单据公司',
+          id: 'paymentCompany',
+          listType: 'company',
+          labelKey: 'name',
+          listExtraParams: { setOfBooksId: props.company.setOfBooksId },
+          valueKey: 'id',
+          single: true,
+        },
+        {
+          colSpan: 6,
           type: 'valueList',
-          label: '单据状态',
+          label: this.$t('fund.the.documents.state') /* 单据状态 */,
           id: 'billStatus',
           options: [],
           valueListCode: 'ZJ_BILL_STATUS',
         },
         {
-          colSpan: 9,
+          colSpan: 6,
           type: 'intervalDate',
           id: 'intervalDate',
-          fromlabel: '日期从',
+          fromlabel: this.$t('fund.date.from') /* 日期从 */,
           fromId: 'dateFrom',
-          tolabel: '日期到',
+          tolabel: this.$t('fund.the.date.to') /* 日期到 */,
           toId: 'dateTo',
         },
       ],
@@ -199,6 +220,7 @@ class PaymentQuery extends React.Component {
           ...searchParams,
           billType: params.billType ? params.billType.key : '',
           paymentMethod: params.paymentType ? params.paymentType.key : '',
+          paymentCompanyId: params.paymentCompany ? params.paymentCompany[0].id : '',
           billStatus: params.billStatus ? params.billStatus.key : '',
           // paymentAccount: paymentAccount || '',
           billDateFrom: params.dateFrom
@@ -211,7 +233,7 @@ class PaymentQuery extends React.Component {
                 .format()
                 .slice(0, 10)
             : '',
-          paymentAccount: params.accountNumber || '',
+          paymentAccount: params.accountNumber ? params.accountNumber.accountNumber : '',
         },
       },
       () => {
@@ -289,7 +311,12 @@ class PaymentQuery extends React.Component {
           >
             <Row>
               <Col span={6} offset={18}>
-                <Search placeholder="请输入单据编号" enterButton onSearch={this.searchNumber} />
+                <Search
+                  placeholder={this.$t('fund.please.enter.the.receipt.number')}
+                  enterButton
+                  onSearch={this.searchNumber}
+                />
+                {/* 请输入单据编号 */}
               </Col>
             </Row>
           </div>
@@ -304,7 +331,7 @@ class PaymentQuery extends React.Component {
             onRowClick={this.handleRowClick}
             bordered
             size="middle"
-            scroll={{ x: 1500 }}
+            scroll={{ x: 1300 }}
           />
         </div>
       </div>

@@ -29,7 +29,9 @@ import 'styles/expense-adjust/new-expense-adjust-detail.scss';
 import expenseAdjustService from 'containers/expense-adjust/expense-adjust/expense-adjust.service';
 import Upload from 'widget/upload-button';
 const TextArea = Input.TextArea;
+import reimburseService from 'containers/reimburse/my-reimburse/reimburse.service';
 import ImporterNew from 'widget/Template/importer-new';
+
 class NewExpenseAdjustDetail extends React.Component {
   constructor(props) {
     super(props);
@@ -38,6 +40,8 @@ class NewExpenseAdjustDetail extends React.Component {
       params: {},
       num: 0,
       addData: false,
+      dimParams: {},
+      lineDimParams: {},
       updateParams: {}, //编辑数据
       dimensionData: [], //维度数据
       lineHeaderData: {},
@@ -312,11 +316,19 @@ class NewExpenseAdjustDetail extends React.Component {
   };
 
   handleChange = (key, value, record, index) => {
-    const { amount, defaultValue, data } = this.state;
+    let { amount, defaultValue, data, lineDimParams } = this.state;
+    let dimParam = '';
     if (key === 'companyId' || key === 'unitId' || key === 'expenseTypeId') {
       if (value.length > 0) {
-        key === 'companyId' && (data[index][key] = value[0].id);
-        key === 'unitId' && (data[index][key] = value[0].departmentId);
+        if (key === 'companyId') {
+          data[index][key] = value[0].id;
+          dimParam = value[0].id;
+        }
+        if (key === 'unitId') {
+          data[index][key] = value[0].departmentId;
+          dimParam = value[0].departmentId;
+        }
+
         key === 'expenseTypeId' && (data[index][key] = value[0].id);
         data[index][key + '_table'] = value;
       }
@@ -330,10 +342,12 @@ class NewExpenseAdjustDetail extends React.Component {
       data[index][key] = value;
     }
 
+    lineDimParams[key] = dimParam;
     this.setState(
       {
         defaultValue,
         data,
+        lineDimParams,
       },
       () => {}
     );
@@ -380,9 +394,10 @@ class NewExpenseAdjustDetail extends React.Component {
           <Select
             selectedIndex={defaultValue}
             defaultValue={defaultValue}
+            onFocus={() => this.getOptions(key, index)}
             onChange={value => this.handleChange(key, value, record, index)}
           >
-            {opt[key].map(item => <Option key={item.value}>{item.label}</Option>)}
+            {(opt[key + index] || []).map(item => <Option key={item.value}>{item.label}</Option>)}
           </Select>
         );
       }
@@ -411,15 +426,18 @@ class NewExpenseAdjustDetail extends React.Component {
     ) {
       this.props.params.costCenterData.reverse().map(item => {
         if (item) {
+          console.log(item);
           let options = [];
           item.itemDTOList.map(item => options.push({ label: item.itemName, value: item.itemId }));
           formItems.splice(4, 0, {
             type: 'select',
             label: item.name,
+            defaultLabel: 'dimension' + item.sequenceNumber + 'Name',
             required: true,
             key: 'dimension' + item.sequenceNumber + 'Id',
             span: this.props.params.adjustLineCategory === '1001' ? 12 : 30,
-            options: options,
+            method: () => this.getDimValue(item.id, 'dimension' + item.sequenceNumber + 'Id'),
+            options: [],
           });
           columns.splice(3, 0, {
             title: item.name,
@@ -429,7 +447,7 @@ class NewExpenseAdjustDetail extends React.Component {
             render: (desc, record, index) =>
               this.renderCol(desc, record, index, 'dimension' + item.sequenceNumber + 'Id'),
           });
-          opt['dimension' + item.sequenceNumber + 'Id'] = options;
+          //opt['dimension' + item.sequenceNumber + 'Id'] = options;
           validator['dimension' + item.sequenceNumber + 'Id'] = item.name;
         }
       });
@@ -527,154 +545,86 @@ class NewExpenseAdjustDetail extends React.Component {
     // this.getDimension(this.props.params.expenseAdjustTypeId);
   }
 
-  // getDimension = expenseAdjustTypeId => {
-  //   const { columns } = this.state;
-  //   expenseAdjustService.getDimensionAndValue(expenseAdjustTypeId).then(response => {
-  //     response.data.reverse().map(
-  //       item =>
-  //         item &&
-  //         columns.splice(4, 0, {
-  //           title: item.name,
-  //           dataIndex: 'dimension' + item.sequenceNumber + 'Name',
-  //           align: 'center',
-  //           render: desc => (
-  //             <span>
-  //               <Popover content={desc ? desc : '-'}>{desc ? desc : '-'}</Popover>
-  //             </span>
-  //           ),
-  //         })
-  //     );
-  //     this.setState({ columns, costCenterData: response.data });
-  //   });
-  // };
-
-  /*componentWillReceiveProps(nextProps) {
-    console.log(nextProps)
-    const { formItems, columns, column, opt, defaultValue, validator } = this.state;
-    if (!this.props.params.flag && nextProps.params.flag) {
-      if (
-        !this.props.params.flag &&
-        nextProps.params.costCenterData.length &&
-        columns.length === 5 &&
-        nextProps.params.flag
-      ) {
-        nextProps.params.costCenterData.reverse().map(item => {
-          if (item) {
-            let options = [];
-            item.itemDTOList.map(item =>
-              options.push({ label: item.itemName, value: item.itemId })
-            );
-            formItems.splice(4, 0, {
-              type: 'select',
-              label: item.name,
-              required: true,
-              key: 'dimension' + item.sequenceNumber + 'Id',
-              span: nextProps.params.adjustLineCategory === '1001' ? 12 : 30,
-              options: options,
-            });
-            columns.splice(3, 0, {
-              title: item.name,
-              dataIndex: 'dimension' + item.sequenceNumber + 'Id',
-              key: 'dimension' + item.sequenceNumber + 'Id',
-              align: 'center',
-              render: (desc, record, index) =>
-                this.renderCol(desc, record, index, 'dimension' + item.sequenceNumber + 'Id'),
-            });
-            opt['dimension' + item.sequenceNumber + 'Id'] = options;
-            validator['dimension' + item.sequenceNumber + 'Id'] = item.name;
-          }
-        });
-      }
-      //公司和部门设置默认值
-      if (!nextProps.params.record) {
-        //新建
-        let defaultValue = [];
-        defaultValue['companyId'] = [
-          { id: nextProps.expenseHeader.companyId, name: nextProps.expenseHeader.companyName },
-        ];
-        defaultValue['unitId'] = [
-          { departmentId: nextProps.expenseHeader.unitId, name: nextProps.expenseHeader.unitName },
-        ];
-        this.setState({ defaultValue });
-      } else {
-        //编辑 ,复制
-        let value = {
-          ...nextProps.params.record,
-          companyId: [
-            { id: nextProps.params.record.companyId, name: nextProps.params.record.companyName },
-          ],
-          unitId: [
-            {
-              departmentId: nextProps.params.record.unitId,
-              name: nextProps.params.record.unitName,
-            },
-          ],
-          expenseTypeId: [
-            {
-              id: nextProps.params.record.expenseTypeId,
-              name: nextProps.params.record.expenseTypeName,
-            },
-          ],
-        };
-        value.copy && delete value.id;
-        let data = [];
-        let fileList = [];
-        nextProps.params.record.attachments &&
-          nextProps.params.record.attachments.map(o =>
-            fileList.push({
-              ...o,
-              uid: o.attachmentOid,
-              name: o.fileName,
-            })
-          );
-        nextProps.params.record.linesDTOList.length &&
-          nextProps.params.record.linesDTOList.map(item => {
-            item['companyId' + '_table'] = [{ id: item.companyId, name: item.companyName }];
-            item['unitId' + '_table'] = [{ departmentId: item.unitId, name: item.unitName }];
-            item['expenseTypeId_table'] = [{ id: item.expenseTypeId, name: item.expenseTypeName }];
-            for (let name in item) {
-              !item[name] && delete item[name];
-            }
-            data.push(item);
-          });
-        this.state.formItems[this.state.formItems.length - 1].key === 'desc'
-          ? (value['desc'] = nextProps.params.record.description)
-          : (value['description'] = nextProps.params.record.description);
-        this.setState({
-          attachmentOid: nextProps.params.record.attachmentOids,
-          defaultValue: value,
-          type: nextProps.params.type,
-          data,
-          fileList,
-          record: nextProps.params.record,
-        });
-      }
-      if (nextProps.params.costCenterData.length > 0) {
-        columns[columns.length - 1].fixed = 'right';
-      }
-      this.setState({
-        formItems,
-        costCenterData: nextProps.params.costCenterData,
-        headerData: nextProps.params.expenseHeader,
-        columns,
-        addData: false,
-        opt,
-        scrollX:
-          nextProps.params.costCenterData.length > 0
-            ? 620 + nextProps.params.costCenterData.length * 120
-            : false,
-      });
-    }
-    if (!nextProps.params.flag && this.props.params.flag) {
-      this.upload && this.upload.reset();
-      this.props.form.resetFields();
-      this.setState({ fileList: [], data: [] });
-    }
-  }
-*/
   //上传附件
   handleUpload = values => {
     this.setState({ attachmentOid: values });
+  };
+
+  getOptions = (key, index) => {
+    const { data, opt, costCenterData } = this.state;
+    let { expenseHeader } = this.props.params;
+
+    if (key.includes('dimension')) {
+      let param = data[index];
+
+      let dim = costCenterData.find(item => key.includes(item.sequenceNumber)) || {};
+
+      let params = {
+        dimensionId: dim.id,
+        enabled: true,
+        userId: expenseHeader.employeeId,
+        companyId: param.companyId,
+        unitId: param.unitId,
+      };
+
+      let setOption = (arr = []) => {
+        opt[key + index] = arr;
+        this.setState({ opt });
+      };
+      console.log(params);
+      if (params.unitId && params.companyId) {
+        reimburseService.getDimValueById(params).then(res => {
+          setOption(
+            res.data.map(item => {
+              item.value = item.id;
+              item.label = item.dimensionItemName;
+              return item;
+            })
+          );
+        });
+      } else {
+        return setOption();
+      }
+    }
+  };
+
+  //获取维值
+  getDimValue = (id, dataIndex) => {
+    let { formItems } = this.state;
+    let { expenseHeader } = this.props.params;
+    let value = this.props.form.getFieldsValue();
+
+    let params = {
+      dimensionId: id,
+      enabled: true,
+      userId: expenseHeader.employeeId,
+      companyId: value.companyId && value.companyId.length ? value.companyId[0].id : null,
+      unitId: value.unitId && value.unitId.length ? value.unitId[0].departmentId : null,
+    };
+
+    let setOption = (opt = []) => {
+      formItems.map(item => {
+        if (item.key === dataIndex) {
+          item.options = opt.map(i => {
+            return {
+              value: i.id,
+              label: i.dimensionItemName,
+            };
+          });
+        }
+      });
+      this.setState({
+        formItems,
+      });
+    };
+
+    if (params.unitId && params.companyId) {
+      reimburseService.getDimValueById(params).then(res => {
+        setOption(res.data);
+      });
+    } else {
+      return setOption();
+    }
   };
 
   renderItem(item, index) {
@@ -695,9 +645,7 @@ class NewExpenseAdjustDetail extends React.Component {
         return (
           <Select
             placeholder={this.$t('common.please.select')}
-            onFocus={
-              item.options.length === 0 && item.method ? this.handleFocus(item, index) : () => {}
-            }
+            onFocus={item.method ? item.method : () => {}}
           >
             {item.options.map(item => <Option key={item.value}>{item.label}</Option>)}
           </Select>
@@ -768,10 +716,17 @@ class NewExpenseAdjustDetail extends React.Component {
     this.setState({ loading: true });
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        const { data, lastData, fileList } = this.state;
+        const { data, lastData, fileList, defaultValue, formItems, record } = this.state;
         let temp = data;
         if (this.validate(data)) {
-          values.amount = values.amount;
+          //编辑时位修改维度值设置id
+          formItems.map(item => {
+            if (item.defaultLabel && values[item.key] === defaultValue[item.defaultLabel]) {
+              values[item.key] = defaultValue[item.key];
+            }
+          });
+
+          //values.amount = values.amount;
           values.companyId =
             typeof values.companyId === 'string' ? values.companyId : values.companyId[0].id;
           values.unitId = values.unitId[0].departmentId;
@@ -832,8 +787,9 @@ class NewExpenseAdjustDetail extends React.Component {
           };
           let method = null;
           let flag = true;
-          if (typeof this.state.defaultValue.id !== 'undefined') {
-            param.id = this.state.defaultValue.id;
+          if (typeof defaultValue.id !== 'undefined') {
+            param.id = defaultValue.id;
+            param.versionNumber = record.versionNumber;
             flag = false;
           }
           expenseAdjustService
@@ -861,7 +817,10 @@ class NewExpenseAdjustDetail extends React.Component {
             })
             .catch(e => {
               this.setState({ loading: false });
-              message.error(this.$t(flag ? 'common.save.filed' : 'common.update.filed'));
+              message.error(
+                `${this.$t(flag ? 'common.save.filed' : 'common.update.filed')},${e.response &&
+                  e.response.data.message}`
+              );
             });
         }
       } else {
@@ -889,7 +848,6 @@ class NewExpenseAdjustDetail extends React.Component {
 
   getFormItems() {
     const { getFieldDecorator } = this.props.form;
-
     let formItemLayout =
       this.props.params.adjustLineCategory === '1001'
         ? {
@@ -959,7 +917,7 @@ class NewExpenseAdjustDetail extends React.Component {
               }
             >
               {getFieldDecorator(item.key, {
-                initialValue: this.state.defaultValue[item.key],
+                initialValue: this.state.defaultValue[item.defaultLabel || item.key],
                 rules: [
                   {
                     required: item.required,
@@ -980,11 +938,20 @@ class NewExpenseAdjustDetail extends React.Component {
   handleAgain = () => {
     this.setState({ loading: true });
     let flag = true;
+    const { data, lastData, fileList, defaultValue, formItems, record } = this.state;
+
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         const { data } = this.state;
         //values.amount = values.amount;
         if (this.validate(data)) {
+          //编辑时位修改维度值设置id
+          formItems.map(item => {
+            if (item.defaultLabel && values[item.key] === defaultValue[item.defaultLabel]) {
+              values[item.key] = defaultValue[item.key];
+            }
+          });
+
           values.companyName = values.companyId[0].name;
           values.companyId = values.companyId[0].id;
           values.unitName = values.unitId[0].name;
@@ -1035,6 +1002,7 @@ class NewExpenseAdjustDetail extends React.Component {
 
           if (typeof this.state.defaultValue.id !== 'undefined') {
             param.id = this.state.defaultValue.id;
+            param.versionNumber = record.versionNumber;
             flag = false;
           }
 
@@ -1077,7 +1045,10 @@ class NewExpenseAdjustDetail extends React.Component {
             })
             .catch(e => {
               this.setState({ loading: false });
-              message.error(this.$t(flag ? 'common.save.filed' : 'common.update.filed'));
+              message.error(
+                `${this.$t(flag ? 'common.save.filed' : 'common.update.filed')},${e.response &&
+                  e.response.data.message}`
+              );
             });
         }
       } else {

@@ -1199,10 +1199,10 @@ class NodeConditionList extends React.Component {
                       return (
                         <ListItem key={conditionIndex}>
                           <div className="condition-title">
-                            <h4>
+                            <span style={{ marginRight: 10, color: '#000' }}>
                               {this.$t('setting.key1330' /*条件*/)}
                               {conditionIndex + 1}
-                            </h4>
+                            </span>
                             {!isEdit && (
                               <div className="edit-and-delete">
                                 <a

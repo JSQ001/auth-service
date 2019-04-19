@@ -20,13 +20,6 @@ export default {
     return httpFetch.get(url, params);
   },
   /**
-   * 获取维度数据
-   */
-  getDimension(params) {
-    let url = `${config.mdataUrl}/api/dimension/page/by/cond`;
-    return httpFetch.get(url, params);
-  },
-  /**
    * 根据id查询费用调整单类型
    */
   getExpenseAdjustTypeById(typeId) {
@@ -76,6 +69,68 @@ export default {
       `${
         config.expenseUrl
       }/api/expense/adjust/types/update/budget/or/account?id=${id}&budgetFlag=${budgetFlag}&accountFlag=${accountFlag}`
+    );
+  },
+  /**
+   * 获取维度
+   * @param {*} params
+   */
+  getDimensionList(params) {
+    return httpFetch.get(`${config.mdataUrl}/api/dimension/page/by/cond`, params);
+  },
+  /**
+   * 获取维度列表
+   * @param {*} id
+   */
+  getDimensionById(id, params = {}) {
+    return httpFetch.get(
+      `${config.expenseUrl}/api/expense/adjust/types/${id}/dimension/query`,
+      params
+    );
+  },
+  /**
+   * 获取未分配的维度
+   * @param {*} params
+   */
+  getUndistributedDimensionList(id, params) {
+    return httpFetch.get(
+      `${config.expenseUrl}/api/expense/adjust/types/${id}/dimensions/query/filter`,
+      params
+    );
+  },
+  /**
+   * 获取维度下的维值
+   * @param {*} params
+   */
+  getDimensionValueList(dimensionId) {
+    return httpFetch.get(
+      `${
+        config.mdataUrl
+      }/api/dimension/item/list/By/dimensionId/enabled?dimensionId=${dimensionId}&enabled=true`
+    );
+  },
+  /**
+   * 保存维度
+   */
+  saveDimensionValue(id, params) {
+    return httpFetch.post(
+      `${config.expenseUrl}/api/expense/adjust/types/${id}/assign/dimension`,
+      params
+    );
+  },
+  /**
+   * 删除维度
+   */
+  deleteDimensionValue(id) {
+    return httpFetch.delete(`${config.expenseUrl}/api/expense/adjust/types/dimension/${id}`);
+  },
+  /**
+   * 修改维度
+   */
+  editDimensionValue(id, params) {
+    return httpFetch.post(
+      `${config.expenseUrl}/api/expense/adjust/types/${id}/assign/dimension`,
+      params
     );
   },
 };

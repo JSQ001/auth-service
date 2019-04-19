@@ -2,7 +2,8 @@
 import React from 'react';
 import { connect } from 'dva';
 import config from 'config';
-import { Button, message, Table, Spin } from 'antd';
+import { Button, message, Spin } from 'antd';
+import Table from 'widget/table';
 import NewSeparationRules from './new-separation-rules';
 import SearchArea from 'widget/search-area';
 import SlideFrame from 'widget/slide-frame';
@@ -10,7 +11,8 @@ import ImporterNew from 'widget/Template/importer-new'; //导入
 import ExcelExporter from 'widget/excel-exporter';
 import Service from './service';
 import { routerRedux } from 'dva/router';
-
+import httpFetch from 'share/httpFetch';
+import FileSaver from 'file-saver';
 class TaxPriceSeparationRules extends React.Component {
   constructor(props) {
     super(props);
@@ -20,12 +22,8 @@ class TaxPriceSeparationRules extends React.Component {
       excelVisible: false,
       visibel: false,
       loading: true,
-      dataSource: {},
-      pagination: {
-        total: 0,
-        page: 0,
-        pageSize: 10,
-      },
+      showImportSeparateModel: false, //导入自定义银行弹窗
+      data: [],
       exportColumns: [
         { title: '来源系统', dataIndex: 'sourceSystem' },
         { title: '来源数据价税状态', dataIndex: 'sourceDataStatus' },
@@ -49,25 +47,28 @@ class TaxPriceSeparationRules extends React.Component {
           colSpan: 6,
           options: [],
         },
-
         {
           type: 'select',
           id: 'sourceDataStatus',
           placeholder: '请输入',
           label: '来源数据价税状态',
           colSpan: 6,
-          options: [{ label: '已拆分', value: 'true' }, { label: '未拆分', value: 'false' }],
+          options: [{ label: '已拆分', value: '1' }, { label: '未拆分', value: '2' }],
         },
         {
-          type: 'input',
-          id: 'taxRateName',
-          placeholder: '请输入',
+          type: 'lov',
+          id: 'taxRateId',
+          code: 'tax-rate-definition',
           label: '税目',
+          valueKey: 'id',
+          labelKey: 'taxCategoryName',
+          single: true,
+          extraParams: { taxCategoryCode: 'VAT', enabled: 'Y' },
           colSpan: 6,
         },
         {
           type: 'select',
-          id: 'taxRuleCodeName',
+          id: 'taxRuleCode',
           placeholder: '请输入',
           label: '计税规则',
           colSpan: 6,
@@ -79,7 +80,7 @@ class TaxPriceSeparationRules extends React.Component {
           placeholder: '请输入',
           label: '是否申报',
           colSpan: 6,
-          options: [{ label: '是', value: 'true' }, { label: '否', value: 'false' }],
+          options: [{ label: '是', value: '1' }, { label: '否', value: '0' }],
         },
         {
           type: 'select',
@@ -87,7 +88,7 @@ class TaxPriceSeparationRules extends React.Component {
           placeholder: '请输入',
           label: '是否开票',
           colSpan: 6,
-          options: [{ label: '是', value: 'true' }, { label: '否', value: 'false' }],
+          options: [{ label: '是', value: '1' }, { label: '否', value: '0' }],
         },
         {
           type: 'select',
@@ -95,7 +96,7 @@ class TaxPriceSeparationRules extends React.Component {
           placeholder: '请输入',
           label: '是否生成凭证',
           colSpan: 6,
-          options: [{ label: '是', value: 'true' }, { label: '否', value: 'false' }],
+          options: [{ label: '是', value: '1' }, { label: '否', value: '0' }],
         },
         {
           type: 'select',
@@ -103,7 +104,7 @@ class TaxPriceSeparationRules extends React.Component {
           placeholder: '请输入',
           label: '是否启用',
           colSpan: 6,
-          options: [{ label: '是', value: 'true' }, { label: '否', value: 'false' }],
+          options: [{ label: '是', value: '1' }, { label: '否', value: '0' }],
         },
       ],
       dataSource: [],
@@ -114,7 +115,7 @@ class TaxPriceSeparationRules extends React.Component {
         onShowSizeChange: this.onChangePageSize,
         showSizeChanger: true,
         showQuickJumper: true,
-        pageSize: 10,
+        pageSize: 5,
         pageSizeOptions: ['5', '10', '20', '50', '100'],
         showTotal: (total, range) =>
           this.$t(
@@ -218,13 +219,14 @@ class TaxPriceSeparationRules extends React.Component {
         },
       ],
       model: {},
+      searchParams: {},
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
+    this.getList();
     this.getTaxAccountingMethod();
     this.setColumns();
-    this.getList();
   }
   // 新建
   create = () => {
@@ -237,28 +239,35 @@ class TaxPriceSeparationRules extends React.Component {
     this.setState({ model: JSON.parse(JSON.stringify(record)), visibel: true });
   };
   //搜索
-  search = result => {
+  handleSearch = params => {
     let pagination = this.state.pagination;
     pagination.page = 0;
     pagination.current = 1;
-    pagination.total = 0;
-    this.setState({
-      pagination,
-      searchParams: { ...result },
+
+    this.setState(
+      {
+        searchParams: params,
+        loading: true,
+        pagination,
+      },
+      () => {
+        this.getList();
+      }
+    );
+  };
+  //重置
+  reset = () => {
+    this.setState({ searchParams: {} }, () => {
+      this.getList();
     });
   };
-  // get() {
-  //     Service.pageInvoicingSiteByCond1().then(res => {
-  //         console.log(res.data)
-  //     })
-  // }
   // 获得数据
   getList() {
-    const { pagination } = this.state;
-    const params = {};
+    const { pagination, searchParams } = this.state;
+    const params = { ...searchParams };
     params.page = pagination.current - 1;
     params.size = pagination.pageSize;
-    Service.pageInvoicingSiteByCond()
+    Service.pageInvoicingSiteByCond(params)
       .then(response => {
         pagination.total = Number(response.headers['x-total-count']) || 0;
         response.data.map(item => {
@@ -281,7 +290,6 @@ class TaxPriceSeparationRules extends React.Component {
   setColumns = () => {
     const { columns } = this.state;
     Service.getColumns().then(res => {
-      console.log(res.data);
       if (res.data && res.data.length) {
         columns.splice(
           2,
@@ -290,15 +298,14 @@ class TaxPriceSeparationRules extends React.Component {
             return {
               dataIndex: item.dimensionCode,
               title: item.dimensionName,
-              width: 100,
-              algin: 'center',
+              width: 150,
+              align: 'center',
             };
           })
         );
         this.setState({ columns });
       }
     });
-    console.log(columns);
   };
 
   // 每页多少条
@@ -320,19 +327,9 @@ class TaxPriceSeparationRules extends React.Component {
     });
   };
 
-  // 点击清空按钮
-  reset = () => {
-    // this.setState({
-    //     searchParams: {
-    //         setOfBook: '',
-    //     },
-    // });
-    this.customTable.search();
-  };
-
   // 关闭侧滑页面
   close = flag => {
-    this.setState({ visibel: false, model: {}, loading: true }, () => {
+    this.setState({ visibel: false, model: {} }, () => {
       flag && this.getList();
     });
   };
@@ -359,7 +356,7 @@ class TaxPriceSeparationRules extends React.Component {
     const { dispatch } = this.props;
     dispatch(
       routerRedux.push({
-        pathname: `/basic-tax-information-management/tax-subject-allocation/distribution-accounting/${id}`,
+        pathname: `/rule-definition/vat-invoice-rule`,
       })
     );
   };
@@ -394,6 +391,58 @@ class TaxPriceSeparationRules extends React.Component {
     this.setState({ excelVisible: false });
   };
 
+  handleImportShow = () => {
+    this.setState({
+      showImportSeparateModel: true,
+    });
+  };
+  handleFileUpload = () => {
+    const { fileList } = this.state;
+    const formData = new FormData();
+    formData.append('file', fileList[0]);
+    this.setState({
+      uploading: true,
+      flieUploading: true,
+    });
+    BSService.importSelfBank(formData)
+      .then(res => {
+        this.setState(
+          {
+            uploading: false,
+            fileList: [],
+            flieUploading: false,
+            showImportSeparateModel: false,
+            transactionOid: res.data.transactionOid, //这个transactionOid在导出错误信息的时候，需要用到
+          },
+          () => {
+            this.showImportErrInfo();
+            this.showTransactionLogDialog(this.state.transactionOid); // 将参数传给dialog
+          }
+        );
+      })
+      .catch(res => {
+        this.setState({
+          uploading: false,
+          flieUploading: false,
+        });
+      });
+  };
+  handleImportOk = transactionID => {
+    httpFetch
+      .post(`${config.taxUrl}/api/tax/vat/separate/rule/import/new/confirm/${transactionID}`)
+      .then(res => {
+        if (res.status === 200) {
+          this.getList();
+        }
+      })
+      .catch(() => {
+        message.error(this.$t('importer.import.error.info') /*导入失败，请重试*/);
+      });
+    this.showImport(false);
+  };
+  showImport = flag => {
+    this.setState({ showImportSeparateModel: flag });
+  };
   render() {
     const {
       columns,
@@ -404,6 +453,7 @@ class TaxPriceSeparationRules extends React.Component {
       searchForm,
       exportColumns,
       excelVisible,
+      showImportSeparateModel,
       loading,
     } = this.state;
     return (
@@ -411,7 +461,7 @@ class TaxPriceSeparationRules extends React.Component {
         <div className="train">
           <SearchArea
             searchForm={searchForm}
-            submitHandle={this.search}
+            submitHandle={this.handleSearch}
             clearHandle={this.reset}
             maxLength={4}
           />
@@ -427,7 +477,7 @@ class TaxPriceSeparationRules extends React.Component {
             </Button>
             <Button
               style={{ margin: '10px 20px 10px 0' }}
-              onClick={this.handleExport}
+              onClick={this.handleImportShow}
               type="primary"
             >
               导入
@@ -443,10 +493,9 @@ class TaxPriceSeparationRules extends React.Component {
               columns={columns}
               dataSource={data}
               pagination={pagination}
-              ref={ref => (this.customTable = ref)}
-              scroll={{ x: 1500 }}
+              bordered
               rowKey="id"
-              loading={loading}
+              scroll={{ x: 1500 }}
             />
             <SlideFrame
               show={visibel}
@@ -460,6 +509,19 @@ class TaxPriceSeparationRules extends React.Component {
               <NewSeparationRules params={model} close={this.close} />
             </SlideFrame>
           </div>
+          {/* 导入 */}
+          <ImporterNew
+            visible={showImportSeparateModel}
+            title={this.$t({ id: 'section.mapping.set.import' })}
+            templateUrl={`${config.taxUrl}/api/tax/vat/separate/rule/template`}
+            uploadUrl={`${config.taxUrl}/api/tax/vat/separate/rule/import/new`}
+            errorUrl={`${config.taxUrl}/api/tax/vat/separate/rule/import/new/error/export`}
+            errorDataQueryUrl={`${config.taxUrl}/api/tax/vat/separate/rule/import/new/query/result`}
+            deleteDataUrl={`${config.taxUrl}/api/tax/vat/separate/rule/import/new/delete`}
+            fileName={this.$t('bank.customBank.temp')}
+            onOk={this.handleImportOk}
+            afterClose={() => this.showImport(false)}
+          />
           {/* 导出 */}
           <ExcelExporter
             visible={excelVisible}

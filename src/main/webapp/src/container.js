@@ -54,6 +54,7 @@ class Contanier extends Component {
     this.pageMap = {};
     this.refMap = {};
     this.applicationIds = {};
+    this.ws = null;
   }
 
   async componentDidMount() {
@@ -63,21 +64,6 @@ class Contanier extends Component {
       });
       return;
     }
-
-    // this.ws = new WebSocket("ws://101.132.162.31:9081/peripheral/api/websocket?access_token=" + sessionStorage.getItem("token"));
-
-    // this.ws.onopen = () => {
-    //   console.log("链接了。。。");
-    //   this.ws.send("哈哈哈哈")
-    // }
-
-    // this.ws.onmessage = (evt) => {
-    //   var received_msg = JSON.parse(evt.data);
-    //   notification.open({
-    //     message: received_msg.title,
-    //     description: received_msg.messages,
-    //   });
-    // };
 
     this.hideMessage = message.loading('正在获取用户信息...', 0);
 
@@ -91,6 +77,8 @@ class Contanier extends Component {
       .catch(err => {
         this.hideMessage();
       });
+
+    this.connectService();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -109,6 +97,22 @@ class Contanier extends Component {
     if (this.ws) {
       this.ws.close();
     }
+  }
+
+  connectService() {
+    if (this.ws) return;
+
+    this.ws = new WebSocket(
+      `${config.wsUrl}/peripheral/api/websocket?access_token=` + sessionStorage.getItem('token')
+    );
+
+    this.ws.onmessage = evt => {
+      var received_msg = JSON.parse(evt.data);
+      notification.open({
+        message: received_msg.title,
+        description: received_msg.messages,
+      });
+    };
   }
 
   onlocalChange = local => {

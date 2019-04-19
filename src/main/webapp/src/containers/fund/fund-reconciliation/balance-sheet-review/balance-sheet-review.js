@@ -1,12 +1,16 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table, Form, Row, Col, Button } from 'antd';
+import { Form, Row, Col, Button } from 'antd';
 import FundSearchForm from '../../fund-components/fund-search-form';
-
+import balanceSheetServicen from './balance-sheet-review.service';
+/* eslint-disable */
+let periodData = [];
 class BalanceSheetReview extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
+      tableData: [], // 余额调节表detail
       // loading: false,
       searchForm: [
         {
@@ -26,7 +30,7 @@ class BalanceSheetReview extends React.Component {
           colSpan: 6,
           type: 'valueList',
           label: '币种',
-          id: 'billType',
+          id: 'currency',
           options: [],
           valueListCode: 'ZJ_FORM_TYPE',
         },
@@ -34,311 +38,71 @@ class BalanceSheetReview extends React.Component {
           colSpan: 6,
           type: 'valueList',
           label: '期间',
-          id: 'during',
+          id: 'periodName',
           options: [],
-          valueListCode: 'ZJ_FORM_TYPE',
-        },
-      ],
-      columns: [
-        {
-          title: '银行存款余额调节表',
-          children: [
-            {
-              title: '单位名称：',
-              width: '45%',
-              key: '',
-              value: '123',
-              children: [
-                {
-                  title: '项目及经济业务内容',
-                  width: 170,
-                  children: [
-                    {
-                      title: 'ORACLE银行日记账余额',
-                      width: 170,
-                      children: [
-                        {
-                          title: '加：企业未收银行已收',
-                          width: 170,
-                          children: [
-                            {
-                              title: '加项小计',
-                              width: 170,
-                              children: [
-                                {
-                                  title: '加：企业未收银行已收',
-                                  width: 170,
-                                  children: [
-                                    {
-                                      title: '减项小计',
-                                      width: 170,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '摘要',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '业务发生时间',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '金额',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              title: '银行账号：',
-              width: '45%',
-              children: [
-                {
-                  title: '项目及经济业务内容',
-                  width: 170,
-                  children: [
-                    {
-                      title: 'ORACLE银行日对账余额',
-                      width: 170,
-                      children: [
-                        {
-                          title: '加：企业未收企业已收',
-                          width: 170,
-                          children: [
-                            {
-                              title: '加项小计',
-                              width: 170,
-                              children: [
-                                {
-                                  title: '加：企业未收企业已收',
-                                  width: 170,
-                                  children: [
-                                    {
-                                      title: '减项小计',
-                                      width: 170,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '凭证号',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '业务入账时间',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  title: '金额',
-                  width: 100,
-                  children: [
-                    {
-                      title: '',
-                      width: 100,
-                      children: [
-                        {
-                          title: '',
-                          width: 100,
-                          children: [
-                            {
-                              title: '',
-                              width: 100,
-                              children: [
-                                {
-                                  title: '',
-                                  width: 100,
-                                  children: [
-                                    {
-                                      title: '',
-                                      width: 100,
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          customizeOptions: periodData,
         },
       ],
     };
   }
 
-  componentDidMount() {}
+  componentWillMount() {
+    this.getperiodData();
+  }
+
+  componentDidMount() {
+    // this.getList();
+  }
+
+  // 获取期间列表
+  getperiodData = () => {
+    balanceSheetServicen.getPeriod().then(response => {
+      const { data } = response;
+      console.log(data);
+      const period = [];
+      // let index = 0;
+      periodData = data.map(Item => {
+        period.value = Item.periodNum;
+        period.name = Item.periodName;
+        return Item;
+      });
+      console.log(periodData);
+    });
+  };
+
+  handleSearch = values => {
+    console.log(values);
+    const { searchParams } = this.state;
+    this.setState(
+      {
+        searchParams: {
+          ...searchParams,
+          accountId: values.bankNumber ? values.bankNumber.id : '', // bank id
+          currency: values.currency ? values.currency : '', // 币种
+          periodName: values.periodName ? values.periodName : '', // 期间
+        },
+      },
+      () => {
+        this.getList();
+      }
+    );
+  };
+
+  // 获取列表
+  getList = () => {
+    const { searchParams } = this.state;
+    // this.setState({ loading: true });
+    balanceSheetServicen.getAccountCheckList(searchParams).then(response => {
+      const { data } = response;
+      this.setState({
+        tableData: data,
+        // loading: false,
+      });
+    });
+  };
 
   render() {
-    const { columns, searchForm } = this.state;
+    const { searchForm, tableData } = this.state;
     return (
       <div className="balance-sheet">
         <div className="common-top-area">
@@ -368,13 +132,13 @@ class BalanceSheetReview extends React.Component {
               </Col>
             </Row>
           </div>
-          <Table
+          {/* <Table
             columns={columns}
             // dataSource={data}
             bordered
             size="middle"
             // scroll={{ x: '139%', y: 240}}
-          />
+          /> */}
           <table
             border="1"
             style={{ tableLayout: 'fixed', border: '1px solid #ccc' }}

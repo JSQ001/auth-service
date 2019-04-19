@@ -8,7 +8,6 @@ import {
   Input,
   Select,
   Spin,
-  Icon,
   Popconfirm,
   Modal,
   message,
@@ -18,13 +17,11 @@ import Table from 'widget/table';
 const FormItem = Form.Item;
 const Option = Select.Option;
 import { routerRedux } from 'dva/router';
-
 import debounce from 'lodash.debounce';
 import Chooser from 'widget/chooser';
 import SlideFrame from 'widget/slide-frame';
 import BudgetBalanceCondition from 'containers/budget/budget-balance-query/budget-balance-query-condition';
 import selectorData from 'share/chooserData';
-
 import 'styles/budget/budget-balance/budget-balance.scss';
 import httpFetch from 'share/httpFetch';
 import config from 'config';
@@ -44,30 +41,27 @@ class BudgetBalanceQuery extends React.Component {
       columns: [
         {
           title: this.$t('budget.balance.params.type'),
-          align: 'center',
           dataIndex: 'type',
-          width: '20%',
+          width: 216,
           render: (text, record, index) => this.renderColumns(index, 'type'),
         },
         {
           title: this.$t('budget.balance.params'),
-          align: 'center',
           dataIndex: 'params',
-          width: '35%',
+          width: 377,
           render: (text, record, index) => this.renderColumns(index, 'params'),
         },
         {
           title: this.$t('budget.balance.params.value'),
-          align: 'center',
           dataIndex: 'value',
-          width: '35%',
+          width: 376,
           render: (text, record, index) => this.renderColumns(index, 'value'),
         },
         {
           title: this.$t('budget.balance.operate'),
-          align: 'center',
           dataIndex: 'operation',
-          width: '10%',
+          width: 87,
+          align: 'center',
           render: (text, record, index) => (
             <span>
               {!record.disabled && (
@@ -940,7 +934,9 @@ class BudgetBalanceQuery extends React.Component {
         periodSummaryFlag: {
           key: (condition.periodSummaryFlag + '').toUpperCase(),
           value: (condition.periodSummaryFlag + '').toUpperCase(),
-          label: condition.periodSummaryFlag ? '汇总' : '不汇总',
+          label: condition.periodSummaryFlag
+            ? this.$t('budget.balance.sum')
+            : this.$t('budget.balance.no.sum'), // '汇总'  '不汇总'
         },
         quarterLowerLimit: condition.quarterLowerLimit
           ? { value: condition.quarterLowerLimit, label: condition.quarterLowerLimit }

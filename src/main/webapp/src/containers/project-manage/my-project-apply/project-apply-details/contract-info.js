@@ -72,7 +72,7 @@ class ContractInfo extends Component {
           align: 'center',
           tooltips: true,
         },
-        /* {
+        {
           title: this.$t('common.operation'),
           dataIndex: 'operation',
           align: 'center',
@@ -88,7 +88,69 @@ class ContractInfo extends Component {
               </Popconfirm>
             );
           },
-        }, */
+        },
+      ],
+      columns2: [
+        {
+          title: this.$t('acp.contract.number'), // 合同编号
+          dataIndex: 'contractNumber',
+          align: 'center',
+          render: (text, record) => {
+            return (
+              <Popover content={text}>
+                <a
+                  onClick={e => {
+                    this.handleContractShow(e, record);
+                  }}
+                >
+                  {text}
+                </a>
+              </Popover>
+            );
+          },
+        },
+        {
+          title: this.$t('acp.contract.name'), // 合同名称
+          dataIndex: 'contractName',
+          align: 'center',
+          tooltips: true,
+        },
+        {
+          title: this.$t('my.contract.contractCompany'), // 合同公司
+          dataIndex: 'companyName',
+          align: 'center',
+          tooltips: true,
+        },
+        {
+          title: this.$t('my.contract.signDate'), // 签署日期
+          dataIndex: 'signDate',
+          align: 'center',
+          render: data => {
+            return (
+              <Popover content={moment(data).format('YYYY-MM-DD')}>
+                {moment(data).format('YYYY-MM-DD')}
+              </Popover>
+            );
+          },
+        },
+        {
+          title: this.$t('my.contract.part'),
+          dataIndex: 'partnerCategoryName',
+          align: 'center',
+          tooltips: true,
+        },
+        {
+          title: this.$t('acp.currency'), // 币种
+          dataIndex: 'currency',
+          align: 'center',
+          tooltips: true,
+        },
+        {
+          title: this.$t({ id: 'my.contract.amount' }), // 合同金额
+          dataIndex: 'amount',
+          align: 'center',
+          tooltips: true,
+        },
       ],
       contractShow: false,
       contractId: '',
@@ -96,7 +158,7 @@ class ContractInfo extends Component {
   }
 
   // 行删除
-  /* handleDelete = record => {
+  handleDelete = record => {
     // e.preventDefault();
     const { id } = this.props;
     const params = {
@@ -114,7 +176,7 @@ class ContractInfo extends Component {
       .catch(err => {
         message.error(err.response.data.message);
       });
-  }; */
+  };
 
   // 查看
   handleContractShow = (e, record) => {
@@ -131,12 +193,12 @@ class ContractInfo extends Component {
   };
 
   render() {
-    const { columns, contractShow, contractId } = this.state;
+    const { columns, columns2, contractShow, contractId } = this.state;
     const { id } = this.props;
     return (
       <div>
         <CustomTable
-          columns={columns}
+          columns={this.props.flags == 1 ? columns : columns2}
           ref={ref => {
             this.table = ref;
           }}

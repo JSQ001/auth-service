@@ -62,18 +62,6 @@ const getBreadcrumbNameMap = (menuData, routerData) => {
   return Object.assign({}, routerData, result, childResult);
 };
 
-const dynamicWrapper = component => {
-  // () => require('module')
-  // transformed by babel-plugin-dynamic-import-node-sync
-  if (component.toString().indexOf('.then(') < 0) {
-    return props => {
-      return createElement(component().default, {
-        ...props,
-      });
-    };
-  }
-};
-
 const query = {
   'screen-xs': {
     maxWidth: 575,
@@ -145,90 +133,6 @@ class BasicLayout extends React.Component {
     });
     // this.reloadRoutes();
   }
-
-  // componentWillReceiveProps(nextProps) {
-  //   if (nextProps.location.pathname === this.props.location.pathname) return;
-
-  //   let panes = this.state.panes;
-  //   let path = window.location.hash.replace('#', '');
-
-  //   if (path == '/') {
-  //     this.props.dispatch(
-  //       routerRedux.push({
-  //         pathname: '/dashboard',
-  //       })
-  //     );
-  //     return;
-  //   }
-
-  //   let component = this.getContent();
-
-  //   if (!component) return;
-
-  //   let index = panes.findIndex(o => o.routeKey == component.routeKey);
-
-  //   const isFunc = component.type === 'function';
-  //   if (index >= 0) {
-  //     this.refMap[component.pathname] && this.refMap[component.pathname].componentDidShow();
-  //     this.setState({
-  //       activeKey: component.routeKey,
-  //       selectKey: isFunc ? component.pathname : component.fullUrl,
-  //     });
-  //     this.setCurrentMenuId(component);
-  //     return;
-  //   }
-
-  //   if (!this.state.activeKey || !panes.length) {
-  //     panes.push(component);
-  //     this.setState({
-  //       panes,
-  //       activeKey: component.routeKey,
-  //       selectKey: isFunc ? component.pathname : component.fullUrl,
-  //     });
-  //     this.setCurrentMenuId(component);
-  //     return;
-  //   }
-
-  //   //即将跳转的页面是已经打开的页面的父页面
-  //   index = panes.findIndex(item => item.parent == component.routeKey);
-
-  //   if (index >= 0) {
-  //     panes[index] = component;
-  //     this.setState({
-  //       panes,
-  //       activeKey: component.routeKey,
-  //       selectKey: isFunc ? component.pathname : component.fullUrl,
-  //     });
-
-  //     this.setCurrentMenuId(component);
-  //     return;
-  //   }
-
-  //   index = panes.findIndex(o => o.routeKey == this.state.activeKey);
-
-  //   // 三种情况  不会打开新tab页
-  //   // 1.即将跳转的页面是功能页，并且它的父页面是当前页面
-  //   // 2.即将跳转的页面是功能页, 并且当前页面也是功能页面，并且当前页面和即将跳转的页面同属于一个菜单
-  //   // 3.即将跳转的页面是当前页面的父页面，一般页面的返回按钮
-
-  //   if (
-  //     (component.parent &&
-  //       (component.parent === panes[index].parent || component.parent === panes[index].routeKey)) ||
-  //     panes[index].parent === component.routeKey
-  //   ) {
-  //     panes[index] = component;
-  //   } else {
-  //     panes.push(component);
-  //   }
-
-  //   this.setState({
-  //     panes,
-  //     activeKey: component.routeKey,
-  //     selectKey: isFunc ? component.pathname : component.fullUrl,
-  //   });
-
-  //   this.setCurrentMenuId(component);
-  // }
 
   setCurrentMenuId = component => {
     this.props.dispatch({
@@ -511,7 +415,7 @@ class BasicLayout extends React.Component {
               >
                 {panes.map(pane => (
                   <TabPane
-                    closable={pane.routeKey != '/dashboard'}
+                    closable={pane.routeKey != '-1'}
                     forceRender={false}
                     tab={this.$t(pane.name)}
                     key={pane.routeKey}

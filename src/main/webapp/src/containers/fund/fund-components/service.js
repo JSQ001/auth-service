@@ -15,10 +15,36 @@ export default {
   /**
    * 获取公司列表
    */
-  getCompanys(page, size, setOfBooksId, searchParams) {
+  getFundCompanys(page = 0, size = 10, fundSetOfBooksId, searchParams) {
     let url = `${
       config.mdataUrl
-    }/api/company/by/condition?&page=${page}&size=${size}&setOfBooksId=${setOfBooksId}`;
+    }/api/company/by/condition?&page=${page}&size=${size}&setOfBooksId=${fundSetOfBooksId}`;
+    const params = searchParams;
+    for (const paramsName in params) {
+      if (Object.prototype.hasOwnProperty.call(params, paramsName)) {
+        url += params[paramsName] ? `&${paramsName}=${params[paramsName]}` : '';
+      }
+    }
+    return httpFetch.get(url);
+  },
+
+  /**
+   * 获取账户
+   * @param {*} page
+   * @param {*} size
+   * @param {*} searchParams
+   */
+  getAccountList(page, size, companyId, searchParams) {
+    let url;
+    if (companyId) {
+      url = `${
+        config.fundUrl
+      }/api/account/query/right/pageByCondition?&flag=PAY&page=${page}&size=${size}&companyId=${companyId}`;
+    } else {
+      url = `${
+        config.fundUrl
+      }/api/account/query/right/pageByCondition?&flag=PAY&page=${page}&size=${size}`;
+    }
     const params = searchParams;
     for (const paramsName in params) {
       if (Object.prototype.hasOwnProperty.call(params, paramsName)) {

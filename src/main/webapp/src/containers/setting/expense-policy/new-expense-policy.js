@@ -279,7 +279,6 @@ class NewExpensePolicy extends React.Component {
             let { record } = this.state;
             let detail = this.props.match.params.detail === 'expense-policy-detail';
             setDynamicValue(record.dynamicFields, detail).then(res => {
-              console.log(res);
               record.dynamicFields = res;
               this.setState({ record });
             });
@@ -359,28 +358,36 @@ class NewExpensePolicy extends React.Component {
 
   getControlDimensions(params) {
     let type = this.props.form.getFieldValue('controlDimensionType');
-    let value = null;
-    switch (type.toString()) {
-      case '10001':
-      case '10002':
-      case '20001':
-      case '30001':
-      case '20002':
-        {
-          value = params[0].id;
-        }
-        break;
-      case '10003':
-      case '20003':
-        {
-          value = params[0].departmentOid;
-        }
-        break;
-      default:
-        value = params;
-        break;
+    let value = params;
+    if (type.includes('dept')) {
+      value = value = value = params.map(item => {
+        return {
+          value: item.departmentId,
+        };
+      });
+    } else if (type.includes('duty') || type.includes('level')) {
+      value = value = params.map(item => {
+        return {
+          value: item.value,
+        };
+      });
+    } else if (type.includes('place')) {
+      value = params.map(item => {
+        return {
+          value: item.id,
+        };
+      });
+    } else if (Array.isArray(params)) {
+      //开始结束时间
+      value = params.map(item => {
+        return {
+          value: item,
+        };
+      });
+    } else {
+      return [{ value: params }];
     }
-    return [{ value: value }];
+    return value;
   }
 
   //保存
@@ -418,34 +425,56 @@ class NewExpensePolicy extends React.Component {
         // this.setState({ loading: true });
         values.dynamicFields =
           this.state.expenseTypeInfo.fields &&
-          this.state.expenseTypeInfo.fields.map(item => {
-            console.log(item);
+          this.state.expenseTypeInfo.fields.filter(item => !item.linkedItem).map(item => {
+            let result = {
+              fieldId: item.id,
+              fieldType: item.fieldType,
+              name: item.name,
+              value: values[item.id],
+            };
             if (item.fieldType === 'START_DATE_AND_END_DATE' && values[item.id]) {
-              return {
-                fieldId: item.id,
-                fieldType: item.fieldType,
-                name: item.name,
-                value: null,
-                expensePolicyFieldProperty: {
-                  dateTime1: values[item.id][0],
-                  dateTime2: values[item.id][1],
-                },
+              result.value = null;
+              result.expensePolicyFieldProperty = {
+                dateTime1: values[item.id][0],
+                dateTime2: values[item.id][1],
               };
+              return result;
+            } else if (['PARTICIPANT', 'PARTICIPANTS'].includes(item.fieldType)) {
+              result.value =
+                values[item.id] && values[item.id].length
+                  ? values[item.id].map(item => item.id).toString()
+                  : null;
+              result.expensePolicyFieldProperty = {
+                dutyType:
+                  values[item.id + 'duty' + item.fieldType] &&
+                  values[item.id + 'duty' + item.fieldType].length
+                    ? values[item.id + 'duty' + item.fieldType][0].value
+                    : null,
+                staffLevel:
+                  values[item.id + 'level' + item.fieldType] &&
+                  values[item.id + 'level' + item.fieldType].length
+                    ? values[item.id + 'level' + item.fieldType][0].value
+                    : null,
+                departmentId:
+                  values[item.id + 'dept' + item.fieldType] &&
+                  values[item.id + 'dept' + item.fieldType].length
+                    ? values[item.id + 'dept' + item.fieldType][0].departmentId
+                    : null,
+              };
+              return result;
+            } else if (item.fieldType === 'GPS') {
+              result.value =
+                values[item.id] && values[item.id].length ? values[item.id][0].key : null;
+              result.expensePolicyFieldProperty = {
+                locationLevelId:
+                  values[item.id + 'place' + item.fieldType] &&
+                  values[item.id + 'place' + item.fieldType].length
+                    ? values[item.id + 'place' + item.fieldType][0].id
+                    : null,
+              };
+              return result;
             } else {
-              let value = null;
-              if (item.valueKey && values[item.id] && values[item.id].length) {
-                value = item.valueKey
-                  ? values[item.id]
-                    ? values[item.id][0][item.valueKey]
-                    : ''
-                  : values[item.id];
-              }
-              return {
-                fieldId: item.id,
-                fieldType: item.fieldType,
-                name: item.name,
-                value: value,
-              };
+              return result;
             }
           });
         values.relatedCompanies =
@@ -460,7 +489,6 @@ class NewExpensePolicy extends React.Component {
           values.id = this.state.record.id;
           values.versionNumber = this.state.record.versionNumber;
         }
-        console.log(values);
         !!this.props.match.params.new && delete values.id;
         expensePolicyService
           .saveExpensePolicy(method, values)
@@ -497,14 +525,7 @@ class NewExpensePolicy extends React.Component {
     extraOptions
       .filter(item => !['PARTICIPANT', 'PARTICIPANTS', 'GPS'].includes(item.fieldType))
       .map(item => {
-        item.value = item.id;
-        /*item.id === '10001'&& (item.value = 10001)
-        item.id === '10002'&& (item.value = 10002)
-        item.id === '10003'&& (item.value = 10003)
-        item.id === '20001'&& (item.value = 20001)
-        item.id === '20002'&& (item.value = 20002)
-        item.id === '20003'&& (item.value = 20003)
-        item.id === '30001'&& (item.value = 30001)*/
+        item.value = item.id + item.fieldType;
         dynamicControlDimensionOptions.push({ ...item });
       });
     this.setState({
@@ -519,11 +540,17 @@ class NewExpensePolicy extends React.Component {
 
   //选择控制维度
   selectControlDimension = value => {
-    console.log(value);
     const { dynamicControlDimensionOptions } = this.state;
     let controlDimension = dynamicControlDimensionOptions.find(item => item.value === value);
     controlDimension.type = controlDimension.fieldType;
-    console.log(controlDimension);
+    if (controlDimension.fieldType === 'START_DATE_AND_END_DATE') {
+      controlDimension.overide = {
+        ...controlDimension.overide,
+        style: {
+          width: '125%',
+        },
+      };
+    }
     this.setState({ controlDimension });
   };
 
@@ -624,20 +651,22 @@ class NewExpensePolicy extends React.Component {
   };
 
   getRenderDynamic(array) {
-    let fields = [];
+    const fields = [];
     array.filter(item => item.fieldType !== 'LOCATION').map((item, index) => {
-      //参与人同行人，添加级别，职务
+      // 参与人同行人，添加级别，职务
       if (['PARTICIPANT', 'PARTICIPANTS'].includes(item.fieldType)) {
-        item.valueKey = 'userOid'; //userOid
+        item.valueKey = 'userOid'; // userOid
         item.style = {
           paddingLeft: 20,
         };
         fields.push({ ...item });
-        let arr = [
+        const arr = [
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10001' : '20001',
+            //id: item.fieldType ==='PARTICIPANT' ? '10001' : '20001',
+            id: item.id + 'duty' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}职务`,
+
             linkedItem: true,
             valueKey: 'id',
             overide: {
@@ -650,7 +679,7 @@ class NewExpensePolicy extends React.Component {
             },
           },
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10002' : '20002',
+            id: item.id + 'level' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}级别`,
             valueKey: 'id',
@@ -664,7 +693,8 @@ class NewExpensePolicy extends React.Component {
             },
           },
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10003' : '20003',
+            //id:item.fieldType ==='PARTICIPANT' ? '10003' : '20003',
+            id: item.id + 'dept' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}部门`,
             valueKey: 'departmentOid',
@@ -684,19 +714,26 @@ class NewExpensePolicy extends React.Component {
           fields.push({ ...item });
         });
       } else if (item.fieldType === 'GPS') {
-        //item.valueKey='id' //userOid
+        // item.valueKey='id' //userOid
         item.style = {
           paddingLeft: 20,
         };
         fields.push({ ...item });
         fields.push({
-          id: '30001',
+          id: item.id + 'place' + item.fieldType,
           linkedItem: true,
-          valueKey: 'id',
+          valueKey: 'key',
           style: {
             padding: '0px 20px',
           },
-          fieldType: 'CUSTOM_ENUMERATION',
+          fieldType: 'chooser',
+          overide: {
+            single: true,
+            type: 'place_level',
+            labelKey: 'name',
+            valueKey: 'id',
+            listExtraParams: { setOfBooksId: this.props.company.setOfBooksId },
+          },
           name: `${item.name}级别`,
         });
       } else {
@@ -712,84 +749,6 @@ class NewExpensePolicy extends React.Component {
       case 'expenseType':
         {
           let fields = [];
-          /* value.fields.filter(item=>item.fieldType!=='LOCATION').map((item,index)=>{
-            //参与人同行人，添加级别，职务
-            if(["PARTICIPANT",'PARTICIPANTS'].includes(item.fieldType)){
-              item.valueKey='userOid' //userOid
-              item.style={
-                paddingLeft: 20
-              }
-              fields.push({...item})
-              let arr = [
-                {
-                  id: item.fieldType ==='PARTICIPANT' ? '10001' : '20001',
-                  fieldType: 'chooser',
-                  name: `${item.name}职务`,
-                  linkedItem: true,
-                  valueKey: 'id',
-                  overide: {
-                    single: true,
-                    type: 'personDutyModel',
-                    labelKey: 'name',
-                    valueKey: 'value',
-                    onChange: this.setValue,
-                    listExtraParams:{ systemCustomEnumerationType: '1002' }
-                  }
-                },
-                {
-                  id: item.fieldType ==='PARTICIPANT' ? '10002' : '20002',
-                  fieldType: 'chooser',
-                  name: `${item.name}级别`,
-                  valueKey: 'id',
-                  linkedItem: true,
-                  overide:{
-                    single: true,
-                    type: 'personRankModel',
-                    labelKey: 'name',
-                    valueKey: 'value',
-                    listExtraParams:{ systemCustomEnumerationType: '1008' }
-                  }
-                },
-                {
-                  id:item.fieldType ==='PARTICIPANT' ? '10003' : '20003',
-                  fieldType: 'chooser',
-                  name: `${item.name}部门`,
-                  valueKey: 'departmentOid',
-                  linkedItem: true,
-                  style: {
-                    padding:"0px 20px"
-                  },
-                  overide:{
-                    single: true,
-                    type: 'department',
-                    labelKey: 'name',
-                    valueKey: 'departmentOid',
-                  }
-                },
-              ]
-              arr.map(item=>{
-                fields.push({...item})
-              })
-            }else if(item.fieldType==='GPS'){
-              //item.valueKey='id' //userOid
-              item.style={
-                paddingLeft: 20
-              }
-              fields.push({...item})
-              fields.push({
-                id: '30001',
-                linkedItem: true,
-                valueKey: 'id',
-                style: {
-                  padding:"0px 20px"
-                },
-                fieldType: 'CUSTOM_ENUMERATION',
-                name: `${item.name}级别`,
-              })
-            }else {
-              fields.push({...item})
-            }
-          })*/
           fields = this.getRenderDynamic(value.fields);
           expenseTypeInfo = {
             ...value,
@@ -952,7 +911,6 @@ class NewExpensePolicy extends React.Component {
       let defaultValue = record.id ? record[item.id] || '' : item.defaultValue;
       if (flag && record.dynamicFields) {
         defaultValue = (record.dynamicFields.find(i => i.fieldId === item.id) || {}).defaultValue;
-        console.log(defaultValue);
       }
       return (
         <Col
@@ -998,43 +956,26 @@ class NewExpensePolicy extends React.Component {
         } else {
           baseItem.push(item);
         }
-        //console.log(itemObj[item.key])
       });
-      switch (linkItem.length) {
-        case 4:
-          {
-            let temp = linkItem.slice(0, 4);
-            rowItem.push(this.getRowItem(baseItem, temp));
-          }
-          break;
-        case 8:
-          {
-            let temp1 = linkItem.slice(0, 4);
-            let temp2 = linkItem.slice(4, 8);
-            rowItem.push(this.getRowItem(baseItem, temp1));
-            rowItem.push(this.getRowItem(baseItem, temp2));
-          }
-          break;
-        case 10:
-          {
-            let temp1 = linkItem.slice(0, 4);
-            let temp2 = linkItem.slice(4, 8);
-            let temp3 = linkItem.slice(8, 10);
-            rowItem.push(this.getRowItem(baseItem, temp1));
-            rowItem.push(this.getRowItem(baseItem, temp2));
-            temp3 = this.getRowItem(baseItem, temp3);
-            temp3 = this.getRowItem(baseItem, temp3);
-            rowItem.push(this.getRowItem(baseItem, temp3));
-          }
-          break;
-      }
-
-      if (baseItem.length) {
-        for (let i = 0, j = 4; i < col.length; i = i + 4, j = i + 4) {
-          rowItem.push(col.slice(i, j));
+      for (let i = 0; i < linkItem.length; ) {
+        if (['PARTICIPANTS', 'PARTICIPANT'].includes(itemObj[linkItem[i].key].fieldType)) {
+          let arr = linkItem.slice(i, i + 4);
+          rowItem.push(this.getRowItem(baseItem, arr));
+          i += 4;
+        } else if (itemObj[linkItem[i].key].fieldType === 'GPS') {
+          let arr = linkItem.slice(i, i + 2);
+          arr = this.getRowItem(baseItem, arr);
+          arr = this.getRowItem(baseItem, arr);
+          arr = this.getRowItem(baseItem, arr);
+          rowItem.push(arr);
+          i += 2;
         }
       }
-      //return row.map((item,index)=> <Row key={new Date().getTime()+index}>{item}</Row>);
+      if (baseItem.length) {
+        for (let i = 0, j = 4; i < baseItem.length; i = i + 4, j = i + 4) {
+          rowItem.push(baseItem.slice(i, j));
+        }
+      }
       return rowItem.map((item, index) => <Row key={new Date().getTime() + index}>{item}</Row>);
     } else return col;
   };

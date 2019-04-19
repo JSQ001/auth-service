@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Row, Button, Table } from 'antd';
+import { Button, Table, Alert, Modal, message, Badge } from 'antd';
 import SlideFrame from 'widget/slide-frame';
-import FundSearchForm from '../../fund-components/fund-search-form';
-import accountStatementService from './account-statement.service';
+import AccountStatementSearch from './account-statement-search';
+import AccountStatementDetail from './account-statement-detail';
+import AccountStatementService from './account-statement.service';
 
+const { confirm } = Modal;
 class accountStatement extends Component {
   constructor(props) {
     super(props);
@@ -14,7 +16,12 @@ class accountStatement extends Component {
       tableData: [], // 表单数据
       editModel: {}, // 点击编辑数据
       slideVisible: false, // 侧滑进行显示
+      selectedRowKeys: [], // 选中行的key值
+      selectedRow: [], // 选中行的所有value
+      noticeAlert: null, // 提示信息
+      batchDelete: true, // 删除按钮状态(是否禁用)
       pagination: {
+        // 分页属性
         total: 0,
         page: 0,
         pageSize: 10,
@@ -23,83 +30,8 @@ class accountStatement extends Component {
         showQuickJumper: true,
         showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
       },
-      searchForm: [
-        // 公司
-        {
-          colSpan: 6,
-          type: 'modalList',
-          label: '公司',
-          id: 'documentCompany',
-          listType: 'company',
-          labelKey: 'name',
-          listExtraParams: { setOfBooksId: props.company.setOfBooksId },
-          valueKey: 'id',
-          single: true,
-        },
-        //  银行账号
-        {
-          colSpan: 6,
-          type: 'modalList',
-          label: '银行账号',
-          id: 'accountId',
-          listType: 'paymentAccount',
-        },
-        // 所属银行
-        {
-          colSpan: 6,
-          type: 'valueList',
-          label: '所属银行',
-          id: 'bankBelong',
-          options: [],
-          valueListCode: 'ZJ_OPEN_BANK',
-        },
-        //  日期区间
-        {
-          colSpan: 6,
-          type: 'intervalDate',
-          id: 'intervalDate',
-          fromlabel: '发生日期从',
-          placeholder: '请选择',
-          fromId: 'accountDateFrom',
-          tolabel: '发生日期至',
-          toId: 'accountDateTo',
-        },
-        // 对方账户
-        {
-          colSpan: 6,
-          type: 'input',
-          label: '对方账户',
-          id: 'otherAccount',
-        },
-        // 生成单据标志
-        {
-          colSpan: 6,
-          type: 'valueList',
-          label: '生成单据标志',
-          id: 'isGenerate',
-          options: [],
-          customizeOptions: [{ value: false, name: '待生成' }, { value: true, name: '已生成' }],
-          valueListCode: '',
-        },
-        // 发生金额
-        {
-          colSpan: 6,
-          type: 'intervalInput',
-          label: '金额',
-          id: 'amount',
-        },
-        // 借贷方向
-        {
-          colSpan: 6,
-          type: 'valueList',
-          label: '借贷方向',
-          id: 'direction',
-          options: [],
-          customizeOptions: [{ value: 'D', name: '借方' }, { value: 'C', name: '贷方' }],
-          valueListCode: '',
-        },
-      ],
       columns: [
+        // Table组件的属性
         {
           title: '交易时间',
           dataIndex: 'accountDate',
@@ -180,17 +112,13 @@ class accountStatement extends Component {
         },
         {
           title: '生成单据标志',
-          dataIndex: 'isGenerate',
+          dataIndex: 'generateFlag',
           align: 'center',
           width: 120,
+          render: generateFlag => <Badge status={generateFlag ? 'success' : 'error'} />,
         },
       ],
     };
-    this.search = this.search.bind(this);
-    this.getList = this.getList.bind(this);
-    this.create = this.create.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    // this.transformTime = this.transformTime.bind(this);
   }
 
   /**
@@ -198,20 +126,19 @@ class accountStatement extends Component {
    */
   search = values => {
     console.log('values', values);
-    const accountDateFrom = this.moment(values.accountDateFrom).format();
-    const accountDateTo = this.moment(values.accountDateTo).format();
-    console.log(accountDateFrom, accountDateTo);
     this.setState(
       {
         searchParams: {
-          accountId: values.accountId || '',
-          accountDateFrom: accountDateFrom || '',
-          accountDateTo: accountDateTo || '',
-          otherAccount: values.otherAccount || '',
-          amountFrom: values.amount.intervalFrom || '',
-          amountTo: values.amount.intervalTo || '',
-          direction: values.direction.key || '',
-          isGenerate: values.isGenerate.key || '',
+          accountId: values.accountId.id || '',
+          accountDateFrom: values.accountDateFrom
+            ? values.accountDateFrom.format('YYYY-MM-DD')
+            : '',
+          accountDateTo: values.accountDateTo ? values.accountDateTo.format('YYYY-MM-DD') : '',
+          otherAccount: values.otherAccount ? values.otherAccount : '',
+          amountFrom: values.amountFrom ? values.amountFrom : '',
+          amountTo: values.amountTo ? values.amountTo : '',
+          direction: values.direction ? values.direction : '',
+          generateFlag: values.generateFlag ? values.generateFlag : '',
         },
       },
       () => {
@@ -225,27 +152,28 @@ class accountStatement extends Component {
    */
   getList = () => {
     const { pagination, searchParams } = this.state;
-    // eslint-disable-next-line no-console
     console.log('searchParams', searchParams);
     this.setState({ loading: true });
-    accountStatementService
-      .getMaintainList(pagination.page, pagination.pageSize, searchParams)
-      .then(response => {
-        const { data } = response;
-        console.log('data', data);
-        this.setState({
-          tableData: data,
-          loading: false,
-          pagination: {
-            ...pagination,
-            total: Number(response.headers['x-total-count'])
-              ? Number(response.headers['x-total-count'])
-              : 0,
-            onChange: this.onChangePager,
-            current: pagination.page + 1,
-          },
-        });
+    AccountStatementService.getMaintainList(
+      pagination.page,
+      pagination.pageSize,
+      searchParams
+    ).then(response => {
+      const { data } = response;
+      console.log('data', data);
+      this.setState({
+        tableData: data,
+        loading: false,
+        pagination: {
+          ...pagination,
+          total: Number(response.headers['x-total-count'])
+            ? Number(response.headers['x-total-count'])
+            : 0,
+          onChange: this.onChangePager,
+          current: pagination.page + 1,
+        },
       });
+    });
   };
 
   /**
@@ -283,6 +211,86 @@ class accountStatement extends Component {
     });
   };
 
+  /**
+   * 选中提示框
+   */
+  noticeAlert = rows => {
+    const noticeAlert = (
+      <span>
+        已选择<span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项
+      </span>
+    );
+    this.setState({
+      noticeAlert: rows.length ? noticeAlert : null,
+    });
+  };
+
+  /**
+   * 选中改变时
+   */
+  onSelectChange = (selectedRowKeys, selectedRow) => {
+    console.log('key', selectedRowKeys);
+    this.setState(
+      {
+        selectedRowKeys,
+        batchDelete: !(selectedRowKeys.length > 0),
+      },
+      () => {
+        if (selectedRowKeys.length > 0) {
+          this.noticeAlert(selectedRow);
+        } else {
+          this.setState({
+            noticeAlert: null,
+          });
+        }
+      }
+    );
+  };
+
+  /**
+   * 保存新建或编辑数据
+   */
+  save = saveData => {
+    console.log(saveData);
+    AccountStatementService.addFlow(saveData).then(response => {
+      console.log(response);
+    });
+  };
+
+  /**
+   * 显示删除弹窗
+   */
+  showDeleteConfirm = () => {
+    const that = this;
+    confirm({
+      title: '您将删除选择的单据，删除后数据将永久删除。是否继续？',
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk() {
+        that.deleteItems();
+      },
+    });
+  };
+
+  /**
+   * 删除手工增加
+   */
+  deleteItems = () => {
+    const { selectedRowKeys } = this.state;
+    AccountStatementService.deleteAccount(selectedRowKeys).then(res => {
+      if (res.status === 200) {
+        message.success(this.$t('fund.delete.successful1')); /* 删除成功！ */
+        this.getList();
+        this.setState({
+          batchDelete: true,
+          selectedRowKeys: [],
+          noticeAlert: null,
+        });
+      }
+    });
+  };
+
   // transformTime = date => {
   //   const y = date.getFullYear();
   //   const m = date.getMonth();
@@ -292,33 +300,25 @@ class accountStatement extends Component {
 
   render() {
     const {
-      searchForm,
       columns,
       editModel,
       slideVisible,
       pagination,
       loading,
       tableData,
+      selectedRowKeys,
+      selectedRow,
+      noticeAlert,
+      batchDelete,
     } = this.state;
     const rowSelection = {
-      onChange: (selectedRowKeys, selectedRows) => {
-        // eslint-disable-next-line no-console
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-      },
-      onSelect: (record, selected, selectedRows) => {
-        // eslint-disable-next-line no-console
-        console.log(record, selected, selectedRows);
-      },
-      onSelectAll: (selected, selectedRows, changeRows) => {
-        // eslint-disable-next-line no-console
-        console.log(selected, selectedRows, changeRows);
-      },
+      selectedRowKeys,
+      selectedRow,
+      onChange: this.onSelectChange,
     };
     return (
       <div className="account">
-        <Row>
-          <FundSearchForm searchForm={searchForm} maxLength={4} submitHandle={this.search} />
-        </Row>
+        <AccountStatementSearch submitHandle={this.search} />
         <Button type="primary" style={{ margin: '20px 10px' }}>
           同步
         </Button>
@@ -334,21 +334,48 @@ class accountStatement extends Component {
         <Button type="primary" style={{ margin: '20px 10px' }} onClick={this.create}>
           新增
         </Button>
-        <Button type="primary" style={{ margin: '20px 10px', backgroundColor: 'gray', border: 0 }}>
-          删除
+        <Button
+          style={{ margin: '20px 10px' }}
+          type="danger"
+          disabled={batchDelete}
+          // loading={buttonLoading}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showDeleteConfirm();
+          }}
+        >
+          {this.$t('common.delete')}
         </Button>
         <SlideFrame
           title={editModel.id ? '编辑' : '新增'}
           show={slideVisible}
           onClose={this.handleClose}
-        />
+        >
+          <AccountStatementDetail onClose={this.handleClose} params={editModel} save={this.save} />
+        </SlideFrame>
+        {noticeAlert ? (
+          <Alert message={noticeAlert} type="info" showIcon style={{ marginBottom: '10px' }} />
+        ) : (
+          ''
+        )}
         <Table
+          onRow={record => {
+            return {
+              onClick: () => {
+                console.log('record', record);
+                this.setState({ editModel: record, slideVisible: true });
+              },
+            };
+          }}
+          rowKey={record => record.id}
           scroll={{ x: 1200 }}
           columns={columns}
           rowSelection={rowSelection}
           pagination={pagination}
           loading={loading}
           dataSource={tableData}
+          onChange={this.onChangePager}
         />
       </div>
     );

@@ -1,36 +1,39 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table, Input, Form } from 'antd';
+import { Input, Form } from 'antd';
+import Table from 'widget/table';
 import Lov from 'widget/Template/lov';
+import FundCompanyLov from './fund-company-lov';
+import FundAccountLov from './fund-account-lov';
 import { sliceArray } from './utils';
+import 'styles/fund/editable.scss';
 
 const FormItem = Form.Item;
 class FundEditableTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loadding: false,
       copyDataSource: [],
       copyColumns: [],
-      copyPagination: {},
       count: 0, // 数量
+      accountLovPrams: {}, // 账号需要的参数
     };
   }
 
   componentDidMount() {
-    const { columns, pagination, onRef } = this.props;
+    const { columns, onRef } = this.props;
     onRef(this);
     this.getCopyColumns(columns);
-    this.setState({
-      copyPagination: pagination,
-    });
   }
 
   componentWillReceiveProps(nextProps) {
     const { copyDataSource } = this.state;
-    const { dataSource } = nextProps;
+    const { dataSource, updateTableData } = nextProps;
     // 防止form表单触发componentWillReceiveProps改变table的dataSource
     if (copyDataSource.length === 0) {
+      this.getCopyDataSource(dataSource);
+    }
+    if (updateTableData) {
       this.getCopyDataSource(dataSource);
     }
   }
@@ -39,24 +42,27 @@ class FundEditableTable extends React.Component {
    * 对dataSource处理
    */
   getCopyDataSource = dataSource => {
-    this.setState({
-      loadding: true,
-    });
     const copyDataSource = dataSource.map((item, index) => {
       return {
         ...item,
         key: index,
+        sequenceNumber: index + 1,
       };
     });
     this.setState({
       copyDataSource,
       count: dataSource.length,
-      loadding: true,
-    });
-    this.setState({
-      loadding: false,
     });
     return copyDataSource;
+  };
+
+  getItemInitialValue = (type, text, record) => {
+    if (type === 'fundCompanyLov') {
+      return { key: record.adjustInCorp, lable: record.adjustInCorpDesc };
+    } else if (type === 'fundAccountLov') {
+      return { key: record.adjustInAccountId, lable: record.adjustInAccount };
+    }
+    return text;
   };
 
   /**
@@ -74,12 +80,15 @@ class FundEditableTable extends React.Component {
       return {
         ...col,
         render: (text, record, index) => {
+          const itemInitialValue = this.getItemInitialValue(col.type, text, record);
           return (
             <FormItem style={{ marginBottom: 0 }}>
-              {getFieldDecorator(`${index}-${col.dataIndex}`, {
-                rules: [{ required: true, message: '请输入' }],
-                initialValue: text,
-              })(this.renderFormItem(col))}
+              {getFieldDecorator(`${index}-${col.saveDataIndex}`, {
+                rules: [
+                  { required: col.required === false ? col.required : true, message: '请输入' },
+                ],
+                initialValue: itemInitialValue || col.initialValue,
+              })(this.renderFormItem(col, index, `${index}-${col.saveDataIndex}`))}
             </FormItem>
           );
         },
@@ -92,10 +101,53 @@ class FundEditableTable extends React.Component {
     return copyColumns;
   };
 
-  renderFormItem = item => {
+  onChangeCompany = value => {
+    this.setState({
+      accountLovPrams: {
+        companyId: value.key,
+      },
+    });
+  };
+
+  onChangAccount = (value, data, linkage, index) => {
+    const { copyDataSource } = this.state;
+    linkage.forEach(item => {
+      if (item === 'adjustInOpenBank') {
+        copyDataSource[index][item] = data.openBankName;
+      } else if (item === 'currency') {
+        copyDataSource[index][item] = data.currencyCode;
+      }
+    });
+  };
+
+  renderFormItem = (item, index) => {
     switch (item.type) {
       case 'input': {
-        return <Input />;
+        if (item.inputDisableEdit) {
+          return (
+            <Input
+              style={{ border: 'none', height: '30px', outlineColor: 'transparent' }}
+              disabled
+            />
+          );
+        }
+        return <Input style={{ border: 'none', height: '30px', outlineColor: 'transparent' }} />;
+      }
+      case 'fundCompanyLov': {
+        return <FundCompanyLov labelInValue value onChange={this.onChangeCompany} />;
+      }
+      case 'fundAccountLov': {
+        const { accountLovPrams } = this.state;
+        return (
+          <FundAccountLov
+            labelInValue
+            value
+            accountLovPrams={accountLovPrams}
+            onChange={(value, data) => {
+              this.onChangAccount(value, data, item.linkage, index);
+            }}
+          />
+        );
       }
       case 'lov': {
         return (
@@ -109,7 +161,16 @@ class FundEditableTable extends React.Component {
         );
       }
       default: {
-        return <Input />;
+        return (
+          <Input
+            style={{
+              border: 'none',
+              height: '30px',
+              outlineStyle: 'none',
+              outlineColor: 'transparent',
+            }}
+          />
+        );
       }
     }
   };
@@ -119,15 +180,30 @@ class FundEditableTable extends React.Component {
    */
   handleAdd = () => {
     const { copyDataSource, count } = this.state;
+    const { columns } = this.props;
+    const newDataCol = {};
+    columns.forEach(item => {
+      const { dataIndex } = item;
+      newDataCol[dataIndex] = '';
+    });
     const newData = {
+      ...newDataCol,
       key: count + 1,
-      paramsCode: '',
-      paramsDesc: '',
-      paramsValue: '',
     };
     this.setState({
       copyDataSource: [...copyDataSource, newData],
       count: count + 1,
+    });
+  };
+
+  /**
+   * 删除行
+   */
+  handleDelete = selectedRowKeys => {
+    const { copyDataSource } = this.state;
+    copyDataSource.splice(selectedRowKeys[0] - 1, 1);
+    this.setState({
+      copyDataSource,
     });
   };
 
@@ -137,9 +213,12 @@ class FundEditableTable extends React.Component {
   saveTable = () => {
     const { form, saveTable } = this.props;
     const { copyColumns } = this.state;
+    const len = copyColumns.filter(item => {
+      return item.editable;
+    }).length;
     form.validateFields((err, value) => {
       if (!err) {
-        const saveValue = this.dealData(value, copyColumns.length);
+        const saveValue = this.dealData(value, len);
         saveTable(saveValue);
       }
     });
@@ -194,17 +273,21 @@ class FundEditableTable extends React.Component {
   };
 
   render() {
-    const { copyDataSource, copyColumns, copyPagination, loadding } = this.state;
+    const { copyDataSource, copyColumns } = this.state;
+    const { pagination, rowSelection, onTableChange, loading } = this.props;
     return (
-      <div>
+      <div className="editable">
         <Form>
           <Table
             rowClassName={() => 'editable-row'}
-            loadding={loadding}
+            loading={loading}
+            rowSelection={rowSelection}
+            scroll={{ x: true }}
             bordered
             dataSource={copyDataSource}
             columns={copyColumns}
-            pagination={copyPagination}
+            pagination={pagination}
+            onChange={onTableChange}
           />
         </Form>
       </div>

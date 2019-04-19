@@ -662,8 +662,8 @@ public class OrganizationService {
     }
 
     public Page<ResponsibilityCenterCO> pageDepartmentResCenterByCond(Long departmentId, Long companyId,Page page) {
-        //todo
-      //  return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page);
-        return null;
+        //jiu.zhao 修改三方接口
+        //return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page);
+        return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page.getCurrent() - 1, page.getSize());
     }
 }

@@ -227,7 +227,12 @@ class RegisterApply extends React.Component {
   // eslint-disable-next-line react/sort-comp
   openDetails = record => {
     // eslint-disable-next-line react/no-unused-state
-    this.setState({ record: { ...record, sign: 1 }, newShow: true });
+    record.sign = 1;
+    this.setState({
+      record: record,
+      newShow: true,
+      // showSlideFrameNew: true
+    });
   };
 
   // 获得数据
@@ -570,22 +575,6 @@ class RegisterApply extends React.Component {
             size="middle"
           />
         </div>
-
-        <SlideFrame
-          // eslint-disable-next-line react/destructuring-assignment
-          title={JSON.stringify(this.state.updateParams) === '{}' ? '新建税务登记' : '编辑税务登记'}
-          show={showSlideFrameNew}
-          afterClose={this.handleCloseNewSlide}
-          onClose={this.handleClose}
-        >
-          <SeeDetails
-            params={{ updateParams, timestamp }}
-            visible={newShow}
-            onClose={e => {
-              this.handleClose(e);
-            }}
-          />
-        </SlideFrame>
         {/* 导出 */}
         <ExcelExporter
           visible={excelVisible}
@@ -596,7 +585,7 @@ class RegisterApply extends React.Component {
           onCancel={this.onExportCancel}
           excelItem="PREPAYMENT_FINANCIAL_QUERY"
         />
-        <SeeDetails params={record} visible={newShow} onClose={this.close} />
+        {newShow && <SeeDetails params={record} visible={newShow} onClose={this.close} />}
       </div>
     );
   }

@@ -318,14 +318,15 @@ export const setDynamicValue = (fields, isLabel = true) => {
           methods.push(
             new Promise(resolve => {
               if (item.value) {
-                httpFetch
-                  .get(`${config.mdataUrl}/api/users/v2/${item.value}?roleType=TENANT`)
-                  .then(res => {
-                    item.defaultValue = isLabel
-                      ? res.fullName
-                      : [{ userOid: res.userOid, fullName: res.fullName }];
-                    resolve(item);
-                  });
+                let ids = item.value.split(',');
+                httpFetch.post(`${config.mdataUrl}/api/list/user/batch/ids`, ids).then(res => {
+                  item.defaultValue = isLabel
+                    ? res.map(i => i.fullName).toString()
+                    : res.map(i => {
+                        return { id: i.id, fullName: i.fullName };
+                      });
+                  resolve(item);
+                });
               } else {
                 item.defaultValue = isLabel ? '-' : [];
                 resolve(item);
@@ -340,11 +341,13 @@ export const setDynamicValue = (fields, isLabel = true) => {
             new Promise(resolve => {
               if (item.expensePolicyFieldProperty) {
                 if (isLabel) {
-                  item.defaultValue = item.expensePolicyFieldProperty.dateTime1
+                  let time1 = item.expensePolicyFieldProperty.dateTime1
                     ? moment(item.expensePolicyFieldProperty.dateTime1).format('YYYY-MM-DD')
-                    : '-' + '~' + item.expensePolicyFieldProperty.dateTime2
-                      ? moment(item.expensePolicyFieldProperty.dateTime2).format('YYYY-MM-DD')
-                      : '-';
+                    : '-';
+                  let time2 = item.expensePolicyFieldProperty.dateTime2
+                    ? moment(item.expensePolicyFieldProperty.dateTime2).format('YYYY-MM-DD')
+                    : '-';
+                  item.defaultValue = time1 + '~' + time2;
                   resolve(item);
                 } else {
                   let defaultValue = [];
@@ -365,10 +368,7 @@ export const setDynamicValue = (fields, isLabel = true) => {
       case 'chooser':
         {
           // 仅费用政策
-          let code;
-          console.log(item.value);
-          if (item.fieldId === '10001' || item.fieldId === '20001') {
-            code = '1002';
+          if (item.fieldId.includes('duty')) {
             methods.push(
               new Promise(resolve => {
                 if (item.value) {
@@ -376,16 +376,16 @@ export const setDynamicValue = (fields, isLabel = true) => {
                     .get(
                       `${
                         config.baseUrl
-                      }/api/custom/enumeration/system/by/type/condition?systemCustomEnumerationType=${code}`
+                      }/api/custom/enumeration/system/by/type/condition?systemCustomEnumerationType=1002`
                     )
                     .then(res => {
                       if (isLabel) {
-                        item.defaultValue = (res.find(i => i.id === item.value) || {}).name || '-';
+                        item.defaultValue =
+                          (res.find(i => i.value === item.value || i.id === item.value) || {})
+                            .name || '-';
                       } else {
-                        console.log(res);
                         let value =
                           res.find(i => i.value === item.value || i.id === item.value) || {};
-                        console.log(value);
                         item.defaultValue = [{ ...value, value: value.value, name: value.name }];
                       }
                       resolve(item);
@@ -397,8 +397,7 @@ export const setDynamicValue = (fields, isLabel = true) => {
               })
             );
           }
-          if (item.fieldId === '10002' || item.fieldId === '20002') {
-            code = '1008';
+          if (item.fieldId.includes('level')) {
             methods.push(
               new Promise(resolve => {
                 if (item.value) {
@@ -406,7 +405,7 @@ export const setDynamicValue = (fields, isLabel = true) => {
                     .get(
                       `${
                         config.baseUrl
-                      }/api/custom/enumeration/system/by/type/condition?systemCustomEnumerationType=${code}`
+                      }/api/custom/enumeration/system/by/type/condition?systemCustomEnumerationType=1008`
                     )
                     .then(res => {
                       if (isLabel) {
@@ -427,16 +426,20 @@ export const setDynamicValue = (fields, isLabel = true) => {
               })
             );
           }
-          if (item.fieldId === '10003' || item.fieldId === '20003') {
+          if (item.fieldId.includes('dept')) {
             methods.push(
               new Promise(resolve => {
                 if (item.value) {
                   httpFetch
-                    .get(`${config.mdataUrl}/api/departments/${item.value}?roleType=TENANT`)
+                    .get(
+                      `${config.mdataUrl}/api/DepartmentGroup/selectDept/enabled?departmentId=${
+                        item.value
+                      }&roleType=TENANT`
+                    )
                     .then(res => {
                       item.defaultValue = isLabel
-                        ? res.name
-                        : [{ departmentOid: item.value, name: res.name }];
+                        ? res[0].name
+                        : [{ departmentId: item.value, name: res[0].name }];
                       resolve(item);
                     });
                 } else {
@@ -446,7 +449,7 @@ export const setDynamicValue = (fields, isLabel = true) => {
               })
             );
           }
-          if (item.fieldId === '30001') {
+          if (item.fieldId.includes('place')) {
             methods.push(
               new Promise(resolve => {
                 if (item.value) {
@@ -500,6 +503,7 @@ export const setDynamicValue = (fields, isLabel = true) => {
         {
           methods.push(
             new Promise(resolve => {
+              console.log(item.value);
               if (item.value) {
                 httpFetch
                   .get(`${config.mdataUrl}/api/location/search/cities?id=${item.value}`)
@@ -507,8 +511,8 @@ export const setDynamicValue = (fields, isLabel = true) => {
                     item.defaultValue = isLabel
                       ? res[0].description
                       : [{ key: item.value, label: res[0].description }];
+                    resolve(item);
                   });
-                resolve(item);
               } else {
                 item.defaultValue = isLabel ? '-' : [];
                 resolve(item);
@@ -586,7 +590,7 @@ export const renderFormItem = (field, override = {}) => {
       return (
         <Chooser
           type="contract_user"
-          single={true}
+          //single={true}
           labelKey="fullName"
           valueKey="id"
           {...override}

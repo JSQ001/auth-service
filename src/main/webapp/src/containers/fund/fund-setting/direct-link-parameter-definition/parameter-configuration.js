@@ -214,8 +214,7 @@ class ParameterConfiguration extends React.Component {
             pagination={pagination}
             onRef={this.onRef}
             saveTable={this.saveTable}
-            needTopButton
-            needBottomButton
+            onTableChange={this.onChangePager}
           />
 
           <section style={{ paddingTop: '50px', textAlign: 'center' }}>

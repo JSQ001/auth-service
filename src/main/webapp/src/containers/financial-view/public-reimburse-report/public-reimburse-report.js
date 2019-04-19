@@ -9,6 +9,7 @@ import PublicReimburseReportService from 'containers/financial-view/public-reimb
 import ListSelector from 'components/Widget/list-selector';
 import ExcelExporter from 'components/Widget/excel-exporter.js';
 import FileSaver from 'file-saver';
+import { routerRedux } from 'dva/router';
 const Search = Input.Search;
 
 // import { Button } from 'antd/lib/radio';
@@ -66,15 +67,16 @@ class PublicReimburseReport extends React.Component {
           labelKey: 'name',
         },
         {
-          type: 'select',
+          type: 'list',
+          listType: 'select_report_type',
+          options: [],
           id: 'documentTypeId',
           label: '单据类型',
-          getUrl: `${config.baseUrl}/api/custom/forms/company/my/available/all/?formType=105`,
-          options: [],
-          method: 'get',
-          valueKey: 'formId',
-          labelKey: 'formName',
+          valueKey: 'id',
+          labelKey: 'reportTypeName',
+          single: true,
           colSpan: 6,
+          listExtraParams: { setOfBooksId: this.props.company.setOfBooksId },
         },
         {
           type: 'list',
@@ -191,20 +193,22 @@ class PublicReimburseReport extends React.Component {
         },
       ],
       columns: [
-        /*单据编号 */
+        // this.setState({ searchParams: {...values,...this.state.searchParams}}, () => {
         {
           title: '单据编号',
-          dataIndex: 'businessCode',
-          render: recode => {
+          dataIndex: 'requisitionNumber',
+          render: (requisitionNumber, record) => {
             return (
-              <a>
-                <Popover content={recode}>{recode ? recode : '-'}</Popover>
+              <a onClick={() => this.handleLink(record)}>
+                <Popover content={requisitionNumber}>
+                  {requisitionNumber ? requisitionNumber : '-'}
+                </Popover>
               </a>
             );
           },
           width: 110,
         },
-        /*单据公司 */
+        //     this.getList()
         {
           title: '单据公司',
           dataIndex: 'companyName',
@@ -215,10 +219,10 @@ class PublicReimburseReport extends React.Component {
             </span>
           ),
         },
-        /**单据部门 */
+        // });
         {
           title: '单据部门',
-          dataIndex: 'unitName',
+          dataIndex: 'departmentName',
           width: 100,
           render: recode => (
             <span>
@@ -229,7 +233,7 @@ class PublicReimburseReport extends React.Component {
         /**单据类型 */
         {
           title: '单据类型',
-          dataIndex: 'formName',
+          dataIndex: 'documentTypeName',
           render: recode => (
             <span>
               <Popover content={recode}>{recode ? recode : '-'}</Popover>
@@ -239,7 +243,7 @@ class PublicReimburseReport extends React.Component {
         /**申请人 */
         {
           title: '申请人',
-          dataIndex: 'applicationName',
+          dataIndex: 'applicantName',
           width: 110,
           render: recode => (
             <span>
@@ -250,7 +254,7 @@ class PublicReimburseReport extends React.Component {
         /** 申请日期*/
         {
           title: '申请日期',
-          dataIndex: 'reportDate',
+          dataIndex: 'requisitionDate',
           render: recode => {
             return (
               <Popover content={moment(recode).format('YYYY-MM-DD')}>
@@ -310,7 +314,7 @@ class PublicReimburseReport extends React.Component {
           dataIndex: 'reversedFlag',
           render: (value, recode) => {
             return this.state.backlashFlagList.map(items => {
-              return (recode = items.value === value ? items.label : '');
+              return (recode = items.value == value ? items.label : '');
             });
           },
           width: 90,
@@ -318,7 +322,7 @@ class PublicReimburseReport extends React.Component {
         /**备注 */
         {
           title: '备注',
-          dataIndex: 'remark',
+          dataIndex: 'description',
           render: recode => (
             <span>
               <Popover content={recode}>{recode ? recode : '-'}</Popover>
@@ -328,7 +332,7 @@ class PublicReimburseReport extends React.Component {
         /**状态 */
         {
           title: '状态',
-          dataIndex: 'reportStatus',
+          dataIndex: 'status',
           render: (value, recode) => {
             return (
               <Badge
@@ -392,24 +396,24 @@ class PublicReimburseReport extends React.Component {
       exportParams: {},
       /**导出对公报账单字段 */
       exportColumns: [
-        { title: '单据编号', dataIndex: 'businessCode' },
+        { title: '单据编号', dataIndex: 'requisitionNumber' },
         { title: '单据公司', dataIndex: 'companyName' },
-        { title: '单据部门', dataIndex: 'unitName' },
-        { title: '单据类型', dataIndex: 'formName' },
-        { title: '申请人', dataIndex: 'applicationName' },
-        { title: '创建人', dataIndex: 'createByName' },
-        { title: '申请日期', dataIndex: 'stringSubmitDate' },
+        { title: '单据部门', dataIndex: 'departmentName' },
+        { title: '单据类型', dataIndex: 'documentTypeName' },
+        { title: '申请人', dataIndex: 'applicantName' },
+        //{ title: '创建人', dataIndex: 'createByName' },
+        { title: '申请日期', dataIndex: 'requisitionDate' },
         { title: '币种', dataIndex: 'currencyCode' },
         { title: '金额', dataIndex: 'totalAmount' },
-        { title: '汇率', dataIndex: 'rate' },
+        // { title: '汇率', dataIndex: 'rate' },
         { title: '本币金额', dataIndex: 'functionalAmount' },
         { title: '已付金额', dataIndex: 'paidAmount' },
         { title: '已核销金额', dataIndex: 'writeOffAmount' },
-        { title: '已反冲金额', dataIndex: 'backlashAmount' },
-        { title: '状态', dataIndex: 'reportStatusName' },
-        { title: '审核日期', dataIndex: 'stringAuditDate' },
-        { title: '反冲状态', dataIndex: 'reversedStatus' },
-        { title: '备注', dataIndex: 'remark' },
+        //{ title: '已反冲金额', dataIndex: 'backlashAmount' },
+        { title: '状态', dataIndex: 'status' },
+        { title: '审核日期', dataIndex: 'auditDate' },
+        { title: '反冲状态', dataIndex: 'reversedFlag' },
+        { title: '备注', dataIndex: 'description' },
       ],
     };
   }
@@ -433,22 +437,29 @@ class PublicReimburseReport extends React.Component {
     this.setState({ searchParams: { ...values } }, () => {
       this.getList();
     });
-    // this.setState({ searchParams: {...values,...this.state.searchParams}}, () => {
-    //     this.getList()
-    // });
+    //清除查询条件
+
+    //表格翻页
   };
   //清除查询条件
   clear = () => {
     this.setState({ searchParams: {} });
   };
-  /**
-   * 获取数据源
-   */
+  handleLink(record) {
+    console.log(record);
+    this.props.dispatch(
+      routerRedux.replace({
+        pathname: `/my-reimburse/my-reimburse/reimburse-detail-financial/${record.id}`,
+      })
+    );
+  }
+
   getList = () => {
     const { searchParams, page, pageSize } = this.state;
     const param = {
       ...searchParams,
       documentCode: searchParams.documentCode ? searchParams.documentCode : null,
+      tenantId: this.props.company.tenantId,
     };
     let setOfBooksId = this.props.company.setOfBooksId;
     this.setState({ loading: true });
@@ -513,14 +524,14 @@ class PublicReimburseReport extends React.Component {
     console.log(this.state.applicationType);
     const applySelectorItem = {
       title: '关联的申请单',
-      url: `${config.baseUrl}/api/expReportHeader/get/release/by/reportId`,
+      url: `${config.expenseUrl}/api/expense/application/get/release/by/reportId`,
       searchForm: [
         {
           type: 'input',
           id: 'businessCode',
           label: '报账单单号',
           disabled: true,
-          defaultValue: record.businessCode,
+          defaultValue: record.requisitionNumber,
           colSpan: 6,
         },
         {
@@ -528,7 +539,7 @@ class PublicReimburseReport extends React.Component {
           id: 'formName',
           label: '报账单类型',
           disabled: true,
-          defaultValue: record.formName,
+          defaultValue: record.documentTypeName,
           colSpan: 6,
         },
         { type: 'input', id: 'releaseCode', label: '申请单单号', colSpan: 6 },
@@ -537,7 +548,7 @@ class PublicReimburseReport extends React.Component {
       columns: [
         {
           title: '申请单单号',
-          dataIndex: 'applicationCode',
+          dataIndex: 'documentNumber',
           render: recode => {
             return <a>{recode}</a>;
           },
@@ -545,21 +556,21 @@ class PublicReimburseReport extends React.Component {
         },
         {
           title: '申请单类型',
-          dataIndex: 'applicationTypeNum',
-          render: (value, record) => {
-            return value && <span>{this.state.applicationType[value].label}</span>;
+          dataIndex: 'typeName',
+          render: typeName => {
+            return <Popover content={typeName}>{typeName}</Popover>;
           },
         },
-        { title: '费用类型', dataIndex: 'expenseType' },
-        { title: '申请人', dataIndex: 'applicant' },
+        { title: '费用类型', dataIndex: 'expenseTypeName' },
+        { title: '申请人', dataIndex: 'employeeName' },
         {
           title: '申请日期',
-          dataIndex: 'applicationDate',
+          dataIndex: 'requisitionDate',
           render: value => {
             return value ? moment(value).format('YYYY-MM-DD') : '';
           },
         },
-        { title: '币种', dataIndex: 'currency' },
+        { title: '币种', dataIndex: 'currencyCode' },
         { title: '金额', dataIndex: 'amount', render: this.filterMoney },
         { title: '关联金额', dataIndex: 'releaseAmount', render: this.filterMoney },
         { title: '备注', dataIndex: 'remark' },
@@ -572,6 +583,7 @@ class PublicReimburseReport extends React.Component {
       selectorItem: applySelectorItem,
       extraParams: {
         sourceId: record.id,
+        formName: record.documentTypeId,
       },
     });
   };
@@ -597,7 +609,7 @@ class PublicReimburseReport extends React.Component {
           id: 'businessCode',
           label: '报账单单号',
           disabled: true,
-          defaultValue: record.businessCode,
+          defaultValue: record.requisitionNumber,
           colSpan: 6,
         },
         {
@@ -605,7 +617,7 @@ class PublicReimburseReport extends React.Component {
           id: 'formName',
           label: '报账单类型',
           disabled: true,
-          defaultValue: record.formName,
+          defaultValue: record.documentTypeName,
           colSpan: 6,
         },
         {
@@ -718,7 +730,7 @@ class PublicReimburseReport extends React.Component {
           id: 'businessCode',
           label: '报账单单号',
           disabled: true,
-          defaultValue: record.businessCode,
+          defaultValue: record.requisitionNumber,
           colSpan: 6,
         },
         {
@@ -726,7 +738,7 @@ class PublicReimburseReport extends React.Component {
           id: 'formName',
           label: '报账单类型',
           disabled: true,
-          defaultValue: record.formName,
+          defaultValue: record.documentTypeName,
           colSpan: 6,
         },
         {

@@ -645,6 +645,10 @@ class SupplierManagement extends React.Component {
       onChange: this.onSelectChange,
       onSelect: this.onSelectRow,
       onSelectAll: this.onSelectAllRow,
+      getCheckboxProps: record => ({
+        disabled: record.vendorStatus !== 'APPROVED', // Column configuration not to be checked
+        name: record.name,
+      }),
     };
     return (
       <div className="supplier-management">
@@ -675,7 +679,10 @@ class SupplierManagement extends React.Component {
           show={slideFrame.visible}
           onClose={this.handleAfterClose}
         >
-          <NewUpdateSupplier onClose={this.handleOnClose} params={slideFrame.params} />
+          <NewUpdateSupplier
+            onClose={this.handleOnClose}
+            params={{ visible: slideFrame.visible, ...slideFrame.params }}
+          />
         </SlideFrame>
         <ListSelector
           type="vendor_company"

@@ -103,6 +103,18 @@ class NewProjectTypeDefinition extends Component {
             value.applyEmployee.values &&
             value.applyEmployee.values.map(item => ({ id: item.key })),
         };
+        //校验权限
+        const listLen = data['deptOrUserGroupList'].length;
+        if (data['applyEmployee'] === 1002 && listLen == 0) {
+          message.error('请选择至少一个关于部门的权限');
+          this.setState({ saveLoading: false });
+          return;
+        }
+        if (data['applyEmployee'] === 1003 && listLen == 0) {
+          message.error('请选择至少一个关于人员组的权限');
+          this.setState({ saveLoading: false });
+          return;
+        }
         const method = params.id ? service.updateProjectType : service.addProjectType;
         method(data)
           .then(() => {

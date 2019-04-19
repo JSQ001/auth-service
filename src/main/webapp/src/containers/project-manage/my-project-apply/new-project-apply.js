@@ -31,21 +31,21 @@ class NewProjectApply extends Component {
       rate: 1, // 汇率
       // 币种：默认为本位币；是否显示，是否必输通过项目申请单类型定义“金额设置”控制
       // 申请金额：可手工输入；是否显示，是否必输通过项目申请单类型定义“金额设置”控制
-      // isRequired: false, // 是否必输
-      isRequired: true,
-      // isView: true, // 是否显示
-      isView: true,
+      // isRequired: true, // 是否必输
+      // isView: true,  // 是否显示
       saveLoading: false,
+      currencyList: [],
+      isRequired: props.isNew ? props.match.params.isReq : props.params.amountNullFlag,
+      isView: props.isNew ? props.match.params.isView : props.params.amountFlag, // 是否显示
     };
   }
 
   componentDidMount = () => {
     // 获取币种列表
-    // const { company } = this.props;
-    // service.getCurrencyList(company.companyOid).then(res => {
-    //   this.setState({ currencyList: res.data });
-    // });
-    const { params } = this.props;
+    const { company, params } = this.props;
+    service.getCurrencyList(company.companyOid).then(res => {
+      this.setState({ currencyList: res.data });
+    });
 
     const fileList = [];
     if (params.id && params.attachments && params.attachments.length) {
@@ -77,8 +77,8 @@ class NewProjectApply extends Component {
     service.getCurProjectDetail(applicationTypeId).then(res => {
       this.setState({
         projectTypeList: res.data,
-        isRequired: res.data.amountNullFlag,
-        isView: res.data.amountFlag,
+        // isRequired: res.data.amountNullFlag,
+        // isView: res.data.amountFlag,
       });
     });
   };
@@ -201,7 +201,7 @@ class NewProjectApply extends Component {
   // ------------------
 
   render() {
-    const { projectTypeList, saveLoading, fileList } = this.state;
+    const { projectTypeList, saveLoading, fileList, isView, isRequired, currencyList } = this.state;
     const { form, user, company, isNew, params, show } = this.props;
     const { getFieldDecorator } = form;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
@@ -443,67 +443,70 @@ class NewProjectApply extends Component {
               </FormItem>
             </Col>
           </Row>
-          {/*<Row {...rowLayout}>*/}
-          {/*<Col span={colSpan}>*/}
-          {/*{String(isView) === 'true' ? (*/}
-          {/*<FormItem {...formItemLayout} label="申请金额">*/}
-          {/*{getFieldDecorator('amount', {*/}
-          {/*rules: [*/}
-          {/*{*/}
-          {/*required: isRequired,*/}
-          {/*message: this.$t({ id: 'common.enter' }),*/}
-          {/*},*/}
-          {/*],*/}
-          {/*initialValue: params.amount || '',*/}
-          {/*})(<Input placeholder="请输入参考项目编号" />)}*/}
-          {/*</FormItem>*/}
-          {/*) : (*/}
-          {/*<div />*/}
-          {/*)}*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
-          {/*<Row {...rowLayout}>*/}
-          {/*<Col span={colSpan}>*/}
-          {/*{String(isView) === 'true' ? (*/}
-          {/*<FormItem {...formItemLayout} label={this.$t('acp.currency')}>*/}
-          {/*{getFieldDecorator('currencyCode', {*/}
-          {/*rules: [*/}
-          {/*{*/}
-          {/*required: isRequired,*/}
-          {/*message: this.$t({ id: 'common.please.select' }),*/}
-          {/*},*/}
-          {/*],*/}
-          {/*initialValue: isNew*/}
-          {/*? {*/}
-          {/*key: company.baseCurrency,*/}
-          {/*label: `${company.baseCurrency}-${company.baseCurrencyName}`,*/}
-          {/*}*/}
-          {/*: {*/}
-          {/*key: params.currencyCode,*/}
-          {/*label: `${params.currencyCode}-${params.currencyName}`,*/}
-          {/*},*/}
-          {/*})(*/}
-          {/*<Select*/}
-          {/*placeholder={this.$t('common.please.select')}*/}
-          {/*onChange={this.getExchangeRate}*/}
-          {/*labelInValue*/}
-          {/*getPopupContainer={triggerNode => triggerNode.parentNode}*/}
-          {/*>*/}
-          {/*{currencyList.map(item => {*/}
-          {/*return (*/}
-          {/*<Select.Option key={item.currency}>*/}
-          {/*{item.currency}-{item.currencyName}*/}
-          {/*</Select.Option>*/}
-          {/*);*/}
-          {/*})}*/}
-          {/*</Select>*/}
-          {/*)}*/}
-          {/*</FormItem>*/}
-          {/*) : (*/}
-          {/*<div />*/}
-          {/*)}*/}
-          {/*</Col>*/}
-          {/*</Row>*/}
+
+          <Row {...rowLayout}>
+            <Col span={colSpan}>
+              {String(isView) === 'true' ? (
+                <FormItem {...formItemLayout} label="申请金额">
+                  {getFieldDecorator('amount', {
+                    rules: [
+                      {
+                        required: String(isRequired) === 'true' ? true : false,
+                        message: this.$t({ id: 'common.enter' }),
+                      },
+                    ],
+                    initialValue: params.amount || '',
+                  })(<Input placeholder="请输入参考项目编号" />)}
+                </FormItem>
+              ) : (
+                <div />
+              )}
+            </Col>
+          </Row>
+
+          <Row {...rowLayout}>
+            <Col span={colSpan}>
+              {String(isView) === 'true' ? (
+                <FormItem {...formItemLayout} label={this.$t('acp.currency')}>
+                  {getFieldDecorator('currencyCode', {
+                    rules: [
+                      {
+                        required: String(isRequired) === 'true' ? true : false,
+                        message: this.$t({ id: 'common.please.select' }),
+                      },
+                    ],
+                    initialValue: isNew
+                      ? {
+                          key: company.baseCurrency,
+                          label: `${company.baseCurrency} - ${company.baseCurrencyName}`,
+                        }
+                      : {
+                          key: params.currencyCode,
+                          label: `${params.currencyCode}-${params.currencyName}`,
+                        },
+                  })(
+                    <Select
+                      placeholder={this.$t('common.please.select')}
+                      onChange={this.getExchangeRate}
+                      labelInValue
+                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                    >
+                      {currencyList.map(item => {
+                        return (
+                          <Select.Option key={item.currency}>
+                            {item.currency}-{item.currencyName}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  )}
+                </FormItem>
+              ) : (
+                <div />
+              )}
+            </Col>
+          </Row>
+
           <Row {...rowLayout}>
             <Col span={colSpan}>
               <FormItem label="项目说明" {...formItemLayout}>
@@ -533,13 +536,13 @@ class NewProjectApply extends Component {
           </Row>
           {isNew ? (
             <Affix style={bottomStyle}>
-              <Button onClick={this.handleReturn} style={{ marginRight: '10px' }}>
-                {/* 返回 */}
-                {this.$t('common.return')}
-              </Button>
-              <Button type="primary" onClick={this.handleSave}>
+              <Button type="primary" onClick={this.handleSave} style={{ marginRight: '10px' }}>
                 {/* 下一步 */}
                 {this.$t('acp.next')}
+              </Button>
+              <Button onClick={this.handleReturn}>
+                {/* 取消 */}
+                {this.$t('common.cancel')}
               </Button>
             </Affix>
           ) : (

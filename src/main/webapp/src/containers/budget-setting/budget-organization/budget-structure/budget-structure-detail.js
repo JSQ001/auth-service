@@ -111,21 +111,18 @@ class BudgetStructureDetail extends React.Component {
             /*公司代码*/
             title: this.$t({ id: 'structure.companyCode' }),
             key: 'companyCode',
-            align: 'center',
             dataIndex: 'companyCode',
           },
           {
             /*公司名称*/
             title: this.$t({ id: 'structure.companyName' }),
             key: 'companyName',
-            align: 'center',
             dataIndex: 'companyName',
           },
           {
             /*公司类型*/
             title: this.$t({ id: 'structure.companyType' }),
             key: 'companyTypeName',
-            align: 'center',
             dataIndex: 'companyTypeName',
             render: recode => <span>{recode ? recode : '-'}</span>,
           },

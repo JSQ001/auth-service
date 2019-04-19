@@ -1,16 +1,16 @@
 import React from 'react';
 import { connect } from 'dva';
-
+import config from 'config';
+import httpFetch from 'share/httpFetch';
 import { messages } from 'utils/utils';
 import { Form, Modal, Icon, message, Spin, Select } from 'antd';
 import manApprovalImg from 'images/setting/workflow/man-approval.svg';
 import manApprovalDisabledImg from 'images/setting/workflow/man-approval-disabled.svg';
 import PropTypes from 'prop-types';
 import 'styles/approve-setting/return-back.scss';
+
 const FormItem = Form.Item;
-const Option = Select.Option;
-import config from 'config';
-import httpFetch from 'share/httpFetch';
+const { Option } = Select;
 
 class ReturnBack extends React.Component {
   constructor(props) {
@@ -31,22 +31,21 @@ class ReturnBack extends React.Component {
 
   componentWillMount() {
     const { documentType, documentOid } = this.props;
-    let url = `${
+    const url = `${
       config.workflowUrl
     }/api/workflow/back/nodes?entityOid=${documentOid}&entityType=${documentType}`;
     this.setState({ loading: true });
     httpFetch
       .get(url)
       .then(res => {
-        console.log(res.data);
-        let backTypeFlag = res.data.backFlag;
-        let temp = res.data.approvalNodeDTOList.filter(e => e.type === 1001);
+        const backTypeFlag = res.data.backFlag;
+        const temp = res.data.approvalNodeDTOList.filter(e => e.type === 1001);
         let nodeOid = '';
-        let ruleNodes = temp.map((item, index) => {
-          let result = {};
-          result['ruleApprovalNodeOid'] = item.ruleApprovalNodeOid;
-          result['remark'] = item.remark;
-          result['enabled'] = item.status === 2;
+        const ruleNodes = temp.map((item, index) => {
+          const result = {};
+          result.ruleApprovalNodeOid = item.ruleApprovalNodeOid;
+          result.remark = item.remark;
+          result.enabled = item.status === 2;
           if (index === temp.length - 1) {
             nodeOid = item.ruleApprovalNodeOid;
           }
@@ -56,44 +55,50 @@ class ReturnBack extends React.Component {
           ruleApprovalNodes: ruleNodes,
           currentNodeOid: nodeOid,
           loading: false,
-          backTypeFlag: backTypeFlag,
+          backTypeFlag,
         });
       })
-      .catch(e => {
+      .catch(() => {
         this.setState({ loading: false });
         message.error('嗷~~~~~~,服务器发生异常！');
       });
   }
 
   onOk = () => {
-    if (this.state.skipNodeOid === null || this.state.skipNodeOid === '') {
+    const { documentType, documentOid, form } = this.props;
+    const { skipNodeOid } = this.state;
+
+    if (skipNodeOid === null || skipNodeOid === '') {
       message.warning('请选择要跳转的节点！');
       return;
     }
-    this.props.form.validateFieldsAndScroll((err, values) => {
+    form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        const { documentType, documentOid } = this.props;
         let params = {
-          approvalNodeOid: this.state.skipNodeOid,
+          approvalNodeOid: skipNodeOid,
           backTypeEnum: values.backTypeEnum || 'START',
           entityOid: documentOid,
           entityType: documentType,
         };
-        console.log(params);
       }
     });
   };
 
   onClose = () => {
-    this.props.onClose();
+    const { onClose } = this.props;
+    onClose();
   };
 
-  //获取节点图片
+  // 获取节点图片
   getNodeImg = enabled => {
     if (enabled) {
+      // eslint-disable-next-line jsx-a11y/alt-text
       return <img src={manApprovalImg} className="node-img" />;
     } else {
-      return <img src={manApprovalDisabledImg} className="node-img" />;
+      // eslint-disable-next-line jsx-a11y/alt-text
+      return (
+        <img style={{ cursor: 'not-allowed' }} src={manApprovalDisabledImg} className="node-img" />
+      );
     }
   };
 
@@ -102,24 +107,23 @@ class ReturnBack extends React.Component {
     let skipNodeOid = '';
     if (node.enabled) {
       skipNodeOid = node.ruleApprovalNodeOid;
-
       ruleApprovalNodes = ruleApprovalNodes.map(item => {
-        if (item.ruleApprovalNodeOid === node.ruleApprovalNodeOid) {
-          item.selected = true;
-        } else {
-          item.selected = false;
-        }
-        return item;
+        return {
+          ...item,
+          selected: item.ruleApprovalNodeOid === node.ruleApprovalNodeOid,
+        };
       });
     } else {
       ruleApprovalNodes = ruleApprovalNodes.map(item => {
-        item.selected = false;
-        return item;
+        return {
+          ...item,
+          selected: false,
+        };
       });
     }
     this.setState({
-      skipNodeOid: skipNodeOid,
-      ruleApprovalNodes: ruleApprovalNodes,
+      skipNodeOid,
+      ruleApprovalNodes,
     });
   };
 
@@ -132,16 +136,19 @@ class ReturnBack extends React.Component {
       backTypeOptions,
       backTypeFlag,
     } = this.state;
-    const { getFieldDecorator } = this.props.form;
+    const {
+      form: { getFieldDecorator },
+      modalVisible,
+    } = this.props;
     return (
       <Modal
-        title={'退回指定节点'}
-        width={'50%'}
+        title="退回指定节点"
+        width="50%"
         onCancel={this.onClose}
         onOk={this.onOk}
         confirmLoading={btnLoading}
-        destroyOnClose={true}
-        visible={this.props.modalVisible}
+        destroyOnClose
+        visible={modalVisible}
       >
         <div className="admin-skip-wrap">
           <Icon type="info-circle" className="info" /> 提示：彩色节点为您可以选择退回的节点
@@ -156,7 +163,7 @@ class ReturnBack extends React.Component {
                         this.handleSkip(node);
                       }}
                       className="node-wrap"
-                      key={index}
+                      key={node.ruleApprovalNodeOid}
                     >
                       {node.ruleApprovalNodeOid === currentNodeOid && (
                         <span className="node-current">当前</span>
@@ -177,7 +184,7 @@ class ReturnBack extends React.Component {
               {backTypeFlag && (
                 <Form style={{ marginTop: '40px' }}>
                   <FormItem
-                    label={'退回审批通过后处理'}
+                    label="退回审批通过后处理"
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 9 }}
                   >
@@ -185,7 +192,7 @@ class ReturnBack extends React.Component {
                       rules: [
                         {
                           required: true,
-                          message: this.$t({ id: 'common.please.select' } /*请选择*/),
+                          message: this.$t({ id: 'common.please.select' } /* 请选择 */),
                         },
                       ],
                     })(

@@ -273,37 +273,6 @@ class ExpenseAdjustDetail extends React.Component {
             </span>
           ),
         },
-        {
-          title: this.$t('common.operation'),
-          dataIndex: 'operate',
-          width: 160,
-          align: 'center',
-          render: (value, record) => {
-            return (
-              <div>
-                {record.vatInvoice && <Divider type="vertical" />}
-                <a
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.handleEdit(record);
-                  }}
-                >
-                  {this.$t('common.edit')}
-                </a>
-                <Divider type="vertical" />
-                <a onClick={() => this.checkOldExpense(record)}>{this.$t('common.copy')}</a>
-                <Divider type="vertical" />
-                <Popconfirm
-                  title={this.$t('configuration.detail.tip.delete')}
-                  onConfirm={e => this.deleteItem(e, record)}
-                >
-                  <a>{this.$t('common.delete')}</a>
-                </Popconfirm>
-              </div>
-            );
-          },
-        },
       ],
     };
   }
@@ -842,17 +811,7 @@ class ExpenseAdjustDetail extends React.Component {
         <Card style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}>
           <Tabs forceRender defaultActiveKey="1">
             <TabPane tab="单据信息" key="1" style={{ border: 'none' }}>
-              <DocumentBasicInfo params={documentParams}>
-                {headerData.status === 1002 && (
-                  <Button
-                    type="primary"
-                    onClick={this.withdraw}
-                    style={{ float: 'right', top: -4 }}
-                  >
-                    {this.$t('common.withdraw')}
-                  </Button>
-                )}
-              </DocumentBasicInfo>
+              <DocumentBasicInfo params={documentParams} />
             </TabPane>
           </Tabs>
         </Card>

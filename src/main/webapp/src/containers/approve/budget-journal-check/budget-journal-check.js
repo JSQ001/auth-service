@@ -1,14 +1,13 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Form, Tabs, message, Badge, Input, Row, Col, Popover } from 'antd';
+import { Tabs, Badge, Input, Row, Col, Popover } from 'antd';
 const TabPane = Tabs.TabPane;
 import config from 'config';
 const Search = Input.Search;
 import SearchArea from 'components/Widget/search-area';
 import moment from 'moment';
 import CustomTable from 'components/Widget/custom-table';
-import budgetJournalService from 'containers/approve/budget-journal-check/budget-journal-check.service';
 
 class BudgetJournalCheck extends React.Component {
   constructor(props) {
@@ -61,15 +60,13 @@ class BudgetJournalCheck extends React.Component {
         {
           title: this.$t('budgetJournal.sequenceNumber'),
           dataIndex: 'index',
-          width: '7%',
-          align: 'center',
+          width: 75,
           render: (value, record, index) => index + 1,
         } /*序号*/,
         {
           title: this.$t('budgetJournal.journalCode'),
-          align: 'center',
           dataIndex: 'journalCode',
-          width: '15%',
+          width: 160,
           render: (desc, record) => (
             <Popover content={record.budgetJournalApprovalView.journalCode}>
               {record.budgetJournalApprovalView.journalCode}
@@ -78,9 +75,8 @@ class BudgetJournalCheck extends React.Component {
         } /*预算日记账编号*/,
         {
           title: this.$t('budgetJournal.journalTypeId.name'),
-          align: 'center',
           dataIndex: 'journalTypeName',
-          width: '15%',
+          width: 160,
           render: (desc, record) => (
             <Popover content={record.budgetJournalApprovalView.journalTypeName}>
               {record.budgetJournalApprovalView.journalTypeName}
@@ -90,8 +86,7 @@ class BudgetJournalCheck extends React.Component {
         {
           title: this.$t('budgetJournal.employeeId'),
           dataIndex: 'applicantName',
-          align: 'center',
-          width: '9%' /*申请人*/,
+          width: 96 /*申请人*/,
           render: (desc, record) => (
             <Popover content={record.budgetJournalApprovalView.applicantName}>
               {record.budgetJournalApprovalView.applicantName}
@@ -99,18 +94,16 @@ class BudgetJournalCheck extends React.Component {
           ),
         },
         {
-          title: this.$t({ id: 'role.set.finance.submit.date' } /*创建时间*/),
-          align: 'center',
-          width: '9%',
+          title: this.$t({ id: 'role.set.finance.submit.date' } /*提交日期*/),
+          width: 110,
           dataIndex: 'submittedDate',
           render: (desc, record) =>
             moment(record.budgetJournalApprovalView.submittedDate).format('YYYY-MM-DD'),
         },
         {
           title: this.$t('adjust.formName'),
-          align: 'center',
           dataIndex: 'formName',
-          width: '20%',
+          width: 160,
           render: (desc, record) => (
             <Popover content={record.budgetJournalApprovalView.formName}>
               {record.budgetJournalApprovalView.formName}
@@ -120,14 +113,13 @@ class BudgetJournalCheck extends React.Component {
         {
           title: this.$t('budgetJournal.currency'),
           dataIndex: 'currencyCode',
-          width: '7%',
-          align: 'center',
+          width: 75,
           render: (desc, record) => record.budgetJournalApprovalView.currencyCode,
         },
         {
           title: this.$t('budgetJournal.amount'),
           dataIndex: 'totalBudget',
-          align: 'center',
+          width: 140,
           render: (desc, record) => (
             <Popover content={record.budgetJournalApprovalView.totalBudget}>
               {record.budgetJournalApprovalView.totalBudget}
@@ -136,8 +128,8 @@ class BudgetJournalCheck extends React.Component {
         } /*金额*/,
         {
           title: this.$t({ id: 'common.column.status' } /*状态*/),
-          align: 'center',
           dataIndex: 'status',
+          width: 110,
           render: (value, record) => (
             <Badge
               status={this.$statusList[record.budgetJournalApprovalView.status].state}

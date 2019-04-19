@@ -39,6 +39,7 @@ class UploadButton extends React.Component {
         },
         () => {
           this.setState({ defaultListTag: false });
+          console.log(this.state.fileList);
         }
       );
     }

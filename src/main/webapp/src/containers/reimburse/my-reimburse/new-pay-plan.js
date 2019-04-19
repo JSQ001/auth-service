@@ -9,7 +9,7 @@ import ListSelector from 'widget/list-selector';
 import moment from 'moment';
 import CustomAmount from 'widget/custom-amount';
 import reimburseService from 'containers/reimburse/my-reimburse/reimburse.service';
-import SelectContract from 'containers/reimburse/my-reimburse/select-contract';
+import SelectContract from 'containers/reimburse/my-reimburse/select-contract-line';
 import SelectReceivables from 'widget/select-receivables';
 import { connect } from 'dva';
 import Chooser from '../../../components/Widget/chooser';
@@ -53,7 +53,6 @@ class NewPayPlan extends React.Component {
   componentDidMount() {
     //编辑
     let record = this.props.params.record;
-    console.log(this.props);
     if (record.id) {
       this.setState(
         {
@@ -89,7 +88,6 @@ class NewPayPlan extends React.Component {
     } else {
       this.setState({ isNew: true, headerData: this.props.params.headerData }, () => {
         const { headerData } = this.state;
-        // console.log(headerData);
         if (headerData.multipleReceivables === false) {
           this.setState({
             payeeId: headerData.partnerId,
@@ -124,7 +122,6 @@ class NewPayPlan extends React.Component {
     reimburseService.getConfigDetail(params).then(res => {
       let reTypeDetail = res.data || {};
 
-      console.log(reTypeDetail);
       this.setState({ reTypeDetail });
       //类型为单收款方，付款行付款信息设置为头单付款信息
       let payeeCategory = !reTypeDetail.multiPayee
@@ -314,28 +311,23 @@ class NewPayPlan extends React.Component {
 
   //选定合同后
   handleListOk = values => {
-    console.log(values);
     if (values && values.result[0]) {
+      let contractLine = values.result[0];
       this.setState({
-        //contractInfo: values.result[0],
         contractInfo: {
-          contractId: values.result[0].contractHeaderId,
-          contractLineId: values.result[0].lineList[0].contractLineId,
-          lineNumber: values.result[0].lineList[0].lineNumber,
-          contractLineAmount: values.result[0].lineList[0].amount,
-          dueDate: values.result[0].lineList[0].dueDate,
-          contractNumber: values.result[0].contractNumber,
+          ...contractLine,
         },
         showSelectContract: false,
         contractParams: {},
-        selectedData: [values.result[0].contractLineId],
+        selectedData: [contractLine.contractLineId],
       });
     }
   };
 
   //显示选择合同
   showSelectContract = () => {
-    if (!this.state.payeeId) {
+    const payeeId = this.props.form.getFieldValue('payeeId');
+    if (!payeeId) {
       message.warning('请先选择收款方！');
       return;
     }
@@ -443,13 +435,13 @@ class NewPayPlan extends React.Component {
     this.setState({
       payeeId: value.key,
       payeeName: value.value,
+      contractInfo: {},
     });
     this.getReceivables(value.key, type && type.key);
   };
 
   //获取收款方
   getReceivables = (value, payeeCategory) => {
-    //console.log('value'+ payeeCategory);
     if (!value) return;
     let flag = payeeCategory === 'EMPLOYEE';
     let method = flag ? 'getAccountByUserId' : 'getAccountByVendorId';
@@ -459,7 +451,6 @@ class NewPayPlan extends React.Component {
       res.data.length === 0 &&
         message.warning('该收款方没有银行信息，请先维护改收款方下银行信息！');
       if (!!defaultBank) {
-        console.log(defaultBank);
         this.props.form.setFieldsValue({
           accountNumber: {
             key: defaultBank.bankAccount || defaultBank.bankAccountNo,
@@ -622,7 +613,6 @@ class NewPayPlan extends React.Component {
                 />
               )}
             </FormItem>
-            {console.log(record)}
             <FormItem {...formItemLayout} label="收款方银行账户">
               {getFieldDecorator('accountNumber', {
                 initialValue: { key: record.accountNumber || '', label: record.accountNumber },
@@ -645,9 +635,6 @@ class NewPayPlan extends React.Component {
                   ))}
                 </Select>
               )}
-              {
-                //console.log(banksInfo)
-              }
             </FormItem>
             <FormItem {...formItemLayout} label="收款方户名">
               {getFieldDecorator('accountName', {
@@ -751,10 +738,10 @@ class NewPayPlan extends React.Component {
                     value={contractInfo.contractLineId ? contractInfo.contractNumber : ''}
                     dropdownStyle={{ display: 'none' }}
                   />
-                  <div style={{ marginTop: '-10px' }}>
+                  <div style={{ marginTop: '4px', fontSize: '12px' }}>
                     {!contractInfo.contractLineId
                       ? '注：根据收款方选择合同'
-                      : `付款计划序号：${contractInfo.lineNumber} | 付款计划日期：${moment(
+                      : `序号：${contractInfo.lineNumber} | 付款计划日期：${moment(
                           contractInfo.dueDate
                         ).format('YYYY-MM-DD')}`}
                   </div>

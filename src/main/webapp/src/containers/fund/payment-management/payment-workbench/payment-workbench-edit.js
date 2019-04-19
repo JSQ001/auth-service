@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Row, Col, Input, Select, DatePicker, Alert, Button, message } from 'antd';
+import { Form, Row, Col, Input, Select, DatePicker, Alert, Button, message, Popover } from 'antd';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import Chooser from 'widget/chooser';
@@ -53,69 +53,80 @@ class PaymentWorkbenchEdit extends React.Component {
       bankCode: '', // 付款账号银行code,
       columns: [
         {
-          title: '预警状态',
+          title: this.$t('fund.early.warning.state') /* 预警状态 */,
           dataIndex: 'warningStatusDesc',
           width: 100,
           align: 'center',
         },
         {
-          title: '预警信息',
+          title: this.$t('fund.early.warning.information') /* 预警信息 */,
           dataIndex: 'warningData',
           width: 150,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '来源单据编号',
+          title: this.$t('fund.source.document.number') /* 来源单据编号 */,
           dataIndex: 'sourceDocumentNum',
-          width: 150,
-          align: 'center',
+          width: 200,
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '付款用途',
+          title: this.$t('fund.payment.purpose') /* 付款用途 */,
           dataIndex: 'paymentAccountName',
           width: 100,
-          align: 'center',
         },
         {
-          title: '收款户名',
+          title: this.$t('fund.name.receiver') /* 收款户名 */,
           dataIndex: 'gatherAccountName',
           width: 100,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款分行',
+          title: this.$t('fund.collection.branch') /* 收款分行 */,
           dataIndex: 'gatherBranchBankName',
           width: 150,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '收款账号',
+          title: this.$t('fund.receiving.account') /* 收款账号 */,
           dataIndex: 'gatherAccount',
           width: 200,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
-          width: 100,
-          align: 'center',
+          width: 140,
+          render: amount => this.filterMoney(amount),
         },
         {
-          title: '摘要',
+          title: this.$t('fund.abstract') /* 摘要 */,
           dataIndex: 'summary',
           width: 200,
-          align: 'center',
+          render: record => {
+            return <Popover content={record}>{record}</Popover>;
+          },
         },
         {
-          title: '公私标志',
+          title: this.$t('fund.public.private.signs') /* 公私标志 */,
           dataIndex: 'propFlagDesc',
           width: 80,
           align: 'center',
         },
         {
-          title: '是否付款',
+          title: this.$t('fund.whether.the.payment') /* 是否付款 */,
           dataIndex: 'isPay',
-          width: 80,
+          width: 100,
           align: 'center',
         },
       ],
@@ -257,11 +268,16 @@ class PaymentWorkbenchEdit extends React.Component {
     );
     const noticeAlert = (
       <span>
-        已选择<span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项 |共<span
+        {this.$t('fund.selected')}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.desc.code7')}
+        <span>
           style={{ fontWeight: 'bold', color: '#108EE9' }}
-        >
+          >
           {totalAmount}
-        </span>元
+        </span>
+        {this.$t('fund.yuan')}
+        {/*元*/}
       </span>
     );
     this.setState({
@@ -300,7 +316,7 @@ class PaymentWorkbenchEdit extends React.Component {
       .generateBatchDelete(selectedRowKeys)
       .then(response => {
         if (response.data === true) {
-          message.success('删除成功');
+          message.success(this.$t('fund.delete.successful')); /*删除成功*/
           this.getCreateBatchList();
         }
       })
@@ -340,7 +356,7 @@ class PaymentWorkbenchEdit extends React.Component {
               headerId: response.data.headerId,
               batchNumber: response.data.batchNumber,
             });
-            message.success('保存成功');
+            message.success(this.$t('fund.save.successful')); /*保存成功*/
             this.setState({
               loading: false,
               deleteAllDisableClick: false,
@@ -363,7 +379,7 @@ class PaymentWorkbenchEdit extends React.Component {
       .generateBatchDeleteAll()
       .then(response => {
         if (response.data === true) {
-          message.success('删除成功');
+          message.success(this.$t('fund.delete.successful')); /*删除成功*/
           dispatch(
             routerRedux.push({
               pathname: `/payment-management/payment-workbench/payment-workbench`,
@@ -384,7 +400,7 @@ class PaymentWorkbenchEdit extends React.Component {
     const { headerId } = this.state;
     paymentWorkbenchService.generateSubmit(headerId).then(response => {
       if (response.status === 200) {
-        message.success('提交成功');
+        message.success(this.$t('fund.submitted.successfully')); /*提交成功*/
       }
       dispatch(
         routerRedux.push({
@@ -442,21 +458,25 @@ class PaymentWorkbenchEdit extends React.Component {
           <Form>
             <Row>
               <Col span={6}>
-                <FormItem label="付款批号" {...formItemLayout}>
+                <FormItem label={this.$t('fund.the.payment.batch.number')} {...formItemLayout}>
+                  {/*付款批号*/}
                   {getFieldDecorator('batchNumber', {
                     initialValue: batchNumber,
                   })(<Input disabled />)}
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="付款方式" {...formItemLayout}>
+                <FormItem label={this.$t('fund.payment.method')} {...formItemLayout}>
+                  {/*付款方式*/}
                   {getFieldDecorator('paymentMethod', {
                     initialValue: '',
-                    rules: [{ required: true, message: '付款方式不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t('fund.payment.cannot.be.empty') },
+                    ] /*付款方式不能为空*/,
                   })(
                     <Select
                       onFocus={() => this.getValueList('ZJ_PAYMENT_TYPE', paymentMethods)}
-                      placeholder="请选择"
+                      placeholder={this.$t('fund.please.choose')} /*请选择*/
                       allowClear
                       onSelect={value => {
                         this.setState({
@@ -472,10 +492,16 @@ class PaymentWorkbenchEdit extends React.Component {
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="付款公司" {...formItemLayout}>
+                <FormItem label={this.$t('fund.payment.company')} {...formItemLayout}>
+                  {/*付款公司*/}
                   {getFieldDecorator('paymentCompany', {
                     initialValue: '',
-                    rules: [{ required: true, message: '付款公司不能为空' }],
+                    rules: [
+                      {
+                        required: true,
+                        message: this.$t('fund.payment.companies.cannot.be.empty'),
+                      },
+                    ] /*付款公司不能为空*/,
                   })(
                     <Chooser
                       type="company"
@@ -491,25 +517,31 @@ class PaymentWorkbenchEdit extends React.Component {
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="单据日期" {...formItemLayout}>
+                <FormItem label={this.$t('fund.document.date')} {...formItemLayout}>
+                  {/*单据日期*/}
                   {getFieldDecorator('documentDate', {
                     initialValue: moment(new Date()),
-                    rules: [{ required: true, message: '单据日期不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t('fund.documents.date.can.not.be.empty') },
+                    ] /*单据日期不能为空*/,
                   })(<DatePicker format="YYYY-MM-DD" />)}
                 </FormItem>
               </Col>
             </Row>
             <Row>
               <Col span={6}>
-                <FormItem label="付款账号" {...formItemLayout}>
+                <FormItem label={this.$t('fund.payment.account')} {...formItemLayout}>
+                  {/*付款账号*/}
                   {getFieldDecorator('paymentAccount', {
                     initialValue: '',
-                    rules: [{ required: true, message: '付款账号不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t("fund.payment.account.can't.be.empty") },
+                    ] /*付款账号不能为空*/,
                   })(
                     <Select
                       onFocus={() => this.getPaymentAccountList()}
                       onSelect={this.setAcountInfo}
-                      placeholder="请选择"
+                      placeholder={this.$t('fund.please.choose')} /*请选择*/
                       allowClear
                     >
                       {paymentAccountList.map(item => {
@@ -524,33 +556,46 @@ class PaymentWorkbenchEdit extends React.Component {
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="付款银行" {...formItemLayout}>
+                <FormItem label={this.$t('fund.the.drawee.bank')} {...formItemLayout}>
+                  {/*付款银行*/}
                   {getFieldDecorator('paymentBank', {
                     initialValue: paymentBank,
-                    rules: [{ required: true, message: '付款银行不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t('fund.paying.bank.cannot.be.empty') },
+                    ] /*付款银行不能为空*/,
                   })(<Input disabled />)}
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="付款账户" {...formItemLayout}>
+                <FormItem label={this.$t('fund.payment.account')} {...formItemLayout}>
+                  {/*付款账户*/}
                   {getFieldDecorator('paymentAccountName', {
                     initialValue: paymentAccountName,
-                    rules: [{ required: true, message: '付款账户不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t("fund.payment.account.can't.be.empty") },
+                    ] /*付款账户不能为空*/,
                   })(<Input disabled />)}
                 </FormItem>
               </Col>
               <Col span={6}>
-                <FormItem label="币种" {...formItemLayout}>
+                <FormItem label={this.$t('fund.currency.code')} {...formItemLayout}>
+                  {/*币种*/}
                   {getFieldDecorator('currency', {
                     initialValue: currency,
-                    rules: [{ required: true, message: '币种不能为空' }],
+                    rules: [
+                      { required: true, message: this.$t('fund.currency.cannot.be.empty') },
+                    ] /*币种不能为空*/,
                   })(<Input disabled />)}
                 </FormItem>
               </Col>
             </Row>
             <Row>
               <Col span={12}>
-                <FormItem label="单据描述" {...descrptionFormItemLayout}>
+                <FormItem
+                  label={this.$t('fund.the.documents.described')}
+                  {...descrptionFormItemLayout}
+                >
+                  {/*单据描述*/}
                   {getFieldDecorator('description', {
                     initialValue: '',
                   })(<Input allowClear />)}
@@ -570,7 +615,8 @@ class PaymentWorkbenchEdit extends React.Component {
                 this.generateBatchDelete();
               }}
             >
-              删除行
+              {this.$t('fund.delete.rows')}
+              {/*删除行*/}
             </Button>
             <Button
               type="primary"
@@ -580,7 +626,8 @@ class PaymentWorkbenchEdit extends React.Component {
                 this.generateBatchSave();
               }}
             >
-              保存
+              {this.$t('fund.save')}
+              {/*保存*/}
             </Button>
             <Button
               type="danger"
@@ -591,7 +638,8 @@ class PaymentWorkbenchEdit extends React.Component {
                 this.generateBatchDeleteAll();
               }}
             >
-              整单删除
+              {this.$t('fund.the.whole.single.delete')}
+              {/*整单删除*/}
             </Button>
             <Button
               type="primary"
@@ -602,7 +650,8 @@ class PaymentWorkbenchEdit extends React.Component {
                 this.submit();
               }}
             >
-              提交
+              {this.$t('fund.submit')}
+              {/*提交*/}
             </Button>
             <Button
               type="primary"
@@ -612,7 +661,8 @@ class PaymentWorkbenchEdit extends React.Component {
                 this.goback();
               }}
             >
-              返回
+              {this.$t('fund.return')}
+              {/*返回*/}
             </Button>
           </div>
           {noticeAlert ? (
@@ -621,6 +671,7 @@ class PaymentWorkbenchEdit extends React.Component {
             ''
           )}
           <Table
+            bordered
             rowKey={record => record.id}
             dataSource={tableData}
             loading={loading}

@@ -31,13 +31,11 @@ class BudgetStrategy extends React.Component {
       columns: [
         {
           title: this.$t({ id: 'budget.strategy.code' } /*预算控制策略代码*/),
-          align: 'center',
           dataIndex: 'controlStrategyCode',
           key: 'controlStrategyCode',
         },
         {
           title: this.$t({ id: 'budget.strategy.name' } /*预算控制策略名称*/),
-          align: 'center',
           dataIndex: 'controlStrategyName',
           key: 'controlStrategyName',
           render: desc => (

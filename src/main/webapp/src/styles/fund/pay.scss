@@ -4,6 +4,8 @@
             display: none !important; 
         }
         .ant-modal-close {
-            display: none !important;
+            .ant-modal-close-x {
+                display: none !important;
+            }
         }
     }

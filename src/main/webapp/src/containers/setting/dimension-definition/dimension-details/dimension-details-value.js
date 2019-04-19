@@ -89,7 +89,10 @@ class DimensionDeValue extends Component {
           render: (operation, record, index) => {
             return (
               <div>
-                <a onClick={e => this.EditDimValue(e, record)}> 编辑</a>
+                <a disabled={record.fromProjectFlag} onClick={e => this.EditDimValue(e, record)}>
+                  {' '}
+                  编辑
+                </a>
                 <Divider type="vertical" />
                 <a onClick={e => this.onCompanyClick(e, record)}>分配公司</a>
               </div>

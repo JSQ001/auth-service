@@ -69,17 +69,22 @@ class CpBalanceMaintain extends Component {
           options: [],
           valueListCode: 'ZJ_OPEN_BANK',
         },
-        // 期间
+        // 状态
         {
           colSpan: 6,
-          type: 'value_list',
-          label: '状态',
-          id: 'approveStatus',
+          type: 'valueList',
+          label: '复核状态',
+          id: 'reviewStatus',
           options: [],
-          valueListCode: 'ZJ_BILL_STATUS',
+          valueListCode: 'ZJ_REVIEW',
         },
       ],
       columns: [
+        {
+          title: '公司',
+          dataIndex: 'companyName',
+          align: 'center',
+        },
         {
           title: '银行账号',
           dataIndex: 'bankAccount',
@@ -133,8 +138,9 @@ class CpBalanceMaintain extends Component {
         searchParams: {
           ...searchParams,
           gatherBank: values.openBank ? values.openBank.key : '', // 所属银行
-          bankAccount: values.paymentAccount ? values.paymentAccount : '', // 付款账号
+          bankAccount: values.paymentAccount ? values.paymentAccount.accountNumber : '', // 付款账号
           companyId: values.documentCompany ? values.documentCompany[0].id : '', // 单据公司
+          reviewStatus: values.reviewStatus ? values.reviewStatus.key : '', // 复核状态
         },
       },
       () => {
@@ -158,7 +164,7 @@ class CpBalanceMaintain extends Component {
         }
       })
       .catch(error => {
-        message.error(error.errorCode);
+        message.error(error.response.data.message);
       });
   };
 
@@ -354,6 +360,7 @@ class CpBalanceMaintain extends Component {
               },
             };
           }}
+          bordered
           rowKey={record => record.id}
           pagination={pagination}
           columns={columns}

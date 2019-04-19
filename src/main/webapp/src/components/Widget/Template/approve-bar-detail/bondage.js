@@ -92,7 +92,13 @@ class Bondage extends React.Component {
   };
 
   // 选择
-  onRowSelectChange = (selectedRowKeys, selectedRows) => {
+  onRowSelectChange = (selectedRowKeys, records) => {
+    let { selectedRows } = this.state;
+    records.forEach(item => {
+      let record = selectedRows.find(o => o.userOid === item.userOid);
+      !record && selectedRows.push(item);
+    });
+    selectedRows = selectedRows.filter(o => selectedRowKeys.includes(o.userOid));
     this.setState({ selectedRowKeys, selectedRows });
     this.props.form.setFieldsValue({ userOid: selectedRowKeys[0] });
   };
@@ -147,15 +153,7 @@ class Bondage extends React.Component {
     });
   };
   render() {
-    const {
-      btLoading,
-      selectedRowKeys,
-      columns,
-      searchForm,
-      selectedRows,
-      approveOrderOptions,
-      orderOptions,
-    } = this.state;
+    const { btLoading, selectedRowKeys, columns, searchForm, selectedRows } = this.state;
     const rowSelection = {
       onChange: this.onRowSelectChange,
       selectedRowKeys: selectedRowKeys,

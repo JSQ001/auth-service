@@ -8,6 +8,7 @@ import moment from 'moment';
 import ApprovalBarDWY from './approval-bar-dwy';
 import service from '../service';
 import approvalService from './approval-page-service';
+import { routerRedux } from 'dva/router';
 
 class ExpInputTaxDetails extends Component {
   constructor(props) {
@@ -152,6 +153,7 @@ class ExpInputTaxDetails extends Component {
         );
         const newStatus = this.transferStatus(String(res.data.status));
         const headerInfo = {
+          id: res.data.id,
           createdDate: res.data.createdDate,
           formName: this.$t('tax.business.receipt.input.tax'),
           currencyCode: res.data.currencyCode,
@@ -198,28 +200,38 @@ class ExpInputTaxDetails extends Component {
     if (error) return;
     console.log(value);
     this.setState({ passLoading: true });
-    // const { headerInfo } = this.state;
-    // approvalService
-    //   .passCurApproval(headerInfo.id,value)
-    //   .then(res => {
-    //     if (res) message.success('通过');
-    //     this.setState({ passLoading: false });
-    //   })
-    //   .catch(err => {
-    //     message.error(err.response.data.message);
-    //   });
+    const { docHeaderInfo } = this.state;
+    approvalService
+      .passCurApproval(docHeaderInfo.id, value)
+      .then(res => {
+        if (res) message.success('通过');
+        this.setState({ passLoading: false });
+        this.props.dispatch(
+          routerRedux.push({
+            pathname: '/exp-input-tax/exp-input-tax/approval',
+          })
+        );
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
   };
 
   // 驳回
   refuseApproval = (error, value) => {
     if (error) return;
-    const { headerInfo } = this.state;
+    const { docHeaderInfo } = this.state;
     this.setState({ refuseLoading: true });
     approvalService
-      .refuseCurApproval(headerInfo.id, value)
+      .refuseCurApproval(docHeaderInfo.id, value)
       .then(res => {
         if (res) message.success(this.$t('constants.documentStatus.has.been.rejected'));
         this.setState({ refuseLoading: false });
+        this.props.dispatch(
+          routerRedux.push({
+            pathname: '/exp-input-tax/exp-input-tax/approval',
+          })
+        );
       })
       .catch(err => {
         message.error(err.response.data.message);

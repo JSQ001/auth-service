@@ -19,23 +19,12 @@ class BudgetBalanceCondition extends React.Component {
         total: 0,
       },
       columns: [
-        {
-          title: this.$t('budget.balance.condition.code'),
-          align: 'center',
-          dataIndex: 'conditionCode',
-          width: '35%',
-        },
-        {
-          title: this.$t('budget.balance.condition.name'),
-          align: 'center',
-          dataIndex: 'conditionName',
-          width: '35%',
-        },
+        { title: this.$t('budget.balance.condition.code'), dataIndex: 'conditionCode', width: 222 },
+        { title: this.$t('budget.balance.condition.name'), dataIndex: 'conditionName', width: 222 },
         {
           title: this.$t('budget.balance.operate'),
-          align: 'center',
           dataIndex: 'operation',
-          width: '30%',
+          width: 190,
           render: (text, record) => (
             <span>
               <a onClick={e => this.useCondition(e, record)}>

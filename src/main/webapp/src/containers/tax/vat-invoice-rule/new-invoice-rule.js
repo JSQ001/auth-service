@@ -27,7 +27,8 @@ class NewInvoiceRule extends React.Component {
   }
 
   componentDidMount() {
-    this.getList();
+    this.getList(this.props.params);
+    console.log(this.props.params);
   }
 
   //编辑
@@ -42,7 +43,9 @@ class NewInvoiceRule extends React.Component {
       if (!err) {
         values.id = this.props.params.id;
         const params = { ...values };
-
+        if (params.commodityId) {
+          params.commodityId = params.commodityId.id;
+        }
         invoiceRuleService
           .updateInvoiceRule(params)
           .then(response => {
@@ -81,11 +84,20 @@ class NewInvoiceRule extends React.Component {
     this.setState({ enabled: value });
   };
 
-  getList() {
-    let ac = [];
+  getList(data) {
     invoiceRuleService
       .getColumns()
       .then(response => {
+        if (data != undefined && data.taxVatSeparateRuleAddList.length) {
+          data.taxVatSeparateRuleAddList.map((item, index) => {
+            response.data.map((items, index1) => {
+              if (item.dimensionId == items.dimensionId) {
+                items.dimensionValueName = item.dimensionValueName;
+                items.dimensionValueId = item.dimensionValueId;
+              }
+            });
+          });
+        }
         this.setState({
           formItems: response.data,
         });
@@ -98,41 +110,36 @@ class NewInvoiceRule extends React.Component {
     const { getFieldDecorator } = this.props.form;
     const { formItems, data } = this.state;
     const formItemLayout = {
-      labelCol: {
-        xs: { span: 10 },
-        sm: { span: 10 },
-      },
-      wrapperCol: {
-        xs: { span: 14 },
-        sm: { span: 14 },
-      },
+      labelCol: { span: 6, offset: 1 },
+      wrapperCol: { span: 14, offset: 1 },
     };
     return formItems.map(item => {
       return (
-        <Col span={12} key={item.id}>
-          <FormItem {...formItemLayout} label={this.$t(item.dimensionName)}>
-            {getFieldDecorator(item.id, {
-              initialValue: item.dimensionId && {
-                id: item.dimensionId,
-                dimensionItemName: item.defaultItemValueName,
+        <FormItem {...formItemLayout} label={this.$t(item.dimensionName)}>
+          {getFieldDecorator(item.id, {
+            initialValue: item.dimensionValueId && {
+              id: item.dimensionValueId,
+              dimensionItemName: item.dimensionValueName,
+              dimensionId: item.dimensionId,
+            },
+            rules: [
+              {
+                required: false,
+                message: this.$t('common.please.enter'),
               },
-              rules: [
-                {
-                  required: true,
-                  message: this.$t('common.please.enter'),
-                },
-              ],
-            })(
-              <Lov
-                labelKey="dimensionItemName"
-                valueKey="id"
-                code="dimension"
-                single
-                extraParams={{ dimensionId: item.dimensionId, enabled: true }}
-              />
-            )}
-          </FormItem>
-        </Col>
+            ],
+          })(
+            <Lov
+              labelKey="dimensionItemName"
+              valueKey="id"
+              code="dimension"
+              single
+              disabled
+              allowClear={false}
+              extraParams={{ dimensionId: item.dimensionId, enabled: true }}
+            />
+          )}
+        </FormItem>
       );
     });
   };
@@ -141,102 +148,91 @@ class NewInvoiceRule extends React.Component {
     const { getFieldDecorator } = this.props.form;
     const { enabled, isPut } = this.state;
     const formItemLayout = {
-      labelCol: {
-        xs: { span: 10 },
-        sm: { span: 10 },
-      },
-      wrapperCol: {
-        xs: { span: 14 },
-        sm: { span: 14 },
-      },
+      labelCol: { span: 6, offset: 1 },
+      wrapperCol: { span: 14, offset: 1 },
     };
     const { params } = this.props;
     return (
       <div className="new-invoice-rule">
         <Form onSubmit={this.handleSave}>
-          <Row gutter={24}>
-            <Col span={12}>
-              <FormItem {...formItemLayout} label={'状态'}>
-                {getFieldDecorator('enableFlag', {
-                  valuePropName: 'checked',
-                  initialValue:
-                    // JSON.stringify(this.props.params) === '{}' ? true : this.props.params.enabled,
-                    params && params.id ? params.enableFlag : true,
-                })(
-                  <Switch
-                    checkedChildren={<Icon type="check" />}
-                    unCheckedChildren={<Icon type="cross" />}
-                    onChange={this.switchChange}
-                    disabled={false}
-                  />
-                )}
-              </FormItem>
-            </Col>
-            <Col span={12}>
-              <FormItem {...formItemLayout} label={'开票名称'}>
-                {getFieldDecorator('invoiceTitle', {
-                  rules: [
-                    {
-                      required: true,
-                      message: this.$t('common.please.enter'),
-                    },
-                  ],
-                  initialValue: params.id ? params.invoiceTitle : '',
-                })(<Input placeholder={this.$t('common.please.enter')} disabled={false} />)}
-              </FormItem>
-            </Col>
-          </Row>
-
-          <Row gutter={24}>
-            <Col span={12}>
-              <FormItem {...formItemLayout} label={'发票类型'}>
-                {getFieldDecorator('invoiceType', {
-                  rules: [
-                    {
-                      required: true,
-                      message: this.$t('common.please.enter'),
-                    },
-                  ],
-                  initialValue: params.id ? params.invoiceType : '',
-                })(
-                  <Select placeholder="请选择" style={{ width: '100%' }}>
-                    <Option value="普通发票">普通发票</Option>
-                    <Option value="专用发票">专用发票</Option>
-                    <Option value="电子普票">电子普票</Option>
-                  </Select>
-                )}
-              </FormItem>
-            </Col>
-            <Col span={12}>
-              <FormItem {...formItemLayout} label={'单位'}>
-                {getFieldDecorator('unit', {
-                  rules: [
-                    {
-                      required: true,
-                      message: this.$t('common.please.enter'),
-                    },
-                  ],
-                  initialValue: params.id ? params.unit : '',
-                })(<Input placeholder={this.$t('common.please.enter')} disabled={false} />)}
-              </FormItem>
-            </Col>
-          </Row>
-          <Row gutter={24}>
-            <Col span={12}>
-              <FormItem {...formItemLayout} label={'商品编码'}>
-                {getFieldDecorator('commodityId', {
-                  rules: [
-                    {
-                      required: true,
-                      message: this.$t('common.please.enter'),
-                    },
-                  ],
-                  initialValue: params.id ? params.commodityId : '',
-                })(<Input placeholder={this.$t('common.please.enter')} disabled={false} />)}
-              </FormItem>
-            </Col>
-            <Row gutter={24}>{this.createDom()}</Row>
-          </Row>
+          <FormItem {...formItemLayout} label={'状态'}>
+            {getFieldDecorator('enableFlag', {
+              valuePropName: 'checked',
+              initialValue: params && params.id ? params.enableFlag : true,
+            })(
+              <Switch
+                checkedChildren="启用"
+                unCheckedChildren="禁用"
+                onChange={this.switchChange}
+                disabled={false}
+              />
+            )}
+          </FormItem>
+          <FormItem {...formItemLayout} label={'商品编码'}>
+            {getFieldDecorator('commodityId', {
+              rules: [
+                {
+                  required: true,
+                  message: this.$t('common.please.enter'),
+                },
+              ],
+              initialValue: params.id && {
+                commodityId: params.commodityId,
+                commodityAbb: params.commodityAbb,
+                commodityName: params.commodityName,
+              },
+            })(
+              <Lov
+                labelKey="commodityAbb"
+                valueKey="id"
+                code="commodity"
+                single
+                onChange={record => {
+                  params.invoiceTitle = record.commodityAbb;
+                }}
+              />
+            )}
+          </FormItem>
+          <FormItem {...formItemLayout} label={'开票名称'}>
+            {getFieldDecorator('invoiceTitle', {
+              rules: [
+                {
+                  required: true,
+                  message: this.$t('common.please.enter'),
+                },
+              ],
+              initialValue: params.invoiceTitle,
+            })(<Input placeholder={this.$t('common.please.enter')} disabled={false} />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label={'发票类型'}>
+            {getFieldDecorator('invoiceType', {
+              rules: [
+                {
+                  required: true,
+                  message: this.$t('common.please.enter'),
+                },
+              ],
+              initialValue: params.id ? params.invoiceType : '',
+            })(
+              <Select placeholder="请选择" style={{ width: '100%' }}>
+                <Option value="普通发票">普通发票</Option>
+                <Option value="专用发票">专用发票</Option>
+                <Option value="电子普票">电子普票</Option>
+              </Select>
+            )}
+          </FormItem>
+          <FormItem {...formItemLayout} label={'单位'}>
+            {getFieldDecorator('unit', {
+              rules: [
+                {
+                  required: false,
+                  message: this.$t('common.please.enter'),
+                },
+              ],
+              initialValue: params.id ? params.unit : '',
+            })(<Input placeholder={this.$t('common.please.enter')} disabled={false} />)}
+          </FormItem>
+          {this.createDom()}
 
           <div className="slide-footer">
             <Button type="primary" htmlType="submit" loading={this.state.loading}>

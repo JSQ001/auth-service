@@ -18,6 +18,7 @@ export default {
    * @param {*}  params
    */
   headerInsertOrUpdate(params) {
+    console.log(params);
     return httpFetch.post(`${config.expenseUrl}/api/input/header/insertOrUpdate`, params);
   },
   /**
@@ -61,15 +62,15 @@ export default {
    * @param {*} headerId
    */
   submitList(headerId) {
-    const url = `${config.expenseUrl}/api/input/header/submit?id=${headerId}`;
-    return httpFetch.post(url);
+    const url = `${config.expenseUrl}/api/input/header/updateStatus?id=${headerId}&status=1002`;
+    return httpFetch.post(url, { approvalRemark: '' });
   },
   /**
    * 进项税业务单页面行删除
    */
   deleteLineValue(lineId) {
     const url = `${config.expenseUrl}/api/input/line/delete?id=${lineId}`;
-    return httpFetch.get(url);
+    return httpFetch.delete(url);
   },
   /**
    *进项税业务单页面行编辑
@@ -94,5 +95,13 @@ export default {
   getExpenseLine(params) {
     const url = `${config.expenseUrl}/api/input/line/getReportData`;
     return httpFetch.get(url, params);
+  },
+  /**
+   * 保存费用行
+   * @param {*} params
+   */
+  saveExpenseLine(params) {
+    const url = `${config.expenseUrl}/api/input/line/insertOrUpdate`;
+    return httpFetch.post(url, params);
   },
 };

@@ -208,8 +208,6 @@ class LineAddTransferModal extends React.Component {
       }
     });
     this.setState({ treeData, selectTreeNodes: [...selectTreeNodes], selectedTreeInfo, rightList });
-
-    // this.alreadySelectLists(treeData, this.state.selectTreeNodes)
   };
 
   /**取消全选以及子项 */

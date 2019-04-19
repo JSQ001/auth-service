@@ -18,18 +18,25 @@ class Pay extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      showButtonOne: 'none', // 其余发送请求时---显示一个button
+      showButtonTwo: 'none', // 发送银行---发送成功是显示两个buttons
+      showErrorInfo: 'none', // 显示发送失败时的提示消息的div
+      error1: '', // 发送失败时的提示消息1
+      error2: '', // 发送失败时的提示消息2
+      imgSuccess: '', // img图标
+      imgDelete: '', // delete的img图标
+      showClose: false, // modal的关闭图标
       buttonBankCompany: true, // 银企直联按钮是否点击
       buttonsUnlinePay: true, // 线下支付结果录入按钮是否可点击
-      payingButtons: 'none',
-      successButtons: 'none',
-      unpaidButtons: 'block',
+      payingButtons: 'none', // 支付中的按钮显示
+      successButtons: 'none', // 已支付的按钮显示
+      unpaidButtons: 'block', // 未支付的按钮显示
       deleteId: [],
-      showButton: 'none', // 显示提示框里面是否查看支付状态的button
       backList: '', // 返回列表
       lookPayStatus: '', // 查看支付状态
       sendSuccess: '', // 发送成功
       info: '', // 提示消息
-      status: 'UNPAID', // 默认为未支付状态
+      status: 'UNPAID', // 页面初始化默认为未支付状态
       loading: false, // loading状态
       noticeAlert: null, // 提示信息
       selectedRowKeys: '', // 选中的单选ID
@@ -37,7 +44,7 @@ class Pay extends React.Component {
       documentBackVisible: false, // 退回对话框
       buttonsDisableClick: true, // 操作按钮是否可点击
       isTrue: false, // 银企直联的单据不可点击线下支付
-      searchParams: {},
+      searchParams: {}, // 模糊查询搜索参数
       pagination: {
         total: 0,
         page: 0,
@@ -48,14 +55,14 @@ class Pay extends React.Component {
         {
           colSpan: 6,
           type: 'modalList',
-          label: '付款账号',
+          label: this.$t('fund.payment.account') /* 付款账号 */,
           id: 'accountNumber',
           listType: 'paymentAccount',
         },
         {
           colSpan: 6,
           type: 'valueList',
-          label: '单据类型',
+          label: this.$t('fund.type.of.document') /* 单据类型 */,
           id: 'pageType',
           options: [],
           valueListCode: 'ZJ_FORM_TYPE',
@@ -63,7 +70,7 @@ class Pay extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '付款方式',
+          label: this.$t('fund.payment.method') /* 付款方式 */,
           id: 'payStyle',
           options: [],
           valueListCode: 'ZJ_PAYMENT_TYPE',
@@ -71,31 +78,30 @@ class Pay extends React.Component {
         {
           colSpan: 6,
           type: 'input',
-          label: '制单人',
+          label: this.$t('fund.single.person') /* 制单人 */,
           id: 'createdBy',
         },
         {
           colSpan: 6,
           type: 'intervalInput',
-          label: '本币金额',
+          label: this.$t('fund.local.currency.amount') /* 本币金额 */,
           id: 'coinAmount',
         },
         {
           colSpan: 6,
           type: 'intervalDate',
           id: 'billDate',
-          fromlabel: '日期从',
+          fromlabel: this.$t('fund.date.from') /* 日期从 */,
           fromId: 'dateFrom',
-          tolabel: '日期到',
+          tolabel: this.$t('fund.the.date.to') /* 日期到 */,
           toId: 'dateTo',
         },
       ],
       columns: [
         {
-          title: '单据编号',
+          title: this.$t('fund.receipt.number') /* 单据编号 */,
           dataIndex: 'paymentBatchNumber',
           width: 200,
-          align: 'center',
           render: (paymentBatchNumber, record) => (
             <a
               onClick={event => {
@@ -108,76 +114,70 @@ class Pay extends React.Component {
           ),
         },
         {
-          title: '单据类型',
+          title: this.$t('fund.type.of.document') /* 据类型 */,
           dataIndex: 'billTypeDesc',
-          width: 200,
-          align: 'center',
+          width: 150,
         },
         {
-          title: '付款账户',
+          title: this.$t('fund.payment.account') /* 付款账户 */,
           dataIndex: 'paymentAccountName',
           width: 100,
-          align: 'center',
         },
         {
-          title: '付款账号',
+          title: this.$t('fund.payment.account') /* 付款账号 */,
           dataIndex: 'paymentAccount',
           width: 200,
-          align: 'center',
         },
         {
-          title: '付款方式',
+          title: this.$t('fund.payment.method') /* 付款方式 */,
           dataIndex: 'paymentMethodDesc',
           width: 100,
-          align: 'center',
         },
         {
-          title: '笔数',
+          title: this.$t('fund.the.number') /* 笔数 */,
           dataIndex: 'lineCount',
-          width: 100,
-          align: 'center',
+          width: 80,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
-          width: 100,
-          align: 'right',
+          width: 140,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
-          title: '币种',
+          title: this.$t('fund.currency.code') /* 币种 */,
           dataIndex: 'currencyCode',
-          width: 200,
-          align: 'center',
+          width: 80,
         },
         {
-          title: '单据日期',
+          title: this.$t('fund.document.date') /* 单据日期 */,
           dataIndex: 'billDateDesc',
-          width: 200,
+          width: 135,
           align: 'center',
         },
         {
-          title: '制单人',
+          title: this.$t('fund.single.person') /* 制单人 */,
           dataIndex: 'employeeName',
-          width: 200,
-          align: 'center',
+          tooltips: true,
+          width: 90,
         },
         {
-          title: '处理状态',
+          title: this.$t('fund.processing.state') /* 处理状态 */,
           dataIndex: 'handleStatusDesc',
           width: 100,
           align: 'center',
         },
         {
-          title: '批付款状态',
+          title: this.$t('fund.batch.of.payment.status') /* 批付款状态 */,
           dataIndex: 'headStatusDesc',
-          width: 150,
+          width: 100,
           align: 'center',
         },
         {
-          title: '日志关联信息',
+          title: this.$t('fund.the.log.information.associated') /* 日志关联信息 */,
           dataIndex: '',
           width: 150,
-          align: 'center',
         },
       ],
     };
@@ -193,14 +193,12 @@ class Pay extends React.Component {
       () => {
         this.changeStatus(nowStatus);
         this.getList();
-        // console.log('发送请求后的状态nowStatus===', status);
       }
     );
   }
 
   componentWillReceiveProps(nextProps) {
     // 切换tab页时，父组件传给子组件的nowStatus
-    console.log('返回按钮');
     const { nowStatus } = nextProps;
     if (nowStatus === 'UNPAID') {
       this.setState(
@@ -353,7 +351,11 @@ class Pay extends React.Component {
    */
   onSelectChange = (selectedRowKeys, selectedRow) => {
     // 银企直联结果更新按钮是否显示
-    if (selectedRow[0] && selectedRow[0].paymentMethodDesc === '银企直连') {
+    if (
+      selectedRow[0] &&
+      selectedRow[0].paymentMethodDesc === this.$t('fund.the.fact.the.directly.connected')
+    ) {
+      /* 银企直连 */
       this.setState(
         {
           selectedRowKeys,
@@ -362,7 +364,7 @@ class Pay extends React.Component {
         },
         () => {
           this.setState({
-            selectedRowKeys: selectedRowKeys[0], // 11...789
+            selectedRowKeys: selectedRowKeys[0],
             selectedRow,
             // selectedRow: selectedRow,
           });
@@ -370,7 +372,11 @@ class Pay extends React.Component {
       );
     }
     // 线下支付结果录入是否显示
-    if (selectedRow[0] && selectedRow[0].paymentMethodDesc !== '银企直连') {
+    if (
+      selectedRow[0] &&
+      selectedRow[0].paymentMethodDesc !== this.$t('fund.the.fact.the.directly.connected')
+    ) {
+      /* 银企直连 */
       this.setState({
         selectedRowKeys,
         selectedRow,
@@ -385,10 +391,10 @@ class Pay extends React.Component {
   showDeleteConfirm = () => {
     const aThis = this;
     confirm({
-      title: '您确定删除所选择的单据，是否继续?',
-      okText: '确定',
+      title: this.$t('fund.delete.selected.document'), // 您确定删除所选择的单据，是否继续?
+      okText: this.$t('fund.determine') /* 确定 */,
       okType: 'danger',
-      cancelText: '取消',
+      cancelText: this.$t('fund.cancel') /* 取消 */,
       onOk() {
         aThis.deleteItems();
       },
@@ -404,7 +410,7 @@ class Pay extends React.Component {
     if (deleteId[0] !== '') {
       PayShowService.deleteAccount(deleteId).then(res => {
         if (res.status === 200) {
-          message.success('删除成功！');
+          message.success(this.$t('fund.delete.successful1')); /* 删除成功！ */
           this.getList();
           this.setState({
             selectedRowKeys: '',
@@ -413,7 +419,7 @@ class Pay extends React.Component {
         }
       });
     } else {
-      message.error('请选中要删除的单据！！');
+      message.error(this.$t('fund.select.delete.document')); // 请选中要删除的单据！
     }
   };
 
@@ -427,31 +433,56 @@ class Pay extends React.Component {
         PayShowService.sendBank(selectedRowKeys)
           .then(() => {
             this.setState({
+              // eslint-disable-next-line global-require
+              imgSuccess: require('./images/right-f.png'),
               sendSuccess: '发送成功',
               info:
                 '单据已发送银行处理，30分钟后系统将自动从银行获取支付结果，您也可以进入支付中界面更新支付结果！',
               backList: '返回列表',
-              showButton: 'inline',
-              lookPayStatus: '查看支付状态',
+              showButtonOne: 'none',
+              showButtonTwo: 'block', // 显示两个按钮
+              showErrorInfo: 'none',
+              lookPayStatus: this.$t('fund.to.check.the.payment.status') /* 查看支付状态 */,
               documentBackVisible: true,
             });
-            message.success('请求成功！！！');
+            message.success(this.$t('fund.request.successful1')); // 请求成功！
             this.getList();
           })
           .catch(() => {
-            message.error('请求失败！！！');
+            message.error(this.$t('fund.request.failed1')); // 请求失败！
           });
       } else {
         this.setState({
+          // eslint-disable-next-line global-require
+          imgSuccess: require('./images/delete.png'),
+          // eslint-disable-next-line global-require
+          imgDelete: require('./images/deleteSmall.png'),
           sendSuccess: '发送失败',
           info: '请核对并修改以下信息后，再重新提交！',
+          error1: '该账户银企直联状态未开启，请开启账户银企直联状态',
+          error2: '调取银行前置机失败，请查看网络连接状态',
           backList: '返回列表',
-          showButton: 'none',
+          showErrorInfo: 'inline',
+          showButtonOne: 'block', // 只显示返回列表这一个按钮
+          showButtonTwo: 'none',
           documentBackVisible: true,
+
+          // ========以下可以删除，只是为了测试发送银行的发送成功==========
+          // eslint-disable-next-line global-require
+          // imgSuccess: require('./images/right-f.png'),
+          // sendSuccess: '发送成功',
+          // info:
+          //   '单据已发送银行处理，30分钟后系统将自动从银行获取支付结果，您也可以进入支付中界面更新支付结果！',
+          // backList: '返回列表',
+          // showButtonOne: 'none',
+          // showButtonTwo: 'block',
+          // showErrorInfo: 'none',
+          // lookPayStatus: this.$t('fund.to.check.the.payment.status') /* 查看支付状态 */,
+          // documentBackVisible: true,
         });
       }
     } else {
-      message.error('请选中需要发送银行请求的单据！！');
+      message.error(this.$t('fund.desc.code2')); // 请选中需要发送银行请求的单据！
     }
   };
 
@@ -471,31 +502,35 @@ class Pay extends React.Component {
   sendUnlinePay = () => {
     const { selectedRowKeys } = this.state;
     if (selectedRowKeys !== '') {
-      PayShowService.unlinePay(selectedRowKeys)
-        .then(() => {
-          this.setState({
-            sendSuccess: '处理成功',
-            info: '单据付款状态已经变更，请您进行线下付款，取回付款结果后，记得更新状态哦！！',
-            backList: '返回列表',
-            showButton: 'none',
-            documentBackVisible: true,
-          });
-          message.success('请求成功！！！');
-          // this.getList({status: 'UNPAID'});
-          // this.getList({status: 'SUCCESS'});
-        })
-        .catch(() => {
-          this.setState({
-            sendSuccess: '发送失败',
-            info: '请核对并修改以下信息后，再重新提交！',
-            backList: '返回列表',
-            showButton: 'none',
-            documentBackVisible: true,
-          });
-          message.error('请求失败！！！');
+      PayShowService.unlinePay(selectedRowKeys).then(() => {
+        this.setState({
+          // eslint-disable-next-line global-require
+          imgSuccess: require('./images/right-f.png'),
+          sendSuccess: '处理成功',
+          info: '单据付款状态已经变更，请您进行线下付款，取回付款结果后，记得更新状态哦！！',
+          backList: '返回列表',
+          showButtonOne: 'block',
+          showButtonTwo: 'none',
+          showErrorInfo: 'none',
+          documentBackVisible: true,
         });
+        message.success(this.$t('fund.request.successful1')); /* 请求成功！ */
+      });
+      // .catch(() => {
+      //   this.setState({
+      //     // eslint-disable-next-line global-require
+      //     imgSuccess: require('./images/delete.png'),
+      //     sendSuccess: '发送失败',
+      //     info: '请核对并修改以下信息后，再重新提交！',
+      //     backList: '返回列表',
+      //     showButtonOne: 'block',
+      //     showButtonTwo: 'none',
+      //     documentBackVisible: true,
+      //   });
+      //   message.error(this.$t('fund.request.failed1')); // 请求失败！
+      // });
     } else {
-      message.error('请选中需要线下付款请求的单据！！');
+      message.error(this.$t('fund.desc.code5')); // 请选中需要线下付款请求的单据！
     }
   };
 
@@ -510,9 +545,14 @@ class Pay extends React.Component {
     );
     const noticeAlert = (
       <span>
-        已选择
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项 |共
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>元
+        {this.$t('fund.selected')}
+        {/* 已选择 */}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.desc.code7')}
+        {/* 项 共 */}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>
+        {this.$t('fund.yuan')}
+        {/* 元 */}
       </span>
     );
     this.setState({
@@ -561,10 +601,10 @@ class Pay extends React.Component {
     if (selectedRow[0] && selectedRow[0].paymentMethod === 'INTERFACE') {
       PayShowService.sendBankCompany(selectedRowKeys)
         .then(() => {
-          message.success('请求成功！！！');
+          message.success(this.$t('fund.request.successful1')); /* 请求成功！ */
         })
         .catch(() => {
-          message.error('请求失败！！！');
+          message.error('请求失败！');
         });
     }
   };
@@ -584,7 +624,7 @@ class Pay extends React.Component {
         })
       );
     } else {
-      message.error('请选中要操作的单据！！');
+      message.error(this.$t('fund.desc.code6')); // 请选中要操作的单据！
     }
   };
 
@@ -598,7 +638,7 @@ class Pay extends React.Component {
         searchParams: {
           ...searchParams,
           billType: values.pageType ? values.pageType.key : '', // 单据类型
-          paymentAccount: values.accountNumber ? values.accountNumber : '', // 付款账号
+          paymentAccount: values.accountNumber ? values.accountNumber.accountNumber : '', // 付款账号
           paymentMethod: values.payStyle ? values.payStyle.key : '', // 付款方式
           employeeName: values.createdBy || '', // 制单人
           amountFrom: values.coinAmount.intervalFrom || '', // 金额区间
@@ -648,12 +688,17 @@ class Pay extends React.Component {
 
   render() {
     const {
+      showButtonTwo,
+      showButtonOne,
+      error1,
+      error2,
+      showErrorInfo,
+      showClose,
       buttonsUnlinePay,
       buttonBankCompany,
       unpaidButtons,
       payingButtons,
       successButtons,
-      showButton,
       lookPayStatus,
       backList,
       info,
@@ -669,6 +714,8 @@ class Pay extends React.Component {
       buttonsDisableClick,
       documentBackVisible,
       isTrue,
+      imgSuccess,
+      imgDelete,
     } = this.state;
     const rowSelection = {
       selectedRowKeys,
@@ -692,10 +739,11 @@ class Pay extends React.Component {
             <Row>
               <Col span={8}>
                 <Button type="primary" onClick={this.sendBank}>
-                  发送银行
+                  {this.$t('fund.send.the.bank')}
+                  {/* 发送银行 */}
                 </Button>
                 <Button type="primary" onClick={this.sendUnlinePay} disabled={isTrue}>
-                  线下付款
+                  {this.$t('fund.offline.payment')}
                 </Button>
                 <Button
                   type="danger"
@@ -709,11 +757,15 @@ class Pay extends React.Component {
                     });
                   }}
                 >
-                  删除
+                  {this.$t('fund.delete')}
                 </Button>
               </Col>
               <Col span={6} offset={10}>
-                <Search placeholder="请输入单据编号" enterButton onSearch={this.searchNumber} />
+                <Search
+                  placeholder={this.$t('fund.please.enter.the.receipt.number')}
+                  enterButton
+                  onSearch={this.searchNumber}
+                />
               </Col>
             </Row>
           </div>
@@ -721,25 +773,33 @@ class Pay extends React.Component {
             <Row>
               <Col span={8}>
                 <Button type="primary" disabled={buttonBankCompany} onClick={this.sendBankCompany}>
-                  银企直联结果更新
+                  {this.$t('fund.update.the.fact.straight.league.results')}
                 </Button>
                 <Button
                   type="primary"
                   disabled={buttonsUnlinePay}
                   onClick={this.payingSendUnlinePay}
                 >
-                  线下支付结果录入
+                  {this.$t('fund.offline.payment.entry.as.a.result')}
                 </Button>
               </Col>
               <Col span={6} offset={10}>
-                <Search placeholder="请输入单据编号" enterButton onSearch={this.searchNumber} />
+                <Search
+                  placeholder={this.$t('fund.please.enter.the.receipt.number')}
+                  enterButton
+                  onSearch={this.searchNumber}
+                />
               </Col>
             </Row>
           </div>
           <div className="table-header-buttons" style={{ display: successButtons }}>
             <Row>
               <Col span={6} offset={18}>
-                <Search placeholder="请输入单据编号" enterButton onSearch={this.searchNumber} />
+                <Search
+                  placeholder={this.$t('fund.please.enter.the.receipt.number')}
+                  enterButton
+                  onSearch={this.searchNumber}
+                />
               </Col>
             </Row>
           </div>
@@ -758,29 +818,68 @@ class Pay extends React.Component {
             rowSelection={rowSelection}
             onChange={this.onChangePager}
           />
-          <Modal
-            style={{ backgroundColor: 'gray' }}
-            title=""
-            closable="true"
-            footer={null}
-            visible={documentBackVisible}
-          >
-            <h1 style={{ textAlign: 'center' }}>{sendSuccess}</h1>
-            <p style={{ width: '80%', textAlign: 'center' }}>{info}</p>
-            <div style={{ width: '300px', marginLeft: '10%' }}>
+          <Modal title="" closable={showClose} footer={null} visible={documentBackVisible}>
+            <div>
+              <img
+                style={{ width: '75px', height: '75px', marginLeft: '43%' }}
+                src={imgSuccess}
+                alt="..."
+              />
+            </div>
+            <h1 style={{ fontWeight: 'bolder', textAlign: 'center', margin: '10px 0' }}>
+              {sendSuccess}
+            </h1>
+            <p style={{ margin: '3px auto', width: '80%', textAlign: 'center', color: 'gray' }}>
+              {info}
+            </p>
+            {/* 发送失败时提示失败的原因 */}
+            <div style={{ display: showErrorInfo, margin: '10px 0' }}>
+              <div style={{ margin: '0 auto', width: '80%', textAlign: 'center' }}>
+                <img src={imgDelete} alt="" />
+                <span style={{ marginLeft: '5px' }}>{error1}</span>
+              </div>
+              <div style={{ margin: '0 auto', width: '80%', textAlign: 'center' }}>
+                <img src={imgDelete} alt="" />
+                <span style={{ marginLeft: '5px' }}>{error2}</span>
+              </div>
+            </div>
+            {/* 返回列表---按钮 */}
+            <div
+              style={{
+                display: showButtonOne,
+                width: '300px',
+                marginLeft: '24%',
+                marginTop: '30px',
+              }}
+            >
               <Button
                 onClick={this.goList}
                 style={{
-                  marginLeft: '50%',
+                  marginLeft: '26%',
                   marginRight: '15px',
                   textAlign: 'center',
                   color: 'white',
-                  backgroundColor: 'lightBlue',
+                  backgroundColor: '#0086ff',
                 }}
               >
                 {backList}
               </Button>
-              <Button style={{ display: showButton }}>{lookPayStatus}</Button>
+            </div>
+            {/* 返回列表---查看支付状态按钮 */}
+            <div style={{ display: showButtonTwo, marginTop: '30px' }}>
+              <Button
+                onClick={this.goList}
+                style={{
+                  marginLeft: '26%',
+                  marginRight: '15px',
+                  textAlign: 'center',
+                  color: 'white',
+                  backgroundColor: '#0086ff',
+                }}
+              >
+                {backList}
+              </Button>
+              <Button>{lookPayStatus}</Button>
             </div>
           </Modal>
         </div>

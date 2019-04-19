@@ -94,7 +94,11 @@ class NewExpenseType extends React.Component {
         <TabPane
           tab={tab.name}
           key={tab.key}
-          disabled={tab.key !== 'base' && !this.state.expenseType}
+          disabled={
+            tab.key !== 'base' &&
+            (!this.props.match.params.expenseTypeId ||
+              this.props.match.params.expenseTypeId === '0')
+          }
         />
       );
     });

@@ -164,4 +164,40 @@ export default {
         });
     });
   },
+  /**
+   * 查询公司部门信息
+   * @param {*} params
+   */
+  getDepartmentInfo(params) {
+    return new Promise((resolve, reject) => {
+      httpFetch
+        .get(config.mdataUrl + '/api/company/associate/department/query', params)
+        .then(res => {
+          resolve(res);
+        })
+        .catch(err => {
+          errorMessage(err.response);
+          reject(err);
+        });
+    });
+  },
+  /**
+   * 公司关联部门保存
+   * @param {*} companyId 公司id
+   * @param {*} departmentIds 部门id集合
+   */
+  associate(companyId, departmentIds) {
+    return httpFetch.post(
+      `${config.mdataUrl}/api/company/associate/department?companyId=${companyId}`,
+      departmentIds
+    );
+  },
+
+  /**
+   * 更新状态
+   * @param {*} record 公司id
+   */
+  updateAssociate(record) {
+    return httpFetch.put(`${config.mdataUrl}/api/company/associate/department`, record);
+  },
 };

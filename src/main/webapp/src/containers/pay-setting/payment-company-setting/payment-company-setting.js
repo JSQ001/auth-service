@@ -4,12 +4,10 @@ import { messages } from 'utils/utils';
  */
 import React from 'react';
 import { connect } from 'dva';
-
 import { Button, Popover, Popconfirm, message } from 'antd';
 import Table from 'widget/table';
 import SlideFrame from 'widget/slide-frame';
 import SearchArea from 'widget/search-area';
-
 import NewPaymentCompanySetting from './new-payment-company-setting';
 import paymentCompanySettingService from './payment-company-setting.service';
 
@@ -32,15 +30,14 @@ class PaymentCompanySetting extends React.Component {
           title: messages('paymentCompanySetting.priorty'),
           dataIndex: 'priorty',
           key: 'priorty',
-          align: 'left',
           width: 80,
+          align: 'center',
         },
         {
           /*单据公司代码*/
           title: messages('paymentCompanySetting.companyCode'),
           dataIndex: 'companyCode',
           key: 'companyCode',
-          align: 'left',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
@@ -48,7 +45,6 @@ class PaymentCompanySetting extends React.Component {
           /*单据公司名称*/
           title: messages('paymentCompanySetting.companyName'),
           dataIndex: 'companyName',
-          align: 'left',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
@@ -57,7 +53,6 @@ class PaymentCompanySetting extends React.Component {
           title: messages('paymentCompanySetting.ducumentCategory'),
           dataIndex: 'ducumentCategory',
           key: 'ducumentCategory',
-          align: 'left',
           width: 150,
           render: recode => (
             <Popover content={this.state.ducumentCategoryData[recode]}>
@@ -70,7 +65,6 @@ class PaymentCompanySetting extends React.Component {
           title: messages('paymentCompanySetting.ducumentType'),
           dataIndex: 'ducumentType',
           key: 'ducumentType',
-          align: 'left',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
@@ -79,7 +73,6 @@ class PaymentCompanySetting extends React.Component {
           title: messages('paymentCompanySetting.paymentCompanyCode'),
           dataIndex: 'paymentCompanyCode',
           key: 'paymentCompanyCode',
-          align: 'left',
           width: 150,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
@@ -88,7 +81,6 @@ class PaymentCompanySetting extends React.Component {
           title: messages('paymentCompanySetting.paymentCompanyName'),
           dataIndex: 'paymentCompanyName',
           key: 'paymentCompanyName',
-          align: 'left',
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
       ],

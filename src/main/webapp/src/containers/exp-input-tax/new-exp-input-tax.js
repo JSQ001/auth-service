@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { Component } from 'react';
 import SearchArea from 'widget/search-area';
 import config from 'config';
@@ -20,9 +21,6 @@ const style = {
   lineHeight: '50px',
   padding: '0 60px',
 };
-
-// let checkedAll = false;
-// let indeterminate = true;
 
 class NewExpInputTax extends Component {
   constructor(props) {
@@ -120,6 +118,7 @@ class NewExpInputTax extends Component {
       type: props.match.params.transferType, // 上一页面选择的业务大类，是否视同销售和转出
       page: 0,
       size: 10,
+      saveLoading: false,
       pagination: {
         showSizeChanger: true,
         showQuickJumper: true,
@@ -134,9 +133,11 @@ class NewExpInputTax extends Component {
       dataSources: [],
       splitModalVisible: false, // 分摊模态框是否可见
       splitParams: {},
-      checkListLength: [], // 模拟表格全选，计量选中的数量，决定头check样式
       checkedAll: false,
-      indeterminate: true,
+      indeterminate: false,
+      selectedRows: [],
+      amountTotal: 0, // 报账金额
+      turnAmountTotal: 0, // 转出税额
     };
   }
 
@@ -199,10 +200,14 @@ class NewExpInputTax extends Component {
       },
       {
         title: this.$t('common.happened.date'),
-        dataIndex: 'reportDate',
+        dataIndex: 'transferDate',
         align: 'center',
         render: value => {
-          return <Popover content={value}>{value}</Popover>;
+          return (
+            <Popover content={moment(value).format('YYYY-MM-DD')}>
+              {moment(value).format('YYYY-MM-DD')}
+            </Popover>
+          );
         },
         width: 120,
       },
@@ -300,7 +305,7 @@ class NewExpInputTax extends Component {
 
   // 获取数据源 flag:决定是否要loading状态
   getDataSources = flag => {
-    const { page, size, searchParams, expInputTaxId } = this.state;
+    const { page, size, searchParams, expInputTaxId, selectedRows, pagination } = this.state;
     let { checkedAll } = this.state;
     if (flag) this.setState({ loading: true });
     const params = {
@@ -314,51 +319,67 @@ class NewExpInputTax extends Component {
       .getExpenseLine(params)
       .then(res => {
         const dataSources = res.data;
+        pagination.total = Number(res.headers['x-total-count']) || 0;
         dataSources.forEach(item => {
-          checkedAll = item.selectFlag === 'N' ? false : checkedAll;
+          const row = selectedRows.find(o => o.expReportLineId === item.expReportLineId);
+          if (row) {
+            // eslint-disable-next-line no-param-reassign
+            item.selectFlag = row.selectFlag;
+            if (item.expInputForReportDistDTOS && item.expInputForReportDistDTOS.length) {
+              item.expInputForReportDistDTOS.forEach(line => {
+                const model = row.expInputForReportDistDTOS.find(
+                  o => o.expReportDistId === line.expReportDistId
+                );
+                if (model) {
+                  // eslint-disable-next-line no-param-reassign
+                  line.selectFlag = model.selectFlag;
+                }
+              });
+            }
+          } else {
+            selectedRows.push({
+              ...item,
+              expReportLineId: item.expReportLineId,
+              selectFlag: checkedAll ? 'Y' : item.selectFlag,
+              ableAmount: item.ableAmount,
+              baseAmount: checkedAll ? item.ableAmount : item.baseAmount,
+              reportAmount: item.reportAmount,
+              expInputForReportDistDTOS: item.expInputForReportDistDTOS.map(o => ({
+                ...o,
+                expReportDistId: o.expReportDistId,
+                selectFlag: checkedAll ? 'Y' : o.selectFlag,
+              })),
+            });
+            // eslint-disable-next-line no-param-reassign
+            item.selectFlag = checkedAll ? 'Y' : item.selectFlag;
+            // eslint-disable-next-line no-param-reassign
+            item.baseAmount = checkedAll ? item.ableAmount : item.baseAmount;
+          }
         });
+
         this.setState({
           dataSources,
           loading: false,
           checkedAll,
+          pagination,
         });
       })
       .catch(err => {
         message.error(err.response.data.message);
       });
-
-    // service
-    //   .getHeaderSources(params)
-    //   .then(res => {
-    //     pagination.total = Number(res.headers['x-total-count']);
-    //     console.log(res.data);
-    //     res.data.forEach(item => {
-    //         checkedAll = item.selectFlag === 'N' ? false : checkedAll;
-    //     });
-    //     this.setState({
-    //       dataSources: res.data,
-    //       pagination,
-    //       loading: false,
-    //       searchParams: {},
-    //       checkedAll,
-    //     });
-    //   })
-    //   .catch(err => {
-    //     message.error(err.response.data.message);
-    //   });
   };
 
   // 渲染alert，显示勾选数据的amount
-  renderAlertMsg = data => {
-    const { type } = this.state;
+  renderAlertMsg = () => {
+    const { type, selectedRows } = this.state;
     const { match } = this.props;
-    if (data instanceof Array) {
+    if (selectedRows instanceof Array) {
       let sumReportAmount = 0;
       let sumBaseAmount = 0;
       let num = 0;
       const title =
         type === 'FOR_SALE' ? `${this.$t('tax.sale.amount')}` : `${this.$t('tax.turnOut.tax')}`; // '视同销售金额' : '转出税额';
-      data.forEach(item => {
+      selectedRows.forEach(item => {
         const temp = { ...item };
         temp.reportAmount = temp.reportAmount || 0;
         temp.baseAmount = temp.baseAmount || 0;
@@ -414,98 +435,113 @@ class NewExpInputTax extends Component {
   };
 
   // 勾选所有或取消所有---现在的保存接口是勾选一行即时触发
-  // 此处应考虑是否循环执行保存接口或者请后台再添加一个可用于多值存储
   selectAll = e => {
-    let { checkListLength, dataSources, checkedAll, indeterminate } = this.state;
-    indeterminate = false;
-    checkedAll = e.target.checked;
-    const flag = e.target.checked === true ? 'Y' : 'N';
-    checkListLength = e.target.checked === true ? dataSources : [];
-    dataSources = dataSources.map(item => {
-      const tempItem = { ...item };
-      tempItem.selectFlag = flag;
-      tempItem.baseAmount = tempItem.ableAmount;
-      if (
-        tempItem.expInputForReportDistDTOS &&
-        tempItem.expInputForReportDistDTOS instanceof Array &&
-        tempItem.expInputForReportDistDTOS.length > 0
-      ) {
-        tempItem.expInputForReportDistDTOS = tempItem.expInputForReportDistDTOS.map(value => {
-          const tempValue = { ...value };
-          tempValue.selectFlag = flag;
-          return tempValue;
+    const { dataSources, selectedRows } = this.state;
+    let { checkedAll, indeterminate } = this.state;
+
+    dataSources.forEach(item => {
+      const row = selectedRows.find(o => o.expReportLineId === item.expReportLineId);
+      if (row) {
+        row.baseAmount = e.target.checked ? item.ableAmount : 0;
+        row.selectFlag = e.target.checked ? 'Y' : 'N';
+      }
+      if (item.expInputForReportDistDTOS && item.expInputForReportDistDTOS.length) {
+        // eslint-disable-next-line no-param-reassign
+        item.expInputForReportDistDTOS.forEach((value, i) => {
+          // eslint-disable-next-line no-param-reassign
+          value.selectFlag = e.target.checked ? 'Y' : 'N';
+          row.expInputForReportDistDTOS[i].selectFlag = e.target.checked ? 'Y' : 'N';
         });
       }
-      return tempItem;
+      // eslint-disable-next-line no-param-reassign
+      item.baseAmount = e.target.checked ? item.ableAmount : 0;
+      // eslint-disable-next-line no-param-reassign
+      item.selectFlag = e.target.checked ? 'Y' : 'N';
     });
-    this.setState({ dataSources, checkListLength, checkedAll, indeterminate }, () => {
-      this.saveSplitValue(dataSources, true);
-    });
+
+    if (e.target.checked) {
+      if (dataSources.some(o => o.selectFlag === 'N' || !o.selectFlag)) {
+        checkedAll = false;
+        indeterminate = true;
+      } else {
+        checkedAll = true;
+        indeterminate = false;
+      }
+    } else {
+      checkedAll = false;
+      indeterminate = false;
+    }
+
+    this.setState({ dataSources, checkedAll, indeterminate, selectedRows });
   };
 
   // 勾选单行-计算数额-checkbox
   calculateAmount = (e, record, index) => {
-    const { dataSources, checkListLength } = this.state;
-    const temp = { ...record };
-    temp.expInputForReportDistDTOS = temp.expInputForReportDistDTOS || [];
-    switch (temp.selectFlag) {
-      case 'N':
-      case 'P':
-        dataSources[index].selectFlag = 'Y';
-        temp.selectFlag = 'Y';
-        temp.expInputForReportDistDTOS = temp.expInputForReportDistDTOS.map(item => {
-          const tempItem = { ...item };
-          tempItem.selectFlag = 'Y';
-          return tempItem;
-        });
-        dataSources[index].baseAmount = dataSources[index].ableAmount;
-        break;
-      case 'Y':
-        dataSources[index].selectFlag = 'N';
-        dataSources[index].baseAmount = 0;
-        temp.selectFlag = 'N';
-        temp.expInputForReportDistDTOS = temp.expInputForReportDistDTOS.map(item => {
-          const tempItem = { ...item };
-          tempItem.selectFlag = 'N';
-          return tempItem;
-        });
-        break;
-      default:
-        break;
+    const { dataSources, selectedRows } = this.state;
+    let { checkedAll, indeterminate } = this.state;
+    const data = dataSources[index];
+    const row = selectedRows.find(o => o.expReportLineId === data.expReportLineId);
+    if (data.selectFlag === 'N' || data.selectFlag === 'P' || !data.selectFlag) {
+      row.selectFlag = 'Y';
+      data.selectFlag = 'Y';
+
+      data.expInputForReportDistDTOS.forEach((value, i) => {
+        // eslint-disable-next-line no-param-reassign
+        value.selectFlag = 'Y';
+        row.expInputForReportDistDTOS[i].selectFlag = 'Y';
+      });
+      data.baseAmount = data.ableAmount;
+      row.baseAmount = data.ableAmount;
+      if (dataSources.some(o => o.selectFlag === 'N' || !o.selectFlag)) {
+        indeterminate = true;
+        checkedAll = false;
+      } else {
+        indeterminate = false;
+        checkedAll = true;
+      }
+    } else if (data.selectFlag === 'Y') {
+      data.selectFlag = 'N';
+      data.baseAmount = 0;
+      row.selectFlag = 'N';
+      row.baseAmount = 0;
+
+      data.expInputForReportDistDTOS.forEach((value, i) => {
+        // eslint-disable-next-line no-param-reassign
+        value.selectFlag = 'N';
+        row.expInputForReportDistDTOS[i].selectFlag = 'Y';
+      });
+
+      if (dataSources.some(o => o.selectFlag === 'Y')) {
+        indeterminate = true;
+        checkedAll = false;
+      } else {
+        indeterminate = false;
+        checkedAll = false;
+      }
     }
 
-    // 实现模拟全选
-    if (e.target.checked === true) {
-      checkListLength[index] = dataSources[index];
-    } else checkListLength[index] = null;
-    checkListLength.forEach((value, key) => {
-      if (value === null) {
-        checkListLength.splice(key, 1);
-      }
-    });
-    let { checkedAll, indeterminate } = this.state;
-    checkedAll = checkListLength.length === dataSources.length;
-    console.log(checkListLength.length, dataSources.length);
-    if (checkListLength.length === 0 || checkListLength.length === dataSources.length) {
-      indeterminate = false;
-    } else indeterminate = true;
-    // ------
-    this.setState({ dataSources, checkListLength, checkedAll, indeterminate }, () => {
-      // this.saveSplitValue([temp],true);
-    });
+    this.setState({ dataSources, checkedAll, indeterminate, selectedRows });
   };
 
   // 保存行编辑
-  saveSplitValue = (params, flag) => {
-    service
-      .setHeaderSources(params)
-      .then(res => {
-        if (res) message.success('success!');
-        if (flag) this.onCloseModal(true);
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-      });
+  saveSplitValue = (expReportLineId, params, flag) => {
+    const { dataSources } = this.state;
+    const record = dataSources.find(o => o.expReportLineId === expReportLineId);
+    if (flag === 'N') {
+      record.baseAmount = 0;
+    } else if (flag === 'Y') {
+      record.baseAmount = record.ableAmount;
+    } else {
+      record.baseAmount = params.reduce((prev, current) => {
+        if (current.selectFlag === 'Y') {
+          prev += current.baseAmount;
+        }
+        return prev;
+      }, 0);
+    }
+    record.selectFlag = flag;
+    record.expInputForReportDistDTOS = params;
+    this.setState({ dataSources, splitModalVisible: false, splitParams: {} });
   };
 
   // 展示单据编号对应详情
@@ -522,21 +558,16 @@ class NewExpInputTax extends Component {
   };
 
   // 关闭模态框
-  onCloseModal = flag => {
-    this.setState({ splitModalVisible: false, splitParams: {} }, () => {
-      // if (flag) {
-      //   this.getDataSources(true);
-      // }
-    });
+  onCloseModal = () => {
+    this.setState({ splitModalVisible: false, splitParams: {} });
   };
 
   // 分页
   tablePageChange = pagination => {
-    const { page, size } = this.state;
     this.setState(
       {
-        page: pagination.current - 1 || page,
-        size: pagination.pageSize || size,
+        page: pagination.current - 1,
+        size: pagination.pageSize,
       },
       () => {
         this.getDataSources(true);
@@ -547,24 +578,25 @@ class NewExpInputTax extends Component {
   // 下一步
   handleNextStep = () => {
     const { dispatch, match } = this.props;
-    const { dataSources } = this.state;
-    const flag = dataSources.findIndex(item => {
-      return item.selectFlag === 'Y' || item.selectFlag === 'P';
-    });
-    if (flag === -1) {
-      Modal.info({
-        title: this.$t('common.info'),
-        content: this.$t('tax.fee.banks.no.selected'), // '还未选择任何费用行！',
-      });
-      return;
-    }
-    dispatch(
-      routerRedux.push({
-        pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${match.params.id}/${
-          match.params.transferType
-        }`,
+    const { selectedRows } = this.state;
+    this.setState({ saveLoading: true });
+    const data = selectedRows.filter(o => o.expInputForReportDistDTOS.length);
+    service
+      .saveExpenseLine(data)
+      .then(() => {
+        this.setState({ saveLoading: false });
+        dispatch(
+          routerRedux.push({
+            pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${match.params.id}/${
+              match.params.transferType
+            }`,
+          })
+        );
       })
-    );
+      .catch(err => {
+        message.error(err.response.data.message);
+        this.setState({ saveLoading: false });
+      });
   };
 
   // 取消
@@ -581,34 +613,38 @@ class NewExpInputTax extends Component {
     const {
       searchForm,
       dataSources,
-      pagination,
       loading,
       splitModalVisible,
       type,
       splitParams,
+      pagination,
+      saveLoading,
     } = this.state;
     const columns = this.createColumns();
 
     return (
       <div>
-        <SearchArea
-          searchForm={searchForm}
-          submitHandle={this.handleSubmitSearch}
-          clearHandle={this.handleClearSearch}
-          maxLength={4}
-        />
-        <Alert message={this.renderAlertMsg(dataSources)} type="info" showIcon />
-        <Table
-          style={{ margin: '10px 0' }}
-          columns={columns}
-          rowKey={record => record.expReportLineId}
-          size="middle"
-          bordered
-          dataSource={dataSources}
-          loading={loading}
-          pagination={pagination}
-          onChange={this.tablePageChange}
-        />
+        <div style={{ paddingBottom: 64 }}>
+          <SearchArea
+            searchForm={searchForm}
+            submitHandle={this.handleSubmitSearch}
+            clearHandle={this.handleClearSearch}
+            maxLength={4}
+          />
+          <Alert message={this.renderAlertMsg(dataSources)} type="info" showIcon />
+          <Table
+            style={{ margin: '10px 0' }}
+            columns={columns}
+            rowKey={record => record.expReportLineId}
+            size="middle"
+            bordered
+            dataSource={dataSources}
+            loading={loading}
+            pagination={pagination}
+            onChange={this.tablePageChange}
+            scroll={{ x: 700 }}
+          />
+        </div>
         <Modal
           visible={splitModalVisible}
           title={
@@ -630,7 +666,12 @@ class NewExpInputTax extends Component {
           />
         </Modal>
         <div style={style}>
-          <Button type="primary" style={{ marginRight: '20px' }} onClick={this.handleNextStep}>
+          <Button
+            loading={saveLoading}
+            type="primary"
+            style={{ marginRight: '20px' }}
+            onClick={this.handleNextStep}
+          >
             {/* 下一步 */}
             {this.$t('acp.next')}
           </Button>

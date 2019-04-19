@@ -193,28 +193,25 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.RefundBillCode' } /*退款支付流水号*/)}`,
           dataIndex: 'billcode',
-          align: 'left',
           width: 150,
           render: (value, record) => <a onClick={() => this.doRefund(record)}> {value}</a>,
         },
         {
           title: `${this.$t({ id: 'pay.refund.refBillCode' } /*原支付流水号*/)}`,
           dataIndex: 'refBillCode',
-          align: 'left',
           width: 150,
           tooltips: true,
         },
         {
           title: `${this.$t({ id: 'pay.refund.returnDate' } /*退款日期*/)}`,
           dataIndex: 'payDate',
-          align: 'left',
           width: 110,
+          align: 'center',
           render: value => moment(value).format('YYYY-MM-DD'),
         },
         {
           title: `${this.$t({ id: 'pay.refund.partnerCategoryName' } /*退款方*/)}`,
           dataIndex: 'partnerName',
-          align: 'left',
           width: 140,
           render: (value, record) => {
             return (
@@ -238,8 +235,7 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.payeeAccountNumber' } /*退款账号*/)}`,
           dataIndex: 'payeeAccountNumber',
-          align: 'left',
-          width: 150,
+          width: 180,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : ''}</Popover>
@@ -248,21 +244,18 @@ class PayRefund extends React.Component {
         },
         {
           title: `${this.$t({ id: 'pay.refund.returnAmount' } /*本次退款金额*/)}`,
-          align: 'left',
-          width: 100,
+          width: 130,
           dataIndex: 'amount',
           render: this.filterMoney,
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountNumber' } /*收款方账号*/)}`,
-          align: 'left',
-          width: 100,
+          width: 120,
           tooltips: true,
           dataIndex: 'draweeAccountNumber',
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountName' } /*收款方账户名*/)}`,
-          align: 'left',
           width: 100,
           tooltips: true,
           dataIndex: 'draweeAccountName',
@@ -270,7 +263,8 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.status' } /*状态*/)}`,
           dataIndex: 'paymentStatus',
-          align: 'left',
+          width: 100,
+          align: 'center',
           render: value => (
             <Badge status={this.state.status[value].state} text={this.state.status[value].label} />
           ),
@@ -280,7 +274,6 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.RefundBillCode' } /*退款支付流水号*/)}`,
           dataIndex: 'billcode',
-          align: 'left',
           width: 150,
           tooltips: true,
           render: (value, record) => <a onClick={() => this.viewDetail(record)}> {value}</a>,
@@ -288,22 +281,20 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.refBillCode' } /*原支付流水号*/)}`,
           dataIndex: 'refBillCode',
-          align: 'left',
           width: 150,
           tooltips: true,
         },
         {
           title: `${this.$t({ id: 'pay.refund.returnDate' } /*退款日期*/)}`,
           dataIndex: 'payDate',
-          align: 'left',
           width: 110,
           tooltips: true,
+          align: 'center',
           render: value => moment(value).format('YYYY-MM-DD'),
         },
         {
           title: `${this.$t({ id: 'pay.refund.partnerCategoryName' } /*退款方*/)}`,
           dataIndex: 'partnerName',
-          align: 'left',
           width: 140,
           render: (value, record) => {
             return (
@@ -326,8 +317,7 @@ class PayRefund extends React.Component {
         },
         {
           title: `${this.$t({ id: 'pay.refund.payeeAccountNumber' } /*退款账号*/)}`,
-          align: 'left',
-          width: 150,
+          width: 180,
           dataIndex: 'payeeAccountNumber',
           render: desc => (
             <span>
@@ -343,14 +333,12 @@ class PayRefund extends React.Component {
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountNumber' } /*收款方账号*/)}`,
-          align: 'left',
-          width: 100,
+          width: 130,
           tooltips: true,
           dataIndex: 'draweeAccountNumber',
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountName' } /*收款方账户名*/)}`,
-          align: 'left',
           width: 100,
           tooltips: true,
           dataIndex: 'draweeAccountName',
@@ -358,7 +346,8 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.status' } /*状态*/)}`,
           dataIndex: 'paymentStatus',
-          align: 'left',
+          width: 100,
+          align: 'center',
           render: value => (
             <Badge status={this.state.status[value].state} text={this.state.status[value].label} />
           ),
@@ -637,6 +626,7 @@ class PayRefund extends React.Component {
             dataSource={unRefundData}
             pagination={unRefundPagination}
             loading={loading1}
+            scroll={{ x: 1200 }}
             bordered
             size="middle"
           />
@@ -660,6 +650,7 @@ class PayRefund extends React.Component {
             dataSource={myRefundData}
             pagination={myRefundPagination}
             loading={loading2}
+            scroll={{ x: 1200 }}
             bordered
             size="middle"
           />
@@ -675,6 +666,7 @@ class PayRefund extends React.Component {
       if (value === 'EMPLOYEE') {
         let item = searchForm1[3];
         item.items[1].disabled = false;
+        item.items[1].listType = 'select_returnee';
         item.items[1].listExtraParams['empFlag'] = '1001';
         searchForm1[3] = item;
         this.formRef.setValues({ partnerId: undefined });
@@ -683,7 +675,7 @@ class PayRefund extends React.Component {
       if (value === 'VENDER') {
         let item = searchForm1[3];
         item.items[1].disabled = false;
-        item.items[1].listExtraParams['empFlag'] = '1002';
+        item.items[1].listType = 'select_ven';
         searchForm1[3] = item;
         this.formRef.setValues({ partnerId: undefined });
         this.setState({ searchForm1: searchForm1 });
@@ -705,6 +697,7 @@ class PayRefund extends React.Component {
       if (value === 'EMPLOYEE') {
         let item = searchForm2[3];
         item.items[1].disabled = false;
+        item.items[1].listType = 'select_returnee';
         item.items[1].listExtraParams['empFlag'] = '1001';
         searchForm2[3] = item;
         this.formRef.setValues({ partnerId: undefined });
@@ -713,7 +706,7 @@ class PayRefund extends React.Component {
       if (value === 'VENDER') {
         let item = searchForm2[3];
         item.items[1].disabled = false;
-        item.items[1].listExtraParams['empFlag'] = '1002';
+        item.items[1].listType = 'select_ven';
         searchForm2[3] = item;
         this.formRef.setValues({ partnerId: undefined });
         this.setState({ searchForm2: searchForm2 });
