@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -123,7 +123,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     @Autowired
     private WorkflowControllerImpl workflowClient;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private String applicationName;
 
     @Autowired
@@ -701,7 +701,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     public BudgetCheckResultDTO submit(@LockedObject("documentId") WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {
@@ -976,7 +976,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param status   状态
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     public void updateDocumentStatus(@LockedObject Long headerId, Integer status, String approvalText) {
         ExpenseReportHeader header = this.selectById(headerId);
@@ -1067,7 +1067,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     public String saveInitializeExpReportGeneralLedgerJournalLine(Long reportHeaderId, String accountingDate) {
         ExpenseReportCO reportCO = new ExpenseReportCO();
         //报销单头

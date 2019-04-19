@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.application.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
@@ -108,7 +108,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     @Autowired
     private MapperFacade mapperFacade;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private String applicationName;
 
     //jiu.zhao 预算
@@ -186,7 +186,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      * 费用申请单提交
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     @SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
     public BudgetCheckResultDTO submit(@LockedObject(value = {"documentId"}) WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {

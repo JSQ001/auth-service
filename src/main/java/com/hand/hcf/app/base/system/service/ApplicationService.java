@@ -10,10 +10,10 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,9 +23,6 @@ import java.util.List;
 @Service
 public class ApplicationService extends BaseService<ApplicationMapper, Application> {
 
-
-    @Autowired
-    private DiscoveryClient discoveryClient;
 
     /**
      * 创建应用
@@ -95,7 +92,8 @@ public class ApplicationService extends BaseService<ApplicationMapper, Applicati
                         .orderBy("app_code"))
                 .getRecords();
         if (apps != null && apps.size() > 0) {
-            List<String> services = discoveryClient.getServices();
+            List<String> services = new ArrayList<>();
+
             apps.stream().forEach(a -> {
                 if (services.contains(a.getAppCode())) {
                     a.setStatus(Constants.SERVICE_UP);

@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.contact.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.UserCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
@@ -523,7 +523,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      * @param userDTO
      * @return userDTO
      */
-    @LcnTransaction
+    //@LcnTransaction
     @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public UserDTO upsertUserForControl(UserDTO userDTO, UUID currentUserOID, Long tenantId) {
         CompanyDTO newCompany = companyService.getByCompanyOid(userDTO.getCompanyOid());

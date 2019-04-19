@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
@@ -84,7 +84,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     @Autowired
     private SupplierImplementControllerImpl supplierClient;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private  String applicationName;
 
     @Autowired
@@ -100,7 +100,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     /**
      * 预付款单提交
      */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public Boolean submit(WorkFlowDocumentRefCO workFlowDocumentRef) {
         CashPaymentRequisitionHead head = cashPaymentRequisitionHeadMapper.selectById(workFlowDocumentRef.getDocumentId());
@@ -893,7 +893,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     }
 
     /*根据单据oid更改单据状态*/
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public void updateDocumentStatusByOid(String oid, int status, Long userId, Boolean isWorkflow) {
         /*CashPaymentRequisitionHeaderCO dto = selectByOid(oid);
@@ -928,7 +928,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         return ;
     }
 
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     /*修改预付款单据状态, 工作流监听事件消息*/
     public void updateDocumentStatus(int status, Long headId, String approvalRemark, Long userId) {
@@ -977,7 +977,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         cashPaymentRequisitionHeadMapper.updateById(head);
     }
 
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     @Deprecated
     /*修改预付款单据状态*/
@@ -1174,7 +1174,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
      * @param userId
      * @param dataHead
      */
-    @LcnTransaction
+    //@LcnTransaction
 //    @Transactional(rollbackFor = Exception.class)
     private void createToApplication(List<CashPaymentRequisitionLine> lines, Long userId, CashPaymentRequisitionHead dataHead) {
         List<PrepaymentRequisitionReleaseCO> requisitionReleases = new ArrayList<>();
@@ -1421,7 +1421,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     /*
      工作流审批通过     推送单据到支付模块
      * */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public boolean pushToPayment(CashPaymentRequisitionHead header) {
 
@@ -1483,7 +1483,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 
     /*推送单据到支付模块
      * */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     @Deprecated
     public boolean pushToPayment_bak(Long headId) {
@@ -1645,7 +1645,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 
 
     //预付款单关联合同
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public Boolean toContract(CashPaymentRequisitionHead head, String type, Boolean isWorkflow) {
         /*List<CashPaymentRequisitionLine> lines = cashPaymentRequisitionLineService.selectList(

@@ -5,7 +5,7 @@ package com.hand.hcf.app.prepayment.workflow;
  * 用于监听工作流的事件，主要是用于工作流审批后，相应的更新单据的状态
  */
 
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
@@ -20,7 +20,7 @@ public class WorkflowEventConsumer  {
     @Autowired
     private CashPaymentRequisitionHeadService cashPaymentRequisitionHeadService;
 
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
         Long documentId = approvalNoticeCO.getDocumentId();
