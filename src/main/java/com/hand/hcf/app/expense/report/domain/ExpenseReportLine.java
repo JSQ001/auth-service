@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @TableName("exp_report_line")
-public class ExpenseReportLine extends Domain {
+public class ExpenseReportLine extends Domain{
 
     /**
      * 对公报账头ID
@@ -223,5 +223,9 @@ public class ExpenseReportLine extends Domain {
      */
     @TableField(exist = false)
     private Boolean entryMode;
-
+    /**
+     * 费用图标
+     */
+    @TableField(exist = false)
+    private String iconUrl;
 }

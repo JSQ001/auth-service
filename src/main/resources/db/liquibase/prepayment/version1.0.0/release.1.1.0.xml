@@ -9,4 +9,21 @@
     <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
     <property name="amount" value="decimal(20,2)"/>
 
+    <changeSet id="201904121616001" author="xue.han">
+        <dropNotNullConstraint tableName="csh_payment_requisition_head" columnName="description" columnDataType="varchar(2000)" />
+    </changeSet>
+    
+    <changeSet id="201904160012001" author="xue.han">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="req_in" type="tinyint" defaultValue="0" remarks="是否从申请单创建">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904181102001" author="shouting.cheng">
+        <addColumn tableName="csh_payment_requisition_head">
+            <column name="ref_document_id" type="bigint" remarks="关联申请id（申请单主动关联预付款单）"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

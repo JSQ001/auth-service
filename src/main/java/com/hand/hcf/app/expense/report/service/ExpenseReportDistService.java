@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * @remark
  */
 @Service
-public class ExpenseReportDistService extends BaseService<ExpenseReportDistMapper,ExpenseReportDist> {
+public class ExpenseReportDistService extends BaseService<ExpenseReportDistMapper,ExpenseReportDist>{
 
     @Autowired
     private ExpenseReportTaxDistService expenseReportTaxDistService;
@@ -313,7 +313,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                 expenseReportDist.setFunctionAmount(OperationUtil.sum(expenseReportDist.getFunctionAmount(),expenseReportDist.getTaxDistFunctionAmount()));
             }
         }
-        insertOrUpdateAllColumn(expenseReportDist);
+        insert(expenseReportDist);
         resetExpenseReportTaxDist(expenseReportDist,line,expTaxDist);
         return true;
     }
@@ -452,21 +452,25 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
             expenseReportDistDTO.setCompanyName(company.getName());
             expenseReportDistDTO.setDepartmentName(department.getName());
             String auditFlag = expenseReportDistDTO.getAuditFlag();
-            if (auditFlag.equals("N")){
-                auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVING);
-            }else{
-                auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVED);
+            if (auditFlag != null) {
+                if (auditFlag.equals("N")){
+                    auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVING);
+                }else{
+                    auditFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_APPROVED);
+                }
+                expenseReportDistDTO.setAuditFlag(auditFlag);
             }
-            expenseReportDistDTO.setAuditFlag(auditFlag);
             String reverseFlag = expenseReportDistDTO.getReverseFlag();
-            if (reverseFlag.equals("N")){
-                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_REVERSE);
-            }else if(reverseFlag.equals("Y")){
-                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_REVERSED);
-            }else {
-                reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_APPROVE);
+            if (reverseFlag != null) {
+                if (reverseFlag.equals("N")){
+                    reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_REVERSE);
+                }else if(reverseFlag.equals("Y")){
+                    reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_REVERSED);
+                }else {
+                    reverseFlag = messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_NOT_APPROVE);
+                }
+                expenseReportDistDTO.setReverseFlag(reverseFlag);
             }
-            expenseReportDistDTO.setReverseFlag(reverseFlag);
         }
         return  reportDistDTOList;
     }

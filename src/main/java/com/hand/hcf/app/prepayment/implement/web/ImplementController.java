@@ -15,6 +15,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -119,12 +120,13 @@ public class ImplementController {
     }
 
     /*
-     *根据合同编号查询预付款单头行信息--合同模块需要的接口
+     *根据合同ID查询预付款单头行信息--合同模块需要的接口
      * */
-//    @GetMapping("/get/by/contract/number")
-    public List<CashPaymentParamCO> listPrepaymentByContractNumber(@RequestParam(required = false) String number) {
+    //@GetMapping("/get/by/contract/number")
+
+    public List<CashPaymentParamCO> listPrepaymentByContractId(@RequestParam(required = false) Long contractId) {
         List<CashPaymentParamCO> list = new ArrayList<>();
-        List<CashPaymentParamCO> cashPaymentParamDTOS = cashPaymentRequisitionHeadService.getByContractNumber(number);
+        List<CashPaymentParamCO> cashPaymentParamDTOS = cashPaymentRequisitionHeadService.getByContractId(contractId);
         return mapper.map(cashPaymentParamDTOS, list.getClass());
     }
 
@@ -191,8 +193,70 @@ public class ImplementController {
         return lineDTOS;
     }
 
+    /**
+     * 根据单据头ID提交预付款单
+     *
+     * @param requisitionHeaderId
+     * @param status
+     * @return
+     */
+    public Boolean submitCashPaymentRequisition(@RequestParam(value = "requisitionHeaderId") Long requisitionHeaderId,
+                                                @RequestParam(value = "status") Integer status) {
+        return cashPaymentRequisitionHeadService.submitCashPaymentRequisitionByRequisitionNumber(requisitionHeaderId, status);
+    }
+
+    /**
+     * 更新单据状态
+     *
+     * @param requisitionHeaderId
+     * @param status
+     * @return
+     */
+    public Boolean updateCashPaymentRequisitionStatus(@RequestParam(value = "requisitionHeaderId") Long requisitionHeaderId,
+                                                      @RequestParam(value = "status") Integer status) {
+        return cashPaymentRequisitionHeadService.updateCashPaymentRequisitionStatus(requisitionHeaderId, status);
+    }
+
+    /**
+     * 根据申请单头ID获取关联的预付款单头
+     *
+     * @param applicationHeadId
+     * @return
+     */
+
+    public CashPaymentRequisitionHeaderCO getCashPaymentRequisitionHeaderByApplicationHeaderId(
+            @RequestParam(value = "applicationHeadId") Long applicationHeadId) {
+        CashPaymentRequisitionHead head = cashPaymentRequisitionHeadService
+                .getCashPaymentRequisitionHeaderByApplicationHeaderId(applicationHeadId);
+        if (head == null) {
+            return null;
+        } else {
+            return mapper.map(head, CashPaymentRequisitionHeaderCO.class);
+        }
+    }
+
     public String getFormTypeNameByFormTypeId(@RequestParam("id") Long id) {
         CashPayRequisitionType requisitionType = cashSobPayReqTypeService.selectById(id);
         return requisitionType != null ? requisitionType.getTypeName() : null;
+    }
+
+
+
+    /**
+     * 根据费用申请单头id ，查询从费用申请单详情页面新建的预付款单行
+     * @param refDocumentId
+     * @param page
+     * @param size
+     * @return
+     */
+//    @GetMapping(value = "/api/implement/prepayment/query/prepayment/line/by/refDocumentId")
+
+    public Page<CashPaymentRequisitionLineCO> pagePrepaymentLineByRefDocumentId(@RequestParam Long refDocumentId,
+                                                                         @RequestParam(value = "page", required = false,defaultValue = "0") int page,
+                                                                         @RequestParam(value = "size", required = false,defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page mybatisPage = PageUtil.getPage(pageable);
+        Page<CashPaymentRequisitionLineCO> result = cashPaymentRequisitionHeadService.pagePrepaymentLineByRefDocumentId(refDocumentId,mybatisPage);
+        return result;
     }
 }

@@ -19,6 +19,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ExpInputTaxLineDTO extends ExpInputTaxLine {
 
+    /**
+     * 原报账单头id
+     */
+    private Long expReportHeaderId;
 
     private String documentNumber;
 

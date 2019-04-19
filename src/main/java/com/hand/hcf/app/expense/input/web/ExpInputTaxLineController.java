@@ -63,7 +63,7 @@ public class ExpInputTaxLineController {
     public ResponseEntity insertOrUpdateHeader(@RequestBody List<ExpInputForReportLineDTO> expInputForReportLineDTOs) {
         return ResponseEntity.ok(expInputTaxLineService.insertOrUpdateLine(expInputForReportLineDTOs));
     }
-    @GetMapping("/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity deleteById(@RequestParam(value = "id") Long id) {
         return ResponseEntity.ok(expInputTaxLineService.delete(id));
     }

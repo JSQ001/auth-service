@@ -4,15 +4,19 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
+import com.hand.hcf.app.core.domain.ExportConfig;
+import com.hand.hcf.app.core.util.DateUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.application.domain.ApplicationHeader;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.application.web.dto.*;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.dto.DocumentLineDTO;
-import com.hand.hcf.app.core.domain.ExportConfig;
-import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.core.util.PageUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +43,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/expense/application")
+@Api(tags = "费用申请单")
 public class ApplicationDocumentController {
 
     @Autowired
@@ -154,6 +159,7 @@ public class ApplicationDocumentController {
                                           @RequestParam(value = "remarks", required = false) String remarks,
                                           @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
                                           @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                          @RequestParam(required = false,defaultValue = "false") Boolean editor,
                                           Pageable pageable){
 
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
@@ -173,7 +179,8 @@ public class ApplicationDocumentController {
                 currencyCode,
                 remarks,
                 employeeId,
-                closedFlag);
+                closedFlag,
+                editor);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
 
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
@@ -209,6 +216,14 @@ public class ApplicationDocumentController {
         return ResponseEntity.ok(service.createLine(dto));
     }
 
+    @ApiOperation(value = "根据行id复制一行数据", notes = "根据行id复制一行数据 开发:毛仕林")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "lineId", value = "复制的行id", dataType = "Long")
+    })
+    @GetMapping("/copyLineByLineId")
+    public ResponseEntity copyLineByLineId(@RequestParam("lineId") Long lineId) {
+        return  ResponseEntity.ok(service.copyLine(lineId));
+    }
     /**
      * 更新行
      *
@@ -553,7 +568,7 @@ public class ApplicationDocumentController {
 
         Page page = PageUtil.getPage(pageable);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
-        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS = service.queryReleaseByReport(reportNumber,page);
+        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS = service.queryReleaseByReport(reportNumber,releaseCode,expenseTypeName,page);
         return new ResponseEntity(applicationHeaderWebDTOS,totalHeader,HttpStatus.OK);
     }
 }

@@ -30,4 +30,9 @@ public class DynamicFieldDTO {
      * 动态字段值
      */
     private String fieldValue;
+    /**
+     * 控件类型（对应前端）
+     * 日期 时间 月份 参与人等
+     */
+    private Integer fieldTypeId;
 }

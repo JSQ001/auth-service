@@ -19,4 +19,8 @@ public interface CashPaymentRequisitionLineMapper extends BaseMapper<CashPayment
                                                                       @Param("ew") Wrapper<CashPaymentRequisitionLine> eq,
                                                                       @Param("documentNumber") String documentNumber,
                                                                       @Param("typeId") Long typeId);
+
+
+    List<CashPaymentRequisitionLine> queryCashPaymentReqLinePara(RowBounds rowBounds,
+                                                                 @Param("contractId") Long contractId);
 }

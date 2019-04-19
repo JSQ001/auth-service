@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.common.co.ExpensePaymentScheduleCO;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportPaymentSchedule;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
 
@@ -23,4 +24,7 @@ public interface ExpenseReportPaymentScheduleMapper extends BaseMapper<ExpenseRe
 
     List<ExpensePaymentScheduleCO> getExpPublicReportScheduleByIds(@Param("ids") List<Long> ids);
 
+    List<ExpensePaymentScheduleCO> getExpPublicReportScheduleByContractHeaderId(@Param("ids") List<Long> ids, RowBounds rowBounds);
+
+    List<ExpenseReportPaymentSchedule> getExpPublicReportScheduleByHeaderId(@Param("id")  Long id);
 }

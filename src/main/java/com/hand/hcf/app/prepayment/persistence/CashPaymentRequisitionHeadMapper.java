@@ -3,6 +3,7 @@ package com.hand.hcf.app.prepayment.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
+import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
 import com.hand.hcf.app.prepayment.web.dto.CurrencyDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
@@ -30,5 +31,14 @@ public interface CashPaymentRequisitionHeadMapper extends BaseMapper<CashPayment
      * @return
      */
     List<CashPaymentRequisitionHead> listHeaderAndTypName(RowBounds rowBounds, @Param("ew") Wrapper<CashPaymentRequisitionHead> wrapper);
+
+    /**
+     * 根据费用申请单头id ，查询从费用申请单详情页面新建的预付款单行
+     * @param refDocumentId
+     * @param rowBounds
+     * @return
+     */
+    List<CashPaymentRequisitionLine> pagePrepaymentLineByRefDocumentId(@Param("refDocumentId") Long refDocumentId,
+                                                                       RowBounds rowBounds);
 
 }

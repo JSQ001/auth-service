@@ -85,7 +85,6 @@ public class CashPaymentRequisitionHead extends Domain {
     /**
      * 说明
      */
-    @NotNull
     private String description;
     /**
      * 附件数
@@ -167,6 +166,12 @@ public class CashPaymentRequisitionHead extends Domain {
     @TableField("submit_date")
     private ZonedDateTime submitDate;
 
+
+    //是否从申请单创建(是：true，不是：false)
+    @TableField("req_in")
+    private Boolean reqIn;
+
+
     @TableField("check_by")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long checkBy;
@@ -204,4 +209,10 @@ public class CashPaymentRequisitionHead extends Domain {
     //本位币币种
     @TableField(exist = false)
     private String currency;
+
+    /**
+     * 关联申请id（申请单主动关联预付款单）
+     */
+    @TableField(value = "ref_document_id")
+    private Long refDocumentId;
 }

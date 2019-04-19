@@ -76,7 +76,7 @@ public class ExpenseAdjustHeaderController {
         return ResponseEntity.ok(headerService.submit(workFlowDocumentRef));
     }
 
-    /**
+    /**api/expense/application/header
      * 创建费用调整单单据头
      * @param dto
      * @return

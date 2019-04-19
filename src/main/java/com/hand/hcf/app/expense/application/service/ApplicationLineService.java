@@ -378,5 +378,9 @@ public class ApplicationLineService extends BaseService<ApplicationLineMapper, A
        return this.selectList(new EntityWrapper<ApplicationLine>().eq("header_id", headerId).orderBy("id",true));
     }
 
+    public ApplicationLine getLineByLineId(Long lineId){
+        return baseMapper.selectById(lineId);
+    }
+
 
 }
