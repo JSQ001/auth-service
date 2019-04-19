@@ -2,7 +2,7 @@ package com.hand.hcf.app.expense.adjust.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustLine;
@@ -71,13 +71,13 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
     @Autowired
     private WorkflowControllerImpl workflowInterface;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private  String applicationName;
     /**
      * 费用调整单提交
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     public Boolean submit(WorkFlowDocumentRefCO workFlowDocumentRef) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
         // 1当存在多线程修改单据状态，可能导致最终单据的状态不正确。

@@ -5,7 +5,7 @@ package com.hand.hcf.app.expense.common.workflow;
  * 用于监听工作流的事件，主要是用于工作流审批后，相应的更新单据的状态
  */
 
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustHeaderService;
 import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
@@ -32,7 +32,7 @@ public class ExpenseWorkflowEventConsumer {
     @Autowired
     private ExpenseReportHeaderService expenseReportHeaderService;
 
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
         Long documentId = approvalNoticeCO.getDocumentId();

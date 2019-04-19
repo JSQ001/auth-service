@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.service;
 
 import com.hand.hcf.app.common.co.WorkflowMessageCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.common.event.WorkflowCustomRemoteEvent;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.domain.WorkFlowEventLogs;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.bus.event.AckRemoteApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -24,7 +22,7 @@ import java.util.UUID;
 @Component
 public class WorkFlowEventPublishService {
     private static final Logger logger = LoggerFactory.getLogger(WorkFlowEventPublishService.class);
-    @Value("${spring.application.name}")
+
     private String applicationName;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -98,7 +96,7 @@ public class WorkFlowEventPublishService {
             workflowMessage.setApprovalText(workFlowDocumentRef.getRejectReason());//审批意见
             workflowMessage.setRemark("单据编号:" + workFlowDocumentRef.getDocumentNumber());
         }
-        WorkflowCustomRemoteEvent event = new WorkflowCustomRemoteEvent(this,applicationName+":**", workFlowDocumentRef.getDestinationService(), workflowMessage);
+        /*WorkflowCustomRemoteEvent event = new WorkflowCustomRemoteEvent(this,applicationName+":**", workFlowDocumentRef.getDestinationService(), workflowMessage);
         logger.info("[发布工作流事件消息]：" + event);
         workFlowDocumentRef.setEventId(event.getId());
         workFlowDocumentRef.setEventConfirmStatus(false);
@@ -111,12 +109,12 @@ public class WorkFlowEventPublishService {
         eventLogs.setEventConfirmStatus(false);
         workflowEventLogsService.createSysWorkflowEventLogs(eventLogs);
         workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
-        applicationEventPublisher.publishEvent(event);
+        applicationEventPublisher.publishEvent(event);*/
     }
     /**
      * @param event 监听 对应的消费端是否正常消费了该条消息，并将结果更新到工作流关联的单据表上去
      */
-    @EventListener(AckRemoteApplicationEvent.class)
+    /*@EventListener(AckRemoteApplicationEvent.class)
     public void ackConsumerConfirm(AckRemoteApplicationEvent event){
         // 相当于回调函数，在消息成功被消费时调用，event里能取得actId: event.getAckId 和 消息的ID：event.getId()
         logger.info("[发布工作流事件消息]消费者端: "+event.getOriginService()+", 服务消费确认 ackId :" + event.getAckId());
@@ -135,5 +133,5 @@ public class WorkFlowEventPublishService {
                 workflowApproversService.deleteByRefIdAndNodeOid(workFlowDocumentRef.getId(), workFlowDocumentRef.getApprovalNodeOid());
             }
         }
-    }
+    }*/
 }

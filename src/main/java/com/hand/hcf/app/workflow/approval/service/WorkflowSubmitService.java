@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.approval.service;
 
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
@@ -54,7 +54,7 @@ public class WorkflowSubmitService {
      * @param approvalDocumentCO
      * @return
      */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResultCO submitWorkflow(ApprovalDocumentCO approvalDocumentCO) {
         WorkFlowDocumentRef workFlowDocumentRef = toDomain(approvalDocumentCO);

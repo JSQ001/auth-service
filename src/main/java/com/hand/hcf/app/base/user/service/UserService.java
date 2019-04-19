@@ -10,7 +10,6 @@ import com.hand.hcf.app.base.system.constant.Constants;
 import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.system.domain.PasswordHistory;
 import com.hand.hcf.app.base.system.enums.DeviceVerificationStatus;
-import com.hand.hcf.app.base.system.service.MailService;
 import com.hand.hcf.app.base.system.service.MessageTranslationService;
 import com.hand.hcf.app.base.system.service.PasswordHistoryService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
@@ -88,9 +87,6 @@ public class UserService extends BaseService<UserMapper, User> {
 
     @Autowired
     MessageTranslationService messageTranslationService;
-
-    @Autowired
-    MailService mailService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -777,12 +773,12 @@ public class UserService extends BaseService<UserMapper, User> {
         Long tenantId = null;
         for (User user : userList) {
             int noticeType = getNoticeType();
-            if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
+           /* if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
             }
             if (AccountConstants.NOTICE_TYPE_EMAIL_AND_MOBILE == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
-            }
+            }*/
             if (tenantId == null) {
                 tenantId = user.getTenantId();
             }

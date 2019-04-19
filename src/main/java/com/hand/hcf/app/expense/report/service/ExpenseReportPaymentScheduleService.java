@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
@@ -63,7 +63,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     public boolean deleteExpenseReportPaymentScheduleByHeaderId(Long headerId){
         //jiu.zhao 支付
         //paymentService.deleteWriteOffForDocumentMessage(ExpenseDocumentTypeEnum.PUBLIC_REPORT.name(),headerId,null);
@@ -75,7 +75,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
      * @param id
      * @return
      */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteExpenseReportPaymentSchedule(Long id){
         ExpenseReportPaymentSchedule expenseReportPaymentSchedule = selectById(id);

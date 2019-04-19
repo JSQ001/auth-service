@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
@@ -88,7 +88,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
     @Autowired
     private WorkflowControllerImpl workflowClient;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private String applicationName;
 
     /**
@@ -708,7 +708,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
      * 差旅申请单提交
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     @SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
     public Boolean submit(@LockedObject(value = {"documentId"}) WorkFlowDocumentRefCO workFlowDocumentRef) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
