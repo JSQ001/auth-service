@@ -1,14 +1,17 @@
 package com.hand.hcf.app.mdata.department.service;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
+import com.hand.hcf.app.mdata.department.dto.DepartmentPositionImportDTO;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentPositionMapper;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
@@ -35,7 +38,6 @@ import java.util.concurrent.FutureTask;
 
 @Service
 @Transactional
-@CacheConfig(cacheNames = {CacheConstants.DEPARTMENT_POSITION})
 public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMapper, DepartmentPosition> {
 
     private final Logger log = LoggerFactory.getLogger(DepartmentPositionService.class);
@@ -290,5 +292,54 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         departmentPositionCO.setPositionCode(departmentPosition.getPositionCode());
         departmentPositionCO.setPositionName(departmentPosition.getPositionName());
         return departmentPositionCO;
+    }
+
+    public String importDepartmentPosition(List<DepartmentPositionImportDTO> departmentPositionImportDTOS) {
+        StringBuilder errorMessage = new StringBuilder();
+        departmentPositionImportDTOS.forEach(item -> {
+            if (TypeConversionUtils.isEmpty(item.getTenantId()) || TypeConversionUtils.isEmpty(item.getPositionCode())
+            || TypeConversionUtils.isEmpty(item.getPositionName()) || TypeConversionUtils.isEmpty(item.getEnabled())) {
+                errorMessage.append("必输字段为空！");
+            } else {
+                List<DepartmentPosition> temp = departmentPositionMapper.selectList(
+                        new EntityWrapper<DepartmentPosition>()
+                                .eq("position_code", item.getPositionCode())
+                                .eq("tenant_id", item.getTenantId())
+                );
+                // 无数据做插入操作
+                if (temp.size() == 0) {
+                    DepartmentPosition departmentPosition = new DepartmentPosition();
+                    BeanUtils.copyProperties(item, departmentPosition);
+                    departmentPosition.setTenantId(TypeConversionUtils.parseLong(item.getTenantId()));
+                    if ("Y".equals(item.getEnabled())) {
+                        departmentPosition.setEnabled(true);
+                    } else if ("N".equals(item.getEnabled())) {
+                        departmentPosition.setEnabled(false);
+                    }
+                    departmentPositionMapper.insert(departmentPosition);
+                } else if (temp.size() == 1) {
+                    DepartmentPosition departmentPosition = temp.get(0);
+                    departmentPosition.setPositionName(item.getPositionName());
+                    if ("Y".equals(item.getEnabled())) {
+                        departmentPosition.setEnabled(true);
+                    } else if ("N".equals(item.getEnabled())) {
+                        departmentPosition.setEnabled(false);
+                    }
+                    if (TypeConversionUtils.isNotEmpty(item.getDeleted())) {
+                        if ("Y".equals(item.getDeleted())) {
+                            departmentPosition.setDeleted(true);
+                        } else if ("N".equals(item.getDeleted())) {
+                            departmentPosition.setDeleted(false);
+                        }
+                    }
+                    this.updateById(departmentPosition);
+                }
+            }
+        });
+        if ("".equals(errorMessage.toString())) {
+            return "导入成功!";
+        } else {
+            return errorMessage.toString();
+        }
     }
 }

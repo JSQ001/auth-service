@@ -140,14 +140,14 @@ public class ContactBankAccountResource {
     @Timed
     @RequestMapping(value = "/contact/bank/account/user/id", method = RequestMethod.GET)
     public ResponseEntity<List<ContactBankAccountDTO>> getContactBankAccountByUserId(@RequestParam Long userID,
-                                                                                     @RequestParam(value = "enable", required = false) Boolean enable,
-                                                                                     Pageable pageable) throws URISyntaxException {
+                                                                                      @RequestParam(value = "enable", required = false) Boolean enable,
+                                                                                      Pageable pageable) throws URISyntaxException {
 
         UserDTO user = contactService.getUserDTOByUserId(userID);
         if(user==null){
             return ResponseEntity.ok(new ArrayList<>());
         }
-        Page page= PageUtil.getPage(pageable);
+        Page page=PageUtil.getPage(pageable);
         List<ContactBankAccountDTO> lists = contactBankAccountService.getContactBankAccountByUserOid(user.getUserOid(), enable, page);
         return new ResponseEntity<>(lists, PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
@@ -155,7 +155,7 @@ public class ContactBankAccountResource {
     @Timed
     @RequestMapping(value = "/contact/bank/account/my", method = RequestMethod.GET)
     public ResponseEntity<List<ContactBankAccountDTO>> getMyContactBankAccountByUserOid(@RequestParam(value = "enable", required = false) Boolean enable, Pageable pageable) throws URISyntaxException {
-        Page page= PageUtil.getPage(pageable);
+        Page page=PageUtil.getPage(pageable);
         List<ContactBankAccountDTO> lists = contactBankAccountService.getContactBankAccountByUserOid(OrgInformationUtil.getCurrentUserOid(), enable, page);
         return new ResponseEntity<>(lists, PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
@@ -191,7 +191,14 @@ public class ContactBankAccountResource {
                                             Pageable pageable) throws IOException {
         Page page = PageUtil.getPage(pageable);
         page.setSize(10000);
-        List<UUID> userOids = contactService.listUserDTOByCondition(keyword == null ? null : keyword.trim(),OrgInformationUtil.getCurrentTenantId(),departmentOid,status,corporationOid,null,page)
+        List<UUID> userOids = contactService.listUserDTOByCondition(keyword == null ? null : keyword.trim(),
+                OrgInformationUtil.getCurrentTenantId(),
+                departmentOid,status,
+                corporationOid,null,
+                null,
+                null,
+                null,
+                page)
                 .stream().map(item -> item.getUserOid()).collect(Collectors.toList());
         List<ContactBankAccount> contactBankAccounts = contactBankAccountService.selectList(new EntityWrapper<ContactBankAccount>().in("user_oid",userOids));
         int total = contactBankAccounts.size();

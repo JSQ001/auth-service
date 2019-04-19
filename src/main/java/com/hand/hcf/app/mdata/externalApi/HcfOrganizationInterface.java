@@ -39,8 +39,13 @@ public class HcfOrganizationInterface {
     @Autowired
     private UserRoleControllerImpl userRoleClient;
 
-    public OrderNumberCO getVendorCode (String companyCode, Long tenantId) {
-        return orgClient.getOrderNumberCO("VENDER",companyCode,"");
+    //jiancheng.li TODO
+   /* @Autowired
+    private LovClient lovClient;*/
+
+    public OrderNumberCO getVendorCode(String companyCode, Long tenantId) {
+        return orgClient.getOrderNumberCO("VENDER", companyCode, "");
+
     }
 
     public SysCodeValueCO getValueBySysCodeAndValue(String code, String value) {
@@ -51,8 +56,8 @@ public class HcfOrganizationInterface {
         return orgClient.listAllSysCodeValueByCode(code);
     }
 
-//jiancheng.li TODO
-    /*public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+
+/*    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
         return orgClient.listEnabledSysCodeValueByCode(code);
     }*/
 
@@ -141,4 +146,11 @@ public class HcfOrganizationInterface {
     public Boolean dataAuthHasUsed(Long id) {
         return userRoleClient.dataAuthHasUsed(id);
     }
+
+    //jiancheng.li TODO
+  /*  public Object getObjectByLovCode(String code,
+                                     String id){
+       return lovClient.getObjectByLovCode(code,id);
+    }*/
+
 }

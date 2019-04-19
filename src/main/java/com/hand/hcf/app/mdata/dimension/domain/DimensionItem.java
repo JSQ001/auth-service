@@ -39,4 +39,8 @@ public class DimensionItem extends DomainI18nEnable {
     @TableField(value = "all_company_flag")
     private Boolean allCompanyFlag;
 
+    /**
+     * 维值是否来自项目申请单（true 是，false 不是）
+     */
+    private Boolean fromProjectFlag;
 }

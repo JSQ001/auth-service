@@ -253,16 +253,19 @@ public class DepartmentGroupResource {
 
     @Timed
     @RequestMapping(value = "/selectDept/enabled",method = RequestMethod.GET)
-    public ResponseEntity<List<DepartmentGroupDepartmentCO>> selectDeptEnabled(@RequestParam(value = "deptCode",required = false) String deptCode,
-                                                                               @RequestParam(value = "leafEnable",required = false)Boolean leafEnable,
-                                                                               @RequestParam(value = "departmentCode",required = false) String departmentCode,
-                                                                               @RequestParam(value = "name",required = false) String name, Pageable pageable){
+    public ResponseEntity<List<DepartmentGroupDepartmentCO>> selectDeptEnabled(
+            @RequestParam(value = "deptCode",required = false) String deptCode,
+            @RequestParam(value = "leafEnable",required = false)Boolean leafEnable,
+            @RequestParam(value = "departmentCode",required = false) String departmentCode,
+            @RequestParam(value = "departmentId",required = false) Long departmentId,
+            @RequestParam(value = "name",required = false) String name, Pageable pageable){
 
         Page page = PageUtil.getPage(pageable);
         if (!StringUtils.hasText(deptCode) && StringUtils.hasText(departmentCode)){
             deptCode = departmentCode;
         }
-        Page<DepartmentGroupDepartmentCO> result = departmentGroupService.selectDepartmentByTenantIdAndEnabled(OrgInformationUtil.getCurrentTenantId(),deptCode,name,leafEnable,page);
+        Page<DepartmentGroupDepartmentCO> result = departmentGroupService.selectDepartmentByTenantIdAndEnabled(
+                OrgInformationUtil.getCurrentTenantId(),deptCode,name,leafEnable, departmentId,page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link","/api/DepartmentGroup/selectDept/enabled");

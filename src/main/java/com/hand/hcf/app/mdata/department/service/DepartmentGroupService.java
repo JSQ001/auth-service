@@ -40,11 +40,6 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/*import com.hand.hcf.app.client.org.SysCodeValueCO;*/
-/*
-import com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO;
-*/
-
 @Service
 public class DepartmentGroupService extends ServiceImpl<DepartmentGroupMapper, DepartmentGroup> {
 
@@ -470,9 +465,16 @@ public class DepartmentGroupService extends ServiceImpl<DepartmentGroupMapper, D
 
 
     //条件查询租户下已经启用的部门，code排序
-    public Page<DepartmentGroupDepartmentCO> selectDepartmentByTenantIdAndEnabled(Long tenantId, String deptCode, String name, Boolean leafEnable, Page<DepartmentGroupDepartmentCO> page) {
+    public Page<DepartmentGroupDepartmentCO> selectDepartmentByTenantIdAndEnabled(
+            Long tenantId,
+            String deptCode,
+            String name,
+            Boolean leafEnable,
+            Long departmentId,
+            Page<DepartmentGroupDepartmentCO> page) {
         page.getRecords();
-        List<DepartmentGroupDepartmentCO> list = departmentGroupMapper.selectDepartmentByTenantIdAndEnabled(tenantId, deptCode, name, leafEnable, page);
+        List<DepartmentGroupDepartmentCO> list = departmentGroupMapper.selectDepartmentByTenantIdAndEnabled(
+                tenantId, deptCode, name, leafEnable, departmentId, page);
         list.stream().map(u -> {
             Department one = departmentService.selectOnebyId(u.getDepartmentId());
             if (one != null) {

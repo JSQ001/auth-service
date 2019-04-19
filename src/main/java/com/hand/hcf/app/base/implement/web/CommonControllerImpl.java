@@ -12,9 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class CommonControllerImpl {
@@ -130,6 +129,17 @@ public class CommonControllerImpl {
     public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
         List<SysCodeValueCO> sysCodeValueCOS = listSysValueByCodeConditionByEnabled(code, true);
         return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
+    }
+
+    public Map<String, String> mapAllSysCodeValueByCode(String code) {
+        Map<String, String> map = new HashMap(16);
+        List<SysCodeValueCO> sysCodeValueCOS = listSysValueByCodeConditionByEnabled(code, (Boolean)null);
+        if (null == sysCodeValueCOS) {
+            return map;
+        } else {
+            map = (Map) sysCodeValueCOS.stream().collect(Collectors.toMap(SysCodeValueCO::getValue, SysCodeValueCO::getName));
+            return map;
+        }
     }
 
 

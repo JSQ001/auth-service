@@ -4,6 +4,7 @@ package com.hand.hcf.app.mdata.location.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
@@ -20,7 +21,7 @@ import java.util.List;
  * Created by vance on 2017/3/5.
  */
 @Service
-public class LocationDetailService {
+public class LocationDetailService extends BaseService<LocationDetailMapper, LocationDetail> {
 
 
 

@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
@@ -65,7 +66,8 @@ public class Contact extends Domain {
 
     // qi.yang 2017.04.01 add
     @TableField(strategy = FieldStrategy.IGNORED)
-    private String rank;    //职级
+    @JsonProperty(value = "rank")
+    private String rankInfo;    //职级
 
     @TableField(strategy = FieldStrategy.IGNORED)
     private UUID directManager;//直属领导工号
@@ -146,7 +148,7 @@ public class Contact extends Domain {
             ", duty='" + duty + '\'' +
             ", employeeType='" + employeeType + '\'' +
             ", entryDate=" + entryDate +
-            ", rank='" + rank + '\'' +
+            ", rank='" + rankInfo + '\'' +
             '}';
     }
 }

@@ -6,6 +6,8 @@ import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.mdata.parameter.domain.Parameter;
 import com.hand.hcf.app.mdata.parameter.domain.ParameterModuleStatus;
 import com.hand.hcf.app.mdata.parameter.domain.ParameterSetting;
 import com.hand.hcf.app.mdata.parameter.domain.ParameterValues;
@@ -42,6 +44,8 @@ public class ParameterSettingService extends BaseService<ParameterSettingMapper,
 
     @Autowired
     private ParameterModuleStatusService parameterModuleStatusService;
+    @Autowired
+    private ParameterService parameterService;
 
     public List<ParameterSettingDTO> pageParameterSettingByLevelAndCond(ParameterLevel parameterLevel,
                                                                         Long tenantId,
@@ -160,5 +164,43 @@ public class ParameterSettingService extends BaseService<ParameterSettingMapper,
         if(CollectionUtils.isNotEmpty(parameterSettingList)){
             this.insertBatch(parameterSettingList);
         }
+    }
+
+    /**
+     * 获取租户级参数的值
+     * @param tenantId 租户id
+     * @param parameterCode 参数代码
+     * @return value
+     */
+    public String getTenantParameterValueByCode(Long tenantId, String parameterCode){
+        Parameter parameter = parameterService.selectOne(new EntityWrapper<Parameter>()
+                .eq("parameter_code", parameterCode));
+        if (parameter == null) {
+            return null;
+        }
+        ParameterSetting parameterSetting = this.selectOne(new EntityWrapper<ParameterSetting>()
+                .eq("parameter_id", parameter.getId())
+                .eq("parameter_level", ParameterLevel.TENANT)
+                .eq("tenant_id", tenantId));
+        if (null == parameterSetting){
+            return null;
+        }
+        String result = null;
+        if(ParameterValueTypeEnum.VALUE_LIST.equals(parameter.getParameterValueType())){
+            result = parameterValuesService.selectById(parameterSetting.getParameterValueId()).getParameterValueCode();
+        }else if(ParameterValueTypeEnum.API.equals(parameter.getParameterValueType())){
+            Page basicPage = PageUtil.getPage(0, 1);
+            basicPage.setSearchCount(Boolean.FALSE);
+            List<BasicCO> values = parameterValuesService.pageParameterValuesByCond(parameterCode,
+                    parameterSetting.getParameterValueId(), parameterSetting.getParameterLevel(),
+                    null, null,
+                    null,null, basicPage);
+            if(values != null && values.size() > 0){
+                result = values.get(0).getCode();
+            }
+        }else{
+            result = parameterSetting.getParameterValueId();
+        }
+        return result;
     }
 }

@@ -99,7 +99,15 @@ public class ContactCardResource {
                                         Pageable pageable) throws IOException {
         Page page = PageUtil.getPage(pageable);
         page.setSize(10000);
-        List<UUID> userOids = contactService.listUserDTOByCondition(keyword == null ? null : keyword.trim(),OrgInformationUtil.getCurrentTenantId(),departmentOid,status,corporationOid,null,page)
+        List<UUID> userOids = contactService.listUserDTOByCondition(keyword == null ? null : keyword.trim(),
+                OrgInformationUtil.getCurrentTenantId(),
+                departmentOid,
+                status,
+                corporationOid,null,
+                null,
+                null,
+                null,
+                page)
                 .stream().map(item -> item.getUserOid()).collect(Collectors.toList());
         List<ContactCard> contactCards = contactCardService.selectList(new EntityWrapper<ContactCard>().in("user_oid",userOids));
         int total = contactCards.size();

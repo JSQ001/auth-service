@@ -20,7 +20,7 @@ import java.io.Serializable;
 @ApiModel("责任中心lLov对象")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponsibilityLov implements Serializable {
+public class ResponsibilityLovDTO implements Serializable {
     @ApiModelProperty("id")
     private Long id;
     @ApiModelProperty("责任中心代码")
@@ -29,4 +29,6 @@ public class ResponsibilityLov implements Serializable {
     private String name;
     @ApiModelProperty("责任中心代码-名称")
     private String codeName;
+    @ApiModelProperty("启用状态")
+    private Boolean enabled;
 }

@@ -210,12 +210,20 @@
 
 
     <select id="selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage" resultMap="VendorInfoMap">
-        SELECT avi.* FROM ven_vendor_info avi
-        INNER JOIN ven_relation_vendor_company arvc ON arvc.vendor_info_id = avi.id
-        AND arvc.company_id = #{companyId}
-        AND arvc.enabled = 1
-        WHERE
-        avi.tenant_id = #{tenantId}
+        SELECT avi.*
+        FROM ven_vendor_info avi
+        WHERE EXISTS (
+            SELECT 1
+            FROM ven_relation_vendor_company arvc
+            WHERE arvc.vendor_info_id = avi.id
+            <if test="companyId != null">
+                AND arvc.company_id = #{companyId}
+            </if>
+            <if test="enabled != null">
+                AND arvc.enabled = #{enabled}
+            </if>
+        )
+        AND avi.tenant_id = #{tenantId}
         AND avi.status = 1001
         AND avi.vendor_status = 'APPROVED'
         <if test="venNickname != null and venNickname != ''">
@@ -343,5 +351,24 @@
         <if test="source == 'BILL' || source == 'COMPANY'">
             AND ((vvi.source IN ('BILL', 'COMPANY') AND vvi.company_oid = #{companyOid}) OR (vvi.source = 'TENANT'))
         </if>
+    </select>
+
+    <select id="selectVendorInfosByTaxIdNum" resultMap="VendorInfoMap">
+        SELECT id,
+               tenant_id,
+               company_oid,
+               vendor_id,
+               vendor_name,
+               vendor_code,
+               status,
+               vendor_type_id,
+               source,
+               import_code,
+               industry_id,
+               vendor_level_id,
+               legal_representative,
+               tax_id
+        FROM ven_vendor_info avi
+        WHERE avi.tenant_id = #{tenantId} AND avi.tax_id = #{taxIdNumber}
     </select>
 </mapper>

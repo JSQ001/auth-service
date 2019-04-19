@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.location.domain.Location;
+import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.domain.LocationLevel;
 
 import com.hand.hcf.app.mdata.location.domain.LocationLevelAssign;
@@ -37,6 +40,12 @@ public class LocationLevelService extends BaseService<LocationLevelMapper, Locat
 
     @Autowired
     private LocationLevelAssignService locationLevelAssignService;
+
+    @Autowired
+    private LocationDetailService locationDetailService;
+
+    @Autowired
+    private LocationService locationService;
 
     /**
      * 条件查询地点级别信息
@@ -119,21 +128,38 @@ public class LocationLevelService extends BaseService<LocationLevelMapper, Locat
     }
 
     /**
-     * 根据地点id或级别ID或级别代码获取地点级别
-     * @param locationId
+     * 根据地点详情id或级别ID或级别代码获取地点级别
+     * @param locationDetailId
      * @param levelId
      * @param levelCode
      * @return
      */
-    public LocationLevel getLocationLevelByLocationIdOrLevelIdOrLevelCode(Long locationId, Long levelId, String levelCode) {
+    public LocationLevel getLocationLevelByLocationIdOrLevelIdOrLevelCode(Long locationDetailId,
+                                                                          Long levelId,
+                                                                          String levelCode) {
         List<Long> levelIds = null;
-        if (locationId != null) {
+        if (locationDetailId != null) {
+            LocationDetail locationDetail = locationDetailService.selectById(locationDetailId);
+            if (locationDetail == null) {
+                return null;
+            }
+            List<Location> locations = locationService.getLocationByCode(
+                    locationDetail.getCode(),
+                    OrgInformationUtil.getCurrentLanguage()
+            );
+            if (locations.isEmpty()) {
+                return null;
+            }
             levelIds = locationLevelAssignService.selectList(
-                    new EntityWrapper<LocationLevelAssign>().eq("location_id", locationId)
+                    new EntityWrapper<LocationLevelAssign>().eq("location_id", locations.get(0).getId())
             ).stream().map(LocationLevelAssign::getLevelId).collect(Collectors.toList());
+        }
+        if (levelIds != null && levelIds.size() == 0) {
+            return null;
         }
         LocationLevel locationLevel = this.selectOne(
                 new EntityWrapper<LocationLevel>()
+                        .eq("set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
                         .in(!CollectionUtils.isEmpty(levelIds), "id", levelIds)
                         .eq(levelId != null, "id", levelId)
                         .eq(levelCode != null, "code", levelCode)

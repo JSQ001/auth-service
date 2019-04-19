@@ -66,35 +66,45 @@
         ORDER BY enabled DESC, rs.responsibility_center_code
     </select>
     <select id="pageByCompanyAndDepartment"
-            resultType="com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLov">
+            resultType="com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO">
         select
             temp.id,
             temp.code,
             temp.name,
             concat(concat(temp.code,
             '-'),
-            temp.name) as codeName
+            temp.name) as codeName,
+            temp.enabled
             from
             (select
             t.id ,
             t.code ,
-            t.name
+            t.name,
+            t.enabled
             from
             (SELECT
             rc.id,
             rc.responsibility_center_code as code,
-            rc.responsibility_center_name as name
+            rc.responsibility_center_name as name,
+            rc.enabled
             FROM
             sys_department_sob_res    a,
             sys_department_res_center b,
             sys_res_center            rc,
+            sys_res_center_company_assign rcca,
             sys_company c
             WHERE
             a.id = b.relation_id
             AND a.all_responsibility_center = 'N'
             AND b.responsibility_center_id = rc.id
             AND rc.deleted = 0
-            AND rc.enabled = 1
+        <if test="enabled != null">
+            AND rc.enabled = #{enabled}
+        </if>
+            and rcca.deleted = 0
+            and rcca.enabled = 1
+            and rcca.responsibility_center_id = rc.id
+            and rcca.company_id = c.id
             and c.id = #{companyId}
             and    (
             (
@@ -108,7 +118,8 @@
             SELECT
             rc.id,
             rc.responsibility_center_code as code,
-            rc.responsibility_center_name as name
+            rc.responsibility_center_name as name,
+            rc.enabled
             FROM
             sys_department_sob_res    a,
             sys_res_center_company_assign rcca,
@@ -117,7 +128,9 @@
             WHERE
             a.all_responsibility_center = 'Y'
             AND rc.deleted = 0
-            AND rc.enabled = 1
+        <if test="enabled != null">
+            AND rc.enabled = #{enabled}
+        </if>
             and c.id = #{companyId}
             and rcca.deleted = 0
             and rcca.enabled = 1
@@ -135,19 +148,63 @@
             group by
             t.id,
             t.code,
-            t.name         ) temp
+            t.name, t.enabled        ) temp
         <trim prefix="WHERE" prefixOverrides="AND | OR" >
             <if test="code != null and code !=''">
                 AND temp.code like concat(concat('%', #{code}), '%')
             </if>
             <if test="name != null and name != ''">
-                AND tmp.name like concat(concat('%', #{name}), '%')
+                AND temp.name like concat(concat('%', #{name}), '%')
             </if>
             <if test="id != null">
-                AND tmp.id  = #{id}
+                AND temp.id  = #{id}
+            </if>
+            <if test="codeName != null and codeName != ''">
+                AND (
+                temp.name like concat(concat('%', #{codeName}), '%')
+                or temp.code like concat(concat('%', #{codeName}), '%')
+                )
             </if>
         </trim>
         order by temp.code
+    </select>
+    <select id="listCompanyDepartmentDefaultCenter"
+            resultType="com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityDefaultDTO">
+        SELECT
+            a.company_id,
+            rc.id,
+            rc.responsibility_center_code as responsibilityCenterCode,
+            rc.responsibility_center_name as responsibilityCenterName,
+            concat(concat(rc.responsibility_center_code,
+            '-'),
+            responsibility_center_name) as codeName,
+            a.department_id
+        FROM
+            sys_department_sob_res        a,
+            sys_res_center_company_assign rcca,
+            sys_res_center                rc,
+            sys_company                   c
+        WHERE
+            rc.deleted = 0
+            AND rc.enabled = 1
+            AND c.id = #{companyId}
+            AND rcca.deleted = 0
+            AND rcca.enabled = 1
+            AND (
+                (
+                    c.set_of_books_id = a.set_of_books_id
+                    AND a.company_id IS NULL
+                )
+                OR                c.id = a.company_id
+            )
+            AND a.department_id in
+            <foreach collection="departmentIds" item="departmentId" open="(" close=")" separator=",">
+                #{departmentId}
+            </foreach>
+            AND rcca.company_id = c.id
+            AND rcca.responsibility_center_id = rc.id
+            and a.default_responsibility_center is not null
+            and a.default_responsibility_center = rc.id
     </select>
 
 </mapper>

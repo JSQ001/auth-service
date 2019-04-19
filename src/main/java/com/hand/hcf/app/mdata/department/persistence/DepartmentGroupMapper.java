@@ -130,6 +130,7 @@ public interface DepartmentGroupMapper extends BaseMapper<DepartmentGroup> {
             @Param("deptCode") String deptCode,
             @Param("name") String name,
             @Param("leafEnable") Boolean leafEnable,
+            @Param("departmentId") Long departmentId,
             Pagination page
     );
 

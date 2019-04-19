@@ -32,6 +32,7 @@ import com.hand.hcf.app.mdata.utils.FileUtil;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import io.netty.util.internal.StringUtil;
+import liquibase.util.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections4.CollectionUtils;
@@ -91,18 +92,57 @@ public class BankInfoService extends BaseService<BankInfoMapper,BankInfo> {
     private VendorInfoService vendorInfoService;
 
     /**
+     * 根据code获取银行信息
+     * @param bankCode
+     * @return
+     */
+    public BankInfoDTO getBankDataByCode(String bankCode){
+        List<BankInfo> seleteList = baseMapper.selectList(new EntityWrapper<BankInfo>()
+                .eq("bank_code",bankCode)
+        );
+        return mapper.map(seleteList.get(0),BankInfoDTO.class);
+    }
+
+    /**
+     * 根据code集合获取银行信息
+     * @param bankCodeList
+     * @return
+     */
+    public List<BankInfoDTO> getBankDataByNumList(List<String> bankCodeList){
+        StringBuilder sb = new StringBuilder("bank_code in (");
+        bankCodeList.stream().forEach(s->{
+            sb.append(s).append(',');
+        });
+        sb.append("0)");
+        List<BankInfo> bankInfos =  baseMapper.selectList(new EntityWrapper<BankInfo>()
+                .where(sb.toString())
+        );
+
+        List<BankInfoDTO> out =new ArrayList<>();
+        BankInfoDTO init = new BankInfoDTO();
+        init.setBankCode(null);
+        init.setBankBranchName("无此银行");
+        out.add(init);
+        bankInfos.stream().forEach(s->{
+            out.add(mapper.map(s,BankInfoDTO.class));
+        });
+        return out;
+    }
+
+
+    /**
      * 根据银行分行名称分页查询银行信息
      * @param keyword：文本
      * @param pageable：分页对象
      * @return
      */
-    public Page<BankInfoDTO> findBankInfosByKeyword(boolean isAll, Long tenantId, Long systemTenantId, String keyword, String bankCode, String bankBranchName, String openAccount, String countryCode, String cityCode, String swiftCode, Boolean enable, Pageable pageable) {
+    public Page<BankInfoDTO> findBankInfosByKeyword(String bankHead,boolean isAll, Long tenantId, Long systemTenantId, String keyword, String bankCode, String bankBranchName, String openAccount, String countryCode, String cityCode, String swiftCode, Boolean enable, Pageable pageable) {
         if(!StringUtils.isEmpty(keyword)){
             keyword = keyword.replace(" ","");
         }
         Page<BankInfoDTO> myBatisPage = PageUtil.getPage(pageable);
-        List<BankInfo> results = bankInfoMapper.findByTenantIdAndBankBranchNameContaining(isAll, tenantId, systemTenantId, keyword, bankCode, countryCode, openAccount, cityCode, swiftCode, enable, myBatisPage);
-        return myBatisPage.setRecords(mapper.mapAsList(results, BankInfoDTO.class));
+        List<BankInfo> results = bankInfoMapper.findByTenantIdAndBankBranchNameContaining(bankHead,isAll, tenantId, systemTenantId, keyword, bankCode, countryCode, openAccount, cityCode, swiftCode, enable, myBatisPage);
+        return myBatisPage.setRecords(mapper.mapAsList(results,BankInfoDTO.class));
     }
 
     public BankInfo findOneByTenantIdAndBankCode(Long tenantId,String bankCode){
@@ -187,7 +227,7 @@ public class BankInfoService extends BaseService<BankInfoMapper,BankInfo> {
         // 验证分行名称是否存在
         if (isValidationBankName) {
             if (checkBankBranchNameIsExist(bankInfoDTO.getTenantId(), bankInfoDTO.getBankBranchName())) {
-                throw new BizException("240015");
+                throw new BizException(RespCode.BANK_BRANCH_AND_CODE_EXIST);
             }
         }
         // 验证银行代码是否存在
@@ -253,7 +293,7 @@ public class BankInfoService extends BaseService<BankInfoMapper,BankInfo> {
                                                                     String cityCode,
                                                                     String swiftCode,
                                                                     Boolean enable, Pagination page) {
-        return bankInfoMapper.findByTenantIdAndBankBranchNameContaining(isAll, tenantId, systemTenantId, keyword, bankCode, countryCode, openAccount, cityCode, swiftCode, enable, page);
+        return bankInfoMapper.findByTenantIdAndBankBranchNameContaining(null,isAll, tenantId, systemTenantId, keyword, bankCode, countryCode, openAccount, cityCode, swiftCode, enable, page);
     }
     /**
      * 根据租户id、分行名称查询是否存在

@@ -56,6 +56,8 @@ public class BankInfoController {
 
     @Autowired
     private MessageService messageService;
+
+
     /**
      * @api {put} /api/bank/infos/custom/create 创建租户自定义银行信息
      * @apiGroup BankInfo
@@ -74,26 +76,26 @@ public class BankInfoController {
      * @apiSuccess {String}     bankInfoDTO.cityCode   城市编码
      * @apiSuccess {String}     bankInfoDTO.bankHead   银行头信息
      * @apiSuccess {Long}       bankInfoDTO.tenantId   租户id 0：为系统银行
-     *@apiSuccessExample {json} Success-Result
-    {
-    "id": "131180",
-    "bankCode": "320314300022",
-    "bankBranchName": "扬中恒丰村镇银行股份有限公司",
-    "bankName": "农村合作银行",
-    "enable": true,
-    "countryCode": "CHN",
-    "bankType": "",
-    "province": "江苏省",
-    "provinceCode": "320000",
-    "city": "镇江市",
-    "cityCode": "321100",
-    "bankHead": "320",
-    "tenantId": "1"
-    }
+     * @apiSuccessExample {json} Success-Result
+     * {
+     * "id": "131180",
+     * "bankCode": "320314300022",
+     * "bankBranchName": "扬中恒丰村镇银行股份有限公司",
+     * "bankName": "农村合作银行",
+     * "enable": true,
+     * "countryCode": "CHN",
+     * "bankType": "",
+     * "province": "江苏省",
+     * "provinceCode": "320000",
+     * "city": "镇江市",
+     * "cityCode": "321100",
+     * "bankHead": "320",
+     * "tenantId": "1"
+     * }
      */
-    @RequestMapping(value = "/custom/create",method = RequestMethod.POST)
-    public ResponseEntity<BankInfoDTO> createCustomBankInfo(@RequestBody BankInfoDTO bankInfoDTO){
-        return ResponseEntity.ok(mapperFacade.map(bankInfoService.addOrUpdateBankInfo(bankInfoDTO,true, OrgInformationUtil.getCurrentTenantId()), BankInfoDTO.class));
+    @RequestMapping(value = "/custom/create", method = RequestMethod.POST)
+    public ResponseEntity<BankInfoDTO> createCustomBankInfo(@RequestBody BankInfoDTO bankInfoDTO) {
+        return ResponseEntity.ok(mapperFacade.map(bankInfoService.addOrUpdateBankInfo(bankInfoDTO, true, OrgInformationUtil.getCurrentTenantId()), BankInfoDTO.class));
     }
 
     /**
@@ -114,26 +116,26 @@ public class BankInfoController {
      * @apiSuccess {String}     bankInfoDTO.cityCode   城市编码
      * @apiSuccess {String}     bankInfoDTO.bankHead   银行头信息
      * @apiSuccess {Long}       bankInfoDTO.tenantId   租户id 0：为系统银行
-     *@apiSuccessExample {json} Success-Result
-    {
-    "id": "131180",
-    "bankCode": "320314300022",
-    "bankBranchName": "扬中恒丰村镇银行股份有限公司",
-    "bankName": "农村合作银行",
-    "enable": true,
-    "countryCode": "CHN",
-    "bankType": "",
-    "province": "江苏省",
-    "provinceCode": "320000",
-    "city": "镇江市",
-    "cityCode": "321100",
-    "bankHead": "320",
-    "tenantId": "1"
-    }
+     * @apiSuccessExample {json} Success-Result
+     * {
+     * "id": "131180",
+     * "bankCode": "320314300022",
+     * "bankBranchName": "扬中恒丰村镇银行股份有限公司",
+     * "bankName": "农村合作银行",
+     * "enable": true,
+     * "countryCode": "CHN",
+     * "bankType": "",
+     * "province": "江苏省",
+     * "provinceCode": "320000",
+     * "city": "镇江市",
+     * "cityCode": "321100",
+     * "bankHead": "320",
+     * "tenantId": "1"
+     * }
      */
-    @RequestMapping(value = "/custom/modify",method = RequestMethod.PUT)
-    public ResponseEntity<BankInfoDTO> modifyCustomBankInfo(@RequestBody BankInfoDTO bankInfoDTO){
-        return ResponseEntity.ok(mapperFacade.map(bankInfoService.addOrUpdateBankInfo(bankInfoDTO,true, OrgInformationUtil.getCurrentTenantId()), BankInfoDTO.class));
+    @RequestMapping(value = "/custom/modify", method = RequestMethod.PUT)
+    public ResponseEntity<BankInfoDTO> modifyCustomBankInfo(@RequestBody BankInfoDTO bankInfoDTO) {
+        return ResponseEntity.ok(mapperFacade.map(bankInfoService.addOrUpdateBankInfo(bankInfoDTO, true, OrgInformationUtil.getCurrentTenantId()), BankInfoDTO.class));
     }
 
     /**
@@ -141,8 +143,8 @@ public class BankInfoController {
      * @apiGroup BankInfo
      * @apiParam {Long} id 银行id
      */
-    @RequestMapping(value = "/custom/remove/{id}",method = RequestMethod.DELETE)
-    public ResponseEntity<Void> removeBankInfo(@PathVariable Long id){
+    @RequestMapping(value = "/custom/remove/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> removeBankInfo(@PathVariable Long id) {
         bankInfoService.removeBankInfo(id, OrgInformationUtil.getCurrentTenantId());
         return ResponseEntity.ok().build();
     }
@@ -169,37 +171,37 @@ public class BankInfoController {
      * @apiSuccess {String}     solrBankInfoDTOs.cityCode   城市编码
      * @apiSuccess {String}     solrBankInfoDTOs.bankHead   银行头信息
      * @apiSuccess {Long}     solrBankInfoDTOs.tenantId   租户id 0：为系统银行
-     *@apiSuccessExample {json} Success-Result
-    [
-    {
-    "id": "131180",
-    "bankCode": "320314300022",
-    "bankBranchName": "扬中恒丰村镇银行股份有限公司",
-    "bankBranchNamePinyin": "扬中恒丰村镇银行股份有限公司",
-    "bankName": "农村合作银行",
-    "enable": true,
-    "countryCode": "CHN",
-    "bankType": "",
-    "province": "江苏省",
-    "provinceCode": "320000",
-    "city": "镇江市",
-    "cityCode": "321100",
-    "bankHead": "320",
-    "tenantId": "0",
-    "_version_": 1590446310892240906,
-    "score": 78.9598
-    }
-    ]
+     * @apiSuccessExample {json} Success-Result
+     * [
+     * {
+     * "id": "131180",
+     * "bankCode": "320314300022",
+     * "bankBranchName": "扬中恒丰村镇银行股份有限公司",
+     * "bankBranchNamePinyin": "扬中恒丰村镇银行股份有限公司",
+     * "bankName": "农村合作银行",
+     * "enable": true,
+     * "countryCode": "CHN",
+     * "bankType": "",
+     * "province": "江苏省",
+     * "provinceCode": "320000",
+     * "city": "镇江市",
+     * "cityCode": "321100",
+     * "bankHead": "320",
+     * "tenantId": "0",
+     * "_version_": 1590446310892240906,
+     * "score": 78.9598
+     * }
+     * ]
      */
-    @RequestMapping(value = "/custom/search",method = RequestMethod.POST)
+    @RequestMapping(value = "/custom/search", method = RequestMethod.POST)
     public ResponseEntity<List<BankInfoDTO>> searchSolrCustomBankInfo(@RequestBody BankInfoDTO bankInfoDTO,
-                                                                      @RequestParam(name = "isAll",required = false,defaultValue = "false") boolean isAll,
+                                                                      @RequestParam(name = "isAll", required = false, defaultValue = "false") boolean isAll,
                                                                       Pageable pageable) throws URISyntaxException {
         bankInfoDTO.setTenantId(OrgInformationUtil.getCurrentTenantId());
-        Page<BankInfoDTO> page = bankInfoService.findBankInfosByKeyword(isAll,bankInfoDTO.getTenantId(),null,bankInfoDTO.getBankBranchName(),
+        Page<BankInfoDTO> page = bankInfoService.findBankInfosByKeyword(null,isAll, bankInfoDTO.getTenantId(), null, bankInfoDTO.getBankBranchName(),
                 bankInfoDTO.getBankCode(), bankInfoDTO.getBankBranchName(), bankInfoDTO.getOpenAccount(), bankInfoDTO.getCountryCode(), bankInfoDTO.getCityCode(), null, null, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/bank/infos/custom/search");
-        return new ResponseEntity(page.getRecords(),headers, HttpStatus.OK);
+        return new ResponseEntity(page.getRecords(), headers, HttpStatus.OK);
     }
 
     /**
@@ -224,30 +226,31 @@ public class BankInfoController {
      * @apiSuccess {String}     solrBankInfoDTOs.cityCode   城市编码
      * @apiSuccess {String}     solrBankInfoDTOs.bankHead   银行头信息
      * @apiSuccess {Long}     solrBankInfoDTOs.tenantId   租户id 0：为系统银行
-     *@apiSuccessExample {json} Success-Result
-    [
-    {
-    "id": "131180",
-    "bankCode": "320314300022",
-    "bankBranchName": "扬中恒丰村镇银行股份有限公司",
-    "bankBranchNamePinyin": "扬中恒丰村镇银行股份有限公司",
-    "bankName": "农村合作银行",
-    "enable": true,
-    "countryCode": "CHN",
-    "bankType": "",
-    "province": "江苏省",
-    "provinceCode": "320000",
-    "city": "镇江市",
-    "cityCode": "321100",
-    "bankHead": "320",
-    "tenantId": "0",
-    "_version_": 1590446310892240906,
-    "score": 78.9598
-    }
-    ]
+     * @apiSuccessExample {json} Success-Result
+     * [
+     * {
+     * "id": "131180",
+     * "bankCode": "320314300022",
+     * "bankBranchName": "扬中恒丰村镇银行股份有限公司",
+     * "bankBranchNamePinyin": "扬中恒丰村镇银行股份有限公司",
+     * "bankName": "农村合作银行",
+     * "enable": true,
+     * "countryCode": "CHN",
+     * "bankType": "",
+     * "province": "江苏省",
+     * "provinceCode": "320000",
+     * "city": "镇江市",
+     * "cityCode": "321100",
+     * "bankHead": "320",
+     * "tenantId": "0",
+     * "_version_": 1590446310892240906,
+     * "score": 78.9598
+     * }
+     * ]
      */
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public ResponseEntity<List<BankInfoDTO>> searchSolrAllBankInfo(@RequestParam(name = "bankBranchName", required = false) String bankBranchName,
+    public ResponseEntity<List<BankInfoDTO>> searchSolrAllBankInfo(@RequestParam(name = "bankHead", required = false) String bankHead,
+                                                                   @RequestParam(name = "bankBranchName", required = false) String bankBranchName,
                                                                    @RequestParam(name = "bankCode", required = false) String bankCode,
                                                                    @RequestParam(name = "openAccount", required = false) String openAccount,
                                                                    @RequestParam(name = "countryCode", required = false) String countryCode,
@@ -256,7 +259,7 @@ public class BankInfoController {
                                                                    @RequestParam(name = "enable", required = false) Boolean enable,
                                                                    @RequestParam(name = "isAll", required = false, defaultValue = "false") Boolean isAll,
                                                                    Pageable pageable) throws URISyntaxException {
-        Page<BankInfoDTO> page = bankInfoService.findBankInfosByKeyword(isAll, OrgInformationUtil.getCurrentTenantId(), 0L, bankBranchName, bankCode, bankBranchName, openAccount, countryCode, cityCode, swiftCode, enable, pageable);
+        Page<BankInfoDTO> page = bankInfoService.findBankInfosByKeyword(bankHead,isAll, OrgInformationUtil.getCurrentTenantId(), 0L, bankBranchName, bankCode, bankBranchName, openAccount, countryCode, cityCode, swiftCode, enable, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/bank/infos/search");
         return new ResponseEntity(page.getRecords(),headers, HttpStatus.OK);
     }
@@ -316,10 +319,10 @@ public class BankInfoController {
                                                             @RequestParam(name = "isSearchGeneral",required = false,defaultValue = "false") boolean isSearchGeneral,
                                                             Pageable pageable) throws URISyntaxException {
         Page<BankInfoDTO> page = null;
-        if(isSearchGeneral){
-            page = bankInfoService.findBankInfosByKeyword(isAll,0L,null,keyword,bankCode,bankBranchName,openAccount,countryCode,cityCode,null,null,pageable);
-        }else{
-            page = bankInfoService.findBankInfosByKeyword(isAll, OrgInformationUtil.getCurrentTenantId(),0L,keyword, bankCode,bankBranchName,openAccount,countryCode,cityCode,null,null,pageable);
+        if (isSearchGeneral) {
+            page = bankInfoService.findBankInfosByKeyword(null,isAll, 0L, null, keyword, bankCode, bankBranchName, openAccount, countryCode, cityCode, null, null, pageable);
+        } else {
+            page = bankInfoService.findBankInfosByKeyword(null,isAll, OrgInformationUtil.getCurrentTenantId(), 0L, keyword, bankCode, bankBranchName, openAccount, countryCode, cityCode, null, null, pageable);
         }
 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/bank/infos?keyword="+(StringUtils.isNotEmpty(keyword)?keyword.replace(" ",""):keyword));
@@ -423,7 +426,7 @@ public class BankInfoController {
                                         @RequestParam(name = "countryCode", required = false) String countryCode,
                                         @RequestParam(name = "openAccount", required = false) String openAccount,
                                         Pageable pageable) throws IOException {
-        Page page = PageUtil.getPage(pageable);
+        com.baomidou.mybatisplus.plugins.Page page = PageUtil.getPage(pageable);
         bankInfoService.findByTenantIdAndBankBranchNameContaining(true, OrgInformationUtil.getCurrentTenantId(), null, bankBranchName, bankCode, countryCode, openAccount, null, null, true, page);
         int total = TypeConversionUtils.parseInt(page.getTotal());
         int threadNumber = total > 100000 ? 8 : 2;
@@ -434,7 +437,7 @@ public class BankInfoController {
             }
 
             @Override
-            public List<BankInfoDTO> queryDataByPage(Page page) {
+            public List<BankInfoDTO> queryDataByPage(com.baomidou.mybatisplus.plugins.Page page) {
                 List<BankInfo> results = bankInfoService.findByTenantIdAndBankBranchNameContaining(true, OrgInformationUtil.getCurrentTenantId(), null, bankBranchName, bankCode, countryCode, openAccount, null, null, true, page);
                 return mapperFacade.mapAsList(results, BankInfoDTO.class);
             }

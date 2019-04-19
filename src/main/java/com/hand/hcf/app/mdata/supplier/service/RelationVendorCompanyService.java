@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class RelationVendorCompanyService extends BaseService<RelationVendorCompanyMapper, RelationVendorCompany> {
+public class RelationVendorCompanyService extends BaseService<RelationVendorCompanyMapper, RelationVendorCompany>  {
 
     @Autowired
     private VendorInfoMapper vendorInfoMapper;
@@ -153,16 +153,14 @@ public class RelationVendorCompanyService extends BaseService<RelationVendorComp
     }
 
     /**
-     * 查询某租户下某供应商尚未分配的公司
-     * @param tenantId
-     * @param vendorInfoId
-     * @param setOfBooksId
-     * @param companyCode
-     * @param companyName
-     * @param page
-     * @return
+     * 查询某租户下（某供应商）尚未分配的公司
+     * 4.12 修改为只能选择该账户所属的公司
+     * @param tenantId            租户id
+     * @param vendorInfoId        供应商id
+     * @return                    公司列表
      */
-    public Page<CompanyCO> selectVendorUnassignedCompany(Long tenantId,Long vendorInfoId,Long setOfBooksId,String companyCode,String companyName,Page page){
+    public Page<CompanyCO> selectVendorUnassignedCompany(Long tenantId, Long vendorInfoId){
+        //查询该供应商目前已分配的公司
         List<Long> existCompanyIds = new ArrayList<>();
         if (vendorInfoId != null) {
             existCompanyIds = this.selectList(
@@ -171,11 +169,32 @@ public class RelationVendorCompanyService extends BaseService<RelationVendorComp
                             .eq(vendorInfoId != null, "vendor_info_id", vendorInfoId)
             ).stream().map(RelationVendorCompany::getCompanyId).collect(Collectors.toList());
         }
-        Page<CompanyCO> companyCOPage = companyService.pageByTenantIdConditionByIgnoreIds(
-                tenantId, setOfBooksId, companyCode, companyName, null, null, existCompanyIds,page);
+        //查询该账户所属公司
+        UUID companyOid = OrgInformationUtil.getCurrentCompanyOid();
+        com.hand.hcf.app.mdata.company.dto.CompanyDTO companyDTO = companyService.getByCompanyOid(companyOid);
+        //如果已分配为本公司则返回空
+        if (!existCompanyIds.isEmpty() && companyDTO.getId().equals(existCompanyIds.get(0))) {
+            return new Page<>();
+        }
+        CompanyCO companyCO = companyDTOToCompanyCO(companyDTO);
+        Page<CompanyCO> companyCOPage = new Page<>();
+        companyCOPage.setRecords(Collections.singletonList(companyCO));
         return companyCOPage;
     }
 
+    /**
+     * 将companyDTO类转换为CompanyCO类
+     * @param companyDTO
+     * @return
+     */
+    private CompanyCO companyDTOToCompanyCO(com.hand.hcf.app.mdata.company.dto.CompanyDTO companyDTO) {
+        if (companyDTO == null) {
+            return null;
+        }
+        CompanyCO dto = new CompanyCO();
+        mapper.map(companyDTO, dto);
+        return dto;
+    }
     /**
      * 查询某租户下 某些 供应商尚未分配的公司
      * @param tenantId

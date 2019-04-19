@@ -38,8 +38,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/*import com.hand.hcf.app.client.org.SysCodeValueCO;*/
-
 @Service
 public class ContactCardService extends BaseService<ContactCardMapper,ContactCard> {
 
@@ -58,8 +56,8 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
        return  selectList(new EntityWrapper<ContactCard>()
         .eq("user_oid",userOid)
         .eq(enabled!=null,"enabled",enabled)
-        .eq(primary!=null,"primary",primary)
-        .orderBy("primary",false)
+        .eq(primary!=null,"primary_flag",primary)
+        .orderBy("primary_flag",false)
         .orderBy("enabled",false)
         .orderBy("last_updated_date",false));
 
@@ -70,7 +68,7 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
         return  selectOne(new EntityWrapper<ContactCard>()
                 .eq("user_oid",userOid)
                 .eq(enabled!=null,"enabled",enabled)
-                .eq(primary!=null,"primary",primary)
+                .eq(primary!=null,"primary_flag",primary)
                 );
 
     }
@@ -90,7 +88,7 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
     public List<ContactCard> findByUserOidIn(List<UUID> userOids, Boolean enabled, Boolean primary){
         return  selectList(new EntityWrapper<ContactCard>()
                 .in("user_oid",userOids)
-                .eq(primary!=null,"primary",primary)
+                .eq(primary!=null,"primary_flag",primary)
                 .eq(enabled!=null,"enabled",enabled));
     }
 
@@ -170,7 +168,7 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
             if (contactCardDTO.getPrimary()) {
                 Optional<ContactCard> defaultContactCard = Optional.ofNullable(getUserContactCard(contactCardDTO.getUserOid(),true,true));
                 if (defaultContactCard.isPresent()) {
-                    defaultContactCard.get().setPrimary(false);
+                    defaultContactCard.get().setPrimaryFlag(false);
                     insertOrUpdate(defaultContactCard.get());
                 }
             } else {
@@ -204,7 +202,7 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
             }
             // 导入
             if(isExcelImport){
-                if(contactCard.getPrimary()){
+                if(contactCard.getPrimaryFlag()){
                     contactCardDTO.setPrimary(true);
                 }
             }else{
@@ -223,13 +221,13 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
                 // 默认证件不是当前修改的证件则修改为不默认
                 if(result.isPresent() && !result.get().getContactCardOid().equals(contactCard.getContactCardOid())){
                     ContactCard oldDefault = result.get();
-                    oldDefault.setPrimary(false);
+                    oldDefault.setPrimaryFlag(false);
                     insertOrUpdate(oldDefault);
                 }
             }
         }
 
-        contactCard.setPrimary(contactCardDTO.getPrimary());
+        contactCard.setPrimaryFlag(contactCardDTO.getPrimary());
         contactCard.setUserOid(contactCardDTO.getUserOid());
         contactCard.setEnabled(contactCardDTO.getEnabled());
         contactCard.setCardType(contactCardDTO.getCardType());
@@ -419,8 +417,8 @@ public class ContactCardService extends BaseService<ContactCardMapper,ContactCar
         contactCardDTO.setLastName(contactCard.getLastName());
         contactCardDTO.setCardExpiredTime(contactCard.getCardExpiredTime());
         contactCardDTO.setCardExpiredTimeStr(contactCard.getCardExpiredTime() == null ? "" : contactCard.getCardExpiredTime().format(DateTimeFormatter.ISO_LOCAL_DATE));
-        contactCardDTO.setPrimary(contactCard.getPrimary());
-        contactCardDTO.setPrimaryStr(contactCard.getPrimary() ? messageService.getMessageDetailByCode(RespCode.SYS_YES) : messageService.getMessageDetailByCode(RespCode.SYS_NO));
+        contactCardDTO.setPrimary(contactCard.getPrimaryFlag());
+        contactCardDTO.setPrimaryStr(contactCard.getPrimaryFlag() ? messageService.getMessageDetailByCode(RespCode.SYS_YES) : messageService.getMessageDetailByCode(RespCode.SYS_NO));
         contactCardDTO.setEnabled(contactCard.getEnabled());
         contactCardDTO.setEnabledStr(contactCard.getEnabled() ? messageService.getMessageDetailByCode(RespCode.SYS_ENABLED) : messageService.getMessageDetailByCode(RespCode.SYS_DISABLED));
         contactCardDTO.setNationality(contactCard.getNationality());

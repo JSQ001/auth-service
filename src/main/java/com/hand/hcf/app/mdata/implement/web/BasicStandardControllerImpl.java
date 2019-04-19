@@ -103,7 +103,7 @@ public class BasicStandardControllerImpl  {
                     .build();
             basicCOS.add(basicCO);
         } else {
-            Page<DepartmentGroupDepartmentDTO> departmentGroupDepartmentDTOS = departmentGroupService.selectDepartmentByTenantIdAndEnabled(filterId, code, name, false, myBatisPage);
+            Page<DepartmentGroupDepartmentDTO> departmentGroupDepartmentDTOS = departmentGroupService.selectDepartmentByTenantIdAndEnabled(filterId, code, name, false, null,  myBatisPage);
             myBatisPage.setTotal(departmentGroupDepartmentDTOS.getTotal());
             departmentGroupDepartmentDTOS.getRecords().forEach(
                     departmentGroupDepartmentDTO -> {

@@ -16,7 +16,7 @@
                        nationality,
                        card_expired_time,
                        nationality_code,
-                       primary,
+                       primary_flag,
                        version_number,
                        deleted,
                        enabled,
@@ -35,7 +35,7 @@
                         t.nationality,
                         t.card_expired_time,
                         t.nationality_code,
-                        t.primary,
+                        t.primary_flag,
                         1,
                         0,
                         t.enabled,
@@ -95,14 +95,14 @@
     </resultMap>
 
     <select id="queryErrorData" resultMap="errorDataMap">
-        select t.row_number AS row_number,
+        select t.row_number AS rowNumber,
         t.error_detail AS error
         FROM sys_contact_card_import t
         WHERE t.batch_number = #{transactionId}
         AND t.error_flag = 1
     </select>
     <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
-        <result column="row_number" property="index"/>
+        <result column="rowNumber" property="index"/>
         <result column="error" property="error"/>
     </resultMap>
 

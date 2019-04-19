@@ -172,6 +172,7 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
     List<VendorInfo> selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
             @Param("tenantId") Long tenantId,
             @Param("companyId") Long companyId,
+            @Param("enabled") Boolean enabled,
             @Param("venNickname") String venNickname,
             @Param("vendorCode") String vendorCode,
             Pagination page);
@@ -267,6 +268,14 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
     List<VendorInfo> selectVendorInfosByVendorCodeAndTenantId(@Param("vendorCode") String vendorCode,
                                                               @Param("tenantId") Long tenantId);
 
+    /**
+     * 指定租户下查找指定税号，用于供应商税号校验;同一个租户下，唯一且不区分供应商状态和级别
+     * @param tenantId     租户id
+     * @param taxIdNumber  税务登记号
+     * @return             供应商信息list
+     */
+    List<VendorInfo> selectVendorInfosByTaxIdNum(@Param("tenantId")Long tenantId,
+                                                 @Param("taxIdNumber")String taxIdNumber);
 
     /**
      * 用于artemis openApi update操作，根据供应商编码 在租户或公司级别下查询

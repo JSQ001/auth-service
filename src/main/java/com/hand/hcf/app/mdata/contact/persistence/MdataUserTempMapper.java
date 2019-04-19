@@ -24,5 +24,5 @@ public interface MdataUserTempMapper extends BaseMapper<MdataUserTempDomain> {
 
     List<ImportErrorDTO> queryErrorData(@Param("transactionId") String transactionId);
 
-    Boolean varifyBatchNumberExsits(@Param("transactionId") String transactionId);
+    Integer varifyBatchNumberExsits(@Param("transactionId") String transactionId);
 }

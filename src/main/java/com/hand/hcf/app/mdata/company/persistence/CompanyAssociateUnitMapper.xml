@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.mdata.company.persistence.CompanyAssociateUnitMapper">
+
+
+    <select id="queryByCompanyId" resultType="com.hand.hcf.app.mdata.company.dto.CompanyAssociateUnitDTO">
+        SELECT
+            cad.*,
+            d.department_code,
+            d.name as departmentName,
+            (select
+                sd.name
+            from
+                sys_department sd
+            where
+                sd.id = d.parent_id) as parentDepartmentName
+        FROM
+            sys_company c,
+            sys_department d,
+            sys_company_associate_unit cad
+        WHERE
+            c.id = cad.company_id
+            AND cad.department_id = d.id
+            AND c.id = #{companyId}
+    </select>
+    <select id="checkEmployee" resultType="java.lang.Integer"
+            parameterType="com.hand.hcf.app.mdata.company.domain.CompanyAssociateUnit">
+        SELECT
+            count(0)
+        FROM
+            sys_contact t
+        WHERE
+            t.company_id = #{companyId}
+            and t.status = '1001'
+            and EXISTS (
+                SELECT
+                    1
+                FROM
+                    sys_department_user du
+                WHERE
+                    t.id = du.user_id
+                    AND du.department_id = #{departmentId}
+            )
+    </select>
+    <select id="queryCanAssociate" resultType="com.hand.hcf.app.mdata.company.dto.CompanyAssociateUnitDTO">
+        select
+            t.id  as departmentId,
+            t.department_code,
+            t.name as departmentName,
+            (select
+                d.name
+            from
+                sys_department d
+            where
+                d.id = t.parent_id) as parentDepartmentName,
+            CASE t.status WHEN 101 then 1 else 0 end enabled
+        from
+            sys_department t
+        where
+            not exists (
+                select
+                    1
+                from
+                    sys_company_associate_unit v
+                where
+                    v.department_id = t.id
+                  and
+                    v.company_id = #{companyId}
+            )
+            AND t.tenant_id = #{tenantId}
+            and t.deleted = 0
+            <if test="codeName != null and codeName != ''">
+                AND (
+                    t.department_code like concat(concat('%', #{codeName}), '%')
+                    or t.name like concat(concat('%', #{codeName}), '%')
+                    )
+            </if>
+            <if test="codeFrom != null and codeFrom != ''">
+                AND t.department_code <![CDATA[ >= ]]> #{codeFrom}
+            </if>
+            <if test="codeTo != null and codeTo != ''">
+                AND t.department_code <![CDATA[ <= ]]> #{codeTo}
+            </if>
+            order by t.department_code
+    </select>
+    <select id="queryContact" resultType="com.hand.hcf.app.mdata.contact.dto.ContactDTO">
+        SELECT
+            t.*
+        FROM
+            sys_contact t
+        WHERE
+            t.company_id = #{companyId}
+            and EXISTS (
+                SELECT
+                    1
+                FROM
+                    sys_department_user du
+                WHERE
+                    t.id = du.user_id
+                    AND du.department_id = #{departmentId}
+            )
+        <if test="codeName != null and codeName != ''">
+            AND (t.full_name like concat(concat('%', #{codeName}), '%') or t.employee_id like concat(concat('%', #{codeName}), '%'))
+        </if>
+        <if test="status != null">
+            AND t.status = status
+        </if>
+        <if test="dutyCode != null and dutyCode != ''">
+            AND t.duty_code = #{dutyCode}
+        </if>
+    </select>
+    <select id="queryDepartmentLov" resultType="com.hand.hcf.app.mdata.department.dto.DepartmentLovDTO">
+        SELECT
+            t.id,
+            t.department_code,
+            t.department_oid as departmentOid,
+            t.name as departmentName,
+            t.path as departmentPath,
+            t.parent_id as parentId,
+            t.status,
+            t.tenant_id
+        FROM
+            sys_department t
+        WHERE
+            t.tenant_id = #{ew.tenantId}
+            AND t.deleted = 0
+        <if test="ew.departmentCode != null and ew.departmentCode !=''">
+            AND t.department_code like concat(concat('%', #{ew.departmentCode}) ,'%')
+        </if>
+        <if test="ew.departmentCodeFrom != null and ew.departmentCodeFrom !=''">
+            AND t.department_code <![CDATA[ >= ]]> #{ew.departmentCodeFrom}
+        </if>
+        <if test="ew.departmentCodeTo != null and ew.departmentCodeTo !=''">
+            AND t.department_code <![CDATA[ <= ]]> #{ew.departmentCodeTo}
+        </if>
+        <if test="ew.departmentName != null and ew.departmentName !=''">
+            AND t.name like concat(concat('%', #{ew.departmentName}) ,'%')
+        </if>
+        <if test="ew.codeName != null and ew.codeName !=''">
+            AND (
+            t.name like concat(concat('%', #{ew.codeName}) ,'%')
+            or
+            t.department_code like concat(concat('%', #{ew.codeName}) ,'%')
+            )
+        </if>
+        <if test="ew.status != null">
+            AND t.status = #{ew.status}
+        </if>
+        <if test="ew.id != null">
+            AND t.id = #{ew.id}
+        </if>
+        <if test="ew.associateCompanyFlag != null and ew.associateCompanyFlag">
+            AND exists (
+                select 1
+                from sys_company_associate_unit v, sys_company sc
+                where v.department_id = t.id
+                    and sc.id = v.company_id
+                    and sc.deleted = 0
+                    and sc.enabled = 1
+                <if test="ew.companyId != null">
+                    and v.company_id = #{ew.companyId}
+                </if>
+                <if test="ew.setOfBooksId != null">
+                    and sc.set_of_books_id = #{ew.setOfBooksId}
+                </if>
+                    and v.enabled = 1
+            )
+        </if>
+    </select>
+    <select id="queryCompanyLov" resultType="com.hand.hcf.app.mdata.company.dto.CompanyLovDTO">
+        select
+            t.enabled,
+            t.id,
+            t.company_code,
+            t.company_oid as companyOid,
+            t.name as companyName,
+            le.entity_name as legalEntityName,
+            t.set_of_books_id as setOfBooksId,
+            sob.set_of_books_name as setOfBooksName,
+            t.legal_entity_id as legalEntityId,
+            t.tenant_id,
+            t.company_type_code
+        from
+            sys_company t ,
+            sys_legal_entity le,
+            sys_set_of_books sob
+        where
+            t.set_of_books_id = sob.id
+            and t.legal_entity_id = le.id
+            and t.tenant_id = #{ew.tenantId}
+            and t.deleted = 0
+        <if test="ew.companyCode != null and ew.companyCode !=''">
+            AND t.company_code like concat(concat('%', #{ew.companyCode}) ,'%')
+        </if>
+        <if test="ew.companyCodeFrom != null and ew.companyCodeFrom !=''">
+            AND t.company_code <![CDATA[ >= ]]> #{ew.companyCodeFrom}
+        </if>
+        <if test="ew.companyCodeTo != null and ew.companyCodeTo !=''">
+            AND t.company_code <![CDATA[ <= ]]> #{ew.companyCodeTo}
+        </if>
+        <if test="ew.companyName != null and ew.companyName !=''">
+            AND t.name like concat(concat('%', #{ew.companyName}) ,'%')
+        </if>
+        <if test="ew.codeName != null and ew.codeName !=''">
+            AND (
+            t.name like concat(concat('%', #{ew.codeName}) ,'%')
+            or
+            t.company_code like concat(concat('%', #{ew.codeName}) ,'%')
+            )
+        </if>
+        <if test="ew.enabled != null">
+            AND t.enabled = #{ew.enabled}
+        </if>
+        <if test="ew.id != null">
+            AND t.id = #{ew.id}
+        </if>
+        <if test="ew.setOfBooksId != null">
+            AND t.set_of_books_id = #{ew.setOfBooksId}
+        </if>
+        <if test="ew.associateDepartmentFlag != null and ew.associateDepartmentFlag">
+            AND exists (
+            select 1 from sys_company_associate_unit v
+            where v.department_id = #{ew.departmentId}
+            and v.company_id = t.id
+            and v.enabled = 1
+            )
+        </if>
+    </select>
+    <select id="listSetOfBooksByDepartmentId" resultType="com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks">
+        SELECT
+            t.*
+        FROM
+            sys_set_of_books t
+        WHERE
+            t.enabled = 1
+            AND t.deleted = 0
+            AND EXISTS (
+                SELECT
+                    1
+                FROM
+                    sys_company c,
+                    sys_company_associate_unit v
+                WHERE
+                    c.set_of_books_id = t.id
+                    AND c.deleted = 0
+                    AND c.enabled = 1
+                    AND c.id = v.company_id
+                    AND v.enabled = 1
+                    AND v.department_id = #{departmentId}
+            )
+    </select>
+</mapper>

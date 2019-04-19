@@ -89,24 +89,17 @@ public class RelationVendorCompanyController {
 
     /**
      * 查询某租户下（某供应商）尚未分配的公司
-     * @param tenantId
-     * @param vendorInfoId
-     * @param setOfBooksId
-     * @param companyCode
-     * @param companyName
-     * @param pageable
-     * @return
+     * 4.12 修改为只能选择该账户所属的公司
+     * @param tenantId            租户id
+     * @param vendorInfoId        供应商id
+     * @return                    公司列表
      * @throws URISyntaxException
      */
     @GetMapping("/query/unassigned/company/by/cond")
     public ResponseEntity<List<CompanyCO>> selectVendorUnassignedCompany(@RequestParam(value = "tenantId") Long tenantId,
-                                                                         @RequestParam(value = "vendorInfoId",required = false) Long vendorInfoId,
-                                                                         @RequestParam(value = "setOfBooksId",required = false) Long setOfBooksId,
-                                                                         @RequestParam(value = "companyCode",required = false) String companyCode,
-                                                                         @RequestParam(value = "companyName",required = false) String companyName,
-                                                                         Pageable pageable) throws URISyntaxException{
-        Page page = PageUtil.getPage(pageable);
-        Page<CompanyCO> result = relationVendorCompanyService.selectVendorUnassignedCompany(tenantId, vendorInfoId, setOfBooksId, companyCode, companyName, page);
+                                                                         @RequestParam(value = "vendorInfoId",required = false) Long vendorInfoId
+                                                                        ) throws URISyntaxException{
+        Page<CompanyCO> result = relationVendorCompanyService.selectVendorUnassignedCompany(tenantId, vendorInfoId);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/ven/info/assign/company/query/unassigned/company/by/cond");

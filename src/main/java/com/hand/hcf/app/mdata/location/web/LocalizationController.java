@@ -206,17 +206,4 @@ public class LocalizationController {
         headers.add("Link","/api/localization/query/stateAndCity");
         return new ResponseEntity<>(cityList, headers, HttpStatus.OK);
     }
-
-    /**
-     * @api {POST} /api/localization/city/ids 根据id集合查询城市
-     * @apiGroup Localization
-     */
-    @PostMapping("/localization/city/ids")
-    public List<LocationDTO> listLocalizationCityByIds(
-            @RequestBody List<Long> ids,
-            @RequestParam(value = "vendorType", defaultValue = "standard") String vendorType){
-
-        List<LocationDTO> cityList = localizationDTOService.listCityByIds(ids, vendorType);
-        return cityList;
-    }
 }

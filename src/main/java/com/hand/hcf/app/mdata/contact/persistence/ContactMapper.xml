@@ -14,7 +14,7 @@
         c.employee_id,
         c.title,
         c.duty,
-        c.rank,
+        c.rank_info,
         c.email,
         c.gender,
         c.entry_date,
@@ -200,10 +200,10 @@
             resultType="com.hand.hcf.app.mdata.contact.domain.Contact">
         SELECT c.* FROM sys_contact c
         LEFT JOIN sys_phone p ON c.id = p.contact_id
-        <if test="companyOid != null or companyId!= null or (companyIds != null and companyIds.size()>0) or (companyOids != null and companyOids.size()>0)">
+        <if test="companyOid != null or companyId!= null or (keyCompany != null and keyCompany !='') or (companyIds != null and companyIds.size()>0) or (companyOids != null and companyOids.size()>0)">
             left join sys_company sc on sc.id=c.company_id
         </if>
-        <if test="departmentOid != null or departmentId!= null or (departmentOids != null and departmentOids.size()>0)">
+        <if test="departmentOid != null or departmentId!= null or (keyDepartment != null and keyDepartment !='') or (departmentOids != null and departmentOids.size()>0)">
             INNER JOIN sys_department_user du ON du.user_id = c.user_id
             INNER JOIN sys_department d ON d.id = du.department_id
         </if>
@@ -390,7 +390,7 @@
         c.title,
         c.email,
         c.duty,
-        c.rank,
+        c.rank_info,
         c.gender,
         c.entry_date,
         c.birthday,
@@ -445,7 +445,7 @@
         t2.birthday,
         t2.duty,
         t2.duty_code,
-        t2.rank,
+        t2.rank_info,
         t2.rank_code,
         t2.employee_type,
         t2.employee_type_code,
@@ -641,19 +641,19 @@
     </select>
 
     <select id="listContactByConditionAndWrapper" resultType="com.hand.hcf.app.mdata.contact.domain.Contact">
-        select c.USER_ID, c.USER_OID, c.EMPLOYEE_ID, c.FULL_NAME
-          from SYS_CONTACT c
-          left join SYS_DEPARTMENT_USER du
-            on c.USER_ID = du.USER_ID
+        select c.user_id, c.user_oid, c.employee_id, c.full_name
+          from sys_contact c
+          left join sys_department_user du
+            on c.user_id = du.user_id
          where 1 = 1
          <if test="companyIds != null and !companyIds.isEmpty()">
-             and c.COMPANY_ID in
+             and c.company_id in
              <foreach collection="companyIds" item="item" index="index" open="(" close=")" separator=",">
                  #{item}
              </foreach>
          </if>
          <if test="departmentIds != null and !departmentIds.isEmpty()">
-             and du.DEPARTMENT_ID in
+             and du.department_id in
              <foreach collection="departmentIds" item="item" index="index" open="(" close=")" separator=",">
                  #{item}
              </foreach>
@@ -661,19 +661,19 @@
          <if test="userGroupIds != null and !userGroupIds.isEmpty()">
              and exists (
                  select 1
-                 from SYS_USER_GROUP_USER ugu
-                 where c.USER_ID = ugu.USER_ID
-                 and ugu.USER_GROUP_ID in
+                 from sys_user_group_user ugu
+                 where c.user_id = ugu.user_id
+                 and ugu.user_group_id in
                  <foreach collection="userGroupIds" item="item" index="index" open="(" close=")" separator=",">
                      #{item}
                  </foreach>
              )
          </if>
          <if test="userCode != null">
-             and c.EMPLOYEE_ID like concat(concat('%',#{userCode}),'%')
+             and c.employee_id like concat(concat('%',#{userCode}),'%')
          </if>
          <if test="userName != null">
-              and c.FULL_NAME like concat(concat('%',#{userName}),'%')
+              and c.full_name like concat(concat('%',#{userName}),'%')
          </if>
           and ( 1 = 1
              <if test="ew != null">

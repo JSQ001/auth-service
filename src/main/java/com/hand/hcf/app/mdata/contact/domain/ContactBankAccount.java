@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.contact.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
@@ -36,7 +37,8 @@ public class ContactBankAccount extends DomainLogicEnable {
     private String accountLocation;
 
     @NotNull
-    private Boolean primary;
+    @JsonProperty(value = "primary")
+    private Boolean primaryFlag;
 
     private String bankCode;
 

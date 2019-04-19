@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.company.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ClientCO;
+import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.conver.CompanyCover;
 import com.hand.hcf.app.mdata.company.domain.Company;
@@ -11,6 +12,8 @@ import com.hand.hcf.app.mdata.company.dto.CompanySobDTO;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
+import com.hand.hcf.app.mdata.parameter.service.ParameterSettingService;
+import com.hand.hcf.app.mdata.utils.ParameterCodeConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.security.AuthoritiesConstants;
@@ -54,7 +57,8 @@ public class CompanyController {
 
     @Autowired
     private ContactService contactService;
-
+    @Autowired
+    private ParameterSettingService parameterSettingService;
 
     /**
      * @api {get} /api/my/companies 获取当前登录用户公司详情
@@ -91,9 +95,19 @@ public class CompanyController {
         }else {
             CompanyDTO companyDTO = companyService.getByCompanyOid(companyOid);
             return Optional.ofNullable(companyDTO)
-                    .map(result -> new ResponseEntity<>(
+                    .map(result -> {
+                        String value = parameterSettingService.getTenantParameterValueByCode(result.getTenantId(),
+                                ParameterCodeConstants.COMPANY_UNIT_RELATION);
+                        String flag = "Y";
+                        if (flag.equals(value)){
+                            result.setCompanyUnitFlag(Boolean.TRUE);
+                        } else {
+                            result.setCompanyUnitFlag(Boolean.FALSE);
+                        }
+                        return new ResponseEntity<>(
                             result,
-                            HttpStatus.OK))
+                            HttpStatus.OK);
+                    })
                     .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
         }
     }
@@ -800,5 +814,24 @@ public class CompanyController {
         return new ResponseEntity<>(companyList,headers, HttpStatus.OK);
 
     }
+
+    /**
+     * 查询租户下的公司信息 enabled为null时查询全部包括启用和禁用
+     *
+     */
+    @RequestMapping(value = "/company/by/tenantId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<CompanyCO>> findCompanyByTenantId(@RequestParam(required = false) String keyword,
+                                                                 @RequestParam(value = "enabled", required = false) Boolean enabled,
+                                                                 @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) throws URISyntaxException {
+        Page mybatisPage = PageUtil.getPage(page, size);
+        Page result = companyService.pageConditionKeyWordAndEnabled(keyword, enabled, mybatisPage);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
+        return new ResponseEntity<>(result.getRecords(),httpHeaders,HttpStatus.OK);
+    }
+
+
+
 }
 

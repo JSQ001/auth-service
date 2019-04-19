@@ -12,6 +12,7 @@ import com.hand.hcf.app.mdata.accounts.domain.AccountSet;
 import com.hand.hcf.app.mdata.accounts.service.AccountSetService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
+import com.hand.hcf.app.mdata.company.service.CompanyAssociateUnitService;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
@@ -54,8 +55,6 @@ import java.util.*;
 @CacheConfig(cacheNames = {CacheConstants.SET_OF_BOOKS})
 public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks> {
 
-    private final Logger log = LoggerFactory.getLogger(SetOfBooksService.class);
-
     @Autowired
     private MapperFacade mapper;
 
@@ -87,10 +86,10 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
     private AccountSetService accountSetService;
 
     @Autowired
-    private HcfOrganizationInterface organizationInterface;
+    private ContactService contactService;
 
     @Autowired
-    private ContactService contactService;
+    private CompanyAssociateUnitService companyAssociateUnitService;
 
 
     /**
@@ -380,7 +379,7 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
      * @return
      */
     public List<SetOfBooks> getListByTenantId(Long tenantId) {
-        Map<String, Object> map = new HashedMap();
+        Map<String, Object> map = new HashMap<>(16);
         map.put("tenant_id", tenantId);
         map.put("enabled", true);
         List<SetOfBooks> setOfBooksList = selectByMap(map);
@@ -596,5 +595,15 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
         List<SetOfBooks> setOfBooks = setOfBooksMapper.selectPage(page, setOfBooksWrapper);
         page.setRecords(this.setOfBooksToInfoCO(setOfBooks));
         return page;
+    }
+
+    public List<SetOfBooks> listByDepartmentId(Long departmentId, Long tenantId) {
+        if (companyAssociateUnitService.isOpenCompanyAssociate(tenantId)) {
+            List<SetOfBooks> result = companyAssociateUnitService.listSetOfBooksByDepartmentId(departmentId);
+            result = baseI18nService.convertListByLocale(result);
+            return result;
+        } else {
+            return getListByTenantId(tenantId);
+        }
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,16 @@ public class VendorTypeService extends BaseService<VendorTypeMapper, VendorType>
         result.setRecords(vendorTypeCOs);
         result.setTotal(page.getTotal());
         return result;
+    }
+
+    /**
+     *  通过租户id查询该租户下的所有供应商类型信息
+     * @param  tenantId 租户id
+     * @return  供应商类型信息
+     */
+    public Map<String,Long> searchAllVendorTypesByTenantId(Long tenantId) {
+        List<VendorType> vendorTypes = baseMapper.selectVendorTypeByCode(null,null,tenantId);
+        return vendorTypes.stream().collect(Collectors.toMap(VendorType::getName,VendorType::getId));
     }
 
     public VendorTypeCO insertOrUpDateVendorType(VendorTypeCO vendorTypeCO, String roleType) {

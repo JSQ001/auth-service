@@ -14,7 +14,7 @@
                        bank_name,
                        branch_name,
                        account_location,
-                       primary,
+                       primary_flag,
                        bank_code,
                        version_number,
                        deleted,
@@ -32,7 +32,7 @@
                         t.bank_name,
                         t.branch_name,
                         t.account_location,
-                        t.primary,
+                        t.primary_flag,
                         t.bank_code,
                         1,
                         0,
@@ -92,14 +92,14 @@
     </resultMap>
 
     <select id="queryErrorData" resultMap="errorDataMap">
-        select t.row_number AS row_number,
+        select t.row_number AS rowNumber,
         t.error_detail AS error
         FROM sys_contact_bank_import t
         WHERE t.batch_number = #{transactionId}
         AND t.error_flag = 1
     </select>
     <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
-        <result column="row_number" property="index"/>
+        <result column="rowNumber" property="index"/>
         <result column="error" property="error"/>
     </resultMap>
 

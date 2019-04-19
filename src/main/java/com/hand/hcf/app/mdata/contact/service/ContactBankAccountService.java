@@ -18,11 +18,15 @@ import com.hand.hcf.app.mdata.contact.dto.ContactBankAccountDTO;
 import com.hand.hcf.app.mdata.contact.dto.ContactDTO;
 import com.hand.hcf.app.mdata.contact.persistence.ContactBankAccountMapper;
 import com.hand.hcf.app.mdata.contact.utils.UserInfoEncryptUtil;
+import com.hand.hcf.app.mdata.department.domain.Department;
+import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
 import com.hand.hcf.app.mdata.utils.RespCode;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,20 +59,10 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
     CompanyService companyService;
     @Autowired
     LegalEntityService legalEntityService;
-    @Autowired
-    private PhoneService phoneService;
+
     @Autowired
     private ContactService contactService;
 
-
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private DepartmentUserService departmentUserService;
-
-    @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
 
     @Autowired
     private MessageService messageService;
@@ -148,23 +142,19 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         if (contactBankAccountDTO.getPrimary()) {
             ContactBankAccount result = findOneByUserOidAndIsPrimary(contactBankAccount.getUserOid(), true);
             if (result != null) {
-                result.setPrimary(false);
+                result.setPrimaryFlag(false);
                 insertOrUpdate(result);
             }
         } else {
             // 查询是否有启用的银行信息
             List<ContactBankAccount> contactBankAccounts = findByUserOid(contactBankAccount.getUserOid());
             if (CollectionUtils.isEmpty(contactBankAccounts)) {
-                contactBankAccount.setPrimary(true);
+                contactBankAccount.setPrimaryFlag(true);
             }
         }
-//        User user = userService.getByUserOid(contactBankAccountDTO.getUserOid());
-//
-//        userService.saveUser(user);
+
         insertOrUpdate(contactBankAccount);
-//        String message = new StringBuffer().append(messageTranslationService.getMessageDetailByCode(OrgInformationUtil.getCurrentLanguage(), DataOperationMessageKey.ADD_USER_BANK_ACCOUNT, contactBankAccount.getBankAccountName(), UserInfoEncryptUtil.displayBankNo(contactBankAccount.getBankAccountNo(), true))).toString();
-//
-//        dataOperationService.save(OrgInformationUtil.getCurrentUserId(), contactBankAccount, message, OperationEntityTypeEnum.USER.getKey(), OperationTypeEnum.ADD.getKey(), tenantId);
+
         return contactBankAccount;
     }
 
@@ -187,26 +177,26 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
     public ContactBankAccount findOneByUserOidAndIsPrimary(UUID userOid, Boolean isPrimary) {
         return selectOne(new EntityWrapper<ContactBankAccount>()
                 .eq("user_oid", userOid)
-                .eq("primary", isPrimary));
+                .eq("primary_flag", isPrimary));
     }
 
     public List<ContactBankAccount> findByUserOid(UUID userOid) {
         return selectList(new EntityWrapper<ContactBankAccount>()
                 .eq("user_oid", userOid)
-                .orderBy("enabled,primary,last_updated_date", false));
+                .orderBy("enabled,primary_flag,last_updated_date", false));
     }
 
     public List<ContactBankAccount> findByUserOids(List<UUID> userOids, Boolean isPrimary, Boolean enabled) {
         return selectList(new EntityWrapper<ContactBankAccount>()
                 .in("user_oid", userOids)
-                .eq(isPrimary!=null,"primary", isPrimary)
+                .eq(isPrimary!=null,"primary_flag", isPrimary)
                 .eq(enabled!=null,"enabled", enabled));
     }
 
     public Page<ContactBankAccount> findByUserOid(UUID userOid, Page page) {
         return selectPage(page, new EntityWrapper<ContactBankAccount>()
                 .eq("user_oid", userOid)
-                .orderBy("primary", false)
+                .orderBy("primary_flag", false)
                 .orderBy("enabled",false)
                 .orderBy("last_updated_date",false));
 
@@ -216,7 +206,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         return selectPage(page, new EntityWrapper<ContactBankAccount>()
                 .eq("user_oid", userOid)
                 .eq("enabled", enabled)
-                .orderBy("primary", false)
+                .orderBy("primary_flag", false)
                 .orderBy("last_updated_date",false));
     }
 
@@ -270,7 +260,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         // 导入
         if (isExcelImport) {
             // 由于导入的时候没有标识是否默认，所以默认为dto里的isprimary默认为false，所以这里需要判断如果修改的银行之前为true则还设置为true
-            if (contactBankAccount.getPrimary()) {
+            if (contactBankAccount.getPrimaryFlag()) {
                 contactBankAccountDTO.setPrimary(true);
             }
         } else {
@@ -296,18 +286,17 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
             ContactBankAccount result = findOneByUserOidAndIsPrimary(contactBankAccount.getUserOid(), true);
             // 判断查询出来的是否为当前修改的默认银行
             if (result != null && !result.getContactBankAccountOid().equals(contactBankAccountDTO.getContactBankAccountOid())) {
-                result.setPrimary(false);
+                result.setPrimaryFlag(false);
                 insertOrUpdate(result);
             }
         }
-        contactBankAccount.setPrimary(contactBankAccountDTO.getPrimary());
+        contactBankAccount.setPrimaryFlag(contactBankAccountDTO.getPrimary());
         contactBankAccount.setEnabled(contactBankAccountDTO.getEnabled());
         insertOrUpdate(contactBankAccount);
         oldContactBankAccount.setBankAccountNo(UserInfoEncryptUtil.displayCardNo(oldContactBankAccount.getBankAccountNo(), true));
         ContactBankAccount contactBankAccountNew = new ContactBankAccount();
         BeanUtils.copyProperties(contactBankAccount, contactBankAccountNew);
         contactBankAccountNew.setBankAccountNo(UserInfoEncryptUtil.displayCardNo(contactBankAccountNew.getBankAccountNo(), true));
-//        dataOperationService.save(OrgInformationUtil.getCurrentUserId(), oldContactBankAccount, contactBankAccountNew, OperationEntityTypeEnum.USER.getKey(), OperationTypeEnum.UPDATE.getKey(), user.getTenantId(), contactBankAccount.getBankAccountName());
         return contactBankAccount;
     }
 
@@ -455,8 +444,8 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         result.setBankAccountName(contactBankAccount.getBankAccountName());
         result.setBankName(contactBankAccount.getBankName());
         result.setBranchName(contactBankAccount.getBranchName());
-        result.setPrimary(contactBankAccount.getPrimary());
-        result.setPrimaryStr(contactBankAccount.getPrimary() ? messageService.getMessageDetailByCode(RespCode.SYS_YES) : messageService.getMessageDetailByCode(RespCode.SYS_NO));
+        result.setPrimary(contactBankAccount.getPrimaryFlag());
+        result.setPrimaryStr(contactBankAccount.getPrimaryFlag() ? messageService.getMessageDetailByCode(RespCode.SYS_YES) : messageService.getMessageDetailByCode(RespCode.SYS_NO));
         result.setEnabled(contactBankAccount.getEnabled());
         result.setEnabledStr(contactBankAccount.getEnabled() ? messageService.getMessageDetailByCode(RespCode.SYS_ENABLED) : messageService.getMessageDetailByCode(RespCode.SYS_DISABLED));
         result.setAccountLocation(contactBankAccount.getAccountLocation());
@@ -474,7 +463,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         contactBankAccount.setBankName(dto.getBankName());
         contactBankAccount.setBankAccountName(dto.getBankAccountName());
         contactBankAccount.setBranchName(dto.getBranchName());
-        contactBankAccount.setPrimary(dto.getPrimary() == null ? false : dto.getPrimary());
+        contactBankAccount.setPrimaryFlag(dto.getPrimary() == null ? false : dto.getPrimary());
         contactBankAccount.setEnabled(dto.getEnabled());
         contactBankAccount.setBankCode(dto.getBankCode());
         return contactBankAccount;
@@ -507,7 +496,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
         return result;
     }
 
-    public List<ContactBankAccountDTO> exportContactBankAccountDTO(Page page, List<UUID> userOids){
+    public List<ContactBankAccountDTO> exportContactBankAccountDTO(Page page,List<UUID> userOids){
         List<ContactBankAccount> contactBankAccounts = selectList(new EntityWrapper<ContactBankAccount>().in("user_oid",userOids));
         List<ContactBankAccountDTO> result = contactBankAccounts.stream().map(item -> ContactBankAccountToContactBankAccountDTO(item)).collect(Collectors.toList());
         return result;
@@ -550,8 +539,8 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
                 bankAccount.setPrimary(contactBankAccountDTO.getPrimary());
                 return bankAccount;
             }).collect(Collectors.toList());
-            contactAccountDTO.setBankInfos(bankInfos);
-            list.add(contactAccountDTO);
+                contactAccountDTO.setBankInfos(bankInfos);
+                list.add(contactAccountDTO);
         });
         return list;
     }

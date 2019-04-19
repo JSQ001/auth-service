@@ -4,7 +4,9 @@ import com.hand.hcf.app.common.co.VendorInfoCO;
 
 
 import lombok.Data;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,9 +16,20 @@ import java.util.List;
  * @date: 2019/3/19
  */
 @Data
-public class vendorInfoforStatusDTO extends VendorInfoCO {
+public class VendorInfoforStatusDTO extends VendorInfoCO {
 
     private String vendorStatus;
+
+    private String vendorBankStatus;
+
+    /**
+     * 供应商模板导入功能 获取供应商类别数组
+     */
+    private String vendorIndustryInfoString;
+    /**
+     * 供应商模板导入功能 获取启用日期
+     */
+    private String effectiveDateString;
 
     private List<VendorBankAccountforStatusDTO> venBankAccountForStatusBeans;
 

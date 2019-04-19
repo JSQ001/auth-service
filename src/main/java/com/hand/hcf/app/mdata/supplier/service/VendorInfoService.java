@@ -1,7 +1,9 @@
 package com.hand.hcf.app.mdata.supplier.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.OrderNumberCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.co.VendorBankAccountCO;
 
 import com.hand.hcf.app.common.co.VendorInfoCO;
@@ -9,6 +11,7 @@ import com.hand.hcf.app.common.enums.SourceEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.ReceivablesDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -25,7 +28,7 @@ import com.hand.hcf.app.mdata.supplier.enums.VendorStatusEnum;
 import com.hand.hcf.app.mdata.supplier.persistence.VenVendorIndustryInfoMapper;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorBankAccountMapper;
 import com.hand.hcf.app.mdata.supplier.persistence.VendorInfoMapper;
-import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
+import com.hand.hcf.app.mdata.supplier.service.dto.VendorInfoforStatusDTO;
 import com.hand.hcf.app.mdata.supplier.web.adapter.VendorBankAccountAdapter;
 import com.hand.hcf.app.mdata.supplier.web.adapter.VendorInfoAdapter;
 import com.hand.hcf.app.mdata.supplier.web.dto.CompanyDTO;
@@ -44,9 +47,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -81,6 +82,11 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
     @Autowired
     private VenVendorIndustryInfoMapper venVendorIndustryInfoMapper;
 
+    @Autowired
+    private CommonControllerImpl organizationClient;
+
+    @Autowired
+    private VendorTypeService vendorTypeService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VendorInfoService.class);
 
@@ -99,7 +105,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
     private static final String SUCCEED = "0000";
 
 
-    public vendorInfoforStatusDTO insertOrUpdateVendorInfo(vendorInfoforStatusDTO vendorInfoCO, String roleType) {
+    public VendorInfoforStatusDTO insertOrUpdateVendorInfo(VendorInfoforStatusDTO vendorInfoCO, String roleType) {
 
         validateVendorInfoCO(vendorInfoCO);
         VendorInfo oldVendorInfo;
@@ -131,7 +137,11 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
         if (!CollectionUtils.isEmpty(vendorInfoList)) {
             validateVendorInfoNameAndCode(vendorInfoCO, vendorInfoList, RespCode.SUPPLIER_NAME_EXISTS, RespCode.SUPPLIER_NAME_EXISTS_IN_COMPANY_OR_TENANT_LEVEL);
         }
-
+        // 校验税号名称重复，租户下全局校验，不区分租户级或公司级供应商
+        List<VendorInfo> vendorInfoList1 = baseMapper.selectVendorInfosByTaxIdNum(tenantId,vendorInfoCO.getTaxIdNumber());
+        if (!CollectionUtils.isEmpty(vendorInfoList1)) {
+            validateVendorInfoTaxId(vendorInfoCO, vendorInfoList1);
+        }
         VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(vendorInfoCO);
         vendorInfo.setVendorCode(vendorInfoCO.getVenderCode());
         vendorInfo.setVendorStatus(VendorStatusEnum.EDITOR.getVendorStatus());
@@ -154,12 +164,203 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
                 venVendorIndustryInfoMapper.insert(venVendorVndustryInfo);
             }
         }
-        vendorInfoforStatusDTO result = VendorInfoAdapter.vendorInfoToVendorInfoCO(baseMapper.selectById(vendorInfo.getId()));
+        VendorInfoforStatusDTO result = VendorInfoAdapter.vendorInfoToVendorInfoCO(baseMapper.selectById(vendorInfo.getId()));
         return result;
     }
 
+
+    /**
+     * 校验税号名称重复，租户下全局校验，不区分租户级或公司级供应商
+     * @param vendorInfoCO      供应商信息
+     * @param vendorInfoList1   根据税号查询出的供应商信息
+     */
+    private void validateVendorInfoTaxId(VendorInfoforStatusDTO vendorInfoCO, List<VendorInfo> vendorInfoList1) {
+        if (vendorInfoCO.getId() != null) {
+            if ((vendorInfoList1.size() > 1 || !vendorInfoList1.get(0).getId().equals(vendorInfoCO.getId()))) {
+                throw new BizException(RespCode.SUPPLIER_TAX_ID_EXISTS);
+            }
+        }else {
+            if (vendorInfoCO.getSource() == SourceEnum.TENANT) {
+                throw new BizException(RespCode.SUPPLIER_TAX_ID_EXISTS);
+            }
+        }
+    }
+
+    /**
+     * 基础数据导入-批量插入供应商
+     *
+     * @param vendorInfoCOList 供应商
+     * @return 校验不通过的数据
+     */
+    public Map<String, String> createVendorInfoBatch(List<VendorInfoforStatusDTO> vendorInfoCOList) {
+        String companyOid = OrgInformationUtil.getCurrentCompanyOid().toString();
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        Map<String, String> errorMap = new HashMap<>(16);
+        //获取供应商类型
+        Map<String, Long> vendorTypeMap = vendorTypeService.searchAllVendorTypesByTenantId(tenantId);
+        if (vendorTypeMap.isEmpty()) {
+            errorMap.put("error-1", "获取供应商类型为空");
+            throw new BizException(RespCode.NO_EXIST_VENDOR_TYPE);
+        }
+
+        //获取供应商类别
+        List<SysCodeValueCO> sysCodeValueCOS = organizationClient.listAllSysCodeValueByCode("2214");
+        Map<String, Long> venVendorIndustryInfoMap;
+        if (!sysCodeValueCOS.isEmpty()) {
+            venVendorIndustryInfoMap = sysCodeValueCOS.stream()
+                    .collect(Collectors.toMap(SysCodeValueCO::getName, SysCodeValueCO::getId));
+        } else {
+            errorMap.put("error-2", "获取供应商类型为空");
+            throw new BizException(RespCode.NO_EXIST_VENDOR_INDUSTRY_INFO);
+        }
+
+        for (int i = 0; i < vendorInfoCOList.size(); i++) {
+            VendorInfoforStatusDTO t = vendorInfoCOList.get(i);
+            //校验法人代表、供应商代码、供应商类别、供应商类型、供应商类型Id、供应商名称、税务登记号是否为空
+            if (t.getArtificialPerson() == null || t.getVenderCode() == null || t.getVendorIndustryInfoString() == null
+                    || t.getVenType() == null || t.getVenderTypeName() == null || t.getVenNickname() == null
+                    || t.getTaxIdNumber() == null) {
+                errorMap.put("第" + (i + 1) + "行", "法人代表、供应商代码、供应商类别、供应商类型、供应商类型Id、供应商名称、税务登记号不可为空");
+            }
+            //如果校验有问题返回用户错误信息
+            if (!errorMap.isEmpty()) {
+                return errorMap;
+            }
+            String vendorIndustryInfoString = t.getVendorIndustryInfoString();
+            List<String> list = Arrays.asList(vendorIndustryInfoString.split(","));
+            t.setVenVendorIndustryInfoList(list);
+            try {
+                ZonedDateTime effectiveDate = DateUtil.stringToZonedDateTime(t.getEffectiveDateString());
+                t.setEffectiveDate(effectiveDate);
+            } catch (Exception e) {
+                errorMap.put("第" + (i + 1) + "行", "生效日期格式不正确");
+                throw new BizException(RespCode.TIME_CONVERSION_ANOMALY);
+            }
+            //校验并转化供应商类型
+            String venderTypeName = t.getVenderTypeName();
+            Long venderTypeId = vendorTypeMap.get(venderTypeName);
+            if (venderTypeId == null) {
+                errorMap.put("第" + (i + 1) + "行", "供应商类型不在范围内请核对");
+            } else {
+                t.setVenderTypeId(venderTypeId);
+            }
+            // 校验并转化供应商类别
+            List<String> venVendorIndustryInfoList = t.getVenVendorIndustryInfoList();
+            List<String> venVendorIndustryInfoCode = new ArrayList<>();
+            for (String venVendorIndustryInfo : venVendorIndustryInfoList) {
+                String vendorIndustry = String.valueOf(venVendorIndustryInfoMap.get(venVendorIndustryInfo));
+                if (vendorIndustry == null) {
+                    errorMap.put("第" + (i + 1) + "行", "供应商类别不在范围内请核对");
+                }
+                //转化供应商类别为code
+                venVendorIndustryInfoCode.add(vendorIndustry);
+            }
+            t.setVenVendorIndustryInfoList(venVendorIndustryInfoCode);
+            t.setSource(SourceEnum.TENANT);
+        }
+
+        //如果校验有问题返回用户错误信息不进行插入操作
+        if (!errorMap.isEmpty()) {
+            return errorMap;
+        }
+
+        for (VendorInfoforStatusDTO t : vendorInfoCOList) {
+            // 校验供应商编码重复，租户下全局校验，不区分租户级或公司级供应商[自动编码规则启用，其他处已校验，故该处不用校验]
+            checkVendorCode(t, tenantId);
+            // 校验供应商名称重复，维护租户级供应商，仅在租户级供应商校验；维护公司级供应商，在当前公司级和租户级校验，和供应商编码校验规则不同
+            checkVendorName(t, tenantId, companyOid);
+            // 校验税号名称重复，租户下全局校验，不区分租户级或公司级供应商
+            checkTaxId(t, tenantId);
+            t.setVendorStatus(VendorStatusEnum.APPROVED.getVendorStatus());
+            //插入或更新供应商信息  t.setVersionNumber(1);
+
+            //插入或更新供应商信息
+            insertOrUpdateVendorInfoDBBatch(t, tenantId, companyOid);
+        }
+        errorMap.put("success", "导入成功");
+        return errorMap;
+    }
+
+    /**
+     * 批量插入时-插入或更新供应商信息
+     *
+     * @param t          供应商信息DTO
+     * @param tenantId   租户id
+     * @param companyOid 公司id
+     */
+    private void insertOrUpdateVendorInfoDBBatch(VendorInfoforStatusDTO t, Long tenantId, String companyOid) {
+        VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(t);
+        vendorInfo.setVendorCode(t.getVenderCode());
+        vendorInfo.setTenantId(tenantId);
+        vendorInfo.setCompanyOid(companyOid);
+        baseMapper.insert(vendorInfo);
+
+        venVendorIndustryInfoMapper.deleteVenVendorIndustryInfoByVenderId(vendorInfo.getId());
+        for (String industryId : t.getVenVendorIndustryInfoList()) {
+            if (industryId != null && !"".equals(industryId)) {
+                VendorIndustryInfo venVendorVndustryInfo = new VendorIndustryInfo();
+                venVendorVndustryInfo.setIndustryId(Long.valueOf(industryId));
+                venVendorVndustryInfo.setVendorId(vendorInfo.getId());
+                venVendorIndustryInfoMapper.insert(venVendorVndustryInfo);
+            }
+        }
+    }
+
+    /**
+     * 校验供应商编码
+     *
+     * @param vendorInfoforStatusDTO 供应商信息DTO
+     * @param tenantId               租户id
+     */
+    private void checkVendorCode(VendorInfoforStatusDTO vendorInfoforStatusDTO, Long tenantId) {
+        // 校验供应商编码重复，租户下全局校验，不区分租户级或公司级供应商[自动编码规则启用，其他处已校验，故该处不用校验]
+        List<VendorInfo> vendorInfos = null;
+        if (vendorInfoforStatusDTO.getAutoCodeMark() == null || !vendorInfoforStatusDTO.getAutoCodeMark()) {
+            vendorInfos = baseMapper.selectVendorInfosByVendorCodeAndTenantId(vendorInfoforStatusDTO.getVenderCode(), tenantId);
+        }
+        if (!CollectionUtils.isEmpty(vendorInfos)) {
+            boolean validateVendorCodeDuplicationFlag = vendorInfoforStatusDTO.getId() == null || (vendorInfos.size() > 1
+                    || !vendorInfos.get(0).getId().equals(vendorInfoforStatusDTO.getId()));
+            if (validateVendorCodeDuplicationFlag) {
+                throw new BizException(RespCode.SUPPLIER_CODE_EXISTS);
+            }
+        }
+    }
+
+    /**
+     * 校验供应商名称重复
+     *
+     * @param vendorInfoforStatusDTO 供应商信息DTO
+     * @param tenantId               租户id
+     * @param companyOid             公司id
+     */
+    private void checkVendorName(VendorInfoforStatusDTO vendorInfoforStatusDTO, Long tenantId, String companyOid) {
+        // 校验供应商名称重复，维护租户级供应商，仅在租户级供应商校验；维护公司级供应商，在当前公司级和租户级校验，和供应商编码校验规则不同
+        List<VendorInfo> vendorInfoList = baseMapper.selectVendorInfosByCondtions(tenantId, companyOid,
+                vendorInfoforStatusDTO.getVenNickname(), null, vendorInfoforStatusDTO.getSource().toString());
+        if (!CollectionUtils.isEmpty(vendorInfoList)) {
+            validateVendorInfoNameAndCode(vendorInfoforStatusDTO, vendorInfoList, RespCode.SUPPLIER_NAME_EXISTS,
+                    RespCode.SUPPLIER_NAME_EXISTS_IN_COMPANY_OR_TENANT_LEVEL);
+        }
+    }
+
+    /**
+     * 校验税号名称重复
+     *
+     * @param vendorInfoforStatusDTO 供应商信息DTO
+     * @param tenantId               租户id
+     */
+    private void checkTaxId(VendorInfoforStatusDTO vendorInfoforStatusDTO, Long tenantId) {
+        List<VendorInfo> vendorInfoList1 = baseMapper.selectVendorInfosByTaxIdNum(tenantId, vendorInfoforStatusDTO.getTaxIdNumber());
+        if (!CollectionUtils.isEmpty(vendorInfoList1)) {
+            validateVendorInfoTaxId(vendorInfoforStatusDTO, vendorInfoList1);
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public Page<vendorInfoforStatusDTO> searchVendorInfos(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
+    public Page<VendorInfoforStatusDTO> searchVendorInfos(Long venderTypeId, String venderCode, String venNickname,
+                                                          String bankAccount, Integer venType, String roleType,
+                                                          Pageable pageable) {
         String companyOid = OrgInformationUtil.getCurrentCompanyOid().toString();
         String companyId = OrgInformationUtil.getCurrentCompanyId().toString();
         String tenantId = OrgInformationUtil.getCurrentTenantId().toString();
@@ -176,11 +377,12 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
             vendorInfos = baseMapper.selectVendorInfosByRelationCompanyForPage(venderTypeId, venderCode, venNickname, bankAccount, venType, companyId, companyOid, page);
         }
         page.setRecords(vendorInfos);
-        List<vendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
+        List<VendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(vendorInfoCOs)) {
-            for (vendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
+            for (VendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
                 vendorInfoCO.setVenBankAccountBeans(
-                        vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
+                        vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null,
+                                vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
                 );
 
                 List<VendorIndustryInfo> vendorIndustryInfoList = venVendorIndustryInfoMapper.selectVenVendorIndustryInfoByVenderId(vendorInfoCO.getId(), null);
@@ -192,15 +394,15 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
 
             }
         }
-        Page<vendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
+        Page<VendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         result.setRecords(vendorInfoCOs);
         result.setTotal(page.getTotal());
         return result;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public vendorInfoforStatusDTO searchVendorInfoByOne(Long id) {
-        vendorInfoforStatusDTO vendorInfoCO;
+    public VendorInfoforStatusDTO searchVendorInfoByOne(Long id) {
+        VendorInfoforStatusDTO vendorInfoCO;
         VendorInfo vendorInfo = baseMapper.selectById(id);
         if (vendorInfo == null) {
             throw new BizException(RespCode.SUPPLIER_NOT_EXISTS);
@@ -657,15 +859,16 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
             }
         }
     }
-    public VendorInfoCO operationVendor(vendorInfoforStatusDTO vendorInfoCO, String roleType, String action) {
+    public VendorInfoCO operationVendor(VendorInfoforStatusDTO vendorInfoCO, String roleType, String action) {
         VendorInfo vendorInfo = VendorInfoAdapter.vendorInfoCOToVendorInfo(vendorInfoCO);
-        String vendorStatus = vendorInfo.getVendorStatus();
-        //提交校验
-        if (action.equals(VendorStatusEnum.PENGDING.getVendorStatus())&&(vendorStatus.equals(VendorStatusEnum.PENGDING.getVendorStatus())||vendorStatus.equals(VendorStatusEnum.PENGDING.getVendorStatus()))){
-            throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
+        if (StringUtils.isEmpty(vendorInfo.getVendorStatus())){
+            vendorInfo.setVendorStatus(vendorInfoCO.getVendorBankStatus());
         }
+        String vendorStatus = vendorInfo.getVendorStatus();
         //APPROVED(审批通过)REFUSE(审批驳回)
-        if ((action.equals(VendorStatusEnum.APPROVED.getVendorStatus())||(action.equals(VendorStatusEnum.APPROVED.getVendorStatus()))&&(!vendorStatus.equals(VendorStatusEnum.APPROVED.getVendorStatus())))){
+        //校验是否是已拒绝或已复核通过的状态
+        if (vendorStatus.equals(VendorStatusEnum.REFUSE.getVendorStatus()) ||
+                vendorStatus.equals(VendorStatusEnum.APPROVED.getVendorStatus())){
             throw new BizException(RespCode.SUPPLIER_VENDOR_STATUS);
         }
         vendorInfo.setVendorStatus(action);
@@ -676,7 +879,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
-    public Page<vendorInfoforStatusDTO> searchVendorInfosforApproval(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
+    public Page<VendorInfoforStatusDTO> searchVendorInfosforApproval(Long venderTypeId, String venderCode, String venNickname, String bankAccount, Integer venType, String roleType, Pageable pageable) {
         String companyOid = OrgInformationUtil.getCurrentCompanyOid().toString();
         String companyId = OrgInformationUtil.getCurrentCompanyId().toString();
         String tenantId = OrgInformationUtil.getCurrentTenantId().toString();
@@ -687,9 +890,9 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
         List<VendorInfo> vendorInfos;
         vendorInfos = baseMapper.selectVendorInfosByPage(venderTypeId, venderCode, venNickname, bankAccount, venType, tenantId, page);
         page.setRecords(vendorInfos);
-        List<vendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
+        List<VendorInfoforStatusDTO> vendorInfoCOs = page.getRecords().stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(vendorInfoCOs)) {
-            for (vendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
+            for (VendorInfoforStatusDTO vendorInfoCO : vendorInfoCOs) {
                 vendorInfoCO.setVenBankAccountBeans(
                         vendorBankAccountMapper.selectVendorBankAccountsByCompanyOidAndVendorInfoId(null, vendorInfoCO.getId().toString()).stream().map(VendorBankAccountAdapter::vendorBankAccountToVendorBankAccountCO).collect(Collectors.toList())
                 );
@@ -703,7 +906,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
 
             }
         }
-        Page<vendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
+        Page<VendorInfoforStatusDTO> result = new Page<>(pageable.getPageNumber() + 1, pageable.getPageSize());
         result.setRecords(vendorInfoCOs);
         result.setTotal(page.getTotal());
         return result;

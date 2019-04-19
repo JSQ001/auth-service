@@ -128,5 +128,7 @@ public class CompanyDTO implements Serializable {
      */
     private Boolean enablePasswordModify;
 
+    private Boolean companyUnitFlag;
+
 
 }

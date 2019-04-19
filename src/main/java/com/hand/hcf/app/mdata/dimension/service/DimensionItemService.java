@@ -16,6 +16,7 @@ import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
+import com.hand.hcf.app.mdata.contact.persistence.ContactMapper;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
@@ -114,6 +115,9 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
 
     @Autowired
     private DimensionMapper dimensionMapper;
+
+    @Autowired
+    private ContactMapper contactMapper;
 
     /**
      *  新建维值
@@ -930,6 +934,7 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                         dimensionItem.setDimensionItemCode(projectNumber);
                         dimensionItem.setDimensionItemName(projectName);
                         dimensionItem.setDimensionId(dimension.getId());
+                        dimensionItem.setFromProjectFlag(true);
                         //1005代表分配公司
                         if(visibleUserScope.equals(company)){
                             dimensionItem.setVisibleUserScope(VisibleUserScopeEnum.ALL.getId());
@@ -947,7 +952,19 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                         }
                         //todo 如果给我人员和部门我这边公司怎么分配呢，分配当前账套下的所有公司嘛？
                         dto.setDimensionItem(dimensionItem);
-                        dto.setDepartmentOrUserGroupIdList(departmentOrUserGroupIdList);
+                        //如果是员工1004,用户id转成员工id
+                        if(VisibleUserScopeEnum.USER.getId().equals(visibleUserScope)){
+                            if(CollectionUtils.isNotEmpty(departmentOrUserGroupIdList)) {
+                                List<Long> contactIds =
+                                        contactMapper.selectList(new EntityWrapper<Contact>().in("user_id", departmentOrUserGroupIdList))
+                                        .stream().map(Contact::getId).collect(Collectors.toList());
+                                dto.setDepartmentOrUserGroupIdList(contactIds);
+                            }else{
+                                dto.setDepartmentOrUserGroupIdList(new ArrayList<>());
+                            }
+                        }else {
+                            dto.setDepartmentOrUserGroupIdList(departmentOrUserGroupIdList);
+                        }
                         Integer count = baseMapper.selectCount(new EntityWrapper<DimensionItem>()
                                 .eq("dimension_item_code",dimensionItem.getDimensionItemCode())
                                 .eq("dimension_id",dimensionItem.getDimensionId())

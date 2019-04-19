@@ -181,8 +181,8 @@
         <if test="description !=null and description !=''">
             AND a.description like concat(concat('%',#{description}),'%')
         </if>
-        <if test="code !=null and code !=''">
-            AND a.code #{code}
+        <if test="code != null and code !=''">
+            AND a.code like concat(concat('%',#{code}),'%')
         </if>
         <if test="id !=null ">
             AND a.id = #{id}

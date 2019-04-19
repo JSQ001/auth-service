@@ -22,6 +22,7 @@ import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.dto.CompanyDTO;
+import com.hand.hcf.app.mdata.company.service.CompanyAssociateUnitService;
 import com.hand.hcf.app.mdata.company.service.CompanySecurityService;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
@@ -90,23 +91,17 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     private HcfOrganizationInterface hcfOrganizationInterface;
 
     @Autowired
-    CompanySecurityService companySecurityService;
-    @Autowired
-    DepartmentService departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
-    LegalEntityService legalEntityService;
+    private LegalEntityService legalEntityService;
     @Autowired
-    SetOfBooksService setOfBooksService;
+    private PhoneService phoneService;
+    @Autowired
+    private DepartmentUserService departmentUserService;
 
     @Autowired
-    PhoneService phoneService;
-
-    @Autowired
-    DepartmentUserService departmentUserService;
-
-    @Autowired
-    RedisHelper redisHelper;
+    private RedisHelper redisHelper;
 
     @Autowired
     private UserImportService userImportService;
@@ -122,6 +117,9 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     private MessageService messageService;
     @Autowired
     private DepartmentGroupService departmentGroupService;
+
+    @Autowired
+    private CompanyAssociateUnitService companyAssociateUnitService;
 
 
     public Contact contactDTOToContact(ContactDTO contactDTO) {
@@ -434,6 +432,9 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                                             String status,
                                             List<UUID> companyOids,
                                             UUID currentUserOid,
+                                            String keyContact,
+                                            String keyCompany,
+                                            String keyDepartment,
                                             Page page) {
         Integer statusValue = null;
         if (status == null) {
@@ -451,6 +452,9 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                 .status(statusValue)
                 .companyOids(companyOids)
                 .currentUserOid(currentUserOid)
+                .keyContact(keyContact)
+                .keyCompany(keyCompany)
+                .keyDepartment(keyDepartment)
                 .orderByEmployeeId(true);
         List<UserDTO> list = listUserDTOByQO(
                 contactQOBuilder.build(),page);
@@ -682,12 +686,12 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             // 根据用户租户和职级值列表类型查询值列表
             SysCodeValueCO rankDTO = hcfOrganizationInterface.getValueBySysCodeAndValue(SystemCustomEnumerationTypeEnum.LEVEL.getId().toString(), userDTO.getRankCode());
             if (rankDTO != null) {
-                contact.setRank(rankDTO.getName());
+                contact.setRankInfo(rankDTO.getName());
                 contact.setRankCode(userDTO.getRankCode());
                 userDTO.setRankCode(rankDTO.getValue());
             }
         }else{
-            contact.setRank(null);
+            contact.setRankInfo(null);
             contact.setRankCode(null);
         }
         // 判断员工类型是否为空
@@ -706,7 +710,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
 
         //员工上级领导非必填查询封装
         UUID directManager = userDTO.getDirectManager();
-        if (!StringUtils.isEmpty(directManager)) {
+        if (!org.springframework.util.StringUtils.isEmpty(directManager)) {
             Contact directManagerOp = getByUserOid(directManager);
             if (directManagerOp != null) {
                 contact.setDirectManager(directManager);
@@ -807,7 +811,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         userDTO.setGenderCode(contact.getGenderCode());
         userDTO.setDutyCode(contact.getDutyCode());
         userDTO.setDuty(contact.getDuty());
-        userDTO.setRank(contact.getRank());
+        userDTO.setRankInfo(contact.getRankInfo());
         userDTO.setRankCode(contact.getRankCode());
         userDTO.setEmployeeType(contact.getEmployeeType());
         userDTO.setEmployeeTypeCode(contact.getEmployeeTypeCode());
@@ -1161,6 +1165,23 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      */
     @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public void recoverEntry(Contact contact) {
+        Integer departmentStatus = 101;
+        // 查询部门
+        DepartmentUser departmentUser = departmentUserService.selectOne(new EntityWrapper<DepartmentUser>()
+                .eq("user_id", contact.getUserId()));
+        Department department = departmentService.selectById(departmentUser.getDepartmentId());
+        if (department == null || departmentStatus.compareTo(department.getStatus()) != 0){
+            throw new BizException(RespCode.MAIN_DATA_DEPARTMENT_IS_DISABLED);
+        }
+        Company company = companyService.selectById(contact.getCompanyId());
+        if (company == null || company.getEnabled() == null || !company.getEnabled()){
+            throw new BizException(RespCode.MAIN_DATA_COMPANY_IS_DISABLED);
+        }
+        if (!companyAssociateUnitService.isAssociate(
+                contact.getTenantId(), contact.getCompanyId(), department.getId())){
+            // 校验公司部门
+            throw new BizException(RespCode.MAIN_DATA_COMPANY_DEPARTMENT_ASSOCIATE_IS_DISABLED);
+        }
         String leaveMail = contact.getEmail();
         String leaveEmployee = contact.getEmployeeId();
         String normalMail = null;
@@ -1174,7 +1195,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         if(baseMapper.varifyEmailExsits(normalMail) != null){
             throw new BizException(RespCode.EMPLOYEE_EMAIL_EXISTS);
         }
-        Company company = companyService.selectById(contact.getCompanyId());
         Optional<Contact> optional = this.getByEmployeeIdAndTenantId(company.getTenantId(), normalEmployee);
         if (optional.isPresent()) {
             throw new BizException(RespCode.EMPLOYEE_EXISTS, new String[]{normalEmployee});
@@ -1221,7 +1241,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     public byte[] exportContactCardImportTemplate() {
         return contactCardImportService.exportContactCardImportTemplate();
     }
-
+    @LcnTransaction
     public UUID importUserPublic(MultipartFile file) throws Exception {
         try {
             InputStream in = file.getInputStream();
@@ -1367,7 +1387,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             if(!StringUtil.isNullOrEmpty(user.getRankCode())){
                 SysCodeValueCO rankDTO = hcfOrganizationInterface.getValueBySysCodeAndValue(SystemCustomEnumerationTypeEnum.LEVEL.getId().toString(), rankCode);
                 if (rankDTO != null) {
-                    user.setRank(rankDTO.getName());
+                    user.setRankInfo(rankDTO.getName());
                 }else {
                     user.setErrorFlag(true);
                     user.setErrorDetail(user.getErrorDetail()+"级别不存在!");
@@ -1486,7 +1506,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             user.setPhoneNumber(contact.getMobile());
             return user;
         }).collect(Collectors.toList());
-        hcfOrganizationInterface.saveUserBatch(users);
+        users = hcfOrganizationInterface.saveUserBatch(users);
         Map<String, UserCO> userMap = users.stream().collect(Collectors.toMap(UserCO::getLogin, e -> e));
         mdataUserTempDomains.stream().forEach(userTemp -> {
             // 保存员工
@@ -1541,7 +1561,15 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                                                  Boolean isInactiveSearch,
                                                  Page page) {
 
-        List<UserDTO> list = listUserDTOByCondition(keyword, tenantId, departmentOids, status, companyOids,null, page);
+        List<UserDTO> list = listUserDTOByCondition(keyword,
+                tenantId,
+                departmentOids,
+                status, companyOids,
+                null,
+                null,
+                null,
+                null,
+                page);
         return list;
     }
 

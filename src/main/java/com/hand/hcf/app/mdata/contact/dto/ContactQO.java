@@ -42,6 +42,14 @@ public class ContactQO {
     private String title;
     private Boolean isPrimaryPhone;//是否主手机号
     private String keyContact;//联系人姓名/工号模糊查询
+    /**
+     * 公司代码/名称 模糊查询
+     */
+    private String keyCompany;
+    /**
+     * 部门代码/名称模糊查询
+     */
+    private String keyDepartment;
     private String keyword;//模糊查询关键字
     @Builder.Default
     private Boolean fuzzy = false;//模糊查询

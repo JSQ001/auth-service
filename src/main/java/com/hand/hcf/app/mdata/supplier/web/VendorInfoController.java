@@ -4,9 +4,8 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.VendorInfoCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.supplier.service.VendorInfoService;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.supplier.service.dto.vendorInfoforStatusDTO;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import com.hand.hcf.app.mdata.supplier.service.dto.VendorInfoforStatusDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,7 +38,7 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @PostMapping("/ven/info/insert")
-    public ResponseEntity<vendorInfoforStatusDTO> createVendorInfo(@RequestBody vendorInfoforStatusDTO vendorInfoCO,
+    public ResponseEntity<VendorInfoforStatusDTO> createVendorInfo(@RequestBody VendorInfoforStatusDTO vendorInfoCO,
                                                                    @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
 
         return ResponseEntity.ok(vendorInfoService.insertOrUpdateVendorInfo(vendorInfoCO, roleType));
@@ -53,7 +52,7 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @PutMapping("/ven/info/update")
-    public ResponseEntity<VendorInfoCO> updateVendorInfo(@RequestBody vendorInfoforStatusDTO vendorInfoCO,
+    public ResponseEntity<VendorInfoCO> updateVendorInfo(@RequestBody VendorInfoforStatusDTO vendorInfoCO,
                                                  @RequestParam(value = "roleType", required = false) String roleType) throws URISyntaxException {
         return ResponseEntity.ok(vendorInfoService.insertOrUpdateVendorInfo(vendorInfoCO, roleType));
     }
@@ -65,7 +64,7 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @PutMapping("/ven/info/operation")
-    public ResponseEntity<VendorInfoCO> operationVendorInfo(@RequestBody vendorInfoforStatusDTO vendorInfoCO,
+    public ResponseEntity<VendorInfoCO> operationVendorInfo(@RequestBody VendorInfoforStatusDTO vendorInfoCO,
                                                          @RequestParam(value = "roleType", required = false) String roleType,
                                                             @RequestParam(value = "action",required = true) String action) throws URISyntaxException {
         return ResponseEntity.ok(vendorInfoService.operationVendor(vendorInfoCO, roleType, action));
@@ -83,14 +82,14 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @GetMapping("/ven/info")
-    public ResponseEntity<List<vendorInfoforStatusDTO>> searchVendorInfos(@RequestParam(value = "venderTypeId", required = false) Long venderTypeId,
+    public ResponseEntity<List<VendorInfoforStatusDTO>> searchVendorInfos(@RequestParam(value = "venderTypeId", required = false) Long venderTypeId,
                                                                           @RequestParam(value = "venderCode", required = false) String venderCode,
                                                                           @RequestParam(value = "venNickname", required = false) String venNickname,
                                                                           @RequestParam(value = "bankAccount", required = false) String bankAccount,
                                                                           @RequestParam(value = "venType", required = false) Integer venType,
                                                                           @RequestParam(value = "roleType", required = false) String roleType,
                                                                           Pageable pageable) throws URISyntaxException {
-        Page<vendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfos(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
+        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfos(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/ven/info");
         return new ResponseEntity<>(page.getRecords(),headers,HttpStatus.OK);
     }
@@ -103,7 +102,7 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @GetMapping("/ven/info/{id}")
-    public ResponseEntity<vendorInfoforStatusDTO> searchVendorInfoByOne(@PathVariable("id") Long id) throws URISyntaxException {
+    public ResponseEntity<VendorInfoforStatusDTO> searchVendorInfoByOne(@PathVariable("id") Long id) throws URISyntaxException {
         return ResponseEntity.ok(vendorInfoService.searchVendorInfoByOne(id));
     }
 
@@ -158,14 +157,14 @@ public class VendorInfoController {
      * @throws URISyntaxException
      */
     @GetMapping("/ven/info/approval")
-    public ResponseEntity<List<vendorInfoforStatusDTO>> searchVendorInfosForApproval(@RequestParam(value = "venderTypeId", required = false) Long venderTypeId,
+    public ResponseEntity<List<VendorInfoforStatusDTO>> searchVendorInfosForApproval(@RequestParam(value = "venderTypeId", required = false) Long venderTypeId,
                                                                                      @RequestParam(value = "venderCode", required = false) String venderCode,
                                                                                      @RequestParam(value = "venNickname", required = false) String venNickname,
                                                                                      @RequestParam(value = "bankAccount", required = false) String bankAccount,
                                                                                      @RequestParam(value = "venType", required = false) Integer venType,
                                                                                      @RequestParam(value = "roleType", required = false) String roleType,
                                                                                      Pageable pageable) throws URISyntaxException {
-        Page<vendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfosforApproval(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
+        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfosforApproval(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/ven/info/approval");
         return new ResponseEntity<>(page.getRecords(),headers,HttpStatus.OK);
     }

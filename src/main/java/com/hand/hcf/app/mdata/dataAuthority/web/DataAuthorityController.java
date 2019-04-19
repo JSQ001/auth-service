@@ -242,6 +242,7 @@ public class DataAuthorityController {
      * @api {GET} /api/system/data/authority/query 【数据权限】查询数据权限
      * @apiDescription 查询数据权限
      * @apiGroup SysDataPermission
+     * @apiParam (请求参数) {Long} [id] 权限id
      * @apiParam (请求参数) {String} [dataAuthorityCode] 权限代码
      * @apiParam (请求参数) {String} [dataAuthorityName] 权限名称
      * @apiParam (请求参数) {Integer} [page] 页数
@@ -282,11 +283,12 @@ public class DataAuthorityController {
      * }
      */
     @GetMapping("/query")
-    public ResponseEntity<List<DataAuthority>> getDataAuthorityByCond(@RequestParam(name = "dataAuthorityCode",required = false) String dataAuthorityCode,
+    public ResponseEntity<List<DataAuthority>> getDataAuthorityByCond(@RequestParam(name = "id",required = false) Long id,
+                                                                      @RequestParam(name = "dataAuthorityCode",required = false) String dataAuthorityCode,
                                                                       @RequestParam(name = "dataAuthorityName",required = false) String dataAuthorityName,
                                                                       Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<DataAuthority> dataAuthorityByCond = dataAuthorityService.getDataAuthorityByCond(dataAuthorityCode, dataAuthorityName, page);
+        List<DataAuthority> dataAuthorityByCond = dataAuthorityService.getDataAuthorityByCond(id,dataAuthorityCode, dataAuthorityName, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/system/data/authority/query");
         return new ResponseEntity(dataAuthorityByCond,httpHeaders, HttpStatus.OK);
     }
