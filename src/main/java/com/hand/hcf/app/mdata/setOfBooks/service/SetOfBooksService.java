@@ -31,7 +31,6 @@ import com.hand.hcf.app.mdata.setOfBooks.dto.SetOfBooksPeriodDTO;
 import com.hand.hcf.app.mdata.setOfBooks.persistence.SetOfBooksMapper;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import io.netty.util.internal.StringUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.RandomStringUtils;
@@ -106,19 +105,19 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
         if (setOfBooks.getId() != null) {
             throw new BizException(RespCode.SETOFBOOKS_ID_NULL);
         }
-        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksCode())) {
+        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksCode())) {
             throw new BizException(RespCode.SETOFBOOKS_CODE_NULL);
         }
-        if (StringUtil.isNullOrEmpty(setOfBooks.getPeriodSetCode())) {
+        if (StringUtils.isEmpty(setOfBooks.getPeriodSetCode())) {
             throw new BizException(RespCode.SETOFBOOKS_PERIODSETCODE_NULL);
         }
-        if (StringUtil.isNullOrEmpty(setOfBooks.getFunctionalCurrencyCode())) {
+        if (StringUtils.isEmpty(setOfBooks.getFunctionalCurrencyCode())) {
             throw new BizException(RespCode.SETOFBOOKS_FCURRENCYCODE_NULL);
         }
         if (setOfBooks.getAccountSetId() == null) {
             throw new BizException(RespCode.SETOFBOOKS_18007);
         }
-        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksName())) {
+        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksName())) {
             throw new BizException(RespCode.SETOFBOOKS_NAME_NULL);
         }
         //  校验是否获取到租户ID
@@ -183,11 +182,11 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
             throw new BizException(RespCode.SETOFBOOKS_18002);
         }
         //  检查是否输入账套代码
-        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksCode())) {
+        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksCode())) {
             throw new BizException(RespCode.SETOFBOOKS_CODE_NULL);
         }
         //  检查是否输入账套名称
-        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksName())) {
+        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksName())) {
             throw new BizException(RespCode.SETOFBOOKS_NAME_NULL);
         }
         //  如果改变状态为禁用时,需要检查账套下是否存在法人

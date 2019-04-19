@@ -11,12 +11,10 @@ import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.handler.ExcelImportHandler;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelImportService;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.RedisHelper;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -105,8 +103,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     @Autowired
     DepartmentUserService departmentUserService;
 
-    @Autowired
-    RedisHelper redisHelper;
 
     @Autowired
     private UserImportService userImportService;
@@ -524,7 +520,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      * @return userDTO
      */
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
+   //@SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public UserDTO upsertUserForControl(UserDTO userDTO, UUID currentUserOID, Long tenantId) {
         CompanyDTO newCompany = companyService.getByCompanyOid(userDTO.getCompanyOid());
         Department newDepartment = departmentService.getByDepartmentOid(userDTO.getDepartmentOid());
@@ -986,7 +982,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         Set<Phone> phones = getPhones(contact.getId());
         for (Phone phone : phones) {
             if (phone.getPhoneNumber().indexOf("_") == -1) {
-                redisHelper.deleteByKey(CacheConstants.PHONE_KEY_PREFIX + phone.getPhoneNumber());
                 phone.setPhoneNumber(phone.getPhoneNumber() + "_" + Constants.LEAVED);
 
             }
@@ -1159,7 +1154,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      *
      * @param contact
      */
-    @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
+   //@SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public void recoverEntry(Contact contact) {
         String leaveMail = contact.getEmail();
         String leaveEmployee = contact.getEmployeeId();

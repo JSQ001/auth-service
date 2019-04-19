@@ -10,8 +10,6 @@ import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.service.MessageService;
@@ -260,8 +258,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param headerId
      */
     @Transactional(rollbackFor = Exception.class)
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public void deleteExpenseReportHeaderById(@LockedObject Long headerId) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public void deleteExpenseReportHeaderById(Long headerId) {
         ExpenseReportHeader expenseReportHeader = selectById(headerId);
         if (expenseReportHeader != null) {
             // 判断单据状态 非编辑中、撤回、拒绝的单据，都不能删除
@@ -702,8 +700,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      */
     @Transactional(rollbackFor = Exception.class)
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public BudgetCheckResultDTO submit(@LockedObject("documentId") WorkFlowDocumentRefCO workFlowDocumentRef,
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public BudgetCheckResultDTO submit( WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {
 
         ExpenseReportHeader expenseReportHeader = selectById(workFlowDocumentRef.getDocumentId());
@@ -977,8 +975,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      */
     @Transactional(rollbackFor = Exception.class)
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public void updateDocumentStatus(@LockedObject Long headerId, Integer status, String approvalText) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public void updateDocumentStatus(Long headerId, Integer status, String approvalText) {
         ExpenseReportHeader header = this.selectById(headerId);
         if (header == null) {
             throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);

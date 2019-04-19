@@ -10,8 +10,6 @@ import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
 import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ServiceUnavailableException;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
-import com.hand.hcf.app.core.redisLock.enums.CredentialTypeEnum;
 import com.hand.hcf.app.core.service.MessageService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +44,7 @@ public class ApprovalPassService {
      * @param approvalReqDTO
      * @return
      */
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
+   //@SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResDTO passWorkflow(UUID approverOid, ApprovalReqDTO approvalReqDTO, UUID formOid) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();

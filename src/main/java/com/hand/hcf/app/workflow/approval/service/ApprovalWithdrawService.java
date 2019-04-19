@@ -17,8 +17,6 @@ import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
 import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
-import com.hand.hcf.app.core.redisLock.enums.CredentialTypeEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,7 +50,7 @@ public class ApprovalWithdrawService {
      */
     @Transactional
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
+   //@SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
     public ApprovalResDTO withdrawWorkflow(UUID userOid, ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();
         approvalResDTO.setSuccessNum(0);

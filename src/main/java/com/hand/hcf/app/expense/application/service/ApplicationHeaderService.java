@@ -7,8 +7,6 @@ import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.DateUtil;
@@ -187,8 +185,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      */
     @Transactional(rollbackFor = Exception.class)
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
-    public BudgetCheckResultDTO submit(@LockedObject(value = {"documentId"}) WorkFlowDocumentRefCO workFlowDocumentRef,
+   //@SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
+    public BudgetCheckResultDTO submit( WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
         // 1当存在多线程修改单据状态，可能导致最终单据的状态不正确。

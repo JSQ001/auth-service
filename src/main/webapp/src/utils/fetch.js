@@ -2,6 +2,7 @@ import axios from 'axios';
 import store from '../index';
 import qs from 'qs';
 import moment from 'moment';
+import config from 'config';
 
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
@@ -50,7 +51,7 @@ axios.interceptors.response.use(
   }
 );
 
-const baseUrl = '';
+const baseUrl = config.baseUrl;
 const httpFetch = {
   get(url, params, header = {}, options = {}) {
     if (url.indexOf('TENANT') < 0) {

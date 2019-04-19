@@ -31,8 +31,6 @@ import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -709,8 +707,8 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
      */
     @Transactional(rollbackFor = Exception.class)
     //@LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
-    public Boolean submit(@LockedObject(value = {"documentId"}) WorkFlowDocumentRefCO workFlowDocumentRef) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
+    public Boolean submit( WorkFlowDocumentRefCO workFlowDocumentRef) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
         // 1当存在多线程修改单据状态，可能导致最终单据的状态不正确。
         lockByDocumentId(workFlowDocumentRef.getDocumentId());

@@ -10,8 +10,6 @@ import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.OperationUtil;
@@ -156,9 +154,9 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param id
      * @return
      */
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteExpenseReportLineById(@LockedObject Long id){
+    public boolean deleteExpenseReportLineById( Long id){
         ExpenseReportLine expenseReportLine = selectById(id);
         ExpenseReportHeader expenseReportHeader = expenseReportHeaderService.selectById(expenseReportLine.getExpReportHeaderId());
         // 判断单据状态 非编辑中、撤回、拒绝的单据，都不能删除

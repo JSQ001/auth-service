@@ -17,7 +17,6 @@ import com.hand.hcf.app.core.exception.core.UserNotActivatedException;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
-import com.hand.hcf.app.core.util.RedisHelper;
 import com.hand.hcf.app.core.web.util.HttpRequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +45,6 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
     //默认自动锁定持续时间,单位:second
     private static final int DEFAULT_AUTO_UNLOCK_DURATION = 3600;
 
-    @Autowired
-    private RedisHelper redisHelper;
 
     @Autowired
     private UserLockMapper userLockMapper;
@@ -280,10 +277,7 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
         //3.拿到LoginAttempt
         Integer maxAttemptTimes = passwordPolicyDTO.getPasswordAttemptTimes() == 0 ? DEFAULT_MAX_LOGIN_ATTEMPT : passwordPolicyDTO.getPasswordAttemptTimes();
 
-        //4.增加失败次数:1,最大到maxAttemptTimes,如果小于则直接返回,等于则lockUser
-        if (maxAttemptTimes.longValue() > redisHelper.increment(CacheConstants.LOGIN_ATTEMPT_PREFIX + user.getId(), 1)) {
-            return;
-        }
+
 
         //5.construct userlock
         UserLock userLock = UserLock.builder()
@@ -317,7 +311,6 @@ public class AuthUserService extends BaseService<AuthUserMapper, UserDTO> {
                         .lockDateDeadline(ZonedDateTime.now().plusMinutes(unlockMinutes))
                         .build());
         //锁定用户时,清除登陆失败次数
-        redisHelper.deleteByKey(CacheConstants.LOGIN_ATTEMPT_PREFIX + userLock.getUserId());
         return userLock;
     }
 

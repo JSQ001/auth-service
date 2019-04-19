@@ -54,9 +54,6 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,8 +85,6 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
     @Autowired
     private CompanySecurityService companySecurityService;
 
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Autowired
     private CompanyLevelService companyLevelService;
@@ -416,15 +411,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
             throw new BizException(RespCode.COMPANY_6030007);
         }
         UUID uuid = UUID.randomUUID();
-        redisTemplate.execute(new RedisCallback() {
-            @Override
-            public Object doInRedis(RedisConnection connection) throws DataAccessException {
-                byte[] key = (REDIS_KEY + uuid).getBytes(Charset.forName("utf8"));
-                connection.set(key, verifyCode.getBytes(Charset.forName("utf8")));
-                connection.expire(key, CacheConstants.cacheExpireMap.get(REDIS_KEY));
-                return null;
-            }
-        });
+
         try {
             return VerifyCodeDTO.builder().attachmentOid(uuid).image(new String(Base64.getEncoder().encode(image), "UTF-8")).build();
         } catch (Exception e) {
@@ -1033,23 +1020,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return baseMapper.findByIdIn(companyIds);
     }
 
-    public String getCompanyRegistrationTokenForTest(UUID attachmentOid) {
-        final String[] verifyCode = {""};
-        redisTemplate.execute(new RedisCallback() {
-            @Override
-            public Object doInRedis(RedisConnection connection) throws DataAccessException {
-                byte[] key = (REDIS_KEY + attachmentOid).getBytes(Charset.forName("utf8"));
-                byte[] val = connection.get(key);
-                if (val == null) {
-                    throw new ValidationException(new ValidationError("token", "verifyCode not exist"));
-                }
-                verifyCode[0] = new String(val, Charset.forName("utf8"));
-                return null;
-            }
-        });
-        return verifyCode[0];
 
-    }
 
     public Company findCompanyByCompanyCodeAndTenantId(String companyCode, Long tenantId) {
         return baseMapper.getByQO(CompanyQO.builder().tenantId(tenantId).companyCode(companyCode).build()).get(0);

@@ -31,7 +31,6 @@ import com.hand.hcf.app.mdata.supplier.service.VendorInfoService;
 import com.hand.hcf.app.mdata.utils.FileUtil;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections4.CollectionUtils;
@@ -606,10 +605,10 @@ public class BankInfoService extends BaseService<BankInfoMapper,BankInfo> {
         // 非空校验
         list
                 .stream()
-                .filter(e -> StringUtil.isNullOrEmpty(e.getBankCode())
-                        || StringUtil.isNullOrEmpty(e.getBankName())
-                        || StringUtil.isNullOrEmpty(e.getBankBranchName())
-                        || StringUtil.isNullOrEmpty(e.getEnabledStr()))
+                .filter(e -> StringUtils.isEmpty(e.getBankCode())
+                        || StringUtils.isEmpty(e.getBankName())
+                        || StringUtils.isEmpty(e.getBankBranchName())
+                        || StringUtils.isEmpty(e.getEnabledStr()))
                 .forEach(e -> {
                     e.setErrorFlag(true);
                     e.setErrorDetail("必输字段不能为空！");
@@ -627,7 +626,7 @@ public class BankInfoService extends BaseService<BankInfoMapper,BankInfo> {
                             e.setErrorDetail("银行编码长度是否超过36位并只能包含数字和减号!");
                         }
                     }
-                    if(!StringUtil.isNullOrEmpty(e.getCountryCode())){
+                    if(!StringUtils.isEmpty(e.getCountryCode())){
                         Boolean locationExist = countryCodeList.stream().anyMatch((countryCode)-> countryCode.equals(e.getCountryCode()));
                         if(!locationExist){
                             e.setErrorFlag(true);
