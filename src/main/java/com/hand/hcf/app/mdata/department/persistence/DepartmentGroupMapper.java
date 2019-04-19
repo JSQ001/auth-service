@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.department.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.pagination.Pagination;
-import com.hand.hcf.app.mdata.department.domain.DepartmentGroupDepartmentCO;
+import com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.contact.domain.ContactBankAccount;
 import com.hand.hcf.app.mdata.contact.dto.UserInfoDTO;

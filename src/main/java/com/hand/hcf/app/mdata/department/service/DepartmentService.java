@@ -6,6 +6,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.hand.hcf.app.common.co.DepartmentCO;
+import com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
@@ -21,7 +22,7 @@ import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
-import com.hand.hcf.app.mdata.department.domain.DepartmentGroupDepartmentCO;
+
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;

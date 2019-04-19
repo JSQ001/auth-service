@@ -18,7 +18,7 @@ import com.hand.hcf.app.mdata.contact.dto.UserInfoDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactBankAccountService;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.domain.DepartmentGroup;
-import com.hand.hcf.app.mdata.department.domain.DepartmentGroupDepartmentCO;
+import com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO;
 import com.hand.hcf.app.mdata.department.domain.DepartmentGroupDetail;
 import com.hand.hcf.app.mdata.department.dto.DepartmentDTO;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentGroupDetailMapper;

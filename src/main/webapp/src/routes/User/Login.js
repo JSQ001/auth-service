@@ -583,7 +583,7 @@ export default class Login extends React.Component {
     );
     axios({
       /** jiu.zhao 环境IP */
-      url: 'http://127.0.0.1:9082/oauth/token',
+      url: 'http://localhost:9082/oauth/token',
       method: 'POST',
       headers: {
         'x-helios-client': 'web',

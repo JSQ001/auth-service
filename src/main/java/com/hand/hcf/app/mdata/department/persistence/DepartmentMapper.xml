@@ -167,7 +167,7 @@
             then d.name
             else i18n.name
         end as name,
-        ifnull(d.DEPARTMENT_CODE, 'ZZZZ9999'),--jiu.zhao 修复mysql兼容性问题
+        ifnull(d.DEPARTMENT_CODE, 'ZZZZ9999'),/**jiu.zhao 修复mysql兼容性问题**/
         d.path,
         d.department_code,
         d.department_oid,
