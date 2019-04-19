@@ -19,7 +19,7 @@
     <!-- 主数据建表语句 -->
     <include file="classpath:db/liquibase/mdata/version1.0.0/init.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/mdata/version1.0.0/release20190114.xml" relativeToChangelogFile="false"/>
-
+    <include file="classpath:db/liquibase/mdata/1.1.0/release1.1.0.xml" relativeToChangelogFile="false"/>
     <!-- workflow表初始化 -->
     <!-- 初始化表结构 -->
     <include file="classpath:db/liquibase/workflow/initTable/initTable.xml" relativeToChangelogFile="false"/>

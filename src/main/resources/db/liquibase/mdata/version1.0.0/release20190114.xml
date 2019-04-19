@@ -587,6 +587,9 @@
         </createTable>
     </changeSet>
 
+
+
+
     <changeSet id="201901281133001" author="zhu.zhao">
         <createTable tableName="sys_currency" remarks="">
             <column name="id" type="bigint" remarks="">
