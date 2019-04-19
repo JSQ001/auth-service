@@ -2,12 +2,12 @@ const config = {
   appEnv: 'dev',
 
   /** jiu.zhao 蚂蚁定制 环境IP */
-  authUrl: 'http://localhost:9082',
-  baseUrl: 'http://localhost:9082',
-  expenseUrl: 'http://localhost:9082',
-  mdataUrl: 'http://localhost:9082',
-  prePaymentUrl: 'http://localhost:9082',
-  workflowUrl: 'http://localhost:9082',
+  authUrl: '.',
+  baseUrl: '.',
+  expenseUrl: '.',
+  mdataUrl: '.',
+  prePaymentUrl: '.',
+  workflowUrl: '.',
   /** jiu.zhao 蚂蚁定制 */
 
   // baseUrl: 'http://139.224.2.45:11024',

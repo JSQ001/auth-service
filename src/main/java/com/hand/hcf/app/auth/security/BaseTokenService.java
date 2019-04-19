@@ -113,9 +113,13 @@ public class BaseTokenService extends DefaultTokenServices {
     @Override
     public OAuth2Authentication loadAuthentication(String accessTokenValue)  {
         OAuth2Authentication oAuth2Authentication = super.loadAuthentication(accessTokenValue);
-        String uri = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getRequestURI();
-        if ("/api/refactor/devicebind/bind".equals(uri)) {
-            return oAuth2Authentication;
+
+        ServletRequestAttributes requestAttributes= ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
+        if(requestAttributes!=null) {
+            String uri = requestAttributes.getRequest().getRequestURI();
+            if ("/api/refactor/devicebind/bind".equals(uri)) {
+                return oAuth2Authentication;
+            }
         }
         BaseTokenStore baseTokenStore = (BaseTokenStore) applicationContext.getBean("tokenStore");
         boolean isValidate = baseTokenStore.getIsValidatedDevice(accessTokenValue);
