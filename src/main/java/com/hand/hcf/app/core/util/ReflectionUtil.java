@@ -13,27 +13,14 @@ import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.invoker.MethodInvoker;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -458,24 +445,16 @@ public final class ReflectionUtil {
                     if (data == null) {
                         paramField = new Object[]{null};
                     } else {
-                        if (data instanceof BigDecimal) {
-                            paramField = new Object[]{((BigDecimal) data).longValue()};// 将bigDecimal转成Long类型
-                        } else {
-                            paramField = new Object[]{data};
-                        }
+                        paramField = new Object[]{TypeConversionUtils.parseLong(data)};
                     }
                 } else if (parameterClazz == Boolean.class) {
                     if (data == null) {
                         paramField = new Object[]{null};
                     } else {
-                        if (data instanceof BigDecimal) {
-                            if ("1".equals(((BigDecimal) data).toString())) {
-                                paramField = new Object[]{Boolean.TRUE};
-                            } else if ("0".equals(((BigDecimal) data).toString())) {
-                                paramField = new Object[]{Boolean.FALSE};
-                            } else {
-                                paramField = new Object[]{data};
-                            }
+                        if ("1".equals(TypeConversionUtils.parseString(data))) {
+                            paramField = new Object[]{Boolean.TRUE};
+                        } else if ("0".equals(TypeConversionUtils.parseString(data))) {
+                            paramField = new Object[]{Boolean.FALSE};
                         } else {
                             paramField = new Object[]{data};
                         }
@@ -484,11 +463,7 @@ public final class ReflectionUtil {
                     if (data == null) {
                         paramField = new Object[]{null};
                     } else {
-                        if (data instanceof BigDecimal) {
-                            paramField = new Object[]{((BigDecimal) data).intValue()};
-                        } else {
-                            paramField = new Object[]{data};
-                        }
+                        paramField = new Object[]{TypeConversionUtils.parseInt(data)};
                     }
                 } else if (parameterClazz.isEnum()) {
                     // 如果是枚举类，并且实现了 IEnum接口
@@ -586,9 +561,9 @@ public final class ReflectionUtil {
             sql = ignoreCaseReplaceAll(sql, "[\\s\\t\\n]+false+[\\s\\t\\n]=", " 0 =");
             sql = ignoreCaseReplaceAll(sql, "[\\s\\t\\n]+false=", " 0 =");
             sql = ignoreCaseReplaceAll(sql, "\\(false=", "(0 =");
-            if (sql.indexOf("`") > 0) {
+            /*if (sql.indexOf("`") > 0) {
                 sql = sql.replaceAll("`", "");// oracle数据库不支持 ` 符合
-            }
+            }*/
         }
         return sql;
     }

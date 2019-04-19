@@ -15,6 +15,10 @@ public final class HttpServletUtil {
 
     public final static String HTTP_HEADER_USER = "HCF-User";
 
+    public final static String HTTP_MENU_ID = "X-Menu-Id";
+
+    public final static String HTTP_MENU_PARAM = "X-Menu-Params";
+
     private HttpServletUtil(){
 
     }

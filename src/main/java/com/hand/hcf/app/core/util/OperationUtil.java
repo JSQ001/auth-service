@@ -225,7 +225,7 @@ public final class OperationUtil {
      */
     private static Double safeDivide(boolean isZero,boolean isAbs,boolean isRound,Double dividend, Double divisor,Integer scale) {
         if(dividend == null || divisor == null){
-            throw new BizException(RespCode.SYS_OPERATION_DATA_NOT_BE_EMPTY);
+            throw new BizException("SYS_OPERATION_DATA_NOT_BE_EMPTY");
         }
         BigDecimal returnValue = BigDecimal.valueOf(dividend);
         if(isRound){
@@ -307,7 +307,7 @@ public final class OperationUtil {
      */
     private static Double safeMultiply(boolean isZero,boolean isAbs,boolean isRound,Double value1, Double value2,Integer scale){
         if(value1 == null || value2 == null){
-            throw new BizException(RespCode.SYS_OPERATION_DATA_NOT_BE_EMPTY);
+            throw new BizException("SYS_OPERATION_DATA_NOT_BE_EMPTY");
         }
         BigDecimal returnValue = BigDecimal.valueOf(value1);
         if(isRound){
@@ -576,7 +576,7 @@ public final class OperationUtil {
      */
     private static BigDecimal safeDivide(boolean isZero,boolean isAbs,boolean isRound,BigDecimal dividend, BigDecimal divisor,Integer scale) {
         if(dividend == null || divisor == null){
-            throw new BizException(RespCode.SYS_OPERATION_DATA_NOT_BE_EMPTY);
+            throw new BizException("SYS_OPERATION_DATA_NOT_BE_EMPTY");
         }
         BigDecimal returnValue ;
         if(isRound){
@@ -658,7 +658,7 @@ public final class OperationUtil {
      */
     private static BigDecimal safeMultiply(boolean isZero,boolean isAbs,boolean isRound,BigDecimal value1, BigDecimal value2,Integer scale){
         if(value1 == null || value2 == null){
-            throw new BizException(RespCode.SYS_OPERATION_DATA_NOT_BE_EMPTY);
+            throw new BizException("SYS_OPERATION_DATA_NOT_BE_EMPTY");
         }
         BigDecimal returnValue;
         if(isRound){

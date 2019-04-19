@@ -60,11 +60,11 @@ public final class TypeConversionUtils {
         if(object == null){
             return null;
         }
-        if(object.toString().equals("null")){
+        if("null".equals(object.toString())){
             return null;
         }
         // 注意：String类型  null和""
-        if(object.toString().equals("")){
+        if("".equals(object.toString())){
             return "";
         }
         return object.toString();
@@ -106,7 +106,7 @@ public final class TypeConversionUtils {
         if(object == null){
             return null;
         }
-        if(object.toString().equals("") || object.toString().equals("null")){
+        if("".equals(object.toString()) || "null".equals(object.toString())){
             return null;
         }
         return object.toString();
@@ -121,7 +121,7 @@ public final class TypeConversionUtils {
             return list;
         }
         if(list == null){
-            list = new ArrayList();
+            list = new ArrayList<>();
         }
         if(isUniqueness){
             if(list.contains(value)){
@@ -170,7 +170,7 @@ public final class TypeConversionUtils {
 
     public static Boolean collectionIsNotEmpty(Collection collection){
         if(isNotEmpty(collection)){
-            return collection.size() > 0 ? true : false;
+            return collection.size() > 0;
         }
         return false;
     }

@@ -23,18 +23,6 @@ public class DomainObjectMetaObjectHandler extends MetaObjectHandler {
             setValue("createdBy", 0L, metaObject);
             setValue("lastUpdatedBy", 0L, metaObject);
         }
-        // 由于不确定这两个字段非公用字段，先判断类是否有该属性的get方法
-//        Object originalObject = metaObject.getOriginalObject();
-//        try {
-//            originalObject.getClass().getMethod("getEnabled",null);
-//            setValue("enabled", Boolean.TRUE, metaObject);
-//        } catch (NoSuchMethodException e) {
-//        }
-//        try {
-//            originalObject.getClass().getMethod("getDeleted",null);
-//            setValue("deleted", Boolean.FALSE, metaObject);
-//        } catch (NoSuchMethodException e) {
-//        }
     }
 
     @Override

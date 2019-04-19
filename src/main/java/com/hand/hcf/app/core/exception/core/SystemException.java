@@ -1,6 +1,6 @@
 
 
-package com.hand.hcf.app.core.exception.core;
+package com.hand.hcf.core.exception.core;
 
 public class SystemException extends RuntimeException {
 

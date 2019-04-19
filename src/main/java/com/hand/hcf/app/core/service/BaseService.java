@@ -14,6 +14,7 @@ import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.core.domain.DomainI18n;
 import com.hand.hcf.app.core.domain.DomainLogic;
 import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.ExceptionUtil;
 import com.hand.hcf.app.core.util.ReflectUtil;
 import com.hand.hcf.app.core.util.ReflectionUtil;

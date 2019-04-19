@@ -5,20 +5,26 @@ import com.baomidou.mybatisplus.MybatisXMLLanguageDriver;
 import com.baomidou.mybatisplus.entity.GlobalConfiguration;
 import com.baomidou.mybatisplus.mapper.LogicSqlInjector;
 import com.baomidou.mybatisplus.spring.MybatisSqlSessionFactoryBean;
+import com.baomidou.mybatisplus.spring.boot.starter.GlobalConfig;
 import com.baomidou.mybatisplus.spring.boot.starter.MybatisPlusProperties;
 import com.hand.hcf.app.core.annotation.EnableBaseI18nService;
+
 import com.hand.hcf.app.core.persistence.DomainObjectMetaObjectHandler;
 import com.hand.hcf.app.core.plugin.*;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.type.JdbcType;
+import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -135,9 +141,6 @@ public class DatabaseConfiguration {
     @Bean
     public Interceptor[] getInterceptors() {
         List<Interceptor> interceptors = new ArrayList<Interceptor>();
-        // 数据权限拦截器
-//        DataAuthProcessInterceptor dataAuthProcessInterceptor = new DataAuthProcessInterceptor();
-//        interceptors.add(dataAuthProcessInterceptor);
         // 考虑到公用字段填充与部分方法冲突，现使用拦截器创建时公用字段enabled、deleted、versionNumber
         DomainMetaInterceptor domainMetaInterceptor = new DomainMetaInterceptor();
         interceptors.add(domainMetaInterceptor);
@@ -163,6 +166,10 @@ public class DatabaseConfiguration {
 
         // 乐观锁重写，使用 updateById 或者 updateAllColumnById方法后会把更新后的versionNumber的值赋值给原对象
         interceptors.add(new HcfOptimisticLockerInterceptor());
+
+        // 数据权限拦截器(拦截器需要最后放在最后，最先执行该拦截器，处理掉sql中特殊标识)
+        DataAuthProcessInterceptor dataAuthProcessInterceptor = new DataAuthProcessInterceptor();
+        interceptors.add(dataAuthProcessInterceptor);
         return interceptors.toArray(new Interceptor[]{});
     }
 
