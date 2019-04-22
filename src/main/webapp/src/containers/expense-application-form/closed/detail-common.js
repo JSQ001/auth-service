@@ -21,31 +21,31 @@ class ApplicationCommon extends React.Component {
       historyLoading: false, //控制审批历史记录是否loading
       columns: [
         {
-          title: '序号',
+          title: this.$t('expense.the.serial.number') /*序号*/,
           dataIndex: 'number',
           width: 90,
           render: (value, record, index) =>
             (this.state.pagination.current - 1) * this.state.pagination.pageSize + index + 1,
         },
         {
-          title: '申请类型',
+          title: this.$t('expense.application.type') /*申请类型*/,
           dataIndex: 'expenseTypeName',
           width: 150,
         },
         {
-          title: '申请金额',
+          title: this.$t('expense.apply.amount') /*申请金额*/,
           dataIndex: 'amount',
           width: 120,
           render: value => this.filterMoney(value),
         },
         {
-          title: '本位币金额',
+          title: this.$t('expense.functional.currency.amount') /*本位币金额*/,
           dataIndex: 'functionalAmount',
           width: 120,
           render: value => this.filterMoney(value),
         },
         {
-          title: '可关闭金额',
+          title: this.$t('expense.can.close.the.amount') /*可关闭金额*/,
           dataIndex: 'canCloseAmount',
           width: 120,
           render: value => this.filterMoney(value),
@@ -94,9 +94,9 @@ class ApplicationCommon extends React.Component {
       statusCode: headerData.status,
       remark: headerData.remarks,
       infoList: [
-        { label: '申请人', value: headerData.employeeName },
-        { label: '公司', value: headerData.companyName },
-        { label: '部门', value: headerData.departmentName },
+        { label: this.$t('expense.reverse.apply.name'), value: headerData.employeeName } /*申请人*/,
+        { label: this.$t('expense.the.company'), value: headerData.companyName } /*公司*/,
+        { label: this.$t('expense.department'), value: headerData.departmentName } /*部门*/,
       ],
       customList: headerData.dimensions
         ? headerData.dimensions
@@ -108,7 +108,7 @@ class ApplicationCommon extends React.Component {
 
     if (headerData.associateContract) {
       headerInfo.infoList.push({
-        label: '关联合同',
+        label: this.$t('expense.associated.with.the.contract') /*关联合同*/,
         value: headerData.contractNumber,
         linkId: headerData.contractHeaderId,
       });
@@ -130,7 +130,7 @@ class ApplicationCommon extends React.Component {
       });
 
       let option = {
-        title: '备注',
+        title: this.$t('expense.reverse.remark') /*备注*/,
         dataIndex: 'remarks',
         align: 'center',
       };
@@ -141,13 +141,15 @@ class ApplicationCommon extends React.Component {
 
       //关闭
       columns.push({
-        title: '操作',
+        title: this.$t('expense.operation') /*操作*/,
         dataIndex: 'options',
         width: 120,
         align: 'center',
         fixed: 'right',
         render: (value, record) =>
-          record.closedFlag !== 'CLOSED' && <a onClick={() => this.closeLine(record)}>关闭</a>,
+          record.closedFlag !== 'CLOSED' && (
+            <a onClick={() => this.closeLine(record)}>{this.$t('expense.shut.down')}</a>
+          ),
       });
 
       this.setState({ columns }, () => {
@@ -273,12 +275,18 @@ class ApplicationCommon extends React.Component {
       <div>
         <Row>
           <Col span={2}>
-            <span style={{ float: 'right' }}>金额属性</span>
+            <span style={{ float: 'right' }}>{this.$t('expense.amount.of.property')}</span>
+            {/*金额属性*/}
           </Col>
           <Col span={6} offset={1}>
-            汇率日期：{moment(record.exchangeDate).format('YYYY-MM-DD')}
+            {this.$t('expense.exchange.rate.date1')}
+            {moment(record.exchangeDate).format('YYYY-MM-DD')}
           </Col>
-          <Col span={6}>汇率：{record.exchangeRate}</Col>
+          <Col span={6}>
+            {this.$t('expense.exchange.rate1')}
+            {record.exchangeRate}
+          </Col>
+          {/*汇率：*/}
         </Row>
       </div>
     );
@@ -305,7 +313,8 @@ class ApplicationCommon extends React.Component {
           style={{ color: '#fff', background: '#f04134' }}
           onClick={() => this.setState({ modalVisible: true, isCloseHeader: true })}
         >
-          关闭
+          {this.$t('expense.shut.down')}
+          {/*关闭*/}
         </Button>
       </h3>
     );
@@ -325,21 +334,22 @@ class ApplicationCommon extends React.Component {
             marginTop: 20,
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
           }}
-          title="申请信息"
+          title={this.$t('expense.application.information')} /*申请信息*/
         >
           <div className="table-header">
             {lineInfo.currencyAmount && (
               <div style={{ float: 'right' }}>
                 <Breadcrumb style={{ marginBottom: '10px', lineHeight: '32px' }}>
                   <Breadcrumb.Item>
-                    申请金额:
+                    {this.$t('expense.apply.amount')}:/*申请金额*/
                     <span style={{ color: 'green' }}>
                       {' ' + lineInfo.currencyAmount.currencyCode}{' '}
                       {this.filterMoney(lineInfo.currencyAmount.amount)}
                     </span>
                   </Breadcrumb.Item>
                   <Breadcrumb.Item>
-                    本币金额:<span style={{ color: 'green' }}>
+                    {this.$t('expense.local.currency.amount')}:<span style={{ color: 'green' }}>
+                      {/*本币金额*/}
                       {' ' + this.props.company.baseCurrency}{' '}
                       {this.filterMoney(lineInfo.currencyAmount.functionalAmount)}
                     </span>
@@ -364,23 +374,26 @@ class ApplicationCommon extends React.Component {
         </Card>
         {/** 关闭按钮的弹出框 */}
         <Modal
-          title="关闭申请单"
+          title={this.$t('expense.close.the.application.form')} /*关闭申请单*/
           visible={this.state.modalVisible}
           onOk={this.handleClose}
           confirmLoading={btLoading}
           destroyOnClose={true}
           onCancel={() => this.setState({ modalVisible: false, isCloseHeader: false })}
-          okText="确认"
-          cancelText="取消"
+          okText={this.$t('expense.confirm')} /*确认*/
+          cancelText={this.$t('expense.cancel')} /*取消*/
           cancelButtonProps={{ loading: btLoading }}
         >
           <Form>
-            <FormItem {...formItemLayout} label="关闭原因">
+            <FormItem {...formItemLayout} label={this.$t('expense.close.the.reason')}>
+              {/*关闭原因*/}
               {getFieldDecorator('messages', {
                 rules: [
                   {
                     required: true,
-                    message: '请输入关闭原因',
+                    message: this.$t(
+                      'expense.please.enter.the.shut.down.reason'
+                    ) /*请输入关闭原因*/,
                   },
                 ],
               })(

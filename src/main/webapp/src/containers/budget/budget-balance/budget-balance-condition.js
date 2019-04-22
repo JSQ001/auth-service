@@ -20,25 +20,15 @@ class BudgetBalanceCondition extends React.Component {
       },
       columns: [
         // 方案代码
-        {
-          title: this.$t('budget.balance.condition.code'),
-          align: 'center',
-          dataIndex: 'conditionCode',
-          width: '35%',
-        },
+        { title: this.$t('budget.balance.condition.code'), dataIndex: 'conditionCode', width: 220 },
         //方案名称
-        {
-          title: this.$t('budget.balance.condition.name'),
-          align: 'center',
-          dataIndex: 'conditionName',
-          width: '35%',
-        },
+        { title: this.$t('budget.balance.condition.name'), dataIndex: 'conditionName', width: 220 },
         //操作
         {
           title: this.$t('budget.balance.operate'),
-          align: 'center',
           dataIndex: 'operation',
-          width: '30%',
+          align: 'center',
+          width: 190,
           render: (text, record) => (
             <span>
               <a onClick={e => this.useCondition(e, record)}>

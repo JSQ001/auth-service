@@ -1,6 +1,4 @@
 import React from 'react';
-// import config from 'config';
-// import ListSelector from 'widget/list-selector';
 import Table from 'widget/table';
 import { routerRedux } from 'dva/router';
 import {
@@ -22,10 +20,6 @@ import AutomaticPaymentRulesService from './automatic-payment-rules.service';
 const { Search } = Input;
 const { Option } = Select;
 const selectWidth = { width: '100%' };
-
-// const {
-//     form: { getFieldDecorator },
-// } = this.props;
 
 class EmployDistribution extends React.Component {
   constructor(props) {
@@ -174,6 +168,7 @@ class EmployDistribution extends React.Component {
    */
   getList = () => {
     const { match } = this.props;
+    console.log(match.params.id);
     const { page, pagination } = this.state;
     this.setState({ loading: true });
     AutomaticPaymentRulesService.getDistributiveEmploy(

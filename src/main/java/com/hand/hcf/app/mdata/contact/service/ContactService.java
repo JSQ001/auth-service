@@ -3,7 +3,7 @@ package com.hand.hcf.app.mdata.contact.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.UserCO;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
@@ -11,12 +11,11 @@ import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.handler.ExcelImportHandler;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelImportService;
 import com.hand.hcf.app.core.service.MessageService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.RedisHelper;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -100,8 +99,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     @Autowired
     private DepartmentUserService departmentUserService;
 
-    @Autowired
-    private RedisHelper redisHelper;
 
     @Autowired
     private UserImportService userImportService;
@@ -527,8 +524,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      * @param userDTO
      * @return userDTO
      */
-    @LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
+    //@LcnTransaction
+   //@SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public UserDTO upsertUserForControl(UserDTO userDTO, UUID currentUserOID, Long tenantId) {
         CompanyDTO newCompany = companyService.getByCompanyOid(userDTO.getCompanyOid());
         Department newDepartment = departmentService.getByDepartmentOid(userDTO.getDepartmentOid());
@@ -990,7 +987,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         Set<Phone> phones = getPhones(contact.getId());
         for (Phone phone : phones) {
             if (phone.getPhoneNumber().indexOf("_") == -1) {
-                redisHelper.deleteByKey(CacheConstants.PHONE_KEY_PREFIX + phone.getPhoneNumber());
                 phone.setPhoneNumber(phone.getPhoneNumber() + "_" + Constants.LEAVED);
 
             }
@@ -1163,7 +1159,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
      *
      * @param contact
      */
-    @SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
+   //@SyncLock(lockPrefix = SyncLockPrefix.EMPLOYEE_NEW,waiting = true,timeOut = 3000)
     public void recoverEntry(Contact contact) {
         Integer departmentStatus = 101;
         // 查询部门
@@ -1195,6 +1191,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         if(baseMapper.varifyEmailExsits(normalMail) != null){
             throw new BizException(RespCode.EMPLOYEE_EMAIL_EXISTS);
         }
+
         Optional<Contact> optional = this.getByEmployeeIdAndTenantId(company.getTenantId(), normalEmployee);
         if (optional.isPresent()) {
             throw new BizException(RespCode.EMPLOYEE_EXISTS, new String[]{normalEmployee});
@@ -1241,7 +1238,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     public byte[] exportContactCardImportTemplate() {
         return contactCardImportService.exportContactCardImportTemplate();
     }
-    @LcnTransaction
+
     public UUID importUserPublic(MultipartFile file) throws Exception {
         try {
             InputStream in = file.getInputStream();

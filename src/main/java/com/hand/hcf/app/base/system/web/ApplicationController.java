@@ -5,12 +5,12 @@ import com.hand.hcf.app.base.system.domain.Application;
 import com.hand.hcf.app.base.system.service.ApplicationService;
 import com.hand.hcf.app.core.util.PageUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,8 +22,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ApplicationController {
     private final ApplicationService applicationService;
-
-    private DiscoveryClient discoveryClient;
 
 
     /**
@@ -241,7 +239,7 @@ public class ApplicationController {
 
     @GetMapping("/services")
     public ResponseEntity<List<String>> getAllService() {
-        List<String> services = discoveryClient.getServices();
+        List<String> services =new ArrayList<>();// discoveryClient.getServices();
         services.sort(String::compareTo);
         return ResponseEntity.ok(services);
     }

@@ -389,6 +389,7 @@ class RuleDefinitionRight extends Component {
           id: taskingParams.id,
           assignNumberId: taskingParams.assignNumberId,
           handleNumberId: taskingParams.handleNumberId,
+          versionNumber: taskingParams.versionNumber,
         };
         this.setState({ nodeSaving: true });
         service

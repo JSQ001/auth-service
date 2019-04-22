@@ -6,7 +6,8 @@
 
 
     <select id="listPageByRoleIds" resultType="com.hand.hcf.app.base.userRole.dto.FunctionPageDTO">
-        SELECT v.page_name,
+        SELECT
+        v.page_name,
         t.function_id,
         t.page_id,
         v.file_path,
@@ -17,11 +18,44 @@
         v.full_router as fullRouter,
         v.full_url as fullUrl,
         cfr.content_id
-        FROM sys_page_list v
-        inner join sys_function_page_relation t on t.page_id = v.id
-        left join sys_content_function_rel cfr on t.function_id = cfr.function_id
-        WHERE v.deleted = 0
-        AND exists (select 1 from sys_role_function rf where rf.function_id = t.function_id
+        FROM
+        sys_page_list v
+        inner join
+        (
+        select
+        fpr.*
+        from
+        sys_function_page_relation fpr,
+        sys_function_list fl
+        where
+        fl.id = fpr.function_id
+        and fl.tenant_id = #{tenantId}
+        )  t
+        on t.page_id = v.id
+        left join
+        (
+        select
+        fr.*
+        from
+        sys_content_function_rel fr,
+        sys_content_list cl
+        where
+        cl.id = fr.content_id
+        and cl.tenant_id = #{tenantId}
+        )  cfr
+        on t.function_id = cfr.function_id
+        WHERE
+        v.deleted = 0
+        AND exists (
+        select
+        1
+        from
+        sys_role_function rf,
+        sys_role sr
+        where
+        rf.function_id = t.function_id
+        and sr.id = rf.role_id
+        and sr.tenant_id = #{tenantId}
             <if test="roleIds != null and roleIds.size > 0">
                 AND rf.role_id in
                 <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">

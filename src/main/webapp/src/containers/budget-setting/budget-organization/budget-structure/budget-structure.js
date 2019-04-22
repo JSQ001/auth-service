@@ -46,24 +46,23 @@ class BudgetStructure extends React.Component {
         {
           /*预算表代码*/
           title: this.$t({ id: 'budget.structureCode' }),
-          align: 'center',
+          width: 230,
           key: 'structureCode',
           dataIndex: 'structureCode',
         },
         {
           /*预算表名称*/
           title: this.$t({ id: 'budget.structureName' }),
-          align: 'center',
+          awidth: 300,
           key: 'structureName',
           dataIndex: 'structureName',
         },
         {
           /*编制期段*/
           title: this.$t({ id: 'budget.periodStrategy' }),
-          align: 'center',
+          width: 105,
           key: 'periodStrategy',
           dataIndex: 'periodStrategy',
-          width: '10%',
           render: recode => {
             if (recode === 'MONTH') return this.$t({ id: 'periodStrategy.month' }); /*月度*/
             if (recode === 'QUARTER') return this.$t({ id: 'periodStrategy.quarter' }); /*季度*/
@@ -73,9 +72,9 @@ class BudgetStructure extends React.Component {
         {
           /*备注*/
           title: this.$t({ id: 'budget.structureDescription' }),
-          align: 'center',
           key: 'description',
           dataIndex: 'description',
+          width: 330,
           render: desc => (
             <span>
               {desc ? (
@@ -92,9 +91,9 @@ class BudgetStructure extends React.Component {
           /*状态*/
           title: this.$t({ id: 'common.column.status' }),
           key: 'status',
-          width: '10%',
-          align: 'center',
+          width: 110,
           dataIndex: 'enabled',
+          align: 'center',
           render: enabled => (
             <Badge
               status={enabled ? 'success' : 'error'}

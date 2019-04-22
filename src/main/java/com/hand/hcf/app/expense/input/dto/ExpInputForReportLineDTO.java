@@ -30,6 +30,11 @@ public class ExpInputForReportLineDTO {
      * 报账单单号
      */
     private String documentNumber;
+
+    /**
+     * 原报账单头id
+     */
+    private Long expReportHeaderId;
     /**
      * 原报账单行id
      */
@@ -98,4 +103,9 @@ public class ExpInputForReportLineDTO {
      * 分摊行信息
      */
     List<ExpInputForReportDistDTO> expInputForReportDistDTOS;
+
+    /**
+     * 用途类类型
+     */
+    private String useType;
 }

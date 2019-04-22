@@ -52,7 +52,7 @@ class WorkTeamDetails extends Component {
       .then(res => {
         message.success(this.$t('common.update.success'));
         this.props.changeStatus('normal');
-        this.props.reRenderTree(workDetails);
+        this.props.reRenderTree(res.data);
       })
       .catch(err => {
         message.error(err.response.data.message);

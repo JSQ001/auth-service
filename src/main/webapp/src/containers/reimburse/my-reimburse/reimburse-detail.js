@@ -123,8 +123,8 @@ class ReimburseDetail extends React.Component {
             Modal.confirm({
               title: '确认提交？',
               content: res.data.message,
-              okText: this.$t({ id: 'pay.backlash.ok' }),
-              cancelText: this.$t({ id: 'pay.backlash.cancel' }),
+              okText: this.$t({ id: 'common.ok' }),
+              cancelText: this.$t({ id: 'common.cancel' }),
               onOk: () => {
                 reimburseService
                   .submit(params, true)

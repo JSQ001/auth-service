@@ -1,15 +1,11 @@
 package com.hand.hcf.app.core.util;
 
 import com.hand.hcf.app.core.exception.BizException;
-import org.thymeleaf.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,11 +24,11 @@ public final class DateUtil {
     //    String(yyyy-MM-dd)转Date
     public static Date stringToDateV1(String StringDate){
         if(StringUtils.isEmpty(StringDate)){
-            throw new BizException(RespCode.SYS_STRING_IS_NULL);
+            throw new BizException("SYS_STRING_IS_NULL");
         }
         String rex = "\\d{4}-\\d{2}-\\d{2}";
         if(!StringDate.matches(rex)){
-            throw new BizException(RespCode.SYS_DATE_FORMAT_NOT_TRUE);
+            throw new BizException("SYS_DATE_FORMAT_NOT_TRUE");
         }
         SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
@@ -57,7 +53,7 @@ public final class DateUtil {
         }
         String rex = "\\d{4}-\\d{2}-\\d{2}";
         if (!StringDate.matches(rex)) {
-            throw new BizException(RespCode.SYS_DATE_FORMAT_NOT_TRUE);
+            throw new BizException("SYS_DATE_FORMAT_NOT_TRUE");
         }
         ZonedDateTime zonedDateTime = null;
         try {

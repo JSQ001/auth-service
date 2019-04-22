@@ -3,12 +3,32 @@ import httpFetch from 'share/httpFetch';
 
 export default {
   /**
+   * 获取开户银行列表
+   */
+  getAccountBank() {
+    return httpFetch.get(`${config.fundUrl}/api/account/open/codeList/ZJ_OPEN_BANK`);
+  },
+  /**
+   * 获取币种列表
+   * @param {*} id
+   */
+  getCurrencyList(id) {
+    // return httpFetch.get(`${config.baseUrl}/api/company/standard/currency/getAll`);
+    return httpFetch.get(
+      `${
+        config.mdataUrl
+      }/api/currency/rate/company/standard/currency/getAll/companyOid?companyOid=${id}`
+    );
+  },
+  /**
    * 获取账户开户维护列表页面
    */
   getAccountOpenMaintenanceList(page, size, searchParams) {
     // http://10.211.110.57:8080
-    // let url = `${config.fundUrl}/api/account/maintain/pageByCondition?&page=${page}&size=${size}`;
-    let url = `http://10.211.110.57:8080/api/account/maintain/pageByCondition?&page=${page}&size=${size}`;
+    let url = `${
+      config.fundUrl
+    }/api/account/maintain/pageDirectAddAccount?&page=${page}&size=${size}`;
+    // let url = `http://10.211.110.57:8080/api/account/maintain/pageDirectAddAccount?&page=${page}&size=${size}`;
     const params = searchParams;
     for (const paramsName in params) {
       if (Object.prototype.hasOwnProperty.call(params, paramsName)) {
@@ -17,7 +37,15 @@ export default {
     }
     return httpFetch.get(url);
   },
-
+  /**
+   * 创建或修改
+   * @param {*} record
+   */
+  createOrUpdateList(record) {
+    console.log('service in');
+    return httpFetch.post(`${config.fundUrl}/api/account/maintain/directAdd`, record);
+    // return httpFetch.post(`http://10.211.110.57:8080/api/account/maintain/directAdd`, record);
+  },
   /**
    * 根据ID查询账户开户维护详情
    */
@@ -35,8 +63,8 @@ export default {
   /**
    * 作废
    */
-  obsolete(id) {
-    return httpFetch.delete(`${config.fundUrl}/api/account/maintain/${id}`);
+  deleteList(list) {
+    return httpFetch.delete(`${config.fundUrl}/api/account/maintain/batchDelete`, list);
   },
 
   /**

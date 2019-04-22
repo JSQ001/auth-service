@@ -351,7 +351,7 @@ class RuleDetailItem extends React.Component {
     const tenantItem = {
       title: this.$t('base.add.account.set') /*添加账套*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=SOB`,
       searchForm: [
         {
@@ -419,7 +419,7 @@ class RuleDetailItem extends React.Component {
     const employeeItem = {
       title: this.$t('base.add.employees') /*添加员工*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=EMPLOYEE`,
       searchForm: [
         { type: 'input', id: 'code', label: this.$t('base.staff.code'), colSpan: 6 } /*员工代码*/,
@@ -568,8 +568,8 @@ class RuleDetailItem extends React.Component {
                   {item.dataScope === '1004' ? (
                     <span>
                       {item.filtrateMethodDesc}
-                      {`${item.dataAuthorityRuleDetailValues.length}{this.$t("base.a")}`}
-                      {dataType[item.dataType].label}/*个*/
+                      {`${item.dataAuthorityRuleDetailValues.length}` + this.$t('base.a')}
+                      {dataType[item.dataType].label}
                     </span>
                   ) : (
                     <span>

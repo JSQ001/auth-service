@@ -160,7 +160,10 @@ class ListSelector extends React.Component {
             o[this.getLastKey(selectorItem.key)].toString() ===
               item[this.getLastKey(selectorItem.key)].toString() && (o = { ...item });
           } else {
-            if (o[this.props.valueKey].toString() === item[this.props.valueKey].toString()) {
+            if (
+              (o[this.props.valueKey] || '').toString() ===
+              (item[this.props.valueKey] || '').toString()
+            ) {
               tempSelected[index] = { ...item };
             }
           }
@@ -439,6 +442,12 @@ class ListSelector extends React.Component {
   handleReturn = () => {
     this.props.onReturn();
   };
+  // 清空
+  clearSelected = () => {
+    let { rowSelection } = this.state;
+    rowSelection.selectedRowKeys = [];
+    this.setState({ selectedData: [], rowSelection });
+  };
 
   render() {
     const {
@@ -456,6 +465,7 @@ class ListSelector extends React.Component {
       modalWidth,
       showRowClick,
       okText,
+      cancelText,
     } = this.props;
     const {
       data,
@@ -467,7 +477,20 @@ class ListSelector extends React.Component {
       scrollX,
     } = this.state;
     const { searchForm, columns, title, key } = selectorItem;
-
+    let footDiv = (
+      <div key="footerKey">
+        <span key="clearKey" style={{ float: 'left' }}>
+          已选 {selectedData.length}条 &nbsp;&nbsp;&nbsp;&nbsp;
+          <a onClick={this.clearSelected}>清空</a>
+        </span>,
+        <Button key="back" onClick={onCancel}>
+          {cancelText ? cancelText : '返回'}
+        </Button>,
+        <Button key="confirmKey" type="primary" onClick={this.handleOk}>
+          {okText ? okText : '确定'}
+        </Button>
+      </div>
+    );
     return (
       <Modal
         title={this.$t(listTitle || title)}
@@ -483,6 +506,8 @@ class ListSelector extends React.Component {
             this.props.diyFooter ? (
               <Button onClick={this.handleReturn}>返回</Button>
             ) : null
+          ) : this.props.clearFlag ? (
+            footDiv
           ) : (
             this.state.footerButton
           )
@@ -579,6 +604,7 @@ ListSelector.propTypes = {
   onRowMouseLeave: PropTypes.func, // 鼠标移出行
   diyFooter: PropTypes.bool, // 是否将底部按钮更换为返回按钮
   onReturn: PropTypes.func, // 返回按钮回调
+  clearFlag: PropTypes.bool, //是否显示左下角的清空按钮
 };
 
 ListSelector.defaultProps = {
@@ -595,6 +621,7 @@ ListSelector.defaultProps = {
   showRowClick: false,
   onRowMouseEnter: () => {},
   onRowMouseLeave: () => {},
+  clearFlag: false,
 };
 
 function mapStateToProps() {

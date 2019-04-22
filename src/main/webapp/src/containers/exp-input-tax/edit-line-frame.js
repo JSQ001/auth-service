@@ -8,7 +8,6 @@ class EditLineFrame extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      transferTypeList: [],
       useTypeList: [],
       columns: [
         {
@@ -52,7 +51,7 @@ class EditLineFrame extends Component {
         },
         {
           title: this.$t('expense.apportion.amount'),
-          dataIndex: 'contributions',
+          dataIndex: 'distAmount',
           align: 'center',
           render: amount => {
             return <Popover content={amount}>{this.filterMoney(amount, 2)}</Popover>;
@@ -61,7 +60,7 @@ class EditLineFrame extends Component {
         },
         {
           title: this.$t('tax.share.tax'),
-          dataIndex: 'shareTax',
+          dataIndex: 'distTaxAmount',
           align: 'center',
           render: amount => {
             return <Popover content={amount}>{this.filterMoney(amount, 2)}</Popover>;
@@ -69,7 +68,6 @@ class EditLineFrame extends Component {
           width: 120,
         },
       ],
-      dataSources: [],
       selectedRowKeys: [], // 选中的行rowKey
       pagination: {
         showSizeChanger: true,
@@ -86,16 +84,6 @@ class EditLineFrame extends Component {
   }
 
   componentDidMount = () => {
-    // 业务大类
-    this.getSystemValueList('transferType')
-      .then(res => {
-        const transferTypeList = res.data.values;
-        this.setState({ transferTypeList });
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-      });
-
     // 用途类型
     this.getSystemValueList('useType')
       .then(res => {
@@ -105,6 +93,16 @@ class EditLineFrame extends Component {
       .catch(err => {
         message.error(err.response.data.message);
       });
+
+    const {
+      params: { expInputForReportDistDTOS },
+    } = this.props;
+
+    const selectedRowKeys = expInputForReportDistDTOS
+      .filter(o => o.selectFlag === 'Y')
+      .map(o => o.expReportDistId);
+
+    this.setState({ selectedRowKeys });
   };
 
   // 多选
@@ -121,15 +119,29 @@ class EditLineFrame extends Component {
   // 保存
   handleSubmit = e => {
     e.preventDefault();
-    const { form } = this.props;
+    const { selectedRowKeys } = this.state;
+    const { form, params } = this.props;
     const { validateFields } = form;
-    this.setState({ saveLoading: true });
+
     validateFields((err, values) => {
       if (err) return;
-      console.log(values);
-      const params = { ...values };
+      this.setState({ saveLoading: true });
+
+      if (selectedRowKeys.length === params.expInputForReportDistDTOS.length) {
+        params.selectFlag = 'Y';
+      } else if (selectedRowKeys.length > 0) {
+        params.selectFlag = 'P';
+      } else {
+        params.selectFlag = 'N';
+      }
+      selectedRowKeys.forEach(value => {
+        const row = params.expInputForReportDistDTOS.find(o => o.expReportDistId === value);
+        if (row) {
+          row.selectFlag = 'Y';
+        }
+      });
       service
-        .updateLineValue(params)
+        .saveExpenseLine([{ ...params, ...values, useTypeName: '' }])
         .then(res => {
           if (res) {
             message.success(this.$t('common.update.success'));
@@ -167,15 +179,7 @@ class EditLineFrame extends Component {
       labelCol: { span: 8 },
       wrapperCol: { span: 10 },
     };
-    const {
-      transferTypeList,
-      useTypeList,
-      columns,
-      dataSources,
-      selectedRowKeys,
-      pagination,
-      saveLoading,
-    } = this.state;
+    const { useTypeList, columns, selectedRowKeys, pagination, saveLoading } = this.state;
     const rowSelection = {
       selectedRowKeys,
       onChange: this.handleGetShareTax,
@@ -184,29 +188,18 @@ class EditLineFrame extends Component {
       <div>
         <Form>
           <FormItem {...formItemLayout} label={this.$t('tax.business.categories')}>
-            {getFieldDecorator('transferProportion', {
+            {getFieldDecorator('transferTypeName', {
               rules: [
                 {
                   required: true,
                   message: this.$t({ id: 'common.please.select' }),
                 },
               ],
-              initialValue: params.transferProportion,
-            })(
-              <Select
-                placeholder={this.$t('common.please.select')}
-                labelInValue
-                disabled
-                getPopupContainer={triggerNode => triggerNode.parentNode}
-              >
-                {transferTypeList.map(item => {
-                  return <Select.Option key={item.value}>{item.name}</Select.Option>;
-                })}
-              </Select>
-            )}
+              initialValue: params.transferTypeName,
+            })(<Input disabled />)}
           </FormItem>
-          <FormItem {...formItemLayout} label={this.$t('tax.rate')}>
-            {getFieldDecorator('transferType', {
+          <FormItem {...formItemLayout} label={this.$t('转出比例')}>
+            {getFieldDecorator('transferProportion', {
               rules: [
                 {
                   required: true,
@@ -217,18 +210,17 @@ class EditLineFrame extends Component {
             })(<Input placeholder={this.$t('common.please.enter')} disabled />)}
           </FormItem>
           <FormItem {...formItemLayout} label={this.$t('tax.use.type')}>
-            {getFieldDecorator('useTypeName', {
+            {getFieldDecorator('useType', {
               rules: [
                 {
                   required: true,
                   message: this.$t({ id: 'common.please.enter' }),
                 },
               ],
-              initialValue: params.useTypeName,
+              initialValue: params.useType,
             })(
               <Select
                 placeholder={this.$t('common.please.select')}
-                labelInValue
                 getPopupContainer={triggerNode => triggerNode.parentNode}
               >
                 {useTypeList.map(item => {
@@ -249,7 +241,6 @@ class EditLineFrame extends Component {
             })(
               <Select
                 placeholder={this.$t('common.please.select')}
-                labelInValue
                 disabled
                 getPopupContainer={triggerNode => triggerNode.parentNode}
               >
@@ -323,7 +314,7 @@ class EditLineFrame extends Component {
               </Col>
             </Row>
           </FormItem>
-          <FormItem {...formItemLayout} label={this.$t('tax.msg.leave')}>
+          <FormItem {...formItemLayout} label={this.$t('备注')}>
             {getFieldDecorator('description', {
               initialValue: params.description,
             })(
@@ -336,12 +327,13 @@ class EditLineFrame extends Component {
         </Form>
         <div className="common-item-title">{this.$t('tax.share.info')}</div>
         <Table
+          bordered
           columns={columns}
-          dataSource={dataSources}
+          dataSource={params.expInputForReportDistDTOS}
           style={{ margin: '10px 0 30px 0' }}
           scroll={{ x: 600 }}
           rowSelection={rowSelection}
-          rowKey={record => record.id}
+          rowKey={record => record.expReportDistId}
           pagination={pagination}
           onChange={this.tablePageChange}
         />

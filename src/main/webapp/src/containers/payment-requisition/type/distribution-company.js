@@ -13,23 +13,31 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
     this.state = {
       loading: false,
       companyTypeList: [
-        { label: '账套', id: 'setOfBooksCode' },
-        { label: '付款申请单类型代码', id: 'acpReqTypeCode' },
-        { label: '付款申请单类型名称', id: 'description' },
-        { label: '类型状态', id: 'enabled' },
+        { label: this.$t('payment.zhang.set'), id: 'setOfBooksCode' } /*账套*/,
+        {
+          label: this.$t('payment.payment.requisition.type.code'),
+          id: 'acpReqTypeCode',
+        } /*付款申请单类型代码*/,
+        {
+          label: this.$t('payment.payment.requisition.type.name'),
+          id: 'description',
+        } /*付款申请单类型名称*/,
+        { label: this.$t('payment.type.status'), id: 'enabled' } /*类型状态*/,
       ],
       companyTypeInfo: {},
       columns: [
-        { title: '公司代码', dataIndex: 'companyCode', align: 'center' },
-        { title: '公司名称', dataIndex: 'companyName', align: 'center' },
+        { title: this.$t('payment.company.code'), dataIndex: 'companyCode' } /*公司代码*/,
         {
-          title: '公司类型',
+          title: this.$t('payment.the.name.of.the.company'),
+          dataIndex: 'companyName',
+        } /*公司名称*/,
+        {
+          title: this.$t('payment.the.company.type') /*公司类型*/,
           dataIndex: 'companyTypeName',
-          align: 'center',
           render: type => <span>{type ? type : '-'}</span>,
         },
         {
-          title: '启用',
+          title: this.$t('payment.to.enable.the') /*启用*/,
           dataIndex: 'enabled',
           width: '8%',
           align: 'center',
@@ -61,21 +69,37 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
     const { params } = this.props.match;
     httpFetch.get(`${config.payUrl}/api/acp/request/type/queryById/${params.id}`).then(res => {
       let selectorItem = {
-        title: '批量分配公司',
+        title: this.$t('payment.mass.distribution.company') /*批量分配公司*/,
         url: `${config.payUrl}/api/acp/request/type/company/${
           params.setOfBooksId
         }/companies/query/filter`,
         searchForm: [
           // { type: 'input', id: 'setOfBooksCode', label: '账套', defaultValue: res.data.setOfBooksCode + '-' + res.data.setOfBooksName, disabled: true },
-          { type: 'input', id: 'companyCode', label: '公司代码' },
-          { type: 'input', id: 'companyName', label: '公司名称' },
-          { type: 'input', id: 'companyCodeFrom', label: '公司代码从' },
-          { type: 'input', id: 'companyCodeTo', label: '公司代码至' },
+          { type: 'input', id: 'companyCode', label: this.$t('payment.company.code') } /*公司代码*/,
+          {
+            type: 'input',
+            id: 'companyName',
+            label: this.$t('payment.the.name.of.the.company'),
+          } /*公司名称*/,
+          {
+            type: 'input',
+            id: 'companyCodeFrom',
+            label: this.$t('payment.the.company.code.from'),
+          } /*公司代码从*/,
+          {
+            type: 'input',
+            id: 'companyCodeTo',
+            label: this.$t('payment.the.company.code.to'),
+          } /*公司代码至*/,
         ],
         columns: [
-          { title: '公司代码', dataIndex: 'code' },
-          { title: '公司名称', dataIndex: 'name' },
-          { title: '公司类型', dataIndex: 'attribute4', render: value => value || '-' },
+          { title: this.$t('payment.company.code'), dataIndex: 'code' } /*公司代码*/,
+          { title: this.$t('payment.the.name.of.the.company'), dataIndex: 'name' } /*公司名称*/,
+          {
+            title: this.$t('payment.the.company.type'),
+            dataIndex: 'attribute4',
+            render: value => value || '-',
+          } /*公司类型*/,
         ],
         key: 'id',
       };
@@ -99,7 +123,7 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
       .then(res => {
         if (res.status === 200) {
           this.refs.table.search();
-          message.success('操作成功');
+          message.success(this.$t('payment.operation.is.successful')); /*操作成功*/
         }
       })
       .catch(e => {
@@ -127,7 +151,7 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
         )
         .then(res => {
           if (res.status === 200) {
-            message.success('操作成功');
+            message.success(this.$t('payment.operation.is.successful')); /*操作成功*/
             this.handleListShow(false);
             this.refs.table.search();
           }
@@ -138,7 +162,7 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
           }
         });
     } else {
-      message.warn('请选择公司');
+      message.warn(this.$t('payment.please.select.a.company')); /*请选择公司*/
     }
   };
 
@@ -184,11 +208,16 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
       if (index === 3) {
         periodRow.push(
           <Col span={6} key={index}>
-            <div>状态</div>
+            <div>{this.$t('paymentmethod.isenabled')}</div>
+            {/*状态*/}
             <div>
               <Badge
                 status={companyTypeInfo[item.id] ? 'success' : 'error'}
-                text={companyTypeInfo[item.id] ? '启用' : '禁用'}
+                text={
+                  companyTypeInfo[item.id]
+                    ? this.$t('payment.to.enable.the')
+                    : this.$t('payment.disable')
+                } /*禁用*/ /*启用*/
                 style={{ textAlign: 'center' }}
               />
             </div>
@@ -215,7 +244,8 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
           {/* <div className="table-header-title">{`共搜索到 ${pagination.total} 条数据`}</div> */}
           <div className="table-header-buttons">
             <Button type="primary" onClick={() => this.handleListShow(true)}>
-              批量分配公司
+              {this.$t('payment.mass.distribution.company')}
+              {/*批量分配公司*/}
             </Button>
           </div>
         </div>
@@ -234,7 +264,9 @@ class AcpRequestTypesCompanyDistribution extends React.Component {
           onOk={this.handleListOk}
         />
         <a style={{ fontSize: '14px', paddingBottom: '20px' }} onClick={this.handleBack}>
-          <Icon type="rollback" style={{ marginRight: '5px' }} />返回
+          <Icon type="rollback" style={{ marginRight: '5px' }} />
+          {this.$t('payment.return')}
+          {/*返回*/}
         </a>
       </div>
     );

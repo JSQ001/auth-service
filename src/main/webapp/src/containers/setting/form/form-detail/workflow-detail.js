@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'dva';
-//import Ellipsis from 'ant-design-pro/lib/Ellipsis'
 import {
   Form,
   Icon,
@@ -15,6 +14,7 @@ import {
   Affix,
 } from 'antd';
 
+import { routerRedux } from 'dva/router';
 import CustomApproveNode from 'containers/setting/workflow/custom-approve-node';
 import FormSetting from 'containers/setting/workflow/right-content/form-setting';
 import NodeApproveMan from 'containers/setting/workflow/right-content/node-approve-man';
@@ -25,7 +25,7 @@ import NodeConditionList from 'containers/setting/workflow/right-content/conditi
 import AddPersonModal from 'containers/setting/workflow/right-content/add-person-modal';
 import flowTipsImg from 'images/setting/workflow/flow-tips.png';
 import flowTipsEnImg from 'images/setting/workflow/flow-tips-en.png';
-import { routerRedux } from 'dva/router';
+
 import workflowService from 'containers/setting/workflow/workflow.service';
 import 'styles/setting/workflow/workflow-detail.scss';
 
@@ -221,12 +221,20 @@ class WorkflowDetail extends React.Component {
     this.setState({ chainInfo });
   };
 
-  //保存基本信息
+  // 保存基本信息
   handleBasicInfoSave = () => {
+    this.setState({ saving: true });
     workflowService.getApprovalChainDetail(this.props.params.formOid).then(res => {
       res.data = this.refreshName(res.data);
-      this.setState({ saving: true, chainInfo: res.data }, () => {
-        this.setState({ saving: false });
+      this.setState({
+        loading: false,
+        chainInfo: res.data,
+        saving: false,
+        chosenNodeType:
+          res.data.ruleApprovalNodes && res.data.ruleApprovalNodes[this.state.choseNodeIndex].type,
+        chosenNodeWidget: res.data.ruleApprovalNodes
+          ? res.data.ruleApprovalNodes[this.state.choseNodeIndex]
+          : {},
       });
     });
   };
@@ -240,7 +248,7 @@ class WorkflowDetail extends React.Component {
     }
   };
 
-  //审批人添加／删除
+  // 审批人添加／删除
   handleApproverChange = approverNotChange => {
     this.setState({ addPersonModalVisible: false }, () => {
       if (!approverNotChange) {
@@ -309,7 +317,7 @@ class WorkflowDetail extends React.Component {
     } = this.state;
     let approvalMode = chainInfo.approvalMode;
     return (
-      <div className="workflow-detail" style={{ marginTop: 20 }}>
+      <div className="workflow-detail" style={{ marginTop: 20, paddingBottom: 0 }}>
         <Spin spinning={loading}>
           <Row>
             <Col span={6} className="node-container">
@@ -322,22 +330,15 @@ class WorkflowDetail extends React.Component {
                   {formInfo.formName}
                 </Tooltip>
               ) : (
-                <Row>
-                  <Col span={language.code === 'zh_cn' ? 15 : 12} className="form-name">
-                    <Tooltip
-                      title={formInfo.formName}
-                      placement="topLeft"
-                      className="form-name-tooltip"
-                    >
-                      {formInfo.formName}
-                    </Tooltip>
-                  </Col>
-                  <Col span={9}>
-                    <Button type="primary" onClick={this.handleFormSettingVisible}>
-                      {this.$t('setting.key1412' /*表单配置*/)}
-                    </Button>
-                  </Col>
-                </Row>
+                <div>
+                  <Tooltip
+                    title={formInfo.formName}
+                    placement="topLeft"
+                    className="form-name-tooltip"
+                  >
+                    {formInfo.formName}
+                  </Tooltip>
+                </div>
               )}
               <div className="approve-type">
                 <div>
@@ -392,7 +393,7 @@ class WorkflowDetail extends React.Component {
             {/*div.right-content-cover 是为了操作节点的时候右边的内容区域不可编辑*/}
             {saving && <Col span={18} className="right-content-cover" />}
             {showFormSetting && (
-              <Col span={18} className="right-content">
+              <Col span={6} className="right-content">
                 <FormSetting formOid={this.props.params.formOid} />
               </Col>
             )}
@@ -436,62 +437,87 @@ class WorkflowDetail extends React.Component {
                 )}
                 {approvalMode === 1005 && (
                   <div className="node-detail">
-                    {chosenNodeType === 1001 && (
-                      <NodeApproveMan
-                        basicInfo={
-                          chosenNodeWidget.ruleApprovers
-                            ? chosenNodeWidget
-                            : { ...chosenNodeWidget, ruleApprovers: [] }
-                        }
-                        formInfo={formInfo}
-                        basicInfoSaveHandle={this.handleBasicInfoSave}
-                        modalVisibleHandle={this.handlePersonModalShow}
-                      />
-                    )}
-                    {chosenNodeType === 1002 && (
-                      <NodeKnow
-                        basicInfo={
-                          chosenNodeWidget.ruleApprovers
-                            ? chosenNodeWidget
-                            : { ...chosenNodeWidget, ruleApprovers: [] }
-                        }
-                        formInfo={formInfo}
-                        basicInfoSaveHandle={this.handleBasicInfoSave}
-                        modalVisibleHandle={this.handlePersonModalShow}
-                      />
-                    )}
-                    {chosenNodeType === 1003 && (
-                      <NodeApproveAi
-                        basicInfo={
-                          chosenNodeWidget.ruleApprovers
-                            ? chosenNodeWidget
-                            : { ...chosenNodeWidget, ruleApprovers: [] }
-                        }
-                        basicInfoSaveHandle={this.handleBasicInfoSave}
-                      />
-                    )}
-                    <NodeConditionList
-                      formOid={this.props.params.formOid}
-                      basicInfo={
-                        chosenNodeWidget.ruleApprovers
-                          ? chosenNodeWidget
-                          : { ...chosenNodeWidget, ruleApprovers: [] }
-                      }
-                      formInfo={formInfo}
-                      onApproverChange={this.handleApproverChange}
-                      judgeRuleInEdit={isRuleInEdit => this.setState({ isRuleInEdit })}
-                      conditionSaveHandle={this.handleConditionSave}
-                    />
-                    <AddPersonModal
-                      visible={addPersonModalVisible}
-                      personType={chosenNodeType === 1001 ? 1 : 2}
-                      ruleApprovers={chosenNodeWidget.ruleApprovers || []}
-                      ruleApprovalNodeOid={chosenNodeWidget.ruleApprovalNodeOid}
-                      formInfo={formInfo}
-                      onCancel={() => this.setState({ addPersonModalVisible: false })}
-                      onSelect={this.handleApproverChange}
-                      onDelete={this.handleDeleteApprover}
-                    />
+                    {chosenNodeType === 1001 &&
+                      (saving ? (
+                        <Spin />
+                      ) : (
+                        <NodeApproveMan
+                          basicInfo={
+                            chosenNodeWidget.ruleApprovers
+                              ? chosenNodeWidget
+                              : { ...chosenNodeWidget, ruleApprovers: [] }
+                          }
+                          formOid={this.props.params.formOid}
+                          formInfo={formInfo}
+                          basicInfoSaveHandle={this.handleBasicInfoSave}
+                          modalVisibleHandle={this.handlePersonModalShow}
+                          onApproverChange={this.handleApproverChange}
+                          conditionSaveHandle={this.handleConditionSave}
+                        />
+                      ))}
+                    {chosenNodeType === 1002 &&
+                      (saving ? (
+                        <Spin />
+                      ) : (
+                        <NodeKnow
+                          basicInfo={
+                            chosenNodeWidget.ruleApprovers
+                              ? chosenNodeWidget
+                              : { ...chosenNodeWidget, ruleApprovers: [] }
+                          }
+                          formOid={this.props.params.formOid}
+                          formInfo={formInfo}
+                          basicInfoSaveHandle={this.handleBasicInfoSave}
+                          modalVisibleHandle={this.handlePersonModalShow}
+                          onApproverChange={this.handleApproverChange}
+                          conditionSaveHandle={this.handleConditionSave}
+                        />
+                      ))}
+                    {chosenNodeType === 1003 &&
+                      (saving ? (
+                        <Spin />
+                      ) : (
+                        <NodeApproveAi
+                          basicInfo={
+                            chosenNodeWidget.ruleApprovers
+                              ? chosenNodeWidget
+                              : { ...chosenNodeWidget, ruleApprovers: [] }
+                          }
+                          formOid={this.props.params.formOid}
+                          formInfo={formInfo}
+                          basicInfoSaveHandle={this.handleBasicInfoSave}
+                          modalVisibleHandle={this.handlePersonModalShow}
+                          onApproverChange={this.handleApproverChange}
+                          conditionSaveHandle={this.handleConditionSave}
+                        />
+                      ))}
+                    {!saving &&
+                      !loading && (
+                        <React.Fragment>
+                          <NodeConditionList
+                            formOid={this.props.params.formOid}
+                            basicInfo={
+                              chosenNodeWidget.ruleApprovers
+                                ? chosenNodeWidget
+                                : { ...chosenNodeWidget, ruleApprovers: [] }
+                            }
+                            formInfo={formInfo}
+                            onApproverChange={this.handleApproverChange}
+                            judgeRuleInEdit={isRuleInEdit => this.setState({ isRuleInEdit })}
+                            conditionSaveHandle={this.handleConditionSave}
+                          />
+                          <AddPersonModal
+                            visible={addPersonModalVisible}
+                            personType={chosenNodeType === 1001 ? 1 : 2}
+                            ruleApprovers={chosenNodeWidget.ruleApprovers || []}
+                            ruleApprovalNodeOid={chosenNodeWidget.ruleApprovalNodeOid}
+                            formInfo={formInfo}
+                            onCancel={() => this.setState({ addPersonModalVisible: false })}
+                            onSelect={this.handleApproverChange}
+                            onDelete={this.handleDeleteApprover}
+                          />
+                        </React.Fragment>
+                      )}
                   </div>
                 )}
                 {approvalMode === 1005 &&

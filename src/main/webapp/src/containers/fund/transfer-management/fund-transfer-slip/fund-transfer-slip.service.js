@@ -11,7 +11,7 @@ export default {
   getCpAdjustShow(page, size, searchParams) {
     let url = `${
       config.fundUrl
-    }/api/cp/adjust/formal/baseInfo/getCpAdjustShow?page=${page}&size=${size}`;
+    }/api/cp/adjust/formal/baseInfo/getCpAdjustNew?page=${page}&size=${size}`;
     const params = searchParams;
     for (const paramsName in params) {
       if (Object.prototype.hasOwnProperty.call(params, paramsName)) {

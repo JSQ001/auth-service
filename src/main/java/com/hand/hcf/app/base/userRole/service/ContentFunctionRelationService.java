@@ -8,8 +8,8 @@ import com.hand.hcf.app.base.userRole.persistence.ContentFunctionRelationMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +24,19 @@ import java.util.stream.Collectors;
  * @date: 2019/1/29
  */
 @Service
-@AllArgsConstructor
 @Transactional
 public class ContentFunctionRelationService extends BaseService<ContentFunctionRelationMapper,ContentFunctionRelation>{
-    private final ContentFunctionRelationMapper contentFunctionRelationMapper;
+    @Autowired
+    private  ContentFunctionRelationMapper contentFunctionRelationMapper;
 
-    private final ContentListService contentListService;
-
-    private final FunctionListService functionListService;
-
-    private final PageListService pageListService;
-
-    private final FunctionPageRelationService functionPageRelationService;
+    @Autowired
+    private  ContentListService contentListService;
+    @Autowired
+    private  FunctionListService functionListService;
+    @Autowired
+    private  PageListService pageListService;
+    @Autowired
+    private  FunctionPageRelationService functionPageRelationService;
 
     /**
      * 批量新增 目录功能关联
@@ -157,23 +158,31 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
      * @return
      */
     public List<FunctionList> filterContentFunctionRelationByCond(String functionName,Page page){
-        List<FunctionList> result = contentFunctionRelationMapper.filterContentFunctionRelationByCond( functionName, page);
+        List<FunctionList> result = contentFunctionRelationMapper.filterContentFunctionRelationByCond( functionName, LoginInformationUtil.getCurrentTenantId(), page);
         return result;
     }
 
     public List<ContentFunctionDTO> listContentFunctions(List<Long> roleIds){
-        return baseMapper.listContentFunctions(roleIds);
+        return baseMapper.listContentFunctions(roleIds, LoginInformationUtil.getCurrentTenantId());
     }
 
-    public List<ContentFunctionDTO> listNotAssignFunction(List<Long> functionIds) {
-        return baseMapper.listNotAssignFunction(functionIds);
-    }
+
 
     /**
      * 查询角色可分配的菜单
      * @return
      */
     public List<ContentFunctionDTO> listCanAssignFunction(Long roleId) {
-        return baseMapper.listCanAssignFunction(roleId);
+        return baseMapper.listCanAssignFunction(roleId, LoginInformationUtil.getCurrentTenantId());
+    }
+
+
+    /**
+     * 条件查询 获取租户来源目录功能关联关系
+     * @param tenantId
+     * @return
+     */
+    public List<ContentFunctionRelation> listRelationByTenant(Long tenantId){
+        return baseMapper.listRelationByTenant(tenantId);
     }
 }

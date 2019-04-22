@@ -675,7 +675,6 @@ class NewPrePaymentDetail extends React.Component {
             {getFieldDecorator('description', {
               rules: [
                 {
-                  required: true,
                   message: '请输入',
                 },
               ],

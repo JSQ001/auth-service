@@ -21,7 +21,7 @@ import config from 'config';
 const FormItem = Form.Item;
 import moment from 'moment';
 import { toDecimal } from 'utils/utils';
-
+import Lov from 'widget/Template/lov';
 class NewExpenseApplicationFromLine extends Component {
   constructor(props) {
     super(props);
@@ -62,7 +62,13 @@ class NewExpenseApplicationFromLine extends Component {
     service
       .getNewInfo({ headerId: this.props.headerData.id, lineId: '', isNew: true })
       .then(res => {
-        this.setState({ model: res.data, pageLoading: false, dimensionList: res.data.dimensions });
+        this.setState({
+          model: res.data,
+          pageLoading: false,
+          dimensionList: res.data.dimensions,
+          companyId: res.data.companyId,
+          departmentId: res.data.departmentId,
+        });
       })
       .catch(err => {
         message.error(err.response.data.message);
@@ -90,13 +96,27 @@ class NewExpenseApplicationFromLine extends Component {
             isNew: false,
             dimensionList: res.data.dimensions,
             expenseTypeInfo,
+            companyId: res.data.companyId,
+            departmentId: res.data.departmentId,
           },
           () => {
             expenseTypeInfo.fields.map(o => {
-              if (o.fieldType === 'GPS') {
+              if (o.fieldType === 'GPS' && o.value) {
                 service.getLocalizationCityById(o.value).then(reso => {
-                  const city = reso.data.length > 0 ? reso.data[0].city : '';
-                  this.props.form.setFieldsValue({ [`field-${o.id}`]: [{ id: o.value, city }] });
+                  const description = reso.data.length > 0 ? reso.data[0].description : '';
+                  this.props.form.setFieldsValue({
+                    [`field-${o.id}`]: [{ id: o.value, description }],
+                  });
+                });
+              } else if (o.fieldType == 'PARTICIPANTS' || o.fieldType == 'PARTICIPANT') {
+                const userIdList = o.value ? o.value.split(',') : [];
+                service.getUserByIds(userIdList).then(reso => {
+                  let userList = reso.data ? reso.data : [];
+                  userList.map(user => {
+                    user.userId = user.id;
+                    user.userName = user.fullName;
+                  });
+                  this.props.form.setFieldsValue({ [`field-${o.id}`]: userList });
                 });
               }
             });
@@ -149,11 +169,16 @@ class NewExpenseApplicationFromLine extends Component {
               record.value = values[key].format();
             } else if (record.fieldType == 'START_DATE_AND_END_DATE') {
               record.value =
-                values[key].length > 0
+                values[key] && values[key].length > 0
                   ? values[key][0].format('YYYY-MM-DD') + ',' + values[key][1].format('YYYY-MM-DD')
                   : '';
             } else if (record.fieldType == 'GPS') {
-              record.value = values[key].length > 0 ? values[key][0].id : '';
+              record.value = values[key] && values[key].length > 0 ? values[key][0].id : '';
+            } else if (record.fieldType == 'PARTICIPANTS' || record.fieldType == 'PARTICIPANT') {
+              record.value =
+                values[key] && values[key].length > 0
+                  ? values[key].map(o => o.userId).toString()
+                  : '';
             } else {
               record.value = values[key];
             }
@@ -180,12 +205,12 @@ class NewExpenseApplicationFromLine extends Component {
         expenseTypeId: values.applicationType.id,
         companyId: values.company[0].id,
         departmentId: values.department[0].departmentId,
-        responsibilityCenterId: values.responsibilityCenter[0].id,
+        // responsibilityCenterId: values.responsibilityCenter[0].id,
+        responsibilityCenterId: values.responsibilityCenter.id,
         dimensions,
         fields,
         amount: values.amount,
       };
-
       if (expenseTypeInfo.entryMode) {
         params.price = values.price;
         params.quantity = values.quantity;
@@ -225,7 +250,6 @@ class NewExpenseApplicationFromLine extends Component {
 
   // 选择申请单
   selectApplicationType = item => {
-    console.log(item);
     this.setState({ expenseTypeInfo: item }, () => {
       if (item.entryMode) {
         this.props.form.setFieldsValue({ price: null, quantity: null, amount: null });
@@ -252,7 +276,6 @@ class NewExpenseApplicationFromLine extends Component {
     };
 
     const { getFieldDecorator } = this.props.form;
-
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
     switch (field.fieldType) {
       case 'TEXT':
@@ -313,7 +336,7 @@ class NewExpenseApplicationFromLine extends Component {
             <Col span={24}>
               <FormItem label={field.name} {...formItemLayout}>
                 {getFieldDecorator('field-' + field.id, {
-                  rules: [{ required: true, message: this.$t('common.please.select') }],
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
                   initialValue: field.value,
                 })(
                   <Select>
@@ -333,14 +356,13 @@ class NewExpenseApplicationFromLine extends Component {
             <Col span={24}>
               <FormItem label={field.name} {...formItemLayout}>
                 {getFieldDecorator(`field-${field.id}`, {
-                  rules: [{ required: true, message: this.$t('common.please.select') }],
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
                 })(
                   <Chooser
                     type="select_city"
-                    labelKey="city"
+                    labelKey="description"
                     valueKey="id"
                     single
-                    listExtraParams={{ code: 'CHN000000000' }}
                     showClear={false}
                   />
                 )}
@@ -359,6 +381,66 @@ class NewExpenseApplicationFromLine extends Component {
                     ? [moment(field.value.split(',')[0]), moment(field.value.split(',')[1])]
                     : '',
                 })(<DatePicker.RangePicker />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'PARTICIPANTS':
+      case 'PARTICIPANT':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                })(
+                  <Chooser
+                    type="select_authorization_user"
+                    labelKey="userName"
+                    valueKey="userId"
+                    listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                    showClear={false}
+                  />
+                )}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'LONG':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber precision={0} style={{ width: '100%' }} />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'DOUBLE':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<CustomAmount />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'POSITIVE_INTEGER':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber min={0} precision={0} style={{ width: '100%' }} />)}
               </FormItem>
             </Col>
           </Row>
@@ -401,7 +483,6 @@ class NewExpenseApplicationFromLine extends Component {
           });
         })
         .catch(err => {
-          console.log(err);
           message.error(err.response.data.message);
         });
     }
@@ -410,16 +491,23 @@ class NewExpenseApplicationFromLine extends Component {
   //公司改变
   companyChange = value => {
     this.setState({ companyId: value[0].id });
+    this.resetDefault();
     this.companyOrUnitChange(value[0].id, 'oldId');
     this.setExpenseTypeNull();
   };
   // 部门改变
   departmentChange = value => {
     this.setState({ departmentId: value[0].departmentId });
+    this.resetDefault();
     this.companyOrUnitChange('oldId', value[0].departmentId);
     this.setExpenseTypeNull();
   };
-
+  // 清空默认责任中心
+  resetDefault = () => {
+    this.props.form.setFieldsValue({
+      responsibilityCenter: undefined,
+    });
+  };
   companyOrUnitChange = (companyId, unitId) => {
     const { headerData } = this.props;
     let oldCompany = this.props.form.getFieldValue('company');
@@ -461,7 +549,15 @@ class NewExpenseApplicationFromLine extends Component {
   render() {
     const { getFieldDecorator } = this.props.form;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
-    const { pageLoading, model, dimensionList, loading, expenseTypeInfo } = this.state;
+    const {
+      pageLoading,
+      model,
+      dimensionList,
+      loading,
+      companyId,
+      departmentId,
+      expenseTypeInfo,
+    } = this.state;
     const { lineId } = this.props;
     const formItemLayout = {
       labelCol: { span: 8 },
@@ -527,23 +623,30 @@ class NewExpenseApplicationFromLine extends Component {
                   {getFieldDecorator('responsibilityCenter', {
                     rules: [{ required: true, message: this.$t('common.please.select') }],
                     initialValue: model.responsibilityCenterId
-                      ? [
-                          {
-                            id: model.responsibilityCenterId,
-                            responsibilityCenterCodeName: model.responsibilityCenterCodeName,
-                          },
-                        ]
+                      ? {
+                          id: model.responsibilityCenterId,
+                          codeName: model.responsibilityCenterCodeName,
+                        }
                       : '',
                   })(
-                    <Chooser
+                    // <Chooser
+                    //   placeholder={this.$t("expense.please.select.the.default.responsibility.center")}/*请选择默认责任中心*/
+                    //   type="responsibility_default"
+                    //   labelKey="responsibilityCenterCodeName"
+                    //   valueKey="id"
+                    //   single={true}
+                    //   listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                    // />
+                    <Lov
+                      code="department_sob_res_intersect"
                       placeholder={this.$t(
                         'expense.please.select.the.default.responsibility.center'
                       )} /*请选择默认责任中心*/
-                      type="responsibility_default"
-                      labelKey="responsibilityCenterCodeName"
                       valueKey="id"
-                      single={true}
-                      listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                      labelKey="codeName"
+                      allowClear
+                      single
+                      extraParams={{ companyId: companyId, departmentId: departmentId }}
                     />
                   )}
                 </FormItem>

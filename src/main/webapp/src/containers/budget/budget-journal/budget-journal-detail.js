@@ -260,14 +260,12 @@ class BudgetJournalDetail extends React.Component {
           title: this.$t({ id: 'budgetJournal.companyId' }),
           key: 'companyName',
           dataIndex: 'companyName',
-          align: 'left',
           width: 100,
           render: companyName => <Popover content={companyName}>{companyName}</Popover>,
         },
         {
           /*部门*/
           title: this.$t({ id: 'budgetJournal.unitId' }),
-          align: 'left',
           key: 'departmentName',
           dataIndex: 'departmentName',
           width: 100,
@@ -275,8 +273,7 @@ class BudgetJournalDetail extends React.Component {
         },
         {
           /*责任中心 */
-          title: '责任中心',
-          align: 'left',
+          title: this.$t('budget.balance.responsibility.center') /*责任中心*/,
           key: 'responsibilityCenterCodeName',
           dataIndex: 'responsibilityCenterCodeName',
           width: 150,
@@ -287,7 +284,6 @@ class BudgetJournalDetail extends React.Component {
         {
           /*员工*/
           title: this.$t({ id: 'budgetJournal.employee' }),
-          align: 'left',
           key: 'employeeName',
           dataIndex: 'employeeName',
           width: 80,
@@ -298,7 +294,6 @@ class BudgetJournalDetail extends React.Component {
           title: this.$t({ id: 'budgetJournal.item' }),
           key: 'itemName',
           dataIndex: 'itemName',
-          align: 'left',
           width: 150,
           render: itemName => <Popover content={itemName}>{itemName}</Popover>,
         },
@@ -306,7 +301,6 @@ class BudgetJournalDetail extends React.Component {
           /*期间*/
           title: this.$t({ id: 'budgetJournal.periodName' }),
           key: 'periodName',
-          align: 'left',
           dataIndex: 'periodName',
           width: 80,
         },
@@ -314,7 +308,6 @@ class BudgetJournalDetail extends React.Component {
           /*季度*/
           title: this.$t({ id: 'budgetJournal.periodQuarter' }),
           key: 'periodQuarterName',
-          align: 'left',
           dataIndex: 'periodQuarterName',
           width: 80,
         },
@@ -322,15 +315,14 @@ class BudgetJournalDetail extends React.Component {
           /*年度*/
           title: this.$t({ id: 'budgetJournal.periodYear' }),
           key: 'periodYear',
-          align: 'left',
           dataIndex: 'periodYear',
           width: 80,
+          align: 'center',
         },
         {
           /*币种*/
           title: this.$t({ id: 'budgetJournal.currency' }),
           key: 'currency',
-          align: 'left',
           dataIndex: 'currency',
           width: 80,
         },
@@ -339,9 +331,9 @@ class BudgetJournalDetail extends React.Component {
           title: this.$t({ id: 'budgetJournal.rate' }),
           key: 'rate',
           dataIndex: 'rate',
-          align: 'right',
           width: 80,
-          render: rate => <Popover content={rate}>{rate}</Popover>,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
+          //render: rate => <Popover content={rate}>{rate}</Popover>,
         },
         {
           /*金额*/
@@ -367,16 +359,15 @@ class BudgetJournalDetail extends React.Component {
           /*数字*/
           title: this.$t({ id: 'budgetJournal.quantity' }),
           key: 'quantity',
-          align: 'right',
           dataIndex: 'quantity',
           width: 80,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
           /*备注*/
           title: this.$t({ id: 'budgetJournal.remark' }),
           key: 'remark',
           dataIndex: 'remark',
-          align: 'left',
           width: 200,
           render: remark => <Popover content={remark}>{remark}</Popover>,
         },
@@ -532,6 +523,8 @@ class BudgetJournalDetail extends React.Component {
         key: `dimension${priority}ValueName`,
         id: `dimension${priority}ValueName`,
         dataIndex: `dimension${priority}ValueName`,
+        width: 150,
+        tooltips: true,
         render: recode => <Popover content={recode}>{recode}</Popover>,
       });
       handleData.push({
@@ -648,11 +641,14 @@ class BudgetJournalDetail extends React.Component {
         //状态
         let statusData = {};
         if (headerData.status === 1001) {
-          statusData = { status: 'processing', value: '编辑中' };
+          statusData = { status: 'processing', value: this.$t('budgetjournal.editor') }; /*编辑中*/
         } else if (headerData.status === 1003) {
-          statusData = { status: 'default', value: '撤回' };
+          statusData = { status: 'default', value: this.$t('budgetjournal.returncommit') }; /*撤回*/
         } else if (headerData.status === 1005) {
-          statusData = { status: 'error', value: '审批驳回' };
+          statusData = {
+            status: 'error',
+            value: this.$t('budgetjournal.rejection.of.examination.and.approval'),
+          }; /*审批驳回*/
         } else {
           statusData = { status: 'default', value: headerData.statusName };
         }
@@ -755,12 +751,12 @@ class BudgetJournalDetail extends React.Component {
     const headerAndListData = this.state.headerAndListData;
 
     if (!value.versionName.length) {
-      message.error('预算版本不能为空！');
+      message.error(this.$t('budget.budget.version.not.empty')); // 预算版本不能为空！
       return;
     }
 
     if (!value.scenarioName.length) {
-      message.error('预算场景不能为空！');
+      message.error(this.$t('budget.scenarios.not.empty')); // 预算场景不能为空！
       return;
     }
     headerAndListData.dto.versionId = value.versionName[0];
@@ -875,7 +871,7 @@ class BudgetJournalDetail extends React.Component {
   handlePut = () => {
     let header = this.state.headerAndListData.dto;
     if (header.formOid) {
-      message.warning('提交单据至工作流');
+      message.warning(this.$t('budget.submit.the.documents.to.the.workflow')); /*提交单据至工作流*/
       //工作流
       this.setState({
         commitLoading: true,
@@ -913,7 +909,7 @@ class BudgetJournalDetail extends React.Component {
         budgetJournalService
           .commitBudgetJournalWorkflow(workFlowDocumentRef)
           .then(req => {
-            message.success('提交成功');
+            message.success(this.$t('budget.submitted.successfully')); /*提交成功*/
             this.setState({
               listData: [],
               commitLoading: false,
@@ -934,13 +930,13 @@ class BudgetJournalDetail extends React.Component {
           });
       } else {
         notification.open({
-          message: '行信息不能为空！',
-          description: '请添加或导入预算日记账行信息',
+          message: this.$t('budget.line.information.not.empty') /*行信息不能为空！*/,
+          description: this.$t('budgetjournal.andorlead') /*请添加或导入预算日记账行信息*/,
           icon: <Icon type="frown-circle" style={{ color: '#e93652' }} />,
         });
       }
     } else {
-      message.warning('提交单据至复核');
+      message.warning(this.$t('budget.submit.documents.review')); /*提交单据至复核*/
       //非工作流
       if (this.state.commitFlag) {
         let header = this.state.headerAndListData.dto;
@@ -1196,7 +1192,7 @@ class BudgetJournalDetail extends React.Component {
               rowKey={record => record.id}
               bordered
               size="middle"
-              scroll={{ x: '200%' }}
+              scroll={{ x: '150%' }}
               onRow={record => ({
                 onClick: () => this.handlePutData(record),
               })}

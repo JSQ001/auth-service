@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.approval.service;
 
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
@@ -47,7 +47,7 @@ public class WorkflowWithdrawService {
      * @param approvalReqDTO
      * @return
      */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResDTO withdrawWorkflow(UUID userOid, ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();

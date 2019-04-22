@@ -301,7 +301,7 @@ class WorkflowDetail extends React.Component {
       <div className="workflow-detail">
         <Spin spinning={loading}>
           <Row>
-            <Col span={6} className="node-container">
+            <Col span={4} className="node-container">
               {approvalMode === 1002 || approvalMode === 1003 || approvalMode === 1006 ? (
                 <Tooltip
                   title={formInfo.formName}
@@ -318,6 +318,7 @@ class WorkflowDetail extends React.Component {
                       placement="topLeft"
                       className="form-name-tooltip"
                     >
+                      {' '}
                       {formInfo.formName}
                     </Tooltip>
                   </Col>
@@ -386,7 +387,7 @@ class WorkflowDetail extends React.Component {
               </Col>
             )}
             {!showFormSetting && (
-              <Col span={18} className="right-content">
+              <Col span={20} className="right-content">
                 {approvalMode === 1002 && (
                   <div className="node-not-custom-approve">
                     <Row>
@@ -435,6 +436,8 @@ class WorkflowDetail extends React.Component {
                         formInfo={formInfo}
                         basicInfoSaveHandle={this.handleBasicInfoSave}
                         modalVisibleHandle={this.handlePersonModalShow}
+                        ruleApprovers={chosenNodeWidget.ruleApprovers || []}
+                        ruleApprovalNodeOid={chosenNodeWidget.ruleApprovalNodeOid}
                       />
                     )}
                     {chosenNodeType === 1002 && (

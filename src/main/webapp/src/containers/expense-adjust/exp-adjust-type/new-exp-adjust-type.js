@@ -519,36 +519,7 @@ class NewExpAdjustType extends Component {
               />
             </div>
           </FormItem>
-          <div className="common-item-title">
-            {this.$t({ id: 'adjust.dimension.set' }) /*维度设置*/}
-          </div>
-          <FormItem
-            {...formItemLayout}
-            label={this.$t({ id: 'adjust.optional.dimension' }) /*可选维度*/}
-          >
-            <div>
-              <RadioGroup value={allDimension} onChange={this.onDimensionChange}>
-                <Radio value={true}>{this.$t({ id: 'adjust.all.dimension' }) /*全部维度*/}</Radio>
-                <Radio value={false}>
-                  {this.$t({ id: 'adjust.partial.dimension' }) /*部分维度*/}
-                </Radio>
-              </RadioGroup>
-              <Select
-                ref="SelectDimension"
-                onDropdownVisibleChange={this.showSelectDimension}
-                placeholder={this.$t({ id: 'common.please.select' })}
-                disabled={allDimension}
-                value={
-                  allDimension
-                    ? this.$t({ id: 'adjust.all.dimension' } /*全部维度*/)
-                    : this.$t(
-                        { id: 'adjust.dimension.selected' },
-                        { total: `${dimensionIdList.length}` } /*已选择了个维度*/
-                      )
-                }
-              />
-            </div>
-          </FormItem>
+
           <div className="common-item-title">
             {this.$t({ id: 'adjust.authority.set' }) /*权限设置*/}
           </div>

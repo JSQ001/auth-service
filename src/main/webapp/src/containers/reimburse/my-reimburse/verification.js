@@ -173,10 +173,19 @@ class Verification extends Component {
 
   //分页
   onChangePaper = page => {
+    let { pagination } = this.state;
+    pagination.page = page - 1;
+    pagination.current = page;
     if (page - 1 !== this.state.page) {
-      this.setState({ page: page - 1 }, () => {
-        this.getList();
-      });
+      this.setState(
+        {
+          page: page - 1,
+          pagination,
+        },
+        () => {
+          //this.getList();
+        }
+      );
     }
   };
 

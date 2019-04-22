@@ -109,7 +109,7 @@ class BusinessType extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getList();
   }
   getList = () => {
@@ -240,8 +240,8 @@ class BusinessType extends React.Component {
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         this.setState({ buttonLoading: true });
-        let params = { ...values };
         const { isEditor, editorRecord } = this.state;
+        let params = { ...editorRecord, ...values };
         if (isEditor) {
           params['id'] = editorRecord.id;
         } else {

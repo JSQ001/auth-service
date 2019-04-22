@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -129,4 +130,15 @@ public class WorkFlowDocumentRef extends Domain {
     @JsonSerialize(using = ToStringSerializer.class)
     private UUID submittedBy; //提交人Oid
 
+    @ApiModelProperty(value = "允许撤回")
+    @TableField("withdraw_flag")
+    private Boolean withdrawFlag;
+
+    @ApiModelProperty(value = "撤回模式")
+    @TableField("withdraw_rule")
+    private Integer withdrawRule;
+
+    @ApiModelProperty(value = "跳到的节点id")
+    @TableField("jump_node_id")
+    private Long jumpNodeId;
 }

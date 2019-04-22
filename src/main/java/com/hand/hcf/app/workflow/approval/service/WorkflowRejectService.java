@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.approval.service;
 
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
@@ -51,7 +51,7 @@ public class WorkflowRejectService {
      * @param approvalReqDTO
      * @return
      */
-    @LcnTransaction
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResDTO rejectWorkflow(UUID userOid, ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();

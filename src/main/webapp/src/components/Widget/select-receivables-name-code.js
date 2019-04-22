@@ -38,9 +38,7 @@ class SelectReceivablesNameCode extends React.Component {
     let url =
       type === 'EMPLOYEE'
         ? `${config.mdataUrl}/api/contact/account/by/name/code?name=${value}`
-        : `${
-            config.mdataUrl
-          }/api/vendor/account/by/companyId/name/code?companyId=${companyId}&name=${value}`;
+        : `${config.mdataUrl}/api/vendor/account/by/companyId/name/code?name=${value}`;
 
     httpFetch.get(url).then(res => {
       this.setState({

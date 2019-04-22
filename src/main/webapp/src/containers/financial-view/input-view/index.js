@@ -370,7 +370,7 @@ class input_tax extends Component {
     );
   };
   // 搜索单号
-  onDocumentSearch = () => {
+  onDocumentSearch = value => {
     this.setState(
       {
         loading: true,

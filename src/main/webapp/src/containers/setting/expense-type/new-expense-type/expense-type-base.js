@@ -98,6 +98,7 @@ class ExpenseTypeBase extends React.Component {
         },
         nameI18n: expenseType.i18n.name,
         name: expenseType.name,
+        amountDisabled: expenseType.applicationModel !== 'MUST',
         apportionEnabled: expenseType.apportionEnabled,
         valid: Number(expenseType.valid),
         subsidyType: expenseType.subsidyType,
@@ -120,6 +121,7 @@ class ExpenseTypeBase extends React.Component {
             label: expenseType.applicationModelName,
             key: valueWillSet.applicationModel,
           });
+        valueWillSet.contrastSign = expenseType.contrastSign;
         valueWillSet.attachmentFlag === 'null' && (valueWillSet.attachmentFlag = '');
         this.props.form.setFieldsValue(valueWillSet);
       }
@@ -136,7 +138,7 @@ class ExpenseTypeBase extends React.Component {
           return;
         }
         values.typeFlag = 1;
-        values.contrastSign = values.contrastSign && values.contrastSign.label;
+        // values.contrastSign = values.contrastSign && values.contrastSign.label;
         values.sourceTypeId = values.sourceTypeId && values.sourceTypeId.key;
         values.priceUnit = this.state.priceUnit;
         values.entryMode = this.state.entryMode;
@@ -259,7 +261,6 @@ class ExpenseTypeBase extends React.Component {
   handleAmountOpt = () => {
     !this.state.linkAmount.length &&
       this.getSystemValueList(2212).then(res => {
-        console.log(res);
         let arr = [res.data.values[0], res.data.values[4]];
         this.setState({
           linkAmount: arr,
@@ -348,7 +349,8 @@ class ExpenseTypeBase extends React.Component {
         <FormItem {...formItemLayout} label={messages('common.column.status')}>
           {getFieldDecorator('enabled', {
             valuePropName: 'checked',
-            initialValue: true,
+            //initialValue: true,
+            initialValue: expenseType ? expenseType.enabled : true,
           })(<Switch />)}
         </FormItem>
         <FormItem {...formItemLayout} label={messages('分类名称')}>
@@ -430,7 +432,7 @@ class ExpenseTypeBase extends React.Component {
             <Col span={8}>
               {getFieldDecorator('contrastSign', {})(
                 <Select
-                  labelInValue={true}
+                  //labelInValue={true}
                   onFocus={this.handleAmountOpt}
                   disabled={amountDisabled}
                   // style={{ width: '38%' }}

@@ -161,4 +161,32 @@ export default {
       `${config.prePaymentUrl}/api/cash/prepayment/requisitionHead/query/created`
     );
   },
+
+  /**
+   * 根据费用申请单头id，查询预付款单行集合
+   * @param {*} id
+   */
+  getPrepayLines(params) {
+    let url = `${
+      config.prePaymentUrl
+    }/api/cash/prepayment/requisitionHead/query/prepayment/line/by/refDocumentId?`;
+    for (let key in params) {
+      url += `&${key}=${params[key]}`;
+    }
+    return httpFetch.get(url);
+  },
+
+  /**
+   * 根据申请单头ID获取关联的预付款单头
+   * @param {*} id
+   */
+  getPrepayHeadByApplicationHeaderId(params) {
+    let url = `${
+      config.prePaymentUrl
+    }/api/cash/prepayment/requisitionHead/get/by/applicationHeaderId?`;
+    for (let key in params) {
+      url += `&${key}=${params[key]}`;
+    }
+    return httpFetch.get(url);
+  },
 };

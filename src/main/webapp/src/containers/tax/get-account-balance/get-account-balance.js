@@ -17,21 +17,22 @@ import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import moment from 'moment';
 const FormItem = Form.Item;
-const { MonthPicker, RangePicker } = DatePicker;
-const monthFormat = 'YYYY/MM';
+const { MonthPicker } = DatePicker;
 import Chooser from 'widget/chooser';
 import getAccountBalanceService from './get-account-balance.service';
+import Lov from 'widget/Template/lov';
 class getAccountBalance extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       params: {},
       data: [],
+      periodName: '',
     };
   }
   //返回科目余额接口界面
   onBackClick = e => {
-    e.preventDefault();
+    //e.preventDefault();
     this.props.dispatch(
       routerRedux.replace({
         pathname: `/inter-management/acc-balance-interface/acc-balance-interface`,
@@ -41,14 +42,25 @@ class getAccountBalance extends React.Component {
 
   handleSubmit = preps => {
     this.props.form.validateFields((err, values) => {
-      const params = {};
-      params.setOfbook = values.setOfbook;
-      params.segment1 = values.segment1;
-      params.segment2 = values.segment2;
-      params.periodName = values.periodName;
-
+      const paramss = {};
+      if (values.ledgerName != 'undefine' && values.ledgerName != null) {
+        paramss.ledgerName = values.ledgerName.setOfBooksName;
+      }
+      if (values.segment1 != 'undefine' && values.segment1 != null) {
+        paramss.segment1 = values.segment1.companyCode;
+      }
+      if (values.segment3 != 'undefine' && values.segment3 != null) {
+        paramss.segment3 = values.segment3.responsibilityCenterCode;
+      }
+      if (
+        this.state.periodName != 'undefine' &&
+        this.state.periodName != null &&
+        this.state.periodName != ''
+      ) {
+        paramss.periodName = this.state.periodName;
+      }
       getAccountBalanceService
-        .getAccountBalance(params)
+        .getAccountBalance(paramss)
         .then(response => {
           this.onBackClick();
         })
@@ -58,6 +70,12 @@ class getAccountBalance extends React.Component {
         });
     });
   };
+  onChange = (date, dateString) => {
+    this.setState({
+      periodName: dateString,
+    });
+  };
+
   render() {
     const { params } = this.props;
     const { form } = this.props;
@@ -81,19 +99,20 @@ class getAccountBalance extends React.Component {
           <Form onSubmit={this.handleSubmit}>
             <Row style={{ textAlign: 'center' }}>
               <Form.Item {...formItemLayout} label="账套">
-                {getFieldDecorator('setOfbook', {
+                {getFieldDecorator('ledgerName', {
                   rules: [{ required: true, message: this.$t('common.please.enter') }],
-                  initialValue: data.outputTaxDiskFirm,
+                  //initialValue: data.outputTaxDiskFirm
                 })(
-                  <Select placeholder="请选择" style={{ width: '100%' }}>
-                    <Option value="方正证券">方正证券</Option>
-                    <Option value="方正中期期货">方正中期期货</Option>
-                    <Option value="方正和生">方正和生</Option>
-                    <Option value="方正香港">方正香港</Option>
-                  </Select>
+                  <Lov
+                    code="setOfBooks"
+                    valueKey="setOfBooksCode"
+                    labelKey="setOfBooksName"
+                    single
+                    extraParams={{ tenantId: this.props.company.tenantId }}
+                  />
                 )}
               </Form.Item>
-              <FormItem {...formItemLayout} label={'机构'}>
+              <FormItem {...formItemLayout} label={'公司'}>
                 {getFieldDecorator('segment1', {
                   rules: [
                     {
@@ -103,16 +122,18 @@ class getAccountBalance extends React.Component {
                   ],
                   //  initialValue: params.companyCode && [{ id: params.companyCode, taxpayerName: params.taxpayerName }],
                 })(
-                  <Chooser
-                    labelKey="segment1Des"
-                    valueKey="segment1"
-                    type="company_detail"
+                  <Lov
+                    code="company_lov"
+                    valueKey="companyCode"
+                    labelKey="companyName"
                     single
+                    extraParams={{ tenantId: this.props.company.tenantId }}
                   />
                 )}
               </FormItem>
+
               <FormItem {...formItemLayout} label={'成本中心'}>
-                {getFieldDecorator('segment2', {
+                {getFieldDecorator('segment3', {
                   rules: [
                     {
                       required: false,
@@ -121,7 +142,13 @@ class getAccountBalance extends React.Component {
                   ],
                   // initialValue: params.taxpayerId && [{ id: params.taxpayerId, taxpayerName: params.taxpayerName }],
                 })(
-                  <Chooser labelKey="segment2Des" valueKey="segment2" type="specific_item" single />
+                  <Lov
+                    code="responsibilityCenter"
+                    valueKey="responsibilityCenterCode"
+                    labelKey="responsibilityCenterName"
+                    single
+                    extraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                  />
                 )}
               </FormItem>
               <FormItem {...formItemLayout} label={'期间'}>
@@ -132,14 +159,7 @@ class getAccountBalance extends React.Component {
                       message: this.$t('common.please.enter'),
                     },
                   ],
-                  //  initialValue: params.companyCode && [{ id: params.companyCode, taxpayerName: params.taxpayerName }],
-                })(
-                  <MonthPicker
-                    defaultValue={moment('2019/04', monthFormat)}
-                    valueKey="periodName"
-                    format={monthFormat}
-                  />
-                )}
+                })(<MonthPicker onChange={this.onChange} placeholder="Select month" />)}
                 <br />
               </FormItem>
             </Row>
@@ -155,7 +175,12 @@ class getAccountBalance extends React.Component {
     );
   }
 }
-
+function mapStateToProps(state) {
+  return {
+    company: state.user.company,
+    user: state.user.currentUser,
+  };
+}
 const wrapperedGetAccountBalance = Form.create()(getAccountBalance);
 
-export default connect()(wrapperedGetAccountBalance);
+export default connect(mapStateToProps)(wrapperedGetAccountBalance);

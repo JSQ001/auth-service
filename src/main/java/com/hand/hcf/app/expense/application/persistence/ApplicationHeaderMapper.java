@@ -159,5 +159,8 @@ public interface ApplicationHeaderMapper extends BaseMapper<ApplicationHeader> {
     /**
      * 获取报账单关联申请单信息
      */
-    List<ApplicationHeaderWebDTO>queryReleaseByReport(@Param("documentNumber") String businessCode, RowBounds pageable);
+    List<ApplicationHeaderWebDTO>queryReleaseByReport(@Param("documentNumber") String businessCode,
+                                                      @Param("releaseCode")String releaseCode,
+                                                      @Param("expenseTypeName")String expenseTypeName,
+                                                      RowBounds pageable);
 }

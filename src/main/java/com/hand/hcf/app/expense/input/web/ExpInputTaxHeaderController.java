@@ -1,12 +1,13 @@
 package com.hand.hcf.app.expense.input.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
 import com.hand.hcf.app.expense.input.dto.ExpInputTaxHeaderDTO;
 import com.hand.hcf.app.expense.input.service.ExpInputTaxHeaderService;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -200,5 +201,17 @@ public class ExpInputTaxHeaderController {
                 documentNumber,response, request, exportConfig);
     }
 
-
+    /**
+     * @api {POST} /api/expense/report/create/accounting 【进项税单】创建凭证
+     * @apiDescription 创建凭证
+     * @apiGroup ExpenseReport
+     * @apiParam {Long} reportHeaderId 报账单头ID
+     * @apiParam {String} accountingDate 财务日期
+     */
+    @PostMapping(value = "/create/accounting")
+    public ResponseEntity saveInitializeExpInputTaxGeneralLedgerJournalLine(@RequestParam("reportHeaderId") Long inputTaxHeaderId,
+                                                                          @RequestParam("accountingDate") String accountingDate){
+        String reuslt = expInputTaxHeaderService.saveInitializeExpInputTaxGeneralLedgerJournalLine(inputTaxHeaderId,accountingDate);
+        return ResponseEntity.ok(reuslt);
+    }
 }

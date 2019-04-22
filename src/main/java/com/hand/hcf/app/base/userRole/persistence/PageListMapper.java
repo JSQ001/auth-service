@@ -21,5 +21,5 @@ public interface PageListMapper extends BaseMapper<PageList>{
      * @param roleIds 角色id集合
      * @return List<FunctionPageDTO>
      */
-    List<FunctionPageDTO> listPageByRoleIds(@Param("roleIds") List<Long> roleIds);
+    List<FunctionPageDTO> listPageByRoleIds(@Param("roleIds") List<Long> roleIds,@Param("tenantId") Long tenantId);
 }

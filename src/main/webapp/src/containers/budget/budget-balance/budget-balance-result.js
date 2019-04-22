@@ -28,84 +28,72 @@ class BudgetBalanceResult extends React.Component {
       columns: [
         {
           title: this.$t('budget.balance.company'),
-          align: 'center',
           dataIndex: 'companyName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.company.group'),
-          align: 'center',
           dataIndex: 'companyGroupName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.department'),
-          align: 'center',
           dataIndex: 'unitName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.department.group'),
-          align: 'center',
           dataIndex: 'unitGroupName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         //责任中心
         {
           title: this.$t('budget.balance.responsibility.center'),
-          align: 'center',
           dataIndex: 'responsibilityCenterName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         //责任中心组
         {
           title: this.$t('budget.balance.responsibility.center.group'),
-          align: 'center',
           dataIndex: 'responsibilityCenterGroupName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.user'),
-          align: 'center',
           dataIndex: 'employeeName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.user.group'),
-          align: 'center',
           dataIndex: 'employeeGroupName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.item.type'),
-          align: 'center',
           dataIndex: 'itemTypeName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.item'),
-          align: 'center',
           dataIndex: 'itemName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
         {
           title: this.$t('budget.balance.item.group'),
-          align: 'center',
           dataIndex: 'itemGroupName',
           render: record => <Popover content={record}>{record}</Popover>,
         },
-        { title: this.$t('budget.balance.year'), align: 'center', dataIndex: 'periodYear' },
-        { title: this.$t('budget.balance.season'), align: 'center', dataIndex: 'periodQuarter' },
+        { title: this.$t('budget.balance.year'), dataIndex: 'periodYear', align: 'center' },
+        { title: this.$t('budget.balance.season'), dataIndex: 'periodQuarter', align: 'center' },
         {
           title: this.$t('budget.balance.period'),
-          align: 'center',
           dataIndex: 'periodName',
+          align: 'cneter',
           render: record => <Popover content={record}>{record}</Popover>,
         },
-        { title: this.$t('common.currency'), align: 'center', dataIndex: 'currency' },
+        { title: this.$t('common.currency'), dataIndex: 'currency' },
         {
           title: this.$t('budget.balance.budget.amt'),
-          align: 'center',
           dataIndex: 'bgtAmount',
           render: (bgtAmount, record) => (
             <a onClick={() => this.showSlideFrame(record, 'J')}>{this.filterMoney(bgtAmount)}</a>
@@ -113,7 +101,6 @@ class BudgetBalanceResult extends React.Component {
         },
         {
           title: this.$t('budget.balance.budget.rsv'),
-          align: 'center',
           dataIndex: 'expReserveAmount',
           render: (expReserveAmount, record) => (
             <a onClick={() => this.showSlideFrame(record, 'R')}>
@@ -123,7 +110,6 @@ class BudgetBalanceResult extends React.Component {
         },
         {
           title: this.$t('budget.balance.budget.usd'),
-          align: 'center',
           dataIndex: 'expUsedAmount',
           render: (expUsedAmount, record) => (
             <a onClick={() => this.showSlideFrame(record, 'U')}>
@@ -133,15 +119,16 @@ class BudgetBalanceResult extends React.Component {
         },
         {
           title: this.$t('budget.balance.budget.avb'),
-          align: 'center',
           dataIndex: 'expAvailableAmount',
           render: expAvailableAmount => this.filterMoney(expAvailableAmount),
         },
         {
           title: this.$t('budget.balance.schedule'),
-          align: 'center',
           dataIndex: 'schedule',
-          render: schedule => (schedule * 100).toFixed(3) + '%',
+          render: value => (
+            <div style={{ textAlign: 'right' }}>{(value * 100).toFixed(3) + '%'}</div>
+          ),
+          //render: schedule => (schedule * 100).toFixed(3) + '%',
         },
       ],
       scrollx: 150,

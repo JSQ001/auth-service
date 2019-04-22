@@ -51,7 +51,7 @@ public class ApplicationHeaderWebDTO extends ApplicationHeader {
      */
     private  BigDecimal releaseAmount;
     /**
-     * 报销单费用类型
+     * 费用类型
      */
     private  Long expenseType;
     private  String expenseTypeName;

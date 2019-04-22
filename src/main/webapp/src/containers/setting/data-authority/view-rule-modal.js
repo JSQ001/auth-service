@@ -184,102 +184,109 @@ class ViewRuleModal extends React.Component {
     };
   }
   componentWillMount() {
-    DataAuthorityService.getSingleDataAuthorityDetail(this.props.dataId, this.props.targetId).then(
-      res => {
-        if (res.status === 200) {
-          if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[0].dataScope === '1004') {
-            this.setState({
-              sobColumns: [
-                {
-                  title: this.$t('base.zhang.set.of.code') /*账套代码*/,
-                  dataIndex: 'valueKeyCode',
-                },
-                {
-                  title: this.$t('base.zhang.set.of.names') /*账套名称*/,
-                  dataIndex: 'valueKeyDesc',
-                },
-                {
-                  title: this.$t('base.state.authority') /*权限状态*/,
-                  dataIndex: 'filtrateMethodDesc',
-                },
-              ],
-            });
-          }
-          if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[1].dataScope === '1004') {
-            this.setState({
-              companyColumns: [
-                {
-                  title: this.$t('base.company.code') /*公司代码*/,
-                  dataIndex: 'valueKeyCode',
-                },
-                {
-                  title: this.$t('base.the.name.of.the.company') /*公司名称*/,
-                  dataIndex: 'valueKeyDesc',
-                },
-                {
-                  title: this.$t('base.state.authority') /*权限状态*/,
-                  dataIndex: 'filtrateMethodDesc',
-                },
-              ],
-            });
-          }
-          if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[2].dataScope === '1004') {
-            this.setState({
-              unitColumns: [
-                {
-                  title: this.$t('base.department.code') /*部门代码*/,
-                  dataIndex: 'valueKeyCode',
-                },
-                {
-                  title: this.$t('base.department.name') /*部门名称*/,
-                  dataIndex: 'valueKeyDesc',
-                },
-                {
-                  title: this.$t('base.state.authority') /*权限状态*/,
-                  dataIndex: 'filtrateMethodDesc',
-                },
-              ],
-            });
-          }
-          if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[3].dataScope === '1004') {
-            this.setState({
-              emplyeeColumns: [
-                {
-                  title: this.$t('base.staff.code') /*员工代码*/,
-                  dataIndex: 'valueKeyCode',
-                },
-                {
-                  title: this.$t('base.staff.name') /*员工名称*/,
-                  dataIndex: 'valueKeyDesc',
-                },
-                {
-                  title: this.$t('base.state.authority') /*权限状态*/,
-                  dataIndex: 'filtrateMethodDesc',
-                },
-              ],
-            });
-          }
+    console.log(this.props);
+    if (this.props.targetId) {
+      this.getRuleDetail(this.props.dataId, this.props.targetId);
+    } else {
+      this.setState({});
+    }
+  }
+
+  getRuleDetail = (dataId, targetId) => {
+    DataAuthorityService.getSingleDataAuthorityDetail(dataId, targetId).then(res => {
+      if (res.status === 200) {
+        if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[0].dataScope === '1004') {
           this.setState({
-            loading: false,
-            infoData: res.data,
-            renderRuleInfo: res.data,
-            ruleDetail: res.data.dataAuthorityRules[0].dataAuthorityRuleDetails,
-            tabVal: 'SOB',
-            ruleName: res.data.dataAuthorityRules[0].dataAuthorityRuleName,
-            ruleDatail: res.data.dataAuthorityRules[0].dataAuthorityRuleDetails,
-            getRulesArr: res.data.dataAuthorityRules[0],
-            ruleId: res.data.id,
-            deleted: res.data.deleted,
-            versionNumber: res.data.versionNumber,
-            createdBy: res.data.createdBy,
-            createdDate: res.data.createdDate,
-            lastUpdatedBy: res.data.lastUpdatedBy,
-            lastUpdatedDate: res.data.lastUpdatedDate,
+            sobColumns: [
+              {
+                title: this.$t('base.zhang.set.of.code') /*账套代码*/,
+                dataIndex: 'valueKeyCode',
+              },
+              {
+                title: this.$t('base.zhang.set.of.names') /*账套名称*/,
+                dataIndex: 'valueKeyDesc',
+              },
+              {
+                title: this.$t('base.state.authority') /*权限状态*/,
+                dataIndex: 'filtrateMethodDesc',
+              },
+            ],
           });
         }
+        if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[1].dataScope === '1004') {
+          this.setState({
+            companyColumns: [
+              {
+                title: this.$t('base.company.code') /*公司代码*/,
+                dataIndex: 'valueKeyCode',
+              },
+              {
+                title: this.$t('base.the.name.of.the.company') /*公司名称*/,
+                dataIndex: 'valueKeyDesc',
+              },
+              {
+                title: this.$t('base.state.authority') /*权限状态*/,
+                dataIndex: 'filtrateMethodDesc',
+              },
+            ],
+          });
+        }
+        if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[2].dataScope === '1004') {
+          this.setState({
+            unitColumns: [
+              {
+                title: this.$t('base.department.code') /*部门代码*/,
+                dataIndex: 'valueKeyCode',
+              },
+              {
+                title: this.$t('base.department.name') /*部门名称*/,
+                dataIndex: 'valueKeyDesc',
+              },
+              {
+                title: this.$t('base.state.authority') /*权限状态*/,
+                dataIndex: 'filtrateMethodDesc',
+              },
+            ],
+          });
+        }
+        if (res.data.dataAuthorityRules[0].dataAuthorityRuleDetails[3].dataScope === '1004') {
+          this.setState({
+            emplyeeColumns: [
+              {
+                title: this.$t('base.staff.code') /*员工代码*/,
+                dataIndex: 'valueKeyCode',
+              },
+              {
+                title: this.$t('base.staff.name') /*员工名称*/,
+                dataIndex: 'valueKeyDesc',
+              },
+              {
+                title: this.$t('base.state.authority') /*权限状态*/,
+                dataIndex: 'filtrateMethodDesc',
+              },
+            ],
+          });
+        }
+        this.setState({
+          loading: false,
+          infoData: res.data,
+          renderRuleInfo: res.data,
+          ruleDetail: res.data.dataAuthorityRules[0].dataAuthorityRuleDetails,
+          tabVal: 'SOB',
+          ruleName: res.data.dataAuthorityRules[0].dataAuthorityRuleName,
+          ruleDatail: res.data.dataAuthorityRules[0].dataAuthorityRuleDetails,
+          getRulesArr: res.data.dataAuthorityRules[0],
+          ruleId: res.data.id,
+          deleted: res.data.deleted,
+          versionNumber: res.data.versionNumber,
+          createdBy: res.data.createdBy,
+          createdDate: res.data.createdDate,
+          lastUpdatedBy: res.data.lastUpdatedBy,
+          lastUpdatedDate: res.data.lastUpdatedDate,
+        });
       }
-    );
-  }
+    });
+  };
 
   onCloseRuleModal = () => {
     this.props.closeRuleModal();
@@ -630,7 +637,7 @@ class ViewRuleModal extends React.Component {
     const tenantItem = {
       title: this.$t('base.add.account.set') /*添加账套*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=SOB`,
       searchForm: [
         {
@@ -739,7 +746,7 @@ class ViewRuleModal extends React.Component {
     const employeeItem = {
       title: this.$t('base.add.employees') /*添加员工*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=EMPLOYEE`,
       searchForm: [
         { type: 'input', id: 'code', label: this.$t('base.staff.code'), colSpan: 6 } /*员工代码*/,
@@ -961,7 +968,7 @@ class ViewRuleModal extends React.Component {
   };
 
   render() {
-    const { visibel } = this.props;
+    const { visible } = this.props;
     const {
       infoList,
       infoData,
@@ -1012,7 +1019,7 @@ class ViewRuleModal extends React.Component {
     };
     return (
       <Modal
-        visible={visibel}
+        visible={visible}
         footer={[
           <Button key="back" onClick={this.onBackRuleModal}>
             {this.$t({ id: 'common.ok' } /* 返回*/)}
@@ -1024,6 +1031,7 @@ class ViewRuleModal extends React.Component {
         onCancel={this.onCloseRuleModal}
       >
         <div>
+          {console.log(infoData)}
           <BasicInfo infoList={infoList} isHideEditBtn={true} infoData={infoData} colSpan={6} />
           <Spin spinning={loading} style={{ marginTop: 24 }}>
             <div className="add-rule-form">
@@ -1042,13 +1050,13 @@ class ViewRuleModal extends React.Component {
                 >
                   <Row>
                     {ruleDatail.map(item => (
-                      <Col span={24}>
+                      <Col span={24} key={item.id}>
                         <span>{dataType[item.dataType].label}:</span>
                         {item.dataScope === '1004' ? (
                           <span>
                             {item.filtrateMethodDesc}
-                            {`${item.dataAuthorityRuleDetailValues.length}{this.$t("base.a")}`}
-                            {dataType[item.dataType].label}/*个*/
+                            {`${item.dataAuthorityRuleDetailValues.length}` + this.$t('base.a')}
+                            {dataType[item.dataType].label}
                           </span>
                         ) : (
                           <span>
@@ -1352,7 +1360,7 @@ class ViewRuleModal extends React.Component {
                 <div style={{ margin: 20 }}>
                   <CustomTable
                     columns={sobColumns}
-                    url={`${config.baseUrl}/api/data/authority/rule/detail/values?ruleId=${
+                    url={`${config.mdataUrl}/api/data/authority/rule/detail/values?ruleId=${
                       this.props.targetId
                     }&dataType=SOB&keyWord=${keyWord}`}
                     ref={ref => (this.sobTable = ref)}
@@ -1380,7 +1388,7 @@ class ViewRuleModal extends React.Component {
                 <div style={{ margin: 20 }}>
                   <CustomTable
                     columns={companyColumns}
-                    url={`${config.baseUrl}/api/data/authority/rule/detail/values?ruleId=${
+                    url={`${config.mdataUrl}/api/data/authority/rule/detail/values?ruleId=${
                       this.props.targetId
                     }&dataType=COMPANY&keyWord=${keyWord}`}
                     ref={ref => (this.companyTable = ref)}
@@ -1408,7 +1416,7 @@ class ViewRuleModal extends React.Component {
                 <div style={{ margin: 20 }}>
                   <CustomTable
                     columns={unitColumns}
-                    url={`${config.baseUrl}/api/data/authority/rule/detail/values?ruleId=${
+                    url={`${config.mdataUrl}/api/data/authority/rule/detail/values?ruleId=${
                       this.props.targetId
                     }&dataType=UNIT&keyWord=${keyWord}`}
                     ref={ref => (this.unitTable = ref)}
@@ -1435,7 +1443,7 @@ class ViewRuleModal extends React.Component {
                 <div style={{ margin: 20 }}>
                   <CustomTable
                     columns={emplyeeColumns}
-                    url={`${config.baseUrl}/api/data/authority/rule/detail/values?ruleId=${
+                    url={`${config.mdataUrl}/api/data/authority/rule/detail/values?ruleId=${
                       this.props.targetId
                     }&dataType=EMPLOYEE&keyWord=${keyWord}`}
                     ref={ref => (this.employeeTable = ref)}

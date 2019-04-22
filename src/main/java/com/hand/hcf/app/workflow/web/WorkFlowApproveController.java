@@ -2,6 +2,7 @@ package com.hand.hcf.app.workflow.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.DateUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.approval.service.WorkflowPassService;
@@ -12,6 +13,7 @@ import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalReqDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalResDTO;
+import com.hand.hcf.app.workflow.dto.BackNodesDTO;
 import com.hand.hcf.app.workflow.dto.CounterSignDTO;
 import com.hand.hcf.app.workflow.dto.NotifyDTO;
 import com.hand.hcf.app.workflow.dto.SendBackDTO;
@@ -19,10 +21,13 @@ import com.hand.hcf.app.workflow.dto.TransferDTO;
 import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
+import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.service.WorkFlowApprovalService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.time.ZonedDateTime;
@@ -66,6 +72,9 @@ public class WorkFlowApproveController {
     @Autowired
     private WorkflowWithdrawService approvalWithdrawService;
 
+    @Autowired
+    private ApprovalChainService approvalChainService;
+
 
     @ApiOperation(value = "审批通过", notes = "通过待审批单据", tags = {"approval"})
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
@@ -87,7 +96,7 @@ public class WorkFlowApproveController {
     @ApiOperation(value = "申请人撤回单据", notes = "申请人撤回待审批单据", tags = {"approval"})
     @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> withdrawWorkflow(
-            @ApiParam(value = "待撤回单据")  @Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
+            @ApiParam(value = "待撤回单据") @Valid @RequestBody ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = approvalWithdrawService.withdrawWorkflow(OrgInformationUtil.getCurrentUserOid(), approvalReqDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
@@ -134,6 +143,15 @@ public class WorkFlowApproveController {
         return ResponseEntity.ok(approvalResDTO);
     }
 
+
+    @ApiOperation(value = "查询可退回节点列表", notes = "查询可退回节点列表", tags = {"query"})
+    @GetMapping(value = "/back/nodes")
+    public ResponseEntity<BackNodesDTO> listApprovalNodeByBack(
+            @ApiParam(value = "单据类型") @RequestParam Integer entityType,
+            @ApiParam(value = "单据oid") @RequestParam UUID entityOid) {
+        return ResponseEntity.ok(approvalChainService.listApprovalNodeByBack(entityType,entityOid));
+    }
+
     /**
      * 【仪表盘】-我的单据
      *
@@ -157,34 +175,16 @@ public class WorkFlowApproveController {
     }
 
     /**
-     * @param entityType 单据类型
-     * @param entityOid  单据Oid
-     * @return
-     * @api {get} /api/workflow/approval/history
-     * @apiDescription 获取审批历史
-     * @apiName listApprovalHistory
-     * @apiGroup Approval
-     * @apiSuccessExample {json} Success-Result
-     * [
-     * {
-     * "operation": 9001,
-     * "operationType": 1000,
-     * "lastModifiedDate": "2018-10-24 11:20:47",
-     * "employeeId": "et1",
-     * "employeeName": "et1",
-     * "operationDetail": "支付金额：5",
-     * "countersignType": null,
-     * "operationRemark": null,
-     * "approvalNodeName": null
-     * }
-     * ]
      * @Author mh.z
      * @Date 2019/01/23
      * @Description 获取审批历史
      */
+    @ApiOperation(value = "获取审批历史", notes = "获取审批历史", tags = {"query"})
     @RequestMapping(value = "/approval/history", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<WebApprovalHistoryDTO>> listApprovalHistory(@RequestParam("entityType") Integer entityType, @RequestParam("entityOid") UUID entityOid) {
-        List<WebApprovalHistoryDTO> list = new ArrayList<WebApprovalHistoryDTO>();
+    public ResponseEntity<List<WebApprovalHistoryDTO>> listApprovalHistory(
+            @ApiParam(value = "单据类型") @RequestParam("entityType") Integer entityType,
+            @ApiParam(value = "单据OID") @RequestParam("entityOid") UUID entityOid) {
+        List<WebApprovalHistoryDTO> list = new ArrayList<>();
 
         // 获取审批历史
         List<ApprovalHistoryDTO> approvalHistoryDtoList = approvalHistoryService.listApprovalHistory(entityType, entityOid);
@@ -195,43 +195,32 @@ public class WorkFlowApproveController {
     }
 
     /**
-     * @api {get} /api/workflow/document/approvals/filters/{entityType}
-     * @apiDescription 获取已审批未审批的单据
-     * @apiName pageApprovalDocument
-     * @apiGroup Approval
-     * @apiParam {String} [documentNumber] 单据编号
-     * @apiParam {String} [documentName] 单据名称
-     * @apiParam {Long} [documentTypeId] 单据类型id
-     * @apiParam {String} [currencyCode] 币种
-     * @apiParam {String} [amountFrom] 最小金额
-     * @apiParam {Double} [amountTo] 最大金额
-     * @apiParam {String} [applicantOid] 申请人oid
-     * @apiParam {String} [beginDate] 最小提交日期
-     * @apiParam {String} [endDate] 最大提交日期
-     * @apiParam {String} [applicantDateFrom] 最小申请日期
-     * @apiParam {String} [applicantDateTo] 最大申请日期
-     * @apiParam {String} [description] 备注
-     * @apiParam {boolean} finished true已审批，false未审批
      * @author mh.z
      * @date 2019/03/06
      * @description 获取已审批未审批的单据
      */
+    @ApiOperation(value = "获取已审批未审批的单据", notes = "获取已审批未审批的单据", tags = {"query"})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码"),
+            @ApiImplicitParam(name = "size", value = "每页条数")}
+    )
     @RequestMapping(value = "/document/approvals/filters/{entityType}", method = RequestMethod.GET)
-    public ResponseEntity<List<ApprovalDocumentDTO>> pageApprovalDocument(@PathVariable(value = "entityType", required = true) Integer entityType,
-                                                                          @RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                                          @RequestParam(value = "documentName", required = false) String documentName,
-                                                                          @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
-                                                                          @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                                                                          @RequestParam(value = "amountFrom", required = false) Double amountFrom,
-                                                                          @RequestParam(value = "amountTo", required = false) Double amountTo,
-                                                                          @RequestParam(value = "applicantOid", required = false) String applicantOidStr,
-                                                                          @RequestParam(value = "beginDate", required = false) String beginDateStr,
-                                                                          @RequestParam(value = "endDate", required = false) String endDateStr,
-                                                                          @RequestParam(value = "applicantDateFrom", required = false) String applicantDateFromStr,
-                                                                          @RequestParam(value = "applicantDateTo", required = false) String applicantDateToStr,
-                                                                          @RequestParam(value = "description", required = false) String description,
-                                                                          @RequestParam(value = "finished", required = true) boolean finished,
-                                                                          Pageable pageable) {
+    public ResponseEntity<List<ApprovalDocumentDTO>> pageApprovalDocument(
+            @ApiParam(value = "单据类型") @PathVariable(value = "entityType") Integer entityType,
+            @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+            @ApiParam(value = "单据名称") @RequestParam(value = "documentName", required = false) String documentName,
+            @ApiParam(value = "单据类型ID") @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
+            @ApiParam(value = "币种") @RequestParam(value = "currencyCode", required = false) String currencyCode,
+            @ApiParam(value = "最小金额") @RequestParam(value = "amountFrom", required = false) Double amountFrom,
+            @ApiParam(value = "最大金额") @RequestParam(value = "amountTo", required = false) Double amountTo,
+            @ApiParam(value = "申请人OID") @RequestParam(value = "applicantOid", required = false) String applicantOidStr,
+            @ApiParam(value = "最小提交日期") @RequestParam(value = "beginDate", required = false) String beginDateStr,
+            @ApiParam(value = "最大提交日期") @RequestParam(value = "endDate", required = false) String endDateStr,
+            @ApiParam(value = "最小申请日期") @RequestParam(value = "applicantDateFrom", required = false) String applicantDateFromStr,
+            @ApiParam(value = "最大申请日期") @RequestParam(value = "applicantDateTo", required = false) String applicantDateToStr,
+            @ApiParam(value = "备注") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "是否已审批") @RequestParam(value = "finished") boolean finished,
+            @ApiIgnore Pageable pageable) {
         documentNumber = StringUtils.isEmpty(documentNumber) ? null : documentNumber;
         documentName = StringUtils.isEmpty(documentName) ? null : documentName;
         currencyCode = StringUtils.isEmpty(currencyCode) ? null : currencyCode;
@@ -286,28 +275,25 @@ public class WorkFlowApproveController {
     /**
      * 待办事项-待审批单据-单据列表
      *
-     * @param documentCategory 单据大类
-     * @param documentTypeId   单据类型id
-     * @param beginDateStr     提交日期从
-     * @param endDateStr       提交日期至
-     * @param amountFrom       本币金额从
-     * @param amountTo         本币金额至
-     * @param remark           备注
-     * @param documentNumber   单据编号
-     * @param pageable         分页信息
      * @return
      */
+    @ApiOperation(value = "待办事项-待审批单据-单据列表", notes = "待办事项-待审批单据-单据列表", tags = {"query"})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码"),
+            @ApiImplicitParam(name = "size", value = "每页条数")}
+    )
     @GetMapping("/getApprovalToPendList")
-    public ResponseEntity<List<WorkFlowDocumentRefDTO>> getApprovalToPendList(@RequestParam(value = "documentCategory", required = false) Integer documentCategory,
-                                                                              @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
-                                                                              @RequestParam(value = "applicantName", required = false) String applicantName,
-                                                                              @RequestParam(value = "beginDate", required = false) String beginDateStr,
-                                                                              @RequestParam(value = "endDate", required = false) String endDateStr,
-                                                                              @RequestParam(value = "amountFrom", required = false) Double amountFrom,
-                                                                              @RequestParam(value = "amountTo", required = false) Double amountTo,
-                                                                              @RequestParam(value = "remark", required = false) String remark,
-                                                                              @RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                                              Pageable pageable) {
+    public ResponseEntity<List<WorkFlowDocumentRefDTO>> getApprovalToPendList(
+            @ApiParam(value = "单据大类") @RequestParam(value = "documentCategory", required = false) Integer documentCategory,
+            @ApiParam(value = "单据类型id") @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
+            @ApiParam(value = "申请人名称") @RequestParam(value = "applicantName", required = false) String applicantName,
+            @ApiParam(value = "提交日期从") @RequestParam(value = "beginDate", required = false) String beginDateStr,
+            @ApiParam(value = "提交日期至") @RequestParam(value = "endDate", required = false) String endDateStr,
+            @ApiParam(value = "本币金额从") @RequestParam(value = "amountFrom", required = false) Double amountFrom,
+            @ApiParam(value = "本币金额至") @RequestParam(value = "amountTo", required = false) Double amountTo,
+            @ApiParam(value = "备注") @RequestParam(value = "remark", required = false) String remark,
+            @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+            @ApiIgnore Pageable pageable) {
 
         // 最小提交日期
         ZonedDateTime beginDate = null;
@@ -333,26 +319,20 @@ public class WorkFlowApproveController {
     /**
      * 待办事项-待审批单据-分类信息
      *
-     * @param documentCategory 单据大类
-     * @param documentTypeId   单据类型id
-     * @param beginDateStr     提交日期从
-     * @param endDateStr       提交日期至
-     * @param amountFrom       本币金额从
-     * @param amountTo         本币金额至
-     * @param remark           备注
-     * @param documentNumber   单据编号
      * @return
      */
+    @ApiOperation(value = "待办事项-待审批单据-分类信息", notes = "待办事项-待审批单据-分类信息", tags = {"query"})
     @GetMapping("/getApprovalToPendTotal")
-    public List<ApprovalDashboardDetailDTO> getApprovalToPendTotal(@RequestParam(value = "documentCategory", required = false) Integer documentCategory,
-                                                                   @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
-                                                                   @RequestParam(value = "applicantName", required = false) String applicantName,
-                                                                   @RequestParam(value = "beginDate", required = false) String beginDateStr,
-                                                                   @RequestParam(value = "endDate", required = false) String endDateStr,
-                                                                   @RequestParam(value = "amountFrom", required = false) Double amountFrom,
-                                                                   @RequestParam(value = "amountTo", required = false) Double amountTo,
-                                                                   @RequestParam(value = "remark", required = false) String remark,
-                                                                   @RequestParam(value = "documentNumber", required = false) String documentNumber) {
+    public List<ApprovalDashboardDetailDTO> getApprovalToPendTotal(
+            @ApiParam(value = "单据大类") @RequestParam(value = "documentCategory", required = false) Integer documentCategory,
+            @ApiParam(value = "单据类型id") @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
+            @ApiParam(value = "申请人名称") @RequestParam(value = "applicantName", required = false) String applicantName,
+            @ApiParam(value = "提交日期从") @RequestParam(value = "beginDate", required = false) String beginDateStr,
+            @ApiParam(value = "提交日期至") @RequestParam(value = "endDate", required = false) String endDateStr,
+            @ApiParam(value = "本币金额从") @RequestParam(value = "amountFrom", required = false) Double amountFrom,
+            @ApiParam(value = "本币金额至") @RequestParam(value = "amountTo", required = false) Double amountTo,
+            @ApiParam(value = "备注") @RequestParam(value = "remark", required = false) String remark,
+            @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber", required = false) String documentNumber) {
 
         // 最小提交日期
         ZonedDateTime beginDate = null;
@@ -376,34 +356,26 @@ public class WorkFlowApproveController {
     /**
      * 待办事项-被退回单据/未完成单据
      *
-     * @param tabNumber          tabNumber=1(被退回的单据) tabNumber=2(未完成的单据)
-     * @param documentCategory   单据大类
-     * @param documentTypeId     单据类型id
-     * @param beginDateStr       提交日期从
-     * @param endDateStr         提交日期至
-     * @param amountFrom         本币金额从
-     * @param amountTo           本币金额至
-     * @param lastApproverOidStr 当前审批人oid
-     * @param approvalNodeName   当前审批节点名称
-     * @param remark             备注
-     * @param documentNumber     单据编号
      * @return
      */
+
+    @ApiOperation(value = "待办事项-被退回单据/未完成单据", notes = "待办事项-被退回单据/未完成单据", tags = {"query"})
     @GetMapping("/my/document/detail/{tabNumber}")
-    public ResponseEntity<List<WorkFlowDocumentRefDTO>> listMyDocumentDetail(@PathVariable Integer tabNumber,
-                                                                             @RequestParam(value = "documentCategory", required = false) Integer documentCategory,
-                                                                             @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
-                                                                             @RequestParam(value = "applicantName", required = false) String applicantName,
-                                                                             @RequestParam(value = "beginDate", required = false) String beginDateStr,
-                                                                             @RequestParam(value = "endDate", required = false) String endDateStr,
-                                                                             @RequestParam(value = "amountFrom", required = false) Double amountFrom,
-                                                                             @RequestParam(value = "amountTo", required = false) Double amountTo,
-                                                                             @RequestParam(value = "lastApproverOid", required = false) String lastApproverOidStr,
-                                                                             @RequestParam(value = "approvalNodeName", required = false) String approvalNodeName,
-                                                                             @RequestParam(value = "remark", required = false) String remark,
-                                                                             @RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                                             @RequestParam(value = "page", defaultValue = "0") int page,
-                                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<List<WorkFlowDocumentRefDTO>> listMyDocumentDetail(
+            @ApiParam(value = "tabNumber=1(被退回的单据) tabNumber=2(未完成的单据)") @PathVariable Integer tabNumber,
+            @ApiParam(value = "单据大类") @RequestParam(value = "documentCategory", required = false) Integer documentCategory,
+            @ApiParam(value = "单据类型id") @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,
+            @ApiParam(value = "申请人") @RequestParam(value = "applicantName", required = false) String applicantName,
+            @ApiParam(value = "提交日期从") @RequestParam(value = "beginDate", required = false) String beginDateStr,
+            @ApiParam(value = "提交日期至") @RequestParam(value = "endDate", required = false) String endDateStr,
+            @ApiParam(value = "本币金额从") @RequestParam(value = "amountFrom", required = false) Double amountFrom,
+            @ApiParam(value = "本币金额至") @RequestParam(value = "amountTo", required = false) Double amountTo,
+            @ApiParam(value = "当前审批人oid") @RequestParam(value = "lastApproverOid", required = false) String lastApproverOidStr,
+            @ApiParam(value = "当前审批节点名称") @RequestParam(value = "approvalNodeName", required = false) String approvalNodeName,
+            @ApiParam(value = "备注") @RequestParam(value = "remark", required = false) String remark,
+            @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+            @ApiParam(value = "页码") @RequestParam(value = "page", defaultValue = "0") int page,
+            @ApiParam(value = "每页条数") @RequestParam(value = "size", defaultValue = "10") int size) {
 
 
         // 最小提交日期

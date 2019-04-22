@@ -5,7 +5,7 @@
 <mapper namespace="com.hand.hcf.app.expense.report.persistence.ExpenseReportDistMapper">
 
     <select id="queryExpenseReportDistFromApplication" resultType="com.hand.hcf.app.expense.report.dto.ExpenseReportDistDTO">
-		select ed.*,eh.requisition_number reportDocumentNumber,eh.id reportId,eh.description from
+		select ed.*,eh.requisition_number reportDocumentNumber,eh.id reportId,eh.description,eh.status from
 			exp_report_dist ed,exp_report_header eh
  	    where
  	    	1=1

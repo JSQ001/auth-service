@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Service
 @Transactional
-public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMapper,ExpenseReportType> {
+public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMapper,ExpenseReportType>{
 
     @Autowired
     private ExpenseReportTypeMapper expenseReportTypeMapper;
@@ -556,7 +556,6 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
             List<ExpenseReportType> expenseReportTypes = this.selectList(
                     new EntityWrapper<ExpenseReportType>()
-                            .eq("set_of_books_id",OrgInformationUtil.getCurrentSetOfBookId())
                             .in(typeIdList.size() != 0, "id", typeIdList)
                             .eq(item.getFormId() != null, "id", item.getFormId())
                             .eq("enabled", true));

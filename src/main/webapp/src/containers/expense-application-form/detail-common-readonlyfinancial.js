@@ -388,16 +388,6 @@ class PrePaymentCommon extends React.Component {
           title={this.$t('expense.application.information')} /*申请信息*/
         >
           <div className="table-header">
-            <div className="table-header-buttons" style={{ float: 'left' }}>
-              {(headerData.status === 1001 ||
-                headerData.status === 1003 ||
-                headerData.status === 1005) && (
-                <Button type="primary" onClick={this.addItem}>
-                  {this.$t('expense.new.application.information')}
-                  {/*新建申请信息*/}
-                </Button>
-              )}
-            </div>
             {lineInfo.currencyAmount && (
               <div style={{ float: 'right' }}>
                 <Breadcrumb style={{ marginBottom: '10px', lineHeight: '32px' }}>

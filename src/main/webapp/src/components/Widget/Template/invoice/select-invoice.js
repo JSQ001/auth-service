@@ -161,9 +161,7 @@ class SelectInvoice extends React.Component {
 
   componentWillReceiveProps = nextProps => {
     if (nextProps.visible && !this.props.visible) {
-      console.log(nextProps);
       let selectedRowKeys = nextProps.selectedData.map(item => item.id);
-      console.log(selectedRowKeys);
       this.setState(
         {
           selectedData: nextProps.selectedData || [],
@@ -184,8 +182,8 @@ class SelectInvoice extends React.Component {
       page,
       pageSize,
       ...this.props.params,
+      ...this.state.searchParams,
     };
-
     let url = `${config.expenseUrl}/api/invoice/head/query/invoice/all/by/cond`;
     httpFetch
       .get(url, params)
@@ -223,10 +221,15 @@ class SelectInvoice extends React.Component {
     this.setState({ showInvoiceDetail: true, invoiceId: record.id });
   };
   search = params => {
+    const searchParams = {
+      ...params,
+      invoiceDateFrom: params.invoiceDateFrom && params.invoiceDateFrom.format('YYYY-MM-DD'),
+      invoiceDateTo: params.invoiceDateTo && params.invoiceDateTo.format('YYYY-MM-DD'),
+    };
     this.setState(
       {
         page: 0,
-        searchParams: params,
+        searchParams: searchParams,
         loading: true,
       },
       () => {
@@ -268,7 +271,6 @@ class SelectInvoice extends React.Component {
 
   handleOk = () => {
     const { selectedData } = this.state;
-    console.log(selectedData);
     this.props.onOk(selectedData);
   };
 
@@ -310,11 +312,6 @@ class SelectInvoice extends React.Component {
   onSelectChange = (selectedRowKeys, selectedRows) => {
     let { rowSelection, selectedData } = this.state;
     let obj = {};
-
-    console.log(selectedRowKeys);
-    console.log(selectedRows);
-    console.log(selectedData);
-    console.log(rowSelection);
 
     selectedRowKeys.map(item => (obj[item] = true));
     selectedData = selectedData.concat(selectedRows);

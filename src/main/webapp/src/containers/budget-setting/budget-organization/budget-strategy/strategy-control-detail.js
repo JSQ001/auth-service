@@ -69,7 +69,6 @@ class StrategyControlDetail extends React.Component {
       columns: [
         {
           title: this.$t({ id: 'budget.strategy.detail.type' } /*类型*/),
-          align: 'center',
           dataIndex: 'id',
           render: () => {
             return this.$t({ id: 'budget.strategy.detail.formula' } /*公式*/);
@@ -77,13 +76,11 @@ class StrategyControlDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.detail.control.object' } /*控制对象*/),
-          align: 'center',
           dataIndex: 'object',
           render: value => <span>{value.label}</span>,
         },
         {
           title: this.$t({ id: 'budget.strategy.detail.compare' } /*比较*/),
-          align: 'center',
           dataIndex: 'range',
           render: value => <span>{value.label}</span>,
         },
@@ -95,13 +92,11 @@ class StrategyControlDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.detail.manner' } /*方式*/),
-          align: 'center',
           dataIndex: 'manner',
           render: value => <span>{value.label}</span>,
         },
         {
           title: this.$t({ id: 'common.operation' } /*操作*/),
-          align: 'center',
           dataIndex: 'operator',
           render: (value, record) => {
             return record.manner.value === 'FIXED_AMOUNT' ? value.label : '-';
@@ -109,7 +104,6 @@ class StrategyControlDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.detail.value' } /*值*/),
-          align: 'center',
           dataIndex: 'value',
           render: (value, record) => {
             return record.manner.value === 'PERCENTAGE' ? value + '%' : value;

@@ -8,8 +8,9 @@ import reimburseService from 'containers/reimburse/my-reimburse/reimburse.servic
 import { routerRedux } from 'dva/router';
 import Chooser from 'components/Widget/chooser';
 import moment from 'moment';
-import SelectContract from 'containers/reimburse/my-reimburse/select-contract';
+import SelectContract from 'containers/reimburse/my-reimburse/select-contract-header';
 import ContractDetail from 'containers/contract/contract-approve/contract-detail-common';
+import Lov from 'widget/Template/lov';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const CheckableTag = Tag.CheckableTag;
@@ -59,6 +60,8 @@ class NewReimburse extends React.Component {
       loading: false,
       isNew: false,
       saveLoading: false,
+      defaultUser: {},
+      firstRender: true,
     };
   }
 
@@ -110,6 +113,7 @@ class NewReimburse extends React.Component {
 
     //加载币种列表
     this.getCurrencyCodeList();
+    this.listUserByTypeId(this.props.match.params.typeId);
   }
 
   //获取报账单类型信息
@@ -290,16 +294,14 @@ class NewReimburse extends React.Component {
       const { record, selectedContract, expenseDimensions, currency } = this.state;
       value.companyId = value.companyId[0].id;
       value.departmentId = value.departmentId[0].departmentId;
-      value.applicantId = value.applicantId.key;
+      value.applicantId = value.applicantId.id;
       value.accountNumber && (value.accountNumber = value.accountNumber.key);
       value.documentTypeId = this.props.match.params.typeId;
       value.payeeCategory = value.payeeCategory && value.payeeCategory.key;
       value.payeeId = value.payeeId && value.payeeId.key;
       value.expenseDimensions = expenseDimensions.map(item => {
-        return {
-          ...item,
-          value: value[item.dimensionField].key,
-        };
+        item.headerFlag && (item.value = value[item.dimensionField].key);
+        return item;
       });
       value.contractHeaderId = selectedContract.length
         ? selectedContract[0].contractHeaderId
@@ -318,7 +320,6 @@ class NewReimburse extends React.Component {
       value.exchangeRate =
         (currency.find(item => value.currencyCode === item.currencyCode) || {}).rate ||
         record.exchangeRate;
-
       reimburseService
         .newReimburse(value)
         .then(res => {
@@ -428,8 +429,43 @@ class NewReimburse extends React.Component {
     }
   };
 
+  userInit = user => {
+    reimburseService
+      .getUserInfoByTypeId(user.userOid)
+      .then(res => {
+        let temp = res.data;
+        let company = [{ id: temp.companyId, name: temp.companyName }];
+        let department = [{ departmentId: temp.departmentId, name: temp.departmentName }];
+        this.props.form.setFieldsValue({
+          companyId: company,
+          departmentId: department,
+        });
+      })
+      .catch(err => {
+        message.error('请求失败，请稍后重试...');
+      });
+  };
+
   userChange = user => {
-    this.userOrCompanyOrUnitChange('oldId', 'oldId', user.key);
+    reimburseService
+      .getUserInfoByTypeId(user.userOid)
+      .then(res => {
+        let temp = res.data;
+        let company = [{ id: temp.companyId, name: temp.companyName }];
+        let department = [{ departmentId: temp.departmentId, name: temp.departmentName }];
+        this.props.form.setFieldsValue(
+          {
+            companyId: company,
+            departmentId: department,
+          },
+          () => {
+            this.userOrCompanyOrUnitChange('oldId', 'oldId', user.id);
+          }
+        );
+      })
+      .catch(err => {
+        message.error('请求失败，请稍后重试...');
+      });
   };
 
   unitChange = value => {
@@ -451,7 +487,7 @@ class NewReimburse extends React.Component {
       unitId = oldUnit[0].departmentId;
     }
     if (userId === 'oldId') {
-      userId = oldUser.key;
+      userId = oldUser.id;
     }
     this.setDimension(this.state.expenseDimensions, companyId, unitId, userId);
   };
@@ -467,14 +503,50 @@ class NewReimburse extends React.Component {
             let items = temp.find(o => o.id === e.dimensionId)['subDimensionItemCOS'];
             e.options = items;
           });
-          this.setState({
-            expenseDimensions: dimensions || [],
-          });
+          this.setState(
+            {
+              expenseDimensions: dimensions || [],
+            },
+            () => {
+              if (this.state.firstRender) {
+                dimensions.forEach(e => {
+                  let dimensionItem = e.options.find(o => o.id === e.value);
+                  if (dimensionItem) {
+                    this.props.form.setFieldsValue({
+                      [`${e.dimensionField}`]: { key: e.value, label: e.valueName },
+                    });
+                  }
+                });
+                this.setState({ firstRender: false });
+              }
+            }
+          );
         })
         .catch(err => {
           message.error(err.response.data.message);
         });
     }
+  };
+
+  listUserByTypeId = typeId => {
+    reimburseService
+      .listUserByTypeId(typeId)
+      .then(res => {
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
+          }
+          this.setState({ defaultUser });
+          this.userInit(defaultUser);
+        }
+      })
+      .catch(err => {
+        message.error('请求失败，请稍后重试...');
+      });
   };
 
   //渲染维度
@@ -488,7 +560,7 @@ class NewReimburse extends React.Component {
           <FormItem {...formItemLayout} label={item.name}>
             {getFieldDecorator(item.dimensionField, {
               rules: [{ required: item.requiredFlag, message: `请选择${item.name}` }],
-              initialValue: { key: item.value, label: item.valueName },
+              // initialValue: {key: item.value, label: item.valueName},
             })(
               <Select labelInValue>
                 {(item.options || []).map(i => (
@@ -524,6 +596,7 @@ class NewReimburse extends React.Component {
       reTypeDetail,
       viewContractId,
       selectedContract,
+      defaultUser,
     } = this.state;
     return (
       <div className="new-contract " style={{ marginBottom: '70px', paddingBottom: '60px' }}>
@@ -532,11 +605,20 @@ class NewReimburse extends React.Component {
             <FormItem {...formItemLayout} label="申请人">
               {getFieldDecorator('applicantId', {
                 rules: [{ required: true, message: '请选择申请人' }],
-                initialValue: {
-                  key: record.applicantId || user.id,
-                  label: record.applicantName || user.userName,
-                },
-              })(<Select disabled labelInValue placeholder="请选择" onChange={this.userChange} />)}
+                initialValue: isNew
+                  ? { id: defaultUser.id, fullName: defaultUser.fullName }
+                  : { id: record.applicantId, fullName: record.applicantName },
+              })(
+                <Lov
+                  code="report_user_authorize"
+                  valueKey="id"
+                  labelKey="fullName"
+                  onChange={this.userChange}
+                  allowClear={false}
+                  single
+                  extraParams={{ expenseReportTypeId: this.props.match.params.typeId }}
+                />
+              )}
             </FormItem>
             <FormItem {...formItemLayout} label="公司">
               {getFieldDecorator('companyId', {
@@ -771,7 +853,6 @@ class NewReimburse extends React.Component {
           onOk={this.handleContractOk}
           single={true}
           viewContract={value => {
-            console.log(value);
             this.setState({
               contractShow: true,
               viewContractId: value,

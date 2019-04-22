@@ -140,4 +140,12 @@ public class ExpensePaymentScheduleCO {
 
     private String reportTypeName;
 
+    private  Integer status;
+    /**
+     * 单据编号
+     */
+    private  String  documentNumber;
+
+    private  Integer lineNumber;
+
 }

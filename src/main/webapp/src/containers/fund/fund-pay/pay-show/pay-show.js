@@ -30,7 +30,7 @@ class PayShow extends React.Component {
     // const { nowStatus } = this.state;
     // console.log('--父组件中tabs的状态nowStatus---', nowStatus);
     const { match } = this.props;
-    console.log('--父组件中的match.params.tab---', match.params.tab);
+    // console.log('--父组件中的match.params.tab---', match.params.tab);
     if (match.params.tab) {
       this.setState({ nowStatus: match.params.tab });
     }
@@ -40,8 +40,6 @@ class PayShow extends React.Component {
    *  tab页的改变
    */
   onChangeTabs = key => {
-    console.log('000');
-    console.log('key', key);
     const { dispatch } = this.props;
     const { payShow } = this.state;
     // match.params.subTab = undefined;
@@ -84,7 +82,7 @@ class PayShow extends React.Component {
   render() {
     const { tabs, nowStatus } = this.state;
     // const { match } = this.props;
-    console.log('--父组件render中的nowStatus---', nowStatus, tabs);
+    // console.log('--父组件render中的nowStatus---', nowStatus, tabs);
     return (
       <div className="pay-show">
         <Tabs onChange={this.onChangeTabs} defaultActiveKey={nowStatus}>

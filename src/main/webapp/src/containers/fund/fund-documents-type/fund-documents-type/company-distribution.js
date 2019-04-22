@@ -48,8 +48,8 @@ class CompanyDistribution extends React.Component {
       pageSize: 8,
       showListSelector: false,
       selectorItem: {},
-      acpRequisitionTypeDefine:
-        '/document-type-manage/payment-requisition-type/payment-requisition-type',
+      acpRequisitionTypeDefine: '/fund-documents-type/fund-documents-type/fund-documents-type',
+      // '/document-type-manage/payment-requisition-type/payment-requisition-type',
     };
   }
 
@@ -59,10 +59,14 @@ class CompanyDistribution extends React.Component {
 
   getBasicInfo = () => {
     const { params } = this.props.match;
-    httpFetch.get(`${config.payUrl}/api/acp/request/type/queryById/${params.id}`).then(res => {
+    // httpFetch.get(`http://10.211.110.100:9099/api/setting/request/type/queryById/${params.id}`).then(res => {
+    httpFetch.get(`${config.fundUrl}/api/setting/request/type/queryById/${params.id}`).then(res => {
       let selectorItem = {
         title: '批量分配公司',
-        url: `${config.payUrl}/api/acp/request/type/company/${
+        //   url: `http://10.211.110.100:9099/api/setting/request/type/company/${
+        //     params.setOfBooksId
+        //   }/companies/query/filter`,
+        url: `${config.fundUrl}/api/setting/request/type/company/${
           params.setOfBooksId
         }/companies/query/filter`,
         searchForm: [
@@ -91,11 +95,17 @@ class CompanyDistribution extends React.Component {
     };
     httpFetch
       .put(
-        `${config.payUrl}/api/acp/request/type/company/${
+        `${config.fundUrl}/api/setting/request/type/company/${
           this.props.match.params.setOfBooksId
         }/updateCompany`,
         params
       )
+      //   .put(
+      //     `http://10.211.110.100:9099/api/setting/request/type/company/${
+      //       this.props.match.params.setOfBooksId
+      //     }/updateCompany`,
+      //     params
+      //   )
       .then(res => {
         if (res.status === 200) {
           this.refs.table.search();
@@ -115,14 +125,19 @@ class CompanyDistribution extends React.Component {
     if (values && values.result.length) {
       const { params } = this.props.match;
       let paramsValue = {};
-      paramsValue.acpReqTypesId = params.id;
+      paramsValue.fundReqTypesId = params.id;
       paramsValue.companyIds = [];
       values.result.map(item => {
         paramsValue.companyIds.push(item.id);
       });
       httpFetch
         .post(
-          `${config.payUrl}/api/acp/request/type/company/${params.setOfBooksId}/batchAssignCompany`,
+          //   `http://10.211.110.100:9099/api/setting/request/type/company/${
+          //     params.setOfBooksId
+          //   }/batchAssignCompany`,
+          `${config.fundUrl}/api/setting/request/type/company/${
+            params.setOfBooksId
+          }/batchAssignCompany`,
           paramsValue
         )
         .then(res => {
@@ -222,7 +237,10 @@ class CompanyDistribution extends React.Component {
         <CustomTable
           columns={columns}
           ref="table"
-          url={`${config.payUrl}/api/acp/request/type/company/${
+          //   url={`http://10.211.110.100:9099/api/setting/request/type/company/${
+          //     this.props.match.params.setOfBooksId
+          //   }/queryCompany?acpReqTypeId=${this.props.match.params.id}`}
+          url={`${config.fundUrl}/api/setting/request/type/company/${
             this.props.match.params.setOfBooksId
           }/queryCompany?acpReqTypeId=${this.props.match.params.id}`}
         />

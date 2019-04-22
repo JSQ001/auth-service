@@ -1,22 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
-import config from 'config';
-import {
-  Radio,
-  Badge,
-  Tabs,
-  Popover,
-  Pagination,
-  message,
-  Alert,
-  Icon,
-  Dropdown,
-  Menu,
-  Modal,
-  Form,
-  DatePicker,
-} from 'antd';
+import { Badge, Popover } from 'antd';
 import Table from 'widget/table';
 import SearchArea from 'widget/search-area';
 import backlashService from './pay-backlash.service';
@@ -99,8 +83,7 @@ class CanBacklash extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.backlashCode' }),
           dataIndex: 'billcode',
-          width: 250,
-          align: 'center',
+          width: 160,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>
@@ -110,8 +93,7 @@ class CanBacklash extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.sourceBacklashCode' }),
           dataIndex: 'refBillCode',
-          width: 250,
-          align: 'center',
+          width: 160,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : '-'}</Popover>
@@ -121,7 +103,8 @@ class CanBacklash extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.backlashDate' }),
           dataIndex: 'refundDate',
-          width: 150,
+          width: 120,
+          align: 'center',
           render: desc => (
             <span>
               <Popover content={moment(desc).format('YYYY-MM-DD')}>
@@ -152,6 +135,7 @@ class CanBacklash extends React.Component {
         {
           title: this.$t({ id: 'pay.backlash.backlashStauts' }),
           dataIndex: 'paymentStatus',
+          width: 120,
           render: (value, record) => {
             return (
               <Badge

@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Modal, Button, Tabs, Upload, Icon, message, Radio } from 'antd';
+import { Modal, Tabs, message, Radio } from 'antd';
 import Table from 'widget/table';
 const RadioGroup = Radio.Group;
 const TabPane = Tabs.TabPane;
@@ -22,7 +22,7 @@ class Exporter extends React.Component {
   exportResult = () => {
     let { selectedRowKeys, excelVersion } = this.state;
     if (selectedRowKeys.length === 0) {
-      message.error('请选择导出列');
+      message.error(this.$t('budget.select.export.column')); // 请选择导出列
       return;
     }
     let columnFiledMap = {};
@@ -46,7 +46,11 @@ class Exporter extends React.Component {
         let b = new Blob([res.data], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
-        FileSaver.saveAs(b, `预算余额查询结果导出表.xls${excelVersion === '2003' ? '' : 'x'}`);
+        FileSaver.saveAs(
+          b,
+          this.$t('budget.Budget.balance.query.result.export.table') +
+            `.xls${excelVersion === '2003' ? '' : 'x'}`
+        ); // 预算余额查询结果导出表
         hide();
         this.props.afterClose();
       })
@@ -104,13 +108,13 @@ class Exporter extends React.Component {
         onCancel={this.props.onCancel}
         onOk={this.exportResult}
         afterClose={this.props.afterClose}
-        title="选择要导出的列"
+        title={this.$t('budget.select.column.export')}
         bodyStyle={{ height: '70vh', overflowY: 'scroll' }}
         confirmLoading={exporting}
-        okText="导出"
+        okText={this.$t('budget.export')}
         cancelText={this.$t('common.cancel')}
       >
-        导出为：
+        {this.$t('budget.export.is')}
         <RadioGroup
           onChange={e => this.setState({ excelVersion: e.target.value })}
           value={excelVersion}
@@ -118,10 +122,11 @@ class Exporter extends React.Component {
           <Radio value="2003">Excel 2003</Radio>
           <Radio value="2007">Excel 2007</Radio>
         </RadioGroup>
+
         <Table
           dataSource={columns.concat(dimensionColumns)}
           rowSelection={rowSelection}
-          columns={[{ title: '列名', dataIndex: 'title' }]}
+          columns={[{ title: this.$t('budget.colum.name'), dataIndex: 'title' }]}
           rowKey="dataIndex"
           size="middle"
           onRow={record => ({

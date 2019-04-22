@@ -279,6 +279,13 @@ export default {
    * @param {*} id
    */
   getLocalizationCityById(id) {
-    return httpFetch.post(`${config.mdataUrl}/api/localization/city/ids`, [id]);
+    return httpFetch.post(`${config.mdataUrl}/api/location/city/ids`, [id]);
+  },
+  /**
+   * 根据id批量获取用户
+   * @param {*} ids
+   */
+  getUserByIds(ids) {
+    return httpFetch.post(`${config.mdataUrl}/api/list/user/batch/ids`, ids);
   },
 };

@@ -1,81 +1,43 @@
 /* eslint-disable */
 import React, { Component } from 'react';
 import SearchArea from 'widget/search-area';
-import {
-  Button,
-  Divider,
-  message,
-  Popconfirm,
-  Modal,
-  Form,
-  Select,
-  Row,
-  DatePicker,
-  Table,
-} from 'antd';
+import { Button, message, Modal, Form, DatePicker, Popover } from 'antd';
 import SlideFrame from 'widget/slide-frame';
 import config from 'config';
 import moment from 'moment';
 import { connect } from 'dva';
-import CustomTable from 'widget/custom-table';
 import { routerRedux } from 'dva/router';
+import Table from 'widget/table';
 import jobService from 'containers/job/job.service';
 import Service from './transactio-details-data-supplement.service';
+import NewDetailsData from './new-transactio-details-data-supplement';
 const confirm = Modal.confirm;
 const { MonthPicker, RangePicker } = DatePicker;
 const monthFormat = 'YYYY/MM';
-import transactioDetailsDataSupplementService from './transactio-details-data-supplement.service';
 class TransactioDetailsDataSupplement extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      ruleParameterTypeArray: [], //值列表
-      importSysId: '',
       searchForm: [
-        // {
-        //   type: 'list',
-        //   id: 'companyCode',
-        //   colSpan: 6,
-        //   listType: 'company_detail',
-        //   labelKey: 'companyName',
-        //   valueKey: 'id',
-        //   event: 'companyCode',
-        //   single: true,
-        //   listExtraParams: {},
-        //   label: '机构' /*机构*/,
-        // },
-        // {
-        //   type: 'select',
-        //   colSpan: 6,
-        //   id: 'invoiceTypeId',
-        // //  label: this.$t('expense.wallet.invoiceType') /* 发票类型 */,
-        //   label:"来源系统" /* 发票类型 */,
-        //   options: [],
-        //   method: 'get',
-        //   getUrl: `${config.expenseUrl}/api/invoice/type/query/for/invoice`,
-        //   getParams: { tenantId: props.company.tenantId, setOfBooksId: props.company.setOfBooksId },
-        //   labelKey: 'invoiceTypeName',
-        //   valueKey: 'id',
-        // },
         {
           type: 'value_list',
           valueListCode: 'TAX_SOURCE_SYSTEM',
           colSpan: 6,
           // id为传到后台的字段
-          id: 'invoiceTypeId',
+          id: 'sourceSystem',
           label: '来源系统',
           options: [],
         },
         {
           type: 'input',
-          id: 'taxRate',
+          id: 'transNum',
           placeholder: '请输入',
           label: '交易流水号',
           colSpan: 6,
         },
         {
           type: 'list',
-          id: 'clientNumber',
+          id: 'clientAcc',
           colSpan: 6,
           listType: 'customer_information_query',
           labelKey: 'clientName',
@@ -101,8 +63,7 @@ class TransactioDetailsDataSupplement extends Component {
         {
           type: 'list',
           colSpan: 6,
-          id: 'companyId',
-          //label: this.$t({ id: 'my.contract.contractCompany' } /*公司*/),
+          id: 'org',
           label: '交易机构',
           listType: 'company_detail',
           valueKey: 'id',
@@ -113,21 +74,9 @@ class TransactioDetailsDataSupplement extends Component {
           event: 'COMPANY_ID',
           allowClear: true,
         },
-        // {
-        //   type: 'list',
-        //   id: 'companyCode',
-        //   colSpan: 6,
-        //   listType: 'company_detail',
-        //   labelKey: 'companyName',
-        //   valueKey: 'id',
-        //   event: 'companyCode',
-        //   single: true,
-        //   listExtraParams: {},
-        //   label: '交易机构' /*交易机构*/,
-        // },
         {
           type: 'input',
-          id: 'taxRate',
+          id: 'batchId',
           placeholder: '请输入',
           label: '批次号',
           colSpan: 6,
@@ -136,8 +85,8 @@ class TransactioDetailsDataSupplement extends Component {
           type: 'items',
           id: 'date',
           items: [
-            { type: 'date', id: 'dateFrom', label: '交易日期从' },
-            { type: 'date', id: 'dateTo', label: '交易日期至' },
+            { type: 'date', id: 'transDateFrom', label: '交易日期从' },
+            { type: 'date', id: 'transDateTo', label: '交易日期至' },
           ],
           colSpan: 6,
         },
@@ -158,10 +107,12 @@ class TransactioDetailsDataSupplement extends Component {
             { range0: `${range[0]}`, range1: `${range[1]}`, total }
           ),
       },
+      visibel: false,
+      model: {},
       columns: [
         {
           title: '来源系统',
-          dataIndex: 'sourceSystem',
+          dataIndex: 'sourceSystemName',
           align: 'center',
           width: 200,
         },
@@ -177,36 +128,12 @@ class TransactioDetailsDataSupplement extends Component {
           align: 'center',
           width: 200,
         },
-        // {
-        //   title: '来源数据价税状态',
-        //   dataIndex: 'sourceDataStatus',
-        //   align: 'center',
-        //   width: 200
-        // },
         {
           title: '交易机构',
           dataIndex: 'org',
           align: 'center',
           width: 200,
         },
-        // {
-        //   title: '责任中心',
-        //   dataIndex: 'costCenter',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '交易期间',
-        //   dataIndex: 'tranPeriod',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '客户纳税人名称',
-        //   dataIndex: 'taxpayerName',
-        //   align: 'center',
-        //   width: 200
-        // },
         {
           title: '客户编号',
           dataIndex: 'clientAcc',
@@ -215,7 +142,7 @@ class TransactioDetailsDataSupplement extends Component {
         },
         {
           title: '客户名称',
-          dataIndex: 'clientName',
+          dataIndex: 'taxpayerName',
           align: 'center',
           width: 200,
         },
@@ -231,94 +158,80 @@ class TransactioDetailsDataSupplement extends Component {
           align: 'center',
           width: 200,
         },
-        // {
-        //   title: '本币交易金额',
-        //   dataIndex: 'functionalAmount',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '原币应税销售额',
-        //   dataIndex: 'discAmount',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '本币应税销售额',
-        //   dataIndex: 'funcDiscAmount',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '原币销项税额',
-        //   dataIndex: 'outTaxes',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '本币销项税额',
-        //   dataIndex: 'funOutTaxes',
-        //   align: 'center',
-        //   width: 200
-        // },
-        // {
-        //   title: '交易说明',
-        //   dataIndex: 'transDesc',
-        //   align: 'center',
-        //   width: 200
-        // },
         {
           title: '数据创建方式',
-          dataIndex: 'dataCreationType',
+          dataIndex: 'dataTypeName',
           align: 'center',
           width: 200,
         },
         {
           title: '价税分离状态',
-          dataIndex: 'processFlag',
+          dataIndex: 'processFlagName',
           align: 'center',
           width: 200,
         },
         {
           title: '交易日期',
-          dataIndex: 'tranDate',
+          dataIndex: 'transDate',
+          align: 'center',
+          width: 200,
+          render: recode => {
+            return (
+              <Popover content={moment(recode).format('YYYY-MM-DD')}>
+                {recode ? moment(recode).format('YYYY-MM-DD') : ''}
+              </Popover>
+            );
+          },
+        },
+        {
+          title: '操作',
+          dataIndex: 'operation',
+          align: 'center',
+          render: (value, record) => (
+            <div>
+              <a onClick={() => this.edit(record)}>编辑</a>
+            </div>
+          ),
+          width: 100,
+        },
+        {
+          title: '错误信息',
+          dataIndex: 'errorMessage',
           align: 'center',
           width: 200,
         },
       ],
       searchParams: {},
-      visibel: false,
       model: {},
       taxCategory: {},
+      ruleParameterTypeArray: [], //值列表
+      importSysId: '',
+      data: [],
       selectedKey: [],
       id: props.match.params.id,
       importSys: [
         {
           type: 'value_list',
           id: 'importSys',
-          //  label: messages('code.rule.document.type') /*单据类型'*/,
           valueListCode: 2023,
           options: [],
         },
       ],
-      searchParams: {},
-      visibel: false,
-      model: {},
       lsVisible: false,
     };
     this.showConfirm = this.showConfirm.bind(this);
   }
   componentWillMount() {
     this.getList();
+    this.setColumns();
   }
 
   // 获得数据
   getList() {
-    const { pagination } = this.state;
-    const params = {};
+    const { pagination, searchParams } = this.state;
+    const params = { ...searchParams };
     params.page = pagination.current - 1;
     params.size = pagination.pageSize;
-    // console.log(this.props.params.id);
     Service.getCangeRecord(params)
       .then(response => {
         response.data.map(item => {
@@ -333,7 +246,33 @@ class TransactioDetailsDataSupplement extends Component {
       })
       .catch(() => {});
   }
-
+  // 动态创建columns
+  setColumns = () => {
+    const { columns } = this.state;
+    Service.getColumns().then(res => {
+      if (res.data && res.data.length) {
+        columns.splice(
+          2,
+          0,
+          ...res.data.map(item => {
+            return {
+              dataIndex: item.colName.replace('_f', 'F'),
+              title: item.dimensionName,
+              key: item.dimensionId,
+              width: 100,
+              align: 'center',
+              render: (value, record) => (
+                <span>
+                  {value}-{record[item.colName.replace('_f', 'F') + 'Name']}
+                </span>
+              ),
+            };
+          })
+        );
+        this.setState({ columns });
+      }
+    });
+  };
   // 每页多少条
   onChangePageSize = (page, pageSize) => {
     const { pagination } = this.state;
@@ -352,9 +291,13 @@ class TransactioDetailsDataSupplement extends Component {
       this.getList();
     });
   };
+  //编辑
+  edit = record => {
+    this.setState({ model: JSON.parse(JSON.stringify(record)), visibel: true });
+  };
+  // 关闭侧滑页面
   close = flag => {
-    this.setState({ newShow: false, record: {} }, () => {
-      // eslint-disable-next-line no-unused-expressions
+    this.setState({ visibel: false, model: {} }, () => {
       flag && this.getList();
     });
   };
@@ -406,7 +349,6 @@ class TransactioDetailsDataSupplement extends Component {
     });
   }
   showConfirm() {
-    console.log(this.state);
     confirm({
       title: '提示',
       content: '请求提交成功，是否跳转请求运行监控界面？',
@@ -429,56 +371,34 @@ class TransactioDetailsDataSupplement extends Component {
       },
     });
   }
+
   //搜索
-  search = values => {
-    let params = { ...this.state.searchParams, ...values };
+  handleSearch = params => {
+    let pagination = this.state.pagination;
+    pagination.page = 0;
+    pagination.current = 1;
 
-    params.dateFrom && (params.dateFrom = moment(params.dateFrom).format('YYYY-MM-DD'));
-    params.dateTo && (params.dateTo = moment(params.dateTo).format('YYYY-MM-DD'));
-
-    this.setState({ searchParams: params }, () => {
-      this.getList();
-    });
+    this.setState(
+      {
+        searchParams: params,
+        loading: true,
+        pagination,
+      },
+      () => {
+        this.getList();
+      }
+    );
   };
   //重置
   reset = () => {};
 
-  //获取数据
-  // getdata = () => {
-  //   this.setState({
-  //     lsVisible: true,
-  //   });
-  // };
-
-  //跳转到详情
-  // handleRowClick = record => {
-  //   console.log('record.id=' + record.clientTaxName);
-  //   this.props.dispatch(
-  //     routerRedux.push({
-  //       pathname: '/inter-management/cust-inter/customer-inter-detail/' + record.id,
-  //     })
-  //   );
-  // };
   onCancel = () => {
     this.setState({
       ruleParameterTypeArray: [],
       lsVisible: false,
     });
   };
-  handleSubmit = preps => {
-    this.props.form.validateFields((err, values) => {
-      this.run(values.importSysId);
-    });
-  };
-  跳转到获取科目余额界面;
-  toDistributionAccounting = (id, taxCategoryName) => {
-    const { dispatch } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: `/inter-management/acc-balance-interface/get-account-balance`,
-      })
-    );
-  };
+
   // 立即运行
   run = id => {
     jobService
@@ -498,11 +418,16 @@ class TransactioDetailsDataSupplement extends Component {
   };
   submit = () => {
     const { selectedKey } = this.state;
-    // console.log(selectedKey);
-    invoicingDimensionService
-      .deleteInvoicingDimensionBatch(selectedKey)
-      .then(() => {
-        message.success('提交成功');
+    let data1 = [];
+    selectedKey.map(res => {
+      data1.push({
+        id: res,
+      });
+    });
+    Service.submitData(data1)
+      .then(res => {
+        console.log(res.data);
+        message.success(res.data.resultMessage);
         this.setState({ selectedKey: [] });
         this.getList();
       })
@@ -513,22 +438,23 @@ class TransactioDetailsDataSupplement extends Component {
     const { selectedKey } = this.state;
     if (!selectedKey.length) {
       message.warning('请选择要提交的数据！');
+    } else {
+      this.submit();
     }
   };
   selectChange = key => {
-    // console.log(key)
     this.setState({ selectedKey: key });
   };
   render() {
     let {
       searchForm,
       columns,
-      lsVisible,
-      ruleParameterTypeArray,
       loading,
       selectedKey,
       data,
       pagination,
+      visibel,
+      model,
     } = this.state;
     const { getFieldDecorator, id } = this.props.form;
     const rowSelection = {
@@ -539,40 +465,13 @@ class TransactioDetailsDataSupplement extends Component {
       <div>
         <SearchArea
           searchForm={searchForm}
-          submitHandle={this.search}
+          submitHandle={this.handleSearch}
           clearHandle={this.reset}
           maxLength={4}
         />
-        <div style={{ margin: '20px 0' }}>
-          {/* <Button type="primary" onClick={this.toDistributionAccounting}>
-            获取数据
-          </Button> */}
-        </div>
-        {/* <Row style={{ textAlign: 'right' }}>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            {this.$t({ id: 'common.submit' })}
-          </Button>
-          <Button style={{ marginLeft: 8 }} onClick={this.onCancel}>
-            {this.$t({ id: 'common.cancel' })}
-          </Button>
-        </Row> */}
-        <Button
-          style={{ margin: '20px 0', padding: '0' }}
-          type="primary"
-          onClick={this.submitClick}
-        >
-          {selectedKey.length ? (
-            <Popconfirm
-              title="你确定要提交吗？"
-              onConfirm={this.delete}
-              okText="确定"
-              cancelText="取消"
-            >
-              <div style={{ lineHeight: '20px', padding: '0 15px' }}>提交</div>
-            </Popconfirm>
-          ) : (
-            <div style={{ lineHeight: '20px', padding: '0 15px' }}>提交</div>
-          )}
+
+        <Button style={{ margin: '10px 20px 10px 0' }} onClick={this.submitClick} type="primary">
+          提交
         </Button>
         <Table
           onClick={this.handleRowClick}
@@ -581,20 +480,25 @@ class TransactioDetailsDataSupplement extends Component {
           loading={loading}
           bordered
           columns={columns}
-          url={`${config.baseUrl}/api/tax/vat/trans/interface/pageByCondition?errorFlag=E`}
-          ref={ref => (this.table = ref)}
           onRowClick={this.handleRowClick}
           scroll={{ x: 1500 }}
           rowSelection={rowSelection}
         />
-        {/* <MonthPicker defaultValue={moment('2015/01', monthFormat)} format={monthFormat} />
-        <br /> */}
+        <SlideFrame
+          show={visibel}
+          onClose={() => {
+            this.setState({
+              visibel: false,
+              model: {},
+            });
+          }}
+        >
+          <NewDetailsData params={model} close={this.close} />
+        </SlideFrame>
       </div>
     );
   }
 }
-
-//export default CustomerInterface
 
 function mapStateToProps(state) {
   return {

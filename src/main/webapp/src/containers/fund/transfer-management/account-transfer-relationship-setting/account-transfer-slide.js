@@ -26,19 +26,14 @@ class AccountTransferSlide extends React.Component {
         isNew: false,
       });
     }
-    // console.log('rowpParams-->行', rowpParams);
   }
 
-  componentDidMount() {
-    // const { priority } = this.props;
-    // console.log('priority<<<<<', priority)
-  }
+  componentDidMount() {}
 
   /**
    * Lov组件中，modal中选中元素的那一行值
    */
   changeValue = values => {
-    // console.log('--MadalValue-', values);
     this.setState({
       selectModalRowValue: values,
     });
@@ -97,8 +92,9 @@ class AccountTransferSlide extends React.Component {
           this.handleCancel('save');
           this.setState({ loading: false, isNew: false });
         })
-        .catch(() => {
-          message.error('保存失败！');
+        .catch(error => {
+          message.error(error.response.data.message);
+          // message.error('保存失败！');
           this.setState({ loading: false });
         });
     });

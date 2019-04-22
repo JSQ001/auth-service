@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* eslint-disable import/order */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-empty */
@@ -58,6 +59,9 @@ class NewRegisterApply extends React.Component {
     this.getTaxCompanyType();
     this.getTaxAccountingSystem();
     this.getTaxAccountingMethod();
+    this.setState({
+      data: this.props.params,
+    });
   }
 
   /**
@@ -468,12 +472,14 @@ class NewRegisterApply extends React.Component {
             values.taxpayerNumber = null;
           }
         }
+
+        values.id = this.state.id;
+        console.log(values.id);
         if (!values.id) {
           service
             .addTax(values)
             .then(res => {
               if (res && res.data) {
-                values.id = res.data.id;
                 // eslint-disable-next-line no-unused-vars
                 service
                   .submitTax(values)
@@ -484,22 +490,52 @@ class NewRegisterApply extends React.Component {
                     // eslint-disable-next-line no-unused-expressions
                     this.props.onClose && this.props.onClose(true);
                   })
-                  .catch(() => {});
+                  .catch(e => {
+                    if (e.response) {
+                      message.error(
+                        this.$t({ id: 'common.save.filed' }) + `,${e.response.data.message}`
+                      );
+                    }
+                    this.setState({ loading: false });
+                  });
               }
             })
-            .catch(() => {});
+            .catch(e => {
+              if (e.response) {
+                message.error(this.$t({ id: 'common.save.filed' }) + `,${e.response.data.message}`);
+              }
+              this.setState({ loading: false });
+            });
           // message.error('请先保存！');
         } else {
-          service.updateTax(values).then(() => {
-            // eslint-disable-next-line no-unused-vars
-            service.submitTax(values).then(res => {
-              message.success('提交成功！');
-              this.setState({ visible: false });
-              this.props.form.resetFields();
-              // eslint-disable-next-line no-unused-expressions
-              this.props.onClose && this.props.onClose(true);
+          service
+            .updateTax(values)
+            .then(() => {
+              // eslint-disable-next-line no-unused-vars
+              service
+                .submitTax(values)
+                .then(res => {
+                  message.success('提交成功！');
+                  this.setState({ visible: false });
+                  this.props.form.resetFields();
+                  // eslint-disable-next-line no-unused-expressions
+                  this.props.onClose && this.props.onClose(true);
+                })
+                .catch(e => {
+                  if (e.response) {
+                    message.error(
+                      this.$t({ id: 'common.save.filed' }) + `,${e.response.data.message}`
+                    );
+                  }
+                  this.setState({ loading: false });
+                });
+            })
+            .catch(e => {
+              if (e.response) {
+                message.error(this.$t({ id: 'common.save.filed' }) + `,${e.response.data.message}`);
+              }
+              this.setState({ loading: false });
             });
-          });
         }
       }
     });
@@ -511,9 +547,9 @@ class NewRegisterApply extends React.Component {
   };
 
   render() {
-    const { params } = this.props;
+    const { params, visible } = this.props;
     const { getFieldDecorator, getFieldValue } = this.props.form;
-    const { visible, cangeRecordShow, record, data } = this.state;
+    const { cangeRecordShow, record, data } = this.state;
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },

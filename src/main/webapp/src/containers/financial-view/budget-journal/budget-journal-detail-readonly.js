@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Affix, Popover, Button, message, Popconfirm, notification, Icon, Spin, Form } from 'antd';
+import { Popover, message, Spin, Form } from 'antd';
 import Table from 'widget/table';
 import 'styles/budget/budget-journal/budget-journal-detail.scss';
 import config from 'config';
@@ -174,6 +174,7 @@ class BudgetJournalDetail extends React.Component {
           label: this.$t({ id: 'budgetJournal.createdDate' }),
           id: 'createdDate',
           disabled: true,
+          align: 'center',
         },
         /* 预算日记账类型 */
         {
@@ -246,26 +247,23 @@ class BudgetJournalDetail extends React.Component {
           title: this.$t({ id: 'budgetJournal.companyId' }),
           key: 'companyName',
           dataIndex: 'companyName',
-          align: 'center',
-          width: '5%',
+          width: 204,
           render: companyName => <Popover content={companyName}>{companyName}</Popover>,
         },
         {
           /* 部门 */
           title: this.$t({ id: 'budgetJournal.unitId' }),
-          align: 'center',
           key: 'departmentName',
           dataIndex: 'departmentName',
-          width: '5%',
+          width: 190,
           render: departmentName => <Popover content={departmentName}>{departmentName}</Popover>,
         },
         {
           /* 员工 */
           title: this.$t({ id: 'budgetJournal.employee' }),
-          align: 'center',
           key: 'employeeName',
           dataIndex: 'employeeName',
-          width: '5%',
+          width: 110,
           render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
@@ -273,53 +271,54 @@ class BudgetJournalDetail extends React.Component {
           title: this.$t({ id: 'budgetJournal.item' }),
           key: 'itemName',
           dataIndex: 'itemName',
-          align: 'center',
-          width: '10%',
+          width: 140,
           render: itemName => <Popover content={itemName}>{itemName}</Popover>,
         },
         {
           /* 期间 */
           title: this.$t({ id: 'budgetJournal.periodName' }),
           key: 'periodName',
-          align: 'center',
           dataIndex: 'periodName',
+          align: 'center',
+          width: 110,
         },
         {
           /* 季度 */
           title: this.$t({ id: 'budgetJournal.periodQuarter' }),
           key: 'periodQuarterName',
-          align: 'center',
           dataIndex: 'periodQuarterName',
+          align: 'center',
+          width: 110,
         },
         {
           /* 年度 */
           title: this.$t({ id: 'budgetJournal.periodYear' }),
           key: 'periodYear',
-          align: 'center',
           dataIndex: 'periodYear',
+          align: 'center',
+          width: 110,
         },
         {
           /* 币种 */
           title: this.$t({ id: 'budgetJournal.currency' }),
           key: 'currency',
-          align: 'center',
           dataIndex: 'currency',
+          width: 80,
         },
         {
           /* 汇率 */
           title: this.$t({ id: 'budgetJournal.rate' }),
           key: 'rate',
           dataIndex: 'rate',
-          align: 'center',
-          render: rate => <Popover content={rate}>{rate}</Popover>,
+          width: 70,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
           /* 金额 */
           title: this.$t({ id: 'budgetJournal.amount' }),
           key: 'amount',
-          align: 'center',
           dataIndex: 'amount',
-          width: 180,
+          width: 140,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -328,9 +327,8 @@ class BudgetJournalDetail extends React.Component {
           /* 本币今额 */
           title: this.$t({ id: 'budgetJournal.functionalAmount' }),
           key: 'functionalAmount',
-          align: 'center',
           dataIndex: 'functionalAmount',
-          width: 180,
+          width: 140,
           render: recode => (
             <Popover content={this.filterMoney(recode)}>{this.filterMoney(recode)}</Popover>
           ),
@@ -339,21 +337,20 @@ class BudgetJournalDetail extends React.Component {
           /* 数字 */
           title: this.$t({ id: 'budgetJournal.quantity' }),
           key: 'quantity',
-          align: 'center',
           dataIndex: 'quantity',
+          width: 75,
+          render: value => <div style={{ textAlign: 'right' }}>{value}</div>,
         },
         {
           /* 备注 */
           title: this.$t({ id: 'budgetJournal.remark' }),
           key: 'remark',
           dataIndex: 'remark',
-          align: 'center',
           render: remark => <Popover content={remark}>{remark}</Popover>,
         },
       ],
 
       showImportFrame: false,
-      // budgetJournalPage: menuRoute.getRouteItem('budget-journal', 'key'),    //预算日记账
     };
   }
 
@@ -550,11 +547,14 @@ class BudgetJournalDetail extends React.Component {
         // 状态
         let statusData = {};
         if (headerData.status === 1001) {
-          statusData = { status: 'processing', value: '编辑中' };
+          statusData = { status: 'processing', value: this.$t('budgetJournal.editor') }; // 编辑中
         } else if (headerData.status === 1003) {
-          statusData = { status: 'default', value: '撤回' };
+          statusData = { status: 'default', value: this.$t('budgetJournal.returnCommit') }; // 撤回
         } else if (headerData.status === 1005) {
-          statusData = { status: 'error', value: '审批驳回' };
+          statusData = {
+            status: 'error',
+            value: this.$t('budgetJournal.rejection.of.examination.and.approval'),
+          }; // 审批驳回
         } else {
           statusData = { status: 'default', value: headerData.statusName };
         }
@@ -697,7 +697,7 @@ class BudgetJournalDetail extends React.Component {
               rowKey={record => record.id}
               bordered
               size="middle"
-              scroll={{ x: '200%' }}
+              scroll={{ x: '150%' }}
               pagination={this.state.pagination}
               rowSelection={rowSelection}
               loading={loading}
@@ -708,24 +708,6 @@ class BudgetJournalDetail extends React.Component {
           </div>
 
           <div className="divider" />
-          {/* <Affix
-            offsetBottom={0}
-            style={{
-              position: 'fixed',
-              bottom: 0,
-              marginLeft: '-35px',
-              width: '100%',
-              height: '50px',
-              boxShadow: '0px -5px 5px rgba(0, 0, 0, 0.067)',
-              background: '#fff',
-              lineHeight: '50px',
-              zIndex: 1,
-            }}
-          >
-            <Button style={{ marginLeft: 20 }} onClick={this.handleReturn}>
-              {this.$t({ id: 'budgetJournal.return' })}
-            </Button>
-          </Affix> */}
         </Spin>
       </div>
     );

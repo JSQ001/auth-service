@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Lov from 'widget/Template/lov';
 import {
   Form,
   Input,
@@ -47,6 +48,8 @@ class NewExpenseApplicationFromLine extends Component {
       dimensionValues: {},
       //差旅大类ID
       travelTypeCategoryId: '',
+      companyId: '',
+      departmentId: '',
     };
   }
 
@@ -77,7 +80,13 @@ class NewExpenseApplicationFromLine extends Component {
     service
       .getNewInfo({ headerId: this.props.headerData.id, lineId: '', isNew: true })
       .then(res => {
-        this.setState({ model: res.data, pageLoading: false, dimensionList: res.data.dimensions });
+        this.setState({
+          model: res.data,
+          pageLoading: false,
+          dimensionList: res.data.dimensions,
+          companyId: res.data.companyId,
+          departmentId: res.data.unitId,
+        });
       })
       .catch(err => {
         message.error(err.response.data.message);
@@ -109,13 +118,27 @@ class NewExpenseApplicationFromLine extends Component {
             isNew: false,
             dimensionList: res.data.dimensions,
             expenseTypeInfo,
+            companyId: res.data.companyId,
+            departmentId: res.data.unitId,
           },
           () => {
             expenseTypeInfo.fields.map(o => {
-              if (o.fieldType === 'GPS') {
+              if (o.fieldType === 'GPS' && o.value) {
                 service.getLocalizationCityById(o.value).then(reso => {
-                  const city = reso.data.length > 0 ? reso.data[0].city : '';
-                  this.props.form.setFieldsValue({ [`field-${o.id}`]: [{ id: o.value, city }] });
+                  const description = reso.data.length > 0 ? reso.data[0].description : '';
+                  this.props.form.setFieldsValue({
+                    [`field-${o.id}`]: [{ id: o.value, description }],
+                  });
+                });
+              } else if (o.fieldType == 'PARTICIPANTS' || o.fieldType == 'PARTICIPANT') {
+                const userIdList = o.value ? o.value.split(',') : [];
+                service.getUserByIds(userIdList).then(reso => {
+                  let userList = reso.data ? reso.data : [];
+                  userList.map(user => {
+                    user.userId = user.id;
+                    user.userName = user.fullName;
+                  });
+                  this.props.form.setFieldsValue({ [`field-${o.id}`]: userList });
                 });
               }
             });
@@ -168,11 +191,16 @@ class NewExpenseApplicationFromLine extends Component {
               record.value = values[key].format();
             } else if (record.fieldType == 'START_DATE_AND_END_DATE') {
               record.value =
-                values[key].length > 0
+                values[key] && values[key].length > 0
                   ? values[key][0].format('YYYY-MM-DD') + ',' + values[key][1].format('YYYY-MM-DD')
                   : '';
             } else if (record.fieldType == 'GPS') {
-              record.value = values[key].length > 0 ? values[key][0].id : '';
+              record.value = values[key] && values[key].length > 0 ? values[key][0].id : '';
+            } else if (record.fieldType == 'PARTICIPANTS' || record.fieldType == 'PARTICIPANT') {
+              record.value =
+                values[key] && values[key].length > 0
+                  ? values[key].map(o => o.userId).toString()
+                  : '';
             } else {
               record.value = values[key];
             }
@@ -192,6 +220,7 @@ class NewExpenseApplicationFromLine extends Component {
         requisitonTypeId: values.applicationType.id,
         companyId: values.company.length > 0 ? values.company[0].id : '',
         unitId: values.department.length > 0 ? values.department[0].departmentId : '',
+        responsibilityCenterId: values.responsibilityCenter.id,
         dimensions,
         fields,
         travelPeopleDTOList: travelPeopleDTOList,
@@ -234,7 +263,6 @@ class NewExpenseApplicationFromLine extends Component {
 
   // 选择申请单
   selectApplicationType = item => {
-    console.log(item);
     this.setState({ expenseTypeInfo: item }, () => {
       if (item.entryMode) {
         this.props.form.setFieldsValue({ price: 0, quantity: 0 });
@@ -324,7 +352,7 @@ class NewExpenseApplicationFromLine extends Component {
             <Col span={24}>
               <FormItem label={field.name} {...formItemLayout}>
                 {getFieldDecorator(`field-${field.id}`, {
-                  rules: [{ required: true, message: this.$t('common.please.select') }],
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
                   initialValue: field.value,
                 })(
                   <Select disabled={!statusEditable}>
@@ -344,15 +372,14 @@ class NewExpenseApplicationFromLine extends Component {
             <Col span={24}>
               <FormItem label={field.name} {...formItemLayout}>
                 {getFieldDecorator(`field-${field.id}`, {
-                  rules: [{ required: true, message: this.$t('common.please.select') }],
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
                 })(
                   <Chooser
                     type="select_city"
-                    labelKey="city"
+                    labelKey="description"
                     valueKey="id"
                     single
                     disabled={!statusEditable}
-                    listExtraParams={{ code: 'CHN000000000' }}
                     showClear={false}
                   />
                 )}
@@ -371,6 +398,66 @@ class NewExpenseApplicationFromLine extends Component {
                     ? [moment(field.value.split(',')[0]), moment(field.value.split(',')[1])]
                     : '',
                 })(<DatePicker.RangePicker disabled={!statusEditable} />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'PARTICIPANTS':
+      case 'PARTICIPANT':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                })(
+                  <Chooser
+                    type="select_authorization_user"
+                    labelKey="userName"
+                    valueKey="userId"
+                    listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
+                    showClear={false}
+                  />
+                )}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'LONG':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber precision={0} style={{ width: '100%' }} />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'DOUBLE':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<CustomAmount />)}
+              </FormItem>
+            </Col>
+          </Row>
+        );
+      case 'POSITIVE_INTEGER':
+        return (
+          <Row key={field.id} {...rowLayout}>
+            <Col span={24}>
+              <FormItem label={field.name} {...formItemLayout}>
+                {getFieldDecorator(`field-${field.id}`, {
+                  rules: [{ required: field.required, message: this.$t('common.please.select') }],
+                  initialValue: field.value ? field.value : '',
+                })(<InputNumber min={0} precision={0} style={{ width: '100%' }} />)}
               </FormItem>
             </Col>
           </Row>
@@ -420,15 +507,25 @@ class NewExpenseApplicationFromLine extends Component {
 
   // 公司改变
   companyChange = value => {
+    this.setState({ companyId: value[0].id });
     this.companyOrUnitChange(value.length > 0 ? value[0].id : '', 'oldId');
   };
 
   unitChange = value => {
+    this.setState({ departmentId: value[0].departmentId });
     this.companyOrUnitChange('oldId', value.length > 0 ? value[0].departmentId : '');
+  };
+
+  // 清空默认责任中心
+  resetDefault = () => {
+    this.props.form.setFieldsValue({
+      responsibilityCenter: undefined,
+    });
   };
 
   companyOrUnitChange = (companyId, unitId) => {
     const { headerData } = this.props;
+    this.resetDefault();
     let oldCompany = this.props.form.getFieldValue('company');
     let oldUnit = this.props.form.getFieldValue('department');
     if (companyId === 'oldId') {
@@ -473,6 +570,7 @@ class NewExpenseApplicationFromLine extends Component {
               <Col span={24}>
                 <FormItem label="公司" {...formItemLayout}>
                   {getFieldDecorator('company', {
+                    rules: [{ required: true, message: this.$t('common.please.select') }],
                     initialValue: !model.companyId
                       ? []
                       : [{ id: model.companyId, name: model.companyName }],
@@ -495,6 +593,7 @@ class NewExpenseApplicationFromLine extends Component {
               <Col span={24}>
                 <FormItem label="部门" {...formItemLayout}>
                   {getFieldDecorator('department', {
+                    rules: [{ required: true, message: this.$t('common.please.select') }],
                     initialValue: !model.unitId
                       ? []
                       : [
@@ -513,6 +612,38 @@ class NewExpenseApplicationFromLine extends Component {
                       disabled={!statusEditable}
                       single
                       listExtraParams={{ tenantId: this.props.user.tenantId }}
+                    />
+                  )}
+                </FormItem>
+              </Col>
+            </Row>
+            <Row {...rowLayout}>
+              <Col span={24}>
+                <FormItem label={this.$t('expense.responsibility.center')} {...formItemLayout}>
+                  {/*责任中心*/}
+                  {getFieldDecorator('responsibilityCenter', {
+                    rules: [{ required: true, message: this.$t('common.please.select') }],
+                    initialValue: model.responsibilityCenterId
+                      ? {
+                          id: model.responsibilityCenterId,
+                          codeName: model.responsibilityCenterCodeName,
+                        }
+                      : '',
+                  })(
+                    <Lov
+                      code="department_sob_res_intersect"
+                      placeholder={this.$t(
+                        'expense.please.select.the.default.responsibility.center'
+                      )} /*请选择默认责任中心*/
+                      valueKey="id"
+                      labelKey="codeName"
+                      allowClear={statusEditable}
+                      disabled={!statusEditable}
+                      single
+                      extraParams={{
+                        companyId: this.state.companyId,
+                        departmentId: this.state.departmentId,
+                      }}
                     />
                   )}
                 </FormItem>

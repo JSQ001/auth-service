@@ -16,8 +16,6 @@ import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.util.DataFilteringUtil;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +50,8 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      * @return
      */
     @CacheEvict(key = "#codingRuleDetail.codingRuleId.toString()")
-    @SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
-    public CodingRuleDetail insertCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) throws BizException {
+   //@SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
+    public CodingRuleDetail insertCodingRuleDetail( CodingRuleDetail codingRuleDetail) throws BizException {
         if (codingRuleDetail.getId() != null) {
             //创建数据不允许有ID
             throw new BizException(RespCode.ID_NOT_ALLOWED_21001);
@@ -79,8 +77,8 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      * @return
      */
     @CacheEvict(key = "#codingRuleDetail.codingRuleId.toString()")
-    @SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
-    public CodingRuleDetail updateCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
+    public CodingRuleDetail updateCodingRuleDetail( CodingRuleDetail codingRuleDetail) {
         if (codingRuleDetail.getId() == null) {
             //更新数据ID必填
             throw new BizException(RespCode.ID_REQUIRED_21002);
@@ -102,8 +100,8 @@ public class CodingRuleDetailService extends ServiceImpl<CodingRuleDetailMapper,
      * @param codingRuleDetail
      */
     @CacheEvict(key = "#codingRuleDetail.codingRuleId.toString()")
-    @SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
-    public void deleteCodingRuleDetail(@LockedObject(lockKeyField = "codingRuleId") CodingRuleDetail codingRuleDetail) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.CODING_RULE,waiting = true,timeOut = 3000)
+    public void deleteCodingRuleDetail( CodingRuleDetail codingRuleDetail) {
         CodingRule codingRule = codingRuleService.selectById(codingRuleDetail.getCodingRuleId());
         if (codingRule.getEnabled()) {
             throw new BizException(RespCode.BUDGET_CODING_RULE_DETAIL_OPERATION);

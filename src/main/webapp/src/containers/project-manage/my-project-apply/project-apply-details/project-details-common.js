@@ -26,6 +26,7 @@ class ProjectApplyDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      appStatus: '',
       tabKey: '1',
       headerInfo: {}, // 头信息
       detailsInfo: {}, // 详细信息
@@ -108,7 +109,9 @@ class ProjectApplyDetails extends Component {
         // 赋值headerInfo的同时对detailsInfo赋值（启用，禁用，权限，实际日期）
         const headerInfo = this.dealWidthHeaderInfo(data);
         const detailsInfo = this.dealWidthDetailsInfo(data);
+        const appStatus = data.projectRequisition.status;
         this.setState({
+          appStatus,
           headerInfo,
           detailsInfo,
           allInfo: { ...data },
@@ -520,6 +523,7 @@ class ProjectApplyDetails extends Component {
       parentApplyShow,
       accessLabelKey,
       accessValueKey,
+      appStatus,
     } = this.state;
 
     const { readOnly, match } = this.props;
@@ -559,6 +563,27 @@ class ProjectApplyDetails extends Component {
         </h3>
       );
     } else status = <div />;
+
+    const newState = (
+      <div>
+        <ContractInfo
+          headerInfo={headerInfo}
+          id={match.params.id}
+          flags="1"
+          // eslint-disable-next-line no-return-assign
+          ref={ref => (this.contractRef = ref && ref.wrappedInstance)}
+        />
+      </div>
+    );
+    const otherState = (
+      <ContractInfo
+        headerInfo={headerInfo}
+        id={match.params.id}
+        flags="0"
+        // eslint-disable-next-line no-return-assign
+        ref={ref => (this.contractRef = ref && ref.wrappedInstance)}
+      />
+    );
     return (
       <div className="project-apply-details">
         <Spin spinning={false} wrapperClassName="info-box">
@@ -655,12 +680,20 @@ class ProjectApplyDetails extends Component {
                 ) : (
                   <span />
                 )}
-                <ContractInfo
+                {appStatus == 1001 || appStatus == 1003 || appStatus == 1005
+                  ? newState
+                  : otherState}
+                {/*  <ContractInfo
                   headerInfo={headerInfo}
                   id={match.params.id}
+                  music=  {(ac == 1001 ||
+                    ac == 1003 ||
+                    ac == 1005) 
+                    ? newState
+                    : otherState}  
                   // eslint-disable-next-line no-return-assign
                   ref={ref => (this.contractRef = ref && ref.wrappedInstance)}
-                />
+                /> */}
               </div>
             </TabPane>
             <TabPane tab="子项目申请单信息" key="2">

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
@@ -31,8 +31,6 @@ import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -88,7 +86,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
     @Autowired
     private WorkflowControllerImpl workflowClient;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private String applicationName;
 
     /**
@@ -708,9 +706,9 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
      * 差旅申请单提交
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
-    public Boolean submit(@LockedObject(value = {"documentId"}) WorkFlowDocumentRefCO workFlowDocumentRef) {
+    //@LcnTransaction
+   //@SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
+    public Boolean submit( WorkFlowDocumentRefCO workFlowDocumentRef) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
         // 1当存在多线程修改单据状态，可能导致最终单据的状态不正确。
         lockByDocumentId(workFlowDocumentRef.getDocumentId());

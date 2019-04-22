@@ -4,12 +4,14 @@ package com.hand.hcf.app.expense.common.workflow;
  * Created by maohui.zhuang@hand-china.com on 2018/12/24.
  * 用于监听工作流的事件，主要是用于工作流审批后，相应的更新单据的状态
  */
-
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
+import com.hand.hcf.app.common.co.CashPaymentRequisitionHeaderCO;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustHeaderService;
 import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
+import com.hand.hcf.app.expense.common.externalApi.PrepaymentService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationHeaderService;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
@@ -32,7 +34,10 @@ public class ExpenseWorkflowEventConsumer {
     @Autowired
     private ExpenseReportHeaderService expenseReportHeaderService;
 
-    @LcnTransaction
+    @Autowired
+    private PrepaymentService prepaymentService;
+
+    //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResultCO approve(@RequestBody ApprovalNotificationCO approvalNoticeCO) {
         Long documentId = approvalNoticeCO.getDocumentId();
@@ -46,7 +51,14 @@ public class ExpenseWorkflowEventConsumer {
         } else if (ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey().equals(documentCategory)) {
             // 费用申请单
             applicationHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
-        } else if (ExpenseDocumentTypeEnum.TRAVEL_APPLICATION.getKey().equals(documentCategory)) {
+
+            //如果有关联预付款单，更改预付款单单据状态
+            CashPaymentRequisitionHeaderCO paymentRequisitionHeaderCO = prepaymentService
+                    .getCashPaymentRequisitionHeaderByApplicationHeaderId(documentId);
+            if (paymentRequisitionHeaderCO != null) {
+                prepaymentService.updateCashPaymentRequisitionStatus(paymentRequisitionHeaderCO.getId(), approvalStatus);
+            }
+        } else if (DocumentTypeEnum.TRAVEL_APPLICATION.getKey().equals(documentCategory)) {
             // 差旅申请单
             travelApplicationHeaderService.updateDocumentStatus(documentId, approvalStatus, "");
         } else if (ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey().equals(documentCategory)) {
@@ -60,4 +72,6 @@ public class ExpenseWorkflowEventConsumer {
         approvalResultCO.setError(null);
         return approvalResultCO;
     }
+
+
 }

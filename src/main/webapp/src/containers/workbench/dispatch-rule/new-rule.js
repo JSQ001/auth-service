@@ -12,7 +12,7 @@ class NewRule extends React.Component {
     this.state = {
       loading: false,
       businessTypeId: this.props.match.params.businessTypeId,
-      businessTypeDetailUrl: '/workbench/business-type/detail/:id/:tab',
+      businessTypeDetailUrl: '/workbench/business-type/business-type/detail/:id/:tab',
       searchForm: [
         {
           type: 'input',
@@ -54,7 +54,7 @@ class NewRule extends React.Component {
     };
   }
 
-  componentWillMount() {}
+  componentDidMount() {}
   // 保存
   saveHandle = values => {
     if (values.endDate && values.endDate < values.startDate) {

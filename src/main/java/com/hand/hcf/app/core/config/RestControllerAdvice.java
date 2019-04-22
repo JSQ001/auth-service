@@ -20,6 +20,7 @@ import com.hand.hcf.app.core.web.util.RequestContext;
 import com.netflix.hystrix.exception.HystrixBadRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -221,7 +222,7 @@ public class RestControllerAdvice {
     }
 
     @ExceptionHandler(value = {ServiceUnavailableException.class,
-            ServiceUnavailableException.class})
+            com.hand.hcf.app.core.exception.core.ServiceUnavailableException.class})
     public ResponseEntity<ExceptionDetail> handleServiceUnavailableException(Throwable e) {
 
         return getResponse(ExceptionErrorCode.SERVICE_UNAVAILABLE, e);
@@ -231,6 +232,15 @@ public class RestControllerAdvice {
     public ResponseEntity<ExceptionDetail> handleException(Throwable e) {
 
         return getResponse(ExceptionErrorCode.SYSTEM_EXCEPTION, e);
+    }
+
+    @ExceptionHandler(MyBatisSystemException.class)
+    public ResponseEntity<ExceptionDetail> handleMyBatisSystemException(MyBatisSystemException e) {
+        Throwable cause = e.getCause().getCause();
+        if(cause instanceof BizException){
+            return handleBizException((BizException) cause);
+        }
+        throw e;
     }
 
 

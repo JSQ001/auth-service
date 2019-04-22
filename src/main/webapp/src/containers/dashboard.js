@@ -657,7 +657,7 @@ class Dashboard extends React.Component {
         path = `/pre-payment/my-pre-payment/pre-payment-detail/${record.documentId}/prePayment`;
         break;
       case 801002: //预算日记账
-        path = `/project-manage/my-project-apply/my-project-apply`;
+        path = `budget/budget-journal/budget-journal-detail-submit/${record.documentId}`;
         break;
       case 801008: //核算工单
         path = `/my-gl-work-order/my-gl-work-order-detail/${record.documentId}`;

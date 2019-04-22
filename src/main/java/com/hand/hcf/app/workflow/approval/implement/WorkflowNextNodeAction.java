@@ -20,10 +20,17 @@ public class WorkflowNextNodeAction implements WorkflowAction {
 
     /** 动作名称 */
     public static final String ACTION_NAME = "nextNode";
-    /** 移到下一节点 */
-    public static final String RESULT_MOVE_NEXT = "moveNext";
-    /** 移到结束节点 */
-    public static final String RESULT_MOVE_END = "moveEnd";
+
+    /** 用户审批节点 */
+    public static final String RESULT_USER_NODE = "userNode";
+    /** 机器人节点 */
+    public static final String RESULT_ROBOT_NODE = "robotNode";
+    /** 通知节点 */
+    public static final String RESULT_NOTICE_NODE = "noticeNode";
+    /** 结束节点 */
+    public static final String RESULT_END_NODE = "endNode";
+    /** 跳过节点 */
+    public static final String RESULT_SKIP_NODE = "skipNode";
 
     public WorkflowNextNodeAction(WorkflowMoveNodeService service, WorkflowInstance instance, WorkflowNode node) {
         this.service = service;

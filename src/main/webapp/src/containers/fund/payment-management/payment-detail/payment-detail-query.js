@@ -1,20 +1,7 @@
 import React from 'react';
 import { connect } from 'dva';
 import Table from 'widget/table';
-import {
-  Form,
-  //   Table,
-  //   Button,
-  //   message,
-  Input,
-  //   Alert,
-  //   Modal,
-  Row,
-  Col,
-  //   Select,
-  //   DatePicker,
-  //   InputNumber,
-} from 'antd';
+import { Form, Input, Row, Col } from 'antd';
 import moment from 'moment';
 import FundSearchForm from '../../fund-components/fund-search-form';
 import PaymentDetailQueryService from './payment-detail-query-service';
@@ -81,7 +68,7 @@ class PaymentDetailQuery extends React.Component {
         {
           colSpan: 6,
           type: 'valueList',
-          label: '是否收款',
+          label: '是否付款',
           id: 'ifPayment',
           options: [],
           valueListCode: 'if_payment',
@@ -92,37 +79,31 @@ class PaymentDetailQuery extends React.Component {
           title: '来源单据编号',
           dataIndex: 'sourceNumber',
           width: 200,
-          align: 'center',
         },
         {
           title: '单据流水号',
           dataIndex: 'documentNumber',
           width: 170,
-          align: 'center',
         },
         {
           title: '批单据编号',
           dataIndex: 'paymentBatchNumber',
           width: 170,
-          align: 'center',
         },
         {
           title: '收款户名',
           dataIndex: 'gatherAccountName',
           width: 130,
-          align: 'center',
         },
         {
           title: '收款分行',
           dataIndex: 'gatherBranchBankName',
           width: 150,
-          align: 'center',
         },
         {
           title: '收款账号',
           dataIndex: 'gatherAccount',
           width: 170,
-          align: 'center',
         },
         {
           title: '金额',
@@ -134,43 +115,46 @@ class PaymentDetailQuery extends React.Component {
           title: '摘要',
           dataIndex: 'description',
           width: 150,
-          align: 'center',
         },
         {
           title: '公私标志',
           dataIndex: 'propFlagDesc',
           width: 150,
-          align: 'center',
         },
         {
           title: '卡折标志',
           dataIndex: 'cardSignDesc',
           width: 130,
-          align: 'center',
         },
         {
           title: '是否付款',
           dataIndex: 'ifPaymentDesc',
           width: 100,
-          align: 'center',
+        },
+        {
+          title: '支付账号',
+          dataIndex: 'paymentBaseId',
+          width: 200,
+        },
+        {
+          title: '支付状态',
+          dataIndex: 'paymentStatusDesc',
+          width: 100,
         },
         {
           title: '银行反馈信息',
           dataIndex: 'bankFeedback',
           width: 150,
-          align: 'center',
         },
         {
           title: '支付日期',
           dataIndex: 'paymentDateDesc',
           width: 150,
-          align: 'center',
         },
         {
           title: '回单',
           dataIndex: 'receiptNum',
           width: 150,
-          align: 'center',
         },
       ],
     };

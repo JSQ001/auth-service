@@ -231,104 +231,149 @@ class AccountBalance extends React.Component {
    * 渲染柱状图
    */
   renderFundDeposit = () => {
-    const dom = document.getElementById('fundDeposit');
-    // eslint-disable-next-line no-undef
-    const myChart = echarts.init(dom, 'macarons');
-    const option = {
-      title: {
-        text: '资金存款分布',
-      },
-      tooltip: {
-        trigger: 'item',
-        axisPointer: {
-          type: 'shadow',
-        },
-      },
-      grid: {
-        left: '0%',
-        right: '0%',
-        bottom: '10%',
-        top: '16%',
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'value',
-        boundaryGap: [0, 1],
-        axisLabel: {
-          formatter: '{value} 万元',
-          rotate: '-20',
-        },
-      },
-      yAxis: {
-        type: 'category',
-        data: ['中国银行', '中国农业银行', '中国建设银行'],
-      },
-      color: ['#1890FF', '#13C2C2', '#2FC25B'],
-      series: [
+    // 资金存款分布
+    accountBalanceService.getCapitalDistribution().then(res => {
+      const { data } = res;
+      this.setState(
         {
-          type: 'bar',
-          barWidth: '30px',
-          data: [5, 20, 30],
+          capitalDistribution: data,
         },
-      ],
-    };
-    myChart.setOption(option, true);
+        () => {
+          const dom = document.getElementById('fundDeposit');
+          const { capitalDistribution } = this.state;
+          const capitalopenBankNameArray = [];
+          const capitalAmountArray = [];
+          capitalDistribution.forEach(item => {
+            capitalopenBankNameArray.push(item.openBankName);
+            capitalAmountArray.push(item.amount);
+          });
+          // eslint-disable-next-line no-undef
+          const myChart = echarts.init(dom, 'macarons');
+          const option = {
+            title: {
+              text: '资金存款分布',
+            },
+            tooltip: {
+              trigger: 'item',
+              axisPointer: {
+                type: 'shadow',
+              },
+            },
+            grid: {
+              left: '0%',
+              right: '0%',
+              bottom: '10%',
+              top: '16%',
+              containLabel: true,
+            },
+            xAxis: {
+              type: 'value',
+              boundaryGap: [0, 1],
+              axisLabel: {
+                formatter: '{value} 万元',
+                rotate: '-20',
+              },
+            },
+            yAxis: {
+              type: 'category',
+              // data: ['中国银行', '中国农业银行', '中国建设银行'],
+              data: capitalopenBankNameArray,
+            },
+            color: ['#1890FF', '#13C2C2', '#2FC25B'],
+            series: [
+              {
+                type: 'bar',
+                barWidth: '30px',
+                // data: [5, 20, 30],
+                data: capitalAmountArray,
+              },
+            ],
+          };
+          myChart.setOption(option, true);
+        }
+      );
+    });
   };
 
   /**
    * 渲染饼状图
    */
   renderDepositType = () => {
-    const dom = document.getElementById('depositType');
-    // eslint-disable-next-line no-undef
-    const myChart = echarts.init(dom, 'macarons');
-    const option = {
-      title: {
-        text: '存款类型分布',
-        x: 'right',
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        data: ['正常', '变更', '冻结', '销户'],
-      },
-      color: [
-        '#1890FF',
-        '#13C2C2',
-        '#2FC25B',
-        '#FACC14',
-        '#F04864',
-        '#8543E0',
-        '#3436C7',
-        '#223273',
-      ],
-      series: [
+    // 存款类型分布
+    accountBalanceService.getCapitalType().then(res => {
+      const { data } = res;
+      this.setState(
         {
-          name: '账户状态',
-          type: 'pie',
-          radius: '55%',
-          center: ['50%', '60%'],
-          data: [
-            { value: 335, name: '正常' },
-            { value: 310, name: '变更' },
-            { value: 234, name: '冻结' },
-            { value: 135, name: '销户' },
-          ],
-          itemStyle: {
-            emphasis: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-            },
-          },
+          accountType: data,
         },
-      ],
-    };
-    myChart.setOption(option, true);
+        () => {
+          const dom = document.getElementById('depositType');
+          // eslint-disable-next-line no-undef
+          const myChart = echarts.init(dom, 'macarons');
+          const { accountType } = this.state;
+          const accountTypeStatus = []; // 存款类型分布的状态
+          const accountTypeArray = []; // 存款类型分布的数组键值对
+          accountType.forEach(item => {
+            accountTypeStatus.push(item.accountDepositTypeDesc);
+            // let itemValue = item.accountDepositTypeDesc;
+            // if(itemValue === null) {
+            //   itemValue = 0
+            //   accountTypeArray.push({value: itemValue, name: item.number});
+            // }
+            accountTypeArray.push({ value: item.number, name: item.accountDepositTypeDesc });
+          });
+          const option = {
+            title: {
+              text: '存款类型分布',
+              x: 'right',
+            },
+            tooltip: {
+              trigger: 'item',
+              formatter: '{a} <br/>{b} : {c} ({d}%)',
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left',
+              // data: ['正常', '变更', '冻结', '销户'],
+              data: accountTypeStatus,
+            },
+            color: [
+              '#1890FF',
+              '#13C2C2',
+              '#2FC25B',
+              '#FACC14',
+              '#F04864',
+              '#8543E0',
+              '#3436C7',
+              '#223273',
+            ],
+            series: [
+              {
+                name: '账户状态',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '60%'],
+                data: accountTypeArray,
+                // data: [
+                //   { value: 335, name: '正常' },
+                //   { value: 310, name: '变更' },
+                //   { value: 234, name: '冻结' },
+                //   { value: 135, name: '销户' },
+                // ],
+                itemStyle: {
+                  emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)',
+                  },
+                },
+              },
+            ],
+          };
+          myChart.setOption(option, true);
+        }
+      );
+    });
   };
 
   handleClose = value => {

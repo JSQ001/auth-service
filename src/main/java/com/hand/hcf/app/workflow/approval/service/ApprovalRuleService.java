@@ -42,7 +42,6 @@ import com.hand.hcf.app.workflow.service.DefaultWorkflowIntegrationServiceImpl;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -718,7 +717,7 @@ public class ApprovalRuleService {
      * @param approvalTxt
      */
     @Transactional(rollbackFor = Exception.class)
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
+   //@SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
     public void passWorkflow(UUID approverOid, UUID chainApproverOid, String approvalTxt, boolean selfApproval, boolean priceAuditor, ApprovalResDTO approvalResDTO, WorkFlowDocumentRef sysWorkFlowDocumentRef) {
         ZonedDateTime now = ZonedDateTime.now();
         UUID entityOid = sysWorkFlowDocumentRef.getDocumentOid();

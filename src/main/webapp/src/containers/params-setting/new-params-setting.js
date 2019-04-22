@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Form, Input, Button, message, Select } from 'antd';
 const FormItem = Form.Item;
 const { TextArea } = Input;
+import CustomChooser from 'components/Template/custom-chooser';
 
 import service from './service';
 
@@ -46,8 +47,9 @@ class NewParamsSetting extends Component {
       });
   };
 
-  //提交
-  handleSubmit = () => {
+  // 提交
+  handleSubmit = e => {
+    e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (err) return;
 

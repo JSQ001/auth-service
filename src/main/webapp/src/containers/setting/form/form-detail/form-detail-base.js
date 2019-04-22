@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'dva';
-import constants from 'share/constants';
 import {
   Button,
   Form,
@@ -8,23 +7,19 @@ import {
   Input,
   Checkbox,
   Radio,
-  InputNumber,
   Affix,
   Row,
   Col,
   message,
   Spin,
+  Select,
 } from 'antd';
 
-const RadioGroup = Radio.Group;
 const CheckboxGroup = Checkbox.Group;
-const { TextArea } = Input;
 const FormItem = Form.Item;
 import LanguageInput from 'widget/Template/language-input/language-input';
-import PermissionsAllocation from 'widget/Template/permissions-allocation';
 // import ExpenseAllocation from 'containers/setting/form/form-detail/expense-allocation/expense-allocation'
 import formService from 'containers/setting/form/form.service';
-import Chooser from 'widget/chooser';
 import PropTypes from 'prop-types';
 import { routerRedux } from 'dva/router';
 
@@ -130,6 +125,7 @@ class FormDetailBase extends React.Component {
         valid: form.valid,
         formName: form.formName,
         remark: form.remark,
+        allowWithdraw: form.allowWithdraw || true,
       });
     }
 
@@ -363,6 +359,8 @@ class FormDetailBase extends React.Component {
               );
             }
           }
+          form.withdrawFlag = values.withdrawFlag;
+          form.withdrawRule = values.withdrawRule;
           let result = {
             approvalFormDTO: form,
           };
@@ -447,29 +445,26 @@ class FormDetailBase extends React.Component {
     );
   };
 
+  allowWithdrawChange = value => {
+    if (value) {
+      this.props.form.setFieldsValue({ withdrawMode: 1001 });
+    } else {
+      this.props.form.setFieldsValue({ withdrawMode: '' });
+    }
+  };
+
   render() {
     const { formType, formOid } = this.context;
     const { getFieldDecorator } = this.props.form;
-    const {
-      form,
-      documentType,
-      saving,
-      associateExpenseReport,
-      applicationOption,
-      applicationTypeCheckedList,
-      outApplicationAmount,
-      isReference,
-      isHasLoanRelated,
-    } = this.state;
+    const { form, documentType, saving, associateExpenseReport } = this.state;
     const formItemLayout = {
       labelCol: { span: 4 },
-      wrapperCol: { span: 8, offset: 1 },
+      wrapperCol: { span: 8 },
     };
 
     return (
-      <div className="form-detail-base">
+      <div style={{ marginTop: 20 }} className="form-detail-base">
         <Form onSubmit={this.handleSave}>
-          <div className="info-title">{this.$t('form.setting.base.info') /*基本信息*/}</div>
           <FormItem {...formItemLayout} label={this.$t('form.setting.type') /*类型*/}>
             <span>
               {
@@ -523,10 +518,6 @@ class FormDetailBase extends React.Component {
             {getFieldDecorator('remark', {
               rules: [
                 {
-                  required: true,
-                  message: this.$t('common.please.enter'), //请输入
-                },
-                {
                   max: 50,
                   message: this.$t('common.max.characters.length', { max: 50 }),
                 },
@@ -544,99 +535,34 @@ class FormDetailBase extends React.Component {
               />
             )}
           </FormItem>
-          {(formType === 2001 || formType === 2002) &&
-            !formOid && (
-              <div>
-                <FormItem
-                  {...formItemLayout}
-                  label={this.$t('form.setting.related.expenseForm') /*关联报销单*/}
-                >
-                  {getFieldDecorator('associateExpenseReport')(
-                    <Checkbox
-                      disabled={form.fromType == 2 && !this.props.tenantMode}
-                      defaultChecked={form && form.associateExpenseReport}
-                    >
-                      {this.$t('form.setting.related') /*关联*/}
-                      <span className="associate-info">
-                        {this.$t('form.setting.related.generate') /*勾选后将自动生成对应报销单*/}
-                      </span>
-                    </Checkbox>
-                  )}
-                </FormItem>
-              </div>
+          <FormItem {...formItemLayout} label="允许撤回">
+            {getFieldDecorator('withdrawFlag', {
+              initialValue: form.withdrawFlag,
+              valuePropName: 'checked',
+            })(
+              <Switch
+                onChange={this.allowWithdrawChange}
+                checkedChildren="启用"
+                unCheckedChildren="禁用"
+              />
             )}
-          {formType === 2005 && (
-            <div>
-              <FormItem
-                {...formItemLayout}
-                label={this.$t('form.setting.expenseForm.repay') /*报销单还款*/}
-              >
-                {getFieldDecorator('associatePayExpense', {
-                  valuePropName: 'checked',
-                  initialValue: true,
-                })(<Switch disabled={form.fromType == 2 && !this.props.tenantMode} />)}
-              </FormItem>
-              <FormItem
-                {...formItemLayout}
-                label={this.$t('form.setting.related.application') /*关联申请单*/}
-              >
-                <div>
-                  <div className="group-line">
-                    <Checkbox
-                      disabled={form.fromType == 2 && !this.props.tenantMode}
-                      defaultChecked={false}
-                      checked={isHasLoanRelated}
-                      onChange={e =>
-                        this.handleChangeCheckbox(e.target.checked, 'isHasLoanRelated')
-                      }
-                    >
-                      {this.$t('form.setting.form.tip13') /*勾选表示启用该功能*/}
-                    </Checkbox>
-                  </div>
-                  {isHasLoanRelated && (
-                    <div className="group-line">
-                      <CheckboxGroup
-                        disabled={form.fromType == 2 && !this.props.tenantMode}
-                        options={applicationOption}
-                        defaultValue={['1001', '1002']}
-                        value={applicationTypeCheckedList}
-                        onChange={this.handleChangeApplicationType}
-                      />
-                      <div style={{ color: '#989898' }}>
-                        {this.$t(
-                          'form.setting.form.tip09'
-                        ) /*可在创建借款单时，关联审批通过的申请单*/}
-                      </div>
-                      <Checkbox
-                        disabled={form.fromType == 2 && !this.props.tenantMode}
-                        defaultChecked={true}
-                        checked={outApplicationAmount}
-                        onChange={e =>
-                          this.handleChangeCheckbox(e.target.checked, 'outApplicationAmount')
-                        }
-                      >
-                        {this.$t('form.setting.form.tip10') /*借款金额&le;申请金额*/}
-                      </Checkbox>
-                      <div style={{ color: '#989898' }}>
-                        {this.$t(
-                          'form.setting.form.tip11'
-                        ) /*借款单金额必须&le;申请单个人支付费用的折合本位币金额*/}
-                      </div>
-                      <Checkbox
-                        disabled={form.fromType == 2 && !this.props.tenantMode}
-                        defaultChecked={false}
-                        checked={isReference}
-                        onChange={e => this.handleChangeCheckbox(e.target.checked, 'isReference')}
-                      >
-                        {this.$t('form.setting.related.required') /*必选*/}
-                      </Checkbox>
-                    </div>
-                  )}
-                </div>
-              </FormItem>
-            </div>
-          )}
-
+          </FormItem>
+          <FormItem {...formItemLayout} label="撤回模式">
+            {getFieldDecorator('withdrawRule', {
+              initialValue: form.withdrawRule || 1001,
+              rules: [
+                {
+                  required: this.props.form.getFieldValue('allowWithdraw'),
+                  message: this.$t('common.please.select'), //请输入
+                },
+              ],
+            })(
+              <Select disabled={!this.props.form.getFieldValue('withdrawFlag')}>
+                <Select.Option value={1001}>无审批记录时可撤回</Select.Option>
+                <Select.Option value={1002}>审批流未结束均可撤回</Select.Option>
+              </Select>
+            )}
+          </FormItem>
           <Row style={{ marginTop: 12, marginBottom: 20 }}>
             <Col span={8} offset={5}>
               {(form.fromType != 2 || this.props.tenantMode) && (
@@ -648,8 +574,7 @@ class FormDetailBase extends React.Component {
           </Row>
         </Form>
         <div style={{ paddingLeft: '20px' }}>
-          <Affix
-            offsetBottom={0}
+          <div
             style={{
               position: 'fixed',
               bottom: 0,
@@ -665,7 +590,7 @@ class FormDetailBase extends React.Component {
             <Button type="primary" onClick={this.goBack} style={{ margin: '0 20px' }}>
               {this.$t('common.back' /*提 交*/)}
             </Button>
-          </Affix>
+          </div>
         </div>
       </div>
     );

@@ -46,7 +46,7 @@ class UpdateBudgetOrganization extends React.Component {
           })
           .catch(e => {
             if (e.response) {
-              message.error(`保存失败, ${e.response.data.message}`);
+              message.error(`${e.response.data.message}`);
             }
             this.setState({ loading: false });
           });

@@ -63,7 +63,7 @@ class FormSetting extends React.Component {
     });
   };
 
-  获取选择的公司;
+  // 获取选择的公司
   getSelectedCompany = () => {
     this.setState({ companyLoading: true });
     console.log(this.state.companyOid);

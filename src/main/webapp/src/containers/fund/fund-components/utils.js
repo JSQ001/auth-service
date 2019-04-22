@@ -78,4 +78,21 @@ function sliceArray(array, size) {
   return result;
 }
 
-export { accAdd, objectEquals, sliceArray };
+/**
+ * 获取对象数组中某个属性相等的对象
+ * @param {*属性值名} key
+ * @param {*要相等的数据} value
+ * @param {*数组} data
+ */
+function selectDataByKey(key, value, data) {
+  if (key && value && data) {
+    let temp = data.filter(item => {
+      return item[key] === value;
+    });
+    return temp[0];
+  } else {
+    return {};
+  }
+}
+
+export { accAdd, objectEquals, sliceArray, selectDataByKey };

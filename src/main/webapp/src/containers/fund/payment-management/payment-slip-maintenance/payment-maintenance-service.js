@@ -3,6 +3,19 @@ import httpFetch from 'share/httpFetch';
 
 export default {
   /**
+   * 模糊查询付款记录
+   * @param {*} page
+   * @param {*} size
+   * @param {*} searchParams
+   */
+  getGatherAccountList() {
+    const url = `${
+      config.fundUrl
+    }/api/payment/record/getPaymentRecordByGatherAccount?gatherAccount=`;
+    return httpFetch.get(url);
+  },
+
+  /**
    * 获取自动付款规则数据列表{新建，拒绝，收回}
    * @param {*} page
    * @param {*} size
@@ -68,8 +81,8 @@ export default {
    */
   deleteAccount(headDeleteList) {
     // const url = `${config.fundUrl}/api/payment/baseInfo/batch/delete`;
-    // const url = `${config.fundUrl}/api/payment/baseInfo/batch/delete`;
-    const url = `http://10.211.97.86:9099/api/payment/baseInfo/batch/delete`;
+    const url = `${config.fundUrl}/api/payment/baseInfo/batch/delete`;
+    // const url = `http://10.211.97.86:9099/api/payment/baseInfo/batch/delete`;
     return httpFetch.delete(url, headDeleteList);
   },
 
@@ -133,8 +146,8 @@ export default {
    * 手工付款单维护保存
    */
   saveMaintainData(saveList) {
-    // const url = `${config.fundUrl}/api/payment/baseInfo`;
-    const url = `http://10.211.97.86:9099/api/payment/baseInfo`;
+    const url = `${config.fundUrl}/api/payment/baseInfo`;
+    // const url = `http://10.211.97.86:9099/api/payment/baseInfo`;
     return httpFetch.post(url, saveList);
   },
 
@@ -150,8 +163,15 @@ export default {
    * 付款单头批量提交
    */
   submitAll(deleteIdList) {
-    // const url = `${config.fundUrl}/api/payment/baseInfo/submitList`;
     const url = `${config.fundUrl}/api/payment/baseInfo/submitList`;
+    // const url = `http://10.211.97.86:9099/api/payment/baseInfo/submitList`;
     return httpFetch.put(url, deleteIdList);
+  },
+
+  /**
+   * 获取现金流量项
+   */
+  getCashFlowItem(params) {
+    return httpFetch.get(`${config.payUrl}/api/cash/flow/items/query?setOfBookId=${params}`);
   },
 };

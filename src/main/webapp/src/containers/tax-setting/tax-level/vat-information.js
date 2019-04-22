@@ -78,6 +78,7 @@ class VatInformation extends React.Component {
   componentDidMount() {
     TaxLevelService.pageTaxValueAddedTaxInfoByCond1()
       .then(res => {
+        console.log(res.data);
         let data = res.data;
         console.log(data);
         let data1 = this.buildTree(data);

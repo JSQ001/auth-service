@@ -267,97 +267,138 @@ class AccountShow extends React.Component {
    * 渲染柱状图
    */
   renderAccountDistribution = () => {
-    const dom = document.getElementById('accountDistribution');
-    // eslint-disable-next-line no-undef
-    const myChart = echarts.init(dom, 'macarons');
-    const option = {
-      title: {
-        text: '银行账户分布一览',
-      },
-      tooltip: {
-        trigger: 'item',
-        axisPointer: {
-          type: 'shadow',
-        },
-      },
-      grid: {
-        left: '0%',
-        right: '0%',
-        bottom: '0%',
-        top: '16%',
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'value',
-        boundaryGap: [0, 1],
-      },
-      yAxis: {
-        type: 'category',
-        data: ['中国银行', '中国农业银行', '中国建设银行'],
-      },
-      color: ['#1890FF', '#13C2C2', '#2FC25B'],
-      series: [
+    // 获取银行预览分布一览的报表数据
+    accountShowService.getBankRenderAccountStatus().then(res => {
+      const { data } = res;
+      this.setState(
         {
-          type: 'bar',
-          barWidth: '30px',
-          data: [5, 20, 30],
+          bankData: data,
         },
-      ],
-    };
-    myChart.setOption(option, true);
+        () => {
+          const dom = document.getElementById('accountDistribution');
+          // eslint-disable-next-line no-undef
+          const myChart = echarts.init(dom, 'macarons');
+          const { bankData } = this.state;
+          const openBankNameArray = []; // 银行数组
+          const bankNumberArray = []; // 银行number数组
+          bankData.forEach(item => {
+            openBankNameArray.push(item.openBankName);
+            bankNumberArray.push(item.number);
+          });
+          const option = {
+            title: {
+              text: '银行账户分布一览',
+            },
+            tooltip: {
+              trigger: 'item',
+              axisPointer: {
+                type: 'shadow',
+              },
+            },
+            grid: {
+              left: '0%',
+              right: '10%',
+              bottom: '0%',
+              top: '16%',
+              containLabel: true,
+            },
+            xAxis: {
+              name: '个',
+              type: 'value',
+              boundaryGap: [0, 1],
+            },
+            yAxis: {
+              type: 'category',
+              // data: ['中国银行', '中国农业银行', '中国建设银行'],
+              data: openBankNameArray,
+            },
+            color: ['#1890FF', '#13C2C2', '#2FC25B'],
+            series: [
+              {
+                type: 'bar',
+                barWidth: '30px',
+                // data: [5, 20, 30],
+                data: bankNumberArray,
+              },
+            ],
+          };
+          myChart.setOption(option, true);
+        }
+      );
+    });
   };
 
   renderAccountStatus = () => {
-    const dom = document.getElementById('accountStatus');
-    // eslint-disable-next-line no-undef
-    const myChart = echarts.init(dom, 'macarons');
-    const option = {
-      title: {
-        text: '银行账户状态一览',
-        x: 'right',
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        data: ['正常', '变更', '冻结', '销户'],
-      },
-      color: [
-        '#1890FF',
-        '#13C2C2',
-        '#2FC25B',
-        '#FACC14',
-        '#F04864',
-        '#8543E0',
-        '#3436C7',
-        '#223273',
-      ],
-      series: [
+    // 获取银行预览状态一览的报表数据
+    accountShowService.getBankStatusRenderAccountStatus().then(res => {
+      const { data } = res;
+      this.setState(
         {
-          name: '账户状态',
-          type: 'pie',
-          radius: '55%',
-          center: ['50%', '60%'],
-          data: [
-            { value: 335, name: '正常' },
-            { value: 310, name: '变更' },
-            { value: 234, name: '冻结' },
-            { value: 135, name: '销户' },
-          ],
-          itemStyle: {
-            emphasis: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)',
-            },
-          },
+          statusData: data,
         },
-      ],
-    };
-    myChart.setOption(option, true);
+        () => {
+          const dom = document.getElementById('accountStatus');
+          // eslint-disable-next-line no-undef
+          const myChart = echarts.init(dom, 'macarons');
+          const { statusData } = this.state;
+          const statusArray = [];
+          const legendStatusArray = [];
+          statusData.forEach(item => {
+            statusArray.push({ value: item.number, name: item.statusDesc });
+            legendStatusArray.push(item.statusDesc);
+          });
+          const option = {
+            title: {
+              text: '银行账户状态一览',
+              x: 'right',
+            },
+            tooltip: {
+              trigger: 'item',
+              formatter: '{a} <br/>{b} : {c} ({d}%)',
+            },
+            legend: {
+              orient: 'vertical',
+              left: 'left',
+              // data: ['正常', '变更', '冻结', '销户'],
+              data: legendStatusArray,
+            },
+            color: [
+              '#1890FF',
+              '#13C2C2',
+              '#2FC25B',
+              '#FACC14',
+              '#F04864',
+              '#8543E0',
+              '#3436C7',
+              '#223273',
+            ],
+            series: [
+              {
+                name: '账户状态',
+                type: 'pie',
+                radius: '55%',
+                center: ['50%', '60%'],
+                data: statusArray,
+                // data: [
+                //   // { value: 335, name: '正常' },
+                //   // { value: 310, name: '变更' },
+                //   // { value: 234, name: '冻结' },
+                //   // { value: 135, name: '销户' },
+                // ],
+                itemStyle: {
+                  emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)',
+                  },
+                },
+              },
+            ],
+          };
+          myChart.setOption(option, true);
+        }
+      );
+    });
   };
 
   render() {

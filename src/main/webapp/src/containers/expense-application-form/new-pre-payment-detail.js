@@ -176,8 +176,8 @@ class NewPrePaymentDetail extends React.Component {
         values = { ...this.state.params, ...values };
         values.paymentRequisitionHeaderId = this.state.paymentRequisitionHeaderId;
         if (values.application && values.application.length) {
-          values.refDocumentId = values.application[0].applicationId;
-          values.refDocumentCode = values.application[0].applicationNumber;
+          values.refDocumentId = this.props.params.record.refDocumentId;
+          values.refDocumentCode = this.props.params.record.refDocumentCode;
         }
         values.partnerId = values.partnerd.key;
         values.partnerName = values.partnerd.label;

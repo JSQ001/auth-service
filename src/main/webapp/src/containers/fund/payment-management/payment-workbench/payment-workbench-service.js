@@ -54,6 +54,21 @@ export default {
   },
 
   /**
+   * 根据规则创建批
+   * @param {*} list
+   */
+  allCreate(searchParams) {
+    let url = `${config.fundUrl}/api/payment/interface/generateBatchByRule?`;
+    const params = searchParams;
+    for (const paramsName in params) {
+      if (Object.prototype.hasOwnProperty.call(params, paramsName)) {
+        url += params[paramsName] ? `&${paramsName}=${params[paramsName]}` : '';
+      }
+    }
+    return httpFetch.get(url);
+  },
+
+  /**
    * 单据解锁
    */
   documentUnlock(list) {
@@ -90,6 +105,7 @@ export default {
    */
   generateBatchSave(record) {
     return httpFetch.post(`${config.fundUrl}/api/payment/generateBatch/save`, record);
+    // return httpFetch.post(`http://10.211.97.86:9099/api/payment/generateBatch/save`, record);
   },
 
   /**

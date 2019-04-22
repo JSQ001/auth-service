@@ -82,7 +82,6 @@ class AutoPayRuleAdd extends React.Component {
 
   componentWillMount() {
     const { params } = this.props;
-    // console.log(params);
     this.setState({
       paymentCompanyId: params.companyId,
       paymentCompanyName: params.companyName,
@@ -250,7 +249,7 @@ class AutoPayRuleAdd extends React.Component {
 
   companyChange = content => {
     this.setState({
-      companyId: content[0].id,
+      companyId: content[0] && content[0].id,
     });
   };
 
@@ -536,7 +535,11 @@ class AutoPayRuleAdd extends React.Component {
           <FormItem label="付款公司" {...formItemLayout}>
             {getFieldDecorator('paymentCompany', {
               rules: [{ required: true }],
-              initialValue: [isNew ? '' : { id: paymentCompanyId, name: paymentCompanyName }],
+              initialValue: [
+                isNew
+                  ? { id: company.id, name: company.name }
+                  : { id: paymentCompanyId, name: paymentCompanyName },
+              ],
             })(
               <Chooser
                 type="company"
@@ -577,7 +580,7 @@ class AutoPayRuleAdd extends React.Component {
               </Select>
             )}
           </FormItem>
-          <FormItem label="对公对私" {...formItemLayout}>
+          <FormItem label="公私标志" {...formItemLayout}>
             {getFieldDecorator('businessType', {
               rules: [{ required: false }],
               initialValue: isNew ? '' : { key: params.propFlag, value: params.propFlagDesc },
@@ -619,7 +622,7 @@ class AutoPayRuleAdd extends React.Component {
           <FormItem label="状态" {...formItemLayoutSwitch}>
             {getFieldDecorator('states', {
               valuePropName: 'checked',
-              initialValue: typeof params.id === 'undefined' ? true : params.enabled,
+              initialValue: typeof params.id === 'undefined' ? false : params.enabled,
             })(
               <Switch
                 checkedChildren={<Icon type="check" />}

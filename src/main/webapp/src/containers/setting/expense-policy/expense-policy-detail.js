@@ -202,7 +202,6 @@ class NewExpensePolicy extends React.Component {
       .then(res => {
         const { setOfBooks, controlDimensionConditions } = this.state;
         const record = { ...res.data };
-
         const sob = setOfBooks.find(item => item.id === record.setOfBooksId);
         this.getDynamicControlDimensionOptions(record.expenseTypeInfo.fields);
         record.dynamicFields &&
@@ -245,7 +244,48 @@ class NewExpensePolicy extends React.Component {
           () => {
             const { record } = this.state;
             const detail = this.props.match.params.detail === 'expense-policy-detail';
-            setDynamicValue(record.dynamicFields || [], detail).then(res => {
+            let defaultValue = [];
+
+            console.log(record.dynamicFields);
+            (record.dynamicFields || []).map(item => {
+              defaultValue.push({ ...item });
+              if (['PARTICIPANTS', 'PARTICIPANT'].includes(item.fieldType)) {
+                let dynamic = [
+                  {
+                    id: item.id + 'duty' + item.fieldType,
+                    fieldType: 'chooser',
+                    linkedItem: true,
+                    fieldId: item.id + 'duty' + item.fieldType,
+                    value: item ? item.expensePolicyFieldProperty.dutyType : null,
+                  },
+                  {
+                    id: item.id + 'level' + item.fieldType,
+                    fieldType: 'chooser',
+                    linkedItem: true,
+                    fieldId: item.id + 'level' + item.fieldType,
+                    value: item ? item.expensePolicyFieldProperty.staffLevel : null,
+                  },
+                  {
+                    id: item.id + 'dept' + item.fieldType,
+                    fieldType: 'chooser',
+                    linkedItem: true,
+                    fieldId: item.id + 'dept' + item.fieldType,
+                    value: item ? item.expensePolicyFieldProperty.departmentId : null,
+                  },
+                ];
+                defaultValue = defaultValue.concat(dynamic);
+              }
+              if (item.fieldType === 'GPS') {
+                defaultValue.push({
+                  id: item.id + 'place' + item.fieldType,
+                  fieldType: 'chooser',
+                  linkedItem: true,
+                  fieldId: item.id + 'place' + item.fieldType,
+                  value: item ? item.expensePolicyFieldProperty.locationLevelId : null,
+                });
+              }
+            });
+            setDynamicValue(defaultValue).then(res => {
               record.dynamicFields = res;
               this.setDefaultDim(record);
               this.setState({ record });
@@ -280,62 +320,61 @@ class NewExpensePolicy extends React.Component {
 
   setDefaultDim = record => {
     const { controlDimensionConditions, dynamicControlDimensionOptions } = this.state;
-    let dim = '';
-    switch (record.controlDimensionType) {
-      case '10001':
-        dim = '同行人职务';
-        break;
-      case '20001':
-        dim = '参与人职务';
-        break;
-      case '20002':
-        dim = '参与人级别';
-        break;
-      case '10002':
-        dim = '同行人级别';
-        break;
-      case '10003':
-        dim = '同行人部门';
-        break;
-      case '20003':
-        dim = '参与人部门';
-        break;
-      case '30001':
-        dim = '地点级别';
-        break;
-      default:
-        dim = dynamicControlDimensionOptions.find(
-          item => item.value === record.controlDimensionType
-        ).name;
-    }
+    let type = record.controlDimensionType;
+    let dim = (
+      dynamicControlDimensionOptions.find(item => item.value === record.controlDimensionType) || {}
+    ).name;
     const opt =
       record.judgementSymbol &&
-      controlDimensionConditions.find(item => record.judgementSymbol === item.value).name;
-
-    let val =
-      (record.controlDimensions &&
-        record.controlDimensions.length &&
-        record.controlDimensions[0].value) ||
+      (controlDimensionConditions.find(item => record.judgementSymbol === item.value) || {}).name;
+    let value =
+      (record.controlDimensions && record.controlDimensions.length && record.controlDimensions) ||
       '-';
     if (
-      ['10001', '10002', '10003', '20001', '20002', '20003', '30001'].includes(
-        record.controlDimensionType
-      )
+      type.includes('dutyPARTICIPANT') ||
+      type.includes('dutyPARTICIPANTS') ||
+      type.includes('levelPARTICIPANT') ||
+      type.includes('levelPARTICIPANTS') ||
+      type.includes('deptPARTICIPANT') ||
+      type.includes('deptPARTICIPANTS') ||
+      type.includes('place')
     ) {
-      let field = [
-        {
+      let name = '';
+      if (type.includes('duty')) {
+        name = '职务';
+      } else if (type.includes('level') || type.includes('palce')) {
+        name = '级别';
+      } else {
+        name = '部门';
+      }
+
+      dim =
+        (
+          record.dynamicFields
+            .filter(item => item.fieldType !== 'chooser')
+            .find(item => type.includes(item.fieldType)) || {}
+        ).name + name;
+
+      let field = value.map(item => {
+        return {
           fieldType: 'chooser',
-          fieldId: record.controlDimensionType,
-          value: val,
-        },
-      ];
+          fieldId: type,
+          value: item.value,
+        };
+      });
       setDynamicValue(field).then(res => {
-        val = res[0].defaultValue;
-        record.options = dim + opt + val;
+        value = res[0].defaultValue;
+        record.options = dim + opt + value;
         this.setState({ record });
       });
+    } else if (type.includes('START_DATE_AND_END_DATE')) {
+      let time1 = value[0] && value[0].value && moment(value[0].value).format('YYYY-MM-DD');
+      let time2 = value[1] && value[1].value && moment(value[1]).format('YYYY-MM-DD');
+      value = time1 + '~' + time2;
+      record.options = dim + opt + value;
+      this.setState({ record });
     } else {
-      record.options = dim + opt + val;
+      record.options = dim + opt + value[0].value;
       this.setState({ record });
     }
   };
@@ -402,7 +441,6 @@ class NewExpensePolicy extends React.Component {
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         let { relatedCompanies, chooseCompanyScope } = this.state;
-        console.log(values);
         const controlDimensions = [];
         const controlDimension = { value: values.controlDimensionValue };
         controlDimensions.push(controlDimension);
@@ -434,7 +472,6 @@ class NewExpensePolicy extends React.Component {
         values.dynamicFields =
           this.state.expenseTypeInfo.fields &&
           this.state.expenseTypeInfo.fields.map(item => {
-            console.log(item);
             if (item.fieldType === 'START_DATE_AND_END_DATE' && values[item.id]) {
               return {
                 fieldId: item.id,
@@ -447,13 +484,6 @@ class NewExpensePolicy extends React.Component {
                 },
               };
             } else {
-              console.log(
-                item.valueKey
-                  ? values[item.id]
-                    ? values[item.id][0][item.valueKey]
-                    : ''
-                  : values[item.id]
-              );
               return {
                 fieldId: item.id,
                 fieldType: item.fieldType,
@@ -478,7 +508,6 @@ class NewExpensePolicy extends React.Component {
           values.id = this.state.record.id;
           values.versionNumber = this.state.record.versionNumber;
         }
-        console.log(values);
         !!this.props.match.params.new && delete values.id;
         expensePolicyService
           .saveExpensePolicy(method, values)
@@ -515,7 +544,7 @@ class NewExpensePolicy extends React.Component {
     extraOptions
       .filter(item => !['PARTICIPANT', 'PARTICIPANTS', 'GPS'].includes(item.fieldType))
       .map(item => {
-        item.value = item.id;
+        item.value = item.id + item.fieldType;
         dynamicControlDimensionOptions.push({ ...item });
       });
     this.setState({
@@ -530,11 +559,9 @@ class NewExpensePolicy extends React.Component {
 
   // 选择控制维度
   selectControlDimension = value => {
-    console.log(value);
     const { dynamicControlDimensionOptions } = this.state;
     const controlDimension = dynamicControlDimensionOptions.find(item => item.value === value);
     controlDimension.type = controlDimension.fieldType;
-    console.log(controlDimension);
     this.setState({ controlDimension });
   };
 
@@ -638,9 +665,11 @@ class NewExpensePolicy extends React.Component {
         fields.push({ ...item });
         const arr = [
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10001' : '20001',
+            //id: item.fieldType ==='PARTICIPANT' ? '10001' : '20001',
+            id: item.id + 'duty' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}职务`,
+
             linkedItem: true,
             valueKey: 'id',
             overide: {
@@ -653,7 +682,7 @@ class NewExpensePolicy extends React.Component {
             },
           },
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10002' : '20002',
+            id: item.id + 'level' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}级别`,
             valueKey: 'id',
@@ -667,7 +696,8 @@ class NewExpensePolicy extends React.Component {
             },
           },
           {
-            id: item.fieldType === 'PARTICIPANT' ? '10003' : '20003',
+            //id:item.fieldType ==='PARTICIPANT' ? '10003' : '20003',
+            id: item.id + 'dept' + item.fieldType,
             fieldType: 'chooser',
             name: `${item.name}部门`,
             valueKey: 'departmentOid',
@@ -693,13 +723,20 @@ class NewExpensePolicy extends React.Component {
         };
         fields.push({ ...item });
         fields.push({
-          id: '30001',
+          id: item.id + 'place' + item.fieldType,
           linkedItem: true,
-          valueKey: 'id',
+          valueKey: 'key',
           style: {
             padding: '0px 20px',
           },
-          fieldType: 'CUSTOM_ENUMERATION',
+          fieldType: 'chooser',
+          overide: {
+            single: true,
+            type: 'place_level',
+            labelKey: 'name',
+            valueKey: 'id',
+            listExtraParams: { setOfBooksId: this.props.company.setOfBooksId },
+          },
           name: `${item.name}级别`,
         });
       } else {
@@ -898,43 +935,26 @@ class NewExpensePolicy extends React.Component {
         } else {
           baseItem.push(item);
         }
-        // console.log(itemObj[item.key])
       });
-      switch (linkItem.length) {
-        case 4:
-          {
-            const temp = linkItem.slice(0, 4);
-            rowItem.push(this.getRowItem(baseItem, temp));
-          }
-          break;
-        case 8:
-          {
-            const temp1 = linkItem.slice(0, 4);
-            const temp2 = linkItem.slice(4, 8);
-            rowItem.push(this.getRowItem(baseItem, temp1));
-            rowItem.push(this.getRowItem(baseItem, temp2));
-          }
-          break;
-        case 10:
-          {
-            const temp1 = linkItem.slice(0, 4);
-            const temp2 = linkItem.slice(4, 8);
-            let temp3 = linkItem.slice(8, 10);
-            rowItem.push(this.getRowItem(baseItem, temp1));
-            rowItem.push(this.getRowItem(baseItem, temp2));
-            temp3 = this.getRowItem(baseItem, temp3);
-            temp3 = this.getRowItem(baseItem, temp3);
-            rowItem.push(this.getRowItem(baseItem, temp3));
-          }
-          break;
-      }
-
-      if (baseItem.length) {
-        for (let i = 0, j = 4; i < col.length; i += 4, j = i + 4) {
-          rowItem.push(col.slice(i, j));
+      for (let i = 0; i < linkItem.length; ) {
+        if (['PARTICIPANTS', 'PARTICIPANT'].includes(itemObj[linkItem[i].key].fieldType)) {
+          let arr = linkItem.slice(i, i + 4);
+          rowItem.push(this.getRowItem(baseItem, arr));
+          i += 4;
+        } else if (itemObj[linkItem[i].key].fieldType === 'GPS') {
+          let arr = linkItem.slice(i, i + 2);
+          arr = this.getRowItem(baseItem, arr);
+          arr = this.getRowItem(baseItem, arr);
+          arr = this.getRowItem(baseItem, arr);
+          rowItem.push(arr);
+          i += 2;
         }
       }
-      // return row.map((item,index)=> <Row key={new Date().getTime()+index}>{item}</Row>);
+      if (baseItem.length) {
+        for (let i = 0, j = 4; i < baseItem.length; i = i + 4, j = i + 4) {
+          rowItem.push(baseItem.slice(i, j));
+        }
+      }
       return rowItem.map((item, index) => <Row key={new Date().getTime() + index}>{item}</Row>);
     } else return col;
   };

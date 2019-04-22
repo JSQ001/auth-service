@@ -21,7 +21,7 @@ public class CommonControllerImpl {
 
     @Autowired
     private SysCodeService sysCodeService;
-	
+
     @Autowired
     private OrderNumberService orderNumberService;
 
@@ -65,7 +65,7 @@ public class CommonControllerImpl {
      * @return
      */
     public SysCodeValueCO getSysCodeValueByCodeAndValue(@RequestParam("code") String code,
-                                                 @RequestParam("value") String value){
+                                                        @RequestParam("value") String value){
         SysCodeValue sysCodeValue = sysCodeService.getValueBySysCodeAndValue(code, value);
         if (null == sysCodeValue){
             return null;
@@ -85,7 +85,7 @@ public class CommonControllerImpl {
      * @return
      */
     public List<SysCodeValueCO> listSysValueByCodeOidConditionByEnabled(@RequestParam("codeOid") String codeOid,
-                                                                 @RequestParam(value = "enabled",required = false) Boolean enabled){
+                                                                        @RequestParam(value = "enabled",required = false) Boolean enabled){
         return sysCodeService.listSysValueByCodeOidConditionByEnabled(codeOid,enabled);
     }
 
@@ -96,7 +96,7 @@ public class CommonControllerImpl {
      * @return
      */
     public SysCodeValueCO getSysCodeValueByCodeOidAndValue(@RequestParam("codeOid") String codeOid,
-                                                    @RequestParam("value") String value){
+                                                           @RequestParam("value") String value){
         SysCodeValue sysCodeValue = sysCodeService.getSysCodeValueByCodeOidAndValue(codeOid, value);
         if (null == sysCodeValue){
             return null;

@@ -3,6 +3,10 @@ package com.hand.hcf.app.expense.policy.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.security.domain.PrincipalLite;
+import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.expense.application.service.ApplicationTypeService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.PolicyCheckConstant;
@@ -15,15 +19,13 @@ import com.hand.hcf.app.expense.policy.dto.PolicyCheckResultDTO;
 import com.hand.hcf.app.expense.policy.persistence.ExpensePolicyMapper;
 import com.hand.hcf.app.expense.type.domain.ExpenseField;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
+import com.hand.hcf.app.expense.type.domain.enums.FieldType;
 import com.hand.hcf.app.expense.type.service.ExpenseFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.DepartmentControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.SobControllerImpl;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.security.domain.PrincipalLite;
-import com.hand.hcf.app.core.service.BaseService;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,6 +186,8 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
         List<Long> dynamicFieldIds = dynamicFieldService.getDynamicFieldByPolicyId(expensePolicyDTO.getId()).stream().map(ExpensePolicyDynamicField::getId).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(dynamicFieldIds)) {
             dynamicFieldService.deleteBatchIds(dynamicFieldIds);
+            //删除关联属性（两个表用的同一个ID）
+            fieldPropertyService.deleteBatchIds(dynamicFieldIds);
         }
         List<ExpensePolicyDynamicField> dynamicFields = expensePolicyDTO.getDynamicFields();
         if(CollectionUtils.isNotEmpty(dynamicFields)) {
@@ -395,81 +399,182 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
         List<ExpensePolicy> expensePolicys = baseMapper.selectList(new EntityWrapper<ExpensePolicy>()
                 .eq("set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
                 .eq("expense_type_flag", matchDimensionDTO.getExpenseTypeFlag())
+                .eq("expense_type_id", matchDimensionDTO.getExpenseTypeId())
+                .eq("currency_code", matchDimensionDTO.getCurrencyCode())
                 .eq("enabled", true)
                 .eq("deleted", false)
                 .orderBy("priority",false));
 
-        //匹配固定字段
+        ExpensePolicy waringPolicy = null;
+
+        for(ExpensePolicy p: expensePolicys) {
+            //匹配固定字段
+            if (!matchFixedFields(p, matchDimensionDTO)) {
+                continue;
+            }
+            //匹配动态字段
+            if (!matchDynamicFields(p, matchDimensionDTO)) {
+                continue;
+            }
+            Boolean checkSuccess = checkExpensePolicyDimension(p, matchDimensionDTO);
+            if (!checkSuccess) {
+                //遇到禁止直接抛出信息
+                if (p.getControlStrategyCode().equals(PolicyCheckConstant.CONTROL_STRATEGY_CODE_FORBIDDEN)) {
+                    SysCodeValueCO controlStrategy = Optional.ofNullable(
+                            organizationService.getSysCodeValueByCodeAndValue("EXPENSE_POLICY_MESSAGE",p.getMessageCode())
+                    ).orElseGet(() -> new SysCodeValueCO());
+                    return PolicyCheckResultDTO.error(p.getControlStrategyCode(), controlStrategy.getName());
+                }
+                //遇到第一个警告暂存
+                if (waringPolicy == null && p.getControlStrategyCode().equals(PolicyCheckConstant.CONTROL_STRATEGY_CODE_WARNING)) {
+                    waringPolicy = p;
+                }
+            }
+        }
+
+        if (waringPolicy != null) {
+            SysCodeValueCO controlStrategy = Optional.ofNullable(
+                    organizationService.getSysCodeValueByCodeAndValue("EXPENSE_POLICY_MESSAGE",waringPolicy.getMessageCode())
+            ).orElseGet(() ->new SysCodeValueCO());
+            return PolicyCheckResultDTO.error(waringPolicy.getControlStrategyCode(), controlStrategy.getName());
+        } else {
+            //没有匹配的政策或者校验通过
+            return PolicyCheckResultDTO.ok();
+        }
+    }
+
+    /**
+     * 匹配固定字段
+     * @param policy
+     * @param matchDimensionDTO
+     * @return
+     */
+    private Boolean matchFixedFields(ExpensePolicy policy, ExpensePolicyMatchDimensionDTO matchDimensionDTO) {
         //查询申请人信息
-        ContactCO contactCO = Optional.ofNullable(organizationService.getUserById(matchDimensionDTO.getApplicationId())).orElse(new ContactCO());
-        CompanyCO companyCO = Optional.ofNullable(organizationService.getCompanyById(contactCO.getCompanyId())).orElse(new CompanyCO());
-        DepartmentCO departmentCO = Optional.ofNullable(organizationService.getDepartementCOByUserOid(contactCO.getUserOid())).orElse(new DepartmentCO());
+        ContactCO contactCO = Optional.ofNullable(organizationService.getUserById(matchDimensionDTO.getApplicationId()))
+                .orElseGet(() ->new ContactCO());
+        CompanyCO companyCO = Optional.ofNullable(organizationService.getCompanyById(contactCO.getCompanyId()))
+                .orElseGet(() ->new CompanyCO());
+        DepartmentCO departmentCO = Optional.ofNullable(organizationService.getDepartementCOByUserOid(contactCO.getUserOid()))
+                .orElseGet(() ->new DepartmentCO());
 
-        expensePolicys = expensePolicys.stream().filter(p -> {
-            //匹配申请项目
-            if (p.getExpenseTypeId() == null || !p.getExpenseTypeId().equals(matchDimensionDTO.getExpenseTypeId())) {
+        //匹配申请人公司级别
+        if (policy.getCompanyLevelId() != null && !policy.getCompanyLevelId().equals(companyCO.getCompanyLevelId())) {
+            return false;
+        }
+        //匹配申请人职务
+        if (policy.getDutyType() != null && !policy.getDutyType().equals(contactCO.getDutyCode())) {
+            return false;
+        }
+        //匹配申请人员工级别
+        if (policy.getStaffLevel() != null && !policy.getStaffLevel().equals(contactCO.getRankCode())) {
+            return false;
+        }
+        //匹配申请人部门
+        if (policy.getDepartmentId() != null && !policy.getDepartmentId().equals(departmentCO.getId())) {
+            return false;
+        }
+        //匹配公司
+        if (!policy.getAllCompanyFlag()) {
+            if (relatedCompanyService.selectCount(
+                    new EntityWrapper<ExpensePolicyRelatedCompany>()
+                            .eq("exp_expense_policy_id", policy.getId())
+                            .eq("company_id", matchDimensionDTO.getCompanyId())
+            ) <= 0) {
                 return false;
             }
-            //匹配申请人公司级别
-            if (p.getCompanyLevelId() != null && !p.getCompanyLevelId().equals(companyCO.getCompanyLevelId())) {
-                return false;
-            }
-            //匹配申请人职务
-            if (p.getDutyType() != null && !p.getDutyType().equals(contactCO.getDutyCode())) {
-                return false;
-            }
-            //匹配申请人员工级别
-            if (p.getStaffLevel() != null && !p.getStaffLevel().equals(contactCO.getRankCode())) {
-                return false;
-            }
-            //匹配申请人部门
-            if (p.getDepartmentId() != null && !p.getDepartmentId().equals(departmentCO.getId())) {
-                return false;
-            }
-            //匹配币种
-            if (p.getCurrencyCode() != null && !p.getCurrencyCode().equals(matchDimensionDTO.getCurrencyCode())) {
-                return false;
-            }
-            //匹配公司
-            if (!p.getAllCompanyFlag()) {
-                if (relatedCompanyService.selectCount(new EntityWrapper<ExpensePolicyRelatedCompany>().eq("exp_expense_policy_id", p.getId()).eq("company_id", matchDimensionDTO.getCompanyId())) <= 0) {
-                    return false;
-                }
-            }
-            //匹配有效日期
-            if (p.getStartDate() != null && p.getStartDate().compareTo(ZonedDateTime.now()) > 0) {
-                return false;
-            }
-            if (p.getEndDate() != null && p.getEndDate().compareTo(ZonedDateTime.now()) < 0) {
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
+        }
+        //匹配有效日期
+        if (policy.getStartDate() != null && policy.getStartDate().compareTo(ZonedDateTime.now()) > 0) {
+            return false;
+        }
+        if (policy.getEndDate() != null && policy.getEndDate().compareTo(ZonedDateTime.now()) < 0) {
+            return false;
+        }
+        return true;
+    }
 
-        //匹配动态字段
-        Map<Long, DynamicFieldDTO> fieldMap = matchDimensionDTO.getDynamicFields().stream().collect(Collectors.toMap(DynamicFieldDTO::getFieldId, e -> e, (e1, e2) -> e1));
-
-        expensePolicys = expensePolicys.stream().filter(p -> {
-            List<ExpensePolicyDynamicField> dynamicFields = dynamicFieldService.selectList(new EntityWrapper<ExpensePolicyDynamicField>().eq("exp_expense_policy_id", p.getId()));
-            for (ExpensePolicyDynamicField dynamicField : dynamicFields) {
-                if (!fieldMap.containsKey(dynamicField.getFieldId()) || !fieldMap.get(dynamicField.getFieldId()).equals(dynamicField.getValue())) {
-                    return false;
-                }
-                //校验动态字段相关属性
-                DynamicFieldDTO fieldDTO = fieldMap.get(dynamicField.getFieldId());
-                switch (fieldDTO.getFieldName()) {
-                    case PolicyCheckConstant.SYSTEM_CONTROL_COUNTERPART:
-                    case PolicyCheckConstant.SYSTEM_CONTROL_PARTICIPANT:
-                        ExpensePolicyFieldProperty property = Optional.ofNullable(fieldPropertyService.selectById(dynamicField.getId())).orElse(new ExpensePolicyFieldProperty());
-
-                        Long userId;
-                        try {
-                            userId = Long.valueOf(fieldDTO.getFieldValue());
-                        } catch (Exception e){
-                            throw new BizException(RespCode.SYS_DATA_FORMAT_ERROR);
+    /**
+     * 匹配动态
+     * @param policy
+     * @param matchDimensionDTO
+     * @return
+     */
+    private Boolean matchDynamicFields(ExpensePolicy policy, ExpensePolicyMatchDimensionDTO matchDimensionDTO) {
+        Map<Long, DynamicFieldDTO> fieldMap = matchDimensionDTO.getDynamicFields()
+                .stream()
+                .collect(Collectors.toMap(DynamicFieldDTO::getFieldId, e -> e, (e1, e2) -> e1));
+        List<ExpensePolicyDynamicField> dynamicFields = dynamicFieldService.selectList(
+                new EntityWrapper<ExpensePolicyDynamicField>().eq("exp_expense_policy_id", policy.getId())
+        );
+        for (ExpensePolicyDynamicField dynamicField : dynamicFields) {
+            ExpensePolicyFieldProperty property = Optional
+                    .ofNullable(fieldPropertyService.selectById(dynamicField.getId()))
+                    .orElseGet(() ->new ExpensePolicyFieldProperty());
+            //动态字段无值时直接跳过
+            if (dynamicField.getValue() == null && property == null) {
+                continue;
+            }
+            if (!fieldMap.containsKey(dynamicField.getFieldId())) {
+                return false;
+            }
+            DynamicFieldDTO fieldDTO = fieldMap.get(dynamicField.getFieldId());
+            switch (FieldType.parse(fieldDTO.getFieldTypeId())) {
+                case START_DATE_AND_END_DATE:
+                    //未控制开始结束时间时直接跳过
+                    if (property.getDateTime1() == null && property.getDateTime2() == null) {
+                        continue;
+                    }
+                    if (fieldDTO.getFieldValue() == null) {
+                        return false;
+                    }
+                    ZonedDateTime startDte;
+                    ZonedDateTime endDte;
+                    try {
+                        String[] dateString = fieldDTO.getFieldValue().split(",");
+                        startDte = DateUtil.stringToZonedDateTime(dateString[0]);
+                        endDte = DateUtil.stringToZonedDateTime(dateString[1]);
+                    } catch (Exception e){
+                        throw new BizException(RespCode.SYS_DATA_FORMAT_ERROR);
+                    }
+                    if (property.getDateTime1() != null && property.getDateTime2() != null) {
+                        if (property.getDateTime1().compareTo(endDte) > 0 ||
+                                property.getDateTime2().compareTo(startDte) < 0) {
+                            return false;
                         }
-                        ContactCO tempContact = Optional.ofNullable(organizationService.getUserById(userId)).orElse(new ContactCO());
-                        DepartmentCO tempDepartment = Optional.ofNullable(organizationService.getDepartementCOByUserOid(tempContact.getUserOid())).orElse(new DepartmentCO());
+                    }
+                    break;
+                //同行人
+                case PARTICIPANT:
+                //参与人
+                case PARTICIPANTS:
+                    if (fieldDTO.getFieldValue() == null) {
+                        return false;
+                    }
+                    List<Long> dynamicFieldPeople;
+                    List<Long> fieldDTOPeople;
+                    try {
+                        dynamicFieldPeople = Arrays.asList(dynamicField.getValue().split(","))
+                                .stream().map(e -> Long.valueOf(e))
+                                .collect(Collectors.toList());
+                        fieldDTOPeople = Arrays.asList(fieldDTO.getFieldValue().split(","))
+                                .stream().map(e -> Long.valueOf(e))
+                                .collect(Collectors.toList());
+                    } catch (Exception e){
+                        throw new BizException(RespCode.SYS_DATA_FORMAT_ERROR);
+                    }
+                    if (dynamicFieldPeople.size() != fieldDTOPeople.size()) {
+                        return false;
+                    }
+                    for (Long person: fieldDTOPeople) {
+                        if (!dynamicFieldPeople.contains(person)) {
+                            return false;
+                        }
+                        ContactCO tempContact = Optional.ofNullable(organizationService.getUserById(person))
+                                .orElseGet(() ->new ContactCO());
+                        DepartmentCO tempDepartment = Optional
+                                .ofNullable(organizationService.getDepartementCOByUserOid(tempContact.getUserOid()))
+                                .orElseGet(() ->new DepartmentCO());
 
                         //匹配职务
                         if (property.getDutyType() != null && !property.getDutyType().equals(tempContact.getDutyCode())) {
@@ -483,54 +588,79 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
                         if (property.getDepartmentId() != null && !property.getDepartmentId().equals(tempDepartment.getId())) {
                             return false;
                         }
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                //地点
+                case GPS:
+                    if (dynamicField.getValue() != null && !dynamicField.getValue().equals(fieldDTO.getFieldValue())) {
+                        return false;
+                    }
+                    Long locationId;
+                    try {
+                        locationId = Long.valueOf(fieldDTO.getFieldValue());
+                    } catch (Exception e){
+                        throw new BizException(RespCode.SYS_DATA_FORMAT_ERROR);
+                    }
+                    //匹配地点级别
+                    LocationLevelCO locationLevelCO = Optional.ofNullable(
+                            organizationService.getLocationLevelByLocationIdOrLevelIdOrLevelCode(locationId, null, null)
+                    ).orElseGet(() ->new LocationLevelCO());
+                    if (property.getLocationLevelId() != null && !property.getLocationLevelId().equals(locationLevelCO.getId())) {
+                        return false;
+                    }
+                    break;
+                //其他
+                default:
+                    if (dynamicField.getValue() != null && !dynamicField.getValue().equals(fieldDTO.getFieldValue())) {
+                        return false;
+                    }
+                    break;
             }
-            return true;
-        }).collect(Collectors.toList());
-
-        return this.checkExpensePolicyDimension(expensePolicys, matchDimensionDTO);
+        }
+        return true;
     }
 
     /**
      * 控制维度校验
-     * @param expensePolicyList
+     * @param policy
      * @param matchDimensionDTO
      * @return
      */
-    public PolicyCheckResultDTO checkExpensePolicyDimension(List<ExpensePolicy> expensePolicyList, ExpensePolicyMatchDimensionDTO matchDimensionDTO){
+    public Boolean checkExpensePolicyDimension(ExpensePolicy policy, ExpensePolicyMatchDimensionDTO matchDimensionDTO){
         Boolean checkSuccess;
-        for (ExpensePolicy policy: expensePolicyList) {
-            Map<String, DynamicFieldDTO> fieldMap = matchDimensionDTO.getDynamicFields().stream().collect(Collectors.toMap(DynamicFieldDTO::getFieldName, e -> e, (e1, e2) -> e1));
+        Map<String, DynamicFieldDTO> fieldMap = matchDimensionDTO.getDynamicFields()
+                .stream()
+                .collect(Collectors.toMap(DynamicFieldDTO::getFieldName, e -> e, (e1, e2) -> e1));
 
-            List<String> valueList = controlDimensionService.selectList(new EntityWrapper<ExpensePolicyControlDimension>().eq("exp_expense_policy_id", policy.getId())).stream().map(ExpensePolicyControlDimension::getValue).collect(Collectors.toList());
-            switch (policy.getControlDimensionType()) {
-                case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_AMOUNT:
-                    checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(), PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getAmount().toString(), valueList);
+        List<String> valueList = controlDimensionService.selectList(
+                new EntityWrapper<ExpensePolicyControlDimension>()
+                        .eq("exp_expense_policy_id", policy.getId())
+        ).stream().map(ExpensePolicyControlDimension::getValue).collect(Collectors.toList());
+
+        switch (policy.getControlDimensionType()) {
+            case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_AMOUNT:
+                checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(),
+                        PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getAmount().toString(), valueList);
+                break;
+            case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_PRICE:
+                checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(),
+                        PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getPrice().toString(), valueList);
+                break;
+            case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_QUANTITY:
+                checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(),
+                        PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getQuantity().toString(), valueList);
+                break;
+            default:
+                DynamicFieldDTO fieldDTO = fieldMap.get(policy.getControlDimensionType());
+                if (fieldDTO == null) {
+                    checkSuccess = false;
                     break;
-                case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_PRICE:
-                    checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(), PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getPrice().toString(), valueList);
-                    break;
-                case PolicyCheckConstant.CONTROL_DIMENSION_TYPE_QUANTITY:
-                    checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(), PolicyCheckConstant.VALUE_TYPE_LONG, matchDimensionDTO.getQuantity().toString(), valueList);
-                    break;
-                default:
-                    DynamicFieldDTO fieldDTO = fieldMap.get(policy.getControlDimensionType());
-                    if (fieldDTO == null) {
-                        checkSuccess = false;
-                        break;
-                    }
-                    checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(), fieldDTO.getFieldDataType(), fieldDTO.getFieldValue(), valueList);
-                    break;
-            }
-            if (!checkSuccess) {
-                SysCodeValueCO controlStrategy = Optional.ofNullable(organizationService.getSysCodeValueByCodeAndValue("EXPENSE_POLICY_MESSAGE",policy.getMessageCode())).orElse(new SysCodeValueCO());
-                return PolicyCheckResultDTO.error(policy.getControlStrategyCode(), controlStrategy.getName());
-            }
+                }
+                checkSuccess = this.checkExpensePolicyDimensionFieldValue(policy.getJudgementSymbol(),
+                        fieldDTO.getFieldDataType(), fieldDTO.getFieldValue(), valueList);
+                break;
         }
-        return PolicyCheckResultDTO.ok();
+        return checkSuccess;
     }
 
     /**
@@ -547,13 +677,13 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
         switch (judgementSymbol) {
             case PolicyCheckConstant.JUDGEMENT_SYMBOL_LESS_THEN:
                 if (valueType.equals(PolicyCheckConstant.VALUE_TYPE_LONG)) {
-                    return Double.valueOf(value) < Double.valueOf(valueList.get(0));
+                    return Double.valueOf(value).compareTo(Double.valueOf(valueList.get(0))) < 0;
                 } else if (valueType.equals(PolicyCheckConstant.VALUE_TYPE_DATE)){
                     return ZonedDateTime.parse(value).compareTo(ZonedDateTime.parse(valueList.get(0))) < 0;
                 }
             case PolicyCheckConstant.JUDGEMENT_SYMBOL_LESS_EQUAL:
                 if (valueType.equals(PolicyCheckConstant.VALUE_TYPE_LONG)) {
-                    return Double.valueOf(value) <= Double.valueOf(valueList.get(0));
+                    return Double.valueOf(value).compareTo(Double.valueOf(valueList.get(0))) <= 0;
                 } else if (valueType.equals(PolicyCheckConstant.VALUE_TYPE_DATE)){
                     return ZonedDateTime.parse(value).compareTo(ZonedDateTime.parse(valueList.get(0))) <= 0;
                 }

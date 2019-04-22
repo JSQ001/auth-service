@@ -133,7 +133,6 @@ class PayPaying extends React.Component {
               single: true,
               event: 'PARTNER',
               method: 'get',
-              getParams: { companyId: props.company.id },
               valueKey: 'id',
               labelKey: 'id',
               disabled: true,
@@ -143,7 +142,12 @@ class PayPaying extends React.Component {
         },
 
         { type: 'input', colSpan: 6, id: 'billcode', label: messages('pay.refund.billCode') }, //付款流水号
-        { type: 'input', colSpan: 6, id: 'customerBatchNo', label: messages('pay.batch.number') }, //付款批次号
+        {
+          type: 'input',
+          colSpan: 6,
+          id: 'paymentBatchNumber',
+          label: messages('pay.batch.number'),
+        }, //付款批次号
         {
           type: 'items',
           colSpan: 6,
@@ -192,7 +196,7 @@ class PayPaying extends React.Component {
             );
           },
         }, //付款批次号
-        { title: messages('pay.batch.number'), align: 'center', dataIndex: 'customerBatchNo' },
+        { title: messages('pay.batch.number'), align: 'center', dataIndex: 'paymentBatchNumber' },
         {
           title: messages('pay.number.applicant'),
           align: 'center',

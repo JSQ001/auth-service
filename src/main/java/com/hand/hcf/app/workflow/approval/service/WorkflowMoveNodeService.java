@@ -7,7 +7,6 @@ import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;
-import com.hand.hcf.app.workflow.approval.implement.WorkflowInitNodeAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowNextNodeAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowPassInstanceAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
@@ -45,20 +44,7 @@ public class WorkflowMoveNodeService {
         Assert.notNull(instance, "instance null");
 
         WorkflowNode nextNode = workflowBaseService.findNext(instance, node);
-        WorkflowResult result = new WorkflowResult();
-        result.setEntity(nextNode);
-
-        if (!WorkflowNode.TYPE_END.equals(nextNode.getType())) {
-            WorkflowInitNodeAction action = new WorkflowInitNodeAction(this, nextNode);
-            result.setStatus(WorkflowNextNodeAction.RESULT_MOVE_NEXT);
-            result.setNext(action);
-        } else {
-            // 结束节点
-            WorkflowPassInstanceAction action = new WorkflowPassInstanceAction(workflowPassService, instance, null, null);
-            result.setStatus(WorkflowNextNodeAction.RESULT_MOVE_END);
-            result.setNext(action);
-        }
-
+        WorkflowResult result = initNode(nextNode);
         return result;
     }
 
@@ -71,8 +57,10 @@ public class WorkflowMoveNodeService {
     public WorkflowResult initNode(WorkflowNode node) {
         Assert.notNull(node, "node null");
         Assert.notNull(node.getType(), "node.type null");
+        Assert.notNull(node.getInstance(), "instance null");
 
         Integer nodeType = node.getType();
+        WorkflowInstance instance = node.getInstance();
         WorkflowResult result = null;
 
         if (!WorkflowNode.TYPE_END.equals(nodeType)) {
@@ -93,9 +81,11 @@ public class WorkflowMoveNodeService {
             }
         } else {
             // 结束节点
+            WorkflowPassInstanceAction action = new WorkflowPassInstanceAction(workflowPassService, instance, null, null);
             result = new WorkflowResult();
+            result.setStatus(WorkflowNextNodeAction.RESULT_END_NODE);
             result.setEntity(node);
-            result.setStatus(WorkflowInitNodeAction.RESULT_END_NODE);
+            result.setNext(action);
         }
 
         return result;
@@ -120,14 +110,14 @@ public class WorkflowMoveNodeService {
         WorkflowAction action = null;
 
         if (!userList.isEmpty()) {
-            status = WorkflowInitNodeAction.RESULT_MANUAL_APPROVE;
+            status = WorkflowNextNodeAction.RESULT_USER_NODE;
 
             // 保存审批任务
             for (WorkflowUser user : userList) {
                 workflowBaseService.saveTask(node, user);
             }
         } else if (WorkflowRule.EMPTY_NODE_SKIP.equals(rule.getEmptyNodeRule())) {
-            status = WorkflowInitNodeAction.RESULT_EMPTY_NODE;
+            status = WorkflowNextNodeAction.RESULT_SKIP_NODE;
             action = new WorkflowNextNodeAction(this, instance, node);
         } else {
             throw new BizException(ErrorConstants.NODE_EMPTY_NOT_SKIP);
@@ -156,7 +146,7 @@ public class WorkflowMoveNodeService {
 
         WorkflowResult result = new WorkflowResult();
         result.setEntity(node);
-        result.setStatus(WorkflowInitNodeAction.RESULT_AUTO_APPROVE);
+        result.setStatus(WorkflowNextNodeAction.RESULT_ROBOT_NODE);
         result.setNext(action);
         return result;
     }
@@ -179,7 +169,7 @@ public class WorkflowMoveNodeService {
 
         WorkflowNextNodeAction action = new WorkflowNextNodeAction(this, node.getInstance(), node);
         WorkflowResult result = new WorkflowResult();
-        result.setStatus(WorkflowInitNodeAction.RESULT_NOTICE_NODE);
+        result.setStatus(WorkflowNextNodeAction.RESULT_NOTICE_NODE);
         result.setEntity(node);
         result.setNext(action);
         return result;

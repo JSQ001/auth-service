@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetailResult;
+import com.hand.hcf.app.workflow.brms.domain.RuleNoticeAction;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -96,4 +97,36 @@ public class RuleApprovalNodeDTO {
      */
     private Integer invoiceAllowUpdateType;
 
+    /** 节点页面id */
+    private Long pageId;
+
+    /** 是否允许加签 */
+    private Boolean addsignFlag;
+
+    /** 是否允许转交 */
+    private Boolean transferFlag;
+
+    /** 驳回后再次提交处理 */
+    private Integer rejectRule;
+
+    /** 允许退回指定节点 */
+    private Boolean returnFlag;
+
+    /** 可退回节点 */
+    private Integer returnType;
+
+    /** 自定义节点 */
+    private List<ReturnNode> customNodes;
+
+    /** 退回审批通过后处理 */
+    private Integer returnRule;
+
+    /** 开启审批流通知 */
+    private Boolean notifyFlag;
+
+    /** 通知方式 */
+    private List<Integer> notifyMethod;
+
+    /** 审批流通知 */
+    private List<RuleNoticeDTO> ruleNotices;
 }

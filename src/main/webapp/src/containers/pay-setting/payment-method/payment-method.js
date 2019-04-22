@@ -23,6 +23,8 @@ class PaymentMethod extends React.Component {
           title: this.$t('paymentMethod.paymentMethodCategory'),
           dataIndex: 'paymentMethodCategory',
           key: 'paymentMethodCategory',
+          width: 145,
+          align: 'center',
           render(recode) {
             if (recode === 'ONLINE_PAYMENT') {
               return messages('pay.online');
@@ -38,12 +40,14 @@ class PaymentMethod extends React.Component {
           title: this.$t('paymentMethod.paymentMethodCode'),
           dataIndex: 'paymentMethodCode',
           key: 'paymentMethodCode',
+          width: 240,
         },
         {
           /*付款方式名称*/
           title: this.$t('paymentMethod.description'),
           dataIndex: 'description',
           key: 'description',
+          width: 445,
         },
 
         {
@@ -51,6 +55,8 @@ class PaymentMethod extends React.Component {
           title: this.$t('paymentMethod.isEnabled'),
           dataIndex: 'enabled',
           key: 'enabled',
+          width: 120,
+          align: 'center',
           render: (recode, text) => {
             return (
               <div>
@@ -65,6 +71,8 @@ class PaymentMethod extends React.Component {
           title: this.$t({ id: 'paymentMethod.createType' }),
           dataIndex: 'createType',
           key: 'createType',
+          width: 130,
+          align: 'center',
           render: value => {
             return (
               <div>

@@ -2,7 +2,7 @@
 import React from 'react';
 import SearchArea from 'widget/search-area';
 import { routerRedux } from 'dva/router';
-import { Button, Badge, message } from 'antd';
+import { Button, message } from 'antd';
 import Table from 'widget/table';
 import config from 'config';
 import { connect } from 'dva';
@@ -22,19 +22,54 @@ class WaitingInvoiceTradingFlow extends React.Component {
       data: [],
       record: {},
       selectedRow: [],
+      taxInvoiceType: [],
+      taxwriteOff: [],
+      taxSourceSystem: [],
       selectedRowKeys: [],
       //搜索
       searchForm: [
         {
-          type: 'select',
+          type: 'input',
+          id: 'tranNum',
+          label: '交易流水号',
+          colSpan: 6,
+        },
+        {
+          type: 'value_list',
+          valueListCode: 'TAX_SOURCE_SYSTEM',
+          id: 'socrceSystem',
+          placeholder: '请选择',
+          label: '来源系统',
+          colSpan: 6,
+          options: [],
+        },
+        {
+          type: 'value_list',
+          valueListCode: 'TAX_VAT_INVOICE_TYPE',
+          id: 'tradeName',
+          placeholder: '请选择',
+          label: '交易名称',
+          colSpan: 6,
+          options: [],
+        },
+        {
+          type: 'lov',
+          id: 'clientId',
+          code: 'customer_information_query',
+          label: '客户名称',
+          valueKey: 'id',
+          labelKey: 'clientName',
+          single: true,
+          colSpan: 6,
+        },
+        {
+          type: 'value_list',
+          valueListCode: 'TAX_VAT_INVOICE_TYPE',
           id: 'invoiceType',
+          placeholder: '请选择',
           label: '发票类型',
           colSpan: 6,
-          options: [
-            { label: '普通发票', value: '普通发票' },
-            { label: '专用发票', value: '专用发票' },
-            { label: '电子普票', value: '电子普票' },
-          ],
+          options: [],
         },
         {
           type: 'input',
@@ -60,24 +95,23 @@ class WaitingInvoiceTradingFlow extends React.Component {
           ],
         },
         {
-          type: 'list',
+          type: 'lov',
           id: 'orgId',
-          listType: 'orgame',
-          labelKey: 'name',
-          valueKey: 'orgId',
-          single: true,
-          listExtraParams: {},
+          code: 'company',
           label: '机构',
+          valueKey: 'id',
+          labelKey: 'chooser.data.companyName',
+          single: true,
           colSpan: 6,
         },
         {
-          type: 'list',
+          type: 'lov',
           id: 'costCenterId',
-          listType: 'costCenter',
-          labelKey: 'costCenterName',
-          valueKey: 'costCenterId',
-          listExtraParams: {},
+          code: 'responsibilityCenter',
           label: '责任中心',
+          valueKey: 'id',
+          labelKey: 'responsibilityCenterName',
+          single: true,
           colSpan: 6,
         },
         {
@@ -90,15 +124,13 @@ class WaitingInvoiceTradingFlow extends React.Component {
           ],
         },
         {
-          type: 'select',
-          id: 'writeOffStaus',
+          type: 'value_list',
+          valueListCode: 'TAX_WRITE_OFF_STATUS',
+          id: 'writeOffStatus',
+          placeholder: '请选择',
           label: '核销状态',
           colSpan: 6,
-          options: [
-            { label: '未核销', value: '未核销' },
-            { label: '部分核销', value: '部分核销' },
-            { label: '全部核销', value: '全部核销' },
-          ],
+          options: [],
         },
         {
           type: 'input',
@@ -107,15 +139,10 @@ class WaitingInvoiceTradingFlow extends React.Component {
           colSpan: 6,
         },
         {
-          type: 'select',
+          type: 'input',
           id: 'currencyCode',
           label: '币种',
           colSpan: 6,
-          options: [
-            { label: '币种1', value: '币种1' },
-            { label: '币种2', value: '币种2' },
-            { label: '币种3', value: '币种3' },
-          ],
         },
         {
           type: 'input',
@@ -124,13 +151,13 @@ class WaitingInvoiceTradingFlow extends React.Component {
           colSpan: 6,
         },
         {
-          type: 'list',
-          id: 'taxId',
-          listType: 'tax',
-          labelKey: 'taxName',
-          valueKey: 'taxId',
-          listExtraParams: {},
+          type: 'lov',
+          id: 'taxRateName',
+          code: 'tax-rate-definition',
           label: '税目',
+          valueKey: 'id',
+          labelKey: 'taxCategoryName',
+          single: true,
           colSpan: 6,
         },
         {
@@ -157,23 +184,30 @@ class WaitingInvoiceTradingFlow extends React.Component {
           key: 'sourceSystem',
           align: 'center',
           width: 150,
+          render: res => {
+            if (res == '101') {
+              return '恒生系统';
+            } else if (res == '102') {
+              return '投行系统';
+            }
+          },
         },
-        {
-          //交易名称
-          title: '交易名称',
-          dataIndex: 'tradedName',
-          key: 'tradedName',
-          align: 'center',
-          width: 150,
-        },
-        {
-          //费用项目
-          title: '费用项目',
-          dataIndex: 'expenseItem',
-          key: 'expenseItem',
-          align: 'center',
-          width: 150,
-        },
+        // {
+        //   //交易名称
+        //   title: '交易名称',
+        //   dataIndex: 'tradedName',
+        //   key: 'tradedName',
+        //   align: 'center',
+        //   width: 150,
+        // },
+        // {
+        //   //费用项目
+        //   title: '费用项目',
+        //   dataIndex: 'expenseItem',
+        //   key: 'expenseItem',
+        //   align: 'center',
+        //   width: 150,
+        // },
         {
           //机构
           title: '机构',
@@ -237,6 +271,15 @@ class WaitingInvoiceTradingFlow extends React.Component {
           key: 'invoiceType',
           align: 'center',
           width: 150,
+          // render: res => {
+          //   if (res == "GENERAL_INVOICE") {
+          //     return "专用发票"
+          //   } else if (res == "ELECTRONIC_INVOICE") {
+          //     return "电子普票"
+          //   } else {
+          //     return "普通发票"
+          //   }
+          // }
         },
         {
           //交易日期
@@ -279,18 +322,10 @@ class WaitingInvoiceTradingFlow extends React.Component {
           width: 150,
         },
         {
-          //税目代码
-          title: '税目代码',
+          //税目名称
+          title: '税目',
           dataIndex: 'taxRateId',
           key: 'taxRateId',
-          align: 'center',
-          width: 150,
-        },
-        {
-          //税目名称
-          title: '税目名称',
-          dataIndex: 'taxName',
-          key: 'taxName',
           align: 'center',
           width: 150,
         },
@@ -309,9 +344,7 @@ class WaitingInvoiceTradingFlow extends React.Component {
           key: 'alreadyInvoiceAmount',
           align: 'center',
           width: 150,
-          // render: (value, record) => (
-          //   <a onClick={() => this.toAlreadyAmount(record.id, record)}></a>
-          // )
+          render: (value, record) => <a onClick={() => this.toAlreadyAmount(record.id)}>{value}</a>,
         },
         {
           //可开票金额
@@ -363,30 +396,102 @@ class WaitingInvoiceTradingFlow extends React.Component {
         showSizeChanger: true,
         showQuickJumper: true,
         pageSize: 10,
+        pageSizeOptions: ['5', '10', '20', '50', '100'],
         showTotal: (total, range) =>
           this.$t(
             { id: 'common.show.total' },
             { range0: `${range[0]}`, range1: `${range[1]}`, total }
           ),
       },
+      searchParams: {},
     };
   }
+  //获取发票类型
+  getTaxAccountingMethod() {
+    // eslint-disable-next-line prefer-const
+    let taxInvoiceType = [];
+    this.getSystemValueList('TAX_VAT_INVOICE_TYPE').then(res => {
+      res.data.values.map(data => {
+        taxInvoiceType.push({
+          label: data.messageKey,
+          value: data.value,
+          key: data.value,
+        });
+      });
+      this.setState({
+        taxInvoiceType,
+      });
+    });
+  }
+  //获取核销状态
+  getTaxAccountingMethod() {
+    // eslint-disable-next-line prefer-const
+    let taxwriteOff = [];
+    this.getSystemValueList('TAX_WRITE_OFF_STATUS').then(res => {
+      res.data.values.map(data => {
+        taxwriteOff.push({
+          label: data.messageKey,
+          value: data.value,
+          key: data.value,
+        });
+      });
+      this.setState({
+        taxwriteOff,
+      });
+    });
+  }
+  //获取来源系统
+  getTaxAccountingMethod() {
+    // eslint-disable-next-line prefer-const
+    let taxSourceSystem = [];
+    this.getSystemValueList('TAX_SOURCE_SYSTEM').then(res => {
+      res.data.values.map(data => {
+        taxSourceSystem.push({
+          label: data.messageKey,
+          value: data.value,
+          key: data.value,
+        });
+      });
+      this.setState({
+        taxSourceSystem,
+      });
+    });
+  }
+  // 每页多少条
+  onChangePageSize = (page, pageSize) => {
+    const { pagination } = this.state;
+    pagination.pageSize = pageSize;
+    pagination.page = page;
+    this.setState({ pagination, loading: false }, () => {
+      this.getList();
+    });
+  };
+
+  // 分页点击
+  onChangePager = page => {
+    const { pagination } = this.state;
+    pagination.current = page;
+    this.setState({ pagination, loading: true }, () => {
+      this.getList();
+    });
+  };
   // 跳转已开票金额(本币)页面
-  // toAlreadyAmount = (id, record) => {
-  //   const {dispatch} = this.props;
-  //   dispatch(
-  //     routerRedux.push({
-  //       pathname: `/already-amount/already-amount/${id}`
-  //     })
-  //   )
-  // }
+  toAlreadyAmount = id => {
+    const { dispatch } = this.props;
+    dispatch(
+      routerRedux.push({
+        pathname: `/tax/already-amount/already-amount/${id}`,
+      })
+    );
+  };
   componentWillMount() {
     this.getList();
+    this.setColumns();
   }
   // 获得数据
   getList() {
     const { searchParams, pagination } = this.state;
-    const params = {};
+    const params = { ...searchParams };
     Service.getWaitInvoiceList(params)
       .then(response => {
         pagination.total = Number(response.headers['x-total-count']) || 0;
@@ -406,27 +511,48 @@ class WaitingInvoiceTradingFlow extends React.Component {
       })
       .catch(() => {});
   }
-  // toCreateInoviceApply = (id, record) => {
-  //   const {dispatch} = this.props;
-  //   dispatch(
-  //     routerRedux.push({
-  //       pathname: `/appplication-transaction-flow-invoice/appplication-transaction-flow-invoice${id}`
-  //     })
-  //   )
-  // }
+  // 动态创建columns
+  setColumns = () => {
+    const { columns } = this.state;
+    Service.getColumns().then(res => {
+      if (res.data && res.data.length) {
+        columns.splice(
+          2,
+          0,
+          ...res.data.map(item => {
+            return {
+              dataIndex: item.dimensionCode,
+              title: item.dimensionName,
+              width: 100,
+              algin: 'center',
+            };
+          })
+        );
+        this.setState({ columns });
+      }
+    });
+  };
+  toCreateInoviceApply = record => {
+    const { dispatch } = this.props;
+    dispatch(
+      routerRedux.push({
+        pathname: `/tax/appplication-transaction-flow-invoice/appplication-transaction-flow-invoice/${record}`,
+      })
+    );
+  };
   // 创建开票申请
   handleSubmitClick = () => {
-    // const selectedRowKeys = this.state.selectedRowKeys;
+    const selectedRowKeys = this.state.selectedRowKeys;
     const selectedRow = this.state.selectedRow;
     Service.routerNewPage(selectedRow)
       .then(res => {
         if (res.status === 200) {
-          // this.toCreateInoviceApply(selectedRowKeys, record);
-          message.success('提交成功！');
+          message.success('创建开票申请成功！');
+          this.toCreateInoviceApply(selectedRowKeys);
         }
       })
       .catch(err => {
-        message.error(err.response.data.message);
+        message.error('创建开票申请失败！');
       });
     return 'submit';
   };
@@ -441,13 +567,29 @@ class WaitingInvoiceTradingFlow extends React.Component {
       disabledSubmit: !(selectedRowKeys.length > 0),
     });
   };
-
   //搜索
-  search = values => {
-    console.log(values);
+  handleSearch = params => {
+    let pagination = this.state.pagination;
+    pagination.page = 0;
+    pagination.current = 1;
+
+    this.setState(
+      {
+        searchParams: params,
+        loading: true,
+        pagination,
+      },
+      () => {
+        this.getList();
+      }
+    );
   };
   //重置
-  reset = () => {};
+  reset = () => {
+    this.setState({ searchParams: {} }, () => {
+      this.getList();
+    });
+  };
   // 新建
   create = () => {
     this.setState({
@@ -461,7 +603,6 @@ class WaitingInvoiceTradingFlow extends React.Component {
       record: record,
       newShow: true,
     });
-    console.log(record);
   };
   close = flag => {
     this.setState({ newShow: false, record: {} }, () => {
@@ -523,7 +664,7 @@ class WaitingInvoiceTradingFlow extends React.Component {
       <div>
         <SearchArea
           searchForm={searchForm}
-          submitHandle={this.search}
+          submitHandle={this.handleSearch}
           clearHandle={this.reset}
           maxLength={4}
         />

@@ -57,14 +57,15 @@ class NodeAction extends Component {
     this.props.form.validateFields((error, values) => {
       if (!error) {
         const { selectedList } = this.state;
-        if (!selectedList.length) {
-          return message.warning(this.$t('workbench.rule.select.process') /* 请选择节点过程！ */);
-        }
+        // if (!selectedList.length) {
+        //   return message.warning(this.$t('workbench.rule.select.process') /* 请选择节点过程！ */);
+        // }
         const data = {
           businessNodeAction: {
             ...values,
             businessNodeId,
             id: params.id,
+            versionNumber: params.versionNumber,
           },
           businessNodeProcedures: selectedList.map(item => ({
             businessProcedureId: item,

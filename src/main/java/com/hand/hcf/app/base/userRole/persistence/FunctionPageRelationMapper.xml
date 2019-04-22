@@ -16,4 +16,12 @@
         ORDER BY spl.last_updated_date DESC
     </select>
 
+
+    <select id="listRelationByTenant" resultType="com.hand.hcf.app.base.userRole.domain.FunctionPageRelation">
+        select fl.id as function_id, fpr.PAGE_ID from
+                sys_function_page_relation fpr ,
+                SYS_FUNCTION_LIST fl
+            where fpr.FUNCTION_ID=fl.source_id
+              and fl.tenant_id=${tenantId}
+    </select>
 </mapper>

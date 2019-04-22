@@ -4,14 +4,12 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.service.MessageService;
@@ -123,7 +121,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     @Autowired
     private WorkflowControllerImpl workflowClient;
 
-    @Value("${spring.application.name:}")
+    //@Value("${spring.application.name:}")
     private String applicationName;
 
     @Autowired
@@ -260,8 +258,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param headerId
      */
     @Transactional(rollbackFor = Exception.class)
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public void deleteExpenseReportHeaderById(@LockedObject Long headerId) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public void deleteExpenseReportHeaderById(Long headerId) {
         ExpenseReportHeader expenseReportHeader = selectById(headerId);
         if (expenseReportHeader != null) {
             // 判断单据状态 非编辑中、撤回、拒绝的单据，都不能删除
@@ -305,33 +303,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         List<ExpenseDimension> expenseDimensions =
                 expenseDimensionService.listDimensionByHeaderIdAndType(headerId, ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(), null);
         expenseReportHeaderDTO.setExpenseDimensions(expenseDimensions);
-        // 公司信息
-        CompanyCO companyById = organizationService.getCompanyById(expenseReportHeaderDTO.getCompanyId());
-        expenseReportHeaderDTO.setCompanyCode(companyById.getCompanyCode());
-        expenseReportHeaderDTO.setCompanyName(companyById.getName());
-        // 部门信息
-        DepartmentCO departmentById = organizationService.getDepartmentById(expenseReportHeaderDTO.getDepartmentId());
-        expenseReportHeaderDTO.setDepartmentCode(departmentById.getDepartmentCode());
-        expenseReportHeaderDTO.setDepartmentName(departmentById.getName());
-        // 申请人信息
-        ContactCO userById = organizationService.getUserById(expenseReportHeaderDTO.getApplicantId());
-        expenseReportHeaderDTO.setApplicantCode(userById.getEmployeeCode());
-        expenseReportHeaderDTO.setApplicantName(userById.getFullName());
-        // 单据类型
-        ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
-        expenseReportHeaderDTO.setDocumentTypeName(expenseReportType.getReportTypeName());
-        expenseReportHeaderDTO.setFormId(expenseReportType.getFormId());
-        ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
-        expenseReportHeaderDTO.setFormOid(approvalFormById.getFormOid());
-        // 创建人信息
-        if (expenseReportHeaderDTO.getApplicantId().equals(expenseReportHeaderDTO.getCreatedBy())) {
-            expenseReportHeaderDTO.setCreatedCode(userById.getEmployeeCode());
-            expenseReportHeaderDTO.setCreatedName(userById.getFullName());
-        } else {
-            userById = organizationService.getUserById(expenseReportHeaderDTO.getCreatedBy());
-            expenseReportHeaderDTO.setCreatedCode(userById.getEmployeeCode());
-            expenseReportHeaderDTO.setCreatedName(userById.getFullName());
-        }
+        setExpenseReportHeaderDto(expenseReportHeaderDTO);
+
         // 合同信息
         //jiu.zhao 合同
         /*if(expenseReportHeaderDTO.getContractHeaderId() != null){
@@ -391,22 +364,28 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                                                          BigDecimal amountTo,
                                                          String remark,
                                                          String requisitionNumber,
+                                                         Boolean editor,
                                                          Page page) {
         Long currentUserId = OrgInformationUtil.getCurrentUserId();
-        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectPage(page, new EntityWrapper<ExpenseReportHeader>()
+        Wrapper<ExpenseReportHeader> wrapper =new EntityWrapper<ExpenseReportHeader>()
                 .eq("created_by", currentUserId)
                 .eq(documentTypeId != null, "document_type_id", documentTypeId)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(applicantId != null, "applicant_id", applicantId)
-                .eq(status != null, "status", status)
+                //.eq(status != null, "status", status)
                 .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "currency_code", currencyCode)
                 .ge(amountFrom != null, "total_amount", amountFrom)
                 .le(amountTo != null, "total_amount", amountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
-                .orderBy("requisition_number", false)
-        );
+                .orderBy("requisition_number", false);
+        if (editor) {
+            wrapper = wrapper.in("status", "1001,1003,1005,2001");
+        } else {
+            wrapper = wrapper.eq(status != null, "status", status);
+        }
+        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectPage(page, wrapper);
         expenseReportHeaders.stream().forEach(expenseReportHeader -> {
             ContactCO userById = organizationService.getUserById(expenseReportHeader.getApplicantId());
             expenseReportHeader.setApplicantCode(userById.getEmployeeCode());
@@ -701,9 +680,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public BudgetCheckResultDTO submit(@LockedObject("documentId") WorkFlowDocumentRefCO workFlowDocumentRef,
+    //@LcnTransaction
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public BudgetCheckResultDTO submit( WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {
 
         ExpenseReportHeader expenseReportHeader = selectById(workFlowDocumentRef.getDocumentId());
@@ -976,9 +955,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param status   状态
      */
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
-    @SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
-    public void updateDocumentStatus(@LockedObject Long headerId, Integer status, String approvalText) {
+    //@LcnTransaction
+   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
+    public void updateDocumentStatus(Long headerId, Integer status, String approvalText) {
         ExpenseReportHeader header = this.selectById(headerId);
         if (header == null) {
             throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);
@@ -1067,7 +1046,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     }
 
     @Transactional(rollbackFor = Exception.class)
-    @LcnTransaction
+    //@LcnTransaction
     public String saveInitializeExpReportGeneralLedgerJournalLine(Long reportHeaderId, String accountingDate) {
         ExpenseReportCO reportCO = new ExpenseReportCO();
         //报销单头
@@ -1438,72 +1417,90 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 ids = coList.stream()
                         .map(CashTransactionDetailCO::getDocumentId)
                         .collect(Collectors.toList());
-                //在这些id的区间进行查询
-                reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
-                        , applicantId, status, currencyCode, amountFrom, amountTo,
-                        remark, requisitionNumber, unitId, cDateFrom, cDateTo, tenantId),
-                        page);
+                 reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
+                                         , applicantId, status, currencyCode, amountFrom, amountTo,
+                                         remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId),
+                                         page);
             }*/
             //为空则 返回前台空数据。
         } else {
-            //如果条件为空 则不需要遍历出ids
-            // 不需要根据上述查询出来的结果在来进行筛选。
             reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
-                    , applicantId, status, currencyCode, amountFrom, amountTo,
-                    remark, requisitionNumber, unitId, cDateFrom, cDateTo, tenantId),
-                    page);
+                        , applicantId, status, currencyCode, amountFrom, amountTo,
+                        remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId),
+                        page);
         }
         //拼接数据
-        for (CashTransactionDetailCO cashTransactionDetailCO : coList
-        ) {
-            reportHeaderDTOS.stream().forEach(e -> {
-                if (cashTransactionDetailCO.getDocumentId() == e.getId()) {
-                    e.setPaidAmount(cashTransactionDetailCO.getAmount());
-                    e.setReversedFlag(cashTransactionDetailCO.getReservedStatus());
-                    e.setWriteOffAmount(cashTransactionDetailCO.getWriteOffAmount());
-                }
-            });
-
+        setReportHeaderDTOSAmount(coList,reportHeaderDTOS);
+		return reportHeaderDTOS;
+		}
+//查询相关属性
+        public  void  setExpenseReportHeaderDto(ExpenseReportHeaderDTO expenseReportHeaderDTO ){
+            CompanyCO companyById = organizationService.getCompanyById(expenseReportHeaderDTO.getCompanyId());
+            expenseReportHeaderDTO.setCompanyCode(companyById.getCompanyCode());
+            expenseReportHeaderDTO.setCompanyName(companyById.getName());
+            // 部门信息
+            DepartmentCO departmentById = organizationService.getDepartmentById(expenseReportHeaderDTO.getDepartmentId());
+            expenseReportHeaderDTO.setDepartmentCode(departmentById.getDepartmentCode());
+            expenseReportHeaderDTO.setDepartmentName(departmentById.getName());
+            // 申请人信息
+            ContactCO userById = organizationService.getUserById(expenseReportHeaderDTO.getApplicantId());
+            expenseReportHeaderDTO.setApplicantCode(userById.getEmployeeCode());
+            expenseReportHeaderDTO.setApplicantName(userById.getFullName());
+            // 单据类型
+            ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
+            expenseReportHeaderDTO.setDocumentTypeName(expenseReportType.getReportTypeName());
+            expenseReportHeaderDTO.setFormId(expenseReportType.getFormId());
+            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
+            expenseReportHeaderDTO.setFormOid(approvalFormById.getFormOid());
+            // 创建人信息
+            if (expenseReportHeaderDTO.getApplicantId().equals(expenseReportHeaderDTO.getCreatedBy())) {
+                expenseReportHeaderDTO.setCreatedCode(userById.getEmployeeCode());
+                expenseReportHeaderDTO.setCreatedName(userById.getFullName());
+            } else {
+                userById = organizationService.getUserById(expenseReportHeaderDTO.getCreatedBy());
+                expenseReportHeaderDTO.setCreatedCode(userById.getEmployeeCode());
+                expenseReportHeaderDTO.setCreatedName(userById.getFullName());
+            }
         }
 
 
-        return reportHeaderDTOS;
-    }
+        
+    
 
 
-    public Wrapper<ExpenseReportHeader> getHearderWrapper(List<Long> ids,
-                                                          Long companyId,
-                                                          Long documentTypeId,
-                                                          ZonedDateTime reqDateFrom,
-                                                          ZonedDateTime reqDateTo,
-                                                          Long applicantId,
-                                                          Integer status,
-                                                          String currencyCode,
-                                                          BigDecimal amountFrom,
-                                                          BigDecimal amountTo,
-                                                          String remark,
-                                                          String requisitionNumber,
-                                                          Long unitId,
-                                                          ZonedDateTime cDateFrom,
-                                                          ZonedDateTime cDateTo,
-                                                          Long tenantId) {
-        Wrapper<ExpenseReportHeader> wrapper = new EntityWrapper<ExpenseReportHeader>()
-                .eq(tenantId != null, "t.tenantId", tenantId)
-                .in(!CollectionUtils.isEmpty(ids), "t.id", ids)
-                .eq(companyId != null, "t.", companyId)
-                .eq(documentTypeId != null, "t.", documentTypeId)
-                .gt(reqDateFrom != null, "t.", reqDateFrom)
-                .lt(reqDateTo != null, "t.", reqDateTo)
-                .eq(applicantId != null, "t.", applicantId)
-                .eq(status != null, "t.", status)
-                .eq(!StringUtils.isEmpty(currencyCode), "t.", currencyCode)
-                .gt(amountFrom != null, "t.", amountFrom)
-                .lt(amountTo != null, "t.", amountTo)
-                .like(StringUtils.isEmpty(remark), "t.", remark)
-                .like(StringUtils.isEmpty(requisitionNumber), "t.", requisitionNumber)
-                .eq(unitId != null, "t.", unitId)
-                .gt(cDateFrom != null, "t.", cDateFrom)
-                .lt(cDateTo != null, "t.", cDateTo);
+    public Wrapper<ExpenseReportHeader> getHearderWrapper(List<Long>ids,
+                                                       Long companyId,
+                                                       Long documentTypeId,
+                                                       ZonedDateTime reqDateFrom,
+                                                       ZonedDateTime reqDateTo,
+                                                       Long applicantId,
+                                                       Integer status,
+                                                       String currencyCode,
+                                                       BigDecimal amountFrom,
+                                                       BigDecimal amountTo,
+                                                       String remark,
+                                                       String requisitionNumber,
+                                                       Long unitId,
+                                                       ZonedDateTime cDateFrom,
+                                                       ZonedDateTime cDateTo,
+                                                       Long tenantId){
+        Wrapper<ExpenseReportHeader> wrapper= new EntityWrapper<ExpenseReportHeader>()
+                    .eq(tenantId!=null,"t.tenant_id",tenantId)
+                    .in(!CollectionUtils.isEmpty(ids),"t.id",ids)
+                    .eq(companyId!=null,"t.company_id",companyId)
+                    .eq(documentTypeId!=null,"t.document_type_id",documentTypeId)
+                    .gt(reqDateFrom!=null,"t.requisition_date",reqDateFrom)
+                    .lt(reqDateTo!=null,"t.requisition_date",reqDateTo)
+                    .eq(applicantId!=null,"t.applicant_id",applicantId)
+                    .eq(status!=null,"t.status",status)
+                    .eq(!StringUtils.isEmpty(currencyCode),"t.currency_code",currencyCode)
+                    .gt(amountFrom!=null,"t.total_amount",amountFrom)
+                    .lt(amountTo!=null,"t.total_amount",amountTo)
+                    .like(!StringUtils.isEmpty(remark),"t.description",remark)
+                    .like(!StringUtils.isEmpty(requisitionNumber),"t.requisition_number",requisitionNumber)
+                    .eq(unitId!=null,"t.department_id",unitId)
+                    .gt(cDateFrom!=null,"t.audit_date",cDateFrom)
+                    .lt(cDateTo!=null,"t.audit_date",cDateTo);
 
         return wrapper;
     }
@@ -1542,23 +1539,26 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 ids = coList.stream()
                         .map(CashTransactionDetailCO::getDocumentId)
                         .collect(Collectors.toList());
-                //在这些id的区间进行查询
+                
                 wrapper=getHearderWrapper(ids,companyId,documentTypeId,reqDateFrom,reqDateTo
                                                 ,applicantId,status,currencyCode,amountFrom,amountTo,
                                                 remark,requisitionNumber,unitId,cDateFrom,cDateTo,tenantId);
-                total = baseMapper.getCountByCondition(wrapper);
+                
             }*/
-            //为空则 返回前台空数据。
+            
         } else {
             wrapper = getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
                     , applicantId, status, currencyCode, amountFrom, amountTo,
                     remark, requisitionNumber, unitId, cDateFrom, cDateTo, tenantId);
-            total = baseMapper.getCountByCondition(wrapper);
+            
         }
+        total = baseMapper.getCountByCondition(wrapper);
         int total1 = total;
         int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
         Wrapper<ExpenseReportHeader> wrapper1 = wrapper;
-        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpenseReportHeaderDTO, ExpenseReportHeaderDTO>() {
+        //bo.liu 支付
+        /*List<CashTransactionDetailCO> finalCoList = coList;*/
+        excelExportService.exportAndDownloadExcel(exportConfig,new ExcelExportHandler<ExpenseReportHeaderDTO,ExpenseReportHeaderDTO>(){
             @Override
             public int getTotal() {
                 return total1;
@@ -1566,7 +1566,10 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
 
             @Override
             public List<ExpenseReportHeaderDTO> queryDataByPage(Page page) {
-                return baseMapper.queryReportHeaderByids(wrapper1, page);
+                List<ExpenseReportHeaderDTO> reportHeaderDTOS  =   baseMapper.queryReportHeaderByids(wrapper1,page);
+                //bo.liu 支付
+                /*setReportHeaderDTOSAmount(finalCoList,reportHeaderDTOS);*/
+                return reportHeaderDTOS;
             }
 
             @Override
@@ -1580,5 +1583,27 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             }
         }, availProcessors, request, response);
 
+    }
+        //拼接数据
+    public void setReportHeaderDTOSAmount( List<CashTransactionDetailCO> finalCoList,List<ExpenseReportHeaderDTO> reportHeaderDTOS){
+        if(!CollectionUtils.isEmpty(finalCoList)){
+            for (CashTransactionDetailCO cashTransactionDetailCO : finalCoList
+            ) {
+                reportHeaderDTOS.stream().forEach(e->{
+                    if (cashTransactionDetailCO.getDocumentId().longValue()==e.getId().longValue()){
+                        e.setPaidAmount(cashTransactionDetailCO.getAmount());
+                        e.setReversedFlag(cashTransactionDetailCO.getReservedStatus());
+                        e.setWriteOffAmount(cashTransactionDetailCO.getWriteOffAmount());
+
+                    }
+                    setExpenseReportHeaderDto(e);
+                });
+
+             }
+        }else{
+            reportHeaderDTOS.stream().forEach(e->{
+                setExpenseReportHeaderDto(e);
+            });
+        }
     }
 }

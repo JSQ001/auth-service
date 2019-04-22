@@ -7,6 +7,8 @@ import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
+import com.hand.hcf.app.base.system.service.FrontLocaleService;
+import com.hand.hcf.app.base.system.service.ServeLocaleService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
 import com.hand.hcf.app.base.tenant.dto.TenantRegisterDTO;
@@ -16,6 +18,8 @@ import com.hand.hcf.app.base.user.enums.CreatedTypeEnum;
 import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
+import com.hand.hcf.app.base.userRole.service.ContentListService;
+import com.hand.hcf.app.base.userRole.service.FunctionListService;
 import com.hand.hcf.app.base.userRole.service.RoleFunctionService;
 import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
@@ -24,6 +28,7 @@ import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +75,15 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private RoleFunctionService roleFunctionService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private FrontLocaleService frontLocaleService;
+    @Autowired
+    private ServeLocaleService serveLocaleService;
+
+    @Autowired
+    private FunctionListService functionListService;
+    @Autowired
+    private ContentListService contentListService;
 
     /**
      * save tenant
@@ -153,6 +167,19 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         return selectList(new EntityWrapper<Tenant>()
                 .eq("licensed", true)
                 .eq("enalbed", true));
+    }
+
+
+    /**
+     * 获取系统租户id
+     *
+     * @return
+     */
+    public Long getSystemTenantId() {
+        return selectOne(new EntityWrapper<Tenant>()
+                .eq("system_flag", true)
+                .eq("enabled",true)
+                ).getId();
     }
 
 
@@ -263,25 +290,41 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean registerTenant(TenantRegisterDTO register){
+
         Tenant tenant = mapper.map(register, Tenant.class);
         tenant.setEnabled(Boolean.TRUE);
         tenant.setDeleted(Boolean.FALSE);
         tenant.setStatus("1001");
         tenant.setId(null);
         this.insert(tenant);
+        //初始化前端多语言
+        frontLocaleService.initFrontLocale(tenant.getId());
+        // 初始化后端多语言
+        serveLocaleService.initServeLocale(tenant.getId());
+
         register.setId(tenant.getId());
 
         // 初始化用户
         User user = initUser(register);
         // 初始化角色
         Role role = roleService.initRoleByTenant(tenant);
-        // 初始化角色菜单
+
+        // 初始化菜单、功能
+        functionListService.initTenantFunction(tenant.getId());
+        contentListService.initTenantContent(tenant.getId());
+        // 初始化角色关联菜单
         roleFunctionService.initRoleFunctionByTenant(role);
         // 初始化用户角色
         initUserRole(role, user);
         // 初始化值列表
         sysCodeService.init();
         return true;
+    }
+
+
+
+    public void initContentFunction(Long tenantId) {
+       roleFunctionService.initRoleFunction(tenantId);
     }
 
     private void initUserRole(Role role, User user) {

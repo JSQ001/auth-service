@@ -7,23 +7,18 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.toolkit.ClassUtils;
 import com.baomidou.mybatisplus.toolkit.ReflectionKit;
 import com.baomidou.mybatisplus.toolkit.TableInfoHelper;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.util.RespCode;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.reflection.Reflector;
+import org.apache.ibatis.reflection.invoker.Invoker;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -96,6 +91,14 @@ public class HcfOptimisticLockerInterceptor implements Interceptor {
                 Class<?> entityClass = ClassUtils.getUserClass(et.getClass());
                 EntityField entityField = this.getVersionField(entityClass);
                 Field versionField = entityField == null ? null : entityField.getField();
+                if(versionField != null){
+                    Reflector reflector = new Reflector(et.getClass());
+                    Invoker versionNumber = reflector.getGetInvoker(versionField.getName());
+                    Object value = versionNumber.invoke(et, new Object[]{});
+                    if(value == null){
+                        throw new BizException(RespCode.SYS_VERSION_NUMBER_CHANGED);
+                    }
+                }
                 Object originalVersionVal;
                 if (versionField != null && (originalVersionVal = versionField.get(et)) != null) {
                     TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);

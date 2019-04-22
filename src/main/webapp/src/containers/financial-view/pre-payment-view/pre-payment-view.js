@@ -13,7 +13,10 @@ import ListSelector from 'widget/list-selector';
 import FileSaver from 'file-saver';
 import PayDetail from 'containers/pay/pay-workbench/payment-detail'; //支付详情
 import { routerRedux } from 'dva/router';
-
+import ReimburseDetailCommon from 'containers/reimburse/my-reimburse/reimburse-detail-view';
+import reimburseService from 'containers/reimburse/reimburse-approve/reimburse.service';
+import ExpenseApplicationCommon from 'containers/expense-application-form/detail-common-readonly';
+import expenseApplicationService from 'containers/expense-application-form/service';
 class PerPaymentView extends Component {
   constructor(props) {
     super(props);
@@ -220,8 +223,8 @@ class PerPaymentView extends Component {
           render: status => {
             return (
               <Badge
-                status={this.$statusList[status].state}
-                text={this.$statusList[status].label}
+                status={this.$statusList[status] == null ? '-' : this.$statusList[status].state}
+                text={this.$statusList[status] == null ? '-' : this.$statusList[status].label}
               />
             );
           },
@@ -230,6 +233,7 @@ class PerPaymentView extends Component {
           title: '查看信息',
           dataIndex: 'view',
           width: '100',
+          fixed: 'right',
           render: (view, record, index) => {
             return (
               <div>
@@ -258,6 +262,10 @@ class PerPaymentView extends Component {
       data: [],
       searchParam: {},
       showChild: false,
+      reqHeaderData: {},
+      showReq: false,
+      headerData: {},
+      showReimburse: false,
       detailId: undefined,
       page: 0,
       pageSize: 10,
@@ -293,16 +301,9 @@ class PerPaymentView extends Component {
   }
 
   handleLink(record) {
-    // this.context.router.push(this.state.payRequisitionDetail.url.replace(':id', record.id).replace(':flag', 'preFinalQuery'))
-    //  this.props.dispatch(
-    //     routerRedux.push({
-    //       pathname: this.state.payRequisitionDetail.url,
-    //    })
-    //   );
-
     this.props.dispatch(
       routerRedux.replace({
-        pathname: `/pre-payment/my-pre-payment/pre-payment-detail/${record.id}/preFinalQuery`,
+        pathname: `/financial-view/pre-payment-view/pre-payment-view-detail/${record.id}`,
       })
     );
   }
@@ -343,7 +344,17 @@ class PerPaymentView extends Component {
         { type: 'input', id: 'documentFormName', label: '报账单类型', colSpan: '6' },
       ],
       columns: [
-        { title: '报账单单号', dataIndex: 'documentNumber' },
+        {
+          title: '报账单单号',
+          dataIndex: 'documentNumber',
+          render: (documentNumber, record) => {
+            return (
+              <Popover content={documentNumber}>
+                <a onClick={() => this.handleLinkReport(record)}>{documentNumber}</a>
+              </Popover>
+            );
+          },
+        },
         { title: '序号', dataIndex: 'documentLineNumber' },
         { title: '报账单类型', dataIndex: 'documentFormName' },
         { title: '申请人', dataIndex: 'documentApplicantName' },
@@ -510,6 +521,52 @@ class PerPaymentView extends Component {
     });
   };
 
+  //获取费用申请单头信息
+  getReqInfo = id => {
+    expenseApplicationService
+      .getApplicationDetail(id)
+      .then(res => {
+        this.setState({ reqHeaderData: res.data });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
+  };
+  //申请单的超链接,
+  handleExpReqLink(record) {
+    // this.getReqInfo(record.refDocumentId);
+    // this.setState({
+    //   showReq: true,
+    //   id: record.refDocumentId,
+    // });
+    this.setState({ lsVisible: false });
+    this.props.dispatch(
+      routerRedux.replace({
+        pathname: `/financial-view/expense-application/application-view-detail/${
+          record.refDocumentId
+        }`,
+      })
+    );
+  }
+
+  //获取报账单信息
+  getInfo = id => {
+    reimburseService.getReimburseDetailById(id).then(res => {
+      this.setState({
+        headerData: res.data,
+      });
+    });
+  };
+
+  // 报账单的超链接
+  handleLinkReport(record) {
+    this.getInfo(record.expReportHeaderId);
+    this.setState({
+      showReimburse: true,
+      id: record.expReportHeaderId,
+    });
+  }
+
   //查看支付流水详情
   viewPayDetail = id => {
     this.setState({
@@ -534,8 +591,8 @@ class PerPaymentView extends Component {
     e.preventDefault();
     let { extraParams, selectorItem } = this.state;
     selectorItem = {
-      title: '关联的申请单',
-      url: `${config.baseUrl}/api/prepayment/requisition/release/prepayment/query`,
+      title: '关联的申请单!',
+      url: `${config.prePaymentUrl}/api/cash/prepayment/requisitionLine/req/query`,
       searchForm: [
         {
           type: 'input',
@@ -555,44 +612,58 @@ class PerPaymentView extends Component {
         },
         {
           type: 'input',
-          id: 'applicationCode',
+          id: 'documentNumber',
           label: '申请单单号',
           colSpan: '6',
         },
         {
           type: 'input',
-          id: 'applicationType',
+          id: 'reqTypeName',
           label: '申请单类型',
           colSpan: '6',
         },
       ],
       columns: [
-        { title: '申请单单号', dataIndex: 'applicationCode' },
-        { title: '申请单类型', dataIndex: 'applicationType' },
+        {
+          title: '申请单单号',
+          dataIndex: 'refDocumentCode',
+          render: (refDocumentCode, record) => {
+            return (
+              <Popover content={refDocumentCode}>
+                <a onClick={() => this.handleExpReqLink(record)}>{refDocumentCode}</a>
+              </Popover>
+            );
+          },
+        },
+        { title: '申请单类型', dataIndex: 'typeName' },
         { title: '申请人', dataIndex: 'applyName' },
         {
           title: '申请日期',
-          dataIndex: 'applyDate',
+          dataIndex: 'requisitionDate',
           render: applyDate => {
             return <span>{moment(applyDate).format('YYYY-MM-DD')}</span>;
           },
         },
-        { title: '币种', dataIndex: 'currency' },
+        { title: '币种', dataIndex: 'currencyCode' },
         {
           title: '金额',
-          dataIndex: 'amount',
+          dataIndex: 'reqAmount',
           render: amount => {
             return <span>{this.filterMoney(amount, 2)}</span>;
           },
         },
         {
           title: '关联金额',
-          dataIndex: 'releaseAmount',
+          dataIndex: 'amount',
           render: releaseAmount => {
             return <span>{this.filterMoney(releaseAmount, 2)}</span>;
           },
         },
-        { title: '备注', dataIndex: 'description' },
+        {
+          title: '备注',
+          dataIndex: 'description',
+          render: desc => <Popover content={desc}>{desc || '-'}</Popover>,
+        },
       ],
       key: 'applicationCode',
     };
@@ -803,7 +874,7 @@ class PerPaymentView extends Component {
    */
   render() {
     //查询条件
-    const { searchForm, showChild } = this.state;
+    const { searchForm, showChild, showReimburse, headerData, showReq, reqHeaderData } = this.state;
     //返回列表
     const { columns, pagination, loading, data } = this.state;
     //弹窗
@@ -838,7 +909,7 @@ class PerPaymentView extends Component {
           </div>
         </div>
         <Table
-          scroll={{ x: 1850 }}
+          scroll={{ x: 2500 }}
           rowKey={record => record['id']}
           columns={columns}
           size="middle"
@@ -880,6 +951,45 @@ class PerPaymentView extends Component {
           onCancel={this.onClose}
         >
           <div>{this.wrapClose(PayDetail)}</div>
+        </Modal>
+        <Modal
+          title="申请单单详情"
+          visible={showReq}
+          onCancel={() => {
+            this.setState({ showReq: false });
+          }}
+          width="90%"
+          bodyStyle={{
+            maxHeight: '70vh',
+            overflow: 'auto',
+            padding: '0 10px',
+          }}
+          footer={null}
+        >
+          <ExpenseApplicationCommon
+            //id={this.props.match.params.id}
+            headerData={reqHeaderData}
+          />
+        </Modal>
+        <Modal
+          title="报账单详情" /*报账单详情*/
+          visible={showReimburse}
+          onCancel={() => {
+            this.setState({ showReimburse: false });
+          }}
+          width="90%"
+          bodyStyle={{
+            maxHeight: '70vh',
+            overflow: 'auto',
+            padding: '0 10px',
+          }}
+          footer={null}
+        >
+          <ReimburseDetailCommon
+            //id={this.props.match.params.id}
+            getInfo={this.getInfo}
+            headerData={headerData}
+          />
         </Modal>
       </div>
     );

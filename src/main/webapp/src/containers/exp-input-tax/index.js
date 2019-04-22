@@ -87,17 +87,11 @@ class expInputTax extends React.Component {
           title: this.$t('acp.requisitionNumber'), // '单据编号'
           dataIndex: 'documentNumber',
           align: 'center',
-          width: 150,
+          width: 180,
           render: (value, record) => {
             return (
               <Popover content={value}>
-                <a
-                  onClick={e => {
-                    this.handleRowClick(record);
-                  }}
-                >
-                  {value}
-                </a>
+                <a>{value}</a>
               </Popover>
             );
           },
@@ -234,9 +228,9 @@ class expInputTax extends React.Component {
     const { dispatch } = this.props;
     dispatch(
       routerRedux.push({
-        pathname: `/exp-input-tax/exp-input-tax/new-exp-input-tax/${record.id}/${
+        pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${record.id}/${
           record.transferType
-        }/${record.currencyCode}`,
+        }`,
       })
     );
   };

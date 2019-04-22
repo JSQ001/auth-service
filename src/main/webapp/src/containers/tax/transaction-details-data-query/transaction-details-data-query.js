@@ -1,30 +1,15 @@
 /* eslint-disable */
 import React, { Component } from 'react';
 import SearchArea from 'widget/search-area';
-import {
-  Button,
-  Divider,
-  message,
-  Popconfirm,
-  Modal,
-  Form,
-  Select,
-  Row,
-  DatePicker,
-  Table,
-} from 'antd';
-import SlideFrame from 'widget/slide-frame';
-import config from 'config';
+import { message, Modal, Form, Popover } from 'antd';
+import Table from 'widget/table';
 import moment from 'moment';
+import config from 'config';
 import { connect } from 'dva';
-import CustomTable from 'widget/custom-table';
 import { routerRedux } from 'dva/router';
 import jobService from 'containers/job/job.service';
 const confirm = Modal.confirm;
-const { MonthPicker, RangePicker } = DatePicker;
-const monthFormat = 'YYYY/MM';
 import Service from './transaction-details-data-query.service';
-import registerApplyService from '../../tax-setting/register-manage/tax-register-apply.service';
 class TransactionDetailsDataQuery extends Component {
   constructor(props) {
     super(props);
@@ -57,18 +42,18 @@ class TransactionDetailsDataQuery extends Component {
         },
         {
           type: 'input',
-          id: 'taxRate',
+          id: 'transNum',
           placeholder: '请输入',
           label: '交易流水号',
           colSpan: 6,
         },
         {
           type: 'list',
-          id: 'clientNumber',
+          id: 'clientAcc',
           colSpan: 6,
           listType: 'customer_information_query',
           labelKey: 'clientName',
-          valueKey: 'id',
+          valueKey: 'clientNumber',
           event: 'clientNumber',
           single: true,
           listExtraParams: {},
@@ -90,7 +75,7 @@ class TransactionDetailsDataQuery extends Component {
         {
           type: 'list',
           colSpan: 6,
-          id: 'companyId',
+          id: 'orgName',
           //label: this.$t({ id: 'my.contract.contractCompany' } /*公司*/),
           label: '交易机构',
           listType: 'company_detail',
@@ -102,21 +87,9 @@ class TransactionDetailsDataQuery extends Component {
           event: 'COMPANY_ID',
           allowClear: true,
         },
-        // {
-        //   type: 'list',
-        //   id: 'companyCode',
-        //   colSpan: 6,
-        //   listType: 'company_detail',
-        //   labelKey: 'companyName',
-        //   valueKey: 'id',
-        //   event: 'companyCode',
-        //   single: true,
-        //   listExtraParams: {},
-        //   label: '交易机构' /*交易机构*/,
-        // },
         {
           type: 'input',
-          id: 'taxRate',
+          id: 'batchId',
           placeholder: '请输入',
           label: '批次号',
           colSpan: 6,
@@ -125,10 +98,19 @@ class TransactionDetailsDataQuery extends Component {
           type: 'items',
           id: 'date',
           items: [
-            { type: 'date', id: 'dateFrom', label: '交易日期从' },
-            { type: 'date', id: 'dateTo', label: '交易日期至' },
+            {
+              type: 'date',
+              id: 'transDateFrom',
+              label: '交易日期从',
+              colSpan: 6,
+            },
+            {
+              type: 'date',
+              id: 'transDateTo',
+              label: '交易日期至',
+              colSpan: 6,
+            },
           ],
-          colSpan: 6,
         },
       ],
       // 分页代码1
@@ -152,13 +134,13 @@ class TransactionDetailsDataQuery extends Component {
           title: '来源系统',
           dataIndex: 'sourceSystem',
           align: 'center',
-          width: 200,
+          width: 150,
         },
         {
           title: '批次号',
           dataIndex: 'batchId',
           align: 'center',
-          width: 200,
+          width: 150,
         },
         {
           title: '交易流水号',
@@ -168,15 +150,15 @@ class TransactionDetailsDataQuery extends Component {
         },
         {
           title: '来源数据价税状态',
-          dataIndex: 'sourceDataStatus',
+          dataIndex: 'sourceDataStatusName',
           align: 'center',
-          width: 200,
+          width: 150,
         },
         {
           title: '交易机构',
           dataIndex: 'org',
           align: 'center',
-          width: 200,
+          width: 150,
         },
         {
           title: '责任中心',
@@ -192,51 +174,52 @@ class TransactionDetailsDataQuery extends Component {
         },
         {
           title: '客户名称',
-          dataIndex: 'clientName',
+          dataIndex: 'taxpayerName',
           align: 'center',
-          width: 200,
+          width: 150,
         },
-        // {
-        //   title: '客户纳税人名称',
-        //   dataIndex: 'taxpayerName',
-        //   align: 'center',
-        //   width: 200
-        // },
         {
           title: '交易币种',
           dataIndex: 'currencyCode',
           align: 'center',
-          width: 200,
+          width: 100,
         },
         {
           title: '原币种金额',
           dataIndex: 'amount',
           align: 'center',
-          width: 200,
+          width: 100,
         },
         {
           title: '交易说明',
           dataIndex: 'transDesc',
           align: 'center',
-          width: 200,
+          width: 100,
         },
         {
           title: '数据创建方式',
-          dataIndex: 'dataType',
+          dataIndex: 'dataTypeName',
           align: 'center',
-          width: 200,
+          width: 120,
         },
         {
           title: '价税分离状态',
-          dataIndex: 'processFlag',
+          dataIndex: 'processFlagName',
           align: 'center',
-          width: 200,
+          width: 120,
         },
         {
           title: '交易日期',
           dataIndex: 'transDate',
           align: 'center',
           width: 200,
+          render: recode => {
+            return (
+              <Popover content={moment(recode).format('YYYY-MM-DD')}>
+                {recode ? moment(recode).format('YYYY-MM-DD') : ''}
+              </Popover>
+            );
+          },
         },
       ],
       importSys: [
@@ -258,13 +241,12 @@ class TransactionDetailsDataQuery extends Component {
   componentWillMount() {
     this.getList();
     this.setColumns();
-    this.getColName();
   }
 
   // 获得数据
   getList() {
-    const { pagination, colName } = this.state;
-    const params = {};
+    const { pagination, colName, searchParams } = this.state;
+    const params = { ...searchParams };
     params.page = pagination.current - 1;
     params.size = pagination.pageSize;
     // console.log(this.props.params.id);
@@ -296,10 +278,16 @@ class TransactionDetailsDataQuery extends Component {
           0,
           ...res.data.map(item => {
             return {
-              dataIndex: item.dimensionCode,
+              dataIndex: item.colName.replace('_f', 'F'),
               title: item.dimensionName,
+              key: item.dimensionId,
               width: 100,
-              algin: 'center',
+              align: 'center',
+              render: (value, record) => (
+                <span>
+                  {value}-{record[item.colName.replace('_f', 'F') + 'Name']}
+                </span>
+              ),
             };
           })
         );
@@ -307,17 +295,6 @@ class TransactionDetailsDataQuery extends Component {
       }
     });
   };
-  getColName = () => {
-    Service.getColumns().then(res => {
-      if (res.data && res.data.length) {
-        res.data.map(item => {
-          return (colName = item.colName.replace('_f', 'F'));
-        });
-        this.setState({ colName });
-      }
-    });
-  };
-
   // 每页多少条
   onChangePageSize = (page, pageSize) => {
     const { pagination } = this.state;
@@ -414,15 +391,22 @@ class TransactionDetailsDataQuery extends Component {
     });
   }
   //搜索
-  search = values => {
-    let params = { ...this.state.searchParams, ...values };
+  handleSearch = params => {
+    console.log(params);
+    let pagination = this.state.pagination;
+    pagination.page = 0;
+    pagination.current = 1;
 
-    params.dateFrom && (params.dateFrom = moment(params.dateFrom).format('YYYY-MM-DD'));
-    params.dateTo && (params.dateTo = moment(params.dateTo).format('YYYY-MM-DD'));
-
-    this.setState({ searchParams: params }, () => {
-      this.getList();
-    });
+    this.setState(
+      {
+        searchParams: params,
+        loading: true,
+        pagination,
+      },
+      () => {
+        this.getList();
+      }
+    );
   };
   //重置
   reset = () => {};
@@ -497,7 +481,7 @@ class TransactionDetailsDataQuery extends Component {
       <div>
         <SearchArea
           searchForm={searchForm}
-          submitHandle={this.search}
+          submitHandle={this.handleSearch}
           clearHandle={this.reset}
           maxLength={4}
         />

@@ -49,32 +49,28 @@ class BudgetBalance extends React.Component {
         {
           title: this.$t('budget.balance.params.type'),
           dataIndex: 'type',
-          width: '20%',
-          align: 'center',
+          width: 211,
           render: (text, record, index) => this.renderColumns(index, 'type'),
         },
         //参数
         {
           title: this.$t('budget.balance.params'),
           dataIndex: 'params',
-          width: '35%',
-          align: 'center',
+          width: 367,
           render: (text, record, index) => this.renderColumns(index, 'params'),
         },
         //参数值
         {
           title: this.$t('budget.balance.params.value'),
           dataIndex: 'value',
-          width: '35%',
-          align: 'center',
+          width: 367,
           render: (text, record, index) => this.renderColumns(index, 'value'),
         },
         //操作
         {
           title: this.$t('budget.balance.operate'),
           dataIndex: 'operation',
-          width: '10%',
-          align: 'center',
+          width: 105,
           render: (text, record, index) => (
             <span>
               <Popconfirm
@@ -157,8 +153,6 @@ class BudgetBalance extends React.Component {
           res.data.map(item => yearOptions.push({ key: item, label: item }));
         }
       });
-    // for (let i = nowYear - 20; i <= nowYear + 20; i++)
-    //   yearOptions.push({ label: i, key: i })
     let organizationIdParams = { organizationId: this.state.organizationId };
     let searchForm = [
       //预算版本
@@ -586,7 +580,7 @@ class BudgetBalance extends React.Component {
           .get(
             `${config.mdataUrl}/api/dimension/page/by/cond?setOfBooksId=${
               this.props.company.setOfBooksId
-            }`
+            }&size=9999`
           )
           .then(res => {
             let options = [];
@@ -874,7 +868,9 @@ class BudgetBalance extends React.Component {
               : null,
             periodSummaryFlag: {
               value: (condition.periodSummaryFlag + '').toUpperCase(),
-              label: condition.periodSummaryFlag ? '汇总' : '不汇总',
+              label: condition.periodSummaryFlag
+                ? this.$t('budget.balance.sum')
+                : this.$t('budget.balance.no.sum'),
             },
             quarterLowerLimit: condition.quarterLowerLimit
               ? { value: condition.quarterLowerLimit, label: condition.quarterLowerLimit }
@@ -1086,7 +1082,7 @@ class BudgetBalance extends React.Component {
               .get(
                 `${config.mdataUrl}/api/dimension/page/by/cond?setOfBooksId=${
                   this.props.company.setOfBooksId
-                }`
+                }&size=9999`
               )
               .then(res => {
                 let options = [];

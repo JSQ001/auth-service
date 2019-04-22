@@ -57,7 +57,7 @@ class MyNewPrePayment extends React.Component {
       // PrepaymentList: menuRoute.getRouteItem('me-pre-payment', 'key'),    //预付款列表页面
       model: {},
       fileList: [],
-      userList: [],
+      defaultUser: {},
     };
   }
   componentDidMount() {
@@ -195,12 +195,17 @@ class MyNewPrePayment extends React.Component {
     prePaymentService
       .listUserByTypeId(typeId)
       .then(res => {
-        this.setState({ userList: res.data }, () => {
-          if (res.data && res.data.length) {
-            let user = res.data[0];
-            this.userChange(user);
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
           }
-        });
+          this.setState({ defaultUser });
+          this.userChange(defaultUser);
+        }
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -226,7 +231,7 @@ class MyNewPrePayment extends React.Component {
       fileList,
       departmentId,
       pageLoading,
-      userList,
+      defaultUser,
       isNew,
     } = this.state;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
@@ -252,9 +257,7 @@ class MyNewPrePayment extends React.Component {
                   {getFieldDecorator('user', {
                     rules: [{ required: true, message: '请选择' }],
                     initialValue: isNew
-                      ? userList.length > 0
-                        ? { id: userList[0].id, fullName: userList[0].fullName }
-                        : { id: this.props.user.id, fullName: this.props.user.fullName }
+                      ? { id: defaultUser.id, fullName: defaultUser.fullName }
                       : { id: model.employeeId, fullName: model.employeeName },
                   })(
                     <Lov
@@ -341,7 +344,6 @@ class MyNewPrePayment extends React.Component {
                   {getFieldDecorator('description', {
                     rules: [
                       {
-                        required: true,
                         message: '请输入',
                       },
                     ],

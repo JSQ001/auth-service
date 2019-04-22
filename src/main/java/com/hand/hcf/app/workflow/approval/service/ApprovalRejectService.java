@@ -21,9 +21,6 @@ import com.hand.hcf.app.workflow.service.WorkFlowEventPublishService;
 import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ServiceUnavailableException;
-import com.hand.hcf.app.core.redisLock.annotations.LockedObject;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
-import com.hand.hcf.app.core.redisLock.enums.CredentialTypeEnum;
 import com.hand.hcf.app.core.service.MessageService;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -65,7 +62,7 @@ public class ApprovalRejectService {
      * @param approvalReqDTO
      * @return
      */
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
+   //@SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, credential = CredentialTypeEnum.USER_OID)
     @Transactional(rollbackFor = Exception.class)
     public ApprovalResDTO rejectWorkflow(UUID approverOid, ApprovalReqDTO approvalReqDTO) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();
@@ -122,8 +119,8 @@ public class ApprovalRejectService {
      * @return true可以最终决定驳回单据，false无法最终决定驳回单据
      */
     @Transactional
-    @SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
-    public boolean rejectWorkflow(UUID approverOid, Integer entityType, @LockedObject UUID entityOid, UUID chainApproverOid, String approvalTxt) {
+   //@SyncLock(lockPrefix = SyncLockPrefix.APPROVAL, errorMessage = ExceptionCode.SYS_REQUEST_BE_PROCESSING)
+    public boolean rejectWorkflow(UUID approverOid, Integer entityType,  UUID entityOid, UUID chainApproverOid, String approvalTxt) {
         ApprovalChain approvalChain;
         RuleApprovalNodeDTO ruleApprovalNode = new RuleApprovalNodeDTO();
         if (chainApproverOid != null && !chainApproverOid.equals(approverOid)) {

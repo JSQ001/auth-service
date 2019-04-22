@@ -43,7 +43,6 @@ class NewExpenseType extends React.Component {
     let { languageList } = this.props;
     expenseTypeService.getExpenseTypeDetail(id).then(res => {
       let expenseType = JSON.parse(JSON.stringify(res.data));
-
       expenseTypeService.getFieldsById(id).then(data => {
         expenseType.fields = data.data.sort((a, b) => a.sequence > b.sequence || -1);
         expenseType.fields.map(item => {
@@ -83,11 +82,16 @@ class NewExpenseType extends React.Component {
 
   componentWillMount() {
     let id = this.props.match.params.expenseTypeId;
-
     if (id && id != '0') {
       this.getExpenseType();
     }
   }
+
+  componentWillReceiveProps = nextProps => {
+    if (nextProps.match.params.expenseTypeId !== this.props.match.params.expenseTypeId) {
+      this.getExpenseType('', nextProps.match.params.expenseTypeId);
+    }
+  };
 
   renderTabs() {
     return this.state.tabs.map(tab => {

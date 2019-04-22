@@ -7,7 +7,6 @@ import { routerRedux } from 'dva/router';
 import { Button, Col, Row, Select, Form, Input, message, Card, Affix } from 'antd';
 const FormItem = Form.Item;
 const Option = Select.Option;
-
 import Chooser from 'components/Widget/chooser';
 import UploadFile from 'components/Widget/upload.js';
 import httpFetch from 'share/httpFetch';
@@ -16,32 +15,10 @@ import budgetJournalService from 'containers/budget/budget-journal/budget-journa
 import 'styles/budget/budget-journal/new-budget-journal.scss';
 
 class NewBudgetJournalFrom extends React.Component {
-  // GENERATE(1001)//编辑中
-  // , APPROVAL(1002)//审批中
-  // , WITHDRAW(1003) // 撤回
-  // , APPROVAL_PASS(1004) // 审批通过
-  // , APPROVAL_REJECT(1005) // 审批驳回
-  // , DELETE(1006) //已删除
-  // //对公报销单 2001
-  // //预付款申请单 3001
-  // //付款申请单 4001
-  // //预算日记账 5001
-  // ,POSTED(5001)//复核(过账)
-  // ,BACKLASH_SUBMIT(5002)//:反冲提交
-  // ,BACKLASH_CHECKED(5003)//:反冲审核
-  // //合同  6001
-  // ,HOLD(6001)//暂挂中
-  // ,CANCEL(6002)//已取消
-  // ,FINISH(6003)//已完成
-
-  // // 记录操作历史加的
-  // ,NOT_HOLD(6004) //取消暂挂
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      // budgetJournalDetailPage: menuRoute.getRouteItem('budget-journal-detail', 'key'),    //预算日记账详情
-      // budgetJournalPage: menuRoute.getRouteItem('budget-journal', 'key'),    //预算日记账
       idSelectJournal: false,
       isStructureIn: false,
       defaultValueList: {},
@@ -552,6 +529,8 @@ class NewBudgetJournalFrom extends React.Component {
                         fileNum={5}
                         uploadUrl={`${config.baseUrl}/api/upload/static/attachment`}
                         uploadHandle={this.uploadHandle}
+                        defaultFileList={[]}
+                        defaultOids={[]}
                       />
                     )}
                   </div>

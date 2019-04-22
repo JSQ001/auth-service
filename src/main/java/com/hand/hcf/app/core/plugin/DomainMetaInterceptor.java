@@ -2,19 +2,18 @@ package com.hand.hcf.app.core.plugin;
 
 import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.core.domain.DomainI18n;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.RespCode;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.reflection.ReflectionException;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.invoker.Invoker;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -79,36 +78,34 @@ public class DomainMetaInterceptor implements Interceptor{
 //        }
         MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
         SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
+        Object[] parameters = invocation.getArgs();
+        Object parameter = invocation.getArgs()[1];
         if(SqlCommandType.INSERT.equals(sqlCommandType)){
-            Object[] parameters = invocation.getArgs();
-            if(parameters.length > 1) {
-                Object parameter = invocation.getArgs()[1];
-                if (parameter != null) {
-                    Class classParameter = parameter.getClass();
-                    if (classParameter != null) {
-                        if (DomainI18n.class.isAssignableFrom(classParameter) || parameter instanceof DomainI18n || Domain.class.isAssignableFrom(classParameter) || parameter instanceof Domain) {
-                            // 如果为插入或者更新，需要更新公用字段
-                            Reflector reflector = new Reflector(classParameter);
-                            Invoker versionNumber = reflector.getSetInvoker("versionNumber");
-                            versionNumber.invoke(parameter,new Object[]{1});
-                            try {
-                                Invoker enabledGet = reflector.getGetInvoker("enabled");
-                                Object invoke = enabledGet.invoke(parameter, new Object[]{});
-                                if (invoke == null) {
-                                    reflector.getSetInvoker("enabled").invoke(parameter, new Object[]{Boolean.TRUE});
-                                }
-                            } catch (ReflectionException e) {
-
+            if (parameter != null) {
+                Class classParameter = parameter.getClass();
+                if (classParameter != null) {
+                    if (checkParameterMeta(classParameter,parameter)) {
+                        // 如果为插入或者更新，需要更新公用字段
+                        Reflector reflector = new Reflector(classParameter);
+                        Invoker versionNumber = reflector.getSetInvoker("versionNumber");
+                        versionNumber.invoke(parameter,new Object[]{1});
+                        try {
+                            Invoker enabledGet = reflector.getGetInvoker("enabled");
+                            Object invoke = enabledGet.invoke(parameter, new Object[]{});
+                            if (invoke == null) {
+                                reflector.getSetInvoker("enabled").invoke(parameter, new Object[]{Boolean.TRUE});
                             }
-                            try {
-                                Invoker deletedGet = reflector.getGetInvoker("deleted");
-                                Object invoke = deletedGet.invoke(parameter, new Object[]{});
-                                if (invoke == null) {
-                                    reflector.getSetInvoker("deleted").invoke(parameter, new Object[]{Boolean.FALSE});
-                                }
-                            } catch (ReflectionException e) {
+                        } catch (ReflectionException e) {
 
+                        }
+                        try {
+                            Invoker deletedGet = reflector.getGetInvoker("deleted");
+                            Object invoke = deletedGet.invoke(parameter, new Object[]{});
+                            if (invoke == null) {
+                                reflector.getSetInvoker("deleted").invoke(parameter, new Object[]{Boolean.FALSE});
                             }
+                        } catch (ReflectionException e) {
+
                         }
                     }
                 }
@@ -125,6 +122,16 @@ public class DomainMetaInterceptor implements Interceptor{
     @Override
     public void setProperties(Properties properties) {
 
+    }
+
+    /**
+     * 判断参数属性
+     * @param classParameter
+     * @param parameter
+     * @return
+     */
+    private Boolean checkParameterMeta(Class classParameter, Object parameter){
+        return DomainI18n.class.isAssignableFrom(classParameter) || parameter instanceof DomainI18n || Domain.class.isAssignableFrom(classParameter) || parameter instanceof Domain;
     }
 
     private Long getCurrentUserId() {

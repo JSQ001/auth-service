@@ -396,21 +396,33 @@ export default {
    * 获取合同关联的预付款单
    * @param number="CON_CONTRACT2018031300002"
    * */
-  getPrepaymentHeadByContractNumber(number) {
+  getPrepaymentHeadByContractNumber(number, page, size) {
     return httpFetch.get(
       `${
         config.prePaymentUrl
-      }/api/cash/prepayment/requisitionHead/get/by/contract/number?number=${number}`
+      }/api/cash/prepayment/requisitionHead/get/by/contract/number?number=${number}&page=${page}&size=${size}`
     );
   },
+
+  /**
+   * 获取合同关联的预付款单--根据合同ID查询
+   * */
+  getPrepaymentHeadByContractId(contractId) {
+    return httpFetch.get(
+      `${
+        config.prePaymentUrl
+      }/api/cash/prepayment/requisitionHead/get/by/contract/id?contractId=${contractId}`
+    );
+  },
+
   /**
    * 获取合同关联的报账单
    */
-  getAccountHeadByContract(contractHeaderId) {
+  getAccountHeadByContract(contractHeaderId, page, pageSize) {
     return httpFetch.get(
       `${
         config.contractUrl
-      }/api/contract/document/relations/associate/expReport/${contractHeaderId}`
+      }/api/contract/document/relations/associate/expReport/${contractHeaderId}?page=${page}&size=${pageSize}&contractHeaderId=${contractHeaderId}`
     );
   },
   /**
@@ -433,9 +445,22 @@ export default {
   /**
    * 获取合同关联申请单
    */
-  getApplyHeadByContrcat(contractHeaderId) {
+  getApplyHeadByContrcat(contractHeaderId, page, pageSize) {
     return httpFetch.get(
-      `${config.expenseUrl}/api/expense/application/contract?contractHeaderId=${contractHeaderId}`
+      `${
+        config.expenseUrl
+      }/api/expense/application/contract?contractHeaderId=${contractHeaderId}&page=${page}&size=${pageSize}`
+    );
+  },
+
+  /**
+   * 获取合同关联项目申请单
+   */
+  getProjectHeadByContract(contractHeaderId) {
+    return httpFetch.get(
+      `${
+        config.contractUrl
+      }/api/project/requisition/by/contract/id?contractHeaderId=${contractHeaderId}`
     );
   },
 };

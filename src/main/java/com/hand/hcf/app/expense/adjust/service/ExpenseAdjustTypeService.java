@@ -6,12 +6,14 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.expense.adjust.domain.*;
 import com.hand.hcf.app.expense.adjust.dto.DepartmentOrUserGroupReturnDTO;
 import com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeDTO;
 import com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeRequestDTO;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustTypeAssignCompanyMapper;
 import com.hand.hcf.app.expense.adjust.persistence.ExpenseAdjustTypeMapper;
+import com.hand.hcf.app.expense.adjust.web.dto.ExpAdjustTypeDimensionDTO;
 import com.hand.hcf.app.expense.adjust.web.dto.ExpenseAdjustTypeWebDTO;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
@@ -25,7 +27,6 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
-import com.hand.hcf.app.core.exception.BizException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,8 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
 
     @Autowired
     private ContactControllerImpl contactInterface;
+    @Autowired
+    private ExpAdjustTypeDimensionService adjustTypeDimensionService;
 
     /**
      * 自定义条件查询 费用调整单类型定义(分页)
@@ -790,5 +793,76 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         userCOList = contactCOPage.getRecords();
 
         return userCOList;
+    }
+
+    /**
+     * 根据单据类型id查询单据类型及维度信息
+     * @param expAdjustTypeId
+     * @param isHeader
+     * @return
+     */
+    public ExpAdjustTypeDimensionDTO queryTypeAndDimensionById(Long expAdjustTypeId, boolean isHeader) {
+        ExpenseAdjustType expenseAdjustType = this.selectById(expAdjustTypeId);
+        if (expenseAdjustType == null){
+            throw new BizException(RespCode.EXPENSE_APPLICATION_TYPE_IS_NUTT);
+        }
+        List<ExpAdjustTypeDimension> typeDimensions = adjustTypeDimensionService.selectList(
+                new EntityWrapper<ExpAdjustTypeDimension>()
+                        .eq("exp_adjust_type_id", expenseAdjustType.getId())
+                        .orderBy("sequence", true));
+        ExpAdjustTypeDimensionDTO dto = new ExpAdjustTypeDimensionDTO();
+        BeanUtils.copyProperties(expenseAdjustType, dto);
+        List<ExpenseDimension> dimensions = new ArrayList<>();
+        // 根据维度ID查询相关维度信息
+        if (!CollectionUtils.isEmpty(typeDimensions)){
+            List<Long> ids = typeDimensions.stream().map(ExpAdjustTypeDimension::getDimensionId).collect(Collectors.toList());
+            List<DimensionDetailCO> dimensionDetails = organizationService.listDetailCOByDimensionIdsAndCompany(
+                    OrgInformationUtil.getCurrentCompanyId(),
+                    OrgInformationUtil.getCurrentDepartmentId(),
+                    OrgInformationUtil.getCurrentUserId(),
+                    Boolean.TRUE,
+                    ids);
+            Map<Long, DimensionDetailCO> dimensionDetailMap = dimensionDetails
+                    .stream()
+                    .collect(Collectors.toMap(DimensionDetailCO::getId, e -> e, (k1, k2) -> k1));
+
+            for (int i = 1; i <= typeDimensions.size(); i++) {
+                ExpAdjustTypeDimension typeDimension = typeDimensions.get(i -1);
+                // 查询所有的维度，只有当是位置是头的时候才返回，以便确认 dimension*Id
+                ExpenseDimension expenseDimension = new ExpenseDimension();
+                expenseDimension.setDimensionId(typeDimension.getDimensionId());
+                expenseDimension.setHeaderFlag(typeDimension.getHeaderFlag());
+                expenseDimension.setSequence(typeDimension.getSequence());
+                expenseDimension.setRequiredFlag(typeDimension.getRequiredFlag());
+                if (dimensionDetailMap.containsKey(typeDimension.getDimensionId())) {
+                    DimensionDetailCO detailCO = dimensionDetailMap.get(typeDimension.getDimensionId());
+                    expenseDimension.setDimensionField("dimension" + detailCO.getDimensionSequence() + "Id");
+                    Map<Long, DimensionItemCO> collect = detailCO
+                            .getSubDimensionItemCOS()
+                            .stream()
+                            .collect(Collectors.toMap(DimensionItemCO::getId, e -> e));
+                    expenseDimension.setName(detailCO.getDimensionName());
+                    expenseDimension.setOptions(detailCO.getSubDimensionItemCOS());
+                    if (collect.containsKey(typeDimension.getDefaultValue())) {
+                        DimensionItemCO itemCO = collect.get(typeDimension.getDefaultValue());
+                        expenseDimension.setValue(itemCO.getId());
+                        expenseDimension.setValueName(itemCO.getDimensionItemName());
+                    }else{
+                        expenseDimension.setValue(null);
+                        expenseDimension.setValueName(null);
+                    }
+                }else{
+                    expenseDimension.setOptions(new ArrayList<>());
+                }
+                if (expenseDimension.getHeaderFlag() && isHeader) {
+                    dimensions.add(expenseDimension);
+                }
+                if (!isHeader){
+                    dimensions.add(expenseDimension);
+                }
+            }
+            dto.setDimensions(dimensions);
+        }
+        return dto;
     }
 }

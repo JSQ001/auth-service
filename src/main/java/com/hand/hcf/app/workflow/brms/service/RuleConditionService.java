@@ -76,7 +76,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
     @Transactional(readOnly = true)
     public List<RuleCondition> findByRuleConditionOidIn(List<UUID> ruleConditionOids) {
         if (CollectionUtils.isEmpty(ruleConditionOids)) {
-            return null;
+            return new ArrayList<RuleCondition>();
         }
 
         return selectList(new EntityWrapper<RuleCondition>()
@@ -204,13 +204,22 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
         //对于部门路径数据特殊处理
         handleDepartmentPath(ruleConditionDTO);
         //TODO 公司数据隔离
-        switch (RuleApprovalEnum.parse(ruleConditionDTO.getEntityType())) {
+        RuleApprovalEnum ruleApprovalEnum = RuleApprovalEnum.parse(ruleConditionDTO.getEntityType());
+        switch (ruleApprovalEnum) {
             case CONDITION_RELATION_TYPE_SCENE:
                 break;
+            case CONDITION_RELATION_TYPE_NOTICE:
             case CONDITION_RELATION_TYPE_APPROVER:
-                RuleApprover ruleApprover = ruleApproverService.getRuleApprover(ruleConditionDTO.getEntityOid());
-                if (ruleApprover == null) {
-                    throw new BizException("approvalRule.createRuleCondition", "can not find entity , entityType : " + ruleConditionDTO.getEntityType() + " , entityOid : " + ruleConditionDTO.getEntityOid());
+                RuleApprover ruleApprover = null;
+                UUID ruleApproverOid = null;
+
+                if (RuleApprovalEnum.CONDITION_RELATION_TYPE_APPROVER.getId().equals(ruleApprovalEnum.getId())) {
+                    ruleApprover = ruleApproverService.getRuleApprover(ruleConditionDTO.getEntityOid());
+                    if (ruleApprover == null) {
+                        throw new BizException("approvalRule.createRuleCondition", "can not find entity , entityType : " + ruleConditionDTO.getEntityType() + " , entityOid : " + ruleConditionDTO.getEntityOid());
+                    }
+
+                    ruleApproverOid = ruleApprover.getRuleApproverOid();
                 }
 
                 RuleCondition newRuleCondition = fromDTO(ruleConditionDTO);
@@ -230,7 +239,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
                 ruleConditionRelationService.save(
                         RuleConditionRelation.builder()
                                 .ruleConditionOid(newRuleCondition.getRuleConditionOid())
-                                .entityType(RuleApprovalEnum.CONDITION_RELATION_TYPE_APPROVER.getId())
+                                .entityType(ruleApprovalEnum.getId())
                                 .entityOid(ruleConditionDTO.getEntityOid())
                                 .build()
                 );
@@ -240,7 +249,7 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
                 droolsRuleDetail.setRuleCondition(newRuleCondition);
                 droolsRuleDetail.setDroolsRuleDetailOid(UUID.randomUUID());
                 droolsRuleDetail.setRuleConditionOid(newRuleCondition.getRuleConditionOid());
-                droolsRuleDetail.setRuleConditionApproverOid(ruleApprover.getRuleApproverOid());
+                droolsRuleDetail.setRuleConditionApproverOid(ruleApproverOid);
                 droolsService.save(droolsRuleDetail, ruleApprover, ruleConditionDTO);
 
                 return toDTO(newRuleCondition);
@@ -303,8 +312,14 @@ public class RuleConditionService extends BaseService<RuleConditionMapper, RuleC
         DroolsRuleDetail droolsRuleDetail = droolsService.findByRuleConditionOid(existRuleCondition);
         droolsRuleDetail.setRuleCondition(this.selectById(droolsRuleDetail.getRuleConditionId()));
         RuleConditionRelation ruleConditionRelations = ruleConditionRelationService.findByRuleConditionOid(ruleConditionDTO.getRuleConditionOid());
-        RuleApprover ruleApprover = ruleApproverService.getRuleApprover(ruleConditionRelations.getEntityOid());
+
+        RuleApprover ruleApprover = null;
+        if (RuleApprovalEnum.CONDITION_RELATION_TYPE_APPROVER.equals(ruleConditionRelations.getEntityOid())) {
+            ruleApprover = ruleApproverService.getRuleApprover(ruleConditionRelations.getEntityOid());
+        }
+
         droolsService.save(droolsRuleDetail, ruleApprover, ruleConditionDTO);
+
         StringWriter sw = new StringWriter();
         ObjectMapper mapper = new ObjectMapper();
         try {

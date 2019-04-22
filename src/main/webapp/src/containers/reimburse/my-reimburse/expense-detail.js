@@ -150,35 +150,36 @@ class ExpenseDetail extends React.Component {
     baseService.getCurrencyList(this.props.company.baseCurrency).then(res => {
       this.setState({ currencyList: res.data });
     });
-    let { record, isCopy } = this.props.params;
+    let { record, headerData } = this.props.params;
+    console.log(headerData);
     if (record.id) {
-      let fileList = isCopy
-        ? []
-        : record.attachments.map(item => {
-            return {
-              ...item,
-              uid: item.attachmentOid,
-              name: item.fileName,
-              status: 'done',
-            };
-          });
+      let fileList = [];
       reimburseService.getExpenseDetail(record.id).then(res => {
         let invoiceDetail = [];
-        if (!isCopy) {
-          res.data.invoiceHeads.map(item => {
-            item.invoiceLineList.map(i => {
-              invoiceDetail.push({
-                ...i,
-                invoice: { ...item },
-              });
+        console.log(res.data);
+        record = res.data;
+        fileList = res.data.attachments.map(item => {
+          return {
+            ...item,
+            uid: item.attachmentOid,
+            name: item.fileName,
+            status: 'done',
+          };
+        });
+
+        res.data.invoiceHeads.map(item => {
+          item.invoiceLineList.map(i => {
+            invoiceDetail.push({
+              ...i,
+              invoice: { ...item },
             });
           });
-        }
+        });
+
         this.setState(
           {
-            attachmentOid: isCopy ? [] : record.attachmentOidList,
+            attachmentOid: record.attachmentOidList,
             record,
-            isCopy,
             amount: record.amount,
             taxAmount: record.taxAmount,
             relatedApplication: res.data.applicationModel !== 'NO_NEED',
@@ -191,16 +192,31 @@ class ExpenseDetail extends React.Component {
             fileList,
             invoiceDetail,
           },
-          this.checkShareDetail
+          () => {
+            this.checkShareDetail();
+            let value = {
+              ...record,
+            };
+            record.expenseDate && (value.expenseDate = moment(value.expenseDate));
+            this.props.form.setFieldsValue(value);
+          }
         );
       });
-      !isCopy && this.getShareDetail();
+      this.getShareDetail();
     }
-    this.getTypeConfig();
+    headerData.id && this.getTypeConfig(headerData);
   }
 
-  getTypeConfig = () => {
-    let { headerData, record } = this.props.params;
+  /*  componentWillReceiveProps(nextProps){
+    console.log(nextProps)
+    console.log(this.props)
+
+    this.getTypeConfig(nextProps.params.headerData)
+  }*/
+
+  getTypeConfig = headerData => {
+    let { record } = this.props.params;
+    console.log(headerData);
     let { columns } = this.state;
     let params = {
       expenseReportTypeId: headerData.documentTypeId,
@@ -261,6 +277,7 @@ class ExpenseDetail extends React.Component {
   //获取维值
   getDimValue = (id, dataIndex) => {
     const { columns, headerData } = this.state;
+    console.log(headerData);
     let params = {
       dimensionId: id,
       enabled: true,
@@ -1068,9 +1085,11 @@ class ExpenseDetail extends React.Component {
                           disabled
                           onChange={this.handleSelectExpenseType}
                           url={`${config.expenseUrl}/api/expense/report/type/section/expense/type`}
-                          params={{
-                            expenseReportTypeId: headerData.documentTypeId,
-                          }}
+                          params={
+                            {
+                              //expenseReportTypeId: headerData.documentTypeId,
+                            }
+                          }
                           filter={item => item.enabled}
                         />
                       )}
@@ -1270,19 +1289,17 @@ class ExpenseDetail extends React.Component {
             </Spin>
           </Form>
         )}
-        <SelectApplication
+        {/* <SelectApplication
           visible={showSelectApplication}
-          onCancel={() => {
-            this.setState({ showSelectApplication: false, applicationParams: {} });
-          }}
+          onCancel={() => { this.setState({ showSelectApplication: false, applicationParams: {} }) }}
           onOk={this.handleListOk}
           params={{
-            applicationParams: {
+            applicationParams:{
               expenseTypeId: expenseType.id,
               currencyCode: headerData.currencyCode,
-              expReportHeaderId: headerData.id,
+              expReportHeaderId: headerData.id
             },
-            type: expenseType.id,
+            type: expenseType.id
           }}
           selectedData={selectedApplicationData}
         />
@@ -1303,7 +1320,7 @@ class ExpenseDetail extends React.Component {
           }}
           selectedData={selectedInvoice}
           params={{ createdBy: this.props.user.id, roleType: 'TENANT' }}
-        />
+        />*/}
       </div>
     );
   }

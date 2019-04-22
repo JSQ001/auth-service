@@ -70,6 +70,6 @@ export default {
    * @param {*}
    */
   getDataAuthority() {
-    return httpFetch.get(`${config.baseUrl}/api/system/data/authority/query/all/data/authority`);
+    return httpFetch.get(`${config.mdataUrl}/api/system/data/authority/query/all/data/authority`);
   },
 };

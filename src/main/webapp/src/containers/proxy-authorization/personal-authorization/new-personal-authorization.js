@@ -128,18 +128,16 @@ class NewPersonal extends Component {
         .catch(err => {
           message.error(err.response.message);
         });
-    } else if (documentCategory === '801002') {
-      //预算日记账
+    } else if (documentCategory === '801001') {
+      //报账单
       httpFetch
         .get(
-          `${
-            config.budgetUrl
-          }/api/budget/journals/query/headers/byInput?journalTypeId=&journalCode=&periodStrategy=&status=&page=0&size=1000&journalTypeId=` +
-            this.props.organization.id
+          `${config.expenseUrl}/api/expense/report/type/query?page=0&size=1000&setOfBooksId=` +
+            this.state.setOfBooksId
         )
         .then(({ data }) => {
           data.map(item => {
-            list.push({ value: item.id, label: `${item.journalTypeName}` });
+            list.push({ value: item.id, label: `${item.reportTypeName}` });
           });
           this.setState({ setBooks: list });
         })
@@ -311,18 +309,16 @@ class NewPersonal extends Component {
           .catch(err => {
             message.error(err.response.message);
           });
-      } else if (value === '801002') {
-        //预算日记账
+      } else if (value === '801001') {
+        //报账单
         httpFetch
           .get(
-            `${
-              config.budgetUrl
-            }/api/budget/journals/query/headers/byInput?journalTypeId=&journalCode=&periodStrategy=&status=&page=0&size=1000&journalTypeId=` +
-              this.props.organization.id
+            `${config.expenseUrl}/api/expense/report/type/query?page=0&size=1000&setOfBooksId=` +
+              this.state.setOfBooksId
           )
           .then(({ data }) => {
             data.map(item => {
-              list.push({ value: item.id, label: `${item.journalTypeName}` });
+              list.push({ value: item.id, label: `${item.reportTypeName}` });
             });
             this.setState({ setBooks: list, loading: false });
           })

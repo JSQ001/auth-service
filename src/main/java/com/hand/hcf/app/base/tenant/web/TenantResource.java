@@ -1,6 +1,7 @@
 package com.hand.hcf.app.base.tenant.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.system.service.FrontLocaleService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
 import com.hand.hcf.app.base.tenant.dto.TenantRegisterDTO;
@@ -148,7 +149,7 @@ public class TenantResource {
      * 租户定义条件分页查询    跟员工有关的查询条件fullName,mobile,email查询无效。
      * @param tenantName
      * @param tenantCode
-     * @param fullName
+     * @param userName
      * @param mobile
      * @param email
      * @param login
@@ -169,6 +170,13 @@ public class TenantResource {
         List<TenantDTO> result = tenantService.listTenantDTOsByCondition(tenantName, tenantCode, userName, mobile, email, login,remark,page);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/tenant/query/condition");
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/function/init")
+    public ResponseEntity initFunction(@RequestParam Long tenantId) {
+        tenantService.initContentFunction(tenantId);
+        return ResponseEntity.ok().build();
     }
 
 

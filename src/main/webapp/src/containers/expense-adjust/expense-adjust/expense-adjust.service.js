@@ -234,4 +234,24 @@ export default {
   getCreatedUserList() {
     return httpFetch.get(`${config.expenseUrl}/api/expense/adjust/headers/query/created`);
   },
+  /**
+   * 根据单据类型id获得单据类型和维度信息
+   * @param {*} expAdjustTypeId
+   */
+  getTypeAndDimension(expAdjustTypeId) {
+    return httpFetch.get(
+      `${config.expenseUrl}/api/expense/adjust/types/query/typeAndDimension/${expAdjustTypeId}`
+    );
+  },
+  /**
+   * 根据维度id集合和公司id查询启用的维值
+   * @param {*} diemensionIds
+   * @param {*} companyId
+   */
+  getDimensionItemsByIds(diemensionIds, companyId, unitId, userId) {
+    let url = `${
+      config.mdataUrl
+    }/api/dimension/item/list/By/dimensionIds/companyId/enabled?companyId=${companyId}&unitId=${unitId}&userId=${userId}&enabled=true`;
+    return httpFetch.post(url, diemensionIds);
+  },
 };

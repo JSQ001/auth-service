@@ -3,17 +3,12 @@ package com.hand.hcf.app.base.userRole.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.user.dto.UserRoleListDTO;
 import com.hand.hcf.app.base.user.service.UserService;
-import com.hand.hcf.app.base.userRole.domain.Menu;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
-import com.hand.hcf.app.base.userRole.dto.MenuTreeDTO;
-import com.hand.hcf.app.base.userRole.dto.RoleAssignMenuButtonDTO;
 import com.hand.hcf.app.base.userRole.dto.UserAssignRoleDataAuthority;
 import com.hand.hcf.app.base.userRole.dto.UserRoleDTO;
-import com.hand.hcf.app.base.userRole.service.RoleMenuService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -37,12 +32,10 @@ import java.util.UUID;
 @RequestMapping("/api/userRole")
 public class UserRoleController {
     private final UserRoleService userRoleService;
-    private final RoleMenuService roleMenuService;
     private final UserService userService;
 
-    public UserRoleController(UserRoleService userRoleService, RoleMenuService roleMenuService, UserService userService) {
+    public UserRoleController(UserRoleService userRoleService,   UserService userService) {
         this.userRoleService = userRoleService;
-        this.roleMenuService = roleMenuService;
         this.userService = userService;
     }
 
@@ -377,333 +370,7 @@ public class UserRoleController {
         return new ResponseEntity(list, httpHeaders, HttpStatus.OK);
     }
 
-    /**
-     * @api {GET} /query/user/menuTree 【角色权限】用户获取菜单树
-     * @apiDescription 根据用户ID，取对应所有角色分配的菜单树
-     * 20180827 去掉前端传的userId参数，修改为后端取当前登录用户的菜单树
-     * @apiGroup Auth2Service
-     * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/userRole/query/user/menuTree
-     * @apiSuccessExample {json} 返回报文:
-     * [
-     * {
-     * "children": [],
-     * "menuCode": "M001",
-     * "menuName": "费用管理",
-     * "seqNumber": 1,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": 0,
-     * "menuIcon": null,
-     * "menuUrl": null,
-     * "id": 1029973242290647041
-     * },
-     * {
-     * "children": [
-     * {
-     * "children": [
-     * {
-     * "children": [],
-     * "menuCode": "M91000101",
-     * "menuName": "实习生返校申请",
-     * "seqNumber": 1,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": 1032111883234390017,
-     * "menuIcon": "TIcon001",
-     * "menuUrl": "http://backschool.com",
-     * "id": 1032112529471778817
-     * },
-     * {
-     * "children": [],
-     * "menuCode": "M91000102",
-     * "menuName": "旅游申请",
-     * "seqNumber": 2,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": 1032111883234390017,
-     * "menuIcon": "TIcon002",
-     * "menuUrl": "http://travel.com",
-     * "id": 1032112786570031105
-     * }
-     * ],
-     * "menuCode": "M910001",
-     * "menuName": "人事相关申请",
-     * "seqNumber": 1,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": 1032111556967870466,
-     * "menuIcon": "TIcon",
-     * "menuUrl": null,
-     * "id": 1032111883234390017
-     * },
-     * {
-     * "children": [
-     * {
-     * "children": [],
-     * "menuCode": "M91000201",
-     * "menuName": "笔记本更换申请",
-     * "seqNumber": 1,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": 1032113214791692290,
-     * "menuIcon": "TIcon3",
-     * "menuUrl": "http://test3.com",
-     * "id": 1032113411911397378
-     * },
-     * {
-     * "children": [],
-     * "menuCode": "M91000202",
-     * "menuName": "笔记本购买申请",
-     * "seqNumber": 2,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": 1032113214791692290,
-     * "menuIcon": "TIcon4",
-     * "menuUrl": "http://test4.com",
-     * "id": 1032113517226176513
-     * }
-     * ],
-     * "menuCode": "M910002",
-     * "menuName": "笔记本相关申请",
-     * "seqNumber": 2,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": 1032111556967870466,
-     * "menuIcon": "TIcon2",
-     * "menuUrl": null,
-     * "id": 1032113214791692290
-     * }
-     * ],
-     * "menuCode": "M9100",
-     * "menuName": "个人申请",
-     * "seqNumber": 1,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": 0,
-     * "menuIcon": "NEW",
-     * "menuUrl": null,
-     * "id": 1032111556967870466
-     * }
-     * ]
-     */
-    @GetMapping("/query/user/menuTree")
-    public ResponseEntity<List<MenuTreeDTO>> getMenuTreeByUserId() throws URISyntaxException {
-        //修改为取当前登录用户的菜单
-        Long userId = LoginInformationUtil.getCurrentUserId();
-        List<MenuTreeDTO> list = roleMenuService.getMenuTreeByUserId(userId);
-        return new ResponseEntity(list, HttpStatus.OK);
-    }
 
-    /**
-     * @api {GET} /query/user/menuList 【角色权限】用户获取菜单列表【登录】
-     * @apiDescription 根据当前登录用户，取对应所有角色分配的菜单列表，用于登录获取菜单
-     * @apiGroup Auth2Service
-     * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/userRole/query/user/menuList
-     * @apiSuccessExample {json} 返回报文:
-     * [
-     * {
-     * "id": "1032635715402903554",
-     * "enabled": null,
-     * "deleted": null,
-     * "createdDate": null,
-     * "createdBy": null,
-     * "lastUpdatedDate": null,
-     * "lastUpdatedBy": null,
-     * "versionNumber": null,
-     * "menuCode": "setting",
-     * "menuName": "设置",
-     * "seqNumber": 0,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": "0",
-     * "menuIcon": "setting",
-     * "menuUrl": "demo",
-     * "hasChildCatalog": null
-     * },
-     * {
-     * "id": "1032827031878868993",
-     * "enabled": null,
-     * "deleted": null,
-     * "createdDate": null,
-     * "createdBy": null,
-     * "lastUpdatedDate": null,
-     * "lastUpdatedBy": null,
-     * "versionNumber": null,
-     * "menuCode": "1",
-     * "menuName": "1",
-     * "seqNumber": 0,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": "1032635715402903554",
-     * "menuIcon": "dot-chart",
-     * "menuUrl": "demo",
-     * "hasChildCatalog": null
-     * },
-     * {
-     * "id": "1032642040533954562",
-     * "enabled": null,
-     * "deleted": null,
-     * "createdDate": null,
-     * "createdBy": null,
-     * "lastUpdatedDate": null,
-     * "lastUpdatedBy": null,
-     * "versionNumber": null,
-     * "menuCode": "role",
-     * "menuName": "人员管理",
-     * "seqNumber": 0,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": "1032635715402903554",
-     * "menuIcon": "user",
-     * "menuUrl": "demo",
-     * "hasChildCatalog": null
-     * },
-     * {
-     * "id": "1032826975104770050",
-     * "enabled": null,
-     * "deleted": null,
-     * "createdDate": null,
-     * "createdBy": null,
-     * "lastUpdatedDate": null,
-     * "lastUpdatedBy": null,
-     * "versionNumber": null,
-     * "menuCode": "user",
-     * "menuName": "user",
-     * "seqNumber": 0,
-     * "menuTypeEnum": 1001,
-     * "parentMenuId": "1032642040533954562",
-     * "menuIcon": "bars",
-     * "menuUrl": "demo",
-     * "hasChildCatalog": null
-     * },
-     * {
-     * "id": "1032667046353645570",
-     * "enabled": null,
-     * "deleted": null,
-     * "createdDate": null,
-     * "createdBy": null,
-     * "lastUpdatedDate": null,
-     * "lastUpdatedBy": null,
-     * "versionNumber": null,
-     * "menuCode": "ceshi",
-     * "menuName": "测试",
-     * "seqNumber": 0,
-     * "menuTypeEnum": 1000,
-     * "parentMenuId": "1032642040533954562",
-     * "menuIcon": "book",
-     * "menuUrl": "demo",
-     * "hasChildCatalog": null
-     * }
-     * ]
-     */
-    @GetMapping("/query/user/menuList")
-    public ResponseEntity<List<Menu>> getMenuListByLoginUserId() throws URISyntaxException {
-        Long userId = LoginInformationUtil.getCurrentUserId();
-        List<Menu> list = roleMenuService.getMenuListByUserId(userId);
-        return new ResponseEntity(list, HttpStatus.OK);
-    }
-
-    /**
-     * @api {GET} /query/user/menuAndButtonList 【角色权限】菜单查询所有及其按钮
-     * @apiDescription 角色点开分配菜单的按钮，显示所有菜单及菜单按钮的
-     * 个人申请 -》笔记本相关申请-》笔记本购买申请 (common.save，common.delete,common.query 三个按钮)
-       人事申请 -》我的个人信息 (common.save，common.delete,common.query 三个按钮)
-     * @apiGroup Auth2Service
-     * @apiParamExample {json} 请求报文
-     * http://localhost:9082/api/userRole/query/user/menuAndButtonList
-     * @apiSuccess (返回参数) {String} type 类型：DIRECTORY为菜单目录，BUTTON为菜单按钮
-     * @apiSuccess (返回参数) {Long} id 当type为DIRECTORY时，表示菜单的ID，为BUTTON表示菜单按钮ID
-     * @apiSuccess (返回参数) {String} code 当type为DIRECTORY时，表示菜单的代码，为BUTTON表示菜单按钮代码
-     * @apiSuccess (返回参数) {String} name 当type为DIRECTORY时，表示菜单的名称，为BUTTON表示菜单按钮名称
-     * @apiSuccess (返回参数) {String} parentId 当type为DIRECTORY时，表示菜单的上级菜单ID，为BUTTON表示菜单按钮对应的菜单ID
-     * @apiSuccessExample {json} 返回报文:
-     * [
-     * {
-     * "id": "1035532779615899650",
-     * "code": "M1000",
-     * "name": "个人申请",
-     * "parentId": "0",
-     * "type": "DIRECTORY",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035535048168132610",
-     * "code": "M1001",
-     * "name": "人事申请",
-     * "parentId": "0",
-     * "type": "DIRECTORY",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035550093967077377",
-     * "code": "M1002",
-     * "name": "笔记本相关申请",
-     * "parentId": "1035532779615899650",
-     * "type": "DIRECTORY",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035550274938712065",
-     * "code": "M100201",
-     * "name": "笔记本购买申请",
-     * "parentId": "1035550093967077377",
-     * "type": "DIRECTORY",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035541525687676929",
-     * "code": "M100101",
-     * "name": "我的个人信息",
-     * "parentId": "1035535048168132610",
-     * "type": "DIRECTORY",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035550277669203970",
-     * "code": "100201-query",
-     * "name": "common.query",
-     * "parentId": "1035550274938712065",
-     * "type": "BUTTON",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035550277824393218",
-     * "code": "100201-save",
-     * "name": "common.save",
-     * "parentId": "1035550274938712065",
-     * "type": "BUTTON",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035550277937639425",
-     * "code": "100201-delete",
-     * "name": "common.delete",
-     * "parentId": "1035550274938712065",
-     * "type": "BUTTON",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035541549842673665",
-     * "code": "100101-query",
-     * "name": "common.query",
-     * "parentId": "1035541525687676929",
-     * "type": "BUTTON",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035541551004495874",
-     * "code": "100101-save",
-     * "name": "common.save",
-     * "parentId": "1035541525687676929",
-     * "type": "BUTTON",
-     * "flag": null
-     * },
-     * {
-     * "id": "1035541551927242753",
-     * "code": "100101-delete",
-     * "name": "common.delete",
-     * "parentId": "1035541525687676929",
-     * "type": "BUTTON",
-     * "flag": null
-     * }
-     * ]
-     */
-    @GetMapping("/query/user/menuAndButtonList")
-    public ResponseEntity<List<RoleAssignMenuButtonDTO>> getAllMenuAndButton() throws URISyntaxException {
-        List<RoleAssignMenuButtonDTO> list = roleMenuService.getAllMenuAndButton();
-        return new ResponseEntity(list, HttpStatus.OK);
-    }
 
     /**
      * @deprecated 不调用该接口，调用下面getUserList。
@@ -1168,5 +835,6 @@ public class UserRoleController {
     public ResponseEntity updateUserRole(@RequestBody List<UserRole> list) {
         return ResponseEntity.ok(userRoleService.updateUserRoleBatch(list));
     }
+
 
 }

@@ -3,7 +3,6 @@ package com.hand.hcf.app.workflow.approval.dto;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
-import lombok.Data;
 
 import java.util.UUID;
 
@@ -12,7 +11,6 @@ import java.util.UUID;
  * @author mh.z
  * @date 2019/04/07
  */
-@Data
 public class WorkflowNode {
     private RuleApprovalNode ruleApprovalNode;
     /** 实例 */

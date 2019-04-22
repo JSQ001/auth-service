@@ -16,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,8 +46,6 @@ public class RefactorCompanyResource {
     @Autowired
     private CompanyService companyService;
 
-    @Autowired
-    RedisTemplate redisTemplate;
 
     //租户下创建公司接口
     @RequestMapping(value = "/tenant/company/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

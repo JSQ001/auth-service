@@ -22,7 +22,6 @@ class UploadFile extends React.Component {
       Oids: props.defaultOids || [],
       defaultListTag: true,
     };
-    console.log(props.defaultOids);
   }
 
   handleData = () => {

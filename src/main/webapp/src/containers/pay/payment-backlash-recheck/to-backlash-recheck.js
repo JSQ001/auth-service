@@ -1,31 +1,14 @@
 import React from 'react';
-import {
-  Form,
-  Button,
-  Input,
-  Card,
-  Affix,
-  Row,
-  Col,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
-  Tag,
-  Modal,
-} from 'antd';
+import { Form, Button, Input, Row, Col, Select, message, Modal } from 'antd';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const { TextArea } = Input;
 import backlashService from './pay-backlash-recheck.service';
-import config from 'config';
 import ApproveHistory from 'widget/Template/approve-history-work-flow';
 import { Alert } from 'antd';
 import PayDetail from 'containers/pay/pay-workbench/payment-detail'; //支付详情
 import PrepaymentDetail from 'containers/pre-payment/my-pre-payment/pre-payment-detail'; //预付款详情
 import Upload from 'widget/upload-button';
-import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
 
 class PayResverCheckDetail extends React.Component {
   constructor(props) {

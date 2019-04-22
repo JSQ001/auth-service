@@ -17,8 +17,12 @@ export default {
   },
 
   // 获取价税分离
-  pageInvoicingSiteByCond() {
-    return httpFetch.get(`${config.taxUrl}/api/tax/vat/separate/rule/query/condition`);
+  pageInvoicingSiteByCond(params) {
+    return httpFetch.get(`${config.taxUrl}/api/tax/vat/separate/rule/query/condition`, params);
+  },
+  // 根据id查询单条数据
+  pageById(id) {
+    return httpFetch.get(`${config.taxUrl}/api/tax/vat/separate/rule/${id}`);
   },
   // 获取动态列
   getColumns() {
@@ -39,25 +43,16 @@ export default {
     );
   },
 
-  // 导出自定义银行：接口测试ok
+  // 导出价税分离规则：接口测试ok
   exportSelfTax(result, ps, exportParams) {
-    let url = `${config.taxUrl}/api/tax/taxRegister/export/data?page=${ps.page}&size=${ps.size}`;
+    let url = `${config.taxUrl}/api/tax/vat/separate/rule/export/data?page=${ps.page}&size=${
+      ps.size
+    }`;
     // eslint-disable-next-line guard-for-in
     for (const searchName in exportParams) {
       url += exportParams[searchName] ? `&${searchName}=${exportParams[searchName]}` : '';
     }
-    return new Promise((resolve, reject) => {
-      httpFetch
-        .post(url, result, {}, { responseType: 'arraybuffer' })
-        .then(res => {
-          resolve(res);
-        })
-        .catch(err => {
-          // eslint-disable-next-line no-undef
-          errorMessage(err.response);
-          reject(err);
-        });
-    });
+    return httpFetch.post(url, result, {}, { responseType: 'arraybuffer' });
   },
   /**
    * 确认导入

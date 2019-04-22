@@ -2,7 +2,6 @@
  * Created by 13576 on 2018/1/25.
  */
 import React from 'react';
-import { connect } from 'dva';
 import { Collapse, Timeline, Spin, Row, Col } from 'antd';
 import { messages } from 'utils/utils';
 import PropTypes from 'prop-types';

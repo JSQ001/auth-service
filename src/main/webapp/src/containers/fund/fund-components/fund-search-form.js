@@ -1,23 +1,10 @@
 import React from 'react';
-import {
-  Form,
-  Input,
-  Select,
-  message,
-  Row,
-  Col,
-  Button,
-  Checkbox,
-  Icon,
-  DatePicker,
-  Modal,
-  Table,
-} from 'antd';
+import { Form, Input, Select, message, Row, Col, Button, Checkbox, Icon, DatePicker } from 'antd';
+import Lov from 'widget/Template/lov';
 import { messages } from 'utils/utils';
 import Chooser from 'widget/chooser';
 import { connect } from 'dva';
 import styles from './components.scss';
-import service from './service';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -29,38 +16,9 @@ class FundSearchForm extends React.Component {
       expand: false, // 是否展开
       intervalFrom: '',
       intervalTo: '',
-      visible: false, // 是否展示model
-      modelLoading: false, // model框table数据loading
-      selectAccountNumberObj: '',
       accountNumberObj: '',
       startDate: '',
       endDate: '',
-      pagination: {
-        total: 0,
-        page: 0,
-        pageSize: 10,
-        current: 1,
-      },
-      bankAccountColumns: [
-        {
-          title: '银行账号',
-          dataIndex: 'accountNumber',
-          width: '15%',
-          align: 'center',
-        },
-        {
-          title: '账户名称',
-          dataIndex: 'accountName',
-          width: '15%',
-          align: 'center',
-        },
-        {
-          title: '币种',
-          dataIndex: 'currencyCode',
-          width: '15%',
-          align: 'center',
-        },
-      ],
     };
   }
 
@@ -85,91 +43,6 @@ class FundSearchForm extends React.Component {
 
   getLastKey = key => {
     return key.split('.')[key.split('.').length - 1];
-  };
-
-  /**
-   * 获取开户银行列表
-   */
-  getBackList = () => {
-    const {
-      form: { getFieldValue },
-    } = this.props;
-    const { pagination } = this.state;
-    const accountNumber = getFieldValue('modalAccount');
-    this.setState({
-      modelLoading: true,
-    });
-    service
-      .getAccountOpenMaintenanceList(pagination.page, pagination.pageSize, accountNumber)
-      .then(response => {
-        this.setState({
-          bankList: response.data,
-          modelLoading: false,
-          pagination: {
-            ...pagination,
-            total: Number(response.headers['x-total-count'])
-              ? Number(response.headers['x-total-count'])
-              : 0,
-            current: pagination.page + 1,
-            pageSize: pagination.pageSize,
-            onChange: this.onChangePagerBank,
-            onShowSizeChange: this.onShowSizeChange,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              this.$t('common.show.total', { range0: `${range[0]}`, range1: `${range[1]}`, total }),
-          },
-        });
-      });
-  };
-
-  /**
-   * 分页点击
-   */
-  onChangePagerBank = pagination => {
-    const temp = {};
-    temp.page = pagination.current - 1;
-    temp.current = pagination.current;
-    temp.pageSize = pagination.pageSize;
-    this.setState(
-      {
-        pagination: temp,
-      },
-      () => {
-        this.getBackList();
-      }
-    );
-  };
-
-  /**
-   * 改变每页显示的条数
-   */
-  onShowSizeChange = (current, pageSize) => {
-    const temp = {};
-    temp.page = current - 1;
-    temp.pageSize = pageSize;
-    this.setState(
-      {
-        pagination: temp,
-      },
-      () => {
-        this.getBackList();
-      }
-    );
-  };
-
-  modalSearch = () => {
-    const {
-      form: { getFieldValue },
-    } = this.props;
-    this.getBackList(getFieldValue('modalAccount'));
-  };
-
-  modalSearchClear = () => {
-    const {
-      form: { resetFields },
-    } = this.props;
-    resetFields('modalAccount');
   };
 
   /**
@@ -233,16 +106,19 @@ class FundSearchForm extends React.Component {
    */
   getValueList = async item => {
     let options = {};
-    await this.getSystemValueList(item.valueListCode)
-      .then(res => {
-        if (res.data.values.length > 0) {
-          options = res.data.values;
-        }
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-      });
-
+    if (item.customizeOptions && item.customizeOptions.length > 0) {
+      options = item.customizeOptions;
+    } else {
+      await this.getSystemValueList(item.valueListCode)
+        .then(res => {
+          if (res.data.values.length > 0) {
+            options = res.data.values;
+          }
+        })
+        .catch(err => {
+          message.error(err.response.data.message);
+        });
+    }
     let { searchForm } = this.state;
     searchForm = searchForm.map(searchItem => {
       if (searchItem.id === item.id) {
@@ -262,6 +138,7 @@ class FundSearchForm extends React.Component {
     const {
       form: { getFieldDecorator },
       maxLength,
+      user,
     } = this.props;
     const { searchForm, expand, accountNumberObj, startDate, endDate } = this.state;
     const count = expand ? searchForm.length : maxLength;
@@ -271,6 +148,14 @@ class FundSearchForm extends React.Component {
       let itemInitialValue = '';
       if (item.listType === 'paymentAccount') {
         itemInitialValue = accountNumberObj.accountNumber;
+      }
+      if (item.isNeedUserInitialValue) {
+        itemInitialValue = [
+          {
+            userId: user.id,
+            userName: user.userName,
+          },
+        ];
       }
       if (item.type === 'intervalDate') {
         children.push(
@@ -312,7 +197,7 @@ class FundSearchForm extends React.Component {
                         this.setState({
                           endDate: date,
                         });
-                        if (startDate) {
+                        if (startDate && date) {
                           if (new Date(date) < new Date(startDate)) {
                             message.error('结束日期小于结束日期');
                           }
@@ -360,7 +245,7 @@ class FundSearchForm extends React.Component {
    *  渲染FormItem里面的内容
    */
   renderFormItem = item => {
-    const { intervalFrom, intervalTo, accountNumberObj } = this.state;
+    const { intervalFrom, intervalTo } = this.state;
     switch (item.type) {
       // 普通输入框
       case 'input': {
@@ -377,17 +262,24 @@ class FundSearchForm extends React.Component {
       case 'modalList': {
         if (item.listType === 'paymentAccount') {
           return (
-            <Input
-              allowClear
-              placeholder={item.placeholder || messages('common.please.select')}
-              disabled={item.disabled}
-              setfieldsvalue={accountNumberObj.accountNumber}
-              onClick={() => {
-                this.getBackList();
-                this.setState({
-                  visible: true,
-                });
-              }}
+            // <Input
+            //   allowClear
+            //   placeholder={item.placeholder || messages('common.please.select')}
+            //   disabled={item.disabled}
+            //   setfieldsvalue={accountNumberObj.accountNumber}
+            //   onClick={() => {
+            //     this.getBackList();
+            //     this.setState({
+            //       visible: true,
+            //     });
+            //   }}
+            // />
+            <Lov
+              code="bankaccount_choose"
+              valueKey="id"
+              labelKey="accountNumber"
+              single
+              onChange={this.onChange}
             />
           );
         } else {
@@ -411,7 +303,7 @@ class FundSearchForm extends React.Component {
       case 'intervalInput': {
         return (
           <Row>
-            <Col span={9}>
+            <Col span={10}>
               <Input
                 allowClear
                 placeholder={item.placeholder || messages('common.please.enter')}
@@ -424,7 +316,7 @@ class FundSearchForm extends React.Component {
             <Col span={4} style={{ textAlign: 'center' }}>
               <span style={{ lineHeight: 'normal' }}>至</span>
             </Col>
-            <Col span={9}>
+            <Col span={10}>
               <Input
                 allowClear
                 placeholder={item.placeholder || messages('common.please.enter')}
@@ -520,49 +412,9 @@ class FundSearchForm extends React.Component {
     }
   };
 
-  /**
-   * model确定
-   */
-  onOk = () => {
-    const { selectAccountNumberObj } = this.state;
-    this.setState({
-      visible: false,
-      accountNumberObj: selectAccountNumberObj,
-    });
-  };
-
-  /**
-   * model框取消
-   */
-  onCancel = () => {
-    this.setState({
-      visible: false,
-    });
-  };
-
   render() {
-    const { expand, bankAccountColumns, bankList, modelLoading, visible, pagination } = this.state;
-    const {
-      form: { getFieldDecorator },
-      maxLength,
-    } = this.props;
-    const accountFormItemLayout = {
-      labelCol: {
-        span: 3,
-      },
-      wrapperCol: {
-        span: 4,
-      },
-    };
-    const rowRadioSelection = {
-      type: 'radio',
-      columnTitle: '选择',
-      onSelect: record => {
-        this.setState({
-          selectAccountNumberObj: record,
-        });
-      },
-    };
+    const { expand } = this.state;
+    const { maxLength } = this.props;
     return (
       <div>
         <Form>
@@ -586,39 +438,6 @@ class FundSearchForm extends React.Component {
             </Button>
           </Col>
         </Form>
-        <Modal
-          title="银行账号选择"
-          visible={visible}
-          onOk={this.onOk}
-          onCancel={this.onCancel}
-          width="50%"
-        >
-          {/* 搜索区域 */}
-          <Form style={{ paddingBottom: '20px' }}>
-            <Form.Item label="银行账号" {...accountFormItemLayout}>
-              {getFieldDecorator('modalAccount', {
-                initialValue: '',
-              })(<Input autoComplete="off" onPressEnter={this.modalSearch} />)}
-            </Form.Item>
-            <div style={{ position: 'relative', left: '80%' }}>
-              <Button type="primary" onClick={this.modalSearch}>
-                {this.$t('搜索')}
-              </Button>&nbsp;&nbsp;&nbsp;
-              <Button onClick={this.modalSearchClear}>重置</Button>
-            </div>
-          </Form>
-          <Table
-            rowKey={record => record.id}
-            onChange={this.onChangePagerBank}
-            pagination={pagination}
-            loading={modelLoading}
-            rowSelection={rowRadioSelection}
-            columns={bankAccountColumns}
-            dataSource={bankList}
-            bordered
-            size="middle"
-          />
-        </Modal>
       </div>
     );
   }
@@ -635,7 +454,8 @@ export default connect(map)(Form.create()(FundSearchForm));
 
 /**
  * searchForm: [
- *  //值列表
+ *  //值列表两种情况
+ *  1.从后台获取
         {
           colSpan: 6,
           type: 'valueList',
@@ -644,7 +464,19 @@ export default connect(map)(Form.create()(FundSearchForm));
           options: [],
           valueListCode: 'ZJ_SOURCE',
         },
-    // modal弹框    
+    2.从前台自定义
+        {
+          colSpan: 6,
+          type: 'valueList',
+          label: '测试',
+          id: 'test',
+          options: [],
+          customizeOptions: [
+            { value: 1, name: '测试1' }, { value: 2, name: '测试2' }
+          ],
+          valueListCode: '',
+        },
+    // modal弹框
         {
           colSpan: 6,
           type: 'modalList',
@@ -656,28 +488,28 @@ export default connect(map)(Form.create()(FundSearchForm));
           valueKey: 'id',
           single: true,
         },
-    // 普通输入框    
+    // 普通输入框
         {
           colSpan: 6,
           type: 'input',
           label: '收款账户',
           id: 'gatherAccountName',
         },
-    // 区间输入    
+    // 区间输入
         {
           colSpan: 6,
           type: 'intervalInput',
           label: '信用分区间',
           id: 'creditScore',
         },
-    // checbox    
+    // checbox
         {
           colSpan: 6,
           type: 'checkBox',
           label: '包含子公司',
           id: 'childCompanyFlag',
         },
-    // 日期区间    
+    // 日期区间
         {
           colSpan: 6,
           type: 'intervalDate',
@@ -687,7 +519,7 @@ export default connect(map)(Form.create()(FundSearchForm));
           tolabel: '日期到',
           toId: 'dateTo',
         },
-    // 银行账号    
+    // 银行账号
         {
           colSpan: 6,
           type: 'modalList',

@@ -98,7 +98,6 @@ class BudgetControlRulesDetail extends React.Component {
         {
           /*规则参数类型*/
           title: this.$t({ id: 'budget.ruleParameterType' }),
-          align: 'center',
           key: 'ruleParameterTypeDescription',
           dataIndex: 'ruleParameterTypeDescription',
           render: recode => {
@@ -108,35 +107,30 @@ class BudgetControlRulesDetail extends React.Component {
         {
           /*规则参数*/
           title: this.$t({ id: 'budget.ruleParameter' }),
-          align: 'center',
           key: 'ruleParameterDescription',
           dataIndex: 'ruleParameterDescription',
         },
         {
           /*取值方式*/
           title: this.$t({ id: 'budget.filtrateMethod' }),
-          align: 'center',
           key: 'filtrateMethodDescription',
           dataIndex: 'filtrateMethodDescription',
         },
         {
           /*取值范围*/
           title: this.$t({ id: 'budget.summaryOrDetail' }),
-          align: 'center',
           key: 'summaryOrDetailDescription',
           dataIndex: 'summaryOrDetailDescription',
         },
         {
           /*下限值*/
           title: this.$t({ id: 'budget.parameterLowerLimit' }),
-          align: 'center',
           key: 'parameterLowerLimit',
           dataIndex: 'parameterLowerLimit',
         },
         {
           /*上限值*/
           title: this.$t({ id: 'budget.parameterUpperLimit' }),
-          align: 'center',
           key: 'parameterUpperLimit',
           dataIndex: 'parameterUpperLimit',
         },

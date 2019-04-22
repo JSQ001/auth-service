@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { message, Icon, Tabs, Button, Input, Popover } from 'antd';
 import config from 'config';
 import baseService from 'share/base.service';
+import httpFetch from 'share/httpFetch';
 import service from './responsibility-service';
 import CustomTable from 'components/Widget/custom-table';
 import SlideFrame from 'widget/slide-frame';
@@ -129,7 +130,9 @@ class ResponsibilityCenter extends Component {
 
   // 获取帐套
   getSetOfBookList = () => {
-    baseService.getSetOfBooksByTenant().then(res => {
+    const { departmentId } = this.state;
+    let url = `${config.mdataUrl}/api/setOfBooks/by/department?departmentId=${departmentId}`;
+    httpFetch.get(url).then(res => {
       let list = [];
       res.data.map(item => {
         list.push({ value: item.id, label: `${item.setOfBooksCode}-${item.setOfBooksName}` });

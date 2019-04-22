@@ -371,9 +371,7 @@ public class OrganizationService {
      * @return 参数值
      */
     public String getParameterValue(Long companyId, Long sobId, String parameterCode){
-        if(ParameterConstant.EXP_TAX_DIST.equals(parameterCode)){
-            return "TAX_IN";
-        }
+        
         //jiu.zhao 修改三方接口 20190401
         //return parameterClient.getParameterValueByParameterCode(parameterCode, sobId, companyId);
         return parameterClient.getParameterValueByParameterCode(parameterCode, LoginInformationUtil.getCurrentTenantId(), sobId, companyId);
@@ -656,5 +654,16 @@ public class OrganizationService {
      */
     public List<LocationDTO> listCityByIds(List<Long> placeList) {
         return locationInterface.listCityByIds(placeList,"standard");
+    }
+
+    public LocationLevelCO getLocationLevelByLocationIdOrLevelIdOrLevelCode(
+            Long locationId,Long levelId,String levelCode) {
+        return locationInterface.getLocationLevelByLocationIdOrLevelIdOrLevelCode(locationId, levelId, levelCode);
+    }
+
+    public Page<ResponsibilityCenterCO> pageDepartmentResCenterByCond(Long departmentId, Long companyId,Page page) {
+        //jiu.zhao 修改三方接口
+        //return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page);
+        return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page.getCurrent() - 1, page.getSize());
     }
 }

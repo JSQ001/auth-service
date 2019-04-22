@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Form, Input, Select, Button, message, Spin } from 'antd';
 import Chooser from 'widget/chooser';
-import Lov from 'widget/Template/lov';
 
 import service from './service';
 import appService from '../app/app.service';

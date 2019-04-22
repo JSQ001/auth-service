@@ -1,7 +1,7 @@
 /*eslint-disable*/
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Form, Input, Row, Col, Button, Select, message, Affix } from 'antd';
+import { Form, Input, Row, Col, Button, Select, message, InputNumber } from 'antd';
 import Chooser from 'widget/chooser';
 import moment from 'moment';
 import config from 'config';
@@ -13,13 +13,12 @@ import service from './service';
 const bottomStyle = {
   position: 'fixed',
   bottom: 0,
+  marginLeft: '-35px',
   width: '100%',
   height: '50px',
-  boxShadow: '0px -5px 5px rgba(0, 0, 0, 0.15)',
+  boxShadow: '0px -5px 5px rgba(0, 0, 0, 0.067)',
   background: '#fff',
   lineHeight: '50px',
-  paddingLeft: '20px',
-  zIndex: 1,
 };
 
 class expInputTaxNew extends Component {
@@ -45,21 +44,22 @@ class expInputTaxNew extends Component {
   }
 
   componentDidMount() {
-    if (!this.state.isNew && this.props.params.id) {
-      let fileList = this.props.params.attachments
-        ? this.props.params.attachments.map(o => ({
-            ...o,
-            uid: o.attachmentOid,
-            name: o.fileName,
-            status: 'done',
-          }))
-        : [];
-
-      this.setState({
-        uploadOIDs: fileList.map(o => o.uid),
-        fileList,
+    if (this.props.match.params.id) {
+      service.getBusinessReceiptHeadValue(this.props.match.params.id).then(res => {
+        let fileList = res.data.attachments
+          ? res.data.attachments.map(o => ({
+              ...o,
+              uid: o.attachmentOid,
+              name: o.fileName,
+              status: 'done',
+            }))
+          : [];
+        this.setState({
+          uploadOIDs: fileList.map(o => o.uid),
+          fileList,
+          headerData: res.data,
+        });
       });
-      console.log(this);
     }
     // 获取币种列表
     const { company } = this.props;
@@ -117,38 +117,39 @@ class expInputTaxNew extends Component {
     const { form } = this.props;
     form.validateFields((err, values) => {
       if (err) return;
+      const { rate, uploadOIDs, headerData } = this.state;
       this.setState({ loading: true });
-      const def = this.props;
-      const { rate, uploadOIDs } = this.state;
       params = {
-        id: def.params.id,
-        tenantId: def.user.tenantId,
-        setOfBooksId: def.company.setOfBooksId,
-        employeeId: def.user.id,
-        companyId: def.company.id,
+        id: headerData ? headerData.id : '',
+        tenantId: this.props.user.tenantId,
+        setOfBooksId: this.props.company.setOfBooksId,
+        employeeId: this.props.user.id,
+        companyId: this.props.company.id,
         departmentId: values.department[0].departmentId,
         transferDate: moment().format(),
         transferType: values.transferType.key,
-        transferProportion: values.transferProportion || 1,
+        transferProportion: values.transferProportion / 100 || 1,
         useType: values.useType.key,
         currencyCode: values.currency ? values.currency.key : '',
         rate,
         description: values.description,
         attachmentOid: uploadOIDs && uploadOIDs.join(),
       };
-    });
-    service
-      .headerInsertOrUpdate(params)
-      .then(res => {
-        message.success(this.$t('common.operate.success'));
-        this.setState({ loading: false }, () => {
-          this.handleNextPage(res.data.id, params.transferType, params.currencyCode);
+      console.log(params);
+      service
+        .headerInsertOrUpdate(params)
+        .then(res => {
+          message.success(this.$t('common.operate.success'));
+          this.setState({ loading: false }, () => {
+            this.handleNextPage(res.data.id, res.data.transferType, res.data.currencyCode);
+          });
+        })
+        .catch(err => {
+          console.log(err);
+          message.error(err.response.data.message);
+          this.setState({ loading: false });
         });
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-        this.setState({ loading: false });
-      });
+    });
   };
 
   // 上传附件
@@ -169,45 +170,55 @@ class expInputTaxNew extends Component {
 
   // 跳转至下一页面
   handleNextPage = (id, transferType, currencyCode) => {
-    this.handleCancel();
-    this.props.getHeaderList();
-    const { dispatch } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${id}/${transferType}`,
-      })
-    );
+    const { headerData } = this.state;
+    if (headerData && headerData.id) {
+      this.handleCancel();
+    } else {
+      const { dispatch } = this.props;
+      dispatch(
+        routerRedux.push({
+          pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${id}/${transferType}`,
+        })
+      );
+    }
   };
 
   handleCancel = () => {
-    const { onClose } = this.props;
-    if (onClose) {
-      onClose();
+    const { dispatch } = this.props;
+    const { headerData } = this.state;
+    dispatch(
+      routerRedux.push({
+        pathname: `/exp-input-tax/exp-input-tax/input-tax-business-receipt/${headerData.id}/${
+          headerData.transferType
+        }`,
+      })
+    );
+  };
+  validator = (rule, value, callback) => {
+    if (value <= 0 || value > 100) {
+      callback('请输入1～100之间的数字！');
+      return;
     }
+    callback();
   };
 
   render() {
     const FormItem = Form.Item;
-    const { form, user, company, params } = this.props;
+    const { form, user, company } = this.props;
     const { getFieldDecorator, getFieldValue } = form;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
-    const formItemLayout =
-      params && params.id
-        ? {
-            labelCol: { span: 8 },
-            wrapperCol: { span: 10 },
-          }
-        : {
-            labelCol: {
-              xs: { span: 12 },
-              sm: { span: 6 },
-            },
-            wrapperCol: {
-              xs: { span: 24 },
-              sm: { span: 16 },
-            },
-          };
-    const colWidth = params ? 24 : 10;
+    const { headerData: params } = this.state;
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 12 },
+        sm: { span: 6 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 16 },
+      },
+    };
+    const colWidth = 10;
     const {
       currencyList,
       transferTypeList,
@@ -382,18 +393,17 @@ class expInputTaxNew extends Component {
                     initialValue: params && params.id ? params.transferProportion : '',
                     rules: [
                       {
-                        required: true,
-                        message: this.$t('common.please.enter'),
-                      },
-                      {
-                        type: 'number',
-                        transform: value => parseInt(value, 10),
-                        // message: this.$t('org.role.type-number'), // "必须是数字"
-                        pattern: /^(?!(0[0-9]{0,}$))[0-9]{1,}[.]{0,}[0-9]{0,}$/gi,
-                        message: this.$t('tax.number.greater.than.zero'), // '且为大于零的数字'
+                        validator: this.validator,
                       },
                     ],
-                  })(<Input placeholder={this.$t('common.please.select')} />)}
+                  })(
+                    <InputNumber
+                      min={0.001}
+                      max={100}
+                      formatter={value => `${value}%`}
+                      parser={value => value.replace('%', '')}
+                    />
+                  )}
                 </FormItem>
               )}
             </Col>
@@ -459,24 +469,29 @@ class expInputTaxNew extends Component {
             </Col>
           </Row>
           {isNew ? (
-            <Affix style={bottomStyle}>
+            <div style={bottomStyle}>
+              <Button
+                type="primary"
+                style={{ margin: '0 20px' }}
+                htmlType="submit"
+                loading={loading}
+              >
+                {/* 下一步 */}
+                {this.$t('acp.next')}
+              </Button>
               <Button onClick={this.onBack} style={{ marginRight: '10px' }}>
                 {/* 返回 */}
                 {this.$t('common.return')}
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                {/* 下一步 */}
-                {this.$t('acp.next')}
-              </Button>
-            </Affix>
+            </div>
           ) : (
-            <div className="slide-footer">
+            <div style={bottomStyle}>
               <Button
                 className="btn"
                 type="primary"
                 htmlType="submit"
-                loading={saveLoading}
-                onClick={this.handleEdit}
+                loading={loading}
+                style={{ margin: '0 20px' }}
               >
                 {this.$t('common.save')}
               </Button>

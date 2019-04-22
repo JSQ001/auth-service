@@ -364,13 +364,13 @@ class PrePaymentCommon extends React.Component {
             this.setState({ showLineDetail: false });
           }}
         >
-          {/* <ApplicationLineDetail
+          <ApplicationLineDetail
             close={() => {
               this.setState({ showLineDetail: false });
             }}
             headerData={this.props.headerData}
             lineId={record.id}
-          /> */}
+          />
         </SlideFrame>
         <Modal
           title={this.$t('expense.the.contract.details')} /*合同详情*/

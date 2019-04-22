@@ -10,7 +10,9 @@ import com.hand.hcf.app.base.userRole.persistence.UserRoleMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -27,19 +29,20 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@AllArgsConstructor
 public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunction>{
-    private final RoleFunctionMapper roleFunctionMapper;
+    @Autowired
+    private  RoleFunctionMapper roleFunctionMapper;
+    @Autowired
+    private  ContentFunctionRelationService contentFunctionRelationService;
+    @Autowired
+    private  FunctionListService functionListService;
+    @Autowired
+    private  ContentListService contentListService;
 
-    private final ContentFunctionRelationService contentFunctionRelationService;
-
-
-    private final ContentListService contentListService;
-
-
-    private final UserRoleMapper userRoleMapper;
-
-    private final PageListService pageListService;
+    @Autowired
+    private  UserRoleMapper userRoleMapper;
+    @Autowired
+    private  PageListService pageListService;
 
     /**
      * 不分页查询 角色可以分配的功能和已分配的功能
@@ -109,7 +112,7 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
      */
     public RoleFunctionDTO getNavigationNar(Long userId){
         RoleFunctionDTO result = new RoleFunctionDTO();
-
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
         if (userId != null) {
             //目录关联功能数据
             List<ContentFunctionDTO> contentFunctionDTOList = new ArrayList<>();
@@ -128,9 +131,9 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
                 return result;
             }
             Set<Long> functionIdList = roleFunctions.stream().map(RoleFunction::getFunctionId).collect(Collectors.toSet());
-            functionPageDTOList = pageListService.listPageByRoleIds(roleIdList);
+            functionPageDTOList = pageListService.listPageByRoleIds(roleIdList,tenantId);
             List<ContentFunctionDTO> contentFunctionDTOS = contentFunctionRelationService.listContentFunctions(roleIdList);
-            List<ContentList> contentLists = contentListService.selectList(null);
+            List<ContentList> contentLists = contentListService.selectList(new EntityWrapper<ContentList>().eq("tenant_id", tenantId));
             List<ContentFunctionDTO> allContentDto = contentLists.stream().map(e -> {
                 ContentFunctionDTO dto = ContentFunctionDTO.builder()
                         .contentId(e.getId())
@@ -160,14 +163,26 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
      */
     @Transactional(rollbackFor = Exception.class)
     public void initRoleFunctionByTenant(Role role) {
+        //获得当前角色对应的租户
+        Long tenantId = role.getTenantId();
         // 先查询系统管理员分配的菜单
-        List<RoleFunction> roleFunctions = this.selectList(new EntityWrapper<RoleFunction>().eq("role_id", 1L));
+        List<RoleFunction> roleFunctions = roleFunctionMapper.getRoleFunctionByAdminRoleIdAndTenantId(1L,tenantId, role.getId());
         if (!CollectionUtils.isEmpty(roleFunctions)){
-            roleFunctions.forEach(e -> {
-                e.setRoleId(role.getId());
-                e.setId(null);
-            });
             this.insertBatch(roleFunctions);
         }
     }
+
+    /**
+     * 初始化租户时关联更新角色功能id
+     * @param tenantId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void initRoleFunction(Long tenantId) {
+        functionListService.initTenantFunction(tenantId);
+        contentListService.initTenantContent(tenantId);
+        baseMapper.updateRoleFunction(tenantId);
+    }
+
+
+
 }

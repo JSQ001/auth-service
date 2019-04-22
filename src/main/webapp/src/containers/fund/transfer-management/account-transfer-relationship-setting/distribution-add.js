@@ -25,7 +25,7 @@ class DistributionAdd extends React.Component {
     this.state = {
       imputationType: [], // 归集方式
       imputationRate: [], // 归集频率
-      autoMakeList: [], // 自动补齐
+      autoMakeList: [{ value: 1, name: '开启' }, { value: 0, name: '关闭' }], // 自动补齐
       editModel: {},
       isGatherRate: false, //
       isautoshow: false,
@@ -51,7 +51,6 @@ class DistributionAdd extends React.Component {
     }
     this.getImputationType();
     this.getImputationRate();
-    this.getAutoMakeList();
   }
 
   /**
@@ -80,23 +79,6 @@ class DistributionAdd extends React.Component {
         if (res.data.values.length > 0) {
           this.setState({
             imputationRate: res.data.values,
-          });
-        }
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-      });
-  }
-
-  /**
-   * 自动补齐
-   */
-  getAutoMakeList() {
-    this.getSystemValueList('ZJ_AUTO_FILLING')
-      .then(res => {
-        if (res.data.values.length > 0) {
-          this.setState({
-            autoMakeList: res.data.values,
           });
         }
       })
@@ -142,11 +124,11 @@ class DistributionAdd extends React.Component {
       companyId: companyOId || params.companyId,
       gatherFrequency: data.gatherFrequency.key || params.gatherFrequency,
       gatherType: data.gatherType.key || params.gatherType,
-      autoCompletion: 1,
+      autoCompletion: data.autoCompletion.key,
       gatherRate: data.gatherRate,
       amount: data.amount,
       gatherDate: data.gatherDate,
-      gatherWeek: data.gatherWeek.label,
+      gatherWeek: data.gatherWeek || '',
       gatherTime: moment(data.gatherTime).format('HH:mm'),
       startDate: data.startDate ? moment(data.startDate) : '',
       // startDateDesc: moment(data.startDateDesc)
@@ -172,6 +154,8 @@ class DistributionAdd extends React.Component {
   };
 
   selectAtionRate = value => {
+    const { onNew2 } = this.props;
+    onNew2();
     console.log(value);
     if (value.key === 'EVERYDAY') {
       this.setState({
@@ -214,6 +198,8 @@ class DistributionAdd extends React.Component {
   };
 
   selectGatherType = value => {
+    const { onNew } = this.props;
+    onNew();
     console.log(value);
     if (value.label === '固定余额') {
       this.setState({
@@ -239,6 +225,12 @@ class DistributionAdd extends React.Component {
   render() {
     const {
       form: { getFieldDecorator },
+      isautoshow1,
+      isGatherRate1,
+      isNew,
+      isNew2,
+      ationRateValue2,
+      ationRateValue3,
       // user,
       // company,
     } = this.props;
@@ -357,7 +349,9 @@ class DistributionAdd extends React.Component {
               <FormItem label="金额" {...formItemLayout2}>
                 {getFieldDecorator('amount', {
                   initialValue: editModel.amount || '',
-                })(<InputNumber disabled={isGatherRate} AUTOCOMPLETE="off" />)}
+                })(
+                  <InputNumber disabled={isNew ? isGatherRate : isGatherRate1} AUTOCOMPLETE="off" />
+                )}
               </FormItem>
             </Col>
             <Col span={5}>
@@ -366,7 +360,7 @@ class DistributionAdd extends React.Component {
                   initialValue: editModel.gatherRate || '',
                 })(
                   <InputNumber
-                    disabled={!isGatherRate}
+                    disabled={isNew ? !isGatherRate : !isGatherRate1}
                     AUTOCOMPLETE="off"
                     formatter={value => `${value}%`}
                     parser={value => value.replace('%', '')}
@@ -376,8 +370,17 @@ class DistributionAdd extends React.Component {
             </Col>
             <Col span={6}>
               <FormItem label="自动补齐" {...formItemLayout}>
-                {getFieldDecorator('autoCompletion', {})(
-                  <Select labelInValue placeholder="请选择" disabled={isautoshow}>
+                {getFieldDecorator('autoCompletion', {
+                  initialValue:
+                    editModel.autoCompletion === 1
+                      ? [{ key: 1, label: '开启' }]
+                      : [{ key: 0, label: '关闭' }],
+                })(
+                  <Select
+                    labelInValue
+                    placeholder="请选择"
+                    disabled={isNew ? isautoshow : isautoshow1}
+                  >
                     {autoMakeList.map(option => {
                       return <Option key={option.value}>{option.name}</Option>;
                     })}
@@ -412,7 +415,11 @@ class DistributionAdd extends React.Component {
                     parser={value => value.replace('^[0-9]*[1-9][0-9]*$')}
                     precision="0"
                     AUTOCOMPLETE="off"
-                    disabled={!(ationRateValue === 'EVERYMONTH')}
+                    disabled={
+                      isNew2
+                        ? !(ationRateValue === 'EVERYMONTH')
+                        : !(ationRateValue2 === 'EVERYMONTH')
+                    }
                   />
                 )}
               </FormItem>
@@ -421,7 +428,21 @@ class DistributionAdd extends React.Component {
               <FormItem label="周" {...formItemLayout2}>
                 {getFieldDecorator('gatherWeek', {
                   initialValue: editModel.gatherWeek || '',
-                })(<InputNumber AUTOCOMPLETE="off" disabled={!(ationRateValue === 'EVERYWEEK')} />)}
+                })(
+                  <InputNumber
+                    min={1}
+                    max={7}
+                    formatter={value => `${value}`}
+                    parser={value => value.replace('^[0-9]*[1-9][0-9]*$')}
+                    precision="0"
+                    AUTOCOMPLETE="off"
+                    disabled={
+                      isNew2
+                        ? !(ationRateValue === 'EVERYWEEK')
+                        : !(ationRateValue2 === 'EVERYWEEK')
+                    }
+                  />
+                )}
               </FormItem>
             </Col>
             <Col span={6}>
@@ -439,7 +460,7 @@ class DistributionAdd extends React.Component {
                   <TimePicker
                     defaultValue={moment('12:08', 'HH:mm')}
                     format="HH:mm"
-                    disabled={!ationRateValue1}
+                    disabled={isNew2 ? !ationRateValue1 : !ationRateValue3}
                   />
                 )}
               </FormItem>

@@ -69,7 +69,7 @@ class PayRefund extends React.Component {
               disabled: true,
               labelKey: 'name',
               valueKey: 'id',
-              listExtraParams: { companyId: props.company.id },
+              listExtraParams: {},
             },
           ],
         },
@@ -159,7 +159,7 @@ class PayRefund extends React.Component {
               disabled: true,
               labelKey: 'name',
               valueKey: 'id',
-              listExtraParams: { companyId: props.company.id },
+              listExtraParams: {},
             },
           ],
         },
@@ -228,7 +228,7 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.billCode' } /*付款流水号*/)}`,
           dataIndex: 'billcode',
-          align: 'center',
+          width: 150,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : ''}</Popover>
@@ -238,7 +238,7 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.documentNumber' } /*单据编号*/)}`,
           dataIndex: 'documentNumber',
-          align: 'center',
+          width: 200,
           render: desc => (
             <span>
               <Popover content={desc}>{desc ? desc : ''}</Popover>
@@ -248,12 +248,12 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.documentTypeName' } /*单据类型*/)}`,
           dataIndex: 'documentTypeName',
-          align: 'center',
+          width: 120,
         },
         {
           title: `${this.$t({ id: 'pay.refund.employeeName' } /*申请人*/)}`,
           dataIndex: 'employeeName',
-          align: 'center',
+          width: 155,
           render: (value, record) => {
             return (
               <Popover
@@ -276,24 +276,24 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.currency' } /*币种*/)}`,
           dataIndex: 'currency',
-          align: 'center',
+          width: 80,
         },
         {
           title: `${this.$t({ id: 'pay.refund.amount' } /*付款金额*/)}`,
-          align: 'center',
           dataIndex: 'amount',
           render: this.filterMoney,
+          width: 140,
         },
         {
           title: `${this.$t({ id: 'pay.refund.abledRefundAmount' } /*可退款金额*/)}`,
-          align: 'center',
           dataIndex: 'abledRefundAmount',
           render: this.filterMoney,
+          width: 140,
         },
         {
           title: `${this.$t({ id: 'pay.refund.partnerName' } /*收款方*/)}`,
           dataIndex: 'partnerName',
-          align: 'center',
+          width: 140,
           render: (value, record) => {
             return (
               <Popover
@@ -317,12 +317,14 @@ class PayRefund extends React.Component {
           title: `${this.$t({ id: 'pay.refund.payDate' } /*付款日期*/)}`,
           dataIndex: 'payDate',
           align: 'center',
+          width: 130,
           render: value => moment(value).format('YYYY-MM-DD'),
         },
         {
           title: `${this.$t({ id: 'pay.refund.operate' } /*操作*/)}`,
           dataIndex: 'id',
           align: 'center',
+          width: 130,
           render: (id, record) => (
             <a onClick={() => this.doRefund(record)}>
               {' '}
@@ -335,23 +337,24 @@ class PayRefund extends React.Component {
         {
           title: `${this.$t({ id: 'pay.refund.RefundBillCode' } /*退款支付流水号*/)}`,
           dataIndex: 'billcode',
-          align: 'center',
+          width: 150,
         },
         {
           title: `${this.$t({ id: 'pay.refund.refBillCode' } /*原支付流水号*/)}`,
           dataIndex: 'refBillCode',
-          align: 'center',
+          width: 180,
         },
         {
           title: `${this.$t({ id: 'pay.refund.returnDate' } /*退款日期*/)}`,
           dataIndex: 'payDate',
           align: 'center',
+          width: 130,
           render: value => moment(value).format('YYYY-MM-DD'),
         },
         {
           title: `${this.$t({ id: 'pay.refund.partnerCategoryName' } /*退款方*/)}`,
           dataIndex: 'partnerName',
-          align: 'center',
+          width: 120,
           render: (value, record) => {
             return (
               <Popover
@@ -373,7 +376,7 @@ class PayRefund extends React.Component {
         },
         {
           title: `${this.$t({ id: 'pay.refund.payeeAccountNumber' } /*退款账号*/)}`,
-          align: 'center',
+          width: 180,
           dataIndex: 'payeeAccountNumber',
           render: desc => (
             <span>
@@ -383,24 +386,25 @@ class PayRefund extends React.Component {
         },
         {
           title: `${this.$t({ id: 'pay.refund.returnAmount' } /*本次退款金额*/)}`,
-          align: 'center',
           dataIndex: 'amount',
           render: this.filterMoney,
+          width: 140,
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountNumber' } /*收款方账号*/)}`,
-          align: 'center',
           dataIndex: 'draweeAccountNumber',
+          width: 190,
         },
         {
           title: `${this.$t({ id: 'pay.refund.draweeAccountName' } /*收款方账户名*/)}`,
-          align: 'center',
           dataIndex: 'draweeAccountName',
+          width: 120,
         },
         {
           title: `${this.$t({ id: 'pay.refund.status' } /*状态*/)}`,
           dataIndex: 'paymentStatus',
           align: 'center',
+          width: 110,
           render: value => (
             <Badge status={this.state.status[value].state} text={this.state.status[value].label} />
           ),
@@ -721,7 +725,6 @@ class PayRefund extends React.Component {
   };
   renderContent = () => {
     const {
-      tabValue,
       loading1,
       loading2,
       searchForm1,
@@ -756,6 +759,7 @@ class PayRefund extends React.Component {
             dataSource={unRefundData}
             pagination={unRefundPagination}
             loading={loading1}
+            scroll={{ x: 1300 }}
             bordered
             size="middle"
           />
@@ -778,6 +782,7 @@ class PayRefund extends React.Component {
             columns={columns2}
             dataSource={myRefundData}
             pagination={myRefundPagination}
+            scroll={{ x: 1300 }}
             onRow={record => ({
               onClick: () => this.rowClick(record),
             })}

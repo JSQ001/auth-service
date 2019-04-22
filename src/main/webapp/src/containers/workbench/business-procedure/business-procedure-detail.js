@@ -35,7 +35,7 @@ class BusinessProcedureDetail extends React.Component {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getTypeOptions();
     const { record, isEditor, businessTypeId } = this.props.params;
     let editorRecord = { ...record };

@@ -23,11 +23,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.SystemMetaObject;
@@ -35,12 +31,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,7 +45,9 @@ import java.util.stream.Collectors;
 @Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
 public class DataAuthProcessInterceptor implements Interceptor {
 
-    private static final Pattern compile = Pattern.compile("[\\s\\t\\n]", Pattern.CASE_INSENSITIVE);
+    private static final Pattern compile = Pattern.compile("[\\s\\t\\n]{1,}", Pattern.CASE_INSENSITIVE);
+
+    private static final String DELIMITER_DOT = ".";
 
     private DataAuthorityMetaHandler dataAuthorityMetaHandler;
 
@@ -70,11 +63,17 @@ public class DataAuthProcessInterceptor implements Interceptor {
         BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
         String sql = boundSql.getSql();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-        MapperMethod.ParamMap<?> parameterMap = (MapperMethod.ParamMap<?>) boundSql.getParameterObject();
+        MapperMethod.ParamMap<?> parameterMap;
+        if(MapperMethod.ParamMap.class.isAssignableFrom(boundSql.getParameterObject().getClass())){
+            parameterMap = (MapperMethod.ParamMap<?>) boundSql.getParameterObject();
+        }else{
+            parameterMap = new MapperMethod.ParamMap<>();
+        }
+
         List<String> parameters = null;
+        String methodName = ms.getId().substring(ms.getId().lastIndexOf(DELIMITER_DOT) + 1);
         if(CollectionUtils.isEmpty(parameterMappings)){
-            Class<?> aClass = Class.forName(ms.getId().substring(0, ms.getId().lastIndexOf(".")));
-            String methodName = ms.getId().substring(ms.getId().lastIndexOf(".") + 1);
+            Class<?> aClass = Class.forName(ms.getId().substring(0, ms.getId().lastIndexOf(DELIMITER_DOT)));
             Method[] methods = aClass.getMethods();
             for(Method method : methods){
                 if(method.getName().equals(methodName)){
@@ -92,19 +91,53 @@ public class DataAuthProcessInterceptor implements Interceptor {
         if(! sql.contains(DataAuthorityUtil.DATA_AUTH_LABEL)){
             sql = replaceDataAuthLabelInParameterToSql(sql,parameterMappings,parameters,parameterMap);
         }
+        //mybatis封装的基础查询方法，默认使用数据权限标记
+        TableInfo tableInfo = null;
+        //拦截mybatis封装的查询方法
+//        if(! DataAuthorityUtil.checkMapperIsIgnore(ms.getId())){
+//            if(DataAuthorityUtil.selectOperationList.contains(methodName)){
+//                if(!sql.contains(DataAuthorityUtil.DATA_AUTH_LABEL)){
+//                    Class<?> type = ms.getResultMaps().get(0).getType();
+//                    tableInfo = TableInfoHelper.getTableInfo(type);
+//                    if(tableInfo != null){
+//                        String tableName = tableInfo.getTableName();
+//                        String regex = tableName.toLowerCase() + "+[\\s\\t\\n]{1,}+where+[\\s\\t\\n]{1,}";
+//                        Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+//                        Matcher m = p.matcher(sql);
+//                        if(m.find()){
+//                            String group = m.group(0);
+//                            sql = sql.replace(group,group + " " + DataAuthorityUtil.getDataAuthBasicLabel(tableName,"") + " and ");
+//                        }
+//                    }
+//                }
+//            }
+//        }
         if(sql.contains(DataAuthorityUtil.DATA_AUTH_LABEL)){
-            if(StringUtil.substringCount(sql,DataAuthorityUtil.DATA_AUTH_LABEL) > 1){
-                throw new BizException(RespCode.DATA_AUTHORITY_LABEL_TOO_MUCH);
-            }
-            String dataAuthLabel = getDataAuthLabel(sql);
-            Map<String, String> dataAuthMap = DataAuthorityUtil.analysisDataAuthLabel(dataAuthLabel);
-            checkDataAuthLabel(dataAuthMap);
-            sql = updateBoundSql(sql, dataAuthLabel, dataAuthMap);
+            sql = handleDataAuthLabel(sql,tableInfo);
             ReflectHelper.setFieldValue(boundSql, "sql", sql);
             ReflectHelper.setFieldValue(boundSql, "parameterMappings", parameterMappings);
             ReflectHelper.setFieldValue(boundSql, "parameterObject", parameterMap);
         }
         return invocation.proceed();
+    }
+
+    /**
+     * 处理sql
+     * @param sql
+     * @return
+     */
+    private String handleDataAuthLabel(String sql, TableInfo tableInfo){
+        String dataAuthLabel = getDataAuthLabel(sql);
+        Map<String, String> dataAuthMap = DataAuthorityUtil.analysisDataAuthLabel(dataAuthLabel);
+        checkDataAuthLabel(dataAuthMap);
+        if(tableInfo == null){
+            tableInfo = getTableInfoByTableName(DataAuthorityUtil.getMapValue(dataAuthMap,DataAuthorityUtil.TABLE_NAME));
+        }
+        sql = updateBoundSql(sql, dataAuthLabel, dataAuthMap, tableInfo);
+        if(sql.contains(DataAuthorityUtil.DATA_AUTH_LABEL)){
+            sql = handleDataAuthLabel(sql,tableInfo);
+        }
+        return sql;
     }
 
     /**
@@ -193,7 +226,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
      * @param dataAuthMap
      * @return
      */
-    private String updateBoundSql(String sql,String dataAuthLabel, Map<String, String> dataAuthMap){
+    private String updateBoundSql(String sql,String dataAuthLabel, Map<String, String> dataAuthMap,TableInfo tableInfo){
         StringBuffer updatedSql = new StringBuffer();
         String sqlBackup = sql;
         // 判断是否启用数据权限，要是不启用，直接替换为恒等式
@@ -210,20 +243,29 @@ public class DataAuthProcessInterceptor implements Interceptor {
                 // 全部转换为小写，容易比对
                 sql = sql.toLowerCase();
                 // 获取表别名
-                String tableName = dataAuthMap.get(DataAuthorityUtil.TABLE_NAME);
+                String tableName = DataAuthorityUtil.getMapValue(dataAuthMap,DataAuthorityUtil.TABLE_NAME);
                 // 获取表别名
-                String tableAlias = dataAuthMap.get(DataAuthorityUtil.TABLE_ALIAS);
+                String tableAlias = DataAuthorityUtil.getMapValue(dataAuthMap,DataAuthorityUtil.TABLE_ALIAS);
                 // 若表别名为空，则需要从sql中解析数据
                 if (StringUtils.isEmpty(tableAlias)) {
                     int labelIndex = sql.indexOf(DataAuthorityUtil.DATA_AUTH_LABEL.toLowerCase());
                     sql = sql.substring(0, labelIndex);
-                    String[] split = sql.split(tableName.toLowerCase());
+                    String tableRegex = "[\\s\\t\\n\\,]{1,}+" + tableName.toLowerCase() + "+[\\s\\t\\n\\,]{1,}";
+                    Pattern tablePattern = Pattern.compile(tableRegex, Pattern.CASE_INSENSITIVE);
+                    Matcher tableMatcher = tablePattern.matcher(sql);
+                    String tableSplit = null;
+                    if(tableMatcher.find()){
+                        tableSplit = tableMatcher.group(0);
+                    }else{
+                        throw new BizException(RespCode.SYS_DATA_AUTHORITY_TABLE_NOT_FOUND, new String[]{tableName});
+                    }
+                    String[] split = sql.split(tableSplit);
                     // 数组长度为1，表示未匹配到表
                     if (split.length == 1) {
                         throw new BizException(RespCode.SYS_DATA_AUTHORITY_TABLE_NOT_FOUND, new String[]{tableName});
                         // 数据长度为2，表示只有表名只出现了一次，直接获取别名
                     } else if (split.length == 2) {
-                        String regex = tableName.toLowerCase() + "+[\\s\\t\\n]+where+[\\s\\t\\n]";
+                        String regex = tableName.toLowerCase() + "+[\\s\\t\\n]{1,}+where+[\\s\\t\\n]{1,}";
                         Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
                         Matcher m = p.matcher(sql);
                         // 如果表没有别名
@@ -235,14 +277,15 @@ public class DataAuthProcessInterceptor implements Interceptor {
                                 String group = m.group(0);
                                 int index = sql.indexOf(group);
                                 String substring = sqlBackup.substring(index, index + group.length());
-
                                 Matcher matcher = compile.matcher(substring);
                                 if (matcher.find()) {
                                     String group1 = matcher.group(0);
-                                    // 默认设置为base
-                                    String replace = matcher.replaceFirst(" base" + group1);
-                                    tableAlias = "base";
-                                    dataAuthMap.put(DataAuthorityUtil.TABLE_ALIAS, tableAlias);
+                                    // 默认设置为base + 6位随机字符串
+//                                    String alias = DataAuthorityUtil.DEFAULT_TABLE_ALIAS + "_" + RandomStringUtils.random(6, 97, 122, false, false);
+                                    String alias = DataAuthorityUtil.DEFAULT_TABLE_ALIAS;
+                                    String replace = matcher.replaceFirst(" " + alias + group1);
+                                    tableAlias = alias;
+                                    DataAuthorityUtil.setMapEntry(dataAuthMap,DataAuthorityUtil.TABLE_ALIAS, tableAlias);
                                     sqlBackup = sqlBackup.replace(group, replace);
                                 }
                             }
@@ -260,7 +303,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
                                 alias = alias.substring(0, alias.indexOf(splitChar));
                             }
                             tableAlias = alias;
-                            dataAuthMap.put(DataAuthorityUtil.TABLE_ALIAS, tableAlias);
+                            DataAuthorityUtil.setMapEntry(dataAuthMap,DataAuthorityUtil.TABLE_ALIAS, tableAlias);
                         }
                         // 如果长度超过2，则表示需要解析sql，获取表别名
                     } else {
@@ -272,12 +315,12 @@ public class DataAuthProcessInterceptor implements Interceptor {
                             String splitChar = matcher.group(0);
                             String alias = substring.substring(0, substring.indexOf(splitChar));
                             tableAlias = alias;
-                            dataAuthMap.put(DataAuthorityUtil.TABLE_ALIAS, tableAlias);
+                            DataAuthorityUtil.setMapEntry(dataAuthMap,DataAuthorityUtil.TABLE_ALIAS, tableAlias);
                         }
                     }
                 }
                 dataAuthValuePropertyList.stream().forEach(dataAuthValueProperties -> {
-                    String dataAuthSql = assembleSqlByDataAuthProperties(dataAuthMap, dataAuthValueProperties);
+                    String dataAuthSql = assembleSqlByDataAuthProperties(dataAuthMap, dataAuthValueProperties,tableInfo);
                     if(StringUtils.isEmpty(updatedSql)){
                         updatedSql.append("(").append(dataAuthSql);
                     }else{
@@ -289,6 +332,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
         }else{
             updatedSql.append(" 1 = 1 ");
         }
+        // 考虑到标识符相同，想对应的筛选的语句肯定也一样，所以直接全部替换
         String replace = sqlBackup.replace(DataAuthorityUtil.DATA_AUTH_LABEL  + dataAuthLabel, updatedSql);
         log.debug("数据权限重置sql: {}" ,replace);
         return replace;
@@ -304,13 +348,20 @@ public class DataAuthProcessInterceptor implements Interceptor {
         return dataAuthValuePropertyList.stream().anyMatch(dataAuthValueProperties -> {
             return dataAuthValueProperties.values().stream().anyMatch(dataAuthValuePropertyDTOS -> {
                 return dataAuthValuePropertyDTOS.stream().anyMatch(dataAuthValuePropertyDTO -> {
-                    String dataLabelValue = dataAuthMap.get(dataAuthValuePropertyDTO.getDataType());
-                    String regex = ";+[\\s\\t\\n]{0,}" + DataAuthFilterMethodEnum.CUSTOM_SQL.name() + "+[\\s\\t\\n]{0,}+;";
-                    Pattern p = Pattern.compile(regex);
-                    Matcher matcher = p.matcher(dataLabelValue == null ? "" : dataLabelValue);
-                    if (matcher.find()) {
-                        return true;
+                    String dataLabelValue = DataAuthorityUtil.getMapValue(dataAuthMap,dataAuthValuePropertyDTO.getDataType());
+                    if(StringUtils.isNotEmpty(dataLabelValue)){
+                        String[] split = dataLabelValue.split(DataAuthorityUtil.DATA_AUTH_TYPE_LABEL_SEPARATOR_REGEX);
+                        if(split.length > 1){
+                            return split[1].equals(DataAuthFilterMethodEnum.CUSTOM_SQL.name());
+                        }
                     }
+                    //以下通过模糊匹配不是很准确
+//                    String regex = ";+[\\s\\t\\n]{0,}" + DataAuthFilterMethodEnum.CUSTOM_SQL.name() + "+[\\s\\t\\n]{0,}+;";
+//                    Pattern p = Pattern.compile(regex);
+//                    Matcher matcher = p.matcher(dataLabelValue == null ? "" : dataLabelValue);
+//                    if (matcher.find()) {
+//                        return true;
+//                    }
                     return false;
                 });
             });
@@ -323,10 +374,10 @@ public class DataAuthProcessInterceptor implements Interceptor {
      * @param dataAuthValueProperties
      * @return
      */
-    private String assembleSqlByDataAuthProperties(Map<String, String> dataAuthMap, Map<String,List<DataAuthValuePropertyDTO>> dataAuthValueProperties){
-        String tableName = dataAuthMap.get(DataAuthorityUtil.TABLE_NAME);
-        String tableAlias = dataAuthMap.get(DataAuthorityUtil.TABLE_ALIAS);
-        TableInfo tableInfoByTableName = getTableInfoByTableName(tableName);
+    private String assembleSqlByDataAuthProperties(Map<String, String> dataAuthMap,
+                                                   Map<String,List<DataAuthValuePropertyDTO>> dataAuthValueProperties,
+                                                   TableInfo tableInfoByTableName){
+        String tableAlias = DataAuthorityUtil.getMapValue(dataAuthMap,DataAuthorityUtil.TABLE_ALIAS);
         // 支持后期项目开发视图，当通过表名查不到对应domain类时，默认为表中包含该列
         boolean foundTable = tableInfoByTableName == null ? false : true;
         StringBuffer stringBuffer = new StringBuffer();
@@ -347,23 +398,23 @@ public class DataAuthProcessInterceptor implements Interceptor {
                 if(CollectionUtils.isEmpty(valueKeyList)){
                     throw new BizException(RespCode.SYS_DATA_AUTHORITY_COLUMN_VALUES_EMPTY,new String[]{dataType});
                 }
-                String columnProperty = dataAuthMap.get(dataType);
+                String columnProperty = DataAuthorityUtil.getMapValue(dataAuthMap,dataType);
                 // 当配置信息为空时，获取默认信息
                 if(StringUtils.isEmpty(columnProperty)){
-                    columnProperty = defaultColumnProperties.get("dataType");
+                    columnProperty = DataAuthorityUtil.getMapValue(defaultColumnProperties,dataType);
                 }
                 if(StringUtils.isEmpty(columnProperty)){
                     log.debug("数据类型" + dataType + "未匹配到列信息配置！");
                     throw new BizException(RespCode.SYS_DATA_AUTHORITY_COLUMN_PROPERTIES_NONE,new String[]{dataType});
                 }
-                String[] split = columnProperty.split(";");
-                int count = StringUtil.substringCount(columnProperty, ";");
+                String[] split = columnProperty.split(DataAuthorityUtil.DATA_AUTH_TYPE_LABEL_SEPARATOR_REGEX);
+                int count = StringUtil.substringCount(columnProperty, DataAuthorityUtil.DATA_AUTH_TYPE_LABEL_SEPARATOR);
                 if(split.length != 1 && count != 2){
                     log.debug("数据类型" + dataType + "对应列配置信息错误！");
                     throw new BizException(RespCode.SYS_DATA_AUTHORITY_COLUMN_PROPERTIES_ERROR,new String[]{dataType});
                 }
                 // 列名
-                String columnName = split[0];
+                String columnNames = split[0];
                 // 条件添加方式
                 String filterMethod = "";
                 // 自定义sql
@@ -374,71 +425,82 @@ public class DataAuthProcessInterceptor implements Interceptor {
                         customSQL = split[2];
                     }
                 }
-                // 通过列筛选
-                if(StringUtils.isEmpty(filterMethod) || DataAuthFilterMethodEnum.TABLE_COLUMN.name().equals(filterMethod)){
-                    TableFieldInfo tableFieldInfo = null;
-                    if(foundTable){
-                        List<TableFieldInfo> fieldList = tableInfoByTableName.getFieldList();
-                        List<TableFieldInfo> collect = fieldList.stream().filter(field -> {
-                            return columnName.equalsIgnoreCase(field.getColumn());
-                        }).collect(Collectors.toList());
-                        // 没有找到对应列，则默认不作为筛选条件
-                        if(CollectionUtils.isEmpty(collect)){
-                            log.debug("数据类型" + dataType + "未匹配到列");
-                            return;
+                String[] columnNameSplit = columnNames.split(",");
+                for(String columnName : columnNameSplit){
+                    // 通过列筛选
+                    if(StringUtils.isEmpty(filterMethod) || DataAuthFilterMethodEnum.TABLE_COLUMN.name().equals(filterMethod)){
+                        String metaFieldName = null;
+                        Class metaPropertyType = null;
+                        if(foundTable){
+                            List<TableFieldInfo> fieldList = tableInfoByTableName.getFieldList();
+                            List<TableFieldInfo> collect = fieldList.stream().filter(field -> {
+                                return columnName.equalsIgnoreCase(field.getColumn());
+                            }).collect(Collectors.toList());
+                            // 没有找到对应列，试着匹配ID
+                            if(CollectionUtils.isEmpty(collect)){
+                                if(columnName.equalsIgnoreCase(tableInfoByTableName.getKeyColumn())){
+                                    metaFieldName = tableInfoByTableName.getKeyProperty();
+                                    metaPropertyType = Long.class;
+                                }
+                            }else{
+                                metaFieldName = collect.get(0).getProperty();
+                                metaPropertyType = collect.get(0).getPropertyType();
+                            }
+                            if(StringUtils.isEmpty(metaFieldName)){
+                                log.debug("数据类型" + dataType + "未匹配到列");
+                                return;
+                            }
                         }
-                        tableFieldInfo = collect.get(0);
-                    }
-                    if(StringUtils.isNotEmpty(first.toString())){
-                        stringBuffer.append("and ");
-                    }else{
-                        first.append("not first");
-                    }
+                        if(StringUtils.isNotEmpty(first.toString())){
+                            stringBuffer.append("and ");
+                        }else{
+                            first.append("not first");
+                        }
 
-                    if("EXCLUDE".equals(dataAuthValuePropertyDTO.getFiltrateMethod())){
-                        stringBuffer.append("not ");
-                    }
-                    stringBuffer.append("exists (select 1 from dual where ");
-                    if(StringUtils.isNotEmpty(tableAlias)){
-                        stringBuffer.append(tableAlias).append(".");
-                    }
-                    stringBuffer.append(columnName).append(" in (");
-                    String values = "";
-                    if(tableFieldInfo == null || Number.class.isAssignableFrom(tableFieldInfo.getPropertyType())){
-                        values = valueKeyList.stream().collect(Collectors.joining(","));
+                        if("EXCLUDE".equals(dataAuthValuePropertyDTO.getFiltrateMethod())){
+                            stringBuffer.append("not ");
+                        }
+                        stringBuffer.append("exists (select 1 from dual where ");
+                        if(StringUtils.isNotEmpty(tableAlias)){
+                            stringBuffer.append(tableAlias).append(".");
+                        }
+                        stringBuffer.append(columnName).append(" in (");
+                        String values = "";
+                        if(metaFieldName == null || Number.class.isAssignableFrom(metaPropertyType)){
+                            values = valueKeyList.stream().collect(Collectors.joining(","));
+                        }else{
+                            values = valueKeyList.stream().map(valueKey ->{
+                                return "'" + valueKey + "'";
+                            }).collect(Collectors.joining(","));
+                        }
+                        stringBuffer.append(values).append(")) ");
+                        // 自定义sql
+                    }else if(DataAuthFilterMethodEnum.CUSTOM_SQL.name().equals(filterMethod)){
+                        if(StringUtils.isNotEmpty(first.toString())){
+                            stringBuffer.append("and ");
+                        }else{
+                            first.append("not first");
+                        }
+                        if("EXCLUDE".equals(dataAuthValuePropertyDTO.getFiltrateMethod())){
+                            stringBuffer.append("not ");
+                        }
+                        stringBuffer.append("exists (");
+                        // 关联表表别名
+                        String relatedTableAlias = extractMessageFirst(customSQL);
+                        if(StringUtils.isEmpty(relatedTableAlias)){
+                            log.error("关联表未指定表别名，可在自定义sql中通过 {alias} 指定表别名，同时也标注筛选条件替换位置！");
+                            throw new BizException(RespCode.SYS_DATA_AUTHORITY_RELATED_TABLE_ALIAS_EMPTY);
+                        }
+                        String relatedTableCondition = " " + relatedTableAlias + "." + columnName + " in(";
+                        // 分配表默认全部为ID
+                        String values = valueKeyList.stream().collect(Collectors.joining(","));
+                        relatedTableCondition = relatedTableCondition + values + ")";
+                        String replace = customSQL.replace("{" + relatedTableAlias + "}", relatedTableCondition);
+                        stringBuffer.append(replace).append(")");
                     }else{
-                        values = valueKeyList.stream().map(valueKey ->{
-                            return "'" + valueKey + "'";
-                        }).collect(Collectors.joining(","));
+                        log.debug("数据权限只支持列筛选及自定义sql两种方式！");
+                        throw new BizException(RespCode.SYS_DATA_AUTHORITY_DATA_TYPE_ERROR);
                     }
-                    stringBuffer.append(values).append(")) ");
-                // 自定义sql
-                }else if(DataAuthFilterMethodEnum.CUSTOM_SQL.name().equals(filterMethod)){
-                    if(StringUtils.isNotEmpty(first.toString())){
-                        stringBuffer.append("and ");
-                    }else{
-                        first.append("not first");
-                    }
-                    if("EXCLUDE".equals(dataAuthValuePropertyDTO.getFiltrateMethod())){
-                        stringBuffer.append("not ");
-                    }
-                    stringBuffer.append("exists (");
-                    // 关联表表别名
-                    String relatedTableAlias = extractMessageFirst(customSQL);
-                    if(StringUtils.isEmpty(relatedTableAlias)){
-                        log.error("关联表未指定表别名，可在自定义sql中通过 {alias} 指定表别名，同时也标注筛选条件替换位置！");
-                        throw new BizException(RespCode.SYS_DATA_AUTHORITY_RELATED_TABLE_ALIAS_EMPTY);
-                    }
-                    String relatedTableCondition = " ";
-                    relatedTableCondition = relatedTableAlias + "." + columnName + " in(";
-                    // 分配表默认全部为ID
-                    String values = valueKeyList.stream().collect(Collectors.joining(","));
-                    relatedTableCondition = relatedTableCondition + values + ")";
-                    String replace = customSQL.replace("{" + relatedTableAlias + "}", relatedTableCondition);
-                    stringBuffer.append(replace).append(")");
-                }else{
-                    log.debug("数据权限只支持列筛选及自定义sql两种方式！");
-                    throw new BizException(RespCode.SYS_DATA_AUTHORITY_DATA_TYPE_ERROR);
                 }
             });
             stringBuffer.append(") or ");
@@ -501,8 +563,8 @@ public class DataAuthProcessInterceptor implements Interceptor {
         if(dataAuthMap == null){
             throw new BizException(RespCode.SYS_DATA_AUTHORITY_TABLE_EMPTY);
         }
-        if(dataAuthMap.containsKey(DataAuthorityUtil.TABLE_NAME)){
-            if(StringUtils.isNotEmpty(dataAuthMap.get(DataAuthorityUtil.TABLE_NAME))){
+        if(DataAuthorityUtil.getMapContainsKey(dataAuthMap,DataAuthorityUtil.TABLE_NAME)){
+            if(StringUtils.isNotEmpty(DataAuthorityUtil.getMapValue(dataAuthMap,DataAuthorityUtil.TABLE_NAME))){
                 return;
             }
         }

@@ -108,6 +108,7 @@ class NewExpense extends React.Component {
           dataIndex: 'company',
           visible: 'companyVisible',
           dist: 'companyDistFlag',
+          required: true,
           defaultValue: [
             {
               id: props.params.headerData.companyId,
@@ -122,6 +123,7 @@ class NewExpense extends React.Component {
           listType: 'department_share_report',
           labelKey: 'name',
           valueKey: 'id',
+          required: true,
           visible: 'departmentVisible',
           dist: 'departmentDistFlag',
           default: 'departmentName',
@@ -137,12 +139,14 @@ class NewExpense extends React.Component {
         {
           title: '责任中心',
           type: 'chooser',
+          required: true,
           listType: 'responsibility_report',
           labelKey: 'responsibilityCenterName',
           valueKey: 'id',
           visible: 'resVisible',
           dist: 'resCenterDistFlag',
           default: 'resName',
+          showName: 'responsibilityCenterName',
           dataIndex: 'responsibility',
           width: 200,
         },
@@ -152,6 +156,7 @@ class NewExpense extends React.Component {
           title: '分摊金额',
           dataIndex: 'shareAmount',
           type: 'inputNumber',
+          required: true,
           width: 160,
           //fixed: 'right',
           key: 'shareAmount',
@@ -271,16 +276,17 @@ class NewExpense extends React.Component {
         columns.splice(0, 0, {
           title: item.name,
           type: 'select',
+          visibleKey: item.dimensionField.replace('Id', 'Name'),
           labelKey: 'dimensionItemName',
           valueKey: 'id',
+          required: item.requiredFlag,
           dataIndex: item.dimensionField,
           width: 120,
-          getOptions: () => this.getDimValue(item.dimensionId, item.dimensionField),
+          //getOptions: () => this.getDimValue(item.dimensionId, item.dimensionField),
         });
       });
       //公司部门，责任中心分摊规则
       //不参与分摊或参与分摊但隐藏时不显示  dist: departmentDistFlag
-      console.log(distSetting);
       let config = shareConfig.filter(item =>
         ['EDITABLE', 'READ_ONLY'].includes(distSetting[item.visible])
       );
@@ -293,6 +299,8 @@ class NewExpense extends React.Component {
         }
         item.listExtraParams = {
           expenseTypeId: headerData.documentTypeId,
+          companyId: headerData.companyId,
+          departmentId: headerData.departmentId,
         };
         columns.splice(0, 0, { ...item });
       });
@@ -315,26 +323,40 @@ class NewExpense extends React.Component {
   getDimValue = (id, dataIndex) => {
     const { columns, dimParams } = this.state;
     let { headerData } = this.props.params;
+    let { dataSource } = this.editTable.state;
 
     let params = {
       dimensionId: id,
       enabled: true,
-      companyId: headerData.companyId,
       userId: headerData.applicantId,
-      unitId: headerData.departmentId,
       ...dimParams,
     };
-    reimburseService.getDimValueById(params).then(res => {
+
+    let setOption = (opt = []) => {
       columns.map(item => {
         if (item.dataIndex === dataIndex) {
-          item.options = res.data;
+          item.options = opt;
         }
       });
       this.setState({
         columns,
         editTableRefresh: new Date().getTime(),
       });
-    });
+    };
+
+    if (params.unitId && params.companyId) {
+      return reimburseService.getDimValueById(params).then(res => {
+        setOption(res.data);
+        return new Promise(resolve => {
+          resolve(res.data);
+        });
+      });
+    } else {
+      setOption();
+      return new Promise(resolve => {
+        resolve([]);
+      });
+    }
   };
 
   //获取分摊详情
@@ -352,18 +374,30 @@ class NewExpense extends React.Component {
         sharedAmount += item.amount;
         let data = {
           ...item,
-          company: [
-            {
-              id: item.companyId,
-              name: item.companyName,
-            },
-          ],
-          department: [
-            {
-              departmentId: item.departmentId,
-              name: item.departmentName,
-            },
-          ],
+          company: item.companyId
+            ? [
+                {
+                  id: item.companyId,
+                  name: item.companyName,
+                },
+              ]
+            : [],
+          department: item.departmentId
+            ? [
+                {
+                  id: item.departmentId,
+                  name: item.departmentName,
+                },
+              ]
+            : [],
+          responsibility: item.responsibilityCenterId
+            ? [
+                {
+                  id: item.responsibilityCenterId,
+                  responsibilityCenterName: item.responsibilityCenterName,
+                },
+              ]
+            : [],
         };
         if (headerData.expTaxDist === 'TAX_IN') {
           data.shareAmount = data.amount;
@@ -621,6 +655,7 @@ class NewExpense extends React.Component {
 
   //选择费用类型，所选类型是否有动态字段
   handleSelectExpenseType = expenseType => {
+    console.log(expenseType.fields);
     this.setState({ expenseType }, this.checkShareDetail);
   };
 
@@ -733,10 +768,35 @@ class NewExpense extends React.Component {
     arr.map(item => {
       dataSource[index][item.dimensionField] = '';
     });
-    console.log(dataSource);
     this.setState({
       dataSource,
       editTableRefresh: new Date().getTime(),
+    });
+  };
+
+  //设置默认维值
+  getDefaultDimValue = index => {
+    const { reTypeDetail, columns, shareData } = this.state;
+    let { dataSource } = this.editTable.state;
+    let arr = reTypeDetail.expenseDimensions || [];
+    arr.map(item => {
+      let value = item.value;
+      if (shareData && shareData[index] && shareData[index][item.dimensionField]) {
+        value = shareData[index][item.dimensionField];
+      }
+      this.getDimValue(item.dimensionId, item.dimensionField).then(res => {
+        if (value) {
+          //设置·行默认维值
+          let defaultDimValue = res.find(item => item.value === item.id) || {};
+          if (defaultDimValue.id) {
+            dataSource[index][item.dimensionField] = defaultDimValue.id;
+            this.setState({
+              dataSource,
+              editTableRefresh: new Date().getTime(),
+            });
+          }
+        }
+      });
     });
   };
 
@@ -753,7 +813,6 @@ class NewExpense extends React.Component {
             dataSource[index].noTaxAmount = value - sharedTaxAmount;
             dataSource[index].sharedTaxAmount = sharedTaxAmount;
 
-            console.log(dataSource[index]);
             if (
               dataSource[index].usableAmount &&
               Number(dataSource[index].usableAmount) < Number(value)
@@ -780,43 +839,49 @@ class NewExpense extends React.Component {
         case 'company':
           {
             this.resetDimValue(index);
-            if (value && value.length) {
-              columns.map(item => {
-                if (item.dataIndex === 'responsibility') {
-                  item.listExtraParams = {
-                    ...item.listExtraParams,
-                    companyId: value[0].id,
-                  };
-                }
-              });
-              this.setState({
+            columns.map(item => {
+              if (item.dataIndex === 'responsibility') {
+                item.listExtraParams = {
+                  ...item.listExtraParams,
+                  companyId: value && value.length ? value[0].id : '',
+                };
+              }
+            });
+            this.setState(
+              {
                 dimParams: {
                   ...this.state.dimParams,
-                  companyId: value[0].id,
+                  companyId: value && value.length ? value[0].id : '',
                 },
-              });
-            }
+              },
+              () => {
+                this.getDefaultDimValue(index);
+              }
+            );
           }
           break;
         case 'department':
           {
             this.resetDimValue(index);
-            if (value && value.length) {
-              columns.map(item => {
-                if (item.dataIndex === 'responsibility') {
-                  item.listExtraParams = {
-                    ...item.listExtraParams,
-                    departmentId: value[0].id,
-                  };
-                }
-              });
-              this.setState({
+            columns.map(item => {
+              if (item.dataIndex === 'responsibility') {
+                item.listExtraParams = {
+                  ...item.listExtraParams,
+                  departmentId: value && value.length ? value[0].id : '',
+                };
+              }
+            });
+            this.setState(
+              {
                 dimParams: {
                   ...this.state.dimParams,
-                  unitId: value[0].id,
+                  unitId: value && value.length ? value[0].id : '',
                 },
-              });
-            }
+              },
+              () => {
+                this.getDefaultDimValue(index);
+              }
+            );
           }
           break;
         case 'responsibility':
@@ -914,11 +979,26 @@ class NewExpense extends React.Component {
   };
 
   //设置已分摊金额
-  setSharedAmount = () => {
-    const { dataSource } = this.editTable.state;
-    let sharedAmount = 0;
-    dataSource.map(item => (sharedAmount += Number(item.shareAmount)));
-    this.setState({ sharedAmount });
+  setSharedAmount = (isEdit, record) => {
+    if (isEdit) {
+      this.setState(
+        {
+          dimParams: {
+            ...this.state.dimParams,
+            unitId: record.departmentId,
+            companyId: record.companyId,
+          },
+        },
+        () => {
+          this.getDefaultDimValue(record.index - 1);
+        }
+      );
+    } else {
+      const { dataSource } = this.editTable.state;
+      let sharedAmount = 0;
+      dataSource.map(item => (sharedAmount += Number(item.shareAmount)));
+      this.setState({ sharedAmount });
+    }
   };
 
   //选择申请单的回调
@@ -1185,6 +1265,9 @@ class NewExpense extends React.Component {
     }
   };
 
+  //行校验
+  lineSaveValidate = (value, index) => {};
+
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
     let { headerData } = this.props.params;
@@ -1396,6 +1479,7 @@ class NewExpense extends React.Component {
                   checkMethod={this.handleCheck}
                   handleEvent={this.handleLineEvent}
                   lineEvent={this.setSharedAmount}
+                  lineSaveValidate={this.lineSaveValidate}
                   onCancel={this.handleCloseInvoice}
                 >
                   <FormItem labelCol={{ span: 3 }} wrapperCol={{ span: 20 }} label="分摊费用">

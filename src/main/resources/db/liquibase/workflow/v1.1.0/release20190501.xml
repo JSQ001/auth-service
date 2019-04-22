@@ -12,4 +12,107 @@
         <dropColumn tableName="sys_rule_condition" columnName="cost_center_name"/>
     </changeSet>
 
+    <changeSet id="201904150919001" author="maohui.zhuang">
+        <createTable tableName="sys_rule_notice" remarks="审批流通知">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_rule_notice_id"/>
+            </column>
+            <column name="rule_notice_oid" type="varchar(36)" remarks="审批流通知oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_approval_node_id" type="bigint" remarks="节点id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="sys_rule_notice_action" remarks="审批流通知动作">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_rule_notice_action_id"/>
+            </column>
+            <column name="rule_approval_node_id" type="bigint" remarks="节点id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rule_notice_id" type="bigint" remarks="审批流通知id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="action_type" type="varchar(200)" remarks="动作类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addColumn tableName="sys_rule_approval_node">
+            <column name="page_id" type="bigint" remarks="节点页面id"/>
+            <column name="addsign_flag" type="boolean" defaultValue="0" remarks="是否允许加签"/>
+            <column name="transfer_flag" type="boolean" defaultValue="0" remarks="是否允许转交"/>
+            <column name="reject_rule" type="int" defaultValue="1001" remarks="驳回后再次提交处理"/>
+            <column name="return_flag" type="boolean" defaultValue="0" remarks="允许退回指定节点"/>
+            <column name="return_info" type="mediumtext" remarks="可退回节点"/>
+            <column name="return_rule" type="int" defaultValue="1001" remarks="退回审批通过后处理"/>
+            <column name="notify_flag" type="boolean" defaultValue="0" remarks="开启审批流通知"/>
+            <column name="notify_method" type="int" remarks="通知方式"/>
+        </addColumn>
+
+        <addColumn tableName="sys_rule_approver">
+            <column name="rule_notice_id" type="bigint" remarks="审批流通知id"></column>
+        </addColumn>
+
+        <addColumn tableName="sys_wfl_document_ref">
+            <column name="withdraw_flag" type="boolean" defaultValue="1" remarks="允许撤回"></column>
+            <column name="withdraw_rule" type="int" defaultValue="1001" remarks="撤回模式"></column>
+            <column name="jump_node_id" type="bigint" remarks="跳到的节点id"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904150919002" author="maohui.zhuang">
+        <addColumn tableName="sys_approval_form">
+            <column name="withdraw_flag" type="boolean" defaultValue="1" remarks="允许撤回"></column>
+            <column name="withdraw_rule" type="int" defaultValue="1001" remarks="撤回模式"></column>
+        </addColumn>
+        <addColumn tableName="sys_rule_approval_node">
+            <column name="notify_method_pc" type="int" remarks="PC消息通知方式"/>
+            <column name="notify_method_app" type="int" remarks="APP消息通知方式"/>
+            <column name="notify_method_email" type="int" remarks="邮件通知方式"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904161011001" author="maohui.zhuang">
+        <addColumn tableName="sys_rule_approval_node">
+            <column name="return_type" type="int" remarks="可退回节点"/>
+            <column name="return_nodes" type="mediumtext" remarks="自选节点"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904171257001" author="maohui.zhuang">
+        <dropNotNullConstraint tableName="sys_drools_rule_detail" columnName="rule_condition_approver_oid" columnDataType="varchar(36)"/>
+    </changeSet>
 </databaseChangeLog>

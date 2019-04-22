@@ -72,28 +72,24 @@ class BudgetControlRules extends React.Component {
           /*优先级*/
           title: this.$t({ id: 'budget.controlRules.priority' }),
           key: 'priority',
-          align: 'center',
           dataIndex: 'priority',
         },
         {
           /*控制规则代码*/
           title: this.$t({ id: 'budget.controlRuleCode' }),
           key: 'controlRuleCode',
-          align: 'center',
           dataIndex: 'controlRuleCode',
         },
         {
           /*控制规则名称*/
           title: this.$t({ id: 'budget.controlRuleName' }),
           key: 'controlRuleName',
-          align: 'center',
           dataIndex: 'controlRuleName',
         },
         {
           /*控制策略*/
           title: this.$t('budget.strategy.control.strategy') /*控制策略*/,
           key: 'strategyGroupName',
-          align: 'center',
           dataIndex: 'strategyGroupName',
         },
         {

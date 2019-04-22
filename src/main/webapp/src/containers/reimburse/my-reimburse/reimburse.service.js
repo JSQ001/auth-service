@@ -468,4 +468,21 @@ export default {
       params
     );
   },
+  /**
+   * 根据单据id获取申请人信息（新建单据时调用）
+   * @param {*} id
+   */
+  listUserByTypeId(id) {
+    return httpFetch.get(
+      `${config.expenseUrl}/api/expense/report/type/users?expenseReportTypeId=${id}`
+    );
+  },
+
+  /**
+   * 根据用户oid获取公司及部门信息（新建单据时调用）
+   * @param {*} userOid
+   */
+  getUserInfoByTypeId(userOid) {
+    return httpFetch.get(`${config.mdataUrl}/api/users/oid/` + userOid);
+  },
 };

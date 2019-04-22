@@ -1,22 +1,20 @@
 package com.hand.hcf.app.mdata.period.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.period.domain.Periods;
 import com.hand.hcf.app.mdata.period.dto.PeriodsDTO;
 import com.hand.hcf.app.mdata.period.service.PeriodsService;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,8 +33,7 @@ public class PeriodsResource {
 
     @Autowired
     private PeriodsService periodsService;
-    @Autowired
-    RedisTemplate redisTemplate;
+
     /**
      * @api {get} /api/periods/query/close 分页查询关闭的期间数据
      * @apiGroup Periods
@@ -153,7 +150,7 @@ public class PeriodsResource {
         Boolean result=false;
         byte[] lockKey = (OrgInformationUtil.getCurrentUserOid() + String.valueOf(periodID)).getBytes(Charset.forName("utf8"));
         Boolean locked = false;
-        try {
+        /*try {
             //check
             locked = (Boolean) redisTemplate.execute(new RedisCallback() {
                 @Override
@@ -182,7 +179,7 @@ public class PeriodsResource {
                     }
                 });
             }
-        }
+        }*/
         return ResponseEntity.ok(result);
     }
     /**

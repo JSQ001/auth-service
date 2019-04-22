@@ -1,7 +1,8 @@
 import React from 'react';
 // import Chooser from 'widget/chooser';
-import { Form, Modal, Input, Table, Card, message, Button } from 'antd';
+import { Form, Input, Card, message, Row, Col } from 'antd';
 import { connect } from 'dva';
+import Lov from 'widget/Template/lov';
 import accountService from './modify-account.service';
 import ModifyAccountAddInformation from './modify-account-add-information';
 
@@ -10,45 +11,20 @@ class ModifyAccountAdd extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      bankList: [], // 银行账户列表
-      visible: false, // 控制行信息选择银行账户的弹窗的显示
       selectDate: {}, // 银行账户信息选中的值
       isNew: true, // 是否为新建单据
       isCan1: false, // 是否为新建单据
       isDisable: true, // 可用标志
       applicationInformation: {},
       backInformation: [],
-      pagination: {
-        total: 0,
-        page: 0,
-        pageSize: 10,
-        current: 1,
-      },
-      columns: [
-        {
-          title: '银行账号',
-          dataIndex: 'accountNumber',
-          key: 'accountnumber',
-          align: 'center',
-          width: 150,
-          tooltips: true,
-        },
-        {
-          title: '账户户名',
-          dataIndex: 'accountName',
-          align: 'center',
-          width: 150,
-          tooltips: true,
-        },
-      ],
     };
   }
 
   componentDidMount() {
     const { match } = this.props;
-    if (match.params.id === 'new') {
-      console.log('new');
-    } else {
+    // console.log(match.params.id)
+    if (match.params.id !== 'new') {
+      // console.log(match.params.id!=='new')
       this.setState({
         isNew: false,
       });
@@ -57,26 +33,15 @@ class ModifyAccountAdd extends React.Component {
   }
 
   /**
-   * 选择银行账户
-   */
-  showDrawer = () => {
-    this.setState({
-      visible: true,
-    });
-    this.getBackList();
-  };
-
-  /**
    * 点击确定
    */
-  onOk = () => {
-    const { selectDate, isCan1 } = this.state;
+  onOk = values => {
+    const { isCan1 } = this.state;
     this.setState({
-      applicationInformation: selectDate,
-      visible: false,
+      applicationInformation: values,
     });
-    if (selectDate.accountDepositType === 'ZJ_TIME') {
-      console.log(isCan1);
+    if (values.accountDepositType === 'ZJ_TIME') {
+      console.log(isCan1); //
       this.setState({
         isCan1: false,
       });
@@ -90,20 +55,6 @@ class ModifyAccountAdd extends React.Component {
   onchangeIsCan = () => {
     this.setState({
       isCan1: false,
-    });
-  };
-
-  /**
-   * 取消
-   */
-  onBack = () => {
-    const {
-      form: { resetFields },
-    } = this.props;
-    resetFields('modalAccount');
-    this.setState({
-      visible: false,
-      selectDate: {},
     });
   };
 
@@ -152,52 +103,6 @@ class ModifyAccountAdd extends React.Component {
       });
   };
 
-  /**
-   * 分页点击
-   */
-  onChangePager = pagination => {
-    const temp = {};
-    temp.page = pagination.current - 1;
-    temp.current = pagination.current;
-    temp.pageSize = pagination.pageSize;
-    this.setState(
-      {
-        pagination: temp,
-      },
-      () => {
-        this.getBackList();
-      }
-    );
-  };
-
-  /**
-   * 获取开户银行列表
-   */
-  getBackList = () => {
-    const { pagination } = this.state;
-    const {
-      form: { getFieldValue },
-    } = this.props;
-    const accountNumber = getFieldValue('modalAccount');
-    accountService
-      .getPageByCondition(pagination.page, pagination.pageSize, accountNumber)
-      .then(response => {
-        this.setState({
-          bankList: response.data,
-          loading: false,
-          pagination: {
-            ...pagination,
-            total: Number(response.headers['x-total-count'])
-              ? Number(response.headers['x-total-count'])
-              : 0,
-            pageSize: pagination.pageSize,
-            onChange: this.onChangePager,
-            current: pagination.page + 1,
-          },
-        });
-      });
-  };
-
   modalSearch = () => {
     const {
       form: { getFieldValue },
@@ -214,7 +119,7 @@ class ModifyAccountAdd extends React.Component {
 
   render() {
     const { applicationInformation, isNew, backInformation, isDisable, isCan1 } = this.state;
-    const { columns, pagination, visible, bankList, loading, selectDate } = this.state;
+    const { selectDate } = this.state;
     const { user } = this.props;
     const {
       form: { getFieldDecorator },
@@ -227,23 +132,7 @@ class ModifyAccountAdd extends React.Component {
         span: 12,
       },
     };
-    const rowRadioSelection = {
-      type: 'radio',
-      columnTitle: '选择',
-      onSelect: selectedRowKeys => {
-        this.setState({
-          selectDate: selectedRowKeys,
-        });
-      },
-    };
-    const accountFormItemLayout = {
-      labelCol: {
-        span: 3,
-      },
-      wrapperCol: {
-        span: 12,
-      },
-    };
+
     return (
       <div>
         {isNew ? (
@@ -256,58 +145,45 @@ class ModifyAccountAdd extends React.Component {
             }}
           >
             <Form layout="inline">
-              <FormItem label="银行账号" {...formItemLayout}>
-                {getFieldDecorator('accountNumber', {
-                  rules: [{ required: true }],
-                  initialValue: selectDate.accountNumber ? selectDate.accountNumber : '',
-                })(<Input onClick={this.showDrawer} autoComplete="off" />)}
-              </FormItem>
-              <Modal title="银行账号选择" visible={visible} onOk={this.onOk} onCancel={this.onBack}>
-                {/* 共total条数据 */}
-                <div className="table-header-title">
-                  {this.$t('common.total', { total: pagination.total ? pagination.total : '0' })}
-                </div>
-                {/* 搜索区域 */}
-                <Form style={{ paddingBottom: '20px' }}>
-                  <Form.Item label="银行账号" {...accountFormItemLayout}>
-                    {getFieldDecorator('modalAccount', {
-                      initialValue: '',
-                    })(<Input autoComplete="off" onPressEnter={this.modalSearch} />)}
-                  </Form.Item>
-                  <div style={{ position: 'relative', left: '65%' }}>
-                    <Button type="primary" onClick={this.modalSearch}>
-                      {this.$t('搜索')}
-                    </Button>&nbsp;&nbsp;&nbsp;
-                    <Button onClick={this.modalSearchClear}>重置</Button>
-                  </div>
-                </Form>
-                <Table
-                  rowKey={record => record.id}
-                  columns={columns}
-                  dataSource={bankList}
-                  pagination={pagination}
-                  rowSelection={rowRadioSelection}
-                  loading={loading}
-                  onChange={this.onChangePager}
-                  bordered
-                  size="middle"
-                />
-              </Modal>
-              <FormItem label="单据编号" {...formItemLayout}>
-                {getFieldDecorator('documentNumber', {
-                  rules: [{ required: true }],
-                  initialValue: backInformation,
-                })(<Input setfieldsvalue={applicationInformation.documentNumber} disabled />)}
-              </FormItem>
-              <FormItem label="单据类型" {...formItemLayout}>
-                {<Input defaultValue="账户变更" disabled />}
-              </FormItem>
-              <FormItem label="申请人" {...formItemLayout}>
-                {getFieldDecorator('userName', {
-                  rules: [{ required: true }],
-                  initialValue: user.userName ? user.userName : '',
-                })(<Input setfieldsvalue={user.userName} disabled />)}
-              </FormItem>
+              <Row>
+                <Col span={6}>
+                  <FormItem label="银行账号" {...formItemLayout}>
+                    {getFieldDecorator('accountNumber', {
+                      rules: [{ required: true }],
+                      initialValue: selectDate.accountNumber ? selectDate.accountNumber : '',
+                    })(
+                      <Lov
+                        code="bank_account_all"
+                        valueKey="id"
+                        labelKey="accountNumber"
+                        single
+                        onChange={this.onOk}
+                      />
+                    )}
+                  </FormItem>
+                </Col>
+                <Col span={6}>
+                  <FormItem label="单据编号" {...formItemLayout}>
+                    {getFieldDecorator('documentNumber', {
+                      rules: [{ required: true }],
+                      initialValue: backInformation,
+                    })(<Input setfieldsvalue={applicationInformation.documentNumber} disabled />)}
+                  </FormItem>
+                </Col>
+                <Col span={6}>
+                  <FormItem label="单据类型" {...formItemLayout}>
+                    {<Input defaultValue="账户变更" disabled />}
+                  </FormItem>
+                </Col>
+                <Col span={6}>
+                  <FormItem label="申请人" {...formItemLayout}>
+                    {getFieldDecorator('userName', {
+                      rules: [{ required: true }],
+                      initialValue: user.userName ? user.userName : '',
+                    })(<Input setfieldsvalue={user.userName} disabled />)}
+                  </FormItem>
+                </Col>
+              </Row>
             </Form>
           </Card>
         ) : null}

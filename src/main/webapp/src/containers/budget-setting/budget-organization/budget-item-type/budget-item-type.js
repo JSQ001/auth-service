@@ -19,12 +19,10 @@ class BudgetItemType extends React.Component {
           title: this.$t({ id: 'budgetItemType.itemTypeCode' }),
           dataIndex: 'itemTypeCode',
           key: 'itemTypeCode',
-          align: 'center',
         },
         {
           title: this.$t({ id: 'budgetItemType.itemTypeName' }),
           dataIndex: 'itemTypeName',
-          align: 'center',
           key: 'itemTypeName',
         },
         {

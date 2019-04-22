@@ -55,8 +55,20 @@ class BankDefinition extends React.Component {
       },
       //顶部搜索区域
       searchForm: [
-        { type: 'input', id: 'bankCode', label: this.$t('bank.bankCode') } /*银行代码*/,
-        { type: 'input', id: 'bankBranchName', label: this.$t('bank.bankBranchName') } /*支行*/,
+        {
+          label: this.$t('bank.country'),
+          type: 'list',
+          id: 'countryCode',
+          colSpan: 6,
+          listType: 'select_country',
+          labelKey: 'country',
+          valueKey: 'code',
+          options: [],
+          single: true,
+          listExtraParams: { roleType: 'TENANT' },
+        },
+        { type: 'input', id: 'bankCode', colSpan: 6, label: '联行号' } /*联行号*/,
+        { type: 'input', id: 'bankBranchName', colSpan: 6, label: '分支行名称' } /*分支行名称*/,
         // {
         //   type: 'select',
         //   id: 'countryCode',
@@ -76,21 +88,10 @@ class BankDefinition extends React.Component {
         //   },
         // },
         {
-          label: this.$t('bank.country'),
-          type: 'list',
-          id: 'countryCode',
-          colSpan: 6,
-          listType: 'select_country',
-          labelKey: 'country',
-          valueKey: 'code',
-          options: [],
-          single: true,
-          listExtraParams: { roleType: 'TENANT' },
-        },
-        {
           type: 'input',
           id: 'openAccount',
           options: [],
+          colSpan: 6,
           event: 'ADDRESS_CHANGE',
           label: this.$t('bank.openAccount') /*开户地*/,
         },
@@ -124,19 +125,6 @@ class BankDefinition extends React.Component {
           ),
         },
         {
-          /*银行代码*/
-          width: '15%',
-          title: this.$t('bank.bankCode'),
-          key: 'bankCode',
-          dataIndex: 'bankCode',
-        },
-        {
-          width: '10%',
-          title: 'Swift Code',
-          key: 'Swift Code',
-          dataIndex: 'swiftCode',
-        },
-        {
           /*银行名称*/
           title: this.$t('bank.bankName'),
           key: 'bankName',
@@ -154,8 +142,15 @@ class BankDefinition extends React.Component {
           ),
         },
         {
-          /*支行名称*/
-          title: this.$t('bank.bankBranchName'),
+          /*联行号*/
+          width: '15%',
+          title: '联行号',
+          key: 'bankCode',
+          dataIndex: 'bankCode',
+        },
+        {
+          /*分支行名称*/
+          title: '分支行名称',
           key: 'bankBranchName',
           dataIndex: 'bankBranchName',
         },
@@ -164,6 +159,12 @@ class BankDefinition extends React.Component {
           title: this.$t('bank.openAccount'),
           key: 'openAccount',
           dataIndex: 'openAccount',
+        },
+        {
+          width: '10%',
+          title: 'Swift Code',
+          key: 'Swift Code',
+          dataIndex: 'swiftCode',
         },
         {
           /*详细地址*/
@@ -234,19 +235,6 @@ class BankDefinition extends React.Component {
           ),
         },
         {
-          /*银行代码*/
-          width: '15%',
-          title: this.$t('bank.bankCode'),
-          key: 'bankCode',
-          dataIndex: 'bankCode',
-        },
-        {
-          width: '10%',
-          title: 'Swift Code',
-          key: 'Swift Code',
-          dataIndex: 'swiftCode',
-        },
-        {
           /*银行名称*/
           title: this.$t('bank.bankName'),
           key: 'bankName',
@@ -264,8 +252,15 @@ class BankDefinition extends React.Component {
           ),
         },
         {
-          /*支行名称*/
-          title: this.$t('bank.bankBranchName'),
+          /*联行号*/
+          width: '15%',
+          title: '联行号',
+          key: 'bankCode',
+          dataIndex: 'bankCode',
+        },
+        {
+          /*分支行名称*/
+          title: '分支行名称',
           key: 'bankBranchName',
           dataIndex: 'bankBranchName',
           render: desc => (
@@ -285,6 +280,12 @@ class BankDefinition extends React.Component {
           title: this.$t('bank.openAccount'),
           key: 'openAccount',
           dataIndex: 'openAccount',
+        },
+        {
+          width: '10%',
+          title: 'Swift Code',
+          key: 'Swift Code',
+          dataIndex: 'swiftCode',
         },
         {
           /*详细地址*/
@@ -457,22 +458,23 @@ class BankDefinition extends React.Component {
   // 产品要求说："用户选择中国的时候，把省与市联动"
   // 我需要一个接口，一次性获取中国的所有省市，后端说8号给不了，
   // 我这边就占时循环调接口，把省市掉出来，以此添加用户体验
+  // 因为资金的省市需要特定的省市代码，所以这里重新选择接口 add by xxy
   //获取中国的所有省
   getChinaState = () => {
-    let params = {
-      // language: this.props.language.local === 'zh_cn' ? 'zh_cn' : 'en_us',
-      code: 'CHN000000000',
-      vendorType: 'standard',
-      page: 0,
-      size: 1000,
-    };
-    BSService.getStatesAndCitys(params).then(response => {
-      let children = response.data.map(item => {
-        item.label = item.state;
-        item.value = item.code;
+    // let params = {
+    //   // language: this.props.language.local === 'zh_cn' ? 'zh_cn' : 'en_us',
+    //   code: 'CHN000000000',
+    //   vendorType: 'standard',
+    //   page: 0,
+    //   size: 1000,
+    // };
+    BSService.getProvincesAndCity().then(response => {
+      const children = response.data.map(item => {
+        item.label = item.provinceDesc;
+        item.value = item.provinceCode;
         item.children.map(city => {
-          city.label = city.city;
-          city.value = city.code;
+          city.label = city.description;
+          city.value = city.regionCode;
         });
         //item.children = [];
         //this.getCityByCode(item.code);

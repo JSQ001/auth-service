@@ -36,15 +36,15 @@ class BudgetScenarios extends React.Component {
       columns: [
         {
           title: this.$t({ id: 'budget.scenarios.code' } /*预算场景代码*/),
-          align: 'center',
           dataIndex: 'scenarioCode',
           key: 'scenarioCode',
+          width: 210,
         },
         {
           title: this.$t({ id: 'budget.scenarios.name' } /*预算场景名称*/),
-          align: 'center',
           dataIndex: 'scenarioName',
           key: 'scenarioName',
+          width: 260,
           render: desc => (
             <Popover placement="topLeft" content={desc}>
               {desc}
@@ -53,9 +53,9 @@ class BudgetScenarios extends React.Component {
         },
         {
           title: this.$t({ id: 'common.remark' } /*备注*/),
-          align: 'center',
           dataIndex: 'description',
           key: 'description',
+          width: 372,
           render: desc =>
             desc ? (
               <Popover placement="topLeft" content={desc}>
@@ -67,10 +67,9 @@ class BudgetScenarios extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.scenarios.default' } /*默认场景*/),
-          align: 'center',
           dataIndex: 'defaultFlag',
           key: 'defaultFlag',
-          width: '10%',
+          width: 140,
           render: defaultFlag => (defaultFlag ? 'Y' : '-'),
         },
         {
@@ -78,7 +77,7 @@ class BudgetScenarios extends React.Component {
           align: 'center',
           dataIndex: 'enabled',
           key: 'enabled',
-          width: '10%',
+          width: 105,
           render: enabled => (
             <Badge
               status={enabled ? 'success' : 'error'}

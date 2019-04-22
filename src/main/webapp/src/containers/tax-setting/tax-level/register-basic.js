@@ -16,21 +16,25 @@ class RegisterBasic extends React.Component {
           title: '纳税人名称',
           dataIndex: 'taxpayerName',
           key: 'taxpayerName',
+          align: 'left',
         },
         {
           title: '纳税人识别号',
           dataIndex: 'taxpayerNumber',
           key: 'taxpayerNumber',
+          align: 'left',
         },
         {
           title: '税号类型',
           dataIndex: 'taxpayerNumberTypeName',
           key: 'taxpayerNumberTypeName',
+          align: 'left',
         },
         {
           title: '纳税资质',
           dataIndex: 'taxQualificationName',
           key: 'taxQualificationName',
+          align: 'left',
         },
       ],
     };
@@ -39,7 +43,6 @@ class RegisterBasic extends React.Component {
     TaxLevelService.pageTaxValueAddedTaxInfoByCond()
       .then(res => {
         let data = res.data;
-        console.log(data);
         let data1 = this.buildTree(data);
         this.setState({
           dataSource: data1,

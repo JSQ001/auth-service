@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.approval.service;
 
 import com.hand.hcf.app.common.co.WorkflowMessageCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.common.event.WorkflowCustomRemoteEvent;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.domain.WorkFlowEventLogs;
@@ -25,8 +24,6 @@ import org.springframework.util.Assert;
 public class WorkflowApprovalNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(WorkflowApprovalNotificationService.class);
 
-    @Value("${spring.application.name}")
-    private String applicationName;
 
     @Autowired
     private WorkFlowEventLogsService workFlowEventLogsService;
@@ -56,7 +53,7 @@ public class WorkflowApprovalNotificationService {
             return;
         }
 
-        WorkflowCustomRemoteEvent workflowCustomRemoteEvent = createWorkflowCustomRemoteEvent(workFlowDocumentRef);
+       /* WorkflowCustomRemoteEvent workflowCustomRemoteEvent = createWorkflowCustomRemoteEvent(workFlowDocumentRef);
         // 记录到事件日志表
         WorkFlowEventLogs workFlowEventLogs = createWorkFlowEventLogs(workflowCustomRemoteEvent, workFlowDocumentRef);
         workFlowEventLogsService.createSysWorkflowEventLogs(workFlowEventLogs);
@@ -66,7 +63,7 @@ public class WorkflowApprovalNotificationService {
         workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
 
         logger.info("[发布工作流事件消息]：" + workflowCustomRemoteEvent);
-        applicationEventPublisher.publishEvent(workflowCustomRemoteEvent);
+        applicationEventPublisher.publishEvent(workflowCustomRemoteEvent);*/
     }
 
     /**
@@ -76,7 +73,7 @@ public class WorkflowApprovalNotificationService {
      * @param workFlowDocumentRef
      * @return
      */
-    protected WorkflowCustomRemoteEvent createWorkflowCustomRemoteEvent(WorkFlowDocumentRef workFlowDocumentRef) {
+    /*protected WorkflowCustomRemoteEvent createWorkflowCustomRemoteEvent(WorkFlowDocumentRef workFlowDocumentRef) {
         Assert.notNull(workFlowDocumentRef, "workFlowDocumentRef null");
 
         WorkflowMessageCO workflowMessageCO = new WorkflowMessageCO();
@@ -95,7 +92,7 @@ public class WorkflowApprovalNotificationService {
                 this, originalSevice, destinationService, workflowMessageCO);
 
         return workflowCustomRemoteEvent;
-    }
+    }*/
 
     /**
      * @author mh.z
@@ -105,7 +102,7 @@ public class WorkflowApprovalNotificationService {
      * @param workFlowDocumentRef
      * @return
      */
-    protected WorkFlowEventLogs createWorkFlowEventLogs(WorkflowCustomRemoteEvent workflowCustomRemoteEvent,
+    /*protected WorkFlowEventLogs createWorkFlowEventLogs(WorkflowCustomRemoteEvent workflowCustomRemoteEvent,
                                                         WorkFlowDocumentRef workFlowDocumentRef) {
         Assert.notNull(workFlowDocumentRef, "workflowCustomRemoteEvent null");
         Assert.notNull(workFlowDocumentRef, "workFlowDocumentRef null");
@@ -118,6 +115,6 @@ public class WorkflowApprovalNotificationService {
         workFlowEventLogs.setEventConfirmStatus(false);
 
         return workFlowEventLogs;
-    }
+    }*/
 
 }

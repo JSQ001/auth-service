@@ -35,7 +35,10 @@ import CustomTable from 'components/Widget/custom-table';
 import PropTypes from 'prop-types';
 import PrePaymentCommon from 'containers/pre-payment/my-pre-payment/detail-readonly';
 import ExpenseApplication from 'containers/expense-application-form/detail-readonly';
+import ProjectApplication from 'containers/project-manage/my-project-apply/project-apply-details/mol-project-details-common';
 import ReimburseDetail from 'containers/reimburse/reimburse-approve/reimburse-detail-common';
+import ExpenseReportDetail from 'containers/reimburse/my-reimburse/reimburse-detail-finance';
+import httpFetch from 'share/httpFetch';
 
 class ContractDetailCommon extends React.Component {
   constructor(props) {
@@ -112,6 +115,7 @@ class ContractDetailCommon extends React.Component {
         },
       },
       paginationAccount: {
+        //  报账单分页
         total: 0,
         showTotal: (total, range) =>
           this.$t(
@@ -124,6 +128,9 @@ class ContractDetailCommon extends React.Component {
         current: 1,
         pageSizeOptions: ['5', '10', '20', '30', '40'],
       },
+
+      //  预付款单分页
+      preTableLoading: false,
       paginationPre: {
         total: 0,
         showTotal: (total, range) =>
@@ -138,6 +145,8 @@ class ContractDetailCommon extends React.Component {
         page: 0,
         pageSizeOptions: ['5', '10', '20', '30', '40'],
       },
+
+      // 关联申请单
       applyPagination: {
         total: 0,
         showTotal: (total, range) =>
@@ -152,6 +161,22 @@ class ContractDetailCommon extends React.Component {
         page: 0,
         pageSizeOptions: ['5', '10', '20', '30', '40'],
       },
+
+      //合同关联项目申请单
+      projectPagination: {
+        total: 0,
+        showTotal: (total, range) =>
+          this.$t(
+            { id: 'common.show.total' },
+            { range0: `${range[0]}`, range1: `${range[1]}`, total: total }
+          ),
+        showSizeChanger: true,
+        showQuickJumper: true,
+        pageSize: 5,
+        current: 1,
+        pageSizeOptions: ['5', '10', '20', '30', '40'],
+      },
+
       columns: [
         {
           title: this.$t({ id: 'my.contract.currency' } /*币种*/),
@@ -255,7 +280,7 @@ class ContractDetailCommon extends React.Component {
         {
           /*提交日期*/
           title: this.$t('acp.requisitionDate'),
-          dataIndex: 'createdDate',
+          dataIndex: 'requisitionDate',
           width: 100,
           align: 'center',
           render: value => (
@@ -293,12 +318,9 @@ class ContractDetailCommon extends React.Component {
           key: 'status',
           width: '10%',
           align: 'center',
-          dataIndex: 'reportStatus',
-          render: reportStatus => (
-            <Badge
-              status={this.$statusList[reportStatus].state}
-              text={this.$statusList[reportStatus].label}
-            />
+          dataIndex: 'status',
+          render: status => (
+            <Badge status={this.$statusList[status].state} text={this.$statusList[status].label} />
           ),
         },
       ],
@@ -409,6 +431,51 @@ class ContractDetailCommon extends React.Component {
           ),
         },
       ],
+
+      //合同关联项目申请单
+      projectColumns: [
+        {
+          title: '单据编号',
+          dataIndex: 'projectNumber',
+          align: 'center',
+          render: (projectNumber, record) => (
+            <Popover content={projectNumber}>
+              <a onClick={() => this.skipToDocumentDetail(record, 4)}>{projectNumber}</a>
+            </Popover>
+          ),
+        },
+        {
+          title: '项目申请单名称',
+          dataIndex: 'projectName',
+          align: 'center',
+          render: projectName => <Popover content={projectName}>{projectName}</Popover>,
+        },
+        {
+          title: '申请日期',
+          dataIndex: 'requisitionDate',
+          align: 'center',
+          render: requisitionDate => (
+            <Popover content={requisitionDate ? moment(requisitionDate).format('YYYY-MM-DD') : ''}>
+              {requisitionDate ? moment(requisitionDate).format('YYYY-MM-DD') : ''}
+            </Popover>
+          ),
+        },
+        {
+          title: '项目负责人',
+          dataIndex: 'pmName',
+          align: 'center',
+          //render: pmName => this.filterMoney(pmName),
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          align: 'center',
+          render: status => (
+            <Badge status={this.$statusList[status].state} text={this.$statusList[status].label} />
+          ),
+        },
+      ],
+
       payColumns: [
         //合同行号
         {
@@ -584,77 +651,171 @@ class ContractDetailCommon extends React.Component {
 
   //获取合同关联的预付款单
   getPrepaymentHeadByContract() {
-    const { headerData, paginationPre } = this.state;
-    contractService
-      .getPrepaymentHeadByContractNumber(headerData.contractNumber)
-      .then(res => {
-        let data = [];
-        res.data.map(item =>
-          item.line.map((i, index) =>
-            data.push({
-              ...item.head,
-              ...i,
-              id: item.head.id,
-              lineNumber:
-                index + 1 + this.state.paginationPre.page * this.state.paginationPre.pageSize,
-            })
-          )
-        );
-        paginationPre.total = data.length;
-        this.setState(
-          {
+    let { headerData, paginationPre } = this.state;
+
+    let page = paginationPre.current - 1;
+    let size = paginationPre.pageSize;
+    let number = headerData.id;
+
+    this.setState({ preTableLoading: true }, () => {
+      contractService
+        .getPrepaymentHeadByContractId(number, page, size)
+        .then(res => {
+          let data = [];
+          res.data.map(item =>
+            item.line.map((i, index) =>
+              data.push({
+                ...item.head,
+                ...i,
+                id: item.head.id,
+                lineNumber: index + 1 + page * size,
+              })
+            )
+          );
+
+          this.setState({
             prepaymentData: data,
-          },
-          () => {}
-        );
-      })
-      .catch(e => {
-        if (e && e.response) message.error(e.response.data.message);
-      });
+            preTableLoading: false,
+            paginationPre: {
+              total: Number(res.headers['x-total-count'])
+                ? Number(res.headers['x-total-count'])
+                : 0,
+              current: page + 1,
+              onShowSizeChange: this.onShowPrepaymentSizeChange,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: total => `共搜到 ${total} 条数据`,
+            },
+          });
+        })
+        .catch(e => {
+          if (e && e.response) message.error(e.response.data.message);
+        });
+    });
   }
+  onShowPrepaymentSizeChange = (current, pageSize) => {
+    this.setState(
+      {
+        paginationPre: {
+          current: current,
+          pageSize: pageSize,
+        },
+      },
+      () => {
+        this.getPrepaymentHeadByContract();
+      }
+    );
+  };
+  tablePreChange = paginationPre => {
+    this.setState({ paginationPre }, () => {
+      this.getPrepaymentHeadByContract();
+    });
+  };
 
   //获取合同关联申请单
   getApplyHeadByContrcat() {
-    const { headerData, applyPagination } = this.state;
+    let { headerData, applyPagination } = this.state;
+
+    let page = applyPagination.current - 1;
+    let size = applyPagination.pageSize;
+    let id = headerData.id;
+
     contractService
-      .getApplyHeadByContrcat(headerData.id)
+      .getApplyHeadByContrcat(id, page, size)
       .then(res => {
         const data = [];
         res.data.map((item, index) =>
           data.push({
             ...item,
-            lineNumber: index + 1 + applyPagination.page * applyPagination.pageSize,
+            lineNumber: index + 1 + page * size,
           })
         );
-        applyPagination.total = data.length;
-        this.setState(
-          {
-            applicationData: data,
+
+        this.setState({
+          applicationData: data,
+          applyPagination: {
+            total: Number(res.headers['x-total-count']) ? Number(res.headers['x-total-count']) : 0,
+            current: page + 1,
+            onShowSizeChange: this.onShowApplySizeChange,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: total => `共搜到 ${total} 条数据`,
           },
-          () => {}
-        );
+        });
       })
       .catch(e => {
         if (e && e.response) message.error(e.response.data.message);
       });
   }
+  onShowApplySizeChange = (current, pageSize) => {
+    this.setState(
+      {
+        loading: true,
+        applyPagination: {
+          current: current,
+          pageSize: pageSize,
+        },
+      },
+      () => {
+        this.getApplyHeadByContrcat();
+      }
+    );
+  };
+  tableApplyChange = applyPagination => {
+    this.setState({ applyPagination }, () => {
+      this.getApplyHeadByContrcat();
+    });
+  };
 
   //获取合同关联的报账单
   getAccountHeadByContract() {
-    let { headerData } = this.state;
-    contractService.getAccountHeadByContract(headerData.id).then(res => {
-      let data = [];
+    let { headerData, paginationAccount } = this.state;
+
+    let page = paginationAccount.current - 1;
+    let size = paginationAccount.pageSize;
+    let contractHeaderId = headerData.id;
+
+    httpFetch
+      .get(
+        `${
+          config.contractUrl
+        }/api/contract/document/relations/associate/expReport/${contractHeaderId}?page=${page}&size=${size}`
+      )
+      .then(res => {
+        /* let data = []; 
       res.data.map(item => {
         item.expensePaymentScheduleList.map(i => {
           data.push({ ...item.expenseReportHeader, ...i });
         });
-      });
+      }); */
 
-      this.setState({
-        AccountData: data,
+        this.setState({
+          AccountData: res.data,
+          paginationAccount: {
+            total: Number(res.headers['x-total-count']) ? Number(res.headers['x-total-count']) : 0,
+            current: page + 1,
+            onShowSizeChange: this.onShowSizeChange,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: total => `共搜到 ${total} 条数据`,
+          },
+        });
       });
-    });
   }
+  onShowSizeChange = (current, pageSize) => {
+    this.setState(
+      {
+        loading: true,
+        paginationAccount: {
+          current: current,
+          pageSize: pageSize,
+        },
+      },
+      () => {
+        this.getAccountHeadByContract();
+      }
+    );
+  };
 
   //获取支付明细数据payData
   getPayDetailByContractHeaderId() {
@@ -925,7 +1086,6 @@ class ContractDetailCommon extends React.Component {
   };
 
   handleHeadEdit = () => {
-    //this.context.router.push(this.state.EditContract.url.replace(':id',this.state.headerData.id).replace(':contractTypeId',this.state.headerData.contractTypeId));
     this.props.dispatch(
       routerRedux.replace({
         pathname: `/contract-manager/my-contract/edit-contract/${this.state.headerData.id}/${
@@ -1362,12 +1522,25 @@ class ContractDetailCommon extends React.Component {
     );
   }
 
+  tableChange = paginationAccount => {
+    this.setState({ paginationAccount }, () => {
+      this.getAccountHeadByContract();
+    });
+  };
+
   // 单据编号查看详情
   skipToDocumentDetail = (record, view = 1) => {
     this.setState({
-      detailsId: record.id,
+      detailsId: view === 3 ? record.expReportHeaderId : record.id,
       view,
-      detailsTitle: view === 1 ? '预付款单详情' : view === 2 ? '费用申请单详情' : '报账单详情',
+      detailsTitle:
+        view === 1
+          ? '预付款单详情'
+          : view === 2
+            ? '费用申请单详情'
+            : view === 4
+              ? '项目申请单详情'
+              : '报账单详情',
       detailsShow: true,
     });
   };
@@ -1375,6 +1548,7 @@ class ContractDetailCommon extends React.Component {
   // 渲染关联弹窗
   renderDetailsModal = () => {
     const { detailsTitle, detailsShow, detailsId, view } = this.state;
+    let params = { id: detailsId };
     // view === 1, 预付款单，view === 2 申请单， view === 3 报账单
     return (
       // {/* 关联详情 */}
@@ -1396,8 +1570,10 @@ class ContractDetailCommon extends React.Component {
           <PrePaymentCommon id={detailsId} />
         ) : Number(view) === 2 ? (
           <ExpenseApplication id={detailsId} />
+        ) : Number(view) === 4 ? (
+          <ProjectApplication id={detailsId} />
         ) : (
-          <ReimburseDetail id={detailsId} isApprovePage />
+          <ExpenseReportDetail params={params} />
         )}
       </Modal>
     );
@@ -1409,6 +1585,9 @@ class ContractDetailCommon extends React.Component {
       payColumns,
       paginationAccount,
       paginationPre,
+      projectColumns,
+      ProjectData,
+      paginationProject,
       preColumns,
       headerData,
       prepaymentData,
@@ -1446,6 +1625,8 @@ class ContractDetailCommon extends React.Component {
                     pagination={paginationPre}
                     bordered
                     size="middle"
+                    onChange={this.tablePreChange}
+                    loading={this.state.preTableLoading}
                   />
                 </Card>
               </div>
@@ -1467,6 +1648,7 @@ class ContractDetailCommon extends React.Component {
                     pagination={applyPagination}
                     bordered
                     size="middle"
+                    onChange={this.tableApplyChange}
                   />
                 </Card>
               </div>
@@ -1488,9 +1670,32 @@ class ContractDetailCommon extends React.Component {
                     pagination={paginationAccount}
                     bordered
                     size="middle"
+                    onChange={this.tableChange}
                   />
                 </Card>
               </div>
+
+              <div style={{ background: 'white', margin: '-50px 0 50px 0px', padding: 0 }}>
+                <Card
+                  style={{
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    marginRight: 15,
+                    marginLeft: 15,
+                  }}
+                >
+                  <h3 style={{ fontSize: 18, borderBottom: '1px solid #ececec' }}>
+                    关联项目申请单
+                  </h3>
+                  <CustomTable
+                    ref={ref => (this.projectDetail = ref)}
+                    url={`${config.contractUrl}/api/project/requisition/by/contract/id`}
+                    params={{ contractHeaderId: headerData.id }}
+                    pagination={{ pageSize: 5 }}
+                    columns={projectColumns}
+                  />
+                </Card>
+              </div>
+
               <div style={{ background: 'white', margin: '-50px 0 50px 0px', padding: 0 }}>
                 <Card
                   style={{

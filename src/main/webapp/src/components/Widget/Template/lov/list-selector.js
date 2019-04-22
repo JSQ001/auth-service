@@ -27,7 +27,9 @@ class ListSelector extends Component {
     const { code, lovData, dispatch } = nextProps;
     if (code) {
       if (code in lovData) {
-        this.setState({ lov: { ...lovData[code] }, loading: false });
+        this.setState({ lov: { ...lovData[code] }, loading: true }, () => {
+          this.setState({ loading: false });
+        });
         return;
       }
 
@@ -35,6 +37,7 @@ class ListSelector extends Component {
       httpFetch
         .get(`${config.baseUrl}/api/lov/detail/${code}`)
         .then(res => {
+          console.log(res);
           if (res.data) {
             res.data.columns = res.data.columns.map(o => ({ ...o, title: this.$t(o.title) }));
             res.data.searchForm = res.data.searchForm.map(o => ({ ...o, label: this.$t(o.label) }));

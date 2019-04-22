@@ -33,7 +33,7 @@ class NewExpenseApplicationFrom extends Component {
         documentType: 'PREPAYMENT_REQUISITION',
       },
       dimensionValues: {},
-      userList: [],
+      defaultUser: {},
       contractId: '',
       select_contract: {
         title: this.$t('expense.select.the.contract') /*选择合同*/,
@@ -169,12 +169,17 @@ class NewExpenseApplicationFrom extends Component {
     service
       .listUserByTypeId(typeId)
       .then(res => {
-        this.setState({ userList: res.data }, () => {
-          if (res.data) {
-            let user = res.data[0];
-            this.userInit(user);
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
           }
-        });
+          this.setState({ defaultUser });
+          this.userInit(defaultUser);
+        }
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -295,12 +300,8 @@ class NewExpenseApplicationFrom extends Component {
   };
 
   userInit = user => {
-    let userOid;
-    this.state.userList.map(u => {
-      if (u.id == user.id) userOid = u.userOid;
-    });
     service
-      .getUserInfoByTypeId(userOid)
+      .getUserInfoByTypeId(user.userOid)
       .then(res => {
         let temp = res.data;
         let company = [{ id: temp.companyId, name: temp.companyName }];
@@ -396,7 +397,7 @@ class NewExpenseApplicationFrom extends Component {
       applicationTypeInfo,
       fileList,
       model,
-      userList,
+      defaultUser,
       select_contract,
       contractShow,
       contractId,
@@ -416,9 +417,7 @@ class NewExpenseApplicationFrom extends Component {
                         { required: true, message: this.$t('expense.please.select.a') },
                       ] /*请选择*/,
                       initialValue: isNew
-                        ? userList.length > 0
-                          ? { id: userList[0].id, fullName: userList[0].fullName }
-                          : { id: this.props.user.id, fullName: this.props.user.fullName }
+                        ? { id: defaultUser.id, fullName: defaultUser.fullName }
                         : { id: model.employeeId, fullName: model.employeeName },
                     })(
                       <Lov

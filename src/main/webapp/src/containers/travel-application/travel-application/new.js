@@ -48,10 +48,10 @@ class NewTravelApplicationFrom extends Component {
             (o.userId = o.employeeId), (o.userName = o.employeeName);
           });
           res.data.travelFromPlaceDTOS.map(o => {
-            (o.id = o.placeId), (o.city = o.placeName);
+            (o.id = o.placeId), (o.description = o.placeName);
           });
           res.data.travelToPlaceDTOS.map(o => {
-            (o.id = o.placeId), (o.city = o.placeName);
+            (o.id = o.placeId), (o.description = o.placeName);
           });
           this.setState({
             isNew: false,
@@ -455,9 +455,9 @@ class NewTravelApplicationFrom extends Component {
                       // />
                       <Chooser
                         type="select_city"
-                        labelKey="city"
+                        labelKey="description"
                         valueKey="id"
-                        listExtraParams={{ code: 'CHN000000000' }}
+                        listExtraParams={{ code: 'CHN0' }}
                         showClear={false}
                       />
                     )}
@@ -480,9 +480,9 @@ class NewTravelApplicationFrom extends Component {
                       // />
                       <Chooser
                         type="select_city"
-                        labelKey="city"
+                        labelKey="description"
                         valueKey="id"
-                        listExtraParams={{ code: 'CHN000000000' }}
+                        listExtraParams={{ code: 'CHN0' }}
                         showClear={false}
                       />
                     )}

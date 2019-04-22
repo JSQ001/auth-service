@@ -16,6 +16,8 @@ import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import moment from 'moment';
 import Chooser from 'widget/chooser';
+import Upload from 'widget/upload-button';
+import config from 'config';
 import accountService from './modify-account.service';
 
 const FormItem = Form.Item;
@@ -25,6 +27,7 @@ class modifyAccountAddInformation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      uploadOIDs: [], // 附件oid
       isCan: false, // 定期存款是否可以修改
       backMessage: [], // 保存后返回的信息
       accountPropertyList: [], // 账户性质值列表
@@ -134,12 +137,43 @@ class modifyAccountAddInformation extends React.Component {
   };
 
   /**
+   * 上传附件
+   */
+  handleUpload = OIDs => {
+    const { params } = this.props;
+    const { isTrue } = this.state;
+    if (isTrue) {
+      if (params.approveStatus === 'ZJ_APPROVED') {
+        message.error('单据状态为已审批，信息不可修改');
+      } else if (params.approveStatus === 'ZJ_PENGDING') {
+        message.error('单据状态为审批中，信息不可修改');
+      }
+    } else {
+      const { uploadOIDs } = this.state;
+      console.log('22');
+      console.log(uploadOIDs);
+      OIDs.forEach(item => {
+        uploadOIDs.push(item);
+      });
+      console.log('22');
+      console.log(uploadOIDs);
+      this.setState({
+        uploadOIDs,
+      });
+    }
+  };
+
+  /**
    * 保存
    */
   saveApplicationInformation = async () => {
     const { form, applicationInformation } = this.props;
     const { user, isNew } = this.props;
-    const { backMessage } = this.state;
+    const { backMessage, uploadOIDs } = this.state;
+    console.log('11');
+    console.log(this.state);
+    console.log(uploadOIDs);
+    console.log(uploadOIDs[0]);
     form.validateFields((err, values) => {
       if (!err) {
         const saveData = {
@@ -216,6 +250,7 @@ class modifyAccountAddInformation extends React.Component {
             : values.ukey3RegisterName.name,
           acountUkeyInfo: null,
           id: null,
+          attachmentOid: uploadOIDs.join(','),
           versionNumber: values.versionNumber ? values.versionNumber : '',
         };
 
@@ -411,6 +446,7 @@ class modifyAccountAddInformation extends React.Component {
     };
     const {
       accountPropertyList,
+      fileList,
       accountUseList,
       accountDepositTypeList,
       directFlagList,
@@ -952,7 +988,7 @@ class modifyAccountAddInformation extends React.Component {
             </section>
             <section style={{ paddingTop: '15px' }}>
               <Row>
-                <Col span={12}>
+                <Col span={9}>
                   <FormItem label="说明" labelCol={{ span: 4 }} wrapperCol={{ span: 16 }}>
                     {getFieldDecorator('accountSubjectsCode', {
                       rules: [{ required: true }],
@@ -960,6 +996,27 @@ class modifyAccountAddInformation extends React.Component {
                         ? applicationInformation.accountSubjectsCode
                         : '',
                     })(<Input placeholder="请维护" disabled={isReadOnly} />)}
+                  </FormItem>
+                </Col>
+              </Row>
+            </section>
+            <section>
+              <Row>
+                <Col span={6}>
+                  <FormItem label="附件信息" {...formItemLayout}>
+                    {getFieldDecorator('attachmentOID', {
+                      initialValue: applicationInformation.attachmentOid
+                        ? applicationInformation.attachmentOid
+                        : '',
+                    })(
+                      <Upload
+                        attachmentType="CONTRACT"
+                        uploadUrl={`${config.baseUrl}/api/upload/static/attachment`}
+                        fileNum={9}
+                        uploadHandle={this.handleUpload}
+                        defaultFileList={fileList}
+                      />
+                    )}
                   </FormItem>
                 </Col>
               </Row>

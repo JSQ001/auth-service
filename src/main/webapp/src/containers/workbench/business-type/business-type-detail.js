@@ -28,7 +28,7 @@ class BusinessTypeDetail extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     // redux中没有数据则设置
     if (!this.props.businessType.id) {
       businessTypeService.getBusinessTypeById(this.props.match.params.id).then(res => {
@@ -108,7 +108,7 @@ class BusinessTypeDetail extends React.Component {
       <Spin spinning={this.state.spin}>
         <div style={{ paddingBottom: 60 }}>
           <h3 className="header-title">{businessType.businessTypeName}</h3>
-          <Tabs onChange={this.onChangeTabs} defaultActiveKey={tab}>
+          <Tabs onChange={this.onChangeTabs} activeKey={tab}>
             {this.renderTabs()}
           </Tabs>
           {this.renderContent()}

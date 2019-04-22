@@ -115,6 +115,7 @@ class Lov extends Component {
 
   // table行点击事件
   onTableClick = record => {
+    console.log(record);
     const { selectedRows, selectedRowKeys } = this.state;
     const { single } = this.props;
     const {

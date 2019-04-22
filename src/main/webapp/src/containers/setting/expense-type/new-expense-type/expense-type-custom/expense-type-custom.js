@@ -46,8 +46,9 @@ class ExpenseTypeCustom extends React.Component {
 
   componentDidMount() {
     let { counter } = this.state;
-    let { languageList } = this.props;
-    let nowWidgets = JSON.parse(JSON.stringify(this.props.expenseType.fields));
+    let { languageList, expenseType } = this.props;
+    !expenseType && (expenseType = {});
+    let nowWidgets = JSON.parse(JSON.stringify(expenseType.fields)) || [];
     nowWidgets.map(widget => {
       widget.counterFlag = counter++;
       if (!widget.i18n || JSON.stringify(widget) === '{}') {
@@ -265,6 +266,7 @@ class ExpenseTypeCustom extends React.Component {
           this.props.onSave();
         })
         .catch(e => {
+          message.error(messages('adjust.save.fail') + e.response.data.message);
           this.setState({ saving: false });
         });
     }
@@ -474,7 +476,7 @@ class ExpenseTypeCustom extends React.Component {
             ) : (
               messages('expense.type.drag.components')
             )}
-            {(expenseType.fields.length > 0 || nowWidgets.length > 0) &&
+            {((expenseType && expenseType.fields.length > 0) || nowWidgets.length > 0) &&
               tenantMode && (
                 <div className="widget-setting-buttons">
                   <Button type="primary" onClick={this.handleSave} loading={saving}>

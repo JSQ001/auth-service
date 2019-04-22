@@ -46,20 +46,17 @@ class BudgetStrategyDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.rule.code' } /*规则代码*/),
-          align: 'center',
           dataIndex: 'detailCode',
           key: 'detailCode',
         },
         {
           title: this.$t({ id: 'budget.strategy.control.strategy' } /*控制策略*/),
-          align: 'center',
           dataIndex: 'controlMethod',
           key: 'controlMethod',
           render: method => <span>{method.label}</span>,
         },
         {
           title: this.$t({ id: 'budget.strategy.rule.name' } /*控制规则名称*/),
-          align: 'center',
           dataIndex: 'detailName',
           key: 'detailName',
           render: desc => (
@@ -70,7 +67,6 @@ class BudgetStrategyDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.message' } /*消息*/),
-          align: 'center',
           dataIndex: 'messageCode',
           key: 'messageCode',
           render: (message, record) =>
@@ -87,7 +83,6 @@ class BudgetStrategyDetail extends React.Component {
         },
         {
           title: this.$t({ id: 'budget.strategy.event' } /*事件*/),
-          align: 'center',
           dataIndex: 'expWfEvent',
           key: 'expWfEvent',
           render: event => <span>{event ? event : '-'}</span>,

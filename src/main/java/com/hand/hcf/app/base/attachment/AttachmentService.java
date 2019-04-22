@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.attachment;
 
-import com.alibaba.fastjson.JSONObject;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.persistence.AttachmentMapper;

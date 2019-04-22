@@ -7,15 +7,17 @@ import {
   Card,
   Select,
   Modal,
-  Table,
+  Input,
   Icon,
   DatePicker,
   message,
   Button,
+  Popover,
 } from 'antd';
 import { connect } from 'dva';
 import moment from 'moment';
 import { routerRedux } from 'dva/router';
+import Table from 'widget/table';
 import PayShowService from './pay-show.service';
 import { accAdd, objectEquals } from '../../fund-components/utils';
 
@@ -26,7 +28,6 @@ class ManualQuery extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      // goBack: '',
       selectValue: {},
       payUpdateValue: {}, // 存放支付状态和支付日期的修改值
       showOrHideButton: 'none',
@@ -45,79 +46,84 @@ class ManualQuery extends React.Component {
         current: 1,
         showSizeChanger: true,
         showQuickJumper: true,
-        showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
+        showTotal: (total, range) =>
+          this.$t('common.show.total', {
+            range0: `${range[0]}`,
+            range1: `${range[1]}`,
+            total,
+          }),
       },
       columns: [
         {
-          title: '预警状态',
+          title: this.$t('fund.early.warning.state') /* 预警状态 */,
           dataIndex: 'warningStatusDesc',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '预警信息',
+          title: this.$t('fund.early.warning.information') /* 预警信息 */,
           dataIndex: 'warningData',
-          width: 100,
-          align: 'center',
+          width: 120,
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '来源单据号',
+          title: this.$t('fund.source.document.number') /* 来源单据号 */,
           dataIndex: 'tradeCode',
-          width: 100,
-          align: 'center',
+          width: 200,
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '收款户名',
+          title: this.$t('fund.name.receiver') /* 收款户名 */,
           dataIndex: 'gatherAccountName',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '收款分行',
+          title: this.$t('fund.collection.branch') /* 收款分行 */,
           dataIndex: 'gatherBranchBankName',
-          width: 100,
-          align: 'center',
+          width: 180,
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '收款账号',
+          title: this.$t('fund.receiving.account') /* 收款账号 */,
           dataIndex: 'gatherAccount',
-          width: 100,
-          align: 'center',
+          width: 190,
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
-          width: 100,
-          align: 'center',
+          width: 140,
+          render: value => <div style={{ textAlign: 'right' }}>{this.filterMoney(value)}</div>,
         },
         {
-          title: '付款用途',
+          title: this.$t('fund.payment.purpose') /* 付款用途 */,
           dataIndex: 'paymentPurposeDesc',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '摘要',
+          title: this.$t('fund.abstract') /* 摘要 */,
           dataIndex: 'description',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '公私标志',
+          title: this.$t('fund.public.private.signs') /* 公私标志 */,
           dataIndex: 'propFlagDesc',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '卡折标志',
+          title: this.$t('fund.kashe.logo') /* 卡折标志 */,
           dataIndex: 'cardSignDesc',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '支付状态',
+          title: this.$t('fund.payment.status') /* 支付状态 */,
           dataIndex: 'paymentStatusDesc',
-          width: 130,
+          width: 110,
           align: 'center',
           render: (record, index) => {
             const {
@@ -129,8 +135,6 @@ class ManualQuery extends React.Component {
               doingSelecRow,
             } = this.state;
             const { match } = this.props;
-            // record -----> 当前框的值，如支付状态
-            // index  -----> 当前行的整个对象
             let value = {};
             if (selectedRow.includes(index) && JSON.stringify(payUpdateValue) !== '{}') {
               value = { key: payUpdateValue.payStatus.key, value: payUpdateValue.payStatus.label };
@@ -142,9 +146,11 @@ class ManualQuery extends React.Component {
                 value: index.paymentStatusDesc,
               };
             }
-            return match.params.status === 'BEING' && paymentMethodDesc !== '银企直连' ? (
+            return match.params.status === 'BEING' &&
+              paymentMethodDesc !== '银企直联' /* 银企直连 */ ? (
+              /* eslint-disable */
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('fund.please.choose')} /* 请选择 */
                 style={selectWidth}
                 labelInValue
                 value={value}
@@ -156,14 +162,15 @@ class ManualQuery extends React.Component {
                   })}
               </Select>
             ) : (
+              /* eslint-disable */
               <span>{record || ''}</span>
             );
           },
         },
         {
-          title: '支付日期',
+          title: this.$t('fund.date.of.payment') /* 支付日期 */,
           dataIndex: 'paymentDate',
-          width: 170,
+          width: 110,
           align: 'center',
           render: (record, index) => {
             const { match } = this.props;
@@ -179,16 +186,28 @@ class ManualQuery extends React.Component {
           },
         },
         {
-          title: '银行反馈信息',
+          title: this.$t('fund.bank.feedback.information') /* 银行反馈信息 */,
           dataIndex: 'bankFeedback',
           width: 100,
-          align: 'center',
+          render: recode => <Popover content={recode}>{recode}</Popover>,
         },
         {
-          title: '回单',
+          title: this.$t('fund.the.receipt') /* 回单 */,
           dataIndex: 'receiptNum',
           width: 100,
           align: 'center',
+          render: (record, index) => {
+            // console.log(record)
+            const { paymentMethodDesc, billTypeDesc } = this.state;
+            const { match } = this.props;
+            return match.params.status === 'BEING' &&
+              paymentMethodDesc !== '银企直连' &&
+              billTypeDesc === '手工付款单' ? (
+              <Input value={index.receiptNum} onChange={e => this.inputData(e, index)} />
+            ) : (
+              <span>{record || ''}</span>
+            );
+          },
         },
       ],
     };
@@ -280,6 +299,7 @@ class ManualQuery extends React.Component {
           description: data[0].description || '', // 描述
           bankCodeName: data[0].bankCodeName || '', // 付款银行名称
           billDateDesc: data[0].billDateDesc, // 单据日期
+          billTypeDesc: data[0].billTypeDesc, // 回单
           pagination: {
             ...pagination,
             total: Number(response.headers['x-total-count'])
@@ -325,9 +345,13 @@ class ManualQuery extends React.Component {
     );
     const noticeAlert = (
       <span>
-        已选择
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项 |共
-        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>元
+        {this.$t('fund.selected')}
+        {/* 已选择 */}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.desc.code7')}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}>{totalAmount}</span>
+        {this.$t('fund.yuan')}
+        {/* 元 */}
       </span>
     );
     this.setState({
@@ -389,14 +413,15 @@ class ManualQuery extends React.Component {
   confirmButton = () => {
     const { selectedRow } = this.state;
     const { dispatch } = this.props;
-
+    // console.log('保存', selectedRow)
     PayShowService.updateSave(selectedRow)
       .then(res => {
+        // console.log(res)
         if (res.data === 'SUCCESS') {
-          message.success('保存成功');
+          message.success(this.$t('fund.save.successful')); /* 保存成功 */
           dispatch(
             routerRedux.push({
-              pathname: '/fund-pay/pay-show/pay-show/Success',
+              pathname: `/fund-pay/pay-show/pay-show/${'SUCCESS'}`,
             })
           );
         } else {
@@ -418,7 +443,7 @@ class ManualQuery extends React.Component {
         showModal: true,
       });
     } else {
-      message.error('请选中要修改的单据！！');
+      message.error(this.$t('')); // 请选中要修改的单据！
     }
   };
 
@@ -440,6 +465,24 @@ class ManualQuery extends React.Component {
       payUpdateValue: {},
       selectValue: e,
       doingSelecRow: index,
+      tableData: tableData,
+    });
+  };
+
+  /**
+   * 回单
+   */
+  inputData = (e, index) => {
+    const { tableData } = this.state;
+    tableData.map(item => {
+      if (item.id === index.id) {
+        /* eslint-disable */
+        item.receiptNum = e.target.value;
+        /* eslint-disable */
+      }
+      return item;
+    });
+    this.setState({
       tableData: tableData,
     });
   };
@@ -535,22 +578,59 @@ class ManualQuery extends React.Component {
           }}
         >
           <div style={{ borderBottom: '1px solid rgb(236, 236, 236)', marginTop: '-20px' }}>
-            <h3>明细信息:</h3>
+            <h3>{this.$t('fund.the.detail.information')}:</h3>
+            {/*明细信息*/}
           </div>
           <Row style={{ marginTop: '15px' }}>
-            <Col span={7}>付款单号：{paymentBatchNumber || ''}</Col>
-            <Col span={6}>付款方式：{paymentMethodDesc || ''}</Col>
-            <Col span={6}>付款公司：{paymentCompanyName || ''}</Col>
-            <Col span={5}>单据日期：{billDateDesc || ''}</Col>
+            <Col span={7}>
+              {this.$t('fund.payment.order.no1')}
+              {paymentBatchNumber || ''}
+            </Col>
+            {/*付款单号：*/}
+            <Col span={6}>
+              {this.$t('fund.terms.of.payment:')}
+              {paymentMethodDesc || ''}
+            </Col>
+            {/*付款方式：*/}
+            <Col span={6}>
+              {this.$t('fund.payment.companies:')}
+              {paymentCompanyName || ''}
+            </Col>
+            {/*付款公司：*/}
+            <Col span={5}>
+              {this.$t('fund.date.of.documents:')}
+              {billDateDesc || ''}
+            </Col>
+            {/*单据日期：*/}
           </Row>
           <Row style={{ marginTop: '15px' }}>
-            <Col span={7}>付款账号：{paymentAccount || ''}</Col>
-            <Col span={6}>付款银行：{bankCodeName || ''}</Col>
-            <Col span={6}>付款账户：{paymentAccountName || ''}</Col>
-            <Col span={5}>币种：{currencyCode || ''}</Col>
+            <Col span={7}>
+              {this.$t('fund.payment.account:')}
+              {paymentAccount || ''}
+            </Col>
+            {/*付款账号：*/}
+            <Col span={6}>
+              {this.$t('fund.paying.bank:')}
+              {bankCodeName || ''}
+            </Col>
+            {/*付款银行：*/}
+            <Col span={6}>
+              {this.$t('fund.payment.account:')}
+              {paymentAccountName || ''}
+            </Col>
+            {/*付款账户：*/}
+            <Col span={5}>
+              {this.$t('fund.currency:')}
+              {currencyCode || ''}
+            </Col>
+            {/*币种：*/}
           </Row>
           <Row style={{ marginTop: '15px' }}>
-            <Col span={5}>描述：{description || ''}</Col>
+            <Col span={5}>
+              {this.$t('fund.description:')}
+              {description || ''}
+            </Col>
+            {/*描述：*/}
           </Row>
         </Card>
         <div style={{ marginTop: '30px' }}>
@@ -564,7 +644,8 @@ class ManualQuery extends React.Component {
                   disabled={selectedRow.length === 0}
                   onClick={this.confirmButton}
                 >
-                  保存
+                  {this.$t('fund.save')}
+                  {/*保存*/}
                 </Button>
                 <Button
                   style={{ marginRight: '8px', display: showOrHideButton }}
@@ -572,11 +653,9 @@ class ManualQuery extends React.Component {
                   type="primary"
                   onClick={this.bulkChanges}
                 >
-                  批量修改
+                  {this.$t('fund.bulk.changes')}
+                  {/*批量修改*/}
                 </Button>
-                {/* <Button type="primary" onClick={this.sendUnlinePay}>
-                  跟踪单据
-                </Button> */}
               </Col>
             </Row>
           </div>
@@ -598,7 +677,7 @@ class ManualQuery extends React.Component {
             scroll={{ x: 1500 }}
           />
           <Modal
-            title="批量修改"
+            title={this.$t('fund.bulk.changes')} /*批量修改*/
             visible={showModal}
             onOk={this.handleOk}
             onCancel={this.handleCancel}
@@ -606,7 +685,8 @@ class ManualQuery extends React.Component {
             <Form>
               <Row style={{ marginTop: '20px' }}>
                 <Col span={4}>
-                  <span>支付状态：</span>
+                  <span>{this.$t('fund.payment.condition:')}</span>
+                  {/*支付状态：*/}
                 </Col>
                 <Col span={20}>
                   <Form.Item>
@@ -616,7 +696,7 @@ class ManualQuery extends React.Component {
                     })(
                       <Select
                         style={{ width: '60%' }}
-                        placeholder="请选择"
+                        placeholder={this.$t('fund.please.choose')} /*请选择*/
                         labelInValue
                         onChange={this.getPayOptions}
                       >
@@ -631,7 +711,8 @@ class ManualQuery extends React.Component {
               </Row>
               <Row>
                 <Col span={4}>
-                  <span>支付日期：</span>
+                  <span>{this.$t('fund.date.of.payment:')}</span>
+                  {/*支付日期：*/}
                 </Col>
                 <Col span={20}>
                   <Form.Item>
@@ -645,7 +726,9 @@ class ManualQuery extends React.Component {
             </Form>
           </Modal>
           <a style={{ fontSize: '14px', paddingBottom: '20px' }} onClick={this.handleBack}>
-            <Icon type="rollback" style={{ marginRight: '5px', marginBottom: '15px' }} />返回
+            <Icon type="rollback" style={{ marginRight: '5px', marginBottom: '15px' }} />
+            {this.$t('fund.back')}
+            {/*返回*/}
           </a>
         </div>
       </div>

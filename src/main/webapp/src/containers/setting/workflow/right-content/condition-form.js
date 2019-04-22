@@ -1377,7 +1377,7 @@ class ConditionForm extends React.Component {
       });
   };
 
-  //保存修改的条件
+  // 保存修改的条件
   handelSaveUpdateParams = params => {
     params.map((item, index) => {
       params[index].approverIndex = this.props.approverIndex;
@@ -1550,8 +1550,8 @@ class ConditionForm extends React.Component {
               if (type === 'text') {
                 return (
                   <Row className="type-text" key={index}>
-                    <Col span={2}>{item.name}</Col>
-                    <Col span={language.code === 'zh_cn' ? 3 : 4}>
+                    <span>{item.name}</span>
+                    <span className="condition-list-item">
                       <Select
                         size="small"
                         value={String(item.symbol)}
@@ -1567,21 +1567,22 @@ class ConditionForm extends React.Component {
                           return <Option key={symbolsItem.key}>{symbolsItem.name}</Option>;
                         })}
                       </Select>
-                    </Col>
-                    <Col span={6}>
+                    </span>
+                    <span>
                       <Input
                         size="small"
+                        style={{ width: 200 }}
                         defaultValue={item.value}
                         onChange={e => this.handleTextValueChange(e, item)}
                       />
-                    </Col>
+                    </span>
                   </Row>
                 );
               }
               if (type === 'boolean') {
                 return (
                   <Row className="type-boolean" key={index}>
-                    <Col span={2}>
+                    <span>
                       {item.remark === 'judge_cost_center' ? (
                         <span>
                           {this.$t('setting.key1302' /*申请人*/)} = {item.name}
@@ -1590,8 +1591,8 @@ class ConditionForm extends React.Component {
                       ) : (
                         <span>{item.name}</span>
                       )}
-                    </Col>
-                    <Col span={language.code === 'zh_cn' ? 3 : 4}>
+                    </span>
+                    <span className="condition-list-item">
                       <Select
                         size="small"
                         value={String(item.symbol)}
@@ -1603,7 +1604,7 @@ class ConditionForm extends React.Component {
                           return <Option key={symbolsItem.key}>{symbolsItem.name}</Option>;
                         })}
                       </Select>
-                    </Col>
+                    </span>
                   </Row>
                 );
               }
@@ -1630,15 +1631,15 @@ class ConditionForm extends React.Component {
                 }
                 return (
                   <Row className="type-cust-list" key={index}>
-                    <Col span={4}>
+                    <span>
                       {item.remark === 'default_user_department'
                         ? this.$t('setting.key1304' /*【申请人】*/)
                         : item.remark === 'select_department'
                           ? this.$t('setting.key1305' /*【表单】*/)
                           : ''}
                       {item.name}
-                    </Col>
-                    <Col span={language.code === 'zh_cn' ? 3 : 4}>
+                    </span>
+                    <span className="condition-list-item">
                       <Select
                         size="small"
                         value={String(item.symbol)}
@@ -1655,8 +1656,8 @@ class ConditionForm extends React.Component {
                           return <Option key={symbolsItem.key}>{symbolsItem.name}</Option>;
                         })}
                       </Select>
-                    </Col>
-                    <Col span={item.remark === 'cust_list' ? 2 : 15}>
+                    </span>
+                    <span>
                       {item.remark !== 'cust_list' && this.props.itemValueRender(item, true, index)}
                       {String(item.symbol) === '9015' || String(item.symbol) === '9016' ? (
                         ''
@@ -1712,7 +1713,7 @@ class ConditionForm extends React.Component {
                           + {this.$t('common.add')}
                         </a>
                       )}
-                    </Col>
+                    </span>
                   </Row>
                 );
               }

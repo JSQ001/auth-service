@@ -47,6 +47,7 @@ class NewDataAuthority extends React.Component {
       });
     } else {
       DataAuthorityService.getDataAuthorityDetail(param.id).then(res => {
+        console.log(res.data);
         const { renderNewChangeRules } = this.state;
         const { getFieldDecorator } = this.props.form;
         renderNewChangeRules.push(
@@ -95,7 +96,8 @@ class NewDataAuthority extends React.Component {
   /**点击添加转换规则 */
   renderNewChangeRules = () => {
     const { getFieldDecorator } = this.props.form;
-    const { renderNewChangeRules } = this.state;
+    const { renderNewChangeRules, isEditRule, newDataPrams, hasId } = this.state;
+    const { form, params, company } = this.props;
     renderNewChangeRules.push(
       <LineModelChangeRules
         key={`new${this.cardIndex++}`}
@@ -103,16 +105,16 @@ class NewDataAuthority extends React.Component {
         cancelHandle={this.cancelHandle}
         canceEditHandle={this.canceEditHandle}
         targeKey={`new${this.targetKey++}`}
-        isEditRule={this.state.isEditRule}
+        isEditRule={isEditRule}
         // saveNewRule={this.saveNewRule}
         getFieldDecorator={getFieldDecorator}
-        form={this.props.form}
-        tenantId={this.props.company.tenantId}
-        newEditId={this.props.params ? this.props.params.id : undefined}
-        newDataPrams={this.state.newDataPrams}
+        form={form}
+        tenantId={company.tenantId}
+        newEditId={params ? params.id : undefined}
+        newDataPrams={newDataPrams}
         hadleHasSaveRules={this.hadleHasSaveRules}
         hasSaveEdit={this.hasSaveEdit}
-        hasId={this.state.hasId}
+        hasId={hasId}
         handleTenantListOk={this.handleTenantListOk}
         handleEmployeeListOk={this.handleEmployeeListOk}
         handleCompanyListOk={this.handleCompanyListOk}

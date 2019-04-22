@@ -14,4 +14,8 @@ public enum SourceTransactionType {
     CSH_RECEIPT,              //收款单
     CSH_WRITE_OFF,            //核销
     EXP_REVERSE,       //对公报账反冲
+    /**
+     * 进项税
+     */
+    EXP_INPUT_TAX,
 }

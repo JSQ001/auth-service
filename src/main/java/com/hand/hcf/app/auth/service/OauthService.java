@@ -6,7 +6,6 @@ import com.hand.hcf.app.auth.persistence.OauthMapper;
 import com.hand.hcf.app.auth.security.BaseTokenService;
 import com.hand.hcf.app.auth.security.BaseTokenStore;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.RedisHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +29,6 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
     @Autowired
     private OauthMapper oauthMapper;
 
-    @Autowired
-    private RedisHelper redisHelper;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -75,9 +72,6 @@ public class OauthService extends BaseService<OauthMapper, ClientDTO> {
                 map.put("authentication", SerializationUtils.serialize(authentication));
                 map.put("authenticationId", key);
                 oauthMapper.updateOauthAccessTokenById(map);
-                //删除authentication缓存对象
-                redisHelper.deleteByKey(CacheConstants.TOKEN.concat("::Authentication").concat(tokenValue));
-                redisHelper.deleteByKey(CacheConstants.TOKEN.concat("::").concat(tokenValue));
             });
         }
     }

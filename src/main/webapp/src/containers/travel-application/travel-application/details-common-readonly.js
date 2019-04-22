@@ -64,6 +64,14 @@ class TravelCommon extends React.Component {
             return <span>{record.departmentName ? record.departmentName : ''}</span>;
           },
         },
+        {
+          title: this.$t('expense.responsibility.center') /*责任中心*/,
+          dataIndex: 'responsibilityCenterCodeName',
+          width: 120,
+          render: value => {
+            return <Popover content={value}>{value}</Popover>;
+          },
+        },
       ],
       showSlideFrame: false,
       slideFrameTitle: '',

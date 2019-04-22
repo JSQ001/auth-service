@@ -10,7 +10,6 @@ import com.hand.hcf.app.base.system.constant.Constants;
 import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.system.domain.PasswordHistory;
 import com.hand.hcf.app.base.system.enums.DeviceVerificationStatus;
-import com.hand.hcf.app.base.system.service.MailService;
 import com.hand.hcf.app.base.system.service.MessageTranslationService;
 import com.hand.hcf.app.base.system.service.PasswordHistoryService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
@@ -34,13 +33,11 @@ import com.hand.hcf.app.common.enums.UserStatusEnum;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
-import com.hand.hcf.app.core.redisLock.annotations.SyncLock;
 import com.hand.hcf.app.core.security.domain.Authority;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.RandomUtil;
-import com.hand.hcf.app.core.util.RedisHelper;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
@@ -90,13 +87,7 @@ public class UserService extends BaseService<UserMapper, User> {
     MessageTranslationService messageTranslationService;
 
     @Autowired
-    MailService mailService;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    RedisHelper redisHelper;
 
     private final static String[] ruleRegex = new String[4];
 
@@ -777,12 +768,12 @@ public class UserService extends BaseService<UserMapper, User> {
         Long tenantId = null;
         for (User user : userList) {
             int noticeType = getNoticeType();
-            if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
+           /* if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
             }
             if (AccountConstants.NOTICE_TYPE_EMAIL_AND_MOBILE == noticeType) {
                 mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
-            }
+            }*/
             if (tenantId == null) {
                 tenantId = user.getTenantId();
             }
@@ -1084,7 +1075,7 @@ public class UserService extends BaseService<UserMapper, User> {
      * @return userDTO
      */
     @Transactional
-    @SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
+   //@SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
     public User createOrUpdate(User user, Long currentUserId, Long tenantId) {
 
 

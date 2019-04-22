@@ -76,4 +76,7 @@ public class ExpenseReportDistDTO extends ExpenseReportDist{
 
     //备注
     private String description;
+
+    //报账单状态
+    private Integer status;
 }

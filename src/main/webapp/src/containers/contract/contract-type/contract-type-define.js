@@ -69,6 +69,16 @@ class ContractTypeDefine extends React.Component {
           dataIndex: 'contractCategoryName',
         },
         {
+          title: this.$t('contract.type.stampTaxType'),
+          align: 'center',
+          dataIndex: 'stampTaxTypeName',
+        },
+        {
+          title: this.$t('contract.type.stampTax'),
+          align: 'center',
+          dataIndex: 'stampTax',
+        },
+        {
           title: this.$t('adjust.formName'),
           align: 'center',
           dataIndex: 'formName',

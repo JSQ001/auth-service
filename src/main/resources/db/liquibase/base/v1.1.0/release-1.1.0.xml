@@ -5,5 +5,70 @@
     <property name="now" value="sysdate" dbms="oracle"/>
     <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
     <property name="amount" value="decimal(20,2)"/>
+    <changeSet id="2019041610550001" author="zhanhua.cheng">
+        <addColumn tableName="sys_tenant">
+            <column name="system_flag" type="tinyint" defaultValue="0" remarks="是否系统级租户"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2019041610550002" author="zhanhua.cheng">
+        <addColumn tableName="sys_serve_locale">
+            <column name="tenant_id" type="bigint" remarks="租户id"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2019041610550003" author="zhanhua.cheng">
+        <addColumn tableName="sys_front_locale">
+            <column name="tenant_id" type="bigint" remarks="租户id"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="2019041610550004" author="zhanhua.cheng">
+        <update tableName="sys_tenant">
+        <column name="system_flag"  type="tinyint" value="1"/>
+        <where>id = 0</where>
+        </update>
+    </changeSet>
 
+    <changeSet id="201904161653001" author="zhanhua.cheng">
+        <dropUniqueConstraint tableName="sys_serve_locale" uniqueColumns="language,key_code" constraintName="sys_serve_locale_u1"/>
+        <addUniqueConstraint tableName="sys_serve_locale" columnNames="language,key_code,tenant_id" constraintName="sys_serve_locale_u1"/>
+    </changeSet>
+    <changeSet id="201904161653002" author="zhanhua.cheng">
+        <dropUniqueConstraint tableName="sys_front_locale" uniqueColumns="language,key_code" constraintName="sys_front_locale_u1"/>
+        <addUniqueConstraint tableName="sys_front_locale" columnNames="language,key_code,tenant_id" constraintName="sys_front_locale_u1"/>
+    </changeSet>
+
+    <changeSet id="20194161700001" author="polus">
+        <dropTable tableName="sys_error_message"/>
+        <dropTable tableName="sys_front_key"/>
+        <dropTable tableName="sys_module"/>
+        <dropTable tableName="sys_menu"/>
+        <dropTable tableName="sys_menu_button"/>
+        <dropTable tableName="sys_role_menu"/>
+        <dropTable tableName="sys_role_menu_button"/>
+    </changeSet>
+
+    <changeSet id="20194161700002" author="polus">
+        <addColumn tableName="sys_content_list">
+            <column name="tenant_id" type="bigint" remarks="租户id"></column>
+        </addColumn>
+        <addColumn tableName="sys_function_list">
+            <column name="tenant_id" type="bigint" remarks="租户id"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20194161700003" author="polus">
+        <addColumn tableName="sys_content_list">
+            <column name="source_id" type="bigint" remarks="租户id"></column>
+        </addColumn>
+        <addColumn tableName="sys_function_list">
+            <column name="source_id" type="bigint" remarks="租户id"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20194161900001" author="polus">
+        <dropUniqueConstraint tableName="sys_function_list" constraintName="sys_function_list_u1"/>
+        <addUniqueConstraint tableName="sys_function_list" columnNames="function_name,tenant_id"  constraintName="sys_function_list_u1"/>
+
+        <dropUniqueConstraint tableName="sys_content_list" constraintName="sys_content_list_u1"/>
+        <addUniqueConstraint tableName="sys_content_list" columnNames="content_name,tenant_id"  constraintName="sys_content_list_u1"/>
+    </changeSet>
 </databaseChangeLog>

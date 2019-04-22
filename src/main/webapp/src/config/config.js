@@ -2,12 +2,12 @@ const config = {
   appEnv: 'dev',
 
   /** jiu.zhao 蚂蚁定制 环境IP */
-  authUrl: 'http://30.50.48.99:9082',
-  baseUrl: 'http://30.50.48.99:9082',
-  expenseUrl: 'http://30.50.48.99:9082',
-  mdataUrl: 'http://30.50.48.99:9082',
-  prePaymentUrl: 'http://30.50.48.99:9082',
-  workflowUrl: 'http://30.50.48.99:9082',
+  authUrl: '.',
+  baseUrl: '.',
+  expenseUrl: '.',
+  mdataUrl: '.',
+  prePaymentUrl: '.',
+  workflowUrl: '.',
   /** jiu.zhao 蚂蚁定制 */
 
   // baseUrl: 'http://139.224.2.45:11024',

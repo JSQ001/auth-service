@@ -2,6 +2,7 @@ package com.hand.hcf.app.mdata.company.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ClientCO;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.conver.CompanyCover;
@@ -17,7 +18,7 @@ import com.hand.hcf.app.mdata.utils.ParameterCodeConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.security.AuthoritiesConstants;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;

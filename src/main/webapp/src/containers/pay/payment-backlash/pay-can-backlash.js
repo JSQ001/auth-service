@@ -1,26 +1,10 @@
 import React from 'react';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
 import SlideFrame from 'widget/slide-frame';
-import config from 'config';
 import SearchArea from 'widget/search-area';
 import backlashService from './pay-backlash.service';
 import moment from 'moment';
-import {
-  Radio,
-  Badge,
-  Tabs,
-  Popover,
-  Pagination,
-  message,
-  Alert,
-  Icon,
-  Dropdown,
-  Menu,
-  Modal,
-  Form,
-  DatePicker,
-} from 'antd';
+import { Popover, Form } from 'antd';
 import ToBacklash from './to-backlash';
 import Table from 'widget/table';
 const FormItem = Form.Item;
@@ -78,7 +62,7 @@ class PayMyBacklash extends React.Component {
               disabled: true,
               labelKey: 'name',
               valueKey: 'id',
-              listExtraParams: { companyId: props.company.id },
+              listExtraParams: {},
             },
           ],
         },
@@ -156,10 +140,6 @@ class PayMyBacklash extends React.Component {
             </span>
           ),
         },
-        // { title: '申请日期', dataIndex: 'requisitionDate',
-        //   render: desc=><span><Popover content={moment(desc).format('YYYY-MM-DD')}>{desc? moment(desc).format('YYYY-MM-DD') : "-"}</Popover></span>
-        // },
-        // {title: '币种', dataIndex: 'currency'},
         {
           title: this.$t({ id: 'pay.backlash.currency' }),
           dataIndex: 'currency',
@@ -205,6 +185,7 @@ class PayMyBacklash extends React.Component {
 
         {
           title: this.$t({ id: 'pay.backlash.option' }),
+          align: 'center',
           render: (value, record) => {
             record.flag = false;
             return (
@@ -213,7 +194,7 @@ class PayMyBacklash extends React.Component {
                   this.goBacklash(record);
                 }}
               >
-                发起反冲
+                {this.$t('pay.backlash.gotoBacklash')}
               </a>
             );
           },

@@ -52,17 +52,27 @@ class NewExpenseAdjust extends React.Component {
       expenseAdjustType: {},
       model: {},
       fileList: [],
-      userList: [],
+      dimensionList: [],
+      defaultUser: {},
     };
   }
 
-  getExpenseAdjustTypeById() {
+  getExpenseAdjustTypeById = () => {
+    let expAdjustTypeId = this.props.match.params.expenseAdjustTypeId;
     expenseAdjustService
-      .getExpenseAdjustTypeById(this.props.match.params.expenseAdjustTypeId)
-      .then(response => {
-        this.setState({ expenseAdjustType: response.data.expenseAdjustType });
+      .getTypeAndDimension(expAdjustTypeId)
+      .then(res => {
+        let dimensionList = res.data.dimensions || [];
+        this.setState({
+          expenseAdjustType: res.data,
+          pageLoading: false,
+          dimensionList,
+        });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
       });
-  }
+  };
 
   /* getDept() {
      expenseAdjustService.getDeptByOid(this.props.user.departmentOid).then(response => {
@@ -93,10 +103,71 @@ class NewExpenseAdjust extends React.Component {
         let model = res.data;
         model.companyId = [{ id: model.companyId, name: model.companyName }];
         model.unitId = [{ departmentId: model.unitId, name: model.unitName }];
-        this.props.form.setFieldsValue({ ...model, employeeId: model.employeeName });
+        this.setState(
+          {
+            model,
+            fetch: true,
+            fileList,
+            uploadOids: res.data.attachmentOidList,
+            dimensionList: res.data.dimensions || [],
+          },
+          () => {
+            this.props.form.setFieldsValue({ ...model, employeeId: model.employeeName });
+          }
+        );
         this.setState({ model, fetch: true, fileList, uploadOids: res.data.attachmentOidList });
       });
   }
+
+  userOrCompanyOrUnitChange = (companyId, unitId, userId) => {
+    let oldCompany = this.props.form.getFieldValue('companyId');
+    let oldUnit = this.props.form.getFieldValue('unitId');
+    let oldUser = this.props.form.getFieldValue('user');
+    if (companyId === 'oldId') {
+      companyId = oldCompany[0].id;
+    }
+    if (unitId === 'oldId') {
+      unitId = oldUnit[0].departmentId;
+    }
+    if (userId === 'oldId') {
+      userId = oldUser.id;
+    }
+    this.setDimension(this.state.dimensionList, companyId, unitId, userId);
+  };
+
+  companyChange = value => {
+    debugger;
+    this.userOrCompanyOrUnitChange(value[0].id, 'oldId', 'oldId');
+  };
+
+  unitChange = value => {
+    this.userOrCompanyOrUnitChange('oldId', value[0].departmentId, 'oldId');
+  };
+
+  /**
+   * 设置维度
+   */
+  setDimension = (dimensions, companyId, unitId, userId) => {
+    if (dimensions !== null && dimensions.length !== 0) {
+      let dimensionIds = dimensions.map(item => item.dimensionId);
+      expenseAdjustService
+        .getDimensionItemsByIds(dimensionIds, companyId, unitId, userId)
+        .then(res => {
+          let temp = res.data;
+          dimensions.forEach(e => {
+            let items = temp.find(o => o.id === e.dimensionId)['subDimensionItemCOS'];
+            e.options = items;
+            this.props.form.setFieldsValue({ ['dimension-' + e.dimensionId]: undefined });
+          });
+          this.setState({
+            dimensionList: dimensions || [],
+          });
+        })
+        .catch(err => {
+          message.error(err.response.data.message);
+        });
+    }
+  };
 
   //获取币种
   getCurrencyOptions = () => {
@@ -120,12 +191,29 @@ class NewExpenseAdjust extends React.Component {
           companyId: values.companyId[0].id,
           unitId: values.unitId[0].departmentId,
         };
+
+        let { dimensionList } = this.state;
+        Object.keys(values).map(key => {
+          if (key.indexOf('-') >= 0) {
+            let dimensionId = key.split('-')[1];
+            let record = dimensionList.find(o => o.dimensionId == dimensionId);
+            record.value = values[key];
+          }
+        });
+
+        dimensionList.map(o => {
+          if (!o.value) {
+            o.value = o.defaultValue;
+          }
+        });
+
         let method = null;
         if (this.props.match.params.id !== 'new') {
           method = expenseAdjustService.upExpenseAdjustHead;
           dataValue.expAdjustTypeId = this.props.match.params.expenseAdjustTypeId;
           dataValue.id = this.props.match.params.id;
           dataValue.employeeId = this.state.model.employeeId;
+          dataValue.dimensions = dimensionList.filter(o => o.headerFlag);
         } else {
           method = expenseAdjustService.addExpenseAdjustHead;
           dataValue = {
@@ -138,6 +226,7 @@ class NewExpenseAdjust extends React.Component {
             jeCreationDate: null,
             expAdjustTypeId: this.props.match.params.expenseAdjustTypeId,
             employeeId: values.user.id,
+            dimensions: dimensionList,
           };
         }
         method(dataValue)
@@ -168,10 +257,15 @@ class NewExpenseAdjust extends React.Component {
         let temp = res.data;
         let company = [{ id: temp.companyId, name: temp.companyName }];
         let department = [{ departmentId: temp.departmentId, name: temp.departmentName }];
-        this.props.form.setFieldsValue({
-          companyId: company,
-          unitId: department,
-        });
+        this.props.form.setFieldsValue(
+          {
+            companyId: company,
+            unitId: department,
+          },
+          () => {
+            this.userOrCompanyOrUnitChange('oldId', 'oldId', user.id);
+          }
+        );
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -182,12 +276,17 @@ class NewExpenseAdjust extends React.Component {
     expenseAdjustService
       .listUserByTypeId(typeId)
       .then(res => {
-        this.setState({ userList: res.data }, () => {
-          if (res.data) {
-            let user = res.data[0];
-            this.userChange(user);
+        if (res.data) {
+          let { defaultUser } = this.state;
+          const currentUser = res.data.find(o => o.id === this.props.user.id);
+          if (currentUser) {
+            defaultUser = currentUser;
+          } else {
+            defaultUser = res.data[0];
           }
-        });
+          this.setState({ defaultUser });
+          this.userChange(defaultUser);
+        }
       })
       .catch(err => {
         message.error('请求失败，请稍后重试...');
@@ -229,8 +328,9 @@ class NewExpenseAdjust extends React.Component {
       companyIdOptions,
       selectorItem,
       extraParams,
-      userList,
+      defaultUser,
       fetch,
+      dimensionList,
     } = this.state;
     const rowLayout = { type: 'flex', gutter: 24, justify: 'center' };
     const formItemLayout = {
@@ -255,9 +355,7 @@ class NewExpenseAdjust extends React.Component {
                     rules: [{ required: true, message: '请选择' }],
                     initialValue:
                       this.props.match.params.id === 'new'
-                        ? userList.length > 0
-                          ? { id: userList[0].id, fullName: userList[0].fullName }
-                          : { id: this.props.user.id, fullName: this.props.user.fullName }
+                        ? { id: defaultUser.id, fullName: defaultUser.fullName }
                         : { id: model.employeeId, fullName: model.employeeName },
                   })(
                     <Lov
@@ -322,6 +420,7 @@ class NewExpenseAdjust extends React.Component {
                       labelKey="name"
                       valueKey="id"
                       single={true}
+                      onChange={this.companyChange}
                       listExtraParams={{ setOfBooksId: this.props.company.setOfBooksId }}
                     />
                   )}
@@ -355,6 +454,7 @@ class NewExpenseAdjust extends React.Component {
                       labelKey="name"
                       single={true}
                       valueKey="departmentId"
+                      onChange={this.unitChange}
                       listExtraParams={{ tenantId: this.props.user.tenantId }}
                     />
                   )}
@@ -397,6 +497,35 @@ class NewExpenseAdjust extends React.Component {
                 </FormItem>
               </Col>
             </Row>
+            {dimensionList.filter(item => item.headerFlag).map(item => {
+              return (
+                <Row key={item.dimensionId} {...rowLayout}>
+                  <Col span={10}>
+                    <FormItem label={item.name} {...formItemLayout}>
+                      {getFieldDecorator('dimension-' + item.dimensionId, {
+                        rules: [
+                          {
+                            required: item.requiredFlag,
+                            message: this.$t('common.please.select'),
+                          },
+                        ],
+                        initialValue: item.value ? item.value : undefined,
+                      })(
+                        <Select allowClear={true} placeholder={this.$t('common.please.select')}>
+                          {item.options.map(option => {
+                            return (
+                              <Select.Option key={option.id}>
+                                {option.dimensionItemName}
+                              </Select.Option>
+                            );
+                          })}
+                        </Select>
+                      )}
+                    </FormItem>
+                  </Col>
+                </Row>
+              );
+            })}
             <Row {...rowLayout}>
               <Col span={10}>
                 <FormItem label={this.$t('request.detail.jd.remark')} {...formItemLayout}>

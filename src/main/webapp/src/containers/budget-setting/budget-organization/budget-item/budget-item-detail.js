@@ -91,19 +91,16 @@ class BudgetItemDetail extends React.Component {
       columns: [
         {
           title: this.$t({ id: 'structure.companyCode' }),
-          align: 'center',
           key: 'companyCode',
           dataIndex: 'companyCode',
         } /*公司代码*/,
         {
           title: this.$t({ id: 'structure.companyName' }),
-          align: 'center',
           key: 'companyName',
           dataIndex: 'companyName',
         } /*公司明称*/,
         {
           title: this.$t({ id: 'structure.companyType' }),
-          align: 'center',
           key: 'companyTypeName',
           dataIndex: 'companyTypeName' /*公司类型*/,
           render: desc => <span>{desc ? desc : '-'}</span>,
@@ -111,7 +108,6 @@ class BudgetItemDetail extends React.Component {
         {
           /*启用*/
           title: this.$t({ id: 'common.status.enable' }),
-          align: 'center',
           key: 'doneRegisterLead',
           dataIndex: 'doneRegisterLead',
           width: '10%',

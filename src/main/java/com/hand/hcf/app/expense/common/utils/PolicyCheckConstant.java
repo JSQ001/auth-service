@@ -10,9 +10,9 @@ public class PolicyCheckConstant {
     /**
      * 控制维度
      */
-    public static final String CONTROL_DIMENSION_TYPE_AMOUNT = "金额";
-    public static final String CONTROL_DIMENSION_TYPE_PRICE = "单价";
-    public static final String CONTROL_DIMENSION_TYPE_QUANTITY = "数量";
+    public static final String CONTROL_DIMENSION_TYPE_AMOUNT = "AMOUNT"; //金额
+    public static final String CONTROL_DIMENSION_TYPE_PRICE = "PRICE"; //单价
+    public static final String CONTROL_DIMENSION_TYPE_QUANTITY = "QUANTITY"; //数量
 
     /**
      * 控制维度相关数据类型
@@ -30,8 +30,9 @@ public class PolicyCheckConstant {
     public static final String JUDGEMENT_SYMBOL_NOT_BELONG = "04"; //不属于
 
     /**
-     * 系统级控件
+     * 控制策略值CODE
      */
-    public static final String SYSTEM_CONTROL_COUNTERPART = "同行人";
-    public static final String SYSTEM_CONTROL_PARTICIPANT = "参与人";
+    public static final String CONTROL_STRATEGY_CODE_PASS = "PASS"; //通过
+    public static final String CONTROL_STRATEGY_CODE_WARNING = "WARNING"; //警告
+    public static final String CONTROL_STRATEGY_CODE_FORBIDDEN = "FORBIDDEN"; //禁止
 }

@@ -268,15 +268,19 @@ class AccountOpenMaintenanceList extends React.Component {
    */
   showDeleteConfirm = () => {
     const that = this;
-    confirm({
-      title: '确定作废选中的单据吗?',
-      okText: '确定',
-      okType: 'danger',
-      cancelText: '取消',
-      onOk() {
-        that.voidClick();
-      },
-    });
+    if (that.state.selectedRow[0].approveStatus === 'ZJ_APPROVED') {
+      message.error('审批中或已审批的单据不能作废!');
+    } else {
+      confirm({
+        title: '确定作废选中的单据吗?',
+        okText: '确定',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk() {
+          that.voidClick();
+        },
+      });
+    }
   };
 
   /**

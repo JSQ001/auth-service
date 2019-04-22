@@ -25,7 +25,6 @@ import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
 import com.hand.hcf.app.mdata.system.enums.CurrencyRateSourceEnum;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import io.netty.util.internal.StringUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -476,8 +475,8 @@ public class CurrencyRateService extends BaseService<CurrencyRateMapper, Currenc
         CurrencyRateDTO target = new CurrencyRateDTO();
         List<CurrencyRate> currencyRates = currencyRateMapper.selectList(
                 new EntityWrapper<CurrencyRate>()
-                        .eq(!StringUtil.isNullOrEmpty(baseCurrency),"tenant_id", tenantId)
-                        .eq(!StringUtil.isNullOrEmpty(baseCurrency),"base_currency_code", baseCurrency)
+                        .eq(!StringUtils.isEmpty(baseCurrency),"tenant_id", tenantId)
+                        .eq(!StringUtils.isEmpty(baseCurrency),"base_currency_code", baseCurrency)
                         .eq(setOfBooksId != null,"set_of_books_id",setOfBooksId)
                         .eq("currency_code", otherCurrency)
         );
@@ -499,8 +498,8 @@ public class CurrencyRateService extends BaseService<CurrencyRateMapper, Currenc
     public CurrencyI18n getOneOtherCurrencyByBaseCurrency(Long tenantId, String baseCurrency, String otherCurrency, String language) {
         List<CurrencyRate> list = currencyRateMapper.selectList(
                 new EntityWrapper<CurrencyRate>()
-                        .eq(!StringUtil.isNullOrEmpty(baseCurrency),"tenant_id", tenantId)
-                        .eq(!StringUtil.isNullOrEmpty(baseCurrency),"base_currency_code", baseCurrency)
+                        .eq(!StringUtils.isEmpty(baseCurrency),"tenant_id", tenantId)
+                        .eq(!StringUtils.isEmpty(baseCurrency),"base_currency_code", baseCurrency)
                         .eq("currency_code", otherCurrency)
         );
         if (CollectionUtils.isEmpty(list)) {

@@ -39,10 +39,12 @@
 		<result property="auditDate" column="audit_date" />
  		<result property="requisitionDate" column="requisition_date" />
 		<result property="reportTypeName" column="report_type_name" />
+		<result property="documentNumber" column="requisition_number"/>
+		<result property="status" column="status"/>
 	</resultMap>
 
 	<select id="getExpPublicReportScheduleByIds" resultMap="ExpensePaymentScheduleResult" >
-		SELECT t.requisition_date, v.*, rt.report_type_name
+		SELECT t.requisition_date, v.*, rt.report_type_name,t.requisition_number ,t.status
 		FROM exp_report_header t, exp_report_payment_schedule v, exp_report_type rt
 		WHERE t.id = v.exp_report_header_id
 		  and t.document_type_id = rt.id
@@ -50,5 +52,22 @@
 			  <foreach collection="ids" item="id" open="(" separator="," close=")" >
 				  #{id}
 			  </foreach>
+	</select>
+
+	<select id="getExpPublicReportScheduleByContractHeaderId" resultMap="ExpensePaymentScheduleResult" >
+		SELECT t.requisition_date, v.*, rt.report_type_name,t.requisition_number ,t.status
+		FROM exp_report_header t, exp_report_payment_schedule v, exp_report_type rt
+		WHERE t.id = v.exp_report_header_id
+		and t.document_type_id = rt.id
+		and t.contract_header_id in
+		<foreach collection="ids" item="id" open="(" separator="," close=")" >
+			#{id}
+		</foreach>
+		and v.con_payment_schedule_line_id is not null
+	</select>
+	<select id="getExpPublicReportScheduleByHeaderId" resultType="com.hand.hcf.app.expense.report.domain.ExpenseReportPaymentSchedule">
+		select * from exp_report_payment_schedule t
+		where t.exp_report_header_id = #{id}
+		order by t.created_date
 	</select>
 </mapper>

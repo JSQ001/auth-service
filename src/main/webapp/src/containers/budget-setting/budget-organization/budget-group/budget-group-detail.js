@@ -25,19 +25,16 @@ class BudgetGroupDetail extends React.Component {
       columns: [
         {
           title: this.$t('budget.itemCode') /*"预算项目代码",*/,
-          align: 'center',
           dataIndex: 'itemCode',
           width: '25%',
         },
         {
           title: this.$t('budget.itemName') /*"预算项目名称",*/,
-          align: 'center',
           dataIndex: 'itemName',
           width: '35%',
         },
         {
           title: this.$t('budget.itemType') /*预算项目类型*/,
-          align: 'center',
           dataIndex: 'itemTypeName',
           width: '25%',
         },

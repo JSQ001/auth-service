@@ -209,7 +209,7 @@ class RuleDetail extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getRule(this.props.match.params.id);
     this.getList();
   }

@@ -26,6 +26,7 @@ import LineAddTransferModal from 'containers/setting/data-authority/line-add-tra
 import ListSelector from 'components/Widget/list-selector';
 import DataAuthorityService from 'containers/setting/data-authority/data-authority.service';
 import config from 'config';
+import debounce from 'lodash.debounce';
 
 class LineModelChangeRulesSystem extends React.Component {
   constructor() {
@@ -95,6 +96,7 @@ class LineModelChangeRulesSystem extends React.Component {
       selectedCompanyTreeInfo: [],
       selectedDepTreeInfo: [],
     };
+    this.handleItemName = debounce(this.handleItemName, 500);
   }
   componentWillMount() {
     let params = this.props.params;
@@ -151,6 +153,16 @@ class LineModelChangeRulesSystem extends React.Component {
   removeEditRule = targeKey => {
     this.props.canceEditHandle(targeKey);
   };
+
+  handleItemName = value => {
+    this.setState({
+      ruleName: value,
+      ruleNameValue: value,
+      validateStatus: value ? '' : 'error',
+      help: value ? '' : '请输入',
+    });
+  };
+
   /**保存单条规则 */
   saveRuleItem = (e, targeKey) => {
     e.preventDefault();
@@ -185,9 +197,15 @@ class LineModelChangeRulesSystem extends React.Component {
       filtrateMethodDesc,
       companyItemsKeys,
       departMentItemsKeys,
+      ruleName,
     } = this.state;
     this.props.form.validateFields(testRules, (err, values) => {
       if (!err) {
+        if (!ruleName) {
+          message.error('请输入规则名称！');
+          this.setState({ saveLoading: false });
+          return;
+        }
         let tenantId = this.props.tenantId;
         let params = {
           id: ruleId ? ruleId : null,
@@ -210,7 +228,7 @@ class LineModelChangeRulesSystem extends React.Component {
           dataAuthorityRules: [
             {
               i18n: null,
-              dataAuthorityRuleName: values[`dataAuthorityRuleName-${targeKey}`],
+              dataAuthorityRuleName: ruleName, // values[`dataAuthorityRuleName-${targeKey}`],
               dataAuthorityRuleDetails: [
                 {
                   dataType: 'SOB',
@@ -490,7 +508,7 @@ class LineModelChangeRulesSystem extends React.Component {
     const tenantItem = {
       title: this.$t('base.add.account.set') /*添加账套*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=SOB`,
       searchForm: [
         {
@@ -560,7 +578,7 @@ class LineModelChangeRulesSystem extends React.Component {
     const employeeItem = {
       title: this.$t('base.add.employees') /*添加员工*/,
       url: `${
-        config.baseUrl
+        config.mdataUrl
       }/api/data/authority/rule/detail/values/select?ruleId=${ruleId}&dataType=EMPLOYEE`,
       searchForm: [
         { type: 'input', id: 'code', label: this.$t('base.staff.code'), colSpan: 6 } /*员工代码*/,
@@ -705,7 +723,7 @@ class LineModelChangeRulesSystem extends React.Component {
     });
   };
   render() {
-    const { getFieldDecorator } = this.props;
+    const { getFieldDecorator } = this.props.form;
     const {
       targeKey,
       show,
@@ -739,6 +757,8 @@ class LineModelChangeRulesSystem extends React.Component {
       employeeText,
       selectedTenantList,
       selectedEmployeeList,
+      validateStatus,
+      help,
     } = this.state;
     const ruleFormLayout = {
       labelCol: { span: 6, offset: 1 },
@@ -750,21 +770,20 @@ class LineModelChangeRulesSystem extends React.Component {
           <Card style={{ background: '#f7f7f7', marginTop: 25 }}>
             <Row>
               <Col span={16} className="rule-form-title">
-                <FormItem {...ruleFormLayout} label="" className="rule-item-name">
-                  {getFieldDecorator(`dataAuthorityRuleName-${this.props.targeKey}`, {
-                    rules: [
-                      {
-                        required: true,
-                        message: this.$t({ id: 'common.please.enter' }),
-                      },
-                    ],
-                    initialValue: ruleName || '',
-                  })(
-                    <Input
-                      className="input_title"
-                      placeholder={this.$t('base.please.enter.the.rule.name')}
-                    />
-                  )}
+                <FormItem
+                  {...ruleFormLayout}
+                  label=""
+                  className="rule-item-name"
+                  validateStatus={validateStatus}
+                  help={help}
+                >
+                  <Input
+                    onChange={e => this.handleItemName(e.target.value)}
+                    className="input_title"
+                    defaultValue={ruleName}
+                    //value={ruleNameValue||''}
+                    placeholder={this.$t('base.please.enter.the.rule.name')}
+                  />
                 </FormItem>
               </Col>
               <Col span={8} style={{ paddingLeft: 60 }}>
@@ -1050,13 +1069,13 @@ class LineModelChangeRulesSystem extends React.Component {
           >
             <Row>
               {ruleDatail.map(item => (
-                <Col span={24}>
+                <Col span={24} key={item.id}>
                   <span>{dataType[item.dataType].label}:</span>
                   {item.dataScope === '1004' ? (
                     <span>
                       {item.filtrateMethodDesc}
-                      {`${item.dataAuthorityRuleDetailValues.length}{this.$t("base.a")}`}
-                      {dataType[item.dataType].label}/*个*/
+                      {`${item.dataAuthorityRuleDetailValues.length}` + this.$t('base.a')}
+                      {dataType[item.dataType].label}
                     </span>
                   ) : (
                     <span>
@@ -1070,7 +1089,7 @@ class LineModelChangeRulesSystem extends React.Component {
           </Card>
         )}
         <ViewRuleModal
-          visibel={showRuleModal}
+          visible={showRuleModal}
           closeRuleModal={this.closeRuleModal}
           targetId={getRulesArr.id}
           dataId={this.state.ruleId}

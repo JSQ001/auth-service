@@ -80,8 +80,7 @@ class EditableCell extends React.Component {
           this.props.record.partnerId
         }`;
       } else {
-        let companyId = this.props.companyId;
-        url = `${config.mdataUrl}/api/vendor/account/by/companyId/name/code?companyId=${companyId}`;
+        url = `${config.mdataUrl}/api/vendor/account/by/companyId/name/code`;
       }
       this.setState({ fetching: true });
       httpFetch

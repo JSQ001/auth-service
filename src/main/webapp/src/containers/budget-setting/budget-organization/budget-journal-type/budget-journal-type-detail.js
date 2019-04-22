@@ -24,46 +24,46 @@ class BudgetJournalTypeDetail extends React.Component {
       infoList: [
         {
           type: 'input',
-          label: '预算日记账类型代码',
+          label: this.$t('expense.budget.journal.type.code'),
           id: 'journalTypeCode',
-          message: '请输入',
+          message: this.$t('expense.please.enter.the'),
           disabled: true,
-        },
+        } /*请输入*/ /*预算日记账类型代码*/,
         {
           type: 'input',
-          label: '预算日记账类型名称',
+          label: this.$t('expense.budget.journal.type.name'),
           id: 'journalTypeName',
-          message: '请输入',
+          message: this.$t('expense.please.enter.the'),
           isRequired: true,
-        },
+        } /*请输入*/ /*预算日记账类型名称*/,
         {
           type: 'value_list',
           labelKey: 'formName',
           valueKey: 'formOid',
-          label: '预算业务类型',
+          label: this.$t('expense.budget.business.types'),
           bgt: true,
           id: 'businessType',
-          message: '请选择',
+          message: this.$t('expense.please.select.a'),
           options: [],
           valueListCode: 2018,
           isRequired: true,
-        },
+        } /*请选择*/ /*预算业务类型*/,
         {
           type: 'select',
-          label: '关联表单',
+          label: this.$t('expense.associated.with.the.form'),
           bgt: true,
           id: 'form0id',
-          message: '请选择',
+          message: this.$t('expense.please.select.a'),
           options: [],
           labelKey: 'formName',
           valueKey: 'formOid',
-        },
-        { type: 'switch', label: '状态', id: 'enabled' },
+        } /*请选择*/ /*关联表单*/,
+        { type: 'switch', label: this.$t('expense.policy.enabled'), id: 'enabled' } /*状态*/,
       ],
       tabs: [
-        { key: 'STRUCTURE', name: '预算表' },
-        { key: 'ITEM', name: '预算项目' },
-        { key: 'COMPANY', name: '公司分配' },
+        { key: 'STRUCTURE', name: this.$t('expense.general.budget') } /*预算表*/,
+        { key: 'ITEM', name: this.$t('expense.project.budget') } /*预算项目*/,
+        { key: 'COMPANY', name: this.$t('expense.distribution.of.the.company') } /*公司分配*/,
       ],
       typeData: {},
       data: [],
@@ -77,10 +77,18 @@ class BudgetJournalTypeDetail extends React.Component {
             journalTypeId: this.props.match.params.id,
           },
           columns: [
-            { title: '预算表代码', dataIndex: 'structureCode', width: '40%' },
-            { title: '预算表', dataIndex: 'structureName', width: '30%' },
             {
-              title: '默认',
+              title: this.$t('expense.general.budget.code'),
+              dataIndex: 'structureCode',
+              width: '40%',
+            } /*预算表代码*/,
+            {
+              title: this.$t('expense.general.budget'),
+              dataIndex: 'structureName',
+              width: '30%',
+            } /*预算表*/,
+            {
+              title: this.$t('expense.the.default'),
               dataIndex: 'defaultFlag',
               width: '15%',
               render: (defaultFlag, record) => (
@@ -89,9 +97,9 @@ class BudgetJournalTypeDetail extends React.Component {
                   checked={record.defaultFlag}
                 />
               ),
-            },
+            } /*默认*/,
             {
-              title: '启用',
+              title: this.$t('expense.enable'),
               key: 'enabled',
               width: '15%',
               render: (enabled, record) => (
@@ -100,7 +108,7 @@ class BudgetJournalTypeDetail extends React.Component {
                   checked={record.enabled}
                 />
               ),
-            },
+            } /*启用*/,
           ],
         },
         ITEM: {
@@ -112,10 +120,18 @@ class BudgetJournalTypeDetail extends React.Component {
             journalTypeId: this.props.match.params.id,
           },
           columns: [
-            { title: '预算项目代码', dataIndex: 'itemCode', width: '30%' },
-            { title: '预算项目名称', dataIndex: 'itemName', width: '50%' },
             {
-              title: '启用',
+              title: this.$t('expense.budget.project.code'),
+              dataIndex: 'itemCode',
+              width: '30%',
+            } /*预算项目代码*/,
+            {
+              title: this.$t('expense.budget.for.the.project.name'),
+              dataIndex: 'itemName',
+              width: '50%',
+            } /*预算项目名称*/,
+            {
+              title: this.$t('expense.enable'),
               key: 'enabled',
               width: '20%',
               render: (enabled, record) => (
@@ -124,7 +140,7 @@ class BudgetJournalTypeDetail extends React.Component {
                   checked={record.enabled}
                 />
               ),
-            },
+            } /*启用*/,
           ],
         },
         COMPANY: {
@@ -133,13 +149,25 @@ class BudgetJournalTypeDetail extends React.Component {
           selectorItem: selectorData['budget_journal_company'],
           extraParams: { journalTypeId: this.props.match.params.id },
           columns: [
-            { title: '公司代码', dataIndex: 'companyCode', width: '25%' },
-            { title: '公司名称', dataIndex: 'companyName', width: '30%' },
-            { title: '公司类型', dataIndex: 'companyTypeName', width: '25%' },
             {
-              title: '启用',
+              title: this.$t('billing.expense.companycode'),
+              dataIndex: 'companyCode',
+              width: '25%',
+            } /*公司代码*/,
+            {
+              title: this.$t('billing.expense.companyname'),
+              dataIndex: 'companyName',
+              width: '30%',
+            } /*公司名称*/,
+            {
+              title: this.$t('billing.expense.companytype'),
+              dataIndex: 'companyTypeName',
+              width: '25%',
+            } /*公司类型*/,
+            {
+              title: this.$t('expense.enable'),
               dataIndex: 'enabled',
-              width: '20%',
+              width: '20%' /*启用*/,
               render: (enabled, record) => (
                 <Checkbox
                   onChange={e => this.onChangeCompanyEnabled(e, record)}
@@ -361,7 +389,7 @@ class BudgetJournalTypeDetail extends React.Component {
     });
     this.setState({ saving: true }, () => {
       httpFetch.post(tabsData[nowStatus].saveUrl, paramList).then(response => {
-        message.success('添加成功');
+        message.success(this.$t('expense.add.a.success')); /*添加成功*/
         this.setState(
           {
             newData: [],
@@ -430,11 +458,14 @@ class BudgetJournalTypeDetail extends React.Component {
           {this.renderTabs()}
         </Tabs>
         <div className="table-header">
-          <div className="table-header-title">共搜索到 {pagination.total} 条数据</div>
+          <div className="table-header-title">
+            {this.$t('budget.desc.code2', { total: pagination.total })}
+          </div>
           <div className="table-header-buttons">
             <Button type="primary" onClick={this.handleNew} loading={saving}>
-              添 加
+              {this.$t('expense.addition')}
             </Button>
+            {/*添 加*/}
           </div>
         </div>
         <Table
@@ -459,7 +490,8 @@ class BudgetJournalTypeDetail extends React.Component {
             );
           }}
         >
-          <Icon type="rollback" style={{ marginRight: '5px' }} />返回
+          <Icon type="rollback" style={{ marginRight: '5px' }} />
+          {this.$t('expense.return')}/*返回*/
         </a>
 
         <ListSelector

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Alert, Popover, message, Button, Modal } from 'antd';
+import { Alert, Popover, Button } from 'antd';
 import Table from 'widget/table';
-import service from './service';
 
 class SelectSplitLine extends Component {
   constructor(props) {
@@ -19,7 +18,7 @@ class SelectSplitLine extends Component {
               </Popover>
             );
           },
-          width: 120,
+          width: 150,
         },
         {
           title: this.$t('acp.company'), // '公司'
@@ -49,7 +48,7 @@ class SelectSplitLine extends Component {
         },
         {
           title: this.$t('expense.apportion.amount'), // '分摊金额',
-          dataIndex: 'amount',
+          dataIndex: 'distAmount',
           align: 'center',
           render: amount => {
             return <Popover content={amount}>{this.filterMoney(amount, 2)}</Popover>;
@@ -58,7 +57,7 @@ class SelectSplitLine extends Component {
         },
         {
           title: this.$t('tax.share.tax'), // '分摊税额',
-          dataIndex: 'shareTax',
+          dataIndex: 'distTaxAmount',
           align: 'center',
           render: amount => {
             return <Popover content={amount}>{this.filterMoney(amount, 2)}</Popover>;
@@ -66,7 +65,6 @@ class SelectSplitLine extends Component {
           width: 120,
         },
       ],
-      dataSources: [],
       selectedRowKeys: [], // 存放选中的分摊行 `id-分摊税额`,
       // selectedRows: [], // 存放选中的分摊行数据
       sum: props.splitParams.baseAmount,
@@ -89,7 +87,7 @@ class SelectSplitLine extends Component {
       splitParams: { expInputForReportDistDTOS },
     } = this.props;
     const selectedRowKeys = expInputForReportDistDTOS
-      .filter(o => o.selectFlag === 'N')
+      .filter(o => o.selectFlag === 'Y')
       .map(o => o.expReportDistId);
     this.setState({ selectedRowKeys });
   };
@@ -97,42 +95,6 @@ class SelectSplitLine extends Component {
   // 关联报账单
   showDocumentDetail = e => {
     e.preventDefault();
-  };
-
-  // 获取行数据
-  getTableList = () => {
-    this.setState({
-      dataSources: [
-        {
-          id: '10',
-          applicationNumber: '1000323',
-          companyName: 'company',
-          departmentName: 'dp1',
-          amount: 1000,
-          shareTax: 800,
-          costCenter: [{ costCenter1Id: { name: 'cc1', id: '1001' } }],
-        },
-        {
-          id: '11',
-          applicationNumber: '1111323',
-          companyName: 'company',
-          departmentName: 'dp2',
-          amount: 2000,
-          shareTax: 1800,
-          costCenter: [{ costCenter1Id: { name: 'cc2', id: '1002' } }],
-        },
-      ],
-    });
-    if (true) return;
-    const { splitParams } = this.props;
-    service
-      .getSplitLineList(splitParams.id)
-      .then(res => {
-        console.log(res);
-      })
-      .catch(err => {
-        message.error(err.response.data.message);
-      });
   };
 
   // 动态增加成本中心字段至columns
@@ -204,62 +166,28 @@ class SelectSplitLine extends Component {
 
   // 点击确定，计算分摊税额总值，并调接口存入后台，关闭模态框，并刷新页面
   handleOk = () => {
-    const { selectedRowKeys, dataSources } = this.state;
-    const { splitParams, onSave } = this.props;
-    if (selectedRowKeys.length > 0) {
-      const sumShareTax = selectedRowKeys.reduce((pre, cur) => {
-        return pre + Number(cur.split('-')[1]);
-      }, 0);
-      const params = { ...splitParams };
-      params.baseAmount = sumShareTax;
-      /**
-       * 1. 如果selectedRowKeys.length === dataSources.length
-       *    表示全选，则splitParams的两个selectFlag = 'Y'
-       * 2. 如果selectedRowKeys.length = 0
-       *    表示不选，则splitParams的两个selectFlag = 'N'
-       * 3. 非上者，循环splitParams.expInputForReportDistDTOS,
-       *    将内部每个对象的selectFlag按照selectedRowKeys所拥有
-       *    的进行对应修改
-       */
-      if (selectedRowKeys.length === dataSources.length) {
-        params.selectFlag = 'Y';
-        params.expInputForReportDistDTOS = params.expInputForReportDistDTOS.map(item => {
-          const tempItem = { ...item };
-          tempItem.selectFlag = 'Y';
-          return tempItem;
-        });
-      } else if (selectedRowKeys.length === 0) {
-        params.selectFlag = 'N';
-        params.expInputForReportDistDTOS = params.expInputForReportDistDTOS.map(item => {
-          const tempItem = { ...item };
-          tempItem.selectFlag = 'N';
-          return tempItem;
-        });
+    const { selectedRowKeys } = this.state;
+    const {
+      splitParams: { expInputForReportDistDTOS, expReportLineId },
+      onSave,
+    } = this.props;
+    selectedRowKeys.forEach(value => {
+      const record = expInputForReportDistDTOS.find(o => o.expReportDistId === value);
+      record.selectFlag = 'Y';
+    });
+
+    let flag = 'N';
+    if (expInputForReportDistDTOS.length) {
+      if (expInputForReportDistDTOS.length === selectedRowKeys.length) {
+        flag = 'Y';
+      } else if (selectedRowKeys.length) {
+        flag = 'P';
       } else {
-        debugger;
-        params.selectFlag = 'P';
-        const temp = [];
-        selectedRowKeys.forEach(item => {
-          params.expInputForReportDistDTOS.forEach(value => {
-            // 分摊行的id === 从后台获取到的表格内分摊行id
-            if (value.expReportDistId === item.split('-')[0]) {
-              const tempValue = { ...value };
-              tempValue.selectFlag = 'Y';
-              temp.push(tempValue);
-            } else temp.push(value);
-          });
-        });
-        params.expInputForReportDistDTOS = temp;
+        flag = 'N';
       }
-      console.log(params);
-      if (params) return;
-      onSave([params], true);
-    } else {
-      Modal.info({
-        title: this.$t('common.info'),
-        content: this.$t('tax.share.row.no.selected'), // '还未选择任何分摊行！',
-      });
     }
+
+    onSave(expReportLineId, expInputForReportDistDTOS, flag);
   };
 
   // 分页
@@ -272,7 +200,7 @@ class SelectSplitLine extends Component {
   };
 
   render() {
-    const { columns, dataSources, selectedRowKeys, sum, pagination } = this.state;
+    const { columns, selectedRowKeys, sum, pagination } = this.state;
     const { type } = this.props;
     const rowSelection = {
       selectedRowKeys,
@@ -302,7 +230,6 @@ class SelectSplitLine extends Component {
           columns={columns}
           dataSource={splitParams.expInputForReportDistDTOS}
           style={{ margin: '10px 0 30px 0' }}
-          scroll={{ x: 700 }}
           rowSelection={rowSelection}
           rowKey={record => record.expReportDistId}
           pagination={pagination}

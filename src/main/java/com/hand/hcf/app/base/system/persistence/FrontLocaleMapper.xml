@@ -9,6 +9,7 @@
       FROM sys_front_locale sfl
       WHERE sfl.deleted = 0
       AND sfl.application_id = #{applicationId}
+      and sfl.tenant_id = #{tenantId}
       AND sfl.language = #{targetLanguage}
         <if test="keyCode != null and keyCode !=''">
             AND sfl.key_code LIKE concat(concat('%', #{keyCode}), '%')

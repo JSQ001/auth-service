@@ -2,6 +2,7 @@ package com.hand.hcf.app.prepayment.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
 import com.hand.hcf.app.prepayment.domain.enumeration.Constants;
 import com.hand.hcf.app.prepayment.externalApi.PrepaymentHcfOrganizationInterface;
@@ -10,9 +11,13 @@ import com.hand.hcf.app.prepayment.utils.StringUtil;
 import com.hand.hcf.app.prepayment.web.adapter.CashPaymentRequisitionHeaderAdapter;
 import com.hand.hcf.app.prepayment.web.dto.*;
 import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +42,10 @@ import java.util.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/cash/prepayment/requisitionHead")
+@Api(tags = "预付款单")
 public class CashPaymentRequisitionHeadController {
 
     private final CashPaymentRequisitionHeadService cashPaymentRequisitionHeadService;
-//    private final CompanyService companyService;
     @Autowired
     private PrepaymentHcfOrganizationInterface prepaymentHcfOrganizationInterface;
     @Autowired
@@ -145,6 +150,7 @@ public class CashPaymentRequisitionHeadController {
      * @param employeeId
      * @param status
      * @param pageable
+     * @param editor 默认为false，true时可以查询编辑中的数据
      * @return
      * @throws URISyntaxException
      */
@@ -165,6 +171,7 @@ public class CashPaymentRequisitionHeadController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) Double noWritedAmountFrom,
             @RequestParam(required = false) Double noWritedAmountTo,
+            @RequestParam(required = false,defaultValue = "false") Boolean editor,
             Pageable pageable
     ) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
@@ -184,6 +191,7 @@ public class CashPaymentRequisitionHeadController {
                 description,
                 noWritedAmountFrom,
                 noWritedAmountTo,
+                editor,
                 page
         );
         HttpHeaders headers = PageUtil.generateHttpHeaders(page, "/api/cash/prepayment/requisitionHead/query");
@@ -481,6 +489,14 @@ public class CashPaymentRequisitionHeadController {
     @PostMapping("/insertOrUpdateLine")
     public ResponseEntity<List<CashPaymentRequisitionLineCO>> insertOrUpdateLine(@RequestBody @Valid List<CashPaymentRequisitionLineCO> lineDTOS) {
         return ResponseEntity.ok(cashPaymentRequisitionHeadService.insertOrUpdateLine(lineDTOS));
+    }
+    @ApiOperation(value = "根据行id复制一行数据", notes = "根据行id复制一行数据 开发:毛仕林")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "lineId", value = "复制的行id", dataType = "Long")
+    })
+    @GetMapping("/copyLineByLineId")
+    public ResponseEntity copyLineByLineId(@RequestParam("lineId") Long lineId) {
+        return  ResponseEntity.ok(cashPaymentRequisitionHeadService.copyLine(lineId));
     }
 
     /**
@@ -995,12 +1011,16 @@ public class CashPaymentRequisitionHeadController {
 
 
     /*
-     *根据合同编号查询预付款单头行信息--合同模块需要的接口
+     *根据合同编号查询预付款单头行信息--合同模块需要的接口--分页
      * */
-    @GetMapping("/get/by/contract/number")
-    public ResponseEntity<List<CashPaymentParamCO>> getPrepaymentByContractNumber(@RequestParam(required = false) String number) throws URISyntaxException {
-        List<CashPaymentParamCO> list = cashPaymentRequisitionHeadService.getByContractNumber(number);
-        return ResponseEntity.ok(list);
+    @GetMapping("/get/by/contract/id")
+    public ResponseEntity<List<CashPaymentParamCO>> getPrepaymentByContractId(@RequestParam(required = false) Long contractId, Pageable pageable) throws URISyntaxException {
+
+        Page mybatispage = PageUtil.getPage(pageable);
+        List<CashPaymentParamCO> list = cashPaymentRequisitionHeadService.getByContractId(contractId, mybatispage);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(mybatispage);
+
+        return new ResponseEntity(list,totalHeader,HttpStatus.OK);
     }
 
     /*判断头是否包含行信息
@@ -1214,5 +1234,58 @@ public class CashPaymentRequisitionHeadController {
     @GetMapping("/query/created")
     public List<ContactCO> listUsersByCreatedCashPaymentRequisitions(){
         return cashPaymentRequisitionHeadService.listUsersByCreatedCashPaymentRequisitions();
+    }
+
+
+    /**
+     * 根据费用申请单头id ，查询从费用申请单详情页面新建的预付款单行
+     *
+     * @param refDocumentId
+     * @param pageable
+     * @return
+     */
+    @ApiOperation(value = "根据费用申请单头id，查询从费用申请单详情页面新建的预付款单行", notes = "分页查询预付款单行信息 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "refDocumentId", value = "费用申请单头id", dataType = "Long"),
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    @GetMapping("/query/prepayment/line/by/refDocumentId")
+    public ResponseEntity<List<CashPaymentRequisitionLineCO>> pagePrepaymentLineByRefDocumentId(
+            @RequestParam(value = "refDocumentId") Long refDocumentId,
+            Pageable pageable
+    ){
+        Page page = PageUtil.getPage(pageable);
+        Page<CashPaymentRequisitionLineCO> lineCOPage = cashPaymentRequisitionHeadService.pagePrepaymentLineByRefDocumentId(refDocumentId, page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(lineCOPage);
+        return new ResponseEntity<>(lineCOPage.getRecords(),httpHeaders,HttpStatus.OK);
+    }
+
+
+    /**
+     * 根据申请单头ID获取关联的预付款单头
+     *
+     * @param applicationHeadId
+     * @return
+     */
+    @ApiOperation(value = "根据申请单头ID获取关联的预付款单头", notes = "根据申请单头ID获取关联的预付款单头 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "applicationHeadId", value = "申请单头ID", dataType = "Long")
+    })
+    @GetMapping("/get/by/applicationHeaderId")
+    public CashPaymentRequisitionHeaderCO getCashPaymentRequisitionHeaderByApplicationHeaderId(
+            @RequestParam(value = "applicationHeadId") Long applicationHeadId){
+        CashPaymentRequisitionHead head = cashPaymentRequisitionHeadService.getCashPaymentRequisitionHeaderByApplicationHeaderId(applicationHeadId);
+
+        CashPaymentRequisitionHeaderCO co = new CashPaymentRequisitionHeaderCO();
+        if (head != null) {
+            CompanyCO companyCO = prepaymentHcfOrganizationInterface.getCompanyById(head.getCompanyId());
+            if(companyCO != null) {
+                head.setCurrency(companyCO.getBaseCurrency());
+            }
+            co = cashPaymentRequisitionHeaderAdapter.toDTO(head);
+            return co;
+        }
+        return null;
     }
 }

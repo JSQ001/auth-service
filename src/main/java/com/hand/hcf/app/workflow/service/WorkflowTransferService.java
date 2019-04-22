@@ -89,7 +89,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
                 .eq(StringUtils.isNotEmpty(documentCategory),"document_category",documentCategory)
                 .eq(workflowId != null, "workflow_id",workflowId)
                 .ge(StringUtils.isNotEmpty(startDate),"start_date", TypeConversionUtils.getStartTimeForDayYYMMDD(startDate))
-                .le(StringUtils.isNotEmpty(endDate),"end_date", TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
+                .le(StringUtils.isNotEmpty(endDate),"end_date",TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
                 .like(StringUtils.isNotEmpty(authorizationNotes),"authorization_notes",authorizationNotes)
                 .orderBy("start_date");
         if(tab.equals("agent")){

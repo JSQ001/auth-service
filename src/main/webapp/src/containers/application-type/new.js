@@ -136,7 +136,7 @@ class NewApplicationType extends React.Component {
         method = service.updateApplicationType;
         values.applicationType = {
           id: record.id,
-          versionNumber: record.record,
+          versionNumber: record.versionNumber,
           ...values.applicationType,
         };
       }
@@ -239,6 +239,17 @@ class NewApplicationType extends React.Component {
                   checkedChildren={<Icon type="check" />}
                   unCheckedChildren={<Icon type="close" />}
                 />
+              )}
+            </FormItem>
+            <div className="common-item-title">申请同时发起预付款设置</div>
+            <FormItem {...formItemLayout} colon={false} label={<span />}>
+              {getFieldDecorator('prePaymentFlag', {
+                initialValue: record.id ? record.prePaymentFlag : false,
+              })(
+                <Radio.Group>
+                  <Radio value={true}>可发起</Radio>
+                  <Radio value={false}>不可发起</Radio>
+                </Radio.Group>
               )}
             </FormItem>
             <div className="common-item-title">预算管控设置</div>

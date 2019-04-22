@@ -46,7 +46,6 @@ class Lov extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { value, single, labelKey } = nextProps;
-    console.log(nextProps);
     if (value) {
       if (!single) {
         this.setState({

@@ -12,6 +12,7 @@ import {
   Checkbox,
   Icon,
 } from 'antd';
+import Lov from 'widget/Template/lov';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import Chooser from 'widget/chooser';
@@ -31,6 +32,7 @@ class maintenanceDetailFrom extends React.Component {
       depositDurationList: [], // 获取存款期限值列表
       directFlagList: [], // 直联状态值列表
       versionNumber: null, // 保存后获得的versionNumber
+      keyversionNumber: null,
       isReadOnly: false, // 是否只读
       saveSuccess: false, // 保存成功的标准
     };
@@ -179,8 +181,8 @@ class maintenanceDetailFrom extends React.Component {
    * 保存
    */
   saveFormData = async () => {
-    const { form, formData } = this.props;
-    const { versionNumber } = this.state;
+    const { form, formData, from, entrySave } = this.props;
+    const { versionNumber, keyversionNumber } = this.state;
     form.validateFields((err, values) => {
       if (!err) {
         const acountUkeyInfo = {
@@ -226,7 +228,7 @@ class maintenanceDetailFrom extends React.Component {
           detailSegmentCode: values.detailSegmentCode,
           directFlag: this.isArray(values.directFlag)
             ? Number(values.directFlag[0].key)
-            : values.directFlag.key,
+            : Number(values.directFlag.key),
           finOfficialPrime: values.finOfficialPrime,
           interestRuleType: values.interestRuleType,
           openDate: moment(values.openDate).format(),
@@ -242,31 +244,43 @@ class maintenanceDetailFrom extends React.Component {
         if (versionNumber) {
           saveData.versionNumber = versionNumber;
           if (saveData.acountUkeyInfo.versionNumber) {
-            delete saveData.acountUkeyInfo.versionNumber; // acountUkeyInfo不需要versionNumber
+            saveData.acountUkeyInfo.versionNumber = keyversionNumber; // acountUkeyInfo不需要versionNumber
           }
         }
-        maintenanceService
-          .updateAccountOpenMaintenanceDetail(saveData)
-          .then(res => {
-            if (res.status === 200) {
-              this.setState({
-                versionNumber: res.data.versionNumber,
-                saveSuccess: true,
-              });
-              message.success('保存成功！');
+        if (from === 'openEntryList') {
+          const { porpversionNumber, porpkeyversionNumber } = this.props;
+          if (porpversionNumber) {
+            saveData.versionNumber = porpversionNumber;
+            if (saveData.acountUkeyInfo.versionNumber) {
+              saveData.acountUkeyInfo.versionNumber = porpkeyversionNumber; // acountUkeyInfo不需要versionNumber
             }
-          })
-          .catch(error => {
-            message.error(error.response.data.message);
-          });
+          }
+          entrySave(saveData);
+        } else {
+          maintenanceService
+            .updateAccountOpenMaintenanceDetail(saveData)
+            .then(res => {
+              if (res.status === 200) {
+                this.setState({
+                  versionNumber: res.data.versionNumber,
+                  keyversionNumber: res.data.acountUkeyInfo.versionNumber,
+                  saveSuccess: true,
+                });
+                message.success('保存成功！');
+              }
+            })
+            .catch(error => {
+              message.error(error.response.data.message);
+            });
+        }
       }
     });
   };
 
   submitDetail = async () => {
-    const { formData } = this.props;
+    const { formData, porosaveSuccess } = this.props;
     const { saveSuccess } = this.state;
-    if (saveSuccess) {
+    if (saveSuccess || porosaveSuccess) {
       await maintenanceService
         .submit(formData.id)
         .then(res => {
@@ -294,6 +308,12 @@ class maintenanceDetailFrom extends React.Component {
           pathname: `/account-manage/account-open-maintenance/account-open-maintenance-list`,
         })
       );
+    } else if (from === 'openEntryList') {
+      dispatch(
+        routerRedux.push({
+          pathname: `/fund-account/account-open-entry/account-open-entry-list`,
+        })
+      );
     } else {
       dispatch(
         routerRedux.push({
@@ -308,6 +328,7 @@ class maintenanceDetailFrom extends React.Component {
       form: { getFieldDecorator },
       formData,
       accountShowReadOnly,
+      company,
     } = this.props;
     let acountUkeyInfoCopy = {};
     const { acountUkeyInfo } = formData;
@@ -524,7 +545,7 @@ class maintenanceDetailFrom extends React.Component {
                     )}
                   </FormItem>
                 </Col>
-                <Col span={5} offset={1}>
+                <Col span={5} offset={1} style={{ marginLeft: '-50px' }}>
                   <FormItem {...formItemLayout}>
                     {getFieldDecorator('regularAccountFlag', {})(
                       <Checkbox
@@ -552,10 +573,23 @@ class maintenanceDetailFrom extends React.Component {
                   <FormItem label="核算科目" labelCol={{ span: 4 }} wrapperCol={{ span: 16 }}>
                     {getFieldDecorator('accountSubjectsCode', {
                       rules: [{ required: true }],
-                      initialValue: formData.accountSubjectsCode
-                        ? formData.accountSubjectsCode
-                        : '',
-                    })(<Input placeholder="请维护" disabled={isReadOnly} />)}
+                      // initialValue: formData.accountSubjectsCode
+                      //   ? formData.accountSubjectsCode
+                      //   : '',
+                      initialValue: {
+                        accountCode: formData.accountSubjectsCode,
+                        accountName: formData.accountSubjectsCode,
+                      },
+                    })(
+                      <Lov
+                        code="subject"
+                        valueKey="accountCode"
+                        labelKey="accountName"
+                        single
+                        extraParams={{ setOfBooksId: company.setOfBooksId }}
+                      />
+                      // <Input placeholder="请维护" disabled={isReadOnly} />
+                    )}
                   </FormItem>
                 </Col>
               </Row>

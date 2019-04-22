@@ -120,7 +120,7 @@ class BusinessParameter extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getList();
   }
 

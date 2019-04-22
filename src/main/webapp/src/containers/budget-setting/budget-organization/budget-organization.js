@@ -21,30 +21,26 @@ class BudgetOrganization extends React.Component {
       columns: [
         {
           title: this.$t({ id: 'budget.organization.code' }),
-          align: 'center',
           dataIndex: 'organizationCode',
-          width: '20%',
+          width: 216,
         }, //预算组织代码
         {
           title: this.$t({ id: 'budget.organization.name' }),
-          align: 'center',
           dataIndex: 'organizationName',
-          width: '30%', //预算组织名称
+          width: 313, //预算组织名称
           render: organizationName => (
             <Popover content={organizationName}>{organizationName}</Popover>
           ),
         },
         {
           title: this.$t({ id: 'budget.organization.set.of.books' }),
-          align: 'center',
           dataIndex: 'setOfBooksName',
-          width: '20%',
+          width: 215,
         }, //账套
         {
           title: this.$t({ id: 'common.column.status' }),
-          align: 'center',
           dataIndex: 'enabled',
-          width: '15%',
+          width: 161,
           render: enabled => (
             <Badge
               status={enabled ? 'success' : 'error'}
@@ -58,9 +54,9 @@ class BudgetOrganization extends React.Component {
         }, //状态
         {
           title: this.$t({ id: 'common.operation' }),
-          align: 'center',
           key: 'operation',
-          width: '15%',
+          align: 'center',
+          width: 161,
           render: (text, record) => (
             <span>
               <a href="#" onClick={e => this.editItem(e, record)}>

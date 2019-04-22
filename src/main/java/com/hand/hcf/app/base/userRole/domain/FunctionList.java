@@ -51,4 +51,8 @@ public class FunctionList extends DomainI18n {
     //应用ID
     @TableField("application_id")
     private Long applicationId;
+
+    private Long tenantId;
+
+    private Long sourceId;
 }

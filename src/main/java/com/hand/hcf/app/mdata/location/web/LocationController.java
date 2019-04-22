@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.location.web;
 
 import com.hand.hcf.app.common.dto.LocationDTO;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.dto.LocationInfoDTO;
@@ -8,6 +9,7 @@ import com.hand.hcf.app.mdata.location.dto.SolrLocationDTO;
 import com.hand.hcf.app.mdata.location.service.DtoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.service.LocationDetailService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

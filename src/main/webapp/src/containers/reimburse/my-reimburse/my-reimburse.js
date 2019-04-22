@@ -101,6 +101,7 @@ class MyReimburse extends React.Component {
             // enable: true,
             setOfBooksId: this.props.company.setOfBooksId,
             tenantId: this.props.company.tenantId,
+            size: 100,
           },
           options: [],
           method: 'get',

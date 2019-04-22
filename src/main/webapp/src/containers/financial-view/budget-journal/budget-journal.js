@@ -4,7 +4,6 @@ import { routerRedux } from 'dva/router';
 import config from 'config';
 import SearchArea from 'widget/search-area';
 import { Input, Button, message, Popover, Row, Col, Badge, Modal } from 'antd';
-import Table from 'widget/table';
 import CustomTable from 'components/Widget/custom-table';
 import ExcelExporter from 'widget/excel-exporter';
 import ListSelector from 'widget/list-selector';
@@ -61,11 +60,14 @@ class BudgetJournalView extends React.Component {
           colSpan: 6,
           id: 'status',
           options: [
-            { value: 1001, label: '编辑中' },
-            { value: 1002, label: '审批中' },
-            { value: 1003, label: '撤回' },
-            { value: 1004, label: '审批通过' },
-            { value: 1005, label: '审批驳回' },
+            { value: 1001, label: this.$t('budgetjournal.editor') } /*编辑中*/,
+            { value: 1002, label: this.$t('budgetjournal.approval') } /*审批中*/,
+            { value: 1003, label: this.$t('budgetjournal.returncommit') } /*撤回*/,
+            { value: 1004, label: this.$t('budgetjournal.approval.and.approval') } /*审批通过*/,
+            {
+              value: 1005,
+              label: this.$t('budgetjournal.rejection.of.examination.and.approval'),
+            } /*审批驳回*/,
           ],
           valueListCode: 2028,
         },
@@ -144,19 +146,12 @@ class BudgetJournalView extends React.Component {
             },
           ],
         },
-        // {
-        //   type: 'input',
-        //   id: 'description',
-        //   label: this.$t({ id: 'budget.journal.view.description' }),
-        //   colSpan: 6,
-        // },
       ],
       columns: [
         {
-          title: '单据编号',
+          title: this.$t('budget.balance.doc.no') /*单据编号*/,
           dataIndex: 'journalCode',
-          align: 'center',
-          width: 180,
+          width: 210,
           render: (journalCode, record) => {
             return (
               <Popover content={journalCode}>
@@ -166,103 +161,95 @@ class BudgetJournalView extends React.Component {
           },
         },
         {
-          title: '单据类型',
+          title: this.$t('budget.balance.doc.type') /*单据类型*/,
           dataIndex: 'journalTypeName',
-          align: 'center',
-          width: 160,
+          width: 210,
           render: journalTypeName => {
             return <Popover content={journalTypeName}>{journalTypeName}</Popover>;
           },
         },
         {
-          title: '编制期段',
+          title: this.$t('budget.periodstrategy') /*编制期段*/,
           dataIndex: 'periodStrategyName',
+          width: 110,
           align: 'center',
-          width: 120,
           render: periodStrategyName => {
             return <Popover content={periodStrategyName}>{periodStrategyName}</Popover>;
           },
         },
         {
-          title: '预算表',
+          title: this.$t('budget.balance.budget.structure') /*预算表*/,
           dataIndex: 'structureName',
+          width: 110,
           align: 'center',
-          width: 120,
           render: structureName => {
             return <Popover content={structureName}>{structureName}</Popover>;
           },
         },
         {
-          title: '年度',
+          title: this.$t('budget.balance.year') /*年度*/,
           dataIndex: 'periodYear',
+          width: 100,
           align: 'center',
-          width: 120,
           render: periodYear => {
             return <Popover content={periodYear}>{periodYear}</Popover>;
           },
         },
         {
-          title: '预算场景',
+          title: this.$t('budget.balance.budget.scenarios') /*预算场景*/,
           dataIndex: 'scenarioName',
-          align: 'center',
-          width: 160,
+          width: 140,
           render: scenarioName => {
             return <Popover content={scenarioName}>{scenarioName}</Popover>;
           },
         },
         {
-          title: '预算版本',
+          title: this.$t('budget.balance.budget.version') /*预算版本*/,
           dataIndex: 'versionName',
-          align: 'center',
-          width: 160,
+          width: 134,
           render: versionName => {
             return <Popover content={versionName}>{versionName}</Popover>;
           },
         },
         {
-          title: '公司',
+          title: this.$t('budget.balance.company') /*公司*/,
           dataIndex: 'companyName',
-          align: 'center',
-          width: 160,
+          width: 200,
           render: desc => <Popover content={desc}>{desc || '-'}</Popover>,
         },
         {
-          title: '部门',
+          title: this.$t('budget.balance.department') /*部门*/,
           dataIndex: 'unitName',
-          align: 'center',
+          width: 143,
+          render: desc => <Popover content={desc}>{desc || '-'}</Popover>,
+        },
+        {
+          title: this.$t('budget.balance.requisitioned.by') /*申请人*/,
+          dataIndex: 'applicatName',
           width: 100,
           render: desc => <Popover content={desc}>{desc || '-'}</Popover>,
         },
         {
-          title: '申请人',
-          dataIndex: 'applicatName',
-          align: 'center',
-          width: 80,
-          render: desc => <Popover content={desc}>{desc || '-'}</Popover>,
-        },
-        {
-          title: '创建日期',
+          title: this.$t('budget.creation.date') /*创建日期*/,
           dataIndex: 'createdDate',
+          width: 126,
           align: 'center',
-          width: 120,
           render: createdDate => {
             return <span>{moment(createdDate).format('YYYY-MM-DD')}</span>;
           },
         },
         {
-          title: '本位币金额',
+          title: this.$t('budget.functional.currency.amount') /*本位币金额*/,
           dataIndex: 'amount',
-          align: 'center',
-          width: 100,
+          width: 153,
           render: amount => {
             return <span>{this.filterMoney(amount, 2)}</span>;
           },
         },
         {
-          title: '状态',
+          title: this.$t('budget.state') /*状态*/,
           dataIndex: 'status',
-          align: 'center',
-          width: 100,
+          width: 112,
           render: status => {
             return (
               <Badge
@@ -272,15 +259,6 @@ class BudgetJournalView extends React.Component {
             );
           },
         },
-        // {
-        //   title: '备注',
-        //   dataIndex: 'description',
-        //   align: 'center',
-        //   width: 120,
-        //   render: description => {
-        //     return <Popover content={description}>{description}</Popover>;
-        //   },
-        // },
       ],
       data: [],
       /**
@@ -289,20 +267,29 @@ class BudgetJournalView extends React.Component {
       excelVisible: false,
       btLoading: false,
       exportColumns: [
-        { title: '单据编号', dataIndex: 'journalCode' },
-        { title: '单据类型', dataIndex: 'journalTypeName' },
-        { title: '预算业务类型', dataIndex: 'businessTypeName' },
-        { title: '编制期段', dataIndex: 'periodStrategyName' },
-        { title: '预算表', dataIndex: 'structureName' },
-        { title: '年度', dataIndex: 'periodYear' },
-        { title: '预算场景', dataIndex: 'scenarioName' },
-        { title: '预算版本', dataIndex: 'versionName' },
-        { title: '公司', dataIndex: 'companyName' },
-        { title: '部门', dataIndex: 'unitName' },
-        { title: '申请人', dataIndex: 'applicatName' },
-        { title: '创建时期', dataIndex: 'createdDateStr' },
-        { title: '总金额', dataIndex: 'amount' },
-        { title: '状态', dataIndex: 'statusName' },
+        { title: this.$t('budget.balance.doc.no'), dataIndex: 'journalCode' } /*单据编号*/,
+        { title: this.$t('budget.balance.doc.type'), dataIndex: 'journalTypeName' } /*单据类型*/,
+        {
+          title: this.$t('budget.budget.business.types'),
+          dataIndex: 'businessTypeName',
+        } /*预算业务类型*/,
+        { title: this.$t('budget.periodstrategy'), dataIndex: 'periodStrategyName' } /*编制期段*/,
+        {
+          title: this.$t('budget.balance.budget.structure'),
+          dataIndex: 'structureName',
+        } /*预算表*/,
+        { title: this.$t('budget.balance.year'), dataIndex: 'periodYear' } /*年度*/,
+        {
+          title: this.$t('budget.balance.budget.scenarios'),
+          dataIndex: 'scenarioName',
+        } /*预算场景*/,
+        { title: this.$t('budget.balance.budget.version'), dataIndex: 'versionName' } /*预算版本*/,
+        { title: this.$t('budget.balance.company'), dataIndex: 'companyName' } /*公司*/,
+        { title: this.$t('budget.balance.department'), dataIndex: 'unitName' } /*部门*/,
+        { title: this.$t('budget.balance.requisitioned.by'), dataIndex: 'applicatName' } /*申请人*/,
+        { title: this.$t('budget.create.a.period'), dataIndex: 'createdDateStr' } /*创建时期*/,
+        { title: this.$t('budgetjournal.total.amount'), dataIndex: 'amount' } /*总金额*/,
+        { title: this.$t('budget.state'), dataIndex: 'statusName' } /*状态*/,
       ],
       lsVisible: false,
       selectorItem: {},
@@ -405,14 +392,14 @@ class BudgetJournalView extends React.Component {
    * 确定导出
    */
   export = result => {
-    let hide = message.loading('正在生成文件，请等待......');
+    let hide = message.loading(this.$t('budget.files.generated')); // 正在生成文件，请等待......
 
     const exportParams = this.state.searchParam;
     budgetJournalService
       .export(result, exportParams)
       .then(res => {
         if (res.status === 200) {
-          message.success('操作成功');
+          message.success(this.$t('budget.operation.is.successful')); /*操作成功*/
           let fileName = res.headers['content-disposition'].split('filename=')[1];
           let f = new Blob([res.data]);
           FileSaver.saveAs(f, decodeURIComponent(fileName));
@@ -423,7 +410,7 @@ class BudgetJournalView extends React.Component {
         }
       })
       .catch(e => {
-        message.error('下载失败，请重试!');
+        message.error(this.$t('budget.download.failed')); // 下载失败，请重试！
         this.setState({
           btLoading: false,
         });
@@ -453,12 +440,13 @@ class BudgetJournalView extends React.Component {
             <Row>
               <Col span={18}>
                 <Button loading={btLoading} type="primary" onClick={this.onExportClick}>
-                  导出预算日记账
+                  {this.$t('budget.export.budget.journal')}
+                  {/*导出预算日记账*/}
                 </Button>
               </Col>
               <Col span={6}>
                 <Search
-                  placeholder="请输入预算日记账编号"
+                  placeholder={this.$t('budget.enter.budget.journal.number')}
                   onSearch={this.onBudgetJournalSearch}
                   enterButton
                 />
@@ -490,12 +478,12 @@ class BudgetJournalView extends React.Component {
           visible={excelVisible}
           onOk={this.export}
           columns={exportColumns}
-          fileName={'预算日记账'}
+          fileName={this.$t('budgetjournal.journal')} /*预算日记账*/
           onCancel={this.onExportCancel}
           excelItem={'BUDGET_JOURNAL'}
         />
         <Modal
-          title="预算日记账详情"
+          title={this.$t('budget.budget.journal.details')} /*预算日记账详情*/
           visible={showBudgetJournal}
           destroyOnClose
           onCancel={() => {

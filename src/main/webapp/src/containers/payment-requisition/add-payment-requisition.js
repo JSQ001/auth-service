@@ -142,7 +142,7 @@ class AddPaymentRequsition extends React.Component {
         // refDocumentNumber: '',//报账单单号
         currency: '', //币种
         // paymentMethodCategory:''//付款方式类型
-        scheduleLineNumber: '', //付款计划序号
+        // scheduleLineNumber: '', //付款计划序号
         schedulePaymentDate: '', //付款计划日期
       },
       payWayTypeList: [], //付款方式
@@ -328,7 +328,7 @@ class AddPaymentRequsition extends React.Component {
           contractNumber: record.contractNumber, //合同编号
           contractLineNumber: record.contractLineNumber, //合同行序号
           contractDueDate: record.contractDueDate, //付款计划日期
-          scheduleLineNumber: record.scheduleLineNumber, //付款计划序号
+          // scheduleLineNumber: record.scheduleLineNumber, //付款计划序号
           schedulePaymentDate: record.schedulePaymentDate, //付款计划日期
         },
         isAddLine: true,
@@ -368,19 +368,19 @@ class AddPaymentRequsition extends React.Component {
   // 渲染额外行
   expandedRowRender = record => {
     const columns = [
-      {
-        title: this.$t('acp.index' /*序号*/),
-        dataIndex: 'scheduleLineNumber',
-        key: 'scheduleLineNumber',
-        width: 80,
-        render: value => {
-          return (
-            <Popover content={value} overlayStyle={{ maxWidth: 300 }}>
-              {value}
-            </Popover>
-          );
-        },
-      },
+      // {
+      //   title: this.$t('acp.index' /*序号*/),
+      //   dataIndex: 'scheduleLineNumber',
+      //   key: 'scheduleLineNumber',
+      //   width: 80,
+      //   render: value => {
+      //     return (
+      //       <Popover content={value} overlayStyle={{ maxWidth: 300 }}>
+      //         {value}
+      //       </Popover>
+      //     );
+      //   },
+      // },
       {
         title: this.$t('acp.partnerCategory' /*收款方*/),
         dataIndex: 'payeeId',
@@ -712,7 +712,7 @@ class AddPaymentRequsition extends React.Component {
                         className="ant-col-offset-1"
                         style={{ margin: '-20px 0px 10px 0px' }}
                       >
-                        付款计划序号&nbsp;:&nbsp;&nbsp;{lineData.scheduleLineNumber}&nbsp;&nbsp;|&nbsp;&nbsp;付款计划日期&nbsp;&nbsp;:&nbsp;&nbsp;{moment(
+                        付款计划日期&nbsp;&nbsp;:&nbsp;&nbsp;{moment(
                           lineData.schedulePaymentDate
                         ).format('YYYY-MM-DD')}
                       </Col>

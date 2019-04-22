@@ -1,9 +1,10 @@
 package com.hand.hcf.app.expense.input.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.input.dto.ExpInputForReportLineDTO;
 import com.hand.hcf.app.expense.input.service.ExpInputTaxLineService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -63,7 +64,7 @@ public class ExpInputTaxLineController {
     public ResponseEntity insertOrUpdateHeader(@RequestBody List<ExpInputForReportLineDTO> expInputForReportLineDTOs) {
         return ResponseEntity.ok(expInputTaxLineService.insertOrUpdateLine(expInputForReportLineDTOs));
     }
-    @GetMapping("/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity deleteById(@RequestParam(value = "id") Long id) {
         return ResponseEntity.ok(expInputTaxLineService.delete(id));
     }

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Form,
-  Table,
   Button,
   message,
   Input,
@@ -18,6 +17,7 @@ import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import moment from 'moment';
 import Chooser from 'widget/chooser';
+import Table from 'widget/table';
 import PaymentMaintenanceService from './payment-maintenance-service';
 
 const { confirm } = Modal;
@@ -33,6 +33,7 @@ class ManualMaintain extends React.Component {
       tableData: [], // 数据列表
       visible: false, // 选择银行账号
       bankOptions: [], // 开户银行列表
+      gatherBranchBankNum: [], // 分行列表
       paymentMethodOptions: [], // 付款方式值列表
       paymentPurpose: [], // 付款用途值列表
       publicPrivateSigns: [], // 公私标志
@@ -40,6 +41,8 @@ class ManualMaintain extends React.Component {
       ifPayment: [], // 是否支付
       // paymentBaseInfo: {}, // 保存的头数据
       isTrue: false,
+      gatherAccountList: [], // 收款账号
+      versionNumber: '', // 版本号
       pagination: {
         total: 0, // 数据总数
         page: 0, // 用于计算页数
@@ -47,7 +50,12 @@ class ManualMaintain extends React.Component {
         current: 1, // 当前页数
         showSizeChanger: true, // 是否可以改变 pageSize
         showQuickJumper: true, // 是否可以快速跳转至某页
-        showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`, // 用于显示数据总量和当前数据顺序
+        showTotal: (total, range) =>
+          this.$t('common.show.total', {
+            range0: `${range[0]}`,
+            range1: `${range[1]}`,
+            total,
+          }), // 用于显示数据总量和当前数据顺序
       },
       pagination1: {
         total: 0,
@@ -56,25 +64,55 @@ class ManualMaintain extends React.Component {
         current: 1,
         showSizeChanger: true,
         showQuickJumper: true,
-        showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
+        showTotal: (total, range) =>
+          this.$t('common.show.total', {
+            range0: `${range[0]}`,
+            range1: `${range[1]}`,
+            total,
+          }),
       },
       columns: [
         {
-          title: '单据流水号',
+          title: this.$t('fund.document.serial.number') /* 单据流水号 */,
           dataIndex: 'tradeCode',
           width: 100,
-          align: 'center',
         },
         {
-          title: '收款户名',
+          title: this.$t('fund.receiving.account') /* 收款账号 */,
+          dataIndex: 'gatherAccount',
+          width: 100,
+          render: (gatherAccount, record, index) => {
+            const { status, gatherAccountList } = this.state;
+            const defaultValue = {
+              key: Object.prototype.hasOwnProperty.call(record, 'id') ? record.id : '',
+            };
+            return status !== 'BATCH_PAYMENT' ? (
+              <Select
+                showSearch
+                defaultValue={defaultValue}
+                labelInValue
+                optionFilterProp="children"
+                style={{ maxWidth: 300, width: '100%' }}
+                onChange={value =>
+                  this.onChangeGatherAccount(value, record, gatherAccountList, index)
+                }
+              >
+                {gatherAccountList.map(item => <Option key={item.id}>{item.gatherAccount}</Option>)}
+              </Select>
+            ) : (
+              <span>{record.gatherAccount}</span>
+            );
+          },
+        },
+        {
+          title: this.$t('fund.name.receiver') /* 收款户名 */,
           dataIndex: 'gatherAccountName',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Input
-                placeholder="请输入"
+                placeholder={this.$t('fund.please.enter.the')} /* 请输入 */
                 defaultValue={record.gatherAccountName ? record.gatherAccountName : value}
                 onChange={e => this.onDescChange(e, index, 'gatherAccountName')}
                 style={{ textAlign: 'center' }}
@@ -85,52 +123,42 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '收款分行',
+          title: this.$t('fund.collection.branch') /* 收款分行 */,
           dataIndex: 'gatherBranchBankName',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { status } = this.state;
+            const { gatherBranchBankNum } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
-              <Input
-                placeholder="请输入"
-                defaultValue={record.gatherBranchBankName ? record.gatherBranchBankName : value}
-                onChange={e => this.onDescChange(e, index, 'gatherBranchBankName')}
-                style={{ textAlign: 'center' }}
-              />
+              <Select
+                placeholder="请选择"
+                style={selectWidth}
+                defaultValue={{
+                  key: record.gatherBranchBankName,
+                  label: record.gatherBranchBankNum,
+                }}
+                labelInValue
+                /* eslint-disable */
+                onChange={value => this.handleValueChange(value, index, 'gatherBranchBankName')}
+              >
+                {gatherBranchBankNum.map(option => {
+                  return <Option key={option.value}>{option.name}</Option>;
+                })}
+              </Select>
             ) : (
-              <span>{record.gatherBranchBankName}</span>
+              <span>{record.gatherBranchBankNum}</span>
             );
           },
         },
         {
-          title: '收款账号',
-          dataIndex: 'gatherAccount',
-          width: 100,
-          align: 'center',
-          render: (gatherAccount, record, index) => {
-            const { status } = this.state;
-            return status !== 'BATCH_PAYMENT' ? (
-              <Input
-                placeholder="请输入"
-                defaultValue={record.gatherAccount ? record.gatherAccount : gatherAccount}
-                onChange={e => this.onDescChange(e, index, 'gatherAccount')}
-                style={{ textAlign: 'center' }}
-              />
-            ) : (
-              <span>{record.gatherAccount}</span>
-            );
-          },
-        },
-        {
-          title: '金额',
+          title: this.$t('fund.amount') /* 金额 */,
           dataIndex: 'amount',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <InputNumber
+                min={1}
                 placeholder="请输入"
                 defaultValue={record.amount ? record.amount : value}
                 /* eslint-disable */
@@ -144,16 +172,15 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '付款用途',
+          title: this.$t('fund.payment.purpose') /* 付款用途 */,
           dataIndex: 'paymentPurposeDesc',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { paymentPurpose } = this.state;
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('fund.please.choose')} /* 请选择 */
                 style={selectWidth}
                 defaultValue={{ key: record.paymentPurposeDesc, label: record.paymentPurpose }}
                 labelInValue
@@ -162,7 +189,7 @@ class ManualMaintain extends React.Component {
                 /* eslint-enable */
               >
                 {paymentPurpose.map(dimeItem => {
-                  return <Option key={dimeItem.value}>{dimeItem.name}</Option>;
+                  return <Option key={dimeItem.flowCode}>{dimeItem.description}</Option>;
                 })}
               </Select>
             ) : (
@@ -171,15 +198,14 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '摘要',
+          title: this.$t('fund.abstract') /* 摘要 */,
           dataIndex: 'description',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Input
-                placeholder="请输入"
+                placeholder={this.$t('fund.please.enter.the')} /* 请输入 */
                 defaultValue={record.description ? record.description : value}
                 min={10}
                 onChange={e => this.onDescChange(e, index, 'description')}
@@ -191,16 +217,15 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '公私标志',
+          title: this.$t('fund.public.private.signs') /* 公私标志 */,
           dataIndex: 'propFlagDesc',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { publicPrivateSigns } = this.state;
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('fund.please.choose')} /* 请选择 */
                 style={selectWidth}
                 defaultValue={{ key: record.propFlag, label: record.propFlagDesc }}
                 labelInValue
@@ -218,21 +243,20 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '卡折标志',
+          title: this.$t('fund.kashe.logo') /* 卡折标志 */,
           dataIndex: 'cardSignDesc',
           width: 100,
-          align: 'center',
           render: (value, record, index) => {
             const { discountSign } = this.state;
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('fund.please.choose')} /* 请选择 */
                 style={selectWidth}
                 defaultValue={
                   { key: record.cardSign, label: record.cardSignDesc } || {
                     key: 'BANK_CARD',
-                    label: '银行卡',
+                    label: this.$t('fund.bank.card') /* 银行卡 */,
                   }
                 }
                 labelInValue
@@ -250,7 +274,7 @@ class ManualMaintain extends React.Component {
           },
         },
         {
-          title: '是否付款',
+          title: this.$t('fund.whether.the.payment') /* 是否付款 */,
           dataIndex: 'ifPaymentDesc',
           width: 100,
           align: 'center',
@@ -259,7 +283,7 @@ class ManualMaintain extends React.Component {
             const { status } = this.state;
             return status !== 'BATCH_PAYMENT' ? (
               <Select
-                placeholder="请选择"
+                placeholder={this.$t('fund.please.choose')} /* 请选择 */
                 style={selectWidth}
                 defaultValue={{ key: record.ifPayment, label: record.ifPaymentDesc }}
                 labelInValue
@@ -279,22 +303,19 @@ class ManualMaintain extends React.Component {
       ],
       columns1: [
         {
-          title: '银行账号',
+          title: this.$t('fund.bank.account') /* 银行账号 */,
           dataIndex: 'accountNumber',
           width: '15%',
-          align: 'center',
         },
         {
-          title: '账户名称',
+          title: this.$t('fund.account.name') /* 账户名称 */,
           dataIndex: 'accountName',
           width: '15%',
-          align: 'center',
         },
         {
-          title: '币种',
+          title: this.$t('fund.currency.code') /* 币种 */,
           dataIndex: 'currencyCode',
           width: '15%',
-          align: 'center',
         },
       ],
     };
@@ -311,13 +332,49 @@ class ManualMaintain extends React.Component {
       this.getList(match.params.id);
       this.getUserList(match.params.paymentBatchNumber);
     }
+    this.getGatherAccountList(); // 收款账号列表
     this.getAccountBank(); // 开户银行列表
     this.getPaymentMethodOptions(); // 付款方式值列表
-    this.getPaymentPurpose(); // 付款用途值列表
     this.getPublicPrivateSigns(); // 公私标志
     this.getDiscountSign(); // 卡折标志
     this.getIfPayment(); // 是否付款
+    this.getCashFlowItem(); // 现金流量项
   }
+
+  /**
+   * 获取收款账号列表
+   */
+  getGatherAccountList = () => {
+    PaymentMaintenanceService.getGatherAccountList()
+      .then(response => {
+        this.setState({
+          gatherAccountList: response.data,
+        });
+      })
+      .catch(error => {
+        message.error(error.response.data.message);
+      });
+  };
+
+  /**
+   * 选择账号
+   * value：选择的值
+   * record：当前行
+   * gatherAccountList：收款账号列表
+   * index：序列
+   */
+  onChangeGatherAccount = (value, record, gatherAccountList, index) => {
+    const { tableData } = this.state;
+    console.log(value);
+    const temp = gatherAccountList.filter(item => {
+      return item.id === value.key;
+    });
+    const [foo] = temp;
+    tableData[index] = foo;
+    this.setState({
+      tableData,
+    });
+  };
 
   /**
    * 数据列表
@@ -369,32 +426,40 @@ class ManualMaintain extends React.Component {
         paymentBatchNumber: data[0].paymentBatchNumber || '', // 付款单号
         paymentMethodDesc: data[0].paymentMethodDesc || '', // 付款方式
         paymentMethod: data[0].paymentMethod || '', // 付款方式代码
-        // paymentCompanyName: data[0].paymentCompanyName || '', // 公司名称
         paymentAccountName: data[0].paymentAccountName || '',
         paymentAccount: data[0].paymentAccount || '', //
         currencyCode: data[0].currencyCode || '', // 币种
         description: data[0].description || '', // 描述
-        // paymentCompanyId: data[0].paymentCompanyId || '', // 公司Id
-        // billDateDesc: data[0].billDateDesc,
         bankCodeName: data[0].bankCodeName || '', // 付款银行名称
         bankCode: data[0].bankCode, // 付款银行代码
-        // lineCount: data[0].lineCount, // 头下面的数据条数
         billDate: data[0].billDate.slice(0, 10), // 单据日期
         loading: false,
         money: data[0].amount, // 金额
+        versionNumber: data[0].versionNumber, // 版本号
       });
     });
   }
+
+  getCashFlowItem = () => {
+    const { company } = this.props;
+    const params = company.setOfBooksId;
+    PaymentMaintenanceService.getCashFlowItem(params).then(res => {
+      this.setState({
+        paymentPurpose: res.data,
+      });
+    });
+  };
 
   /**
    * 获取开户银行列表
    */
   getAccountBank = () => {
-    PaymentMaintenanceService.getAccountBank()
+    this.getSystemValueList('ZJ_OPEN_BANK')
       .then(res => {
-        if (res.data.length > 0) {
+        if (res.data.values.length > 0) {
           this.setState({
-            bankOptions: res.data,
+            bankOptions: res.data.values,
+            gatherBranchBankNum: res.data.values,
           });
         }
       })
@@ -616,10 +681,10 @@ class ManualMaintain extends React.Component {
     const value = {
       idSun: 1, // 删除未保存的行用到的字段
       cardSign: 'BANK_CARD',
-      // sequence: 10,
       status: 'new', // 判断行是否新建
+      ifPayment: 'no_payment',
+      ifPaymentDesc: '未支付',
     };
-    // dataTemp[tableData.length] = value;
     tableData.push(value);
     this.setState({ tableData, dataTemp });
   };
@@ -630,7 +695,11 @@ class ManualMaintain extends React.Component {
   noticeAlert = rows => {
     const noticeAlert = (
       <span>
-        已选择<span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span> 项
+        {this.$t('fund.selected')}
+        <span style={{ fontWeight: 'bold', color: '#108EE9' }}> {rows.length} </span>{' '}
+        {this.$t('fund.item')}
+        {/* 已选择 */}
+        {/* 项 */}
       </span>
     );
     this.setState({
@@ -669,7 +738,7 @@ class ManualMaintain extends React.Component {
     const {
       form: { getFieldsValue },
     } = this.props;
-    const { tableData, idNew, billType } = this.state;
+    const { tableData, idNew, billType, versionNumber } = this.state;
     // if(idNew || userId){
     const { match } = this.props;
     let saveDateHead = {}; // 保存的头信息
@@ -697,6 +766,7 @@ class ManualMaintain extends React.Component {
       billType: billType || 'MANUAL_PAYMENT',
       lineCount: tableData.length,
       amount: amountNum, // 总金额
+      versionNumber,
     };
     // 总的保存信息
     saveDate = {
@@ -711,7 +781,7 @@ class ManualMaintain extends React.Component {
           console.log('---', Object.keys(tableData[i - 1]).length);
           let a = Object.keys(tableData[i - 1]).length;
           /* 必输判断 */
-          if (a < 12) {
+          if (a < 13) {
             noSave = true;
             break;
           } else if (
@@ -743,7 +813,7 @@ class ManualMaintain extends React.Component {
     } else {
       PaymentMaintenanceService.saveMaintainData(saveDate)
         .then(res => {
-          message.success('保存成功');
+          message.success(this.$t('fund.save.successful')); /* 保存成功 */
           if (match.params.id) {
             this.getList(match.params.id);
             this.getUserList(match.params.paymentBatchNumber);
@@ -768,17 +838,37 @@ class ManualMaintain extends React.Component {
    */
   showDeleteConfirm = () => {
     const aThis = this;
+    const { billType } = this.state;
     if (aThis.state.selectedRowKeys) {
       confirm({
-        title: '您讲删除所选择的单据，删除后单据将退回至付款工作台，是否继续?',
+        title:
+          billType === 'BATCH_PAYMENT'
+            ? '所选择的单据将返回付款工作台，是否继续？'
+            : '单据将永久删除',
         okText: '确定',
         okType: 'danger',
-        cancelText: '取消',
+        cancelText: this.$t('fund.cancel') /* 取消 */,
         onOk() {
           aThis.deleteItems();
         },
       });
     }
+  };
+
+  /**
+   * 展示删除弹框
+   */
+  showDeleteConfirmAll = () => {
+    const aThis = this;
+    confirm({
+      title: '单据将永久删除',
+      okText: '确定',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk() {
+        aThis.deleteItemsAll();
+      },
+    });
   };
 
   /**
@@ -814,7 +904,7 @@ class ManualMaintain extends React.Component {
       }
     }
     if (deleteDateSuccessFlag) {
-      message.success('删除成功！');
+      message.success(this.$t('fund.delete.successful1')); /* 删除成功！ */
 
       this.setState({
         tableData: resTableData,
@@ -885,7 +975,7 @@ class ManualMaintain extends React.Component {
     PaymentMaintenanceService.deleteAllManualList(userId)
       .then(res => {
         if (res.status === 200) {
-          message.success('删除成功！');
+          message.success(this.$t('fund.delete.successful1')); /* 删除成功！ */
           // this.getList(userId);
           dispatch(
             routerRedux.push({
@@ -916,6 +1006,8 @@ class ManualMaintain extends React.Component {
       tableData[index].cardSign = value.key; // 卡折标志
     } else if (dataIndex === 'ifPaymentDesc') {
       tableData[index].ifPayment = value.key; // 是否付款
+    } else if (dataIndex === 'gatherBranchBankName') {
+      tableData[index].gatherBranchBankNum = value.key; // 付款银行
     }
   };
 
@@ -926,8 +1018,6 @@ class ManualMaintain extends React.Component {
     const { tableData } = this.state;
     if (dataIndex === 'gatherAccountName') {
       tableData[index].gatherAccountName = e.target.value; // 收款户名
-    } else if (dataIndex === 'gatherBranchBankName') {
-      tableData[index].gatherBranchBankName = e.target.value; // 收款分行
     } else if (dataIndex === 'gatherAccount') {
       tableData[index].gatherAccount = e.target.value; // 收款账号
     } else if (dataIndex === 'description') {
@@ -947,7 +1037,7 @@ class ManualMaintain extends React.Component {
       if (allAccount || money) {
         PaymentMaintenanceService.submit(idNew || userId)
           .then(() => {
-            message.success('提交成功');
+            message.success(this.$t('fund.submitted.successfully')); /* 提交成功 */
             dispatch(
               routerRedux.push({
                 pathname: `/payment-management/payment-slip-maintenance/payment-slip-maintenance`,
@@ -1007,7 +1097,7 @@ class ManualMaintain extends React.Component {
     } = this.state;
     const rowRadioSelection = {
       type: 'radio',
-      columnTitle: '选择',
+      columnTitle: this.$t('fund.choose') /* 选择 */,
       onSelect: record => {
         this.setState({
           accountNumber: record.accountNumber, // 带出的银行账号
@@ -1033,24 +1123,27 @@ class ManualMaintain extends React.Component {
     };
     return (
       <div className="train">
-        <div className="table-header">
-          <Form style={{ marginTop: '-10px' }}>
+        <div className="table-header" style={{ padding: '10px', backgroundColor: '#FAFAFA' }}>
+          <Form>
             <Row>
               <Col span={5}>
-                <FormItem label="付款单号:" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.payment.order.no1')} style={{ marginBottom: '0px' }}>
+                  {/* 付款单号: */}
                   {getFieldDecorator('paymentBatchNumber', {
                     initialValue: paymentBatchNumberNew || paymentBatchNumber || '',
                   })(<Input disabled placeholder={paymentBatchNumber} />)}
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="付款方式:" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.payment.method1')} style={{ marginBottom: '0px' }}>
+                  {/* 付款方式： */}
                   {getFieldDecorator('paymentMethodDesc', {
                     initialValue: paymentMethodDesc
                       ? [{ key: paymentMethod, label: paymentMethodDesc }]
                       : [],
                   })(
-                    <Select labelInValue placeholder="请选择" allowClear>
+                    <Select labelInValue placeholder={this.$t('fund.please.choose')} allowClear>
+                      {/* 请选择 */}
                       {paymentMethodOptions.map(option => {
                         return <Option key={option.value}>{option.name}</Option>;
                       })}
@@ -1059,7 +1152,8 @@ class ManualMaintain extends React.Component {
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="付款公司：:" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.payment.companies')} style={{ marginBottom: '0px' }}>
+                  {/* 付款公司： */}
                   {getFieldDecorator('paymentCompanyName', {
                     initialValue: [{ id: company.id, name: company.name }],
                   })(
@@ -1076,7 +1170,8 @@ class ManualMaintain extends React.Component {
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="单据日期：" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.date.of.documents')} style={{ marginBottom: '0px' }}>
+                  {/* 单据日期： */}
                   {getFieldDecorator('billDate', {
                     initialValue: moment(billDate) || '',
                   })(<DatePicker format="YYYY-MM-DD" />)}
@@ -1085,14 +1180,23 @@ class ManualMaintain extends React.Component {
             </Row>
             <Row>
               <Col span={5}>
-                <FormItem label="付款账号：" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.payment.account')} style={{ marginBottom: '0px' }}>
+                  {/* 付款账号： */}
                   {getFieldDecorator('paymentAccount', {
                     initialValue: accountNumber || (paymentAccount || ''),
-                  })(<Input placeholder="请选择" onClick={this.openModal} allowClear />)}
+                  })(
+                    <Input
+                      placeholder={this.$t('fund.please.choose')}
+                      onClick={this.openModal}
+                      allowClear
+                    />
+                  )}
+                  {/* 请选择 */}
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="付款银行" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.the.drawee.bank')} style={{ marginBottom: '0px' }}>
+                  {/* 付款银行 */}
                   {getFieldDecorator('bankCodeName', {
                     initialValue: openBank
                       ? [{ key: openBank, label: openBankName }]
@@ -1100,7 +1204,8 @@ class ManualMaintain extends React.Component {
                         ? [{ key: bankCode, label: bankCodeName }]
                         : [],
                   })(
-                    <Select labelInValue placeholder="请选择" disabled>
+                    <Select labelInValue placeholder={this.$t('fund.please.choose')} disabled>
+                      {/* 请选择 */}
                       {bankOptions.map(option => {
                         return <Option key={option.value}>{option.name}</Option>;
                       })}
@@ -1109,14 +1214,16 @@ class ManualMaintain extends React.Component {
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="付款账户" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.payment.account')} style={{ marginBottom: '0px' }}>
+                  {/* 付款账户 */}
                   {getFieldDecorator('paymentAccountName', {
                     initialValue: accountName || (paymentAccountName || ''),
                   })(<Input disabled />)}
                 </FormItem>
               </Col>
               <Col span={5} offset={1}>
-                <FormItem label="币种" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.currency.code')} style={{ marginBottom: '0px' }}>
+                  {/* 币种 */}
                   {getFieldDecorator('currencyCode', {
                     initialValue: currencyCodeSelect || (currencyCode || ''),
                   })(<Input disabled />)}
@@ -1125,16 +1232,20 @@ class ManualMaintain extends React.Component {
             </Row>
             <Row style={{ marginTop: '-20px' }}>
               <Col span={7}>
-                <FormItem label="描述：" style={{ marginBottom: '0px' }}>
+                <FormItem label={this.$t('fund.description')} style={{ marginBottom: '0px' }}>
+                  {/* 描述： */}
                   {getFieldDecorator('description', {
                     initialValue: description || '',
-                  })(<Input placeholder="请输入" allowClear />)}
+                  })(<Input placeholder={this.$t('fund.please.enter.the')} allowClear />)}
+                  {/* 请输入 */}
                 </FormItem>
               </Col>
             </Row>
           </Form>
+        </div>
+        <div>
           <Modal
-            title="银行账号选择"
+            title={this.$t('fund.bank.account.to.choose')} /* 银行账号选择 */
             visible={visible} // 是否显示
             onOk={this.onClose} // 确认
             onCancel={this.onBack} // 取消
@@ -1142,16 +1253,18 @@ class ManualMaintain extends React.Component {
           >
             {/* 搜索区域 */}
             <Form style={{ paddingBottom: '20px' }} onSubmit={this.search}>
-              <Form.Item label="银行账号" {...formItemLayout2}>
+              <Form.Item label={this.$t('fund.bank.account')} {...formItemLayout2}>
+                {/* 银行账号 */}
                 {getFieldDecorator('account', {
                   initialValue: '',
                 })(<Input autoComplete="off" onPressEnter={this.search} />)}
               </Form.Item>
               <div style={{ position: 'relative', left: '80%' }}>
                 <Button type="primary" onClick={this.search}>
-                  {this.$t('搜索')}
+                  {this.$t(this.$t('fund.search'))}
                 </Button>&nbsp;&nbsp;&nbsp;
-                <Button onClick={this.searchClear}>重置</Button>
+                <Button onClick={this.searchClear}>{this.$t('fund.reset')}</Button>
+                {/* 重置 */}
               </div>
             </Form>
             <Table
@@ -1169,18 +1282,20 @@ class ManualMaintain extends React.Component {
 
           {/* 数据列表 */}
           <div className="table-header-buttons">
-            <Row style={{ marginTop: '20px' }}>
+            <Row style={{ margin: '20px 0' }}>
               <Col>
                 {/* 新建 */}
                 <Button
                   type="primary"
                   onClick={() => this.handleListShow(true)}
                   disabled={billType === 'BATCH_PAYMENT'}
+                  style={{ marginRight: '10px' }}
                 >
-                  {this.$t('新增行')}
+                  {this.$t(this.$t('fund.the.new.line'))}
                 </Button>
                 {/* 删除 */}
                 <Button
+                  style={{ marginRight: '10px' }}
                   type="danger"
                   onClick={e => {
                     e.preventDefault();
@@ -1188,28 +1303,34 @@ class ManualMaintain extends React.Component {
                     this.showDeleteConfirm();
                   }}
                 >
-                  {this.$t('删除行')}
+                  {this.$t(this.$t('fund.delete.rows'))}
                 </Button>
-                <Button type="primary" onClick={this.handleSaveClick}>
-                  {this.$t('保存')}
+                <Button
+                  type="primary"
+                  onClick={this.handleSaveClick}
+                  style={{ marginRight: '10px' }}
+                >
+                  {this.$t(this.$t('fund.save'))}
                 </Button>
                 <Button
                   type="primary"
                   onClick={this.handleCreateClick}
-                  style={{ marginLeft: '15px' }}
+                  style={{ marginRight: '10px' }}
                 >
-                  {this.$t('提交')}
+                  {this.$t(this.$t('fund.submit'))}
                 </Button>
-                {/* <Button type="primary" onClick={this.back} style={{ marginLeft: '15px' }}>
-                  {this.$t('返回')}
-                </Button> */}
+
                 <Button
                   type="danger"
                   disabled={isTrue}
-                  onClick={this.deleteItemsAll}
-                  style={{ marginLeft: '15px' }}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.showDeleteConfirmAll();
+                  }}
+                  style={{ marginRight: '10px' }}
                 >
-                  {this.$t('整单删除')}
+                  {this.$t(this.$t('fund.the.whole.single.delete'))}
                 </Button>
               </Col>
             </Row>
@@ -1234,10 +1355,12 @@ class ManualMaintain extends React.Component {
             scroll={{ x: 1500 }}
           />
           <Row style={{ paddingBottom: '30px' }}>
-            <Col>合计：{allAccount || money} 元</Col>
+            <Col>{this.$t('fund.desc.code12', { total: allAccount || money })}</Col>
           </Row>
           <a style={{ fontSize: '14px', paddingBottom: '40px' }} onClick={this.back}>
-            <Icon type="rollback" style={{ marginRight: '5px', paddingBottom: '15px  ' }} />返回
+            <Icon type="rollback" style={{ marginRight: '5px', paddingBottom: '15px  ' }} />
+            {this.$t('fund.return')}
+            {/* 返回 */}
           </a>
         </div>
       </div>

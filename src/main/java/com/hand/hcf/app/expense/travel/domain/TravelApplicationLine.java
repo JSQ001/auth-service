@@ -82,4 +82,9 @@ public class TravelApplicationLine extends DimensionDomain {
      * 使用状态（y表示预订票；n表示未订票;p表示中间状态）
      */
     private String useFlag;
+    /**
+     * 关联责任中心ID
+     */
+    @TableField("responsibility_center_id")
+    private Long responsibilityCenterId;
 }

@@ -1,32 +1,13 @@
 import React from 'react';
-import {
-  Form,
-  Button,
-  Input,
-  Card,
-  Affix,
-  Row,
-  Col,
-  Select,
-  InputNumber,
-  DatePicker,
-  message,
-  Tag,
-  Modal,
-} from 'antd';
+import { Form, Button, Input, Row, Col, message, Modal } from 'antd';
 const FormItem = Form.Item;
 const { TextArea } = Input;
 import backlashService from './pay-backlash.service';
-import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
-import httpFetch from 'share/httpFetch';
-import config from 'config';
 import PayDetail from 'containers/pay/pay-workbench/payment-detail'; //支付详情
 import PrepaymentDetail from 'containers/pre-payment/my-pre-payment/pre-payment-detail'; //预付款详情
 import ApproveHistory from 'widget/Template/approve-history-work-flow';
 import { Alert } from 'antd';
 import Upload from 'widget/upload-button';
-import PropTypes from 'prop-types';
 class ToBacklash extends React.Component {
   constructor(props) {
     super(props);

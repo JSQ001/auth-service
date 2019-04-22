@@ -31,7 +31,7 @@ class BasicInfo extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ infoList: this.props.infoList });
+    this.setState({ infoList: this.props.infoList, infoData: this.props.infoData });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -161,7 +161,6 @@ class BasicInfo extends React.Component {
       let file_arr = [];
       this.state.infoData[item.id] &&
         this.state.infoData[item.id].map(link => {
-          console.log(link);
           file_arr.push(
             <Col
               span={6}

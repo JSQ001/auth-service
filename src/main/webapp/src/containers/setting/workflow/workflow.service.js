@@ -318,4 +318,28 @@ export default {
         });
     });
   },
+  // 获取页面列表
+  getPages(pageName) {
+    return httpFetch.get(`${config.baseUrl}/api/page/list/query/by/cond`, { pageName });
+  },
+  // 添加通知动作
+  addNoticeActions(params) {
+    return httpFetch.post(`${config.workflowUrl}/api/rule/notice`, params);
+  },
+  // 删除通知
+  deleteNotice(noticeOid) {
+    return httpFetch.delete(`${config.workflowUrl}/api/rule/notice/${noticeOid}`);
+  },
+  // 更新通知动作
+  updateNoticeActions(params) {
+    return httpFetch.put(`${config.workflowUrl}/api/rule/notice/actions/batch`, params);
+  },
+  // 添加通知人员
+  addNoticeUsers(params) {
+    return httpFetch.put(`${config.workflowUrl}/api/rule/notice/users/batch`, params);
+  },
+  // 删除通知人员
+  deleteNoticeUsers(params) {
+    return httpFetch.delete(`${config.workflowUrl}/api/rule/notice/users/batch`, params);
+  },
 };

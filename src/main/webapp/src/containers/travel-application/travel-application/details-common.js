@@ -102,6 +102,14 @@ class TravelCommon extends React.Component {
             );
           },
         },
+        {
+          title: this.$t('expense.responsibility.center') /*责任中心*/,
+          dataIndex: 'responsibilityCenterCodeName',
+          width: 120,
+          render: value => {
+            return <Popover content={value}>{value}</Popover>;
+          },
+        },
       ],
       showSlideFrame: false,
       slideFrameTitle: '',

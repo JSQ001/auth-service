@@ -108,8 +108,8 @@ export default {
    */
   getLogs(params) {
     let url = `${
-      config.baseUrl
-    }/api/acpRequisition/reports/history?entityType=801005&entityOid=${params}`;
+      config.workflowUrl
+    }/api/workflow/approval/history?entityType=801005&entityOid=${params}`;
     return httpFetch.get(url);
   },
 
@@ -118,7 +118,7 @@ export default {
    * @param {*} params
    */
   getPaymentList(params) {
-    let url = `${config.baseUrl}/api/approvals/acp/payment/filters?`;
+    let url = `${config.workflowUrl}/api/workflow/document/approvals/filters/801005?`;
     //let url = `http://192.168.1.71:9083/api/approvals/prepayment/filters?`;
 
     for (let key in params) {
@@ -136,7 +136,7 @@ export default {
    * @Modified by
    */
   rejectFunction(params) {
-    let url = `${config.baseUrl}/api/approvals/reject`;
+    let url = `${config.workflowUrl}/api/workflow/reject`;
     return httpFetch.post(url, params);
   },
   /**
@@ -146,7 +146,7 @@ export default {
    * @Modified by
    */
   passFunction(params) {
-    let url = `${config.baseUrl}/api/approvals/pass`;
+    let url = `${config.workflowUrl}/api/workflow/pass`;
     return httpFetch.post(url, params);
   },
   /**
@@ -156,7 +156,7 @@ export default {
    * @Modified by
    */
   returnFunction(params) {
-    let url = `${config.baseUrl}/api/approvals/withdraw`;
+    let url = `${config.workflowUrl}/api/workflow/withdraw`;
     return httpFetch.post(url, params);
   },
   /**

@@ -31,6 +31,10 @@ public class ApprovalFormDTO {
     private UUID parentOid;
     //备注
     private String remark;
+    /*
+    单据大类
+     */
+    private String formTypeName;
     //申请关联报销单 表单
     private UUID referenceOid;
     private Boolean submitFlag = false;
@@ -47,4 +51,10 @@ public class ApprovalFormDTO {
     private RuleApprovalChainDTO ruleApprovalChain;
     private List<RuleTransferDTO> ruleTransfers;
     private Map<String, List<Map<String, String>>> i18n;
+
+    /** 允许撤回 */
+    private Boolean withdrawFlag;
+
+    /** 撤回模式 */
+    private Integer withdrawRule;
 }

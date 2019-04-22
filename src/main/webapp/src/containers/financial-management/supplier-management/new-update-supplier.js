@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
-import Upload from 'widget/upload';
+import Upload from 'widget/upload-button';
 import {
   Button,
   Input,
@@ -15,14 +14,10 @@ import {
   Row,
   Col,
 } from 'antd';
-import Table from 'widget/table';
 import vendorService from 'containers/financial-management/supplier-management/vendorService';
-import baseService from 'share/base.service';
 import config from 'config';
-import Importer from 'components/Widget/Template/importer';
 import 'styles/financial-management/supplier-management/new-update-supplier.scss';
 import Chooser from 'components/Widget/chooser';
-import { get } from 'https';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -49,6 +44,8 @@ class NewUpdateSupplier extends React.Component {
           label: '申请人', //申请人
           key: 'user',
           // disabled: true,
+          disabled: true,
+          defaultValue: props.user.userName,
         },
         {
           type: 'chooser',
@@ -98,7 +95,7 @@ class NewUpdateSupplier extends React.Component {
         {
           type: 'input',
           flag: 'basic',
-          isRequired: false,
+          isRequired: true,
           label: this.$t('supplier.management.legalRepresentative'),
           key: 'artificialPerson',
         },
@@ -213,6 +210,7 @@ class NewUpdateSupplier extends React.Component {
       let basicInfo = this.state.basicInfo;
       basicInfo[0].disabled = true;
       basicInfo[1].disabled = true;
+      basicInfo[5].disabled = true;
       this.props.form.setFieldsValue({
         venTypes: [
           {
@@ -298,9 +296,14 @@ class NewUpdateSupplier extends React.Component {
   };
   //上传附件
   handleUpload = OIDs => {
-    this.setState({
-      uploadOIDs: OIDs,
-    });
+    this.setState(
+      {
+        uploadOIDs: OIDs,
+      },
+      () => {
+        this.props.form.validateFields(['attachmentOID'], { force: true });
+      }
+    );
   };
   getOptions = item => {
     item.method.then(response => {
@@ -471,7 +474,7 @@ class NewUpdateSupplier extends React.Component {
                     ? item.type === 'switch'
                       ? this.state.enabled
                       : vendorInfo[item.key]
-                    : null,
+                    : item.defaultValue || null,
                 rules: rules,
               })(this.renderFormItem(item))}
             </FormItem>
@@ -594,20 +597,36 @@ class NewUpdateSupplier extends React.Component {
 
             <div className="basic-content">{this.getFields(basicInfo)}</div>
 
-            <Row {...rowLayout} style={{ marginBottom: 40, marginLeft: 20 }}>
-              <Col span={10}>
-                <FormItem label="附件信息" {...formItemLayout}>
-                  {getFieldDecorator('attachmentOID')(
-                    <Upload
-                      attachmentType="SUPPLIER"
-                      uploadUrl={`${config.baseUrl}/api/upload/static/attachment`}
-                      fileNum={9}
-                      uploadHandle={this.handleUpload}
-                      defaultFileList={fileList}
-                      defaultOids={isNew ? [] : model.attachmentOidList}
-                    />
-                  )}
-                </FormItem>
+            <Row {...rowLayout} style={{ marginBottom: 40, marginLeft: -47 }}>
+              <Col span={24}>
+                {this.props.params.visible && (
+                  <FormItem label="附件信息" {...formItemLayout}>
+                    {getFieldDecorator('attachmentOID', {
+                      rules: [
+                        {
+                          required: true,
+                          validator: (rule, value, callback) => {
+                            const { uploadOIDs } = this.state;
+                            let flag = Array.isArray(uploadOIDs) ? uploadOIDs.length : uploadOIDs;
+                            if (!flag) {
+                              callback('请上传附件');
+                            }
+                            callback();
+                          },
+                        },
+                      ],
+                    })(
+                      <Upload
+                        attachmentType="SUPPLIER"
+                        uploadUrl={`${config.baseUrl}/api/upload/static/attachment`}
+                        fileNum={9}
+                        uploadHandle={this.handleUpload}
+                        defaultFileList={fileList}
+                        defaultOids={isNew ? [] : model.attachmentOidList}
+                      />
+                    )}
+                  </FormItem>
+                )}
               </Col>
             </Row>
           </div>

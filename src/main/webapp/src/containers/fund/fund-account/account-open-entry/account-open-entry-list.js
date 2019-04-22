@@ -1,15 +1,14 @@
 import React from 'react';
 import { connect } from 'dva';
-/* eslint-disable */
+// /* eslint-disable */
 
-import { Button, Row, Col, Input, message, Modal, Popconfirm, Alert } from 'antd';
+import { Button, Row, message, Popconfirm, Alert } from 'antd';
 import Table from 'widget/table';
 import { routerRedux } from 'dva/router';
 import moment from 'moment';
 import FundSearchForm from '../../fund-components/fund-search-form';
 import accountOpenEntryService from './account-open-entry.service';
 
-const { Search } = Input;
 // const { confirm } = Modal;
 
 class AccountOpenEntryList extends React.Component {
@@ -26,7 +25,6 @@ class AccountOpenEntryList extends React.Component {
         showTotal: (total, range) => `显示${range[0]}-${range[1]} 共 ${total} 条`,
       },
       loading: false,
-      disabledEdit: true,
       noticeAlert: null, // 提示信息
       batchDelete: true, // 批量删除标志
       searchParams: {},
@@ -50,7 +48,7 @@ class AccountOpenEntryList extends React.Component {
           colSpan: 6,
           type: 'valueList',
           label: '开户银行',
-          id: 'sourceSystem',
+          id: 'openBank',
           options: [],
           valueListCode: 'ZJ_OPEN_BANK',
         },
@@ -109,25 +107,25 @@ class AccountOpenEntryList extends React.Component {
         },
         {
           title: '币种',
-          dataIndex: 'accountName',
+          dataIndex: 'currencyCode',
           width: 100,
           align: 'center',
         },
         {
           title: '开户银行',
-          dataIndex: 'maintainApproveStatusDesc',
+          dataIndex: 'openBankName',
           width: 100,
           align: 'center',
         },
         {
           title: '开户公司',
-          dataIndex: 'requisitionDate',
+          dataIndex: 'companyName',
           width: 100,
           align: 'center',
         },
         {
           title: '开户部门',
-          dataIndex: 'openBankName',
+          dataIndex: 'departmentName',
           width: 100,
           align: 'center',
         },
@@ -140,13 +138,13 @@ class AccountOpenEntryList extends React.Component {
         },
         {
           title: '申请人',
-          dataIndex: 'openBankName',
+          dataIndex: 'employeeName',
           width: 100,
           align: 'center',
         },
         {
           title: '状态',
-          dataIndex: 'openBankName',
+          dataIndex: 'maintainApproveStatusDesc',
           width: 100,
           align: 'center',
         },
@@ -154,7 +152,9 @@ class AccountOpenEntryList extends React.Component {
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.getList();
+  }
 
   /**
    * 新建和编辑
@@ -166,6 +166,45 @@ class AccountOpenEntryList extends React.Component {
         pathname: `/fund-account/account-open-entry/account-open-entry-detail/${id}`,
       })
     );
+  };
+
+  /**
+   * 获取列表页数据
+   */
+  getList = () => {
+    const { pagination, searchParams } = this.state;
+    this.setState({ loading: true, noticeAlert: null, selectedRowKeys: [] });
+    accountOpenEntryService
+      .getAccountOpenMaintenanceList(pagination.page, pagination.pageSize, searchParams)
+      .then(response => {
+        const { data } = response;
+        data.map(item => {
+          return item.requisitionDate
+            ? moment(new Date(item.requisitionDate)).format('YYYY-MM-DD')
+            : '';
+        });
+        this.setState({
+          tableData: data,
+          loading: false,
+          pagination: {
+            ...pagination,
+            total: Number(response.headers['x-total-count'])
+              ? Number(response.headers['x-total-count'])
+              : 0,
+            current: pagination.page + 1,
+            // pageSize: pagination.pageSize,
+            onChange: this.onChangePager,
+            // onShowSizeChange: this.onShowSizeChange,
+            // showSizeChanger: true,
+            // showQuickJumper: true,
+            // showTotal: (total, range) =>
+            //   this.$t('common.show.total', { range0: `${range[0]}`, range1: `${range[1]}`, total }),
+          },
+        });
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
   };
 
   /**
@@ -185,12 +224,34 @@ class AccountOpenEntryList extends React.Component {
   };
 
   /**
+   * 搜索
+   */
+  search = value => {
+    this.setState(
+      {
+        searchParams: {
+          companyId: value.documentCompany ? value.documentCompany[0].id : '',
+          openBank: value.openBank ? value.openBank.key : '',
+          accountNumber: value.accountNumber ? value.accountNumber : '',
+          accountName: value.accountName ? value.accountName : '',
+          requisitionDateFrom: value.dateFrom ? moment(value.dateFrom).format('YYYY-MM-DD') : '',
+          requisitionDateTo: value.dateTo ? moment(value.dateTo).format('YYYY-MM-DD') : '',
+          maintainApproveStatus: value.billStatus ? value.billStatus.key : '',
+        },
+      },
+      () => {
+        this.getList();
+      }
+    );
+  };
+
+  /**
    * 删除
    */
   deleteItems = () => {
     const { selectedRowKeys } = this.state;
     accountOpenEntryService
-      .batchDeleteAccount(selectedRowKeys)
+      .deleteList(selectedRowKeys)
       .then(res => {
         if (res.status === 200) {
           message.success('删除成功！');
@@ -221,12 +282,14 @@ class AccountOpenEntryList extends React.Component {
       tableData,
       noticeAlert,
       batchDelete,
+      selectedRowKeys,
+      selectedRow,
       loading,
       pagination,
     } = this.state;
-
     const rowSelection = {
-      type: 'radio',
+      selectedRowKeys,
+      selectedRow,
       onChange: this.onSelectChange,
     };
     return (
@@ -235,26 +298,32 @@ class AccountOpenEntryList extends React.Component {
         <Row>
           <FundSearchForm searchForm={searchForm} submitHandle={this.search} maxLength={4} />
         </Row>
-        <div className="table-header-buttons">
-          {/* 新建 */}
-          <Button type="primary" onClick={() => this.handleCreateClick('new')}>
-            {this.$t('common.create')}
-          </Button>
-          {/* 删除 */}
-          <Popconfirm onConfirm={e => this.deleteItems(e)} title={this.$t('common.confirm.delete')}>
-            <Button
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              {this.$t('common.delete')}
+        <div className="table-header">
+          <div className="table-header-buttons">
+            {/* 新建 */}
+            <Button type="primary" onClick={() => this.handleCreateClick('new')}>
+              {this.$t('common.create')}
             </Button>
-          </Popconfirm>
-          {/* 提交 */}
-          <Button type="primary" onClick={this.handleSubmitClick}>
-            {this.$t('common.submit')}
-          </Button>
+            {/* 删除 */}
+            <Popconfirm
+              onConfirm={e => this.deleteItems(e)}
+              title={this.$t('common.confirm.delete')}
+            >
+              <Button
+                disabled={batchDelete}
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                {this.$t('common.delete')}
+              </Button>
+            </Popconfirm>
+            {/* 提交 */}
+            <Button type="primary" onClick={this.handleSubmitClick}>
+              {this.$t('common.submit')}
+            </Button>
+          </div>
         </div>
         {noticeAlert ? (
           <Alert message={noticeAlert} type="info" showIcon style={{ marginBottom: '10px' }} />
@@ -265,7 +334,7 @@ class AccountOpenEntryList extends React.Component {
           onRow={record => {
             return {
               onClick: () => {
-                this.goDetail(record);
+                this.handleCreateClick(record.id);
               },
             };
           }}

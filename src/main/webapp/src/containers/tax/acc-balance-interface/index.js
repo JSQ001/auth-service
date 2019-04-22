@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 import SearchArea from 'widget/search-area';
-import { Button, Divider, message, Popconfirm, Modal, Form, Select, Row, DatePicker } from 'antd';
+import {
+  Button,
+  Divider,
+  message,
+  Popconfirm,
+  Modal,
+  Form,
+  Select,
+  Row,
+  DatePicker,
+  Badge,
+} from 'antd';
 import SlideFrame from 'widget/slide-frame';
 import config from 'config';
 import moment from 'moment';
@@ -14,45 +25,52 @@ const monthFormat = 'YYYY/MM';
 class CustomerInterface extends Component {
   constructor(props) {
     super(props);
+    const ledgerPeriodStatus = {
+      F: { label: '将来-分录', state: 'default' },
+      O: { label: '打开', state: 'success' },
+      P: { label: '永久关闭', state: 'processing' },
+      N: { label: '从未打开', state: 'error' },
+      C: { label: '已关闭', state: 'warning' },
+    };
     this.state = {
       ruleParameterTypeArray: [], //值列表
       importSysId: '',
       searchForm: [
         {
-          type: 'list',
-          id: 'companyCode',
-          colSpan: 6,
-          listType: 'company_detail',
+          type: 'lov',
+          id: 'segment1',
+          label: '公司',
+          code: 'company_lov',
+          valueKey: 'companyCode',
           labelKey: 'companyName',
-          valueKey: 'id',
-          event: 'companyCode',
+          extraParams: { tenantId: props.company.tenantId },
           single: true,
-          listExtraParams: {},
-          label: '机构' /*机构*/,
+          editable: true,
+          width: 100,
         },
         {
-          type: 'list',
-          id: 'companyCode',
-          colSpan: 6,
-          listType: 'subject',
-          labelKey: 'companyName',
-          valueKey: 'id',
-          event: 'companyCode',
+          type: 'lov',
+          id: 'segment3',
+          label: '科目',
+          code: 'subject',
+          valueKey: 'accountCode',
+          labelKey: 'accountName',
+          extraParams: { setOfBooksId: props.company.setOfBooksId },
           single: true,
-          listExtraParams: {},
-          label: '科目' /*科目*/,
+          editable: true,
+          width: 100,
         },
         {
-          type: 'list',
-          id: 'companyCode',
-          colSpan: 6,
-          listType: 'specific_item',
-          labelKey: 'companyName',
-          valueKey: 'id',
-          event: 'companyCode',
+          type: 'lov',
+          id: 'segment4',
+          label: '子目',
+          code: 'subhead',
+          valueKey: 'accountCode',
+          labelKey: 'accountName',
+          extraParams: { parentAccountId: '1105753764027211778' },
           single: true,
-          listExtraParams: {},
-          label: '子目' /*子目*/,
+          editable: true,
+          width: 100,
         },
         {
           type: 'items',
@@ -144,7 +162,7 @@ class CustomerInterface extends Component {
           width: 200,
         },
         {
-          title: '期初余额¬',
+          title: '期初余额',
           dataIndex: 'beginBalance',
           align: 'center',
           width: 200,
@@ -187,9 +205,18 @@ class CustomerInterface extends Component {
         },
         {
           title: '账套期间状态',
+          key: 'ledgerPeriodStatus',
           dataIndex: 'ledgerPeriodStatus',
           align: 'center',
           width: 200,
+          render: (value, record) => {
+            return (
+              <Badge
+                status={ledgerPeriodStatus[value].state}
+                text={ledgerPeriodStatus[value].label}
+              />
+            );
+          },
         },
         {
           title: '数据产生日期',

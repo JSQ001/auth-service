@@ -111,7 +111,6 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.requisitionNumber' /*单据编号*/),
           dataIndex: 'requisitionNumber',
-          align: 'center',
           width: 150,
           render: value => {
             return (
@@ -124,7 +123,6 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.typeName' /*单据类型*/),
           dataIndex: 'acpReqTypeName',
-          align: 'center',
           width: 120,
           render: value => {
             return (
@@ -143,7 +141,6 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.employeeName' /*申请人*/),
           dataIndex: 'employeeName',
-          align: 'center',
           width: 90,
           render: record => (
             <span>
@@ -154,8 +151,7 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.requisitionDate' /*申请日期*/),
           dataIndex: 'requisitionDate',
-          align: 'center',
-          width: 90,
+          width: 110,
           render: recode => (
             <span>
               <Popover content={moment(recode).format('YYYY-MM-DD')}>
@@ -167,7 +163,6 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.table.amount' /*总金额*/),
           dataIndex: 'functionAmount',
-          align: 'center',
           width: 110,
           render: recode => (
             <span>
@@ -178,7 +173,6 @@ class PaymentRequisition extends React.Component {
         {
           title: this.$t('acp.remark' /*备注*/),
           dataIndex: 'description',
-          align: 'center',
           width: 250,
           render: value => {
             return (
@@ -352,7 +346,7 @@ class PaymentRequisition extends React.Component {
         this.setState({ menu });
       })
       .catch(err => {
-        message.error('网路错误！请稍后重试');
+        message.error(this.$t('payment.network.error')); // '网路错误！请稍后重试'
       });
     let searchForm = this.state.searchForm;
     //查询当前机构下所有已创建的预付款单的申请人（查询下拉框)
@@ -421,14 +415,15 @@ class PaymentRequisition extends React.Component {
                   }
                 >
                   <Button type="primary">
-                    新建付款申请单<Icon type="down" />
+                    {this.$t('payment.new.create.document')}
+                    <Icon type="down" />
                   </Button>
                 </Dropdown>
               </div>
             </Col>
             <Col span={6}>
               <Search
-                placeholder="请输入付款申请单单据编号"
+                placeholder={this.$t('payment.desc.code4')}
                 onSearch={this.onDocumentSearch}
                 enterButton
               />

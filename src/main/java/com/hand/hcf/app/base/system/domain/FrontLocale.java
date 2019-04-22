@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.annotation.UniqueField;
 import com.hand.hcf.app.core.domain.DomainI18n;
 import com.hand.hcf.app.core.domain.DomainLogic;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,33 +24,39 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel(description = "前端多语言表")
 @TableName("sys_front_locale")
 public class FrontLocale extends DomainLogic{
-    //应用ID
+
+    @ApiModelProperty(value = "应用ID")
     @NotNull
     @TableField("application_id")
     private Long applicationId;
 
-    //应用代码
+    @ApiModelProperty(value = "应用代码")
     @NotNull
     @TableField("application_code")
     private String applicationCode;
 
-    //界面key值
+    @ApiModelProperty(value = "界面key值")
     @NotNull
     @UniqueField
     @TableField("key_code")
     private String keyCode;
 
-    //key描述
+    @ApiModelProperty(value = "key描述")
     @NotNull
     @TableField("key_description")
     private String keyDescription;
 
-    //语言
+    @ApiModelProperty(value = "语言")
     @NotNull
     @UniqueField
     @TableField("language")
     private String language;
+
+    @ApiModelProperty(value = "租户id")
+    @TableField("tenant_id")
+    private Long tenantId;
 
 }
