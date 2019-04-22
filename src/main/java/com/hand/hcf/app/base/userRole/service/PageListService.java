@@ -124,7 +124,7 @@ public class PageListService extends BaseService<PageListMapper,PageList>{
         return result;
     }
 
-    public List<FunctionPageDTO> listPageByRoleIds(List<Long> roleIds){
-        return baseMapper.listPageByRoleIds(roleIds);
+    public List<FunctionPageDTO> listPageByRoleIds(List<Long> roleIds,Long tenantId){
+        return baseMapper.listPageByRoleIds(roleIds,tenantId);
     }
 }

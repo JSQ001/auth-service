@@ -32,25 +32,11 @@ import java.util.Map;
  * @date: 2019/3/11
  */
 @Service
-// update by chenxu
-/*@AllArgsConstructor*/
-@Transactional
 public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocale>{
-
-    //private final ServeLocaleMapper serveLocaleMapper;
-
-   // private final SysCodeService sysCodeService;
-
-    //private final TenantService tenantService;
-
-    // update by chenxu error:dependence cycle
-
-    @Autowired
-    private  SysCodeService sysCodeService;
-
     @Autowired
     private  ServeLocaleMapper serveLocaleMapper;
-
+    @Autowired
+    private  SysCodeService sysCodeService;
     @Autowired
     private  TenantService tenantService;
     /**
@@ -316,24 +302,15 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
      */
     @Transactional(rollbackFor = Exception.class)
     public void initServeLocale(Long tenantId){
-        Tenant tenant = tenantService.findTenantById(tenantId);
-        // 传入的是系统级租户的id
-        if(tenant.getSystemFlag()){
-            List<ServeLocale> serveLocaleList = serveLocaleMapper.selectList(
-                    new EntityWrapper<ServeLocale>()
-                            .eq(tenantId != null,"tenant_id",tenantId)
-            );
-            List<Tenant> tenants = tenantService.findAll();
-            serveLocaleList.stream().forEach(serveLocale -> {
-                tenants.stream().forEach(domain -> {
-                    // 排除系统级租户
-                    if (domain.getId() != 0L){
-                        serveLocale.setId(null);
-                        serveLocale.setTenantId(domain.getId());
-                        serveLocaleMapper.insert(serveLocale);
-                    }
-                });
-            });
-        }
+        Long systemTenantId = tenantService.getSystemTenantId();
+        List<ServeLocale> serveLocaleList = serveLocaleMapper.selectList(
+                new EntityWrapper<ServeLocale>()
+                        .eq(tenantId != null,"tenant_id",systemTenantId)
+        );
+        serveLocaleList.stream().forEach(serveLocale -> {
+            serveLocale.setId(null);
+            serveLocale.setTenantId(tenantId);
+        });
+        this.insertBatch(serveLocaleList);
     }
 }

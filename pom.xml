@@ -18,12 +18,7 @@
         <artifactId>sofaboot-dependencies</artifactId>
         <version>3.1.3</version>
     </parent>
-<!--     <parent>
-        <groupId>com.hand.hcf.app</groupId>
-        <artifactId>hcf-app-parent</artifactId>
-        <version>1.0.0.RELEASE</version>
-        <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;
-    </parent>-->
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -102,8 +97,6 @@
             <version>2.0.0</version>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.kie</groupId>
             <artifactId>kie-api</artifactId>
@@ -152,26 +145,6 @@
             <artifactId>jline</artifactId>
             <version>2.14.2</version>
         </dependency>
-
-        <!--begin蚂蚁内部依赖 需要配置setting.xml-->
-        <dependency>
-            <groupId>com.alipay.fc.buservice</groupId>
-            <artifactId>fcbuservice-common-service-open</artifactId>
-            <version>1.0.0.20171214</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.toolkit.common</groupId>
-            <artifactId>toolkit-common-lang</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba.toolkit.common</groupId>
-            <artifactId>toolkit-common-logging</artifactId>
-            <version>1.15</version>
-        </dependency>
-        <!--end蚂蚁内部依赖 需要配置setting.xml-->
 
         <!-- add app-parent start-->
         <dependency>
@@ -525,7 +498,6 @@
                     </container>
                 </configuration>
             </plugin>
-
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

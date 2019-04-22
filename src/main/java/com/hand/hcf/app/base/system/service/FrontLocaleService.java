@@ -12,6 +12,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -28,10 +29,11 @@ import java.util.Map;
  * @date: 2019/3/12
  */
 @Service
-@AllArgsConstructor
 public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocale>{
-    private final FrontLocaleMapper frontLocaleMapper;
-    private final TenantService tenantService;
+    @Autowired
+    private  FrontLocaleMapper frontLocaleMapper;
+    @Autowired
+    private  TenantService tenantService;
     /**
      * 单个新增 前端多语言
      * @param frontLocale
@@ -242,19 +244,17 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
      */
     @Transactional(rollbackFor = Exception.class)
     public void initFrontLocale(Long tenantId){
-        Tenant tenant = tenantService.findTenantById(tenantId);
-        // 传入的是系统级租户的id
-        if(tenant.getSystemFlag()){
-            List<FrontLocale> frontLocaleList = frontLocaleMapper.selectList(
-                    new EntityWrapper<FrontLocale>()
-                            .eq(tenantId != null,"tenant_id",tenant.getId())
-            );
-            frontLocaleList.stream().forEach(frontLocale -> {
-                // 排除系统级租户
+        Long systemTenantId = tenantService.getSystemTenantId();
+        List<FrontLocale> frontLocaleList = frontLocaleMapper.selectList(
+                new EntityWrapper<FrontLocale>()
+                        .eq(tenantId != null,"tenant_id",systemTenantId)
+        );
+        if (!frontLocaleList.isEmpty()) {
+            frontLocaleList.forEach(frontLocale -> {
                 frontLocale.setId(null);
                 frontLocale.setTenantId(tenantId);
-                frontLocaleMapper.insert(frontLocale);
             });
+            this.insertBatch(frontLocaleList);
         }
     }
 

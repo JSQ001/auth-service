@@ -10,6 +10,7 @@ import com.hand.hcf.app.base.userRole.persistence.UserRoleMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -111,7 +112,7 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
      */
     public RoleFunctionDTO getNavigationNar(Long userId){
         RoleFunctionDTO result = new RoleFunctionDTO();
-
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
         if (userId != null) {
             //目录关联功能数据
             List<ContentFunctionDTO> contentFunctionDTOList = new ArrayList<>();
@@ -130,9 +131,9 @@ public class RoleFunctionService extends BaseService<RoleFunctionMapper,RoleFunc
                 return result;
             }
             Set<Long> functionIdList = roleFunctions.stream().map(RoleFunction::getFunctionId).collect(Collectors.toSet());
-            functionPageDTOList = pageListService.listPageByRoleIds(roleIdList);
+            functionPageDTOList = pageListService.listPageByRoleIds(roleIdList,tenantId);
             List<ContentFunctionDTO> contentFunctionDTOS = contentFunctionRelationService.listContentFunctions(roleIdList);
-            List<ContentList> contentLists = contentListService.selectList(null);
+            List<ContentList> contentLists = contentListService.selectList(new EntityWrapper<ContentList>().eq("tenant_id", tenantId));
             List<ContentFunctionDTO> allContentDto = contentLists.stream().map(e -> {
                 ContentFunctionDTO dto = ContentFunctionDTO.builder()
                         .contentId(e.getId())

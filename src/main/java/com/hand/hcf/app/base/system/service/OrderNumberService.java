@@ -181,7 +181,7 @@ public class OrderNumberService {
                                     + codingRuleDetail.getIncremental()
                             );
                             codingRuleValue.setId(codingRuleValue_for_update.getId());
-
+                            codingRuleValue.setVersionNumber(codingRuleValue_for_update.getVersionNumber());
                             has_current_value = true;
                             //有则直接跳出当前循环
                             break;
@@ -207,7 +207,7 @@ public class OrderNumberService {
                                         + codingRuleDetail.getIncremental()
                                 );
                                 codingRuleValue.setId(codingRuleValue_for_update.getId());
-
+                                codingRuleValue.setVersionNumber(codingRuleValue_for_update.getVersionNumber());
                                 has_current_value = true;
 
                                 //有则直接跳出当前循环
@@ -235,7 +235,7 @@ public class OrderNumberService {
                                         + codingRuleDetail.getIncremental()
                                 );
                                 codingRuleValue.setId(codingRuleValue_for_update.getId());
-
+                                codingRuleValue.setVersionNumber(codingRuleValue_for_update.getVersionNumber());
                                 has_current_value = true;
                                 //有则直接跳出当前循环
                                 break;

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,16 +20,9 @@ import java.util.List;
  */
 //@RequestMapping(value = "/api/implement")
 //// @PreAuthorize("hasRole('" + AuthoritiesConstants.INTEGRATION_CLIENTS + "')")
-// update by chenxu
-/*@AllArgsConstructor*/
 @RestController
 public class MessageControllerImpl {
 
-   // private final ServeLocaleService serveLocaleService;
-
-    //private final MapperFacade mapper;
-
-    // update by chenxu error:dependence cycle
     @Autowired
     private  ServeLocaleService serveLocaleService;
 
