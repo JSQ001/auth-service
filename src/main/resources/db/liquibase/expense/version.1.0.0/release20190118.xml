@@ -2456,4 +2456,10 @@
     <changeSet id="201904171713002" author="xiaoji.li">
         <addNotNullConstraint tableName="exp_report_header" columnName="reverse_flag" columnDataType="varchar(50)"/>
     </changeSet>
+
+    <changeSet id="201904182343001" author="zhu.zhao">
+        <modifyDataType tableName="exp_input_tax_header" columnName="transfer_proportion" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_line" columnName="transfer_proportion" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_dist" columnName="transfer_proportion" newDataType="${amount}"/>
+    </changeSet>
 </databaseChangeLog>

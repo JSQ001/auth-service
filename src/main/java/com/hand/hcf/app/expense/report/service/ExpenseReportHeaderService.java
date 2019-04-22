@@ -833,7 +833,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         //默认创建的分摊数据不完整
         for (ExpenseReportPaymentSchedule expensePaymentSchedule : paymentScheduleList) {
             if (expensePaymentSchedule.getAccountName() == null || expensePaymentSchedule.getAccountNumber() == null
-                    || expensePaymentSchedule.getCshTransactionClassId() == null) {
+                    /*|| expensePaymentSchedule.getCshTransactionClassId() == null*/) { //jiu.zhao 无支付模块所以不需要付款方式
                 throw new BizException(RespCode.EXPENSE_REPORT_PAYMENT_INFO_ERROR);
             }
         }

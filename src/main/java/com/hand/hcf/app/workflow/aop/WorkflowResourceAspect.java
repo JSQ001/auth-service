@@ -50,7 +50,8 @@ public class WorkflowResourceAspect {
 
         rt = jp.proceed();
 
-        long cost = System.currentTimeMillis() - RequestContext.getTimeStart();
+        //jiu.zhao TODO
+		/*long cost = System.currentTimeMillis() - RequestContext.getTimeStart();
         if (log.isInfoEnabled()) {
             String resStatus = "200 OK";
             if (rt instanceof ResponseEntity) {
@@ -60,7 +61,7 @@ public class WorkflowResourceAspect {
 
 
             log.info("REQUEST END  [cost={}] : {} , args={} , res={}", StringUtils.leftPad(cost + "", 5), RequestContext.getLogString(), argsString, resStatus);
-        }
+        }*/
         RequestContext.clear();
         return rt;
     }
