@@ -21,4 +21,63 @@
             ${ew.sqlSegment}
         </if>
     </select>
+    
+    <select id="pageInvoiceCertifiedByCond" resultType="com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO">
+        select
+        h.id id,
+        h.invoice_type_id invoiceTypeId,
+        t.invoice_type_name invoiceTypeName,
+        h.certification_date certificationDate,
+        h.certification_reason certificationReason,
+        h.invoice_no invoiceNo,
+        h.invoice_code invoiceCode,
+        h.invoice_date invoiceDate,
+        h.invoice_amount invoiceAmount,
+        h.created_method createdMethod,
+        h.certification_status certificationStatus
+        from
+        invoice_head h
+        inner join
+        invoice_type t
+        on h.invoice_type_id = t.id
+        where
+        t.deduction_flag = 'Y'
+        and h.cancel_flag = 0
+        and h.red_invoice_flag = 0
+        and h.accounting_flag = 'Y'
+        <if test="isSubmit">
+            and certification_status != 0
+        </if>
+        <if test="!isSubmit">
+            and certification_status = 0
+        </if>
+        <if test="invoiceTypeId != null">
+            and h.invoice_type_id = #{invoiceTypeId}
+        </if>
+        <if test="invoiceCode != null and invoiceCode != ''">
+            and h.invoice_code like concat(concat('%',#{invoiceCode}),'%')
+        </if>
+        <if test="invoiceNo != null and invoiceNo != ''">
+            and h.invoice_no like concat(concat('%',#{invoiceNo}),'%')
+        </if>
+        <if test="invoiceDateFrom != null">
+            and h.invoice_date &gt;= #{invoiceDateFrom}
+        </if>
+        <if test="invoiceDateTo != null">
+            and h.invoice_date &lt;= #{invoiceDateTo}
+        </if>
+        <if test="invoiceAmountFrom != null and invoiceAmountFrom != ''">
+            and h.invoice_amount &gt;= #{invoiceAmountFrom}
+        </if>
+        <if test="invoiceAmountTo != null and invoiceAmountTo != ''">
+            and h.invoice_amount &lt;= #{invoiceAmountTo}
+        </if>
+        <if test="createdMethod != null and createdMethod != ''">
+            and h.created_method = #{createdMethod}
+        </if>
+        <if test="certificationStatus != null and certificationStatus != ''">
+            and h.certification_status = #{certificationStatus}
+        </if>
+
+    </select>
 </mapper>

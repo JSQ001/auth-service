@@ -431,6 +431,13 @@ public class TravelApplicationLineService extends BaseService<TravelApplicationL
             dtos.forEach(e -> {
                 List<TravelApplicationLineDetailWebDTO> detailWebDTOS = lineDetailService.getDetailsByLineId(e.getId());
                 for (TravelApplicationLineDetailWebDTO dto: detailWebDTOS) {
+                    if(dto.getResponsibilityCenterId() != null){
+                        ResponsibilityCenterCO responsibilityCenterCO = organizationService
+                                .getResponsibilityCenterById(e.getResponsibilityCenterId());
+                        if(responsibilityCenterCO != null) {
+                            dto.setResponsibilityCenterCodeName(responsibilityCenterCO.getResponsibilityCenterCodeName());
+                        }
+                    }
                     dto.setExpenseTypeName(e.getExpenseTypeName());
                 }
                 e.setChildren(detailWebDTOS);

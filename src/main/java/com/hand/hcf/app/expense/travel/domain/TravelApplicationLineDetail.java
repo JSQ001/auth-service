@@ -88,4 +88,11 @@ public class TravelApplicationLineDetail extends DimensionDomain {
      * 申请类型id(即费用类型)
      */
     private Long requisitonTypeId;
+
+    /**
+     * 关联责任中心ID
+     */
+    @TableField("responsibility_center_id")
+    private Long responsibilityCenterId;
+
 }

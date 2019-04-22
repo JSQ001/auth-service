@@ -1,4 +1,5 @@
 package com.hand.hcf.app.expense.application.service;
+
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -9,6 +10,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.application.domain.*;
@@ -118,7 +120,6 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     private ExpenseFieldService expenseFieldService;
 
 
-
     /**
      * 提交数据发送工作流模块
      *
@@ -164,7 +165,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         ApprovalResultCO submitResult = workflowClient.submitWorkflow(submitData);
 
         try {
-            if (Boolean.TRUE.equals(submitResult.getSuccess())){
+            if (Boolean.TRUE.equals(submitResult.getSuccess())) {
                 Integer approvalStatus = submitResult.getStatus();
 
                 if (DocumentOperationEnum.APPROVAL.getId().equals(approvalStatus)) {
@@ -195,8 +196,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      */
     @Transactional(rollbackFor = Exception.class)
     //@LcnTransaction
-   //@SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
-    public BudgetCheckResultDTO submit( WorkFlowDocumentRefCO workFlowDocumentRef,
+    //@SyncLock(lockPrefix = SyncLockPrefix.EXP_APPLICATION)
+    public BudgetCheckResultDTO submit(WorkFlowDocumentRefCO workFlowDocumentRef,
                                        Boolean ignoreWarningFlag) {
         // 给单据加上排他锁，否则可能会出现以下几种错误，
         // 1当存在多线程修改单据状态，可能导致最终单据的状态不正确。
@@ -240,6 +241,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         log.info("申请单整体提交,耗时:{}ms", System.currentTimeMillis() - start);
         return budgetCheckResultDTO;
     }
+
     /**
      * @param documentId 单据id
      */
@@ -407,7 +409,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         // 设置汇率
         String currencyCode = organizationService.getUserSetOfBooksCurrencyCode(dto.getApplicationOid());
-        if (!StringUtils.hasText(currencyCode)){
+        if (!StringUtils.hasText(currencyCode)) {
             throw new BizException(RespCode.EXPENSE_APPLICATION_CURRENCY_CODE_IS_NULL);
         }
         if (currencyCode.equals(dto.getCurrencyCode())) {
@@ -590,11 +592,18 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         ApplicationHeaderWebDTO headerDTO = baseMapper.getHeaderWebDTOById(headerId, null);
         List<ExpenseDimension> dimensions = headerDTO.getDimensions();
         if (isNew) {
+            Long companyId = headerDTO.getCompanyId();
+            Long departmentId = headerDTO.getDepartmentId();
             setCompanyAndDepartmentAndEmployee(Collections.singletonList(headerDTO), false);
             lineDto.setCompanyName(headerDTO.getCompanyName());
-            lineDto.setCompanyId(headerDTO.getCompanyId());
+            lineDto.setCompanyId(companyId);
             lineDto.setDepartmentName(headerDTO.getDepartmentName());
-            lineDto.setDepartmentId(headerDTO.getDepartmentId());
+            lineDto.setDepartmentId(departmentId);
+            ResponsibilityCenterCO responsibilityCenterCO = organizationService.getDefaultResponsibilityCenter(companyId, departmentId);
+            if (responsibilityCenterCO != null) {
+                lineDto.setResponsibilityCenterId(responsibilityCenterCO.getId());
+                lineDto.setResponsibilityCenterCodeName(responsibilityCenterCO.getResponsibilityCenterCodeName());
+            }
             lineDto.setFields(new ArrayList<>());
         } else {
             if (id == null) {
@@ -602,9 +611,9 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             }
             ApplicationLine line = lineService.selectById(id);
             BeanUtils.copyProperties(line, lineDto);
-            if(line.getResponsibilityCenterId() != null){
+            if (line.getResponsibilityCenterId() != null) {
                 ResponsibilityCenterCO responsibilityCenterCO = organizationService.getResponsibilityCenterById(line.getResponsibilityCenterId());
-                if(responsibilityCenterCO != null) {
+                if (responsibilityCenterCO != null) {
                     lineDto.setResponsibilityCenterCodeName(responsibilityCenterCO.getResponsibilityCenterCodeName());
                 }
             }
@@ -640,7 +649,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
     @Transactional(rollbackFor = Exception.class)
     public Boolean copyLine(Long lineId) {
-        ApplicationLine dto =  lineService.getLineByLineId(lineId);
+        ApplicationLine dto = lineService.getLineByLineId(lineId);
         dto.setId(null);
         dto.setCreatedBy(OrgInformationUtil.getCurrentUserId());
         dto.setCreatedDate(ZonedDateTime.now());
@@ -803,16 +812,16 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(id, ExpenseDocumentTypeEnum.EXP_REQUISITION.getKey(), null);
         if (CollectionUtils.isEmpty(dimensions)) {
             return new ArrayList<>();
-        }else{
+        } else {
             List<Long> ids = dimensions.stream().map(ExpenseDimension::getDimensionId).collect(Collectors.toList());
             List<DimensionCO> dimensionCOS = organizationService.listDimensionsByIds(ids);
             Map<Long, String> map = dimensionCOS.stream().collect(Collectors.toMap(DimensionCO::getId, DimensionCO::getDimensionName));
             return dimensions.stream().map(e -> {
-                        DimensionDTO dto = new DimensionDTO();
-                        dto.setTitle(map.get(e.getDimensionId()));
-                        String[] split = e.getDimensionField().split("Id");
-                        dto.setDataIndex(split[0] + "Name");
-                        return dto;
+                DimensionDTO dto = new DimensionDTO();
+                dto.setTitle(map.get(e.getDimensionId()));
+                String[] split = e.getDimensionField().split("Id");
+                dto.setDataIndex(split[0] + "Name");
+                return dto;
             }).collect(Collectors.toList());
         }
     }
@@ -831,12 +840,12 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         //设置typeName
         ApplicationType applicationType = typeService.selectById(dto.getTypeId());
-        if (null != applicationType){
+        if (null != applicationType) {
             dto.setTypeName(applicationType.getTypeName());
             dto.setPrePaymentFlag(applicationType.getPrePaymentFlag());
         }
 
-        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId(),dto.getDepartmentId(),
+        commonService.setDimensionValueName(dto.getDimensions(), dto.getCompanyId(), dto.getDepartmentId(),
                 dto.getEmployeeId());
         setCompanyAndDepartmentAndEmployee(Collections.singletonList(dto), true);
         //jiu.zhao 合同
@@ -923,8 +932,15 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             //单位
             detail.setUom(lineDist.getPriceUnit());
             //责任中心id
-			//bo.liu 预算
+            //bo.liu 预算
             //detail.setResponsibilityCenterId(lineDist.getResponsibilityCenterId());
+            /*if (lineDist.getResponsibilityCenterId() != null) {
+                ResponsibilityCenterCO responsibilityCenterCO = organizationService
+                        .getResponsibilityCenterById(lineDist.getResponsibilityCenterId());
+                if (responsibilityCenterCO != null) {
+                    detail.setResponsibilityCenterCode(responsibilityCenterCO.getResponsibilityCenterCode());
+                }
+            }*/
             //创建人
             detail.setCreatedBy(lineDist.getCreatedBy());
             DimensionUtils.setDimensionIdByObject(lineDist, detail, ApplicationLineDist.class, BudgetReserveCO.class);
@@ -1091,6 +1107,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             public List<ApplicationHeaderWebDTO> queryDataByPage(Page page) {
                 return listClosedByCondition(page, wrapper);
             }
+
             @Override
             public ApplicationHeaderClosedDTO toDTO(ApplicationHeaderWebDTO t) {
                 ApplicationHeaderClosedDTO dto = ApplicationHeaderClosedDTO.builder()
@@ -1138,7 +1155,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         if (!CollectionUtils.isEmpty(applicationHeaders)) {
             List<ApplicationAssociateDTO> associateDTOS = baseMapper.listAssociateInfo(closedDTO.getHeaderIds());
             Map<Long, List<ApplicationAssociateDTO>> appAssociateMap = new HashMap<>(16);
-            if (!CollectionUtils.isEmpty(associateDTOS)){
+            if (!CollectionUtils.isEmpty(associateDTOS)) {
                 appAssociateMap = associateDTOS.stream().collect(Collectors.groupingBy(ApplicationAssociateDTO::getApplicationHeaderId));
 
             }
@@ -1174,14 +1191,14 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             Map<Long, BigDecimal> associateAmount = new HashMap<>(16);
             //校验报账单状态和金额
             List<ApplicationAssociateDTO> applicationAssociateDTOS = appAssociateMap.get(header.getId());
-            if (!CollectionUtils.isEmpty(applicationAssociateDTOS)){
+            if (!CollectionUtils.isEmpty(applicationAssociateDTOS)) {
                 applicationAssociateDTOS.forEach(e -> {
-                    if (Constants.AUDIT_FLAG.equals(e.getAuditFlag())){
+                    if (Constants.AUDIT_FLAG.equals(e.getAuditFlag())) {
                         throw new BizException(RespCode.EXPENSE_APPLICATION_HEADER_CLOSE_CHECK_ERROR, new Object[]{header.getDocumentNumber(), e.getReportNumber()});
                     }
                     if (associateAmount.get(e.getApplicationLineId()) == null) {
                         associateAmount.put(e.getApplicationLineId(), e.getAmount());
-                    }else{
+                    } else {
                         associateAmount.put(e.getApplicationLineId(), associateAmount.get(e.getApplicationLineId()).add(e.getAmount()));
                     }
                 });
@@ -1226,7 +1243,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         if (period == null) {
             throw new BizException(RespCode.EXPENSE_PERIODS_ERROR);
         }
-		//jiu.zhao 预算
+        //jiu.zhao 预算
         //BudgetCloseCO budgetCloseCO = new BudgetCloseCO();
         //budgetCloseCO.setBusinessType("EXP_REQUISITION");
         //budgetCloseCO.setDocumentId(header.getId());
@@ -1259,19 +1276,19 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             );
             List<DynamicFieldDTO> dynamicFields = new ArrayList<>();
             fieldList.forEach(f -> {
-                ExpenseField expenseField = expenseFieldService.selectOne(
-                        new EntityWrapper<ExpenseField>().eq("field_oid", f.getFieldOid())
-                );
-                dynamicFields.add(
-                        DynamicFieldDTO
-                                .builder()
-                                .fieldId(expenseField.getId())
-                                .fieldName(f.getName())
-                                .fieldDataType(f.getFieldDataType())
-                                .fieldValue(f.getValue())
-                                .fieldTypeId(f.getFieldTypeId())
-                                .build()
-                );
+                        ExpenseField expenseField = expenseFieldService.selectOne(
+                                new EntityWrapper<ExpenseField>().eq("field_oid", f.getFieldOid())
+                        );
+                        dynamicFields.add(
+                                DynamicFieldDTO
+                                        .builder()
+                                        .fieldId(expenseField.getId())
+                                        .fieldName(f.getName())
+                                        .fieldDataType(f.getFieldDataType())
+                                        .fieldValue(f.getValue())
+                                        .fieldTypeId(f.getFieldTypeId())
+                                        .build()
+                        );
                     }
             );
             ExpensePolicyMatchDimensionDTO matchDimensionDTO = ExpensePolicyMatchDimensionDTO
@@ -1305,29 +1322,42 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
     }
 
-    public  List<ApplicationFinancRequsetDTO> listHeaderDTOsByfincancies(Page page,
-                                                                         String documentNumber,
-                                                                         Long companyId,
-                                                                         Long typeId,
-                                                                         ZonedDateTime requisitionDateFrom,
-                                                                         ZonedDateTime requisitionDateTo,
-                                                                         BigDecimal amountFrom,
-                                                                         BigDecimal amountTo,
-                                                                         Long status,
-                                                                         String currencyCode,
-                                                                         String remarks,
-                                                                         Long employeeId,
-                                                                         Long unitId,
-                                                                         Long closedFlag,
-                                                                         BigDecimal associatedAmountFrom,
-                                                                         BigDecimal associatedAmountTo,
-                                                                         BigDecimal relevanceAmountFrom,
-                                                                         BigDecimal relevanceAmountTo,
-                                                                         Long tenantId){
+    public List<ApplicationFinancRequsetDTO> listHeaderDTOsByfincancies(Page page,
+                                                                        String documentNumber,
+                                                                        Long companyId,
+                                                                        Long typeId,
+                                                                        ZonedDateTime requisitionDateFrom,
+                                                                        ZonedDateTime requisitionDateTo,
+                                                                        BigDecimal amountFrom,
+                                                                        BigDecimal amountTo,
+                                                                        Long status,
+                                                                        String currencyCode,
+                                                                        String remarks,
+                                                                        Long employeeId,
+                                                                        Long unitId,
+                                                                        Long closedFlag,
+                                                                        BigDecimal associatedAmountFrom,
+                                                                        BigDecimal associatedAmountTo,
+                                                                        BigDecimal relevanceAmountFrom,
+                                                                        BigDecimal relevanceAmountTo,
+                                                                        Long tenantId,
+                                                                        boolean dataAuthFlag) {
+
+        String dataAuthLabel = null;
+        if (dataAuthFlag) {
+            Map<String, String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "exp_application_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS, "t");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN, "department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "applicant_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
 
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 //.eq("t.created_by", OrgInformationUtil.getCurrentUserId())
-                .like(StringUtils.hasText(documentNumber),"t.document_number",documentNumber)
+                .like(StringUtils.hasText(documentNumber), "t.document_number", documentNumber)
                 .eq(typeId != null, "t.type_id", typeId)
                 .eq(unitId != null, "t.department_id", unitId)
                 .eq(companyId != null, "t.company_id", companyId)
@@ -1340,9 +1370,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .lt(requisitionDateTo != null, "t.requisition_date", requisitionDateTo)
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
-                .eq(tenantId!=null,"t.tenant_id",tenantId)
+                .eq(tenantId != null, "t.tenant_id", tenantId)
+                .and(TypeConversionUtils.isNotEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("t.id", false);
-        List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo);
+        List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper, associatedAmountFrom, associatedAmountTo, relevanceAmountFrom, relevanceAmountTo);
 
 
         headers.forEach(applicationFinancRequsetDTO -> {
@@ -1356,7 +1387,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         setCompanyAndDepartmentAndEmployee1(headers);
 
 
-        return  headers;
+        return headers;
     }
 
 
@@ -1437,25 +1468,27 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .like(StringUtils.hasText(documentNumber), "t.document_number", documentNumber)
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
-                .eq(companyId!=null, "t.company_id", companyId)
-                .eq(tenantId!=null,"t.tenant_id",tenantId)
+                .eq(companyId != null, "t.company_id", companyId)
+                .eq(tenantId != null, "t.tenant_id", tenantId)
                 .orderBy("t.id", false);
         log.debug("申请单财务查询的查询条件为：{}", wrapper.getSqlSegment());
         return wrapper;
 
     }
+
     public List<ApplicationFinancRequsetDTO> listFDformdByCondition(Page page,
                                                                     Wrapper<ApplicationHeader> wrapper,
                                                                     BigDecimal associatedAmountFrom,
                                                                     BigDecimal associatedAmountTo,
                                                                     BigDecimal relevanceAmountFrom,
-                                                                    BigDecimal relevanceAmountTo){
-        List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo);
+                                                                    BigDecimal relevanceAmountTo) {
+        List<ApplicationFinancRequsetDTO> headers = baseMapper.listByfincancies(page, wrapper, associatedAmountFrom, associatedAmountTo, relevanceAmountFrom, relevanceAmountTo);
         setCompanyAndDepartmentAndEmployee1(headers);
         return headers;
     }
+
     private void setCompanyAndDepartmentAndEmployee1(List<ApplicationFinancRequsetDTO> headers) {
-        if (!CollectionUtils.isEmpty(headers)){
+        if (!CollectionUtils.isEmpty(headers)) {
             Set<Long> companyIds = new HashSet<>();
             Set<Long> departmentIds = new HashSet<>();
             Set<Long> employeeIds = new HashSet<>();
@@ -1472,22 +1505,23 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             // 查询员工
             Map<Long, ContactCO> usersMap = organizationService.getUserMapByUserIds(new ArrayList<>(employeeIds));
             headers
-                    .forEach(e ->{
-                        if (companyMap.containsKey(e.getCompanyId())){
+                    .forEach(e -> {
+                        if (companyMap.containsKey(e.getCompanyId())) {
                             e.setCompanyName(companyMap.get(e.getCompanyId()).getName());
                         }
-                        if (departmentMap.containsKey(e.getDepartmentId())){
+                        if (departmentMap.containsKey(e.getDepartmentId())) {
                             e.setDepartmentName(departmentMap.get(e.getDepartmentId()).getName());
                         }
-                        if(usersMap.containsKey(e.getEmployeeId())){
+                        if (usersMap.containsKey(e.getEmployeeId())) {
                             e.setEmployeeName(usersMap.get(e.getEmployeeId()).getFullName());
                         }
-                        if(usersMap.containsKey(e.getCreatedBy())){
+                        if (usersMap.containsKey(e.getCreatedBy())) {
                             e.setCreatedName(usersMap.get(e.getCreatedBy()).getFullName());
                         }
                     });
         }
     }
+
     public void exportFormExcel(String documentNumber,
                                 Long typeId,
                                 ZonedDateTime requisitionDateFrom,
@@ -1508,7 +1542,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                 ExportConfig exportConfig) throws IOException {
         // 获取查询条件SQL
         Wrapper<ApplicationHeader> wrapper = getFDformQueryWrapper(documentNumber, typeId, requisitionDateFrom,
-                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId,tenantId);
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, tenantId);
 
         int total = baseMapper.getCountByCondition(wrapper);
 
@@ -1518,15 +1552,18 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             public int getTotal() {
                 return total;
             }
+
             @Override
             public List<ApplicationFinancRequsetDTO> queryDataByPage(Page page) {
 
-                return listFDformdByCondition(page, wrapper,associatedAmountFrom,associatedAmountTo,relevanceAmountFrom,relevanceAmountTo);
+                return listFDformdByCondition(page, wrapper, associatedAmountFrom, associatedAmountTo, relevanceAmountFrom, relevanceAmountTo);
             }
+
             @Override
             public ApplicationFinancRequsetDTO toDTO(ApplicationFinancRequsetDTO t) {
                 return t;
             }
+
             @Override
             public Class<ApplicationFinancRequsetDTO> getEntityClass() {
                 return ApplicationFinancRequsetDTO.class;
@@ -1540,19 +1577,19 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     //@Lock(name = SyncLockPrefix.EXP_APPLICATION, keys = "#headerId")
     public boolean closedLine(Long id, String message, Long headerId) {
         ApplicationLine line = lineService.selectById(id);
-        if (null == line || ClosedTypeEnum.CLOSED.equals(line.getClosedFlag())){
+        if (null == line || ClosedTypeEnum.CLOSED.equals(line.getClosedFlag())) {
             return true;
         }
         ApplicationHeader header = this.selectById(headerId);
         List<ApplicationAssociateDTO> associateDTOS = baseMapper.listAssociateInfo(Collections.singletonList(headerId));
         BigDecimal reportAmount = BigDecimal.valueOf(0L);
-        if (!CollectionUtils.isEmpty(associateDTOS)){
+        if (!CollectionUtils.isEmpty(associateDTOS)) {
             Map<Long, List<ApplicationAssociateDTO>> appAssociateMap = associateDTOS.stream().collect(Collectors.groupingBy(ApplicationAssociateDTO::getApplicationHeaderId));
             List<ApplicationAssociateDTO> applicationAssociateDTOS = appAssociateMap.get(headerId);
-            if (!CollectionUtils.isEmpty(applicationAssociateDTOS)){
+            if (!CollectionUtils.isEmpty(applicationAssociateDTOS)) {
                 for (int i = 0; i < applicationAssociateDTOS.size(); i++) {
                     ApplicationAssociateDTO e = applicationAssociateDTOS.get(i);
-                    if (Constants.AUDIT_FLAG.equals(e.getAuditFlag())){
+                    if (Constants.AUDIT_FLAG.equals(e.getAuditFlag())) {
                         throw new BizException(RespCode.EXPENSE_APPLICATION_HEADER_CLOSE_CHECK_ERROR, new Object[]{header.getDocumentNumber(), e.getReportNumber()});
                     }
                     reportAmount = reportAmount.add(e.getAmount());
@@ -1574,9 +1611,9 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
         List<ApplicationLine> lines = lineService.selectList(new EntityWrapper<ApplicationLine>().eq("header_id", header.getId()));
         boolean allMatch = lines.stream().allMatch(e -> ClosedTypeEnum.CLOSED.equals(e.getClosedFlag()));
-        if (!allMatch){
+        if (!allMatch) {
             header.setClosedFlag(ClosedTypeEnum.PARTIAL_CLOSED);
-        }else{
+        } else {
             header.setClosedFlag(ClosedTypeEnum.CLOSED);
         }
         if (null != header.getBudgetFlag() && header.getBudgetFlag()) {
@@ -1613,16 +1650,16 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         Integer status = DocumentOperationEnum.APPROVAL_PASS.getId(); //单据状态 通过
         List<Long> typeIdList = null;
 
-        if (!needApply||allType == 0||formBasis == 0) {
+        if (!needApply || allType == 0 || formBasis == 0) {
             return Arrays.asList();
         } else {
             Wrapper wrapper = new EntityWrapper();
             //关联公司和部门
             if (formBasis == 1) {
-                wrapper.eq( "t.company_id", companyId)
+                wrapper.eq("t.company_id", companyId)
                         .eq("t.department_id", unitId);
             } else if (formBasis == 2) {  //关联申请人
-                wrapper.eq( "t.employee_id", applicantId);
+                wrapper.eq("t.employee_id", applicantId);
             }
             //筛选类型id
             if (allType == 2) {
@@ -1630,10 +1667,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 typeIdList = cashPayRequisitionTypeSummaryCO.getRequisitionTypeIdList();
             }
 
-            List<ApplicationAssociatePrepaymentDTO> result = baseMapper.listInfoByCondition(page,wrapper,sourceDocumentCategory,
-                    currencyCode,typeIdList,status,applicationNumber,applicationType);
+            List<ApplicationAssociatePrepaymentDTO> result = baseMapper.listInfoByCondition(page, wrapper, sourceDocumentCategory,
+                    currencyCode, typeIdList, status, applicationNumber, applicationType);
 
-            for(ApplicationAssociatePrepaymentDTO dto:result) {
+            for (ApplicationAssociatePrepaymentDTO dto : result) {
                 dto.setAssociableAmount(dto.getAmount().subtract(dto.getAssociatedAmount()));
             }
 
@@ -1643,13 +1680,14 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
     /**
      * 关联合同
+     *
      * @param contractHeaderId
      */
     public List<ApplicationHeaderWebDTO> getContractById(Long contractHeaderId, Page myPage) {
 
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
-          .eq("contract_header_id", contractHeaderId
-        );
+                .eq("contract_header_id", contractHeaderId
+                );
         List<ApplicationHeaderWebDTO> headers = baseMapper.listByCondition(myPage, wrapper);
         setCompanyAndDepartmentAndEmployee(headers, true);
         return headers;
@@ -1657,9 +1695,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
     /**
      * 报账单费用行关联申请单
-     * @param expenseTypeId 报账单费用行费用类型ID
-     * @param currencyCode  费用行币种
-     * @param expReportHeaderId   此次操作的报账单
+     *
+     * @param expenseTypeId     报账单费用行费用类型ID
+     * @param currencyCode      费用行币种
+     * @param expReportHeaderId 此次操作的报账单
      * @param page
      * @return
      */
@@ -1667,13 +1706,13 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                                                   String currencyCode,
                                                                                   Long expReportHeaderId,
                                                                                   String documentNumber,
-                                                                                  Page page){
+                                                                                  Page page) {
         ExpenseReportHeader expenseReportHeader = expenseReportHeaderService.selectById(expReportHeaderId);
         // 1.报账单关联申请相关设置
         ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeader.getDocumentTypeId());
         ExpenseType expenseTypeById = expenseTypeService.selectById(expenseTypeId);
         //无需关联申请
-        if("NO_NEED".equals(expenseTypeById.getApplicationModel())){
+        if ("NO_NEED".equals(expenseTypeById.getApplicationModel())) {
             return Arrays.asList();
         }
         //创建用于查询的dto
@@ -1681,32 +1720,32 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         dto.setDocumentNumber(documentNumber);
         //关联申请单依据
         String applicationFormBasis = expenseReportType.getApplicationFormBasis();
-        switch(applicationFormBasis){
+        switch (applicationFormBasis) {
             //1 报账单头公司=申请单头公司
-            case "HEADER_COM" :
-                if(TypeConversionUtils.isEmpty(expenseReportHeader.getCompanyId())){
+            case "HEADER_COM":
+                if (TypeConversionUtils.isEmpty(expenseReportHeader.getCompanyId())) {
                     return Arrays.asList();
                 }
                 dto.setHeaderCompanyId(expenseReportHeader.getCompanyId());
                 break;
             //2 报账单头部门=申请单头部门
-            case "HEADER_DEPARTMENT" :
-                if(TypeConversionUtils.isEmpty(expenseReportHeader.getDepartmentId())){
+            case "HEADER_DEPARTMENT":
+                if (TypeConversionUtils.isEmpty(expenseReportHeader.getDepartmentId())) {
                     return Arrays.asList();
                 }
                 dto.setHeaderDepartmentId(expenseReportHeader.getDepartmentId());
                 break;
             //3 报账单头公司+头部门=申请单头公司+头部门
-            case "COM_DEP" :
-                if(TypeConversionUtils.isEmpty(expenseReportHeader.getCompanyId()) || TypeConversionUtils.isEmpty(expenseReportHeader.getDepartmentId())){
+            case "COM_DEP":
+                if (TypeConversionUtils.isEmpty(expenseReportHeader.getCompanyId()) || TypeConversionUtils.isEmpty(expenseReportHeader.getDepartmentId())) {
                     return Arrays.asList();
                 }
                 dto.setHeaderCompanyId(expenseReportHeader.getCompanyId());
                 dto.setHeaderDepartmentId(expenseReportHeader.getDepartmentId());
                 break;
             //4 报账单头申请人=申请单头申请人
-            case "HEADER_EMPLOYEE" :
-                if(TypeConversionUtils.isEmpty(expenseReportHeader.getApplicantId())){
+            case "HEADER_EMPLOYEE":
+                if (TypeConversionUtils.isEmpty(expenseReportHeader.getApplicantId())) {
                     return null;
                 }
                 dto.setEmployeeId(expenseReportHeader.getApplicantId());
@@ -1750,7 +1789,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                     applicationLineAbbreviateDTO.setDepartmentName(department.getName());
                 }
                 //设置责任中心信息
-                if(applicationLineAbbreviateDTO.getResponsibilityCenterId() != null){
+                if (applicationLineAbbreviateDTO.getResponsibilityCenterId() != null) {
                     ResponsibilityCenterCO responsibilityCenterCO =
                             organizationService.getResponsibilityCenterById(applicationLineAbbreviateDTO.getResponsibilityCenterId());
                     if (responsibilityCenterCO != null) {
@@ -1771,7 +1810,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                     applicationLineAbbreviateDTO.setExpenseTypeName(expenseType.getName());
                 }
                 //维度
-                DimensionUtils.setDimensionName(applicationLineAbbreviateDTO,organizationService);
+                DimensionUtils.setDimensionName(applicationLineAbbreviateDTO, organizationService);
             });
             applicationHeaderDTO.setLines(applicationLineAbbreviateDTOS);
         });
@@ -1780,6 +1819,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
     /**
      * 获取总金额，可关联金额，用于提交校验
+     *
      * @param applicationId
      * @return
      */
@@ -1790,16 +1830,16 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
     /**
      * 获取申请单关联的预付款单的单号
      */
-    public List<PrepaymentRequisitionReleaseCO> getPrepaymentByDocumentNumber(String documentNumber){
-        List<PrepaymentRequisitionReleaseCO>  result = baseMapper.getPrepaymentBydocumentNumber(documentNumber,new EntityWrapper<ExpenseRequisitionReqRelease>()
+    public List<PrepaymentRequisitionReleaseCO> getPrepaymentByDocumentNumber(String documentNumber) {
+        List<PrepaymentRequisitionReleaseCO> result = baseMapper.getPrepaymentBydocumentNumber(documentNumber, new EntityWrapper<ExpenseRequisitionReqRelease>()
                 .eq("err.source_doc_category", ExpenseDocumentTypeEnum.EXP_REQUISITION.name()));
-        return result ;
+        return result;
     }
 
     /**
      * 根据单据id获取申请单信息
      */
-    public ApplicationCO getApplicationByDocumentId(Long documentId){
+    public ApplicationCO getApplicationByDocumentId(Long documentId) {
         ApplicationHeaderCO header = baseMapper.getHeaderByDocumentId(documentId);
         ApplicationType applicationType = typeService.getApplicationTypeById(header.getTypeId());
         header.setTypeName(applicationType.getTypeName());
@@ -1818,11 +1858,11 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                               String releaseCode,
                                                               String expenseTypeName,
                                                               Page pageable) {
-        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS =baseMapper
-                .queryReleaseByReport(reportNumber,releaseCode,expenseTypeName,pageable);
+        List<ApplicationHeaderWebDTO> applicationHeaderWebDTOS = baseMapper
+                .queryReleaseByReport(reportNumber, releaseCode, expenseTypeName, pageable);
         List<Long> employeeIds = applicationHeaderWebDTOS.stream().map(ApplicationHeaderWebDTO::getEmployeeId).collect(Collectors.toList());
         Map<Long, ContactCO> employeeNames = organizationService.getUserMapByUserIds(employeeIds);
-        applicationHeaderWebDTOS.stream().forEach(e->{
+        applicationHeaderWebDTOS.stream().forEach(e -> {
             //费用类型
             ExpenseType expenseType = expenseTypeService.selectById(e.getExpenseType());
             e.setExpenseTypeName(expenseType.getName());
@@ -1832,7 +1872,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
             e.setEmployeeName(employeeNames.get(e.getEmployeeId()).getFullName());
         });
 
-       return applicationHeaderWebDTOS ;
+        return applicationHeaderWebDTOS;
 
     }
 }

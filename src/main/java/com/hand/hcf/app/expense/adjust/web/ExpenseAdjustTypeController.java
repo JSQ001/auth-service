@@ -20,6 +20,9 @@ import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +40,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/expense/adjust/types")
+@Api(tags = "费用调整单单据类型控制器")
 public class ExpenseAdjustTypeController {
     @Autowired
     private ExpenseAdjustTypeService expenseAdjustTypeService;
@@ -144,8 +148,12 @@ public class ExpenseAdjustTypeController {
      * @return
      */
     @GetMapping("/queryExpenseAdjustType")
-    public ResponseEntity listTypeByCurrentUser() {
-        return ResponseEntity.ok(expenseAdjustTypeService.queryByUser());
+    @ApiOperation(value = "查询当前用户可以新建的费用调整单类型",
+            notes = "查询当前用户可以新建的费用调整单类型 修改： 谢宾")
+    public ResponseEntity listTypeByCurrentUser(
+            @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag) {
+
+        return ResponseEntity.ok(expenseAdjustTypeService.queryByUser(authFlag));
     }
 
 

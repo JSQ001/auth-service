@@ -33,9 +33,6 @@ public class ExpenseReportControllerImpl {
     private ExpenseReportHeaderService expenseReportHeaderService;
 
     @Autowired
-    private ExpenseReportLineService expenseReportLineService;
-
-    @Autowired
     private ExpenseReportDistService expenseReportDistService;
 
     @Autowired

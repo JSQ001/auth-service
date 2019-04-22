@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -23,4 +26,32 @@ public interface InvoiceHeadMapper extends BaseMapper<InvoiceHead>{
      */
     List<InvoiceHead> pageInvoiceByCond(Page queryPage,
                                         @Param("ew") Wrapper<InvoiceHead> wrapper);
+
+
+    /**
+     * 分页获取发票信息 （已提交或未提交认证）
+     * @param invoiceTypeId 单据类型Id
+     * @param invoiceNo 发票号码
+     * @param invoiceCode 发票代码
+     * @param invoiceDateFrom 开票时间从
+     * @param invoiceDateTo 开票时间至
+     * @param invoiceAmountFrom 金额合计从
+     * @param invoiceAmountTo 金额合计至
+     * @param createdMethod 创建方式
+     * @param certificationStatus 认证状态
+     * @param isSubmit true:已提交 false：未提交
+     * @param page
+     * @return
+     */
+    List<InvoiceCertificationDTO> pageInvoiceCertifiedByCond(@Param("invoiceTypeId") Long invoiceTypeId,
+                                                             @Param("invoiceNo") String invoiceNo,
+                                                             @Param("invoiceCode") String invoiceCode,
+                                                             @Param("invoiceDateFrom") ZonedDateTime invoiceDateFrom,
+                                                             @Param("invoiceDateTo") ZonedDateTime invoiceDateTo,
+                                                             @Param("invoiceAmountFrom") BigDecimal invoiceAmountFrom,
+                                                             @Param("invoiceAmountTo") BigDecimal invoiceAmountTo,
+                                                             @Param("createdMethod") String createdMethod,
+                                                             @Param("certificationStatus") Long certificationStatus,
+                                                             @Param("isSubmit") Boolean isSubmit,
+                                                             Page page);
 }

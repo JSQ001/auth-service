@@ -104,7 +104,81 @@ public class ApplicationFinancialFormController {
                 associatedAmountTo,
                 relevanceAmountFrom,
                 relevanceAmountTo,
-                tenantId);
+                tenantId,
+                false);
+
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return  new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     *  费用申请单财务条件查询 (数据权限控制)
+     * @param companyId
+     * @param typeId
+     * @param applyId
+     * @param status
+     * @param unitId
+     * @param applyDateFrom
+     * @param applyDateTo
+     * @param currencyCode
+     * @param amountFrom
+     * @param amountTo
+     * @param associatedAmountFrom
+     * @param associatedAmountTo
+     * @param relevanceAmountFrom
+     * @param relevanceAmountTo
+     * @param closedFlag
+     * @param remark
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/query/applicationFinancaiaList/enable/dataAuth")
+    public ResponseEntity getApplicationFDListDataAuth(@RequestParam(value = "companyId", required =  false)Long companyId,
+                                                       @RequestParam(value = "typeId",required = false)Long typeId,
+                                                       @RequestParam(value = "applyId",required = false)Long applyId,
+                                                       @RequestParam(value = "status",required = false)Long status,
+                                                       @RequestParam(value = "unitId",required = false)Long unitId,
+                                                       @RequestParam(value = "applyDateFrom",required = false)String applyDateFrom,
+                                                       @RequestParam(value = "applyDateTo",required = false) String applyDateTo,
+                                                       @RequestParam (value = "currencyCode",required = false)String currencyCode,
+                                                       @RequestParam(value = "amountFrom",required = false)BigDecimal amountFrom,
+                                                       @RequestParam(value = "amountTo",required = false)BigDecimal amountTo,
+                                                       @RequestParam(value = "associatedAmountFrom",required = false)BigDecimal associatedAmountFrom,
+                                                       @RequestParam(value = "associatedAmountTo",required = false)BigDecimal associatedAmountTo,
+                                                       @RequestParam(value = "relevanceAmountFrom",required = false)BigDecimal relevanceAmountFrom,
+                                                       @RequestParam(value = "relevanceAmountTo",required = false)BigDecimal relevanceAmountTo,
+                                                       @RequestParam(value = "closedFlag",required = false)Long closedFlag,
+                                                       @RequestParam(value = "remark",required = false)String  remark,
+                                                       @RequestParam(value = "documentNumber",required = false) String documentNumber,
+                                                       @RequestParam(value = "tenantId",required = false)Long tenantId,
+                                                       Pageable pageable) {
+        ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(applyDateFrom);
+        ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(applyDateTo);
+        if (requisitionDateTo != null){
+            requisitionDateTo = requisitionDateTo.plusDays(1);
+        }
+        Page page = PageUtil.getPage(pageable);
+        //用对象接受前端传过来的 查询条件，
+        List<ApplicationFinancRequsetDTO> result = applicationHeaderService.listHeaderDTOsByfincancies(page,
+                documentNumber,
+                companyId,
+                typeId,
+                requisitionDateFrom,
+                requisitionDateTo,
+                amountFrom,
+                amountTo,
+                status,
+                currencyCode,
+                remark,
+                applyId,
+                unitId,
+                closedFlag,
+                associatedAmountFrom,
+                associatedAmountTo,
+                relevanceAmountFrom,
+                relevanceAmountTo,
+                tenantId,
+                true);
 
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return  new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);

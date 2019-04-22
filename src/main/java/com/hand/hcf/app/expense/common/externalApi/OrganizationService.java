@@ -363,6 +363,14 @@ public class OrganizationService {
     }
 
     /**
+     * 根据账套code获取账套信息
+     * @param setOfBooksCode
+     * @return
+     */
+    public List<SetOfBooksInfoCO> getSetOfBooksBySetOfBooksCode(String setOfBooksCode) {
+        return sobClient.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
+    }
+    /**
      * 获取参数指定的值
      *
      * @param companyId  公司Id
@@ -661,6 +669,30 @@ public class OrganizationService {
         return locationInterface.getLocationLevelByLocationIdOrLevelIdOrLevelCode(locationId, levelId, levelCode);
     }
 
+	/**
+     * 根据部门、公司查询可用的责任中心(可用责任中心包含默认)
+     * @param departmentId 部门Id
+     * @param companyId  公司Id
+     * @param code 责任中心代码
+     * @param name 责任中心名称
+     * @param page
+     * @return
+     */
+    public Page<ResponsibilityCenterCO> pageByCompanyAndDepartment(Long departmentId,
+                                                                   Long companyId,
+                                                                   String code,
+                                                                   String name,
+                                                                   Page page) {
+        return responsibilityCenterClient.pageByCompanyAndDepartment(departmentId,companyId,code,name,page);
+    }
+
+    public List<CompanyCO> listCompanyBySetOfBooksIdAndCodeAndName(Long setOfBooksId, String companyCode){
+        return companyClient.listCompanyBySetOfBooksIdAndCodeAndName(setOfBooksId,companyCode,null);
+    }
+
+    public DepartmentCO getDepartmentByCodeAndTenantId(String code){
+        return departmentClient.getDepartmentByCodeAndTenantId(code);
+    }
     public Page<ResponsibilityCenterCO> pageDepartmentResCenterByCond(Long departmentId, Long companyId,Page page) {
         //jiu.zhao 修改三方接口
         //return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page);

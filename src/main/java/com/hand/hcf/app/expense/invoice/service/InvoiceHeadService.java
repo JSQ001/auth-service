@@ -14,6 +14,7 @@ import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.*;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
@@ -629,5 +630,97 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                 throw new BizException(RespCode.INVOICE_LINE_TAX_AMOUNT_SUM_NO_MORE_THAN_HEAD_TAX_TOTAL_AMOUNT_SUM);
             }
         }
+    }
+
+    /**
+     * 分页获取发票信息 （已提交或未提交认证）
+     * @param invoiceTypeId 单据类型Id
+     * @param invoiceNo 发票号码
+     * @param invoiceCode 发票代码
+     * @param invoiceDateFrom 开票时间从
+     * @param invoiceDateTo 开票时间至
+     * @param invoiceAmountFrom 金额合计从
+     * @param invoiceAmountTo 金额合计至
+     * @param createdMethod 创建方式
+     * @param certificationStatus 认证状态
+     * @param isSubmit true:已提交 false：未提交
+     * @param page
+     * @return
+     */
+    public List<InvoiceCertificationDTO> pageInvoiceCertifiedByCond(Long invoiceTypeId,
+                                                                    String invoiceNo,
+                                                                    String invoiceCode,
+                                                                    ZonedDateTime invoiceDateFrom,
+                                                                    ZonedDateTime invoiceDateTo,
+                                                                    BigDecimal invoiceAmountFrom,
+                                                                    BigDecimal invoiceAmountTo,
+                                                                    String createdMethod,
+                                                                    Long certificationStatus,
+                                                                    Boolean isSubmit,
+                                                                    Page page) {
+        List<InvoiceCertificationDTO> invoiceCertificationDTOList = baseMapper.pageInvoiceCertifiedByCond(
+                invoiceTypeId,
+                invoiceNo,
+                invoiceCode,
+                invoiceDateFrom,
+                invoiceDateTo,
+                invoiceAmountFrom,
+                invoiceAmountTo,
+                createdMethod,
+                certificationStatus,
+                isSubmit,
+                page);
+        invoiceCertificationDTOList
+                .stream()
+                .forEach(invoiceCertification -> {
+                    SysCodeValueCO sysCodeValueCO = null;
+                     sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(
+                            "CREATED_METHOD", invoiceCertification.getCreatedMethod());
+                    if (sysCodeValueCO != null){
+                        invoiceCertification.setCreatedMethodName(sysCodeValueCO.getName());
+                    }
+                    sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(
+                            "INVOICE_CERTIFICATION_STATUS", invoiceCertification.getCertificationStatus());
+                    if (sysCodeValueCO != null){
+                        invoiceCertification.setCertificationStatusName(sysCodeValueCO.getName());
+                    }
+                });
+        return invoiceCertificationDTOList;
+    }
+
+    /**
+     * 更新发票行报销记录以及发票头行入账标志
+     * @param id 报账头Id
+     * @param accountingFlag 入账标志
+     *
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateInvoiceAccountingFlagByHeaderId(Long id, String accountingFlag) {
+       List<InvoiceLineExpence> invoiceLineExpenceList = invoiceLineExpenceService.selectList(
+               new EntityWrapper<InvoiceLineExpence>()
+                       .eq("exp_expense_head_id",id));
+        invoiceLineExpenceList.stream().forEach(invoiceLineExpence->{
+                    InvoiceLineDist invoiceLineDist = invoiceLineDistService.selectById(invoiceLineExpence.getInvoiceDistId());
+                    invoiceLineDist.setAccountingFlag(accountingFlag);
+                    invoiceLineDistService.updateById(invoiceLineDist);
+                    InvoiceLine invoiceLine = invoiceLineService.selectById(invoiceLineDist.getInvoiceLineId());
+                    List<Long> ids = invoiceLineService.selectList(
+                            new EntityWrapper<InvoiceLine>()
+                                    .eq("invoice_head_id",invoiceLine.getInvoiceHeadId()))
+                            .stream()
+                            .map(InvoiceLine::getId)
+                            .collect(Collectors.toList());
+                    Boolean isAll = invoiceLineDistService.selectList(
+                            new EntityWrapper<InvoiceLineDist>()
+                                    .in("invoice_line_id",ids))
+                            .stream()
+                            .anyMatch((e)->e.getAccountingFlag().equals("N"));
+                    //当该发票所有分配行均入账
+                    if(!isAll){
+                        InvoiceHead invoiceHead = invoiceHeadMapper.selectById(invoiceLine.getInvoiceHeadId());
+                        invoiceHead.setAccountingFlag(accountingFlag);
+                        invoiceHeadMapper.updateById(invoiceHead);
+                    }
+        });
     }
 }

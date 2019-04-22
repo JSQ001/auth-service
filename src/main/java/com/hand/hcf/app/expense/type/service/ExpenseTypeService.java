@@ -620,15 +620,25 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
         return expenseTypeWebDTOS;
     }
 
-    public void checkExpenseTypeInitData(ExpenseTypeInitDTO dto){
-        StringBuilder errorMessage = new StringBuilder();
+    public void checkExpenseTypeInitData(ExpenseTypeInitDTO dto,int line){
+        Map<String,List<String>> errorMap = new HashMap<>(16);
+        String lineNumber = "第"+line+"行";
+        List<String> stringList = new ArrayList<>();
         if(TypeConversionUtils.isEmpty(dto.getCode()) || TypeConversionUtils.isEmpty(dto.getName())){
-            errorMessage.append(dto.getCode()+":必输字段为空！");
+            stringList.add("必输字段为空！");
         }else {
             //默认当前租户
             dto.setTenantId(OrgInformationUtil.getCurrentTenantId());
-            //todo 应该根据账套code去查询id,暂时没有这样的三方接口
-            Long setOfBooksId =  OrgInformationUtil.getCurrentSetOfBookId();
+            Long setOfBooksId = null;
+            List<SetOfBooksInfoCO> setOfBooksInfoCOList =
+                    organizationService.getSetOfBooksBySetOfBooksCode(dto.getSetOfBooksCode());
+            if(CollectionUtils.isEmpty(setOfBooksInfoCOList)){
+                stringList.add("账套code不存在！");
+            }else if(setOfBooksInfoCOList.size() == 1){
+                setOfBooksId = setOfBooksInfoCOList.get(0).getId();
+            }else if(setOfBooksInfoCOList.size() > 1){
+                stringList.add("账套code存在多个！");
+            }
             dto.setSetOfBooksId(setOfBooksId);
             ExpenseTypeIcon expenseTypeIcon = expenseTypeIconService.selectOne(
                     new EntityWrapper<ExpenseTypeIcon>()
@@ -638,7 +648,7 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
             if(expenseTypeIcon != null) {
                 dto.setIconUrl(expenseTypeIcon.getIconURL());
             }else{
-                errorMessage.append(dto.getCode()+":图标名称未找到！");
+                stringList.add("图标名称未找到！");
             }
             String y = "Y";
             String n = "N";
@@ -653,11 +663,11 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                         .eq("name",dto.getTypeCategoryName())
             );
             if(categoryList.size() == 0){
-                errorMessage.append(dto.getCode()+":分类名称未找到！");
+                stringList.add("分类名称未找到！");
             }else if(categoryList.size() == 1){
                 dto.setTypeCategoryId(categoryList.get(0).getId());
             }else{
-                errorMessage.append(dto.getCode()+":分类名称存在多个！");
+                stringList.add("分类名称存在多个！");
             }
             if(y.equals(dto.getEntryModeStr())){
                 dto.setEntryMode(Boolean.TRUE);
@@ -677,7 +687,7 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                 dto.setPriceUnit(null);
             }else{
                 if (dto.getPriceUnit() == null){
-                    errorMessage.append(dto.getCode()+":金额录入模式为单价*数量，请输入单位！");
+                    stringList.add("金额录入模式为单价*数量，请输入单位！");
                 }
             }
             if(Integer.valueOf(1).equals(dto.getTypeFlag())){
@@ -686,54 +696,80 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                         .eq("set_of_books_id",dto.getSetOfBooksId())
                         .eq("type_flag", Integer.valueOf(0)));
                 if(list.size() == 0){
-                    errorMessage.append(dto.getCode()+":费用类型的申请类型代码找不到！");
+                    stringList.add("费用类型的申请类型代码找不到！");
                 }else if(list.size() == 1){
                     dto.setSourceTypeId(list.get(0).getId());
                 }else if(list.size() > 1){
-                    errorMessage.append(dto.getCode()+":费用类型的申请类型代码存在多个！");
+                    stringList.add("费用类型的申请类型代码存在多个！");
                 }
-
             }
         }
-        dto.setErrorMessage(errorMessage);
+        if(!CollectionUtils.isEmpty(stringList)){
+            errorMap.put(lineNumber,stringList);
+        }
+        dto.setResultMap(errorMap);
     }
 
-    public String initExpenseType(List<ExpenseTypeInitDTO> expenseTypeInitDTOS){
-        StringBuilder errorMessage = new StringBuilder();
-        expenseTypeInitDTOS.forEach(item -> {
-            checkExpenseTypeInitData(item);
-            if("".equals(item.getErrorMessage().toString())){
+    public Map<String, List<String>> initExpenseType(List<ExpenseTypeInitDTO> expenseTypeInitDTOS){
+        Map<String, List<String>> resultMap = new HashMap<>();
+        int line = 1;
+        for(ExpenseTypeInitDTO item:expenseTypeInitDTOS) {
+            checkExpenseTypeInitData(item, line);
+            String lineNumber = "第" + line + "行";
+            if (item.getResultMap().isEmpty()) {
                 List<ExpenseType> temp = baseMapper.selectList(new EntityWrapper<ExpenseType>()
                         .eq("code", item.getCode())
-                        .eq("set_of_books_id",item.getSetOfBooksId())
+                        .eq("set_of_books_id", item.getSetOfBooksId())
                         .eq("type_flag", item.getTypeFlag()));
 
                 if (temp.size() == 0) {
                     ExpenseType expenseType = new ExpenseType();
-                    BeanUtils.copyProperties(item,expenseType);
+                    BeanUtils.copyProperties(item, expenseType);
                     baseMapper.insert(expenseType);
-                }else  if (temp.size() == 1) {
+                } else if (temp.size() == 1) {
                     ExpenseType expenseTypeTemp = temp.get(0);
-                    StringBuilder updateErrorMessage = new StringBuilder();
+                    List<String> stringList = new ArrayList<>();
                     // 校验数据存不存在
-                    if (null == expenseTypeTemp || expenseTypeTemp.getDeleted()){
-                        updateErrorMessage.append(item.getCode()+":校验数据存不存在或者已删除！");
+                    if (null == expenseTypeTemp || expenseTypeTemp.getDeleted()) {
+                        stringList.add("校验数据存不存在或者已删除！");
                     }
-                    if("".equals(updateErrorMessage.toString())){
-                        BeanUtils.copyProperties(item,expenseTypeTemp);
+                    if(!CollectionUtils.isEmpty(stringList)) {
+                        item.getResultMap().put(lineNumber,stringList);
+                        resultMap.putAll(item.getResultMap());
+                    }
+                    if (item.getResultMap().isEmpty()) {
+                        BeanUtils.copyProperties(item, expenseTypeTemp);
                         baseMapper.updateById(expenseTypeTemp);
-                    }else{
-                        errorMessage.append(updateErrorMessage);
                     }
                 }
-            }else{
-                errorMessage.append(item.getErrorMessage());
+            } else {
+                resultMap.putAll(item.getResultMap());
             }
-        });
-        if ("".equals(errorMessage.toString())) {
-            return "导入成功!";
-        } else {
-            return errorMessage.toString();
+            line++;
         }
+        if (resultMap.isEmpty()) {
+            resultMap.put("success", Arrays.asList("导入成功"));
+        }
+        return resultMap;
+    }
+
+    /**
+     * 报账单类型定义关联费用类型-根据费用类型代码查询费用类型id
+     * @param setOfBooksId
+     * @param expenseTypeCode 费用类型代码
+     * @return
+     */
+    public Long queryExpenseTypeIdByExpenseTypeCode(Long setOfBooksId,String expenseTypeCode) {
+        return baseMapper.queryExpenseTypeIdByExpenseTypeCode(setOfBooksId,expenseTypeCode);
+    }
+
+    /**
+     * 费用申请单类型定义关联申请类型/差旅申请单类型定义关联申请类型-根据申请类型代码查询申请类型id
+     * @param setOfBooksId
+     * @param applicationTypeCode 费用类型代码
+     * @return
+     */
+    public Long queryApplicationTypeIdByApplicationTypeCode(Long setOfBooksId,String applicationTypeCode) {
+        return baseMapper.queryApplicationTypeIdByApplicationTypeCode(setOfBooksId,applicationTypeCode);
     }
 }

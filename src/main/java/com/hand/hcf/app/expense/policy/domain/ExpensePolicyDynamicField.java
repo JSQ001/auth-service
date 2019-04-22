@@ -37,7 +37,6 @@ public class ExpensePolicyDynamicField extends DomainLogic {
     /**
      * 动态字段名
      */
-    @TableField(exist = false)
     private String name;
     /**
      * 值

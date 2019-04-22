@@ -60,6 +60,51 @@ public class ExpenseReportController {
     @Autowired
     private ExpenseReportPaymentScheduleService expenseReportPaymentScheduleService;
 
+
+
+
+
+    /**
+     * queryExpenseReportPaymentScheduleByIds : 查询报账单 付款信息表 -根据ID集合查询---付款申请单财务查询使用
+     */
+    @GetMapping("/payment/schedule/query/ids")
+    public ResponseEntity<List<ExpenseReportPaymentScheduleDTO>> queryExpenseReportPaymentScheduleByIds(@RequestParam(required = false) String ids,
+                                                                                                        @RequestParam(required = false) Long amount,
+                                                                                                        @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
+                                                                                                        @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
+
+
+        Page mybatisPage = PageUtil.getPage(page, size);
+
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(mybatisPage);
+        List<ExpenseReportPaymentScheduleDTO> list  = expenseReportPaymentScheduleService.queryExpenseReportPaymentScheduleByIds(ids, amount, mybatisPage);
+
+        return new ResponseEntity(list,totalHeader,HttpStatus.OK);
+    }
+
+
+    /**
+     * queryExpenseReportLineByids : 查询报账单行表信息，根据id集合查询
+     *
+     */
+    @GetMapping("/line/query/ids")
+    public ResponseEntity<List<ExpenseReportLine>> queryExpenseReportLineByids(@RequestParam(required = false) String ids,
+                                                                               @RequestParam(required = false) Long expenseTypeId,
+                                                                               @RequestParam(required = false) String reportLineFrom,
+                                                                               @RequestParam(required = false) String reportLineTo,
+                                                                               @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
+                                                                               @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
+
+        Page mybatisPage = PageUtil.getPage(page, size);
+
+        List<ExpenseReportLine> list = expenseReportLineService.queryExpenseReportLineByids(ids, expenseTypeId, reportLineFrom, reportLineTo, mybatisPage);
+
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(mybatisPage);
+
+        return new ResponseEntity(list,totalHeader,HttpStatus.OK);
+    }
+
+
     /**
      * @api {POST} /api/expense/report/header/save 【报账单】创建头信息
      * @apiDescription 创建报账单头信息
@@ -1458,6 +1503,73 @@ public class ExpenseReportController {
                 cDateTo,
                 backlashFlag,
                 tenantId,
+                false,
+                page);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(list,totalHeader,HttpStatus.OK);
+    }
+    /**
+     * 报账单财务查询 (数据权限控制)
+     * * @apiParam (请求参数){Long} [documentTypeId] 报账单类型ID
+     *      * @apiParam (请求参数){String} [requisitionDateFrom] 申请日期从(YYYY-MM-DD格式)
+     *      * @apiParam (请求参数){String} [requisitionDateTo] 申请日期至(YYYY-MM-DD格式)
+     *      * @apiParam (请求参数){Long} [applicantId] 申请人ID
+     *      * @apiParam (请求参数){Integer} [status] 状态
+     *      * @apiParam (请求参数){String} [currencyCode] 币种
+     *      * @apiParam (请求参数){BigDecimal} [amountFrom] 金额从
+     *      * @apiParam (请求参数){BigDecimal} [amountTo] 金额至
+     *      * @apiParam (请求参数){String} [remark] 备注
+     *      * @apiParam (请求参数){int} [page] 页数
+     *      * @apiParam (请求参数){int} [size] 每页大小
+     */
+    @GetMapping("/get/expenseReport/by/query/enable/dataAuth")
+    public ResponseEntity<List<ExpenseReportHeaderDTO>> MyExpenseReportsFinanceQueryDataAuth(
+            @RequestParam(required = false)Long companyId,
+            @RequestParam(required = false) Long documentTypeId,
+            @RequestParam(required = false,value = "applyId") Long applicantId,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false)Long unitId,
+            @RequestParam(required = false,value = "applyDateFrom") String requisitionDateFrom,
+            @RequestParam(required = false,value = "applyDateTo") String requisitionDateTo,
+            @RequestParam(required = false,value = "currency") String currencyCode,
+            @RequestParam(required = false) BigDecimal amountFrom,
+            @RequestParam(required = false) BigDecimal amountTo,
+            @RequestParam(required = false) BigDecimal paidAmountFrom,
+            @RequestParam(required = false) BigDecimal paidAmountTo,
+            @RequestParam(required = false) String backlashFlag,
+            @RequestParam(required = false,value = "checkDateFrom") String checkDateFrom,
+            @RequestParam(required = false,value = "checkDateTo") String checkDateTo,
+            @RequestParam(required = false) String remark,
+            @RequestParam(required = false,value = "documentCode") String requisitionNumber,
+            @RequestParam(required = false)Long tenantId,
+            Pageable pageable){
+        Page page =PageUtil.getPage(pageable);
+        ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
+        ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
+        ZonedDateTime cDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(checkDateFrom);
+        ZonedDateTime cDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(checkDateTo);
+
+        //首先在费用模块根据条件全部查询出来， 然后再将符合条件的单据编号单据id输出至支付模块， 再信息返回回来。然后在进行比对筛选
+        List<ExpenseReportHeaderDTO> list =expenseReportHeaderService.queryExpenseReportsFinance(
+                companyId,
+                documentTypeId,
+                reqDateFrom,
+                reqDateTo,
+                applicantId,
+                status,
+                currencyCode,
+                amountFrom,
+                amountTo,
+                remark,
+                requisitionNumber,
+                unitId,
+                paidAmountFrom,
+                paidAmountTo,
+                cDateFrom,
+                cDateTo,
+                backlashFlag,
+                tenantId,
+                true,
                 page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(list,totalHeader,HttpStatus.OK);

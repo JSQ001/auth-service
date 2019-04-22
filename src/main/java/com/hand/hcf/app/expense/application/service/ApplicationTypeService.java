@@ -16,6 +16,8 @@ import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.common.utils.StringUtil;
+import com.hand.hcf.app.expense.init.dto.ModuleInitDTO;
+import com.hand.hcf.app.expense.init.dto.SourceTypeTargetTypeDTO;
 import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
@@ -607,11 +609,19 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
                 }
             }
         }
-        applicationTypes.addAll(listAuthorizedApplicationType());
-        //根据ID去重
-        applicationTypes = applicationTypes.stream().collect(
-                collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ApplicationType::getId))), ArrayList::new)
-        );
+        return applicationTypes;
+    }
+
+    public List<ApplicationType> queryByUserAndAuth(Boolean isAuth) {
+        List<ApplicationType> applicationTypes = queryByUser();
+        if (isAuth != null && isAuth) {
+            applicationTypes.addAll(listAuthorizedApplicationType());
+            //根据ID去重
+            applicationTypes = applicationTypes.stream().collect(
+                    collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ApplicationType::getId))),
+                            ArrayList::new)
+            );
+        }
         return applicationTypes;
     }
 
@@ -957,7 +967,9 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
                 .userGroupIdList(userGroupIdList)
                 .currentUserId(OrgInformationUtil.getCurrentUserId())
                 .build();
-        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        //jiu.zhao 修改三方接口
+        //Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage.getCurrent() - 1, queryPage.getSize());
         queryPage.setTotal(contactCOPage.getTotal());
         userCOList = contactCOPage.getRecords();
 
@@ -992,5 +1004,87 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
         result.setRecords(applicationTypeCOS);
         result.setTotal(page.getTotal());
         return result;
+    }
+
+    /**
+     * 批量导入费用申请单类型定义-关联申请类型
+     * @param moduleInitDTOList
+     * @return
+     */
+    @Transactional
+    public String expApplicationTypeApplicationType(List<ModuleInitDTO> moduleInitDTOList) {
+        for (ModuleInitDTO moduleInitDTO : moduleInitDTOList) {
+            String setOfBooksCode = moduleInitDTO.getSetOfBooksCode();
+            List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
+            if (setOfBooksList == null || setOfBooksList.size() == 0) {
+                throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
+            }
+            if (setOfBooksList.size() > 1) {
+                throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
+            }
+            Long setOfBooksId = setOfBooksList.get(0).getId();
+            List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOList = moduleInitDTO.getSourceTypeTargetTypeDTOList();
+            for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOList) {
+                String allTypeFlag = sourceTypeTargetTypeDTO.getAllTypeFlag();
+                //申请类型代码列表
+                List<String> ApplicationTypeCodeList = sourceTypeTargetTypeDTO.getTargetTypeCode();
+                //费用申请单类型代码
+                String expenseApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
+                ApplicationType expenseApplicationType = new ApplicationType();
+                expenseApplicationType.setSetOfBooksId(setOfBooksId);
+                expenseApplicationType.setTypeCode(expenseApplicationTypeCode);
+                expenseApplicationType.setBudgetFlag(null);
+                expenseApplicationType.setAssociateContract(null);
+                expenseApplicationType.setRequireInput(null);
+                ApplicationType expenseApplicationTypeResult = baseMapper.selectOne(expenseApplicationType);
+                if (expenseApplicationTypeResult == null) {
+                    String errorMessage = new String();
+                    errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseApplicationTypeCode + "\'费用申请单类型代码！";
+                    throw new BizException(errorMessage);
+                }
+                //费用申请单类型id
+                Long expenseApplicationTypeId = expenseApplicationTypeResult.getId();
+                //批量插入参数
+                List<ApplicationTypeAssignType> applicationTypeAssignTypeList = new ArrayList<>();
+                //全选类型
+                if (allTypeFlag == null) {
+                    throw new BizException("全部类型不可为空");
+                }
+                //全选
+                if (allTypeFlag.equals("Y")) {
+                    if (ApplicationTypeCodeList != null) {
+                        throw new BizException("当全部类型为'Y'时,申请类型代码无需输入");
+                    }
+                    expenseApplicationTypeResult.setAllFlag(true);
+                    baseMapper.updateById(expenseApplicationTypeResult);
+                    //清空原有关联信息
+                    assignTypeService.delete(new EntityWrapper<ApplicationTypeAssignType>().eq("application_type_id",expenseApplicationTypeId));
+                }else if(allTypeFlag.equals("N")) {
+                    if (ApplicationTypeCodeList == null || ApplicationTypeCodeList.size() == 0) {
+                        throw new BizException("当全部类型为'N'时,申请类型不可为空");
+                    }
+                    //构造批量新增的参数
+                    for (String applicationTypeCode : ApplicationTypeCodeList) {
+                        Long applicationTypeId = expenseTypeService.queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, applicationTypeCode);
+                        if (applicationTypeId == null) {
+                            throw new BizException("申请类型代码\'" + applicationTypeCode + "\'不存在");
+                        }
+                        ApplicationTypeAssignType applicationTypeAssignType = new ApplicationTypeAssignType();
+                        applicationTypeAssignType.setApplicationTypeId(expenseApplicationTypeId);
+                        applicationTypeAssignType.setExpenseTypeId(applicationTypeId);
+                        applicationTypeAssignTypeList.add(applicationTypeAssignType);
+                    }
+                    expenseApplicationTypeResult.setAllFlag(false);
+                    baseMapper.updateById(expenseApplicationTypeResult);
+                    //清空原有关联信息
+                    assignTypeService.delete(new EntityWrapper<ApplicationTypeAssignType>().eq("application_type_id",expenseApplicationTypeId));
+                    //批量插入新关联信息
+                    assignTypeService.insertBatch(applicationTypeAssignTypeList);
+                }else {
+                    throw new BizException("全部类型输入错误,只可为 'Y' 或 'N'");
+                }
+            }
+        }
+        return "SUCCESS";
     }
 }

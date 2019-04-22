@@ -11,6 +11,9 @@ import com.hand.hcf.app.expense.application.service.ApplicationTypeService;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDTO;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDimensionDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +34,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/expense/application/type")
+@Api(tags = "申请单类型控制器")
 public class ApplicationTypeController {
 
     @Autowired
@@ -560,10 +564,13 @@ public class ApplicationTypeController {
      *     }
      *     ]
      */
+    @ApiOperation(value = "获取当前人分配的申请单类型",
+            notes = "获取当前人分配的申请单类型 开发：谢宾")
     @GetMapping("/query/condition/user")
-    public ResponseEntity<List<ApplicationType>> queryByUser(){
+    public ResponseEntity<List<ApplicationType>> queryByUserAndAuth(
+            @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag){
 
-        return ResponseEntity.ok(service.queryByUser());
+        return ResponseEntity.ok(service.queryByUserAndAuth(authFlag));
     }
 
 
@@ -712,12 +719,12 @@ public class ApplicationTypeController {
                                                                     @RequestParam("employeeId") Long employeeId,
                                                                     @RequestParam("companyId") Long companyId,
                                                                     @RequestParam("departmentId") Long departmentId,
-                                                                    @RequestParam(value = "categoryId",required = false) Long categoryId,
-                                                                    @RequestParam(value = "expenseTypeName", required = false) String expenseTypeName,
+                                                                    @RequestParam(value = "typeCategoryId",required = false) Long typeCategoryId,
+                                                                    @RequestParam(value = "name", required = false) String name,
                                                                     Pageable pageable){
         Page<ExpenseTypeWebDTO> page = PageUtil.getPage(pageable);
         List<ExpenseTypeWebDTO> result = service.queryExpenseTypeByApplicationTypeId(applicationTypeId,
-                categoryId, expenseTypeName, companyId, employeeId, departmentId, page);
+                typeCategoryId, name, companyId, employeeId, departmentId, page);
         HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }

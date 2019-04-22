@@ -497,6 +497,12 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
             lineDto.setCompanyId(headerDTO.getCompanyId());
             lineDto.setDepartmentName(headerDTO.getDepartmentName());
             lineDto.setUnitId(headerDTO.getUnitId());
+            ResponsibilityCenterCO responsibilityCenterCO = organizationService
+                    .getDefaultResponsibilityCenter(headerDTO.getCompanyId(),headerDTO.getUnitId());
+            if(responsibilityCenterCO != null){
+                lineDto.setResponsibilityCenterId(responsibilityCenterCO.getId());
+                lineDto.setResponsibilityCenterCodeName(responsibilityCenterCO.getResponsibilityCenterCodeName());
+            }
             lineDto.setFields(new ArrayList<>());
             lineDto.setChildren(new ArrayList<>());
         } else {

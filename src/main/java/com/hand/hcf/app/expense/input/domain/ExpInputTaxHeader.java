@@ -87,7 +87,7 @@ public class ExpInputTaxHeader extends Domain {
      */
     @NotNull
     @TableField("transfer_proportion")
-    private Long transferProportion;
+    private BigDecimal transferProportion;
 
     /**
      * 用途类型

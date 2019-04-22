@@ -225,6 +225,25 @@
         </if>
     </select>
 
+    <select id="queryExpenseTypeIdByExpenseTypeCode" resultType="java.lang.Long">
+        SELECT t.id
+        FROM exp_expense_type t
+        WHERE t.type_flag = 1
+        AND t.set_of_books_id = #{setOfBooksId}
+        AND t.enabled = 1
+        AND t.deleted = 0
+        AND t.code = #{expenseTypeCode}
+    </select>
+    <select id="queryApplicationTypeIdByApplicationTypeCode" resultType="java.lang.Long">
+        SELECT t.id
+        FROM exp_expense_type t
+        WHERE t.type_flag = 0
+        AND t.set_of_books_id = #{setOfBooksId}
+        AND t.enabled = 1
+        AND t.deleted = 0
+        AND t.code = #{applicationTypeCode}
+    </select>
+
     <resultMap id="ExpenseTypeWebMap" type="com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO">
         <id column="id" property="id" />
         <result column="name" property="name"/>

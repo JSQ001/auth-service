@@ -153,11 +153,37 @@ public class InvoiceHead extends Domain {
     private Boolean checkResult;
 
     //是否来源账本
+    @TableField("from_book")
     private Boolean fromBook;
+
+    //入账标志
+    @TableField("accounting_flag")
+    private String accountingFlag;
+
+    //红冲标志
+    @TableField("red_flag")
+    private String redFlag;
+
+    //认证状态
+    @TableField("certification_status")
+    private Long certificationStatus;
+
+    //认证日期
+    @TableField("certification_date")
+    private ZonedDateTime certificationDate;
+
+    //认证失败原因
+    @TableField("certification_reason")
+    private String certificationReason;
+
+    //发票状态
+    @TableField("invoice_status")
+    private Long invoiceStatus;
 
     //String格式的开票日期(给导出用)
     @TableField(exist = false)
     private String stringInvoiceDate;
+
     //String格式的验真状态(给导出用)
     @TableField(exist = false)
     private String stringCheckResult;
@@ -165,9 +191,11 @@ public class InvoiceHead extends Domain {
     //发票类型名称
     @TableField(exist = false)
     private String invoiceTypeName;
+
     //创建方式名称
     @TableField(exist = false)
     private String createdMethodName;
+
     //报账进度
     @TableField(exist = false)
     private String reportProgress;
