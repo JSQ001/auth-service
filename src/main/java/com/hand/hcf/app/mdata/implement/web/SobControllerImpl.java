@@ -84,4 +84,9 @@ public class SobControllerImpl {
         mybatisPage.setRecords(setOfBooksList);
         return mybatisPage;
     }
+
+    //jiu.zhao 三方接口
+    public List<SetOfBooksInfoCO> getSetOfBooksBySetOfBooksCode(String setOfBooksCode) {
+        return this.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
+    }
 }

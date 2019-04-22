@@ -25,7 +25,6 @@
                             (select t4.amount - coalesce(sum(BASE_AMOUNT), 0)
                             from EXP_INPUT_TAX_LINE eitl
                             where eitl.EXP_REPORT_LINE_ID = t4.id
-                            and eitl.INPUT_TAX_HEADER_ID != #{headerId}
                             and exists
                             (select 1
                             from EXP_INPUT_TAX_LINE tl, EXP_INPUT_TAX_HEADER th

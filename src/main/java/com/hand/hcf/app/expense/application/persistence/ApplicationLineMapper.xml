@@ -16,7 +16,8 @@
             t.*,
             (t.amount - coalesce(t.closed_amount,
             0) - t.associateAmount) AS canCloseAmount,
-            eet.name as expenseTypeName
+            eet.name as expenseTypeName,
+            eet.icon_url
         FROM
             (SELECT
                 t1.*,

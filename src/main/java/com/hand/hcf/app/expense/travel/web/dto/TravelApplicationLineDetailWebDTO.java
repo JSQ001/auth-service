@@ -7,6 +7,11 @@ import lombok.Data;
 public class TravelApplicationLineDetailWebDTO extends TravelApplicationLineDetail {
     private String companyName;
     private String departmentName;
+
+    /**
+     * 责任中心代码名称
+     */
+    private String responsibilityCenterCodeName;
     /**
      * 订票人名称
      */

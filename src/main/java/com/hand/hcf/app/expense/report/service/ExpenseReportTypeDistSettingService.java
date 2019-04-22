@@ -493,9 +493,11 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
             // 部门对应的责任中心
             }else if ("DEP_RES_CENTER".equals(respCenterDistRange)){
                 if(companyId != null && departmentId != null){
-                    Page<ResponsibilityCenterCO> resCenters = organizationService.pageDepartmentResCenterByCond(
+                    Page<ResponsibilityCenterCO> resCenters = organizationService.pageByCompanyAndDepartment(
                             departmentId,
                             companyId,
+                            responsibilityCenterCode,
+                            responsibilityCenterCodeName,
                             page
                             );
                     if(resCenters != null){

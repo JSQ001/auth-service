@@ -14,6 +14,8 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.init.dto.ModuleInitDTO;
+import com.hand.hcf.app.expense.init.dto.SourceTypeTargetTypeDTO;
 import com.hand.hcf.app.expense.report.domain.*;
 import com.hand.hcf.app.expense.report.dto.DepartmentOrUserGroupDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDTO;
@@ -39,9 +41,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingLong;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.Comparator.naturalOrder;
+import static java.util.stream.Collectors.*;
 
 /**
  * @description:
@@ -503,7 +504,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
      * 获取当前用户有权限的单据类型
      * @return
      */
-    public List<ExpenseReportType> getCurrentUserExpenseReportType(){
+    public List<ExpenseReportType> getCurrentUserExpenseReportType(Boolean isAuth){
         Long currentSetOfBookId = OrgInformationUtil.getCurrentSetOfBookId();
         Long currentCompanyId = OrgInformationUtil.getCurrentCompanyId();
         Long currentDepartmentId = OrgInformationUtil.getCurrentDepartmentId();
@@ -523,11 +524,13 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }).collect(toList());
             currentUserExpenseReportType.removeAll(notMatchUserGroupTypes);
         }
-        currentUserExpenseReportType.addAll(listAuthorizedExpenseReportType());
-        //根据ID去重
-        currentUserExpenseReportType = currentUserExpenseReportType.stream().collect(
-                collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ExpenseReportType::getId))), ArrayList::new)
-        );
+        if (isAuth != null && isAuth) {
+            currentUserExpenseReportType.addAll(listAuthorizedExpenseReportType());
+            //根据ID去重
+            currentUserExpenseReportType = currentUserExpenseReportType.stream().collect(
+                    collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ExpenseReportType::getId))), ArrayList::new)
+            );
+        }
         return currentUserExpenseReportType;
     }
 
@@ -906,7 +909,9 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
                 .userGroupIdList(userGroupIdList)
                 .currentUserId(OrgInformationUtil.getCurrentUserId())
                 .build();
-        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        //jiu.zhao 修改三方接口
+        //Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage.getCurrent() - 1, queryPage.getSize());
         queryPage.setTotal(contactCOPage.getTotal());
         userCOList = contactCOPage.getRecords();
 
@@ -927,4 +932,85 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
                 .like(StringUtils.isNotEmpty(code),"report_type_code",code)
                 .like(StringUtils.isNotEmpty(name),"report_type_name",name));
     }
+
+    /**
+     * 批量导入费用报账单类型定义-关联费用类型
+     * @param moduleInitDTOList
+     * @return
+     */
+    @Transactional
+    public String expExpenseReportTypeExpenseType(List<ModuleInitDTO> moduleInitDTOList) {
+        for (ModuleInitDTO moduleInitDTO : moduleInitDTOList) {
+            String setOfBooksCode = moduleInitDTO.getSetOfBooksCode();
+            List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
+            if (setOfBooksList == null || setOfBooksList.size() == 0) {
+                throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
+            }
+            if (setOfBooksList.size() > 1) {
+                throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
+            }
+            Long setOfBooksId = setOfBooksList.get(0).getId();
+            List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOList = moduleInitDTO.getSourceTypeTargetTypeDTOList();
+            for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOList) {
+                String allTypeFlag = sourceTypeTargetTypeDTO.getAllTypeFlag();
+                //费用类型代码列表
+                List<String> expenseTypeCodeList = sourceTypeTargetTypeDTO.getTargetTypeCode();
+                //报账单类型代码
+                String reportTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
+                ExpenseReportType expenseReportType = new ExpenseReportType();
+                expenseReportType.setSetOfBooksId(setOfBooksId);
+                expenseReportType.setReportTypeCode(reportTypeCode);
+                ExpenseReportType ExpenseReportTypeResult = baseMapper.selectOne(expenseReportType);
+                if (ExpenseReportTypeResult == null) {
+                    String errorMessage = new String();
+                    errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + reportTypeCode + "\'报账单类型代码！";
+                    throw new BizException(errorMessage);
+                }
+                //报账单类型id
+                Long reportTypeId = ExpenseReportTypeResult.getId();
+                //批量插入参数
+                List<ExpenseReportTypeExpenseType> expenseReportTypeExpenseTypeList = new ArrayList<>();
+                //全选类型
+                if (allTypeFlag == null) {
+                    throw new BizException("全部类型不可为空");
+                }
+                //全选
+                if (allTypeFlag.equals("Y")) {
+                    if (expenseTypeCodeList != null) {
+                        throw new BizException("当全部类型为'Y'时,费用类型代码无需输入");
+                    }
+                    ExpenseReportTypeResult.setAllExpenseFlag(true);
+                    baseMapper.updateById(ExpenseReportTypeResult);
+                    //清空原有关联信息
+                    expenseReportTypeExpenseTypeService.deleteExpenseReportTypeExpenseTypeByReportTypeIdBatch(reportTypeId);
+                }else if(allTypeFlag.equals("N")) {
+                    if (expenseTypeCodeList == null || expenseTypeCodeList.size() == 0) {
+                        throw new BizException("当全部类型为'N'时,费用类型不可为空");
+                    }
+                    //构造批量新增的参数
+                    for (String expenseTypeCode : expenseTypeCodeList) {
+                        Long expenseTypeId = expenseTypeService.queryExpenseTypeIdByExpenseTypeCode(setOfBooksId, expenseTypeCode);
+                        if (expenseTypeId == null) {
+                            throw new BizException("费用类型代码\'" + expenseTypeCode + "\'不存在");
+                        }
+                        ExpenseReportTypeExpenseType expenseReportTypeExpenseType = new ExpenseReportTypeExpenseType();
+                        expenseReportTypeExpenseType.setReportTypeId(reportTypeId);
+                        expenseReportTypeExpenseType.setExpenseTypeId(expenseTypeId);
+                        expenseReportTypeExpenseTypeList.add(expenseReportTypeExpenseType);
+                    }
+                    ExpenseReportTypeResult.setAllExpenseFlag(false);
+                    baseMapper.updateById(ExpenseReportTypeResult);
+                    //清空原有关联信息
+                    expenseReportTypeExpenseTypeService.deleteExpenseReportTypeExpenseTypeByReportTypeIdBatch(reportTypeId);
+                    //批量插入新关联信息
+                    expenseReportTypeExpenseTypeService.createExpenseReportTypeExpenseTypeBatch(expenseReportTypeExpenseTypeList);
+                }else {
+                    throw new BizException("全部类型输入错误,只可为 'Y' 或 'N'");
+                }
+            }
+        }
+        return "SUCCESS";
+    }
+
+
 }

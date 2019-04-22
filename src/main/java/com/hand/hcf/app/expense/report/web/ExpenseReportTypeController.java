@@ -12,6 +12,9 @@ import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +36,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/expense/report/type")
+@Api(tags = "报账单类型控制器")
 public class ExpenseReportTypeController {
     private final ExpenseReportTypeService expenseReportTypeService;
 
@@ -487,78 +491,12 @@ public class ExpenseReportTypeController {
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result.getRecords(),httpHeaders,HttpStatus.OK);
     }
-
-    /**
-     * 获取用户有权限创建的报账单类型
-     * @return
-     */
-    /**
-     * @api {GET} /api/expense/report/type/owner/all 【报账单】用户有权限创建的单据类型
-     * @apiDescription 获取用户有权限创建的单据类型
-     * @apiGroup ExpenseReport
-     * @apiSuccess (返回参数) {Long} id  ID
-     * @apiSuccess (返回参数) {Long} tenantId  租户ID
-     * @apiSuccess (返回参数) {Long} setOfBooksId  账套ID
-     * @apiSuccess (返回参数) {String} reportTypeCode 报账单类型代码
-     * @apiSuccess (返回参数) {String} reportTypeName 报账单类型名称
-     * @apiSuccess (返回参数) {Long} formId  关联表单ID
-     * @apiSuccess (返回参数) {Long} formType  关联表单类型
-     * @apiSuccess (返回参数) {Boolean} enabled 是否启用
-     * @apiSuccess (返回参数) {Boolean} allExpenseFlag 是否关联全部费用类型标志(全部类型:1;部分类型:0)
-     * @apiSuccess (返回参数) {Boolean} budgetFlag 预算管控标志(启用:Y;不启用:N)
-     * @apiSuccess (返回参数) {String} applicationFormBasis 关联申请单依据
-     * @apiSuccess (返回参数) {Boolean} associateContract 关联合同标志(可关联:Y;不可关联:N)
-     * @apiSuccess (返回参数) {Boolean} [contractRequired] 合同必输标志(必输:Y;非必输:N)
-     * @apiSuccess (返回参数) {Boolean} multiPayee 多收款方标志(多收款方:Y;单一收款方:N)
-     * @apiSuccess (返回参数) {String} payeeType 收款方属性
-     * @apiSuccess (返回参数) {Boolean} allCashTransactionClass 是否全部付款用途标志(全部类型:1;部分类型:0)
-     * @apiSuccess (返回参数) {String} paymentMethod 付款方式类型
-     * @apiSuccess (返回参数) {Boolean} writeOffApplication 核销依据:是否关联相同申请单(是:Y;否:N)
-     * @apiSuccess (返回参数) {Boolean} writeOffContract 核销依据:是否关联相同合同(是:Y;否:N)
-     * @apiSuccess (返回参数) {String} applyEmployee 适用人员("1001":全部;"1002";部门;"1003":人员组)
-     * @apiParamExample {json} 请求参数:
-        /api/expense/report/type/owner/all
-     * @apiSuccessExample {json} 成功返回值:
-    [
-        {
-            "i18n": null,
-            "id": "1105854700853731329",
-            "deleted": false,
-            "createdDate": "2019-03-13T23:34:41.128+08:00",
-            "createdBy": "1083751705402064897",
-            "lastUpdatedDate": "2019-03-13T23:34:41.128+08:00",
-            "lastUpdatedBy": "1083751705402064897",
-            "versionNumber": 1,
-            "enabled": true,
-            "tenantId": "1083751703623680001",
-            "setOfBooksId": "1083762150064451585",
-            "reportTypeCode": "PKK_EXPENSE",
-            "reportTypeName": "PKK报账单类型",
-            "formId": "1105649912412237826",
-            "formType": 2,
-            "allExpenseFlag": false,
-            "budgetFlag": true,
-            "applicationFormBasis": "HEADER_DEPARTMENT",
-            "associateContract": false,
-            "contractRequired": null,
-            "multiPayee": true,
-            "payeeType": "BOTH",
-            "allCashTransactionClass": false,
-            "paymentMethod": "ONLINE_PAYMENT",
-            "writeOffApplication": false,
-            "writeOffContract": false,
-            "applyEmployee": "1001",
-            "setOfBooksCode": null,
-            "setOfBooksName": null,
-            "paymentMethodName": null,
-            "formName": null
-        }
-    ]
-     */
+    @ApiOperation(value = "获取用户有权限创建的报账单类型", notes = "获取用户有权限创建的报账单类型 修改： 谢宾")
     @GetMapping("/owner/all")
-    public ResponseEntity<List<ExpenseReportType>> getCurrentUserExpenseReportType(){
-        List<ExpenseReportType> currentUserExpenseReportType = expenseReportTypeService.getCurrentUserExpenseReportType();
-        return ResponseEntity.ok(currentUserExpenseReportType);
+    public ResponseEntity<List<ExpenseReportType>> getCurrentUserExpenseReportType(
+            @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag){
+        List<ExpenseReportType> result = expenseReportTypeService.getCurrentUserExpenseReportType(authFlag);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -787,11 +725,11 @@ public class ExpenseReportTypeController {
                                                                  @RequestParam("companyId") Long companyId,
                                                                  @RequestParam("departmentId") Long departmentId,
                                                                  @RequestParam(value = "typeCategoryId",required = false) Long typeCategoryId,
-                                                                 @RequestParam(value = "expenseTypeName", required = false) String expenseTypeName,
+                                                                 @RequestParam(value = "name", required = false) String name,
                                                                  Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         List<ExpenseTypeWebDTO> expenseReportTypeExpenseType =
-                expenseReportTypeService.getExpenseReportTypeExpenseType(expenseReportTypeId,employeeId,companyId, departmentId, typeCategoryId, expenseTypeName, page);
+                expenseReportTypeService.getExpenseReportTypeExpenseType(expenseReportTypeId,employeeId,companyId, departmentId, typeCategoryId, name, page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity(expenseReportTypeExpenseType,totalHeader,HttpStatus.OK);
     }

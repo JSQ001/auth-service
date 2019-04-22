@@ -7,10 +7,12 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.DateUtil;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.application.service.ApplicationTypeService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.PolicyCheckConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.init.dto.ExpensePolicyInitDTO;
 import com.hand.hcf.app.expense.policy.domain.*;
 import com.hand.hcf.app.expense.policy.dto.DynamicFieldDTO;
 import com.hand.hcf.app.expense.policy.dto.ExpensePolicyDTO;
@@ -20,6 +22,7 @@ import com.hand.hcf.app.expense.policy.persistence.ExpensePolicyMapper;
 import com.hand.hcf.app.expense.type.domain.ExpenseField;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.domain.enums.FieldType;
+import com.hand.hcf.app.expense.type.persistence.ExpenseTypeMapper;
 import com.hand.hcf.app.expense.type.service.ExpenseFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
@@ -28,6 +31,7 @@ import com.hand.hcf.app.mdata.implement.web.DepartmentControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.SobControllerImpl;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +72,8 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
     @Autowired
     private ExpenseFieldService expenseFieldService;
 
+    @Autowired
+    private ExpenseTypeMapper expenseTypeMapper;
     /**
      * 新增费用政策
      *
@@ -511,10 +517,7 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
             ExpensePolicyFieldProperty property = Optional
                     .ofNullable(fieldPropertyService.selectById(dynamicField.getId()))
                     .orElseGet(() ->new ExpensePolicyFieldProperty());
-            //动态字段无值时直接跳过
-            if (dynamicField.getValue() == null && property == null) {
-                continue;
-            }
+
             if (!fieldMap.containsKey(dynamicField.getFieldId())) {
                 return false;
             }
@@ -548,28 +551,33 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
                 case PARTICIPANT:
                 //参与人
                 case PARTICIPANTS:
-                    if (fieldDTO.getFieldValue() == null) {
-                        return false;
-                    }
                     List<Long> dynamicFieldPeople;
                     List<Long> fieldDTOPeople;
                     try {
-                        dynamicFieldPeople = Arrays.asList(dynamicField.getValue().split(","))
-                                .stream().map(e -> Long.valueOf(e))
-                                .collect(Collectors.toList());
-                        fieldDTOPeople = Arrays.asList(fieldDTO.getFieldValue().split(","))
-                                .stream().map(e -> Long.valueOf(e))
-                                .collect(Collectors.toList());
+                        dynamicFieldPeople = dynamicField.getValue() != null
+                                ? Arrays.asList(dynamicField.getValue().split(","))
+                                    .stream().map(e -> Long.valueOf(e)).collect(Collectors.toList())
+                                : new ArrayList<>();
+                        fieldDTOPeople = dynamicField.getValue() != null
+                                ? Arrays.asList(fieldDTO.getFieldValue().split(","))
+                                    .stream().map(e -> Long.valueOf(e)).collect(Collectors.toList())
+                                : new ArrayList<>();
                     } catch (Exception e){
                         throw new BizException(RespCode.SYS_DATA_FORMAT_ERROR);
                     }
-                    if (dynamicFieldPeople.size() != fieldDTOPeople.size()) {
-                        return false;
-                    }
-                    for (Long person: fieldDTOPeople) {
-                        if (!dynamicFieldPeople.contains(person)) {
+                    //校验同行人
+                    if (!dynamicFieldPeople.isEmpty()) {
+                        if (dynamicFieldPeople.size() != fieldDTOPeople.size()) {
                             return false;
                         }
+                        for (Long person: fieldDTOPeople) {
+                            if (!dynamicFieldPeople.contains(person)) {
+                                return false;
+                            }
+                        }
+                    }
+                    //校验关联属性
+                    for (Long person: fieldDTOPeople) {
                         ContactCO tempContact = Optional.ofNullable(organizationService.getUserById(person))
                                 .orElseGet(() ->new ContactCO());
                         DepartmentCO tempDepartment = Optional
@@ -696,4 +704,223 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
         }
     }
 
+    public void checkExpensePolicyInitData(ExpensePolicyInitDTO dto, int line) {
+        Map<String,List<String>> errorMap = new HashMap<>(16);
+        String lineNumber = "第"+line+"行";
+        List<String> stringList = new ArrayList<>();
+        if (TypeConversionUtils.isEmpty(dto.getSetOfBooksCode())
+                || TypeConversionUtils.isEmpty(dto.getPriority())
+                || TypeConversionUtils.isEmpty(dto.getExpenseTypeCode())
+                || TypeConversionUtils.isEmpty(dto.getExpenseTypeFlag())
+                || TypeConversionUtils.isEmpty(dto.getCurrencyCode()
+        )) {
+            stringList.add("必输字段为空！");
+        } else {
+            Long setOfBooksId = null;
+            List<SetOfBooksInfoCO> setOfBooksInfoCOList =
+                    organizationService.getSetOfBooksBySetOfBooksCode(dto.getSetOfBooksCode());
+            if(CollectionUtils.isEmpty(setOfBooksInfoCOList)){
+                stringList.add("账套code不存在！");
+            }else if(setOfBooksInfoCOList.size() == 1){
+                setOfBooksId = setOfBooksInfoCOList.get(0).getId();
+            }else if(setOfBooksInfoCOList.size() > 1){
+                stringList.add("账套code存在多个！");
+            }
+            dto.setSetOfBooksId(setOfBooksId);
+            dto.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            List<ExpenseType> typelist = expenseTypeMapper.selectList(
+                    new EntityWrapper<ExpenseType>()
+                            .eq("set_of_books_id",setOfBooksId)
+                            .eq("code",dto.getExpenseTypeCode())
+                            .eq("type_flag",dto.getExpenseTypeFlag())
+            );
+            if (CollectionUtils.isEmpty(typelist)) {
+                stringList.add("类型代码找不到！");
+            }else if(typelist.size() == 1){
+                dto.setExpenseTypeId(typelist.get(0).getId());
+            }else if(typelist.size() > 1){
+                stringList.add("类型代码存在多个！");
+            }
+            //todo 这个接口是CompanyCode是模糊查询的需要提供三方接口
+            if(org.springframework.util.StringUtils.hasText(dto.getCompanyCode())){
+                List<CompanyCO> companyCOList = organizationService.listCompanyBySetOfBooksIdAndCodeAndName(
+                        setOfBooksId,dto.getCompanyCode());
+                if (CollectionUtils.isEmpty(companyCOList)) {
+                    stringList.add("公司代码找不到！");
+                }else if(companyCOList.size() == 1) {
+                    dto.setCompanyId(companyCOList.get(0).getId());
+                }else if(companyCOList.size() > 1){
+                    stringList.add("公司代码存在多个！");
+                }
+            }
+            //todo CompanyLevelCO没有id，暂时注释
+            if(org.springframework.util.StringUtils.hasText(dto.getCompanyLevelCode())){
+                List<CompanyLevelCO> companyLevelCOList =
+                        organizationService.listCompanyLevel(null,dto.getCompanyLevelCode());
+                if (CollectionUtils.isEmpty(companyLevelCOList)) {
+                    stringList.add("公司级别代码找不到！");
+                }else if(companyLevelCOList.size() == 1) {
+                    dto.setCompanyLevelId(companyLevelCOList.get(0).getId());
+                }else if(companyLevelCOList.size() > 1){
+                    stringList.add("公司级别代码存在多个！");
+                }
+            }
+            //公司职务校验
+            if(org.springframework.util.StringUtils.hasText(dto.getDutyType())){
+                SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue("1002", dto.getDutyType());
+                if(sysCodeValueCO != null) {
+                    dto.setDutyType(sysCodeValueCO.getValue());
+                }else{
+                    stringList.add("公司职务代码不存在！");
+                }
+            }
+            if(org.springframework.util.StringUtils.hasText(dto.getStaffLevel())){
+                SysCodeValueCO sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue("1008", dto.getStaffLevel());
+                if(sysCodeValueCO != null) {
+                    dto.setStaffLevel(sysCodeValueCO.getValue());
+                }else{
+                    stringList.add("申请人员工级别不存在！");
+                }
+            }
+            if(org.springframework.util.StringUtils.hasText(dto.getDepartmentCode())) {
+                DepartmentCO departmentCO = organizationService.getDepartmentByCodeAndTenantId(dto.getDepartmentCode());
+                if(departmentCO != null){
+                    dto.setDepartmentId(departmentCO.getId());
+                }else{
+                    stringList.add("申请人部门代码不存在");
+                }
+            }
+            CurrencyRateCO currencyRateCO = organizationService.getForeignCurrencyByCode("CNY",dto.getCurrencyCode(), dto.getSetOfBooksId());
+            if (currencyRateCO != null){
+                dto.setCurrencyCode(currencyRateCO.getCurrencyCode());
+            }else{
+                stringList.add("币种代码不存在！");
+            }
+            SysCodeValueCO controlStrategy = organizationService.getSysCodeValueByCodeAndValue("CONTROL_STRATEGY",dto.getControlStrategyCode());
+            if(controlStrategy != null){
+                dto.setControlStrategyCode(controlStrategy.getValue());
+            }else{
+                stringList.add("币种代码不存在！");
+            }
+            try{
+                ZonedDateTime startDate =  DateUtil.stringToZonedDateTime(dto.getStartDateStr());
+                dto.setStartDate(startDate);
+                if(org.springframework.util.StringUtils.hasText(dto.getEnabledStr())){
+                    ZonedDateTime endDate = DateUtil.stringToZonedDateTime(dto.getEndDateStr());
+                    dto.setEndDate(endDate);
+                }
+            }catch (Exception e){
+                stringList.add("日期格式有问题！");
+            }
+            String y = "Y";
+            String n = "N";
+            if (y.equals(dto.getEnabledStr())) {
+                dto.setEnabled(Boolean.TRUE);
+            } else if (n.equals(dto.getEnabledStr())) {
+                dto.setEnabled(Boolean.FALSE);
+            }
+
+            if (y.equals(dto.getAllCompanyFlagStr())) {
+                dto.setAllCompanyFlag(Boolean.TRUE);
+            } else if (n.equals(dto.getAllCompanyFlagStr())) {
+                dto.setAllCompanyFlag(Boolean.FALSE);
+            }
+
+        }
+        if(!CollectionUtils.isEmpty(stringList)){
+            errorMap.put(lineNumber,stringList);
+        }
+        dto.setResultMap(errorMap);
+    }
+    public Map<String, List<String>> initExpensePolicy(List<ExpensePolicyInitDTO> dtoList){
+        Map<String,  List<String>> resultMap = new HashMap<>(16);
+        int line = 1;
+        for(ExpensePolicyInitDTO item :dtoList){
+            checkExpensePolicyInitData(item,line);
+            String lineNumber = "第" + line + "行";
+            if(item.getResultMap().isEmpty()){
+                List<ExpensePolicy> temp = baseMapper.selectList(new EntityWrapper<ExpensePolicy>()
+                        .eq("set_of_books_id", item.getSetOfBooksId())
+                        .eq("priority",item.getPriority())
+                        .eq("expense_type_id",item.getExpenseTypeId())
+                );
+                Long pkId = null;
+                if(CollectionUtils.isEmpty(temp)) {
+                    ExpensePolicy policy = new ExpensePolicy();
+                    BeanUtils.copyProperties(item,policy);
+                    baseMapper.insert(policy);
+                    pkId = policy.getId();
+                }else{
+                    ExpensePolicy policyTemp = temp.get(0);
+                    List<String> stringList = new ArrayList<>();
+                    // 校验数据存不存在
+                    if (null == policyTemp || policyTemp.getDeleted()) {
+                        stringList.add("校验数据存不存在或者已删除！");
+                    }
+                    if(!CollectionUtils.isEmpty(stringList)) {
+                        item.getResultMap().put(lineNumber,stringList);
+                        resultMap.putAll(item.getResultMap());
+                    }
+                    if (item.getResultMap().isEmpty()) {
+                        BeanUtils.copyProperties(item, policyTemp);
+                        baseMapper.updateById(policyTemp);
+                    }
+                    pkId = policyTemp.getId();
+                }
+                ExpensePolicy policy = baseMapper.selectById(pkId);
+                if(policy != null){
+                    if(org.springframework.util.StringUtils.hasText(item.getValue())){
+                        //插入费用政策控制维度值表
+                        List<ExpensePolicyControlDimension> policyControlDimensionList = controlDimensionService.selectList(
+                                new EntityWrapper<ExpensePolicyControlDimension>()
+                                    .eq("set_of_books_id",policy.getSetOfBooksId())
+                                    .eq("exp_expense_policy_id",policy.getId())
+                                    .eq("deleted",false)
+                        );
+                        if(CollectionUtils.isEmpty(policyControlDimensionList)) {
+                            ExpensePolicyControlDimension policyControlDimension = new ExpensePolicyControlDimension();
+                            policyControlDimension.setTenantId(policy.getTenantId() != null ? policy.getTenantId() : OrgInformationUtil.getCurrentTenantId());
+                            policyControlDimension.setSetOfBooksId(policy.getSetOfBooksId() != null ? policy.getSetOfBooksId() : OrgInformationUtil.getCurrentSetOfBookId());
+                            policyControlDimension.setExpExpensePolicyId(policy.getId());
+                            policyControlDimension.setId(null);
+                            policyControlDimension.setValue(item.getValue());
+                            controlDimensionService.insert(policyControlDimension);
+                        }else if (policyControlDimensionList.size() == 1) {
+                            ExpensePolicyControlDimension policyControlDimensionTemp = policyControlDimensionList.get(0);
+                            policyControlDimensionTemp.setValue(item.getValue());
+                            controlDimensionService.updateById(policyControlDimensionTemp);
+                        }
+                    }
+                    if(item.getCompanyId() != null) {
+                        // 插入费用政策关联公司
+                        if (Boolean.FALSE.equals(policy.getAllCompanyFlag())) {
+                            List<ExpensePolicyRelatedCompany> relatedCompanyList = relatedCompanyService.selectList(
+                                    new EntityWrapper<ExpensePolicyRelatedCompany>()
+                                            .eq("set_of_books_id",policy.getSetOfBooksId())
+                                            .eq("exp_expense_policy_id",policy.getId())
+                                            .eq("company_id",item.getCompanyId())
+                                            .eq("deleted",false)
+                            );
+                            if (CollectionUtils.isEmpty(relatedCompanyList)) {
+                                ExpensePolicyRelatedCompany relatedCompany = new ExpensePolicyRelatedCompany();
+                                relatedCompany.setTenantId(policy.getTenantId() != null ? policy.getTenantId() : OrgInformationUtil.getCurrentTenantId());
+                                relatedCompany.setSetOfBooksId(policy.getSetOfBooksId() != null ? policy.getSetOfBooksId() : OrgInformationUtil.getCurrentSetOfBookId());
+                                relatedCompany.setExpExpensePolicyId(policy.getId());
+                                relatedCompany.setCompanyId(item.getCompanyId());
+                                relatedCompanyService.insert(relatedCompany);
+                            }
+                        }
+                    }
+                }
+
+            }else{
+                resultMap.putAll(item.getResultMap());
+            }
+            line++;
+        }
+        if (resultMap.isEmpty()) {
+            resultMap.put("success", Arrays.asList("导入成功"));
+        }
+        return resultMap;
+    }
 }

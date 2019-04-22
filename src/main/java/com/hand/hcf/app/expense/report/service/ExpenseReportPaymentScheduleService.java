@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.OperationUtil;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.common.externalApi.ContractService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
@@ -25,13 +27,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -58,6 +58,79 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
 
     @Autowired
     private ExpenseReportTypeService expenseReportTypeService;
+
+
+    /**
+     * queryExpenseReportPaymentScheduleByIds : 查询报账单 付款信息表 -根据ID集合查询---付款申请单财务查询使用
+     */
+    public List<ExpenseReportPaymentScheduleDTO> queryExpenseReportPaymentScheduleByIds(String ids, Long amount, Page mybatisPage){
+        if(org.apache.commons.lang3.StringUtils.isBlank(ids)){
+            return new ArrayList<ExpenseReportPaymentScheduleDTO>();
+        }
+
+        // 报账单付款信息表id集合
+        String[] idList = ids.split(",");
+
+        List<ExpenseReportPaymentSchedule> list = baseMapper.selectPage(mybatisPage, new EntityWrapper<ExpenseReportPaymentSchedule>()
+                                                .in("id", idList)
+                                                .eq(null != amount, "AMOUNT", amount));
+
+        List<ExpenseReportPaymentSchedule> paymentScheduleList = baseMapper.selectPage(mybatisPage, new EntityWrapper<ExpenseReportPaymentSchedule>()
+                                                                                                        .in("id", idList).orderBy("created_date"));
+
+        List<ExpenseReportPaymentScheduleDTO> result = new ArrayList<ExpenseReportPaymentScheduleDTO>();
+        ExpenseReportPaymentScheduleDTO paymentScheduleDTO ; //报账单的付款信息
+        ExpenseReportHeader expenseReportHeader;    //报账单头信息
+        int index = PageUtil.getPageStartIndex(mybatisPage) + 1;
+
+        for(ExpenseReportPaymentSchedule payScheduleItem : paymentScheduleList){
+
+            expenseReportHeader = getExpenseReportHeaderById(payScheduleItem.getExpReportHeaderId());
+            //jiu.zhao 支付
+            /*paymentScheduleDTO = toResource(expenseReportHeader, payScheduleItem);
+
+            //根据报账单头ID，取报账单计划付款行的核销,支付信息集合
+            CashWriteOffHistoryAndPaymentAmountCO writeOffAndPaid = paymentService.listCashWriteOffHistoryAll(DocumentTypeEnum.PUBLIC_REPORT.name(),payScheduleItem.getExpReportHeaderId(),null);
+
+            paymentScheduleDTO.setIndex(index);
+            index ++;
+
+            //付款行的已付款信息：已付款金额和已退款金额
+            List<PublicReportLineAmountCO> paidInfoDTOList =  writeOffAndPaid.getPublicAmounts();
+            if(paidInfoDTOList != null && paidInfoDTOList.size() > 0){
+                for(PublicReportLineAmountCO amountCO : paidInfoDTOList){
+                    if(amountCO.getDocumentLineId().equals(paymentScheduleDTO.getId())){
+                        paymentScheduleDTO.setPaidInfo(amountCO);
+                    }
+                }
+            }
+
+            List<CashWriteOffCO> offDtoList = writeOffAndPaid.getCashWriteOffHistories();
+            if(offDtoList != null && offDtoList.size() >0){
+                for(CashWriteOffCO offCO : offDtoList){
+                    if(offCO.getDocumentLineId().equals(paymentScheduleDTO.getId())){
+                        if(paymentScheduleDTO.getCashWriteOffMessage() == null){
+                            paymentScheduleDTO.setCashWriteOffMessage(new ArrayList<>());
+                        }
+
+                        paymentScheduleDTO.getCashWriteOffMessage().add(offCO);
+
+                        if(paymentScheduleDTO.getWriteOffAmount() == null){
+                            paymentScheduleDTO.setWriteOffAmount(offCO.getWriteOffAmount() == null ? null : offCO.getWriteOffAmount());
+                        }else{
+                            paymentScheduleDTO.setWriteOffAmount(paymentScheduleDTO.getWriteOffAmount().add(offCO.getWriteOffAmount()));
+                        }
+                    }
+                }
+            }
+
+            result.add(paymentScheduleDTO);*/
+        }
+
+        return result;
+    }
+
+
     /**
      * 根据报账单ID删除计划付款行信息
      * @param headerId

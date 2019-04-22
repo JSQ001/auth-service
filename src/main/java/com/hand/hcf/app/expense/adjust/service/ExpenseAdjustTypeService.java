@@ -517,8 +517,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
     }
 
 
-    public List<ExpenseAdjustTypeDTO> queryByUser() {
-
+    public List<ExpenseAdjustTypeDTO> queryByUser(Boolean isAuth) {
         //获取当前员工ID
         UUID userId = OrgInformationUtil.getCurrentUserOid();
         DepartmentCO departmentCO = organizationService.getDepartementCOByUserOid(userId.toString());
@@ -534,8 +533,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
         // 然后查询权限为人员组的单据类型
         List<ExpenseAdjustTypeDTO> list = baseMapper.selectByUserGroup(companyId, setOfBooksId);
         if (!CollectionUtils.isEmpty(list)) {
-            list.forEach(type -> {
-
+            for (ExpenseAdjustTypeDTO type : list) {
                 JudgeUserCO judgeUserCO = new JudgeUserCO();
                 judgeUserCO.setIdList(type.getUserGroupIdList());
                 judgeUserCO.setUserId(OrgInformationUtil.getCurrentUserId());
@@ -543,26 +541,27 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
                 if (isExists) {
                     adjustTypeDTOList.add(type);
                 }
-            });
+            }
         }
+        if (isAuth != null && isAuth) {
+            //获取当前用户被授权的单据类型
+            List<ExpenseAdjustTypeDTO> collect = listExpenseAdjustTypesByAuthorize()
+                    .stream()
+                    .map(e -> {
+                        ExpenseAdjustTypeDTO expenseAdjustTypeDTO = new ExpenseAdjustTypeDTO();
+                        expenseAdjustTypeDTO.setCode(e.getExpAdjustTypeCode());
+                        expenseAdjustTypeDTO.setName(e.getExpAdjustTypeName());
+                        expenseAdjustTypeDTO.setId(e.getId());
+                        return expenseAdjustTypeDTO;
+                    }).collect(toList());
 
-        //获取当前用户被授权的单据类型
-        listExpenseAdjustTypesByAuthorize().forEach(e ->
-            adjustTypeDTOList.add(
-                    ExpenseAdjustTypeDTO
-                            .builder()
-                            .id(e.getId())
-                            .code(e.getExpAdjustTypeCode())
-                            .name(e.getExpAdjustTypeName())
-                            .build()
-            )
-        );
-        //根据ID去重
-        List<ExpenseAdjustTypeDTO> adjustTypeDTOs = adjustTypeDTOList.stream().collect(
-                collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ExpenseAdjustTypeDTO::getId))), ArrayList::new)
-        );
-
-        return adjustTypeDTOs;
+            adjustTypeDTOList.addAll(collect);
+            //根据ID去重
+            adjustTypeDTOList = adjustTypeDTOList.stream().collect(
+                    collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(ExpenseAdjustTypeDTO::getId))), ArrayList::new)
+            );
+        }
+        return adjustTypeDTOList;
     }
 
     /**
@@ -788,7 +787,9 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
                 .userGroupIdList(userGroupIdList)
                 .currentUserId(OrgInformationUtil.getCurrentUserId())
                 .build();
-        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        //jiu.zhao 修改三方接口
+        //Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage.getCurrent() - 1, queryPage.getSize());
         queryPage.setTotal(contactCOPage.getTotal());
         userCOList = contactCOPage.getRecords();
 

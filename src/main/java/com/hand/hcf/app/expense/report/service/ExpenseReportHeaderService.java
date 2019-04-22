@@ -13,6 +13,7 @@ import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.service.MessageService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
@@ -64,10 +65,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -648,7 +646,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                     throw new BizException(RespCode.EXPENSE_REPORT_STATUS_ERROR);
                 }
                 break;
-            // 审核
+            // 审批通过
             case 1004:
                 if (!status.equals(com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum.APPROVAL.getId())) {
                     throw new BizException(RespCode.EXPENSE_REPORT_STATUS_ERROR);
@@ -962,8 +960,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         if (header == null) {
             throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);
         }
-        header.setStatus(status);
         if (DocumentOperationEnum.WITHDRAW.getId().equals(status) || DocumentOperationEnum.APPROVAL_REJECT.getId().equals(status)) {
+            checkDocumentStatus(status,header.getStatus());
+            header.setStatus(status);
             //审批拒绝  撤回 如果有预算需要释放，
             rollBackBudget(headerId);
             //删除费用申请释放信息
@@ -976,21 +975,30 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         }
         // 审批通过，报账单进入共享池
         if (DocumentOperationEnum.APPROVAL_PASS.getId().equals(status)) {
+            checkDocumentStatus(status,header.getStatus());
+            header.setStatus(status);
             pushToWorkBranchByHeaderId(header);
         }
         // 复核通过，报账单发送支付平台
         if (DocumentOperationEnum.AUDIT_PASS.getId().equals(status)) {
+            if("Y".equals(header.getAuditFlag())){
+                throw new BizException(RespCode.EXPENSE_REPORT_STATUS_ERROR);
+            }
             saveDataToPayment(header);
-            header.setStatus(DocumentOperationEnum.APPROVAL_PASS.getId());
             header.setAuditFlag("Y");
             header.setAuditDate(ZonedDateTime.now());
             expenseReportLineService.updateExpenseReportLineAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());
+            invoiceHeadService.updateInvoiceAccountingFlagByHeaderId(header.getId(),"Y");
             expenseReportDistService.updateExpenseReportDistAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());
             expenseReportTaxDistService.updateExpenseReportTaxDistAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());
             expenseReportPaymentScheduleService.updateExpenseReportScheduleAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());
         }
         // 复核拒绝
         if (DocumentOperationEnum.AUDIT_REJECT.getId().equals(status)) {
+            if(! DocumentOperationEnum.APPROVAL_PASS.getId().equals(header.getStatus())
+                    || "Y".equals(header.getAuditFlag())){
+                throw new BizException(RespCode.EXPENSE_REPORT_STATUS_ERROR);
+            }
             //审批拒绝  撤回 如果有预算需要释放，
             rollBackBudget(headerId);
             //删除费用申请释放信息
@@ -1398,6 +1406,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                                                                    ZonedDateTime cDateTo,
                                                                    String backlashFlag,
                                                                    Long tenantId,
+                                                                   boolean dataAuthFlag,
                                                                    Page page) {
         //要么费用模块查询出来相对应的 要么就是支付模块查询出来再给费用。
         //采用先查询支付模块 再将数据放入到费用模块来进行查询。
@@ -1407,33 +1416,45 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
 
         //coList = paymentService.queryCashTransactionDetailByReport(paidAmountFrom, paidAmountTo, backlashFlag);
 
-        //如果查询出来为零的话 也要分情况， 只要已支付金额 核销金额  反冲标志 其中只要一个不为null 那就返回为Null
-        List<Long> ids = new ArrayList<>();
-        //在判断传入的参数是否为空 如果不为空则
-        if (paidAmountFrom != null || paidAmountTo != null || !StringUtils.isEmpty(backlashFlag)) {
-            // 判断返回的结果是否为空， 如果不为空
-            //获取到id。
-            /*if (!CollectionUtils.isEmpty(coList)) {
-                ids = coList.stream()
-                        .map(CashTransactionDetailCO::getDocumentId)
-                        .collect(Collectors.toList());
-                 reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
-                                         , applicantId, status, currencyCode, amountFrom, amountTo,
-                                         remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId),
-                                         page);
-            }*/
-            //为空则 返回前台空数据。
-        } else {
-            reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
-                        , applicantId, status, currencyCode, amountFrom, amountTo,
-                        remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId),
-                        page);
+            //如果查询出来为零的话 也要分情况， 只要已支付金额 核销金额  反冲标志 其中只要一个不为null 那就返回为Null
+               List<Long>ids = new ArrayList<>();
+                     //在判断传入的参数是否为空 如果不为空则
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"exp_report_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN,"department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"applicant_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
-        //拼接数据
-        setReportHeaderDTOSAmount(coList,reportHeaderDTOS);
-		return reportHeaderDTOS;
-		}
-//查询相关属性
+            if (paidAmountFrom!=null||paidAmountTo!=null||!StringUtils.isEmpty(backlashFlag)) {
+                         // 判断返回的结果是否为空， 如果不为空
+                         //获取到id。
+                    if(!CollectionUtils.isEmpty(coList)) {
+                        ids = coList.stream()
+                                .map(CashTransactionDetailCO::getDocumentId)
+                                .collect(Collectors.toList());
+                        reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
+                                         , applicantId, status, currencyCode, amountFrom, amountTo,
+                                         remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId).and(dataAuthLabel !=  null,dataAuthLabel),
+                                         page);
+                    }
+                         //为空则 返回前台空数据。
+            }else{
+                    reportHeaderDTOS = baseMapper.queryReportHeaderByids(getHearderWrapper(ids, companyId, documentTypeId, reqDateFrom, reqDateTo
+                        , applicantId, status, currencyCode, amountFrom, amountTo,
+                        remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId).and(dataAuthLabel !=  null,dataAuthLabel),
+                        page);
+            }
+
+              //拼接数据
+                setReportHeaderDTOSAmount(coList,reportHeaderDTOS);
+        return reportHeaderDTOS;
+    }
+        //查询相关属性
         public  void  setExpenseReportHeaderDto(ExpenseReportHeaderDTO expenseReportHeaderDTO ){
             CompanyCO companyById = organizationService.getCompanyById(expenseReportHeaderDTO.getCompanyId());
             expenseReportHeaderDTO.setCompanyCode(companyById.getCompanyCode());
@@ -1462,11 +1483,6 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 expenseReportHeaderDTO.setCreatedName(userById.getFullName());
             }
         }
-
-
-        
-    
-
 
     public Wrapper<ExpenseReportHeader> getHearderWrapper(List<Long>ids,
                                                        Long companyId,

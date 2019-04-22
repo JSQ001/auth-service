@@ -2,6 +2,8 @@ package com.hand.hcf.app.expense.init.dto;
 
 import lombok.Data;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: zhu.zhao
@@ -13,7 +15,7 @@ public class ExpenseTypeInitDTO{
     /**
      * 校验信息
      */
-    private StringBuilder errorMessage;
+    private Map<String, List<String>> resultMap;
     /**
      * 名称
      */

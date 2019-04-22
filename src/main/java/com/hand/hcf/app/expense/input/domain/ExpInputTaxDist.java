@@ -65,7 +65,7 @@ public class ExpInputTaxDist extends Domain {
      */
     @NotNull
     @TableField("transfer_proportion")
-    private Long transferProportion;
+    private BigDecimal transferProportion;
 
     /**
      * 公司

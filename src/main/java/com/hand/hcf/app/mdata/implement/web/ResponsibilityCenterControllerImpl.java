@@ -271,5 +271,8 @@ public class ResponsibilityCenterControllerImpl {
         return mybatisPage;
     }
 
-
+    //jiu.zhao 修改三方接口
+    public Page<ResponsibilityCenterCO> pageByCompanyAndDepartment(Long unitId, Long companyId, String code, String name, Page page) {
+        return this.pageByCompanyAndDepartment(unitId, companyId, code, name, page);
+    }
 }

@@ -785,7 +785,9 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
                 .userGroupIdList(userGroupIdList)
                 .currentUserId(OrgInformationUtil.getCurrentUserId())
                 .build();
-        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        //jiu.zhao 修改三方接口
+        //Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage);
+        Page<ContactCO> contactCOPage = authorizeClient.pageUsersByAuthorizeAndCondition(queryCO, userCode, userName, queryPage.getCurrent() - 1, queryPage.getSize());
         queryPage.setTotal(contactCOPage.getTotal());
         userCOList = contactCOPage.getRecords();
 

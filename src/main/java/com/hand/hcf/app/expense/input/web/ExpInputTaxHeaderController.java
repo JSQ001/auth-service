@@ -202,14 +202,14 @@ public class ExpInputTaxHeaderController {
     }
 
     /**
-     * @api {POST} /api/expense/report/create/accounting 【进项税单】创建凭证
+     * @api {POST} /api/input/header/create/accounting 【进项税单】创建凭证
      * @apiDescription 创建凭证
      * @apiGroup ExpenseReport
-     * @apiParam {Long} reportHeaderId 报账单头ID
+     * @apiParam {Long} inputTaxHeaderId 进项税单头ID
      * @apiParam {String} accountingDate 财务日期
      */
     @PostMapping(value = "/create/accounting")
-    public ResponseEntity saveInitializeExpInputTaxGeneralLedgerJournalLine(@RequestParam("reportHeaderId") Long inputTaxHeaderId,
+    public ResponseEntity saveInitializeExpInputTaxGeneralLedgerJournalLine(@RequestParam("inputTaxHeaderId") Long inputTaxHeaderId,
                                                                           @RequestParam("accountingDate") String accountingDate){
         String reuslt = expInputTaxHeaderService.saveInitializeExpInputTaxGeneralLedgerJournalLine(inputTaxHeaderId,accountingDate);
         return ResponseEntity.ok(reuslt);

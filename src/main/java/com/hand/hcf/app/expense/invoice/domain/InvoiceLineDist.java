@@ -98,4 +98,7 @@ public class InvoiceLineDist extends Domain {
     @TableField("exchange_rate")
     private BigDecimal exchangeRate;
 
+    //入账标识
+    @TableField("accounting_flag")
+    private String accountingFlag;
 }

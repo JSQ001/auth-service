@@ -60,4 +60,24 @@ public interface ExpenseTypeMapper extends BaseMapper<ExpenseType> {
      * @return List<ExpenseTypeWebDTO>
      */
     List<ExpenseTypeWebDTO> listByDocumentLov(ExpenseBO expenseBO);
+
+    /**
+     * 报账单类型定义关联费用类型-根据费用类型代码查询费用类型id
+     * @param setOfBooksId
+     * @param expenseTypeCode 费用类型代码
+     * @return
+     */
+    Long queryExpenseTypeIdByExpenseTypeCode(@Param("setOfBooksId") Long setOfBooksId,
+                                             @Param("expenseTypeCode") String expenseTypeCode);
+
+
+    /**
+     * 费用申请单类型定义关联申请类型-根据申请类型代码查询申请类型id
+     * @param setOfBooksId
+     * @param applicationTypeCode 费用类型代码
+     * @return
+     */
+    Long queryApplicationTypeIdByApplicationTypeCode(@Param("setOfBooksId") Long setOfBooksId,
+                                                     @Param("applicationTypeCode") String applicationTypeCode);
+
 }

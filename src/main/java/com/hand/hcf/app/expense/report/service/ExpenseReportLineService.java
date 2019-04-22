@@ -12,10 +12,7 @@ import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
-import com.hand.hcf.app.core.util.OperationUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.ReflectUtil;
+import com.hand.hcf.app.core.util.*;
 import com.hand.hcf.app.expense.book.domain.ExpenseBook;
 import com.hand.hcf.app.expense.book.service.ExpenseBookService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
@@ -108,6 +105,38 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
 
     @Autowired
     private MessageService messageService;
+
+
+    /**
+     * queryExpenseReportLineByids : 查询报账单行表信息，根据id集合查询
+     *
+     */
+    public List<ExpenseReportLine> queryExpenseReportLineByids(String ids, Long expenseTypeId, String reportLineFrom, String reportLineTo, Page mybatisPage){
+        if(org.apache.commons.lang3.StringUtils.isBlank(ids)){
+            return new ArrayList<ExpenseReportLine>();
+        }
+
+        ZonedDateTime reportZonedDateFrom = DateUtil.stringToZonedDateTime(reportLineFrom);
+        ZonedDateTime reportZonedDateTo = DateUtil.stringToZonedDateTime(reportLineTo);
+
+        //查询报账单行表信息
+        String[] idList = ids.split(",");
+        List<ExpenseReportLine> list = baseMapper.selectPage(mybatisPage, new EntityWrapper<ExpenseReportLine>()
+                                                                                .in("id", idList)
+                                                                                .eq(expenseTypeId != null, "expenseTypeId", expenseTypeId)
+                                                                                .ge(reportZonedDateFrom != null,"expenseDate",reportZonedDateFrom)
+                                                                                .lt(reportZonedDateTo != null,"expenseDate",reportZonedDateTo)
+                                                            );
+
+        ExpenseType expenseType = null;
+        //设置报账单行表信息 费用类型名称
+        for(ExpenseReportLine reportLine : list){
+            expenseType = expenseTypeService.selectById(reportLine.getExpenseTypeId());
+            reportLine.setExpenseTypeName(expenseType.getName());
+        }
+
+        return list;
+    }
 
 
     /**

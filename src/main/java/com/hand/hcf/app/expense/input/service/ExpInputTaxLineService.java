@@ -143,7 +143,7 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                     expInputTaxDist.setUseType(header.getUseType());
                     expInputTaxDist.setTransferProportion(header.getTransferProportion());
                     //金额计算
-                    BigDecimal tp = new BigDecimal(header.getTransferProportion());
+                    BigDecimal tp = header.getTransferProportion();
                     expInputTaxDist.setAmount(dist.getBaseAmount().multiply(tp).setScale(2));
                     expInputTaxDist.setFunctionAmount(dist.getBaseFunctionAmount().multiply(tp).setScale(2));
                     //日志信息
