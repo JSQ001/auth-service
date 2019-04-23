@@ -5,12 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-@ApiModel(value="ÉóÅúÒÇ±íÅÌ¼ÇÂ¼")
+@ApiModel(value="å®¡æ‰¹ä»ªè¡¨ç›˜è®°å½•")
 public class ApprovalDashboardDetailDTO {
-    @ApiModelProperty(value="ÊôĞÔÃû³Æ")
+    @ApiModelProperty(value="å±æ€§åç§°")
     private String name;
-    @ApiModelProperty(value="ÊıÁ¿")
+    @ApiModelProperty(value="æ•°é‡")
     private Integer count;
-    @ApiModelProperty(value="ÀàĞÍ")
+    @ApiModelProperty(value="ç±»å‹")
     private String type;
 }

@@ -21,7 +21,7 @@ export default {
    * @param {*} params
    */
   getRolesDistribute(params) {
-    return httpFetch.get(`${config.baseUrl}api/userRole/query/roles/dataAuthority`, params);
+    return httpFetch.get(`${config.baseUrl}/api/userRole/query/roles/dataAuthority`, params);
   },
   /**
    * 新增角色权限分配

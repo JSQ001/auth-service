@@ -92,7 +92,7 @@ public class RuleApproverService extends BaseService<RuleApproverMapper,RuleAppr
     }
 
     /**
-     * 返回跟指定审批流通知关联的通知人员
+     * 杩斿洖璺熸寚瀹氬鎵规祦閫氱煡鍏宠仈鐨勯�氱煡浜哄憳
      * @author mh.z
      * @date 2019/04/17
      *
