@@ -31,7 +31,7 @@ import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;

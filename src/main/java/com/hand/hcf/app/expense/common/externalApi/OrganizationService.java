@@ -683,7 +683,8 @@ public class OrganizationService {
                                                                    String code,
                                                                    String name,
                                                                    Page page) {
-        return responsibilityCenterClient.pageByCompanyAndDepartment(departmentId,companyId,code,name,page);
+        //jiu.zhao TODO
+        return responsibilityCenterClient.pageByCompanyAndDepartment(departmentId,companyId,code,name,page.getCurrent(),page.getSize());
     }
 
     public List<CompanyCO> listCompanyBySetOfBooksIdAndCodeAndName(Long setOfBooksId, String companyCode){

@@ -102,7 +102,8 @@ public class ExpenseReportPaymentSchedule extends Domain {
     /**
      * 付款用途ID
      */
-    @NotNull
+    //jiu.zhao 付款方式
+    //@NotNull
     @TableField(value = "csh_transaction_class_id")
     private Long cshTransactionClassId;
 

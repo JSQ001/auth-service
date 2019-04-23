@@ -14,7 +14,7 @@ import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

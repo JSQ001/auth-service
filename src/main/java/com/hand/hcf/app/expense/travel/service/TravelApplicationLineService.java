@@ -29,7 +29,7 @@ import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;

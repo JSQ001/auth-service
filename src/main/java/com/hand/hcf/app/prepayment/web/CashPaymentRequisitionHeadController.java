@@ -13,7 +13,7 @@ import com.hand.hcf.app.prepayment.web.dto.*;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

@@ -913,7 +913,7 @@ public class VendorInfoService extends BaseService<VendorInfoMapper, VendorInfo>
     }
     public List<ReceivablesDTO>  selectVendorInfosByCompanyIdAndVendorName(Long companyId, String venNickname){
         List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
-        List<VendorInfoCO> vendorInfoList = baseMapper.selectVendorInfosByCompanyIdAndVendorName(companyId, venNickname).stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());;
+        List<VendorInfoCO> vendorInfoList = baseMapper.selectVendorInfosByCompanyIdAndVendorName(companyId, venNickname).stream().map(VendorInfoAdapter::vendorInfoToVendorInfoCO).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(vendorInfoList)){
             return receivablesDTOS;
         }

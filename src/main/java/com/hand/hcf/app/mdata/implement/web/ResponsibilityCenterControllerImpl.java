@@ -8,6 +8,7 @@ import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
+import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.DepartmentSobResponsibilityService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterGroupService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterService;
@@ -271,8 +272,36 @@ public class ResponsibilityCenterControllerImpl {
         return mybatisPage;
     }
 
-    //jiu.zhao 修改三方接口
-    public Page<ResponsibilityCenterCO> pageByCompanyAndDepartment(Long unitId, Long companyId, String code, String name, Page page) {
-        return this.pageByCompanyAndDepartment(unitId, companyId, code, name, page);
+    //jiu.zhao 修改三方接口 jiancheng.li
+    public Page<ResponsibilityCenterCO> pageByCompanyAndDepartment(@RequestParam("unitId") Long unitId,
+                                                                   @RequestParam("companyId") Long companyId,
+                                                                   @RequestParam(value = "code", required = false) String code,
+                                                                   @RequestParam(value = "name", required = false) String name,
+                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        Page mybatisPage = PageUtil.getPage(page, size);
+        List<ResponsibilityCenterCO> responsibilityCenterCOList = new ArrayList<>();
+        List<ResponsibilityLovDTO> responsibilityLovDTOList = responsibilityCenterService
+                .pageByCompanyAndDepartment(
+                        mybatisPage,
+                        companyId,
+                        unitId,
+                        code,
+                        name,
+                        true,
+                        null,
+                        null);
+        responsibilityLovDTOList.stream().forEach(resLovDTO -> {
+            responsibilityCenterCOList.add(
+                    ResponsibilityCenterCO.builder()
+                            .id(resLovDTO.getId())
+                            .responsibilityCenterCode(resLovDTO.getCode())
+                            .responsibilityCenterName(resLovDTO.getName())
+                            .responsibilityCenterCodeName(resLovDTO.getCodeName())
+                            .build());
+        });
+        mybatisPage.setRecords(responsibilityCenterCOList);
+        return mybatisPage;
     }
+
 }
