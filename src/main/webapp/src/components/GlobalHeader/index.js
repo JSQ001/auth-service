@@ -50,7 +50,8 @@ export default class GlobalHeader extends React.Component {
       window.localStorage.setItem('theme', colors[0].color);
       this.setState({ theme: colors[0].color });
     }
-    this.getNoticeData();
+    //update by chenxu
+    //this.getNoticeData();
   }
 
   componentWillUnmount() {
@@ -59,10 +60,11 @@ export default class GlobalHeader extends React.Component {
 
   getNoticeData = () => {
     fetch
-      .get(`${config.peripheralUrl}/api/messages/query`, {
+      //update by chenxu
+      /* .get(`${config.peripheralUrl}/api/messages/query`, {
         size: 9999,
         page: 0,
-      })
+      })*/
       .then(({ data }) => {
         this.setState({
           messagesList: data.messagesList.map(o => ({
@@ -231,8 +233,8 @@ export default class GlobalHeader extends React.Component {
     const { id, read } = clickedItem;
 
     if (read) return;
-
-    fetch.post(`${config.peripheralUrl}/api/messages/read/` + id).then(() => {
+    //update by chenxu
+    /* fetch.post(`${config.peripheralUrl}/api/messages/read/` + id).then(() => {
       if (tabProps.title === '消息') {
         const record = messagesList.find(o => o.id === id);
         if (record) {
@@ -250,7 +252,7 @@ export default class GlobalHeader extends React.Component {
           this.setState({ noticeList, noticeTotal, total });
         }
       }
-    });
+    });*/
   };
 
   clearMessages = () => {
