@@ -209,6 +209,8 @@ class NewPayPlan extends React.Component {
         if (values.cshTransactionClassId && values.cshTransactionClassId.length) {
           values.cshTransactionClassId = values.cshTransactionClassId[0].id;
         }
+        //jiu.zhao 付款方式不需要 默认给0
+        values.cshTransactionClassId = '0';
 
         if (contractInfo.contractId) {
           values.contractHeaderId = contractInfo.contractId;
@@ -657,7 +659,7 @@ class NewPayPlan extends React.Component {
                       },
                     ]
                   : [],
-                rules: [{ message: '请输入', required: true }],
+                rules: [{ message: '请输入', required: false }],
               })(
                 <Chooser
                   type="pay_source_from"

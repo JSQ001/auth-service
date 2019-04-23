@@ -1,6 +1,9 @@
 package com.hand.hcf.app.common.co;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -9,6 +12,9 @@ import lombok.Data;
  * @version: 1.0.0
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponsibilityCenterCO {
 
     private Long id;

@@ -15,7 +15,7 @@ import com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.StringUtil;
-import com.hand.hcf.app.core.util.TypeConversionUtils;;
+import com.hand.hcf.app.core.util.TypeConversionUtils;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -56,4 +56,34 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201904181715001" author="shaofeng.zheng">
+        <addColumn tableName="exp_travel_app_line_d">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id">
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904191702001" author="shouting.cheng">
+        <addColumn tableName="exp_policy_dynamic_field">
+            <column name="name" type="varchar(30)" remarks="动态字段名"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904190941001" author="shaofeng.zheng">
+        <addColumn tableName="invoice_line_dist">
+            <column name="accounting_flag" type="varchar(1)" defaultValue="N" remarks="入账标志（Y/N）">
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904190944001" author="shaofeng.zheng">
+        <addColumn tableName="invoice_head">
+            <column name="accounting_flag" type="varchar(1)" defaultValue="N" remarks="入账标志（Y/N）"></column>
+            <column name="red_flag" type="varchar(50)" defaultValue="N" remarks="红冲标志"></column>
+            <column name="certification_status" type="int" defaultValue="0" remarks="认证状态"></column>
+            <column name="certification_date" type="timestamp"  remarks="认证日期"></column>
+            <column name="certification_reason" type="varchar(300)" remarks="认证失败原因"></column>
+            <column name="invoice_status" type="int" defaultValue="0" remarks="发票状态"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
