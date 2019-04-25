@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.DataAuthTablePropertyCO;
 import com.hand.hcf.app.core.util.DataAuthorityUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.web.dto.DataAuthValuePropertyDTO;
 import com.hand.hcf.app.mdata.implement.web.DataAuthControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ParameterControllerImpl;
@@ -33,9 +34,9 @@ public class DataAuthMetaRealization {
      * @return
      */
     public boolean checkEnabledDataAuthority() {
-        //jiu.zhao TODO
+        //jiu.zhao 修改三方接口
         //String dataAuthority = parameterClient.getParameterValueByParameterCode("DATA_AUTHORITY", null, null);
-        String dataAuthority = parameterClient.getParameterValueByParameterCode("DATA_AUTHORITY", null, null, null);
+        String dataAuthority = parameterClient.getParameterValueByParameterCode("DATA_AUTHORITY", LoginInformationUtil.getCurrentTenantId(), null, null);
         if(StringUtils.isNotEmpty(dataAuthority)){
             return "Y".equals(dataAuthority);
         }
