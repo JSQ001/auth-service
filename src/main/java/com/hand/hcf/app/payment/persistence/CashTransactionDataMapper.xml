@@ -1,0 +1,1352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.CashTransactionDataMapper">
+
+    <select id="selectPageCshTransactionData" resultType="com.hand.hcf.app.payment.domain.CashTransactionData">
+        SELECT
+	temp.*,
+CASE
+	temp.amount - temp.paid_amount
+	WHEN 0 THEN
+	'T'
+	WHEN temp.amount THEN
+	'N' ELSE 'P' END AS paymentStatus
+FROM
+	(
+SELECT
+b.id,
+b.tenant_id,
+b.document_category,
+b.document_header_id,
+b.document_number,
+b.employee_id,
+b.employee_name,
+b.requisition_date,
+b.document_line_id,
+b.company_id,
+b.payment_company_id,
+(
+SELECT
+COALESCE(sum( c.write_off_amount ), 0) as write_off_amount
+FROM
+	csh_write_off c
+WHERE
+	c.document_header_id = b.document_header_id
+	AND c.document_line_id = b.document_line_id
+	AND c.document_type = b.document_category
+	AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+	) AS write_off_amount,
+	b.partner_category,
+	b.partner_id,
+	b.partner_code,
+	b.partner_name,
+	b.account_name,
+	b.account_number,
+	b.bank_branch_code,
+	b.bank_branch_name,
+	b.payment_method_category,
+	b.requisition_payment_date,
+	b.csh_transaction_type_code,
+	b.csh_transaction_class_id,
+	b.contract_header_id,
+	b.instalment_id,
+	b.remark,
+	b.frozen_flag,
+	b.created_date,
+	b.created_by,
+	b.last_updated_date,
+	b.last_updated_by,
+	b.version_number,
+	b.currency,
+	b.exchange_rate,
+	b.bank_code,
+	b.bank_name,
+	b.province_code,
+	b.province_name,
+	b.city_code,
+	b.city_name,
+	b.csh_flow_item_id,
+	b.attribute1,
+	b.attribute2,
+	b.attribute3,
+	b.attribute4,
+	b.attribute5,
+	b.document_type_id,
+	b.document_type_name,
+	b.source_data_id,
+	b.source_header_id,
+	b.source_line_id,
+	b.application_line_id,
+	b.entity_oid AS entityOid,
+	b.entity_type AS entityType,
+	b.amount,
+	(
+	SELECT
+	COALESCE (SUM( a.amount ), 0) as commited_amount
+		FROM
+			csh_transaction_detail a
+		WHERE
+			(
+				( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+				OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+			)
+			AND a.csh_transaction_data_id = b.id
+		) AS commited_amount,
+		(
+		SELECT
+			(
+				COALESCE(sum(a.amount), 0)
+				+
+				COALESCE(SUM(
+					CASE
+							WHEN (
+								( a.refund_status = 'Y' AND a.payment_status = 'S' )
+								OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+								) THEN
+								- a.amount ELSE 0
+							END
+								), 0)
+									) AS paid_amount
+								FROM
+									csh_transaction_detail a
+								WHERE
+									a.payment_status = 'S'
+									AND a.csh_transaction_data_id = b.id
+								) AS paid_amount
+													FROM
+														csh_transaction_data b
+													) temp
+											WHERE
+(temp.amount - temp.commited_amount - temp.write_off_amount ) > 0
+        ${ew.sqlSegment}
+    </select>
+
+    <select id="overrideSelectList" resultType="com.hand.hcf.app.payment.domain.CashTransactionData">
+        SELECT
+        temp.*,
+        CASE
+        temp.amount - temp.paid_amount
+        WHEN 0 THEN
+        'T'
+        WHEN temp.amount THEN
+        'N' ELSE 'P'
+        END AS paymentStatus
+        FROM
+        (
+        SELECT
+		b.id,
+		b.tenant_id,
+		b.document_category,
+		b.document_header_id,
+		b.document_number,
+		b.employee_id,
+		b.employee_name,
+		b.requisition_date,
+		b.document_line_id,
+		b.company_id,
+		b.payment_company_id,
+        (
+        SELECT
+        COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+        FROM
+        csh_write_off c
+        WHERE
+        c.document_header_id = b.document_header_id
+        AND c.document_line_id = b.document_line_id
+        AND c.document_type = b.document_category
+        AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        ) AS write_off_amount,
+		b.partner_category,
+		b.partner_id,
+		b.partner_code,
+		b.partner_name,
+		b.account_name,
+		b.account_number,
+		b.bank_branch_code,
+		b.bank_branch_name,
+		b.payment_method_category,
+		b.requisition_payment_date,
+		b.csh_transaction_type_code,
+		b.csh_transaction_class_id,
+		b.contract_header_id,
+		b.instalment_id,
+		b.remark,
+		b.frozen_flag,
+		b.created_date,
+		b.created_by,
+		b.last_updated_date,
+		b.last_updated_by,
+		b.version_number,
+		b.currency,
+		b.exchange_rate,
+		b.bank_code,
+		b.bank_name,
+		b.province_code,
+		b.province_name,
+		b.city_code,
+		b.city_name,
+		b.csh_flow_item_id,
+		b.attribute1,
+		b.attribute2,
+		b.attribute3,
+		b.attribute4,
+		b.attribute5,
+		b.document_type_id,
+		b.document_type_name,
+		b.source_data_id,
+		b.source_header_id,
+		b.source_line_id,
+		b.application_line_id,
+		b.entity_oid AS entityOid,
+		b.entity_type AS entityType,
+		b.amount,
+        (
+        SELECT
+        CASE
+
+        WHEN
+        COALESCE(SUM( a.amount ), 0) AS commited_amount
+        FROM
+        csh_transaction_detail a
+        WHERE
+        (
+        ( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+        OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+        )
+        AND a.csh_transaction_data_id = b.id
+        ) AS commited_amount,
+        (
+        SELECT
+        (
+        COALESCE(sum( a.amount ), 0)
+		+
+        COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		), 0)
+        ) AS paid_amount
+        FROM
+        csh_transaction_detail a
+        WHERE
+        a.payment_status = 'S'
+        AND a.csh_transaction_data_id = b.id
+        ) AS paid_amount
+        FROM
+        csh_transaction_data b
+        ) temp
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+
+    <select id="overrideSelectById" resultType="com.hand.hcf.app.payment.domain.CashTransactionData">
+        SELECT
+	temp.*,
+CASE
+	temp.amount - temp.paid_amount
+	WHEN 0 THEN
+	'T'
+	WHEN temp.amount THEN
+	'N' ELSE 'P'
+	END AS payment_status
+FROM
+	(
+SELECT
+	id,
+	tenant_id,
+	document_category,
+	document_header_id,
+	document_number,
+	employee_id,
+	employee_name,
+	requisition_date,
+	document_line_id,
+	company_id,
+	payment_company_id,
+	(
+SELECT
+COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+FROM
+	csh_write_off c
+WHERE
+	c.document_header_id = b.document_header_id
+	AND c.document_line_id = b.document_line_id
+	AND c.document_type = b.document_category
+	AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+	) AS write_off_amount,
+	partner_category,
+	partner_id,
+	partner_code,
+	partner_name,
+	account_name,
+	account_number,
+	bank_branch_code,
+	bank_branch_name,
+	payment_method_category,
+	requisition_payment_date,
+	csh_transaction_type_code,
+	csh_transaction_class_id,
+	contract_header_id,
+	instalment_id,
+	remark,
+	frozen_flag,
+	created_date,
+	created_by,
+	last_updated_date,
+	last_updated_by,
+	version_number,
+	currency,
+	exchange_rate,
+	bank_code,
+	bank_name,
+	province_code,
+	province_name,
+	city_code,
+	city_name,
+	csh_flow_item_id,
+	attribute1,
+	attribute2,
+	attribute3,
+	attribute4,
+	attribute5,
+	document_type_id,
+	document_type_name,
+	source_data_id,
+	source_header_id,
+	source_line_id,
+	application_line_id,
+	entity_oid AS entityOid,
+	entity_type AS entityType,
+	amount,
+	(
+	SELECT
+	COALESCE(SUM( a.amount ), 0) AS commited_amount
+		FROM
+			csh_transaction_detail a
+		WHERE
+			(
+				( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+				OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+			)
+			AND a.csh_transaction_data_id = b.id
+		) AS commited_amount,
+		(
+		SELECT
+			(
+			COALESCE(SUM( a.amount ), 0 )+
+			COALESCE(SUM(
+					CASE
+
+							WHEN (
+								( a.refund_status = 'Y' AND a.payment_status = 'S' )
+								OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+								) THEN
+								- a.amount ELSE 0
+							END
+								), 0) ) AS paid_amount
+								FROM
+									csh_transaction_detail a
+								WHERE
+									a.payment_status = 'S'
+									AND a.csh_transaction_data_id = b.id
+								) AS paid_amount
+							FROM
+								csh_transaction_data b
+							) temp
+					WHERE
+temp.id = #{id}
+    </select>
+
+
+    <select id="selectTotalAmount" resultType="com.hand.hcf.app.payment.domain.CashTransactionData">
+        SELECT
+        ctd.currency,
+        sum( ctd.amount ) AS amount,
+        sum( ctd.write_off_amount ) AS write_off_amount,
+        sum( ctd.commited_amount ) AS commited_amount,
+        count(0) AS paid_amount
+        FROM
+        (
+        SELECT
+        ( SELECT
+        COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+        FROM
+        csh_write_off c
+        WHERE
+        c.document_header_id = b.document_header_id
+        AND c.document_line_id = b.document_line_id
+        AND c.document_type = b.document_category
+        AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        ) AS write_off_amount,
+        currency,
+        amount,
+        (
+        SELECT
+        COALESCE(SUM( a.amount ), 0)AS commited_amount
+        FROM
+        csh_transaction_detail a
+        WHERE
+        (
+        ( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+        OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+        )
+        AND a.csh_transaction_data_id = b.id
+        ) AS commited_amount
+        FROM
+        csh_transaction_data b
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        ) ctd
+        where ctd.amount - ctd.commited_amount - ctd.write_off_amount > 0
+        GROUP BY
+        ctd.currency
+
+</select>
+
+
+    <resultMap id="AssociatedInfo" type="com.hand.hcf.app.payment.web.dto.CashDataPublicReportHeaderDTO">
+        <result column="header_id" property="reportHeadId"/>
+        <result column="business_code" property="reportNumber"/>
+        <result column="form_name" property="reportTypeName"/>
+        <collection property="lineList" column="{headerId=header_id}"
+                    ofType="ArrayList" select="getPaymentInfo"/>
+    </resultMap>
+    <select id="getPaymentInfo" resultType="com.hand.hcf.app.payment.web.dto.CashDataPublicReportLineDTO">
+        SELECT   temp.document_line_id scheduleLineId,
+        temp.id as cshTransactionId,
+        temp.amount,
+        temp.associated_amount associatedAmount,
+        (temp.amount - temp.associated_amount -
+         ( SELECT
+            COALESCE(sum( c.write_off_amount ) , 0) AS write_off_amount
+            FROM
+                csh_write_off c
+            WHERE
+                c.document_header_id = temp.document_header_id
+                AND c.document_line_id = temp.document_line_id
+                AND c.document_type = temp.document_category
+                AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        ))as  availableAmount,
+        temp.document_header_id expReportHeaderId,
+        0 as scheduleLineNumber,
+        temp.company_id companyId,
+        temp.currency currency,
+        temp.remark description,
+        temp.exchange_rate exchangeRate,
+        temp.requisition_payment_date  schedulePaymentDate,
+        temp.payment_method_category paymentMethod,
+        temp.csh_transaction_class_id cshTransactionClassId,
+				(select ctc.description  from csh_transaction_class ctc where ctc.id = temp.csh_transaction_class_id) as cshTransactionClassName,
+        temp.csh_flow_item_id cashFlowItemId,
+        temp.partner_category  payeeCategory,
+        temp.partner_id payeeId,
+        temp.account_number accountNumber,
+        temp.account_name accountName,
+        temp.bank_code bankCode,
+        temp.bank_name bankName,
+        temp.bank_branch_code bankLocationCode,
+        temp.bank_branch_name bankLocationName,
+        temp.province_code provinceCode,
+        temp.province_name provinceName,
+        temp.city_code cityCode,
+        temp.city_name cityName,
+        temp.csh_transaction_type_code cshTransactionTypeCode,
+        temp.contract_header_id contractHeaderId
+        FROM
+				(select b.*,(select COALESCE(sum( a.amount ) , 0) AS associated_amount from csh_data_relation_acp a
+        where a.report_head_id = b.document_header_id
+        AND a.report_line_id = b.document_line_id
+        AND a.document_type = 'ACP_REQUISITION') AS associated_amount
+
+         from csh_transaction_data b
+		where
+				 b.frozen_flag = 1
+        AND b.document_category = 'PUBLIC_REPORT'
+		and b.document_header_id = #{headerId}
+				) temp
+
+    </select>
+    <select id="queryReportAssociatedAcp" resultMap="AssociatedInfo">
+        SELECT
+        b.document_number AS business_code,
+        b.document_header_id AS header_id,
+        b.document_type_id AS reportTypeId,
+		b.employee_id as employeeId
+        FROM
+        csh_transaction_data b
+        WHERE
+        b.frozen_flag = 1
+        AND b.document_category = 'PUBLIC_REPORT'
+        AND b.employee_id = #{applicationId}
+        <if test = "reportNumber!=null and reportNumber != ''" >
+            AND b.document_number LIKE concat(
+            '%',
+            concat(#{reportNumber,jdbcType=VARCHAR}, '%'))
+        </if >
+		<if test = "documentTypeId !=null and reportNumber != ''" >
+			AND b.document_type_id = #{documentTypeId}
+		</if >
+        <if test = "formTypes != null and formTypes.size > 0" >
+          AND b.document_type_id IN
+            <foreach collection="formTypes" item="formId" open="(" separator="," close=")">
+                #{formId}
+            </foreach>
+        </if >
+        AND (
+        b.amount - ( SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+        FROM
+        csh_write_off c
+        WHERE
+        c.document_header_id = b.document_header_id
+        AND c.document_line_id = b.document_line_id
+        AND c.document_type = b.document_category
+        AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        )  - (
+        SELECT
+        COALESCE(sum( a.amount ), 0) AS commit_amount
+        FROM
+        csh_data_relation_acp a
+        WHERE
+        a.report_head_id = b.document_header_id
+        AND a.report_line_id = b.document_line_id
+        AND a.document_type = 'ACP_REQUISITION'
+        ) > 0
+        )
+        GROUP BY
+        b.document_number,
+        b.document_header_id,
+        b.document_type_id,
+		b.employee_id
+        ORDER BY
+        b.document_number
+    </select>
+
+    <select id="getRelationalById" resultType="com.hand.hcf.app.payment.web.dto.CashDataPublicReportLineDTO">
+        SELECT   temp.document_line_id scheduleLineId,
+        temp.id as cshTransactionId,
+        temp.amount,
+        temp.associated_amount associatedAmount,
+        (temp.amount - temp.associated_amount - ( SELECT
+            COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+            FROM
+                csh_write_off c
+            WHERE
+                c.document_header_id = temp.document_header_id
+                AND c.document_line_id = temp.document_line_id
+                AND c.document_type = temp.document_category
+                AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        ))as  availableAmount,
+        temp.document_header_id expReportHeaderId,
+        0 as scheduleLineNumber,
+        temp.company_id companyId,
+        temp.currency currency,
+        temp.remark description,
+        temp.exchange_rate exchangeRate,
+        temp.requisition_payment_date  schedulePaymentDate,
+        temp.payment_method_category paymentMethod,
+        temp.csh_transaction_class_id cshTransactionClassId,
+        (select ctc.description  from csh_transaction_class ctc where ctc.id = temp.csh_transaction_class_id) as cshTransactionClassName,
+        temp.csh_flow_item_id cashFlowItemId,
+        temp.partner_category  payeeCategory,
+        temp.partner_id payeeId,
+        temp.account_number accountNumber,
+        temp.account_name accountName,
+        temp.bank_code bankCode,
+        temp.bank_name bankName,
+        temp.bank_branch_code bankLocationCode,
+        temp.bank_branch_name bankLocationName,
+        temp.province_code provinceCode,
+        temp.province_name provinceName,
+        temp.city_code cityCode,
+        temp.city_name cityName,
+        temp.csh_transaction_type_code cshTransactionTypeCode,
+        temp.contract_header_id contractHeaderId
+        FROM
+        (select b.*,(select COALESCE(sum( a.amount ), 0) AS associated_amount from csh_data_relation_acp a
+        where a.report_head_id = b.document_header_id
+        AND a.report_line_id = b.document_line_id
+        AND a.document_type = 'ACP_REQUISITION') AS associated_amount
+
+        from csh_transaction_data b
+        where
+        b.frozen_flag = 1
+        AND b.document_category = 'PUBLIC_REPORT'
+        and b.id = #{id}
+        ) temp
+
+    </select>
+
+    <select id="selectPublicList" resultType="com.hand.hcf.app.payment.domain.CashTransactionData">
+		SELECT
+		v.*
+		FROM
+		(
+		SELECT
+		temp.*,
+		CASE
+		temp.amount - temp.paid_amount
+		WHEN 0 THEN
+		'T'
+		WHEN temp.amount THEN
+		'N' ELSE 'P'
+		END AS paymentStatus
+		FROM
+		(
+		SELECT
+		b.id,
+		b.tenant_id,
+		b.document_category,
+		b.document_header_id,
+		b.document_number,
+		b.employee_id,
+		b.employee_name,
+		b.requisition_date,
+		b.document_line_id,
+		b.company_id,
+		b.payment_company_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0)  AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+		) AS write_off_amount,
+		(
+		SELECT
+		CASE
+
+		WHEN
+		sum( c.write_off_amount ) IS NULL THEN
+		0 ELSE sum( c.write_off_amount )
+		END AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND c.STATUS = 'Y'
+		) AS writeOffTotalAmount,
+		b.partner_category,
+		b.partner_id,
+		b.partner_code,
+		b.partner_name,
+		b.account_name,
+		b.account_number,
+		b.bank_branch_code,
+		b.bank_branch_name,
+		b.payment_method_category,
+		b.requisition_payment_date,
+		b.csh_transaction_type_code,
+		b.csh_transaction_class_id,
+		b.contract_header_id,
+		b.instalment_id,
+		b.remark,
+		b.frozen_flag,
+		b.created_date,
+		b.created_by,
+		b.last_updated_date,
+		b.last_updated_by,
+		b.version_number,
+		b.currency,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0)  AS return_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.operation_type = 'return'
+		AND a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS return_amount,
+		b.exchange_rate,
+		b.bank_code,
+		b.bank_name,
+		b.province_code,
+		b.province_name,
+		b.city_code,
+		b.city_name,
+		b.csh_flow_item_id,
+		b.attribute1,
+		b.attribute2,
+		b.attribute3,
+		b.attribute4,
+		b.attribute5,
+		b.document_type_id,
+		b.document_type_name,
+		b.source_data_id,
+		b.source_header_id,
+		b.source_line_id,
+		b.application_line_id,
+		b.entity_oid AS entityOid,
+		b.entity_type AS entityType,
+		( SELECT c.description FROM csh_transaction_class c WHERE c.id = csh_transaction_class_id ) AS cshTransactionClassName,
+		b.amount,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS commited_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		(
+		( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+		OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+		)
+		AND a.csh_transaction_data_id = b.id
+		) AS commited_amount,
+		(
+		SELECT
+		(
+		COALESCE(sum( a.amount ), 0) +
+		COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		), 0)
+		) AS paid_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS paid_amount,
+		0 AS paid_amount_null
+		FROM
+		csh_transaction_data b
+		WHERE
+		b.frozen_flag = 0
+		AND b.document_category = 'PUBLIC_REPORT'
+		) temp UNION ALL
+		SELECT
+		temp.*,
+		CASE
+
+		WHEN temp.paid_amount_null IS NULL THEN
+		0 ELSE temp.paid_amount_null
+		END AS paidAmount,
+		CASE
+		temp.amount - ( COALESCE(temp.paid_amount_null, 0) )
+		WHEN 0 THEN
+		'T'
+		WHEN temp.amount THEN
+		'N' ELSE 'P'
+		END AS paymentStatus
+		FROM
+		(
+		SELECT
+		b.id,
+		b.tenant_id,
+		b.document_category,
+		b.document_header_id,
+		b.document_number,
+		b.employee_id,
+		b.employee_name,
+		b.requisition_date,
+		b.document_line_id,
+		b.company_id,
+		b.payment_company_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+		) AS write_off_amount,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND c.STATUS = 'Y'
+		) AS writeOffTotalAmount,
+		b.partner_category,
+		b.partner_id,
+		b.partner_code,
+		b.partner_name,
+		b.account_name,
+		b.account_number,
+		b.bank_branch_code,
+		b.bank_branch_name,
+		b.payment_method_category,
+		b.requisition_payment_date,
+		b.csh_transaction_type_code,
+		b.csh_transaction_class_id,
+		b.contract_header_id,
+		b.instalment_id,
+		b.remark,
+		b.frozen_flag,
+		b.created_date,
+		b.created_by,
+		b.last_updated_date,
+		b.last_updated_by,
+		b.version_number,
+		b.currency,
+		(
+		SELECT
+		coalesce(SUM( a.amount ), 0) AS return_amount
+		FROM
+		csh_transaction_detail a,
+		csh_data_relation_acp c
+		WHERE
+		a.operation_type = 'return'
+		AND a.payment_status = 'S'
+		AND a.document_category = 'ACP_REQUISITION'
+		AND a.document_id = c.document_head_id
+		AND a.document_line_id = c.document_line_id
+		AND c.report_head_id = b.document_header_id
+		AND c.report_line_id = b.document_line_id
+		) AS return_amount,
+		b.exchange_rate,
+		b.bank_code,
+		b.bank_name,
+		b.province_code,
+		b.province_name,
+		b.city_code,
+		b.city_name,
+		b.csh_flow_item_id,
+		b.attribute1,
+		b.attribute2,
+		b.attribute3,
+		b.attribute4,
+		b.attribute5,
+		b.document_type_id,
+		b.document_type_name,
+		b.source_data_id,
+		b.source_header_id,
+		b.source_line_id,
+		b.application_line_id,
+		b.entity_oid AS entityOid,
+		b.entity_type AS entityType,
+		( SELECT c.description FROM csh_transaction_class c WHERE c.id = csh_transaction_class_id ) AS cshTransactionClassName,
+		b.amount,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS commited_amount
+		FROM
+		csh_data_relation_acp a
+		WHERE
+		a.report_head_id = b.document_header_id
+		AND a.report_line_id = b.document_line_id
+		) AS commited_amount,
+		(
+		SELECT
+		sum(
+		(
+		SELECT
+		(
+		COALESCE(sum( a.amount ), 0) +
+		COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		), 0)
+		) AS paid_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.payment_status = 'S'
+		AND a.csh_transaction_data_id = ctd.id
+		)
+		) AS paid_amount
+		FROM
+		csh_transaction_data ctd
+		WHERE
+		ctd.document_category = 'ACP_REQUISITION'
+		AND ctd.source_data_id = b.id
+		) AS paid_amount_null
+		FROM
+		csh_transaction_data b
+		WHERE
+		b.frozen_flag = 1
+		AND b.document_category = 'PUBLIC_REPORT'
+		) temp
+		) v
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+
+
+
+	<select id="findPublicReserveAmountAndId" resultType="com.hand.hcf.app.common.co.PublicReportAmountCO">
+		SELECT
+		v.documentHeaderId,
+		sum( v.reserveAmount ) AS reserveAmount
+		FROM
+		(
+		SELECT
+		res.document_header_id AS documentHeaderId,
+		res.reserveAmount
+		FROM
+		(
+		SELECT
+		temp.document_header_id,
+		sum( ( ( temp.amount - temp.commited_amount - temp.write_off_amount ) + temp.return_amount ) ) AS reserveAmount
+		FROM
+		(
+		SELECT
+		b.id,
+		b.document_category,
+		b.document_header_id,
+		b.document_line_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amountwhere
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+		) AS write_off_amount,
+		b.frozen_flag,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS return_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.operation_type = 'return'
+		AND a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS return_amount,
+		b.amount,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS commited_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		(
+		( a.operation_type = 'payment' AND a.payment_status NOT IN ( 'R', 'C' ) )
+		OR ( a.operation_type = 'reserved' AND a.payment_status = 'S' )
+		)
+		AND a.csh_transaction_data_id = b.id
+		) AS commited_amount
+		FROM
+		csh_transaction_data b
+		) temp
+		WHERE
+		temp.document_category = 'PUBLIC_REPORT'
+		AND temp.frozen_flag = 0
+		AND ( ( temp.amount - temp.commited_amount - temp.write_off_amount ) + temp.return_amount ) > 0
+		GROUP BY
+		temp.document_header_id
+		) res UNION ALL
+		SELECT
+		res.document_header_id AS documentHeaderId,
+		res.reserveAmount
+		FROM
+		(
+		SELECT
+		temp.document_header_id,
+		sum( ( temp.amount - temp.commited_amount - temp.write_off_amount ) + temp.return_amount ) AS reserveAmount
+		FROM
+		(
+		SELECT
+		b.id,
+		b.tenant_id,
+		b.document_category,
+		b.document_header_id,
+		b.document_line_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+		) AS write_off_amount,
+		b.frozen_flag,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS return_amount
+		FROM
+		csh_transaction_detail a,
+		csh_data_relation_acp c
+		WHERE
+		a.operation_type = 'return'
+		AND a.payment_status = 'S'
+		AND a.document_category = 'ACP_REQUISITION'
+		AND a.document_id = c.document_head_id
+		AND a.document_line_id = c.document_line_id
+		AND c.report_head_id = b.document_header_id
+		AND c.report_line_id = b.document_line_id
+		) AS return_amount,
+		b.amount,
+		(
+		SELECT
+		COALESCE(SUM( a.amount ), 0) AS commited_amount
+		FROM
+		csh_data_relation_acp a
+		WHERE
+		a.report_head_id = b.document_header_id
+		AND a.report_line_id = b.document_line_id
+		) AS commited_amount
+		FROM
+		csh_transaction_data b
+		) temp
+		WHERE
+		temp.frozen_flag = 1
+		AND temp.document_category = 'PUBLIC_REPORT'
+		AND ( temp.amount - temp.commited_amount - temp.write_off_amount ) + temp.return_amount > 0
+		GROUP BY
+		temp.document_header_id
+		) res
+		) v
+		GROUP BY
+		v.documentHeaderId
+		HAVING
+		1 = 1
+		<if test="amountFrom != null">
+			AND sum( v.reserveAmount ) <![CDATA[ >= ]]> #{amountFrom}
+		</if>
+		<if test="amountTo != null">
+			AND sum( v.reserveAmount ) <![CDATA[ <= ]]> #{amountTo}
+		</if>
+
+
+	</select>
+
+
+
+
+	<select id="findPublicPaidAmountAndId" resultType="com.hand.hcf.app.common.co.PublicReportAmountCO">
+		SELECT
+		v.documentHeaderId,
+		SUM( v.paidAmount ) AS paidAmount,
+		sum( v.writeOffTotalAmount ) AS writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		res.document_header_id AS documentHeaderId,
+		res.paidAmount,
+		res.writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		temp.document_header_id,
+		sum( temp.paid_amount ) AS paidAmount,
+		sum( temp.writeOffTotalAmount ) AS writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		b.id,
+		b.document_category,
+		b.document_header_id,
+		b.document_line_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND (c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ))
+		) AS writeOffTotalAmount,
+		b.frozen_flag,
+		b.amount,
+		(
+		SELECT
+		(
+		COALESCE(sum( a.amount ), 0) +
+		COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		), 0)
+		) AS paid_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS paid_amount
+		FROM
+		csh_transaction_data b
+		) temp
+		WHERE
+		temp.document_category = 'PUBLIC_REPORT'
+		AND temp.frozen_flag = 0
+		GROUP BY
+		temp.document_header_id
+		) res UNION ALL
+		SELECT
+		res.document_header_id AS documentHeaderId,
+		res.paidAmount,
+		res.writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		temp.document_header_id,
+		COALESCE(SUM( temp.paid_amount_null ), 0) AS paidAmount,
+		SUM( temp.writeOffTotalAmount ) AS writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		b.id,
+		b.tenant_id,
+		b.document_category,
+		b.document_header_id,
+		b.document_line_id,
+		(
+		SELECT
+		COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		AND (c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ))
+		) AS writeOffTotalAmount,
+		b.frozen_flag,
+		b.amount,
+		(
+		SELECT
+		sum(
+		(
+		SELECT
+		(
+		COALESCE(sum( a.amount ), 0) +
+		COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		), 0)
+		) AS paid_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.payment_status = 'S'
+		AND a.csh_transaction_data_id = ctd.id
+		)
+		) AS paid_amount
+		FROM
+		csh_transaction_data ctd
+		WHERE
+		ctd.document_category = 'ACP_REQUISITION'
+		AND ctd.source_data_id = b.id
+		) AS paid_amount_null
+		FROM
+		csh_transaction_data b
+		) temp
+		WHERE
+		temp.frozen_flag = 1
+		AND temp.document_category = 'PUBLIC_REPORT'
+		GROUP BY
+		temp.document_header_id
+		) res
+		UNION ALL
+		SELECT
+		res.document_header_id documentHeaderId,
+		0 paidAmount,
+		res.write_off_amount AS writeOffTotalAmount
+		FROM
+		(
+		SELECT
+		c.document_header_id,
+		COALESCE (SUM(c.write_off_amount), 0) AS write_off_amount
+		FROM
+		csh_write_off c
+		WHERE
+		(
+		c.STATUS = 'Y'
+		OR (
+		c.STATUS = 'P'
+		AND c.operation_type = 'WRITE_OFF'
+		)
+		)
+		AND NOT EXISTS (
+		SELECT
+		1
+		FROM
+		csh_transaction_data b
+		WHERE
+		c.document_header_id = b.document_header_id
+		AND c.document_line_id = b.document_line_id
+		AND c.document_type = b.document_category
+		)
+		GROUP BY
+		c.document_header_id
+		) res
+		) v
+		GROUP BY
+		v.documentHeaderId
+		HAVING
+		1 = 1
+		<if test="amountFrom != null">
+			and SUM(v.paidAmount) <![CDATA[ >= ]]> #{amountFrom}
+		</if>
+		<if test="amountTo != null">
+			AND SUM(v.paidAmount) <![CDATA[ <= ]]> #{amountTo}
+		</if>
+	</select>
+
+
+	<select id="listAmountByPrepaymentLineIds"
+			resultType="com.hand.hcf.app.common.co.PaymentDocumentAmountCO">
+		SELECT
+        temp.*
+        FROM
+        (
+        SELECT
+
+		b.document_line_id as documentLineId,
+        (
+        SELECT
+        COALESCE(SUM( a.amount ), 0) AS return_amount
+        FROM
+        csh_transaction_detail a
+        WHERE
+        a.operation_type = 'return'
+        AND a.payment_status = 'S'
+        AND a.csh_transaction_data_id = b.id
+        ) AS returnAmount,
+
+        (
+        SELECT
+        (
+        COALESCE(sum( a.amount ), 0) +
+        COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- a.amount ELSE 0
+		END
+		) , 0)
+        ) AS paid_amount
+        FROM
+        csh_transaction_detail a
+        WHERE
+        a.payment_status = 'S'
+        AND a.csh_transaction_data_id = b.id
+        ) AS payAmount
+        FROM
+        csh_transaction_data b
+        WHERE b.document_category = #{documentCategory}
+		<if test="lineIds != null and lineIds.size > 0">
+          AND b.document_line_id IN
+			<foreach item="item" collection="lineIds" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+        ) temp
+	</select>
+    <select id="findAmountByDocumentIds"
+            resultType="com.hand.hcf.app.common.co.PaymentDocumentAmountCO">
+
+		SELECT
+		temp.document_header_id as documentId,
+		sum(temp.payAmount) as payAmount,
+		sum(temp.returnAmount) as returnAmount
+		FROM
+		(
+		SELECT
+
+		b.document_header_id,
+		(
+		SELECT
+		COALESCE(SUM( round(a.amount * a.exchange_rate, 2) ), 0) AS return_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.operation_type = 'return'
+		AND a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS returnAmount,
+
+		(
+		SELECT
+		(
+		COALESCE(sum( round(a.amount * a.exchange_rate, 2) ), 0) +
+		COALESCE(SUM(
+		CASE
+
+		WHEN (
+		( a.refund_status = 'Y' AND a.payment_status = 'S' )
+		OR ( a.operation_type = 'return' AND a.payment_status = 'S' )
+		) THEN
+		- round(a.amount * a.exchange_rate, 2) ELSE 0
+		END
+		), 0)
+		) AS paid_amount
+		FROM
+		csh_transaction_detail a
+		WHERE
+		a.payment_status = 'S'
+		AND a.csh_transaction_data_id = b.id
+		) AS payAmount
+		FROM
+		csh_transaction_data b
+		WHERE b.document_category = #{documentCategory}
+		<if test="documentIds != null and documentIds.size > 0">
+			AND b.document_header_id IN
+			<foreach item="item" collection="documentIds" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="employeeId != null">
+			and b.employee_id = #{employeeId}
+		</if>
+		<if test="companyId != null">
+			and b.company_id = #{companyId}
+		</if>
+		<if test="documentTypeId != null">
+			and b.document_type_id = #{documentTypeId}
+		</if>
+		) temp
+		group by temp.document_header_id
+	</select>
+</mapper>

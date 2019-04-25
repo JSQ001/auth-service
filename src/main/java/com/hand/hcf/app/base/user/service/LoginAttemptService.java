@@ -19,7 +19,7 @@ public class LoginAttemptService {
     public void loginSucceeded(Long userId) {
         //若登录成功,清空当前的user_login_faied_times
         //jiu.zhao redis
-        //redisHelper.deleteByKey(Constants.LOGIN_ATTEMPT_PREFIX + userId);
+        //redisHelper.deleteByKey(PaymentConstants.LOGIN_ATTEMPT_PREFIX + userId);
         userService.unlockUser(userId);
     }
 

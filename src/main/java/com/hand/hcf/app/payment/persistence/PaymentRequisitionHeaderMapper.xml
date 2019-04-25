@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.PaymentRequisitionHeaderMapper">
+    <select id="listHeaders" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionHeader">
+        select * from (SELECT
+            a.*,
+            b.description AS acpReqTypeName
+        FROM
+          csh_acp_requisition_hds a,
+          csh_req_types b
+        WHERE
+            a.acp_req_type_id = b.id
+            ) t
+            <where>
+            ${ew.sqlSegment}
+            </where>
+    </select>
+
+    <select id="getHeaderById" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionHeader">
+        SELECT
+        a.*,
+        b.description AS acpReqTypeName
+        FROM
+            csh_acp_requisition_hds a,
+            csh_req_types b
+        WHERE
+        a.acp_req_type_id = b.id
+        and a.id = #{id}
+    </select>
+
+
+    <!--select *-->
+    <!--from (SELECT h.*,-->
+    <!--b.exchange_rate,-->
+    <!--t.description AS acpReqTypeName,-->
+    <!--(SELECT (COALESCE(sum(round(a.amount * a.exchange_rate, 2)), 0) +-->
+    <!--COALESCE(SUM(CASE WHEN ((a.refund_status = 'Y' AND a.payment_status = 'S') OR (a.operation_type = 'return' AND a.payment_status = 'S'))-->
+    <!--THEN -round(a.amount * a.exchange_rate, 2)-->
+    <!--ELSE 0 END), 0)-->
+    <!--) AS paid_amount-->
+    <!--FROM csh_transaction_detail a-->
+    <!--WHERE a.payment_status = 'S'-->
+    <!--AND a.csh_transaction_data_id = b.id) AS payAmount-->
+    <!--FROM csh_transaction_data b, csh_acp_requisition_hds h, csh_req_types t-->
+    <!--where t.id = h.acp_req_type_id-->
+    <!--and b.document_category = 'ACP_REQUISITION'-->
+    <!--and h.id = b.document_header_id) t-->
+    <!--WHERE 1 = 1-->
+
+    <!--付款申请单财务查询-查询付款申请单头表信息+通用支付信息表中存在的并计算金额-->
+    <select id="queryHeaders" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionHeader">
+
+          select a.*,
+                 t.DESCRIPTION as acpReqTypeName,
+
+                 (SELECT (COALESCE(sum(round(a.amount * a.exchange_rate, 2)), 0) +
+                          COALESCE(SUM(CASE WHEN ((a.refund_status = 'Y' AND a.payment_status = 'S') OR (a.operation_type = 'return' AND a.payment_status = 'S'))
+                                              THEN -round(a.amount * a.exchange_rate, 2)
+                                            ELSE 0 END), 0)
+                           ) AS paid_amount
+                  FROM csh_transaction_detail a
+                  WHERE a.payment_status = 'S'
+                    AND a.csh_transaction_data_id = h.id) AS payAmount
+
+          from CSH_ACP_REQUISITION_HDS a, --付款申请单头表
+               CSH_TRANSACTION_DATA h,  --通用支付信息表
+               CSH_REQ_TYPES t  --付款申请单类型定义
+          where a.ID = h.DOCUMENT_HEADER_ID(+)
+            and a.ACP_REQ_TYPE_ID = t.ID
+
+        ${ew.sqlSegment}
+    </select>
+
+    <!--根据付款申请单头表ID查询对应行表关联的报账单行表ID集合-->
+    <select id="getReportLineIds" resultType="java.lang.Long">
+      select a.REF_DOCUMENT_LINE_ID
+        from CSH_ACP_REQUISITION_LNS a
+        where a.HEADER_ID = #{headId}
+    </select>
+
+</mapper>

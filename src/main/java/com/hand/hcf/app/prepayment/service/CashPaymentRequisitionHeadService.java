@@ -981,7 +981,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         }
         if (status == DocumentOperationEnum.APPROVAL_PASS.getId()) {
             //只有提交状态的单据才可以审批通过和拒绝
-            //if (head.getStatus() != DocumentOperationEnum.APPROVAL.getId()) {
+            //if (head.getStatus() != PaymentDocumentOperationEnum.APPROVAL.getId()) {
             // modify by mh.z 20190108 解决机器人（只有一个节点）审批通过但单据状态没变，
             // BUG产生的原因是prepayment发请求给artemis提交单据，由于只有机器人一个节点且审批通过，
             // 这时候artemis发单据审批通过的广播。因为这时候单据状态是编辑中（artemis提交单据成功后
@@ -1060,7 +1060,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             if (CollectionUtils.isEmpty(lines)) {
                 throw new BizException(RespCode.PREPAY_CASHPAYREQUISITION_HEAD_LINE_IS_NULL);
             }
-//            historyDTO.setOperation(DocumentOperationEnum.APPROVAL.getId());
+//            historyDTO.setOperation(PaymentDocumentOperationEnum.APPROVAL.getId());
             //将formOID更新
             head.setFormOid(requisitionType.getFormOid());
 
@@ -1529,7 +1529,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         if (header == null) {
             throw new BizException(RespCode.PREPAY_CASHPAYREQUISITION_HEAD_NOT_EXIT);
         }
-//        if(header.getStatus()!=DocumentOperationEnum.APPROVAL_PASS.getID()){
+//        if(header.getStatus()!=PaymentDocumentOperationEnum.APPROVAL_PASS.getID()){
 //            throw new BizException(RespCode.PREPAY_ONLY_PASS_CAN_PUSH);
 //        }
         //根据头查询行信息
@@ -1823,9 +1823,9 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 //            for(CashPaymentRequisitionLine line:lines){
 //                //状态不是新建，驳回，撤回的单子的金额
 //                int status = cashPaymentRequisitionHeadMapper.selectById(line.getPaymentRequisitionHeaderId()).getStatus();
-//                if(DocumentOperationEnum.APPROVAL.getID()==status
+//                if(PaymentDocumentOperationEnum.APPROVAL.getID()==status
 //                        ||
-//                  DocumentOperationEnum.APPROVAL_PASS.getID()==status
+//                  PaymentDocumentOperationEnum.APPROVAL_PASS.getID()==status
 //                ){
 //                    Map<String, Double> doubleMap = getAmountGroupByCodeByHeadId(line.getPaymentRequisitionHeaderId());
 //                    doubleMap.remove("totalFunctionAmount");

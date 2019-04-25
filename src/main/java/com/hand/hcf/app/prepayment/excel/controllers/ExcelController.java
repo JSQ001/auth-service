@@ -83,10 +83,10 @@ public class ExcelController {
                 .like(StringUtils.isNotEmpty(remark), "description", remark);
 
         List<Integer> statusInteger = new ArrayList<>();
-        statusInteger.add(DocumentOperationEnum.GENERATE.getId());
-        statusInteger.add(DocumentOperationEnum.APPROVAL.getId());
-        statusInteger.add(DocumentOperationEnum.WITHDRAW.getId());
-        statusInteger.add(DocumentOperationEnum.APPROVAL_REJECT.getId());
+        statusInteger.add(PaymentDocumentOperationEnum.GENERATE.getId());
+        statusInteger.add(PaymentDocumentOperationEnum.APPROVAL.getId());
+        statusInteger.add(PaymentDocumentOperationEnum.WITHDRAW.getId());
+        statusInteger.add(PaymentDocumentOperationEnum.APPROVAL_REJECT.getId());
         if(noWriteAmountFrom == null && noWriteAmountTo == null){
             wrapper = wrapper
                     .orderBy("requisition_number", false);

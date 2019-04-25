@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.payment.persistence.CompanyBankMapper">
+
+    <select id="pageCompanyBankByInfoResultBasic" resultType="com.hand.hcf.app.common.co.BasicCO">
+        SELECT
+        b.bank_account_number id,
+        b.bank_account_number code,
+        b.bank_account_name name
+        FROM
+        csh_company_bank b
+        WHERE
+        b.deleted = FALSE
+
+        <if test="code != null and code !=''">
+            AND
+            b.bank_account_number LIKE concat('%', concat(#{code,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="name != null and name !=''">
+            AND
+            b.bank_account_name LIKE  concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test = "companyIds != null and companyIds.size > 0" >
+            AND b.company_id IN
+            <foreach collection="companyIds" item="companyId" open="(" separator="," close=")">
+                #{companyId}
+            </foreach>
+        </if >
+        ORDER BY b.bank_account_number
+    </select>
+
+</mapper>

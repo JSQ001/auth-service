@@ -1437,7 +1437,7 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
 //        } else if (childPath.length() < parentPath.length()) {
 //            return Boolean.FALSE;
 //        } else {
-//            int i = childPath.lastIndexOf(Constants.DEPARTMENT_SPLIT);
+//            int i = childPath.lastIndexOf(PaymentConstants.DEPARTMENT_SPLIT);
 //            if (i == -1) {
 //                return Boolean.FALSE;
 //            } else {

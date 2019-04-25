@@ -1199,7 +1199,7 @@ public class CashPaymentRequisitionHeadController {
                         prepaymentApprovalDTO.setFormName(approvalFormCO.getFormName()); //设置表单名称
                     }
                     prepaymentApprovalDTO.setFormOid(formOid); //设置表单oid
-                    prepaymentApprovalDTO.setFormType(String.valueOf(Constants.PREPAYMENT_DOCUMENT_TYPE)); //设置单据类型
+                    prepaymentApprovalDTO.setFormType(String.valueOf(PaymentConstants.PREPAYMENT_DOCUMENT_TYPE)); //设置单据类型
                 }*/
 
                 //设置单据状态--和预算日记账的一样

@@ -45,6 +45,12 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
+        <!--xxl-job -->
+        <dependency>
+            <groupId>com.hand.hec</groupId>
+            <artifactId>job-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
@@ -368,7 +374,7 @@
             </plugin>
 
             <!-- 将前端代码 install build 打包成dist文件-->
-            <plugin>
+            <!--<plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.1.1</version>
@@ -385,7 +391,7 @@
                             <arguments>
                                 <argument>install </argument>
                                 <argument>-a </argument>
-                                <argument>--registry</argument>
+                                <argument>&#45;&#45;registry</argument>
                                 <argument>https://registry.npm.taobao.org </argument>
                             </arguments>
                         </configuration>
@@ -421,7 +427,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <!-- copy前先清除文件内容-->
             <plugin>

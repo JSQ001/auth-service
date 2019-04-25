@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.EsCashDefaultFlowItemMapper">
+    <resultMap id="EsBaseResultMap" type="com.hand.hcf.app.payment.web.dto.EsCashDefaultFlowItemDTO">
+        <id column="id" property="id"></id>
+        <result column="transaction_class_id" property="transactionClassId"></result>
+        <result column="cash_flow_item_id" property="cashFlowItemId"></result>
+        <result column="default_flag" property="defaultFlag"></result>
+        <result column="enabled" property="enabled"></result>
+        <result column="deleted" property="deleted"></result>
+    </resultMap>
+    <select id="selectAllCashDefaultFlowItem" resultMap="EsBaseResultMap">
+        SELECT
+            id,
+            transaction_class_id,
+            cash_flow_item_id,
+            default_flag,
+            enabled,
+            deleted
+        FROM
+            csh_default_flowitem
+    </select>
+</mapper>

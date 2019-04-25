@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.CashWriteOffMapper">
+    <resultMap id="BaseResultMap" type="com.hand.hcf.app.payment.domain.CashWriteOff">
+        <id column="id" property="id"></id>
+        <result column="csh_transaction_detail_id" property="cshTransactionDetailId"></result>
+        <result column="write_off_amount" property="writeOffAmount"></result>
+        <result column="document_type" property="documentType"></result>
+        <result column="document_header_id" property="documentHeaderId"></result>
+        <result column="document_line_id" property="documentLineId"></result>
+        <result column="write_off_date" property="writeOffDate"></result>
+        <result column="period_name" property="periodName"></result>
+        <result column="version_number" property="versionNumber"></result>
+        <result column="created_date" property="createdDate"></result>
+        <result column="created_by" property="createdBy"></result>
+        <result column="last_updated_date" property="lastUpdatedDate"></result>
+        <result column="last_updated_by" property="lastUpdatedBy"></result>
+        <result column="tenant_id" property="tenantId"></result>
+        <result column="set_of_books_id" property="setOfBooksId"></result>
+        <result column="status" property="status"></result>
+        <result column="operation_type" property="operationType"></result>
+        <result column="remark" property="remark"></result>
+        <result column="approval_opinions" property="approvalOpinions"></result>
+        <result column="approval_id" property="approvalId"></result>
+        <result column="document_number" property="documentNumber"></result>
+        <result column="document_applicant_id" property="documentApplicantId"></result>
+        <result column="document_created_date" property="documentCreatedDate"></result>
+        <result column="attachment_oid" property="attachmentOid"></result>
+        <result column="source_write_off_id" property="sourceWriteOffId"></result>
+        <result column="is_account" property="isAccount"></result>
+    </resultMap>
+
+    <!--预付款反冲前会先反冲核销记录，所以不用管支付信息状态，直接全部汇总即可-->
+    <select id="selectDocumentWriteOffAmount" resultType="java.util.Map">
+        select ctd.document_line_id documentLineId,
+         round((case when sum(cwo.write_off_amount) > 0 then sum(cwo.write_off_amount) else 0 end),2) amount
+        from
+          csh_write_off cwo,csh_transaction_detail ctd
+        where cwo.csh_transaction_detail_id = ctd.id
+          and ctd.document_category = #{documentCategory}
+          and ctd.document_id = #{documentId}
+          and cwo.status is not NULL
+          and cwo.status in('P','Y')
+          <if test="documentLineId != null">
+              and ctd.document_line_id = #{documentLineId}
+          </if>
+        group by ctd.document_line_id
+    </select>
+
+    <sql id="baseColumn">
+        cwo.id,
+        cwo.csh_transaction_detail_id cshTransactionDetailId,
+        cwo.document_type documentType,
+        cwo.document_header_id documentHeaderId,
+        cwo.document_line_id documentLineId,
+        cwo.write_off_date writeOffDate,
+        cwo.period_name periodName,
+        cwo.tenant_id tenantId,
+        cwo.status,
+        cwo.operation_type operationType,
+        cwo.remark,
+        cwo.approval_opinions approvalOpinions,
+        cwo.approval_id approvalId,
+        cwo.document_number documentNumber,
+        cwo.document_applicant_id documentApplicantId,
+        cwo.document_created_date documentCreatedDate,
+        cwo.attachment_oid attachmentOid,
+        cwo.set_of_books_id setOfBooksId,
+        ctd.document_number sourceDocumentNumber,
+        ctd.document_line_id sourceDocumentLineId,
+        ctd.billcode,
+        cwo.source_write_off_id sourceWriteOffId,
+        ctd.currency currency,
+        (CASE WHEN cwo.is_account IS NULL THEN 'N' ELSE cwo.is_account END) isAccount,
+        cwo.created_by createdBy
+    </sql>
+
+    <sql id="baseWhere">
+        cwo.csh_transaction_detail_id = ctd.id
+        and cwo.set_of_books_id = #{setOfBooksId}
+        <if test="documentNumber != null">
+            and cwo.document_number like  concat(concat('%',#{documentNumber}),'%')
+        </if>
+        <if test="applicantId != null">
+            and cwo.document_applicant_id = #{applicantId}
+        </if>
+        <if test="sourceDocumentNumber != null">
+            and ctd.document_number like concat(concat('%',#{sourceDocumentNumber}),'%')
+        </if>
+        <if test="billCode != null">
+            and ctd.billcode like concat(concat('%',#{billCode}),'%')
+        </if>
+        <if test="createdDateFrom != null">
+            and cwo.document_created_date &gt;= #{createdDateFrom}
+        </if>
+        <if test="createdDateTo != null">
+            and cwo.document_created_date &lt;= #{createdDateTo}
+        </if>
+    </sql>
+    
+    <select id="selectWaitingReserveWriteOffDetail" resultType="com.hand.hcf.app.payment.web.dto.CashWriteOffReserveDTO">
+        select * from (
+            select
+              <include refid="baseColumn"/>
+              ,cwo.write_off_amount writeOffAmount
+              ,round((cwo.write_off_amount - abs((select CASE WHEN sum(cr.write_off_amount) IS NULL THEN 0 ELSE sum(cr.write_off_amount) END
+                  from csh_write_off cr
+                where cr.document_type = cwo.document_type
+                    and cr.document_header_id = cwo.document_header_id
+                    and cr.document_line_id = cwo.document_line_id
+                    and cr.tenant_id = cwo.tenant_id
+                    and cr.operation_type = 'WRITE_OFF_RESERVED'
+                    and cr.status in ('Y','P')))),2) reversedAmount
+            from
+              csh_write_off cwo,csh_transaction_detail ctd
+            where
+                <include refid="baseWhere"/>
+                <if test="writeOffAmountFrom != null">
+                    and cwo.write_off_amount &gt;= #{writeOffAmountFrom}
+                </if>
+                <if test="writeOffAmountTo != null">
+                    and cwo.write_off_amount &lt;= #{writeOffAmountTo}
+                </if>
+                <if test="writeOffDateFrom != null">
+                    and cwo.write_off_date &gt;= #{writeOffDateFrom}
+                </if>
+                <if test="writeOffDateTo != null">
+                    and cwo.write_off_date &lt;= #{writeOffDateTo}
+                </if>
+        and cwo.operation_type = 'WRITE_OFF'
+                and cwo.status = 'Y'
+            order by cwo.created_date desc) temp
+        where temp.reversedAmount &gt; 0
+    </select>
+
+    <select id="selectReservedWriteOffDetail" resultType="com.hand.hcf.app.payment.web.dto.CashWriteOffReserveDTO">
+        select * from (
+          select
+            <include refid="baseColumn"/>
+            ,abs(cwo.write_off_amount) reversedAmount
+            ,(select cr.write_off_amount
+                from csh_write_off cr
+              where cr.id = cwo.source_write_off_id
+                ) writeOffAmount
+            from
+              csh_write_off cwo,csh_transaction_detail ctd
+            where
+            <include refid="baseWhere"/>
+                and cwo.operation_type = 'WRITE_OFF_RESERVED'
+                <if test="createdBy != null">
+                  and cwo.created_by = #{createdBy}
+                </if>
+                <if test="status != null">
+                    and cwo.status = #{status}
+                </if>
+                <if test="approvalId != null">
+                    and cwo.approval_id = #{approvalId}
+                </if>
+                <if test="writeOffReverseAmountFrom != null">
+                    and abs(cwo.write_off_amount) &gt;= #{writeOffReverseAmountFrom}
+                </if>
+                <if test="writeOffReverseAmountTo != null">
+                    and abs(cwo.write_off_amount) &lt;= #{writeOffReverseAmountTo}
+                </if>
+                <if test="writeOffDateFrom != null">
+                    and cwo.write_off_date &gt;= #{writeOffDateFrom}
+                </if>
+                <if test="writeOffDateTo != null">
+                    and cwo.write_off_date &lt;= #{writeOffDateTo}
+                </if>
+                <if test="sourceWriteOffId != null">
+                    and cwo.source_write_off_id = #{sourceWriteOffId}
+                    <!-- 核销反冲信息只展示 Y P -->
+                    and cwo.status in ('Y','P')
+                </if>
+                order by cwo.created_date desc) temp
+        where 1 = 1
+            <if test="writeOffAmountFrom != null">
+                and temp.writeOffAmount &gt;= #{writeOffAmountFrom}
+            </if>
+            <if test="writeOffAmountTo != null">
+                and temp.writeOffAmount &lt;= #{writeOffAmountTo}
+            </if>
+    </select>
+
+    <select id="listDocumentByWriteOffAmount" resultType="com.hand.hcf.app.common.co.CashWriteOffDocumentAmountCO">
+      select tmp.documentHeaderId,tmp.writeOffAmount,tmp.unWriteOffAmount from
+            (select temp.document_id documentHeaderId,
+                round(sum(temp.writeOffAmount),2) writeOffAmount,
+                round(sum(temp.totalAmount - temp.writeOffAmount),2) unWriteOffAmount from
+                (select ctd.document_id,
+                  ctd.document_line_id,
+                  (case when sum(ctd.amount) is not null then sum(ctd.amount) else 0 end) totalAmount,
+                (case when sum(cwo.write_off_amount) is not null then sum(cwo.write_off_amount) else 0 end) writeOffAmount
+                from
+              csh_write_off cwo,csh_transaction_detail ctd where
+                cwo.csh_transaction_detail_id = ctd.id
+                and cwo.tenant_id = #{tenantId}
+                and cwo.status in ('Y','P')
+                group by ctd.document_id,ctd.document_line_id) temp
+            group by temp.document_id) tmp
+        where 1 = 1
+        <if test="unWriteOffAmountFrom != null">
+            and tmp.unWriteOffAmount &gt;= #{unWriteOffAmountFrom}
+        </if>
+        <if test="unWriteOffAmountTo != null">
+            and tmp.unWriteOffAmount &lt;= #{unWriteOffAmountTo}
+        </if>
+        <if test="setOfBooksId != null">
+            and cwo.set_of_books_id = #{setOfBooksId}
+        </if>
+    </select>
+
+    <select id="listExcludeDocumentByWriteOffAmount" resultType="java.lang.Long">
+        select tmp.documentHeaderId from
+        (select temp.document_id documentHeaderId,
+        round(sum(temp.writeOffAmount),2) writeOffAmount,
+        round(sum(temp.totalAmount - temp.writeOffAmount),2) unWriteOffAmount from
+        (select ctd.document_id,
+        ctd.document_line_id,
+        (case when sum(ctd.amount) is not null then sum(ctd.amount) else 0 end) totalAmount,
+        (case when sum(cwo.write_off_amount) is not null then sum(cwo.write_off_amount) else 0 end) writeOffAmount
+        from
+        csh_write_off cwo,csh_transaction_detail ctd where
+        cwo.csh_transaction_detail_id = ctd.id
+        and cwo.tenant_id = #{tenantId}
+        and cwo.status in ('Y','P')
+        group by ctd.document_id,ctd.document_line_id) temp
+        group by temp.document_id) tmp
+        where 1 = 1
+        <if test="unWriteOffAmountFrom != null">
+            and tmp.unWriteOffAmount &lt; #{unWriteOffAmountFrom}
+        </if>
+        <if test="unWriteOffAmountTo != null">
+            or tmp.unWriteOffAmount &gt; #{unWriteOffAmountTo}
+        </if>
+        <if test="setOfBooksId != null">
+            and cwo.set_of_books_id = #{setOfBooksId}
+        </if>
+    </select>
+
+    <!--预付款反冲前会先反冲核销记录，所以不用管支付信息状态，直接全部汇总即可-->
+    <select id="selectDocumentWriteOffAmountBatch" resultType="java.util.Map">
+        select ctd.document_line_id documentLineId,
+        round((case when sum(cwo.write_off_amount) > 0 then sum(cwo.write_off_amount) else 0 end),2) amount
+        from
+        csh_write_off cwo,csh_transaction_detail ctd
+        where cwo.csh_transaction_detail_id = ctd.id
+        and ctd.document_category = #{documentCategory}
+        <if test="documentIds != null and documentIds.size >0" >
+            and ctd.document_id in
+            <foreach collection="documentIds" index="index" item="documentId" open="(" separator="," close=")">
+                #{documentId}
+            </foreach>
+        </if>
+        and cwo.status is not NULL
+        and cwo.status in('P','Y')
+        group by ctd.document_line_id
+    </select>
+
+    <select id="getPrepaymentWriteOffHistory" resultMap="BaseResultMap">
+        select cwo.*
+          from csh_write_off cwo,csh_transaction_detail ctd
+        where cwo.csh_transaction_detail_id = ctd.id
+
+        and ctd.document_category = 'PREPAYMENT_REQUISITION'
+        and ctd.document_id = #{prepaymentRequisitionId}
+    </select>
+</mapper>
