@@ -373,8 +373,8 @@
                 </executions>
             </plugin>
 
-            <!-- 将前端代码 install build 打包成dist文件-->
-            <!--<plugin>
+            <!--&lt;!&ndash; 将前端代码 install build 打包成dist文件&ndash;&gt;
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.1.1</version>
@@ -427,9 +427,9 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
 
-            <!-- copy前先清除文件内容-->
+            &lt;!&ndash; copy前先清除文件内容&ndash;&gt;
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -451,7 +451,7 @@
                 </executions>
             </plugin>
 
-            <!-- 将前端打包生成的dist文件移到resource/public目录-->
+            &lt;!&ndash; 将前端打包生成的dist文件移到resource/public目录&ndash;&gt;
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
@@ -473,7 +473,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
