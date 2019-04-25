@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.CashTransactionDetailMapper">
+
+    <select id="getPrepaymentResult"
+            parameterType="com.hand.hcf.app.payment.web.dto.PaymentDetailWriteOffCondition"
+            resultType="com.hand.hcf.app.payment.web.dto.CashPrepaymentQueryDTO">
+        SELECT temp.*,(amount - write_off_amount - refundAmount) writeOffAmount FROM (
+        SELECT tenant_id tenantId,
+        document_company_id companyId,
+        document_category documentCategory,
+        document_id documentHeaderId,
+        document_line_id documentLineId,
+        document_number documentNumber,
+        document_type_id documentTypeId,
+        document_type_name documentTypeName,
+        id cashTransactionDetailId,
+        billcode billCode,
+        pay_date payDate,
+        amount amount,
+        (SELECT ctc.description FROM csh_transaction_class ctc WHERE ctc.id = t.csh_transaction_class_id)
+        cshTransactionClassName,
+        partner_category partnerCategory,
+        partner_id partnerId,
+        partner_code partnerCode,
+        partner_name partnerName,
+        (SELECT
+        COALESCE(sum( CASE WHEN b.operation_type = 'reserved' THEN - b.amount ELSE b.amount END ), 0) AS refundAmount
+        FROM
+        csh_transaction_detail b
+        WHERE
+        t.id = b.ref_cash_detail_id
+        AND b.operation_type &lt;&gt; 'payment'
+        AND ( b.payment_status = 'S' OR b.payment_status = 'P' )) as refundAmount,
+        (SELECT
+        COALESCE(sum(cwo.write_off_amount ), 0)
+        FROM
+        csh_write_off cwo
+        WHERE
+        t.id = cwo.csh_transaction_detail_id
+        AND (cwo.STATUS = 'Y' or cwo.status = 'P')
+        ) AS write_off_amount,
+        <!-- 查询单据已核销金额 -->
+        (select COALESCE(sum(cwo.write_off_amount ), 0)
+        FROM csh_write_off cwo
+        where t.id = cwo.csh_transaction_detail_id
+        and cwo.document_type = #{documentType}
+        and cwo.document_header_id = #{documentHeaderId}
+        and cwo.document_line_id = #{documentLineId}) WriteOffAmountForThisDocument,
+        currency currencyCode
+        FROM csh_transaction_detail t
+        WHERE
+        tenant_id = #{tenantId} AND
+        t.refund_status = 'N' AND
+        t.operation_type = 'payment' AND
+        t.document_company_id = #{companyId} AND
+        t.partner_category = #{partnerCategory} AND
+        t.partner_id = #{partnerId} AND
+        t.csh_transaction_type_code = 'PREPAYMENT' AND
+        t.amount &gt; 0
+        and t.currency = #{currencyCode}
+        <if test="sameContract == true">
+            AND t.contract_header_id = #{contractHeaderId}
+        </if>
+        <if test="sameApplicationForm == true">
+            AND t.application_line_id IN
+            <foreach item="item" collection="applicationIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        ) temp
+        WHERE (temp.amount - write_off_amount - refundAmount ) &gt;0
+        <!-- 将已完全核销，但单据中还存在对应借款信息核销记录的数据也一并返回 -->
+        or WriteOffAmountForThisDocument > 0
+    </select>
+
+    <select id="getDetailById" resultType="com.hand.hcf.app.payment.web.dto.CashTransactionDetailWebDTO">
+        SELECT tenant_id tenantId,
+        document_company_id companyId,
+        document_number documentNumber,
+        id,
+        billcode billCode,
+        pay_date payDate,
+        amount amount,
+        amount - write_off_amount writeOffAmount,
+        (SELECT ctc.description FROM csh_transaction_class ctc WHERE ctc.id = t.csh_transaction_class_id) cshTransactionClassName
+        FROM csh_transaction_detail t
+        WHERE
+        id = #{id}
+    </select>
+
+    <select id="getDetailByContractHeaderId" resultType="com.hand.hcf.app.payment.domain.CashTransactionDetail">
+        SELECT
+        a.*,a.back_flash_attachment_oid as backFlashAttachmentOIDs
+    FROM
+        csh_transaction_detail a ,csh_transaction_data b
+    WHERE
+        (
+            a.csh_transaction_data_id = b.id AND
+			b.contract_header_id = #{contractHeaderId}
+        )
+    </select>
+
+    <select id="getTotalAmountAndDocumentNum" resultType="com.hand.hcf.app.payment.web.dto.AmountAndDocumentNumberDTO">
+        SELECT
+            count( 0 ) AS documentNumber,
+            coalesce(sum( amount ), 0) AS totalAmount,
+        currency as currency
+        FROM
+            csh_transaction_detail
+        <where>
+            ${ew.sqlSegment}
+        </where>
+      GROUP  by currency
+    </select>
+    
+    <select id="selectRefundByPage" resultType="com.hand.hcf.app.payment.domain.CashTransactionDetail">
+        select c.*,(c.amount - c.refundAmountCommit) as abledRefundAmount from (SELECT
+             a.*,a.back_flash_attachment_oid as backFlashAttachmentOIDs,
+        ((select
+                COALESCE(sum( b.amount ), 0) AS refundAmountCommit
+              from csh_transaction_detail b
+              where a.id = b.ref_cash_detail_id
+                and b.operation_type = 'return'
+                and b.payment_status IN ( 'P', 'S' )
+            )  +
+        (
+        SELECT
+        COALESCE(sum( c.write_off_amount ), 0) AS write_off_amount
+        FROM
+        csh_write_off c
+        WHERE
+        c.csh_transaction_detail_id = a.id
+        AND ( c.STATUS = 'Y' OR ( c.STATUS = 'P' AND c.operation_type = 'WRITE_OFF' ) )
+        )) as refundAmountCommit,
+            (select
+                COALESCE(sum( b.amount ), 0) AS refundAmount
+              from csh_transaction_detail b
+              where a.id = b.ref_cash_detail_id
+                and b.operation_type = 'return'
+                and b.payment_status  = 'S'
+            ) as refundAmount
+            FROM
+            csh_transaction_detail a
+            ) c
+            <where>
+            ${ew.sqlSegment}
+            </where>
+    </select>
+
+    <select id="listPartner" resultType="com.hand.hcf.app.payment.web.dto.PartnerSelectDTO">
+        select partner_category as partnerCategory,
+               partner_id  as partnerId
+        from csh_transaction_detail
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        group by partner_category,partner_id
+    </select>
+    <select id="overrideSelectPage" resultType="com.hand.hcf.app.payment.domain.CashTransactionDetail">
+        select temp.*,temp.back_flash_attachment_oid as backFlashAttachmentOIDs from csh_transaction_detail temp
+        <where>
+        ${ew.sqlSegment}
+        </where>
+    </select>
+
+
+    <select id="getDetailByPublicHeaderId" resultType="com.hand.hcf.app.payment.domain.CashTransactionDetail">
+      SELECT
+            a.*
+        FROM
+            csh_transaction_detail a
+        WHERE
+             (
+            ( a.document_category = 'PUBLIC_REPORT' AND a.document_id = #{headerId} )
+            OR (
+            a.document_category = 'ACP_REQUISITION'
+            AND EXISTS ( SELECT 1 FROM csh_transaction_data c WHERE c.document_category = 'ACP_REQUISITION' AND c.source_header_id = #{headerId} AND a.csh_transaction_data_id = c.id )
+            )
+            )
+            ${ew.sqlSegment}
+    </select>
+
+
+    <select id="selectIdByPrePayment" resultType="com.hand.hcf.app.common.co.PublicReportWriteOffCO">
+        SELECT a.document_header_id as reportHeaderId,
+        a.write_off_date as tranDate,
+        a.write_off_amount as writeOffAmount,
+        a.status as reportStatus,
+        b.document_line_id as lineId
+        FROM csh_write_off a,csh_transaction_detail b where a.csh_transaction_detail_id = b.id
+        AND ( a.STATUS = 'Y' OR ( a.STATUS = 'P' AND a.operation_type = 'WRITE_OFF' ) )
+        and a.document_type = 'PUBLIC_REPORT'
+        and b.document_category = 'PREPAYMENT_REQUISITION'
+        and b.document_id = #{headerId}
+        AND b.document_line_id IN
+            <foreach item="item" collection="lineIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+    </select>
+
+
+    <select id="getWriteOffDetailsId" resultType="java.lang.Long">
+        SELECT
+          a.csh_transaction_detail_id
+        FROM
+          (SELECT
+            c.csh_transaction_detail_id,
+            SUM(c.write_off_amount) amount
+          FROM
+            csh_write_off c
+          WHERE ((
+              c.operation_type = 'WRITE_OFF'
+              AND (c.status = 'Y'
+                OR c.status = 'P')
+            )
+            OR (
+              c.operation_type = 'WRITE_OFF_RESERVED'
+              AND c.status = 'Y'
+            ))
+          GROUP BY c.csh_transaction_detail_id) a
+        WHERE a.amount > 0
+    </select>
+    
+    <select id="queryCashTransactionDetailByReport" resultType="com.hand.hcf.app.common.co.CashTransactionDetailCO">
+        select * from CSH_TRANSACTION_DETAIL t 
+          <where>
+              t.document_category = 'PUBLIC_REPORT'
+            <if test="ew!=null">
+                  ${ew.sqlSegment}
+            </if>
+
+          </where>
+
+    </select>
+</mapper>

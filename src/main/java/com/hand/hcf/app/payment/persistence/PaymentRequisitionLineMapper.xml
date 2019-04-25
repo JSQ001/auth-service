@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.PaymentRequisitionLineMapper">
+    <select id="selectAcpRequisitionLineTotalAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Long">
+        select sum(t.function_amount) as totalAmount from csh_acp_requisition_lns t
+        where t.header_id = #{headerId}
+    </select>
+
+    <select id="countAmountByCurrency" resultType="com.hand.hcf.app.payment.web.dto.PaymentRequisitionNumberWebDTO">
+        select sum(t.function_amount) as functionAmount,
+               sum(t.amount) as amount,
+               count(1) as countNumber,
+               t.currency_code as currencyCode
+        from csh_acp_requisition_lns t
+        where t.header_id = #{headerId}
+        GROUP by t.currency_code
+    </select>
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.PaymentRequisitionTypesMapper">
+    <resultMap id="selectTypeAndUsergroupIdResult"
+               type="com.hand.hcf.app.payment.web.dto.PaymentRequisitionTypesAndUserGroupDTO">
+        <id column="id" property="id" />
+        <result column="acp_req_type_code" property="acpReqTypeCode" />
+        <result column="description" property="description" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="set_of_books_id" property="setOfBooksId" />
+        <result column="is_related" property="related" />
+        <result column="apply_employee" property="applyEmployee" />
+        <result column="according_as_related" property="accordingAsRelated" />
+        <result column="related_type" property="relatedType" />
+        <result column="form_oid" property="formOid" />
+        <result column="form_name" property="formName" />
+        <result column="form_type" property="formType" />
+        <result column="version_number" property="versionNumber" />
+        <result column="enabled" property="enabled" />
+        <result column="deleted" property="deleted" />
+        <result column="created_date" property="createdDate" />
+        <result column="created_by" property="createdBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <collection property="userGroupIds" ofType="java.lang.Long">
+            <id column="userGroupId"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectAcpReqTypesByCompanyId"  resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionTypes">
+
+       select  art.*
+         from csh_req_types art
+        where art.set_of_books_id = #{setOfBooksId}
+    </select>
+
+    <select id="selectByUser" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionTypes">
+
+        SELECT
+            *
+        FROM
+        csh_req_types
+        WHERE
+            deleted = FALSE
+            AND id IN ( SELECT a.acp_req_types_id
+                          FROM csh_req_types_to_company a
+                         WHERE a.company_id = #{companyId}
+                           AND a.enabled = TRUE )
+            AND set_of_books_id = #{setOfBooksId}
+            <if test='acpReqTypeCode!= null'>
+            AND acp_req_type_code like concat(concat('%',#{acpReqTypeCode}),'%')
+            </if>
+            <if test="description!=null">
+            AND description like concat(concat('%',#{description}),'%')
+            </if>
+            AND enabled = TRUE
+            AND (
+            apply_employee = 'BASIS_01'
+            OR (
+            apply_employee = 'BASIS_02'
+            AND id IN
+                ( SELECT b.acp_req_types_id
+                    FROM csh_req_types_to_users b
+                   WHERE b.user_type = 'BASIS_02'
+                     AND b.user_group_id  = #{departmentId}
+                )
+            )
+            )
+    ORDER by acp_req_type_code desc
+    </select>
+
+
+    <select id="selectByUserGroup"
+            resultMap="selectTypeAndUsergroupIdResult">
+        SELECT
+            t.*, b.user_group_id as userGroupId
+        FROM
+            csh_req_types t, csh_req_types_to_users b
+        WHERE
+            t.deleted = FALSE
+            AND t.id IN ( SELECT a.acp_req_types_id FROM csh_req_types_to_company a WHERE a.company_id = #{companyId}
+            AND a.enabled = TRUE )
+            AND t.set_of_books_id = #{setOfBooksId}
+            and t.id = b.acp_req_types_id
+            AND t.enabled = 1
+            AND t.apply_employee = 'BASIS_03'
+    </select>
+
+</mapper>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.payment.persistence.CompanyBankAuthMapper">
+    <select id="getBankAccountIds" resultType="java.lang.Long">
+        SELECT b.id
+        from
+        csh_company_bank b
+        WHERE
+        1 = 1
+        <if test="companyCode!=null and companyCode!=''">
+            AND b.company_code LIKE concat('%', concat(#{companyCode,jdbcType=VARCHAR}, '%'))
+        </if>
+    </select>
+
+    <select id="getCompanyBankAuthByAuth" resultType="com.hand.hcf.app.payment.domain.CompanyBankAuth">
+
+        SELECT
+        a.id id,
+        a.bank_account_id bankAccountId,
+        a.authorize_company_id authorizeCompanyId,
+        a.authorize_department_id authorizeDepartmentId,
+        a.authorize_employee_id authorizeEmployeeId,
+        a.authorize_date_from authorizeDateFrom,
+        a.authorize_date_to authorizeDateTo,
+        a.company_code companyCode,
+        a.department_code departmentCode,
+        a.employee_code employeeCode,
+        a.auth_flag authFlag
+        FROM
+        csh_company_bank_auth a,
+        csh_company_bank ab
+        WHERE
+        a.bank_account_id = ab.id
+        AND
+        a.deleted   = FALSE
+        AND
+        a.enabled = TRUE
+        AND
+        bank_account_id in
+        <foreach item="item" index="index" collection="bankAccountIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+        AND
+        (
+            (
+            a.auth_flag = 1001
+            AND
+            a.authorize_company_id = #{companyId}
+            )
+            OR
+            (
+            a.auth_flag = 1002
+            AND
+            a.authorize_company_id = #{companyId}
+            AND
+            a.authorize_department_id = #{departmentId}
+            )
+            OR
+            (
+            a.auth_flag = 1003
+            AND
+            a.authorize_employee_id = #{empOID}
+            )
+        )
+        ORDER BY ab.bank_account_number
+    </select>
+
+    <select id="getCompanyBankByAuthNoPage" resultType="com.hand.hcf.app.payment.domain.CompanyBank">
+
+        SELECT
+        ab.id id,
+        ab.bank_account_number bankAccountNumber,
+        ab.bank_account_name bankAccountName,
+        ab.company_bank_code companyBankCode,
+        ab.company_id companyId,
+        ab.bank_code bankCode,
+        ab.bank_name bankName
+        FROM
+        csh_company_bank ab
+        WHERE
+        a.bank_account_id = ab.id
+        exists (select 1 from
+        csh_company_bank_auth a
+         where a.bank_account_id = ab.id  AND
+            a.deleted   = FALSE
+            AND
+            a.enabled = TRUE
+            AND
+            (
+                (
+                a.auth_flag = 1001
+                AND
+                a.authorize_company_id  = #{companyId}
+                )
+                OR
+                (
+                a.auth_flag = 1002
+                AND
+                a.authorize_company_id  = #{companyId}
+                AND
+                a.authorize_department_id = #{departmentId}
+                )
+                OR
+                (
+                a.auth_flag = 1003
+                AND
+                a.authorize_employee_id = #{empOID}
+                )
+            ))
+        AND
+        ab.deleted   = FALSE
+        AND
+        ab.enabled = TRUE
+        ORDER BY ab.bank_account_number
+    </select>
+    <select id="getPaymentCompanyInfo"
+            resultType="java.lang.Long">
+        SELECT
+        ab.company_id
+        FROM
+        csh_company_bank_auth a,
+        csh_company_bank ab
+        WHERE
+        a.bank_account_id = ab.id
+        AND
+        a.deleted = FALSE
+        AND
+        a.enabled = TRUE
+        AND
+        a.bank_account_id in
+        <foreach item="item" index="index" collection="bankAccountIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
+        AND
+        (
+        (
+        a.auth_flag = 1001
+        AND
+        a.authorize_company_id = #{companyId}
+        )
+        OR
+        (
+        a.auth_flag = 1002
+        AND
+        a.authorize_company_id = #{companyId}
+        AND
+        a.authorize_department_id = #{departmentId}
+        )
+        OR
+        (
+        a.auth_flag = 1003
+        AND
+        a.authorize_employee_id = #{empOID}
+        )
+        )
+        AND
+            a.authorize_date_from &lt;= #{currentDate}
+        AND
+        ( a.authorize_date_to &gt;= #{currentDate} or a.authorize_date_to is null)
+        group by ab.company_id
+    </select>
+</mapper>

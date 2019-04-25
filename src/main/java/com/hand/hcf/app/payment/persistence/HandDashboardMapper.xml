@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hand.hcf.app.payment.persistence.HandDashboardMapper">
+    <resultMap id="reportDTOResultMap" type="com.hand.hcf.app.payment.dashboard.dto.PaymentSituationDTO">
+        <result column="paid" property="paid"/>
+        <result column="unpaid" property="unpaid"/>
+    </resultMap>
+    <select id="getPaymentSituation" resultMap="reportDTOResultMap">
+        SELECT
+        sum( paid ) paid,
+        sum( unpaid ) unpaid
+        FROM
+        (
+        SELECT
+        da.AMOUNT - (
+        SELECT
+        CASE
+
+        WHEN
+        sum( CASE WHEN de.AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END ) IS NULL THEN
+        0 ELSE sum( CASE WHEN de.AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END )
+        END
+        FROM
+        csh_transaction_detail de
+        WHERE
+        da.ID = de.CSH_TRANSACTION_DATA_ID
+        AND de.PAYMENT_STATUS = 'S'
+        <![CDATA[ AND de.OPERATION_TYPE <> 'return' ]]>
+        <![CDATA[ AND de.REFUND_STATUS <> 'Y' ]]>
+        ) - (
+        SELECT
+        CASE
+
+        WHEN
+        sum( CASE WHEN off.WRITE_OFF_AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END ) IS NULL THEN
+        0 ELSE sum( CASE WHEN off.WRITE_OFF_AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END )
+        END
+        FROM
+        csh_transaction_detail de,
+        csh_write_off off
+        WHERE
+        da.ID = de.CSH_TRANSACTION_DATA_ID
+        AND de.ID = off.CSH_TRANSACTION_DETAIL_ID
+        AND de.PAYMENT_STATUS = 'S'
+        AND de.OPERATION_TYPE = 'payment'
+        AND off.STATUS = 'Y'
+
+        ) paid,
+        (
+        SELECT
+        CASE
+
+        WHEN
+        sum( CASE WHEN de.AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END ) IS NULL THEN
+        0 ELSE sum( CASE WHEN de.AMOUNT IS NULL THEN 0 ELSE de.AMOUNT END )
+        END
+        FROM
+        csh_transaction_detail de
+        WHERE
+        da.ID = de.CSH_TRANSACTION_DATA_ID
+        AND de.PAYMENT_STATUS = 'S'
+        <![CDATA[ AND de.OPERATION_TYPE <> 'return' ]]>
+        <![CDATA[ AND de.REFUND_STATUS <> 'Y' ]]>
+        ) unpaid
+        FROM
+        csh_transaction_data da
+        WHERE
+        da.FROZEN_FLAG = 0
+        AND da.ENTITY_TYPE IN ( 801001, 801003 )
+        AND da.EMPLOYEE_ID = #{ userId }
+        <include refid="getPaymentSituationWhereClause"/>)
+    </select>
+
+    <sql id="getPaymentSituationWhereClause">
+        <if test=" null != entityType">
+            and da.ENTITY_TYPE = #{entityType}
+        </if>
+        <if test=" null != startDate">
+            and da.REQUISITION_DATE >= #{startDate}
+        </if>
+        <if test=" null != endDate">
+            <![CDATA[
+                    and da.REQUISITION_DATE < #{endDate}
+                    ]]>
+        </if>
+    </sql>
+</mapper>
