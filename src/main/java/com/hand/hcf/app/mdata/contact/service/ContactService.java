@@ -890,6 +890,11 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         return listByQO(contactQO,page).stream().map(e -> contactToUserDTO(e)).collect(Collectors.toList());
     }
 
+    public List<UserDTO> pageUserDTOByQO(ContactQO contactQO,Page page){
+        page.setTotal(baseMapper.listByKeywordAndCond(contactQO).size());
+        return baseMapper.listByKeywordAndCond(page,contactQO);
+    }
+
     /**
      * 搜索所有用户信息
      *
@@ -1293,7 +1298,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     }
 
     public void checkImportData(List<MdataUserTempDomain> list, String batchNumber){
-        list.stream().forEach(item -> item.setErrorDetail(""));
+        list.forEach(item -> item.setErrorDetail(""));
         // 必输字段非空校验
         list.stream().filter(item -> StringUtil.isNullOrEmpty(item.getEmployeeId())
                 || StringUtil.isNullOrEmpty(item.getFullName())
@@ -1491,8 +1496,8 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         if(page == null){
             page = PageUtil.getPage(0, 30);
         }
-        List<MdataUserTempDomain> mdataUserTempDomains = userImportService.listImportMessageByTransactionID(transactionID, page);
-        List<UserCO> users = mdataUserTempDomains.stream().map(contact -> {
+        List<MdataUserTempDomain> userTempDomains = userImportService.listImportMessageByTransactionID(transactionID, page);
+        List<UserCO> users = userTempDomains.stream().map(contact -> {
             UserCO user = new UserCO();
             user.setLogin(contact.getLogin());
             user.setTenantId(OrgInformationUtil.getCurrentTenantId());
@@ -1505,7 +1510,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         }).collect(Collectors.toList());
         users = hcfOrganizationInterface.saveUserBatch(users);
         Map<String, UserCO> userMap = users.stream().collect(Collectors.toMap(UserCO::getLogin, e -> e));
-        mdataUserTempDomains.stream().forEach(userTemp -> {
+        userTempDomains.stream().forEach(userTemp -> {
             // 保存员工
             Contact contact = new Contact();
             UserCO user = userMap.get(userTemp.getLogin());
@@ -1797,5 +1802,32 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                                               Wrapper<Contact> orWrapper,
                                               Page queryPage) {
         return baseMapper.listContactByConditionAndWrapper(companyIds, departmentIds, userGroupIds, userCode, userName, orWrapper, queryPage);
+    }
+
+    /**
+     * 根据关键词（员工id 用户id 姓名查询）查询员工
+     * @param id       用户id
+     * @param keyWord  关键词
+     * @return         员工
+     */
+    public List<ContactDTO> getDtoByQOKeyWord(List<Long> id, String keyWord) {
+        Wrapper<Contact> companyDTOWrapper = new EntityWrapper<Contact>()
+                .in("user_id", id);
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(keyWord)) {
+            companyDTOWrapper.andNew()
+                    .like("employee_id", keyWord)
+                    .or()
+                    .like("full_name", keyWord);
+        }
+        List<Contact> list = baseMapper.selectList(companyDTOWrapper);
+        if (list.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<ContactDTO> contactDTOS = new ArrayList<>();
+        for (Contact contact :list) {
+            ContactDTO contactDTO =  contactToContactDTO(contact);
+            contactDTOS.add(contactDTO);
+        }
+        return contactDTOS;
     }
 }

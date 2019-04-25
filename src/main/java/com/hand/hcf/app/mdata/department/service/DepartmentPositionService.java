@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.department.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
 import com.hand.hcf.app.core.exception.BizException;
@@ -29,10 +30,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
@@ -41,6 +39,9 @@ import java.util.concurrent.FutureTask;
 public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMapper, DepartmentPosition> {
 
     private final Logger log = LoggerFactory.getLogger(DepartmentPositionService.class);
+
+    private final String TRUE = "Y";
+    private final String FALSE = "N";
 
     @Autowired
     private DepartmentPositionMapper departmentPositionMapper;
@@ -53,11 +54,7 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
     @Qualifier("taskExecutor")
     private Executor executor;
 
-    @Autowired
-    private HcfOrganizationInterface hcfOrganizationInterface;
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#tenantId.toString()")
     public List<DepartmentPosition> listByTenantId(long tenantId) {
         Map<String, Object> map = new HashMap<>();
         map.put("tenant_id", tenantId);
@@ -67,8 +64,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPositionList;
     }
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#tenantId.toString().concat(#enabled)")
     public List<DepartmentPosition> listByTenantIdAndEnabled(long tenantId, boolean enabled) {
         Map<String, Object> map = new HashMap<>();
         map.put("tenant_id", tenantId);
@@ -93,8 +88,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         }
     }
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#tenantId.toString().concat(#name)")
     public DepartmentPosition getPostionByName(long tenantId, String name) {
         Map<String, Object> map = new HashMap<>();
         map.put("position_name", name);
@@ -108,8 +101,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         }
     }
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#tenantId.toString().concat(#code)")
     public DepartmentPosition getPostionByCode(long tenantId, String code) {
         Map<String, Object> map = new HashMap<>();
         map.put("position_code", code);
@@ -132,7 +123,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         executor.execute(futureTask);
     }
 
-    @CacheEvict(allEntries = true)
     public void initDepartmentPosition() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < DepartmentPositionCode.codes.length; i++) {
@@ -217,8 +207,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPosition;
     }
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#companyOid.toString()")
     public List<DepartmentPosition> listByCompanyOid(UUID companyOid) {
         Company company = companyService.getByCompanyOidCache(companyOid);
         if (company == null) {
@@ -234,7 +222,6 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
 
     }
 
-    @CacheEvict(allEntries = true)
     public List<DepartmentPosition> saveOrUpdate(List<DepartmentPosition> departmentPositionList) {
         long tenantId = OrgInformationUtil.getCurrentTenantId();
         if (CollectionUtils.isNotEmpty(departmentPositionList)) {
@@ -278,10 +265,11 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPositionMapper.selectDepartmentPositionByUserAndDepartment(departmentId, userOid);
     }
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#tenantId.toString().concat(#enabled.toString()).concat(#mybatisPage.getCurrent()).concat(':').concat(#mybatisPage.getSize())")
-    public com.baomidou.mybatisplus.plugins.Page<DepartmentPosition> pageByTenantId(long tenantId, boolean enabled, com.baomidou.mybatisplus.plugins.Page mybatisPage) {
-        List<DepartmentPosition> departmentPositionList = departmentPositionMapper.getDepartmentPositionList(mybatisPage, tenantId, enabled);
+    public Page<DepartmentPosition> pageByTenantId(Long tenantId,
+                                                   boolean enabled,
+                                                   Page<DepartmentPosition> mybatisPage) {
+        List<DepartmentPosition> departmentPositionList = departmentPositionMapper.getDepartmentPositionList(
+                mybatisPage, tenantId, enabled);
         mybatisPage.setRecords(departmentPositionList);
         return mybatisPage;
     }
@@ -294,52 +282,67 @@ public class DepartmentPositionService extends ServiceImpl<DepartmentPositionMap
         return departmentPositionCO;
     }
 
-    public String importDepartmentPosition(List<DepartmentPositionImportDTO> departmentPositionImportDTOS) {
-        StringBuilder errorMessage = new StringBuilder();
+    public Map<String, Object> importDepartmentPosition(List<DepartmentPositionImportDTO> departmentPositionImportDTOS) {
+        List<String> message = new ArrayList<>();
+        List<DepartmentPosition> departmentPositions = new ArrayList<>();
+        final Long tenantId = OrgInformationUtil.getCurrentTenantId();
         departmentPositionImportDTOS.forEach(item -> {
-            if (TypeConversionUtils.isEmpty(item.getTenantId()) || TypeConversionUtils.isEmpty(item.getPositionCode())
-            || TypeConversionUtils.isEmpty(item.getPositionName()) || TypeConversionUtils.isEmpty(item.getEnabled())) {
-                errorMessage.append("必输字段为空！");
+            StringBuilder errorMessage = new StringBuilder();
+            // 必输字段非空校验
+            if (TypeConversionUtils.isEmpty(item.getPositionCode())
+                    || TypeConversionUtils.isEmpty(item.getPositionName())
+                    || TypeConversionUtils.isEmpty(item.getEnabled())) {
+                errorMessage.append("必输字段为空;");
+                message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage.toString()));
             } else {
-                List<DepartmentPosition> temp = departmentPositionMapper.selectList(
-                        new EntityWrapper<DepartmentPosition>()
-                                .eq("position_code", item.getPositionCode())
-                                .eq("tenant_id", item.getTenantId())
-                );
-                // 无数据做插入操作
-                if (temp.size() == 0) {
-                    DepartmentPosition departmentPosition = new DepartmentPosition();
-                    BeanUtils.copyProperties(item, departmentPosition);
-                    departmentPosition.setTenantId(TypeConversionUtils.parseLong(item.getTenantId()));
-                    if ("Y".equals(item.getEnabled())) {
-                        departmentPosition.setEnabled(true);
-                    } else if ("N".equals(item.getEnabled())) {
-                        departmentPosition.setEnabled(false);
+                // 启用标志取值校验
+                if (!TRUE.equals(item.getEnabled()) && !FALSE.equals(item.getEnabled())) {
+                    errorMessage.append("启用标志字段值错误，只能为Y或者N;");
+                }
+                // 删除标志取值校验
+                if (TypeConversionUtils.isNotEmpty(item.getDeleted())) {
+                    if (!TRUE.equals(item.getDeleted()) && !FALSE.equals(item.getDeleted())) {
+                        errorMessage.append("删除标志字段取值错误，只能为Y或者N;");
                     }
-                    departmentPositionMapper.insert(departmentPosition);
-                } else if (temp.size() == 1) {
-                    DepartmentPosition departmentPosition = temp.get(0);
-                    departmentPosition.setPositionName(item.getPositionName());
-                    if ("Y".equals(item.getEnabled())) {
-                        departmentPosition.setEnabled(true);
-                    } else if ("N".equals(item.getEnabled())) {
-                        departmentPosition.setEnabled(false);
-                    }
-                    if (TypeConversionUtils.isNotEmpty(item.getDeleted())) {
-                        if ("Y".equals(item.getDeleted())) {
-                            departmentPosition.setDeleted(true);
-                        } else if ("N".equals(item.getDeleted())) {
-                            departmentPosition.setDeleted(false);
+                }
+                // 有错误，则不执行插入更新
+                if (!"".equals(errorMessage.toString())) {
+                    message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage.toString()));
+                } else {
+                    List<DepartmentPosition> temp = departmentPositionMapper.selectList(
+                            new EntityWrapper<DepartmentPosition>()
+                                    .eq("position_code", item.getPositionCode())
+                                    .eq("tenant_id", tenantId)
+                    );
+                    // 无数据则新建
+                    if (temp.size() == 0) {
+                        DepartmentPosition departmentPosition = new DepartmentPosition();
+                        BeanUtils.copyProperties(item, departmentPosition);
+                        departmentPosition.setTenantId(tenantId);
+                        if (TRUE.equals(item.getEnabled())) {
+                            departmentPosition.setEnabled(true);
+                        } else if (FALSE.equals(item.getEnabled())) {
+                            departmentPosition.setEnabled(false);
                         }
+                        departmentPositions.add(departmentPosition);
+                    } else {
+                        // 有数据则报错，不做更新
+                        message.add(String.format("第%s行存在错误：当前租户下已存在%s该部门角色",
+                                item.getRowNumber(), item.getPositionCode()));
                     }
-                    this.updateById(departmentPosition);
                 }
             }
         });
-        if ("".equals(errorMessage.toString())) {
-            return "导入成功!";
+        Map<String, Object> result = new HashMap<>(2);
+        // 所有数据都校验通过，才导入到表中
+        if (message.size() == 0) {
+            this.insertBatch(departmentPositions);
+            message.add("导入成功!");
+            result.put("status", "success");
         } else {
-            return errorMessage.toString();
+            result.put("status", "fail");
         }
+        result.put("message", message);
+        return result;
     }
 }

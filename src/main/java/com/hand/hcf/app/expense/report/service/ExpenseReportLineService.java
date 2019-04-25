@@ -231,10 +231,11 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
     /**
      * 保存费用行
      * @param dto
+     * @param lineDistRequired
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ExpenseReportLineDTO saveExpenseReportLine(ExpenseReportLineDTO dto){
+    public ExpenseReportLineDTO saveExpenseReportLine(ExpenseReportLineDTO dto,boolean lineDistRequired){
         ExpenseReportLine line = new ExpenseReportLine();
         BeanUtils.copyProperties(dto,line);
         ExpenseReportHeader expenseReportHeader = checkExpenseLineInfoAndGetHeaderMessage(dto);
@@ -259,7 +260,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         // 保存控件field
         saveExpenseDocumentFields(line.getId(),line.getExpReportHeaderId(),dto.getFields(),expenseType.getId(),isNew);
         // 保存分摊行信息
-        saveReportDistMessage(dto,line, expenseType,expenseReportHeader);
+        saveReportDistMessage(dto,line, expenseType,expenseReportHeader,lineDistRequired);
         // 更新头金额
         updateReportHeaderAmount(expenseReportHeader);
         // 创建获取修改默认计划付款行
@@ -496,11 +497,15 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * 保存分摊行数据
      * @param dto
      * @param line
+     * @param expenseType
+     * @param expenseReportHeader
+     * @param lineDistRequired  分摊行是否必输(针对只能从申请单创建分摊行情况)
      */
     private void saveReportDistMessage(ExpenseReportLineDTO dto,
                                        ExpenseReportLine line,
                                        ExpenseType expenseType,
-                                       ExpenseReportHeader expenseReportHeader){
+                                       ExpenseReportHeader expenseReportHeader,
+                                       boolean lineDistRequired){
         List<ExpenseReportDistDTO> expenseReportDistList = dto.getExpenseReportDistList();
         //税金分摊方式
         String expTaxDist = organizationService.getParameterValue(line.getCompanyId(),
@@ -521,7 +526,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         }else{
             //判断是否已生成过
             if(line.getVersionNumber() > 1){
-                throw new BizException(messageService.getMessageDetailByCode("EXPENSE_REPORT_DIST_NOT_NULL"));
+                throw new BizException(RespCode.EXPENSE_REPORT_DIST_NOT_NULL);
             }
             String applicationModel = expenseType.getApplicationModel();
             // 当费用类型必须关联申请时，需要处理判断条件，判断是否能自动生成分摊行
@@ -540,11 +545,17 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                 // 大于
                 if("01".equals(contrastSign)){
                     if(lineAmount.compareTo(contrastAmount) > 0){
+                        if(lineDistRequired){
+                            throw new BizException(RespCode.EXPENSE_REPORT_DIST_NOT_NULL);
+                        }
                         return;
                     }
                 //大于等于
                 } else if("05".equals(contrastSign)){
                     if(lineAmount.compareTo(contrastAmount) >= 0){
+                        if(lineDistRequired){
+                            throw new BizException(RespCode.EXPENSE_REPORT_DIST_NOT_NULL);
+                        }
                         return;
                     }
                 }
@@ -791,7 +802,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             return getExpenseReportLineFromBook(expenseBook, expenseReportHeader);
         }).collect(Collectors.toList());
         collect.stream().forEach(e -> {
-            saveExpenseReportLine(e);
+            saveExpenseReportLine(e,false);
         });
     }
 

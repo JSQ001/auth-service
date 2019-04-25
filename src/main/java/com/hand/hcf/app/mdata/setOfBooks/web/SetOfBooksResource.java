@@ -344,10 +344,54 @@ public class SetOfBooksResource {
                                                                  @RequestParam(required = false) String roleType,
                                                                  Pageable pageable) throws URISyntaxException {
         Page page = new Page(pageable.getPageNumber() + 1, pageable.getPageSize());
-        Page<SetOfBooksDTO> result = setOfBooksService.findSetOfBooksDTO(setOfBooksCode, setOfBooksName, enabled, roleType, OrgInformationUtil.getCurrentTenantId(), page);
+        Page<SetOfBooksDTO> result = setOfBooksService.findSetOfBooksDTO(setOfBooksCode, setOfBooksName, enabled, roleType, OrgInformationUtil.getCurrentTenantId(),false, page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/setOfBooks/query/dto");
+        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/setOfBooks/query/dto/enable/dataAuth 分页查询 账套DTO条件查询（数据权限控制）
+     * @apiGroup SetOfBooksDTO
+     * @apiParam {String} [setOfBooksCode] 账套代码
+     * @apiParam {String} [setOfBooksName] 账套名称
+     * @apiParam {String} [roleType] 角色类型
+     * @apiSuccess {Object[]} SetOfBooksDTO  账套实体DTO集合
+     * @apiSuccess {Long} setOfBooksId   账套ID
+     * @apiSuccess {String} setOfBooksCode   账套代码
+     * @apiSuccess {String} setOfBooksName   账套名称
+     * @apiSuccess {Long} periodSetId        会计期ID
+     * @apiSuccess {String} periodSetCode    会计期代码
+     * @apiSuccess {Long}  accountSetId      科目表ID
+     * @apiSuccess {String}  accountSetCode  科目表代码
+     * @apiSuccess {String} functionalCurrencyCode   本位币
+     * @apiSuccess {Boolean} enabled    启用标志
+     * @apiSuccessExample {json} Success-Result
+     * {
+     * "setOfBooksId": "922640846015250433",
+     * "setOfBooksCode": "DEFAULT_SOB",
+     * "setOfBooksName": "默认账套",
+     * "periodSetId": "922640846585675779",
+     * "periodSetCode": "DEFAULT_CAL",
+     * "accountSetId": "922640845113475074",
+     * "accountSetCode": "DEFAULT_ACC",
+     * "functionalCurrencyCode": AMD,
+     * "enabled": true
+     * }
+     */
+    @GetMapping(value = "/query/dto/enable/dataAuth", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<SetOfBooksDTO>> findSetOfBooksDTOEnableDataAuth(@RequestParam(required = false) String setOfBooksCode,
+                                                                 @RequestParam(required = false) String setOfBooksName,
+                                                                 @RequestParam(required = false) Boolean enabled,
+                                                                 @RequestParam(required = false) String roleType,
+                                                                 Pageable pageable){
+        Page page = new Page(pageable.getPageNumber() + 1, pageable.getPageSize());
+        Page<SetOfBooksDTO> result = setOfBooksService.findSetOfBooksDTO(setOfBooksCode, setOfBooksName, enabled, roleType, OrgInformationUtil.getCurrentTenantId(),true, page);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + result.getTotal());
+        headers.add("Link", "/api/setOfBooks/query/dto/enable/dataAuth");
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
     }
 
@@ -389,10 +433,16 @@ public class SetOfBooksResource {
     @ApiOperation(value = "查询当前租户下启用的账套", notes = "查询当前租户下启用的账套 开发 谢宾")
     @GetMapping(value = "/by/tenant")
     public ResponseEntity<List<SetOfBooks>> getTenantAllSetOfBooks() {
-        List<SetOfBooks> result = setOfBooksService.getListByTenantId(OrgInformationUtil.getCurrentTenantId());
+        List<SetOfBooks> result = setOfBooksService.getListByTenantId(OrgInformationUtil.getCurrentTenantId(), false);
         return ResponseEntity.ok(result);
     }
 
+    @ApiOperation(value = "查询当前租户下启用的账套-数据权限控制", notes = "查询当前租户下启用的账套 开发 王帅")
+    @GetMapping(value = "/by/tenant/enable/dataAuth")
+    public ResponseEntity<List<SetOfBooks>> getTenantAllSetOfBooksEnableDataAuth() {
+        List<SetOfBooks> result = setOfBooksService.getListByTenantId(OrgInformationUtil.getCurrentTenantId(), true);
+        return ResponseEntity.ok(result);
+    }
     @ApiOperation(value = "根据部门查询可用的账套", notes = "根据部门查询可用的账套 开发 谢宾")
     @GetMapping(value = "/by/department")
     public ResponseEntity<List<SetOfBooks>> listByDepartmentId(@ApiParam("部门id") @RequestParam Long departmentId) {
@@ -400,7 +450,6 @@ public class SetOfBooksResource {
                 OrgInformationUtil.getCurrentTenantId());
         return ResponseEntity.ok(result);
     }
-
 
     @GetMapping("/selectSetOfBooksByUserOid")
     public ResponseEntity<SetOfBooks> selectSetOfBooksByUserOid(@RequestParam String userOid) {

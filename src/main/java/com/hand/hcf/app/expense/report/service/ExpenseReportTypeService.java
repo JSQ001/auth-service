@@ -14,6 +14,7 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.externalApi.PaymentService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.common.utils.StringUtil;
 import com.hand.hcf.app.expense.init.dto.ModuleInitDTO;
 import com.hand.hcf.app.expense.init.dto.SourceTypeTargetTypeDTO;
 import com.hand.hcf.app.expense.report.domain.*;
@@ -41,7 +42,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingLong;
-import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -935,13 +935,27 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
 
     /**
      * 批量导入费用报账单类型定义-关联费用类型
-     * @param moduleInitDTOList
+     * @param sourceTypeTargetTypeDTOS
      * @return
      */
     @Transactional
-    public String expExpenseReportTypeExpenseType(List<ModuleInitDTO> moduleInitDTOList) {
-        for (ModuleInitDTO moduleInitDTO : moduleInitDTOList) {
-            String setOfBooksCode = moduleInitDTO.getSetOfBooksCode();
+    public String expExpenseReportTypeExpenseType(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS) {
+        for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOS) {
+            //账套code
+            String setOfBooksCode = sourceTypeTargetTypeDTO.getSetOfBooksCode();
+            //费用类型代码
+            String expenseTypeCode = sourceTypeTargetTypeDTO.getTargetTypeCode();
+            //报账单类型代码
+            String expenseReportTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
+            if (StringUtil.isNullOrEmpty(setOfBooksCode)) {
+                throw new BizException("账套code不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(expenseTypeCode)) {
+                throw new BizException("费用类型代码不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(expenseReportTypeCode)) {
+                throw new BizException("报账单类型代码不可为空");
+            }
             List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
             if (setOfBooksList == null || setOfBooksList.size() == 0) {
                 throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
@@ -949,65 +963,43 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             if (setOfBooksList.size() > 1) {
                 throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
             }
+            //账套id
             Long setOfBooksId = setOfBooksList.get(0).getId();
-            List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOList = moduleInitDTO.getSourceTypeTargetTypeDTOList();
-            for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOList) {
-                String allTypeFlag = sourceTypeTargetTypeDTO.getAllTypeFlag();
-                //费用类型代码列表
-                List<String> expenseTypeCodeList = sourceTypeTargetTypeDTO.getTargetTypeCode();
-                //报账单类型代码
-                String reportTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
-                ExpenseReportType expenseReportType = new ExpenseReportType();
-                expenseReportType.setSetOfBooksId(setOfBooksId);
-                expenseReportType.setReportTypeCode(reportTypeCode);
-                ExpenseReportType ExpenseReportTypeResult = baseMapper.selectOne(expenseReportType);
-                if (ExpenseReportTypeResult == null) {
-                    String errorMessage = new String();
-                    errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + reportTypeCode + "\'报账单类型代码！";
-                    throw new BizException(errorMessage);
-                }
-                //报账单类型id
-                Long reportTypeId = ExpenseReportTypeResult.getId();
-                //批量插入参数
-                List<ExpenseReportTypeExpenseType> expenseReportTypeExpenseTypeList = new ArrayList<>();
-                //全选类型
-                if (allTypeFlag == null) {
-                    throw new BizException("全部类型不可为空");
-                }
-                //全选
-                if (allTypeFlag.equals("Y")) {
-                    if (expenseTypeCodeList != null) {
-                        throw new BizException("当全部类型为'Y'时,费用类型代码无需输入");
-                    }
-                    ExpenseReportTypeResult.setAllExpenseFlag(true);
-                    baseMapper.updateById(ExpenseReportTypeResult);
-                    //清空原有关联信息
-                    expenseReportTypeExpenseTypeService.deleteExpenseReportTypeExpenseTypeByReportTypeIdBatch(reportTypeId);
-                }else if(allTypeFlag.equals("N")) {
-                    if (expenseTypeCodeList == null || expenseTypeCodeList.size() == 0) {
-                        throw new BizException("当全部类型为'N'时,费用类型不可为空");
-                    }
-                    //构造批量新增的参数
-                    for (String expenseTypeCode : expenseTypeCodeList) {
-                        Long expenseTypeId = expenseTypeService.queryExpenseTypeIdByExpenseTypeCode(setOfBooksId, expenseTypeCode);
-                        if (expenseTypeId == null) {
-                            throw new BizException("费用类型代码\'" + expenseTypeCode + "\'不存在");
-                        }
-                        ExpenseReportTypeExpenseType expenseReportTypeExpenseType = new ExpenseReportTypeExpenseType();
-                        expenseReportTypeExpenseType.setReportTypeId(reportTypeId);
-                        expenseReportTypeExpenseType.setExpenseTypeId(expenseTypeId);
-                        expenseReportTypeExpenseTypeList.add(expenseReportTypeExpenseType);
-                    }
-                    ExpenseReportTypeResult.setAllExpenseFlag(false);
-                    baseMapper.updateById(ExpenseReportTypeResult);
-                    //清空原有关联信息
-                    expenseReportTypeExpenseTypeService.deleteExpenseReportTypeExpenseTypeByReportTypeIdBatch(reportTypeId);
-                    //批量插入新关联信息
-                    expenseReportTypeExpenseTypeService.createExpenseReportTypeExpenseTypeBatch(expenseReportTypeExpenseTypeList);
-                }else {
-                    throw new BizException("全部类型输入错误,只可为 'Y' 或 'N'");
-                }
+            ExpenseReportType expenseReportType = new ExpenseReportType();
+            expenseReportType.setSetOfBooksId(setOfBooksId);
+            expenseReportType.setReportTypeCode(expenseReportTypeCode);
+            ExpenseReportType ExpenseReportTypeResult = baseMapper.selectOne(expenseReportType);
+            if (ExpenseReportTypeResult == null) {
+                String errorMessage = new String();
+                errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseReportTypeCode + "\'报账单类型代码！";
+                throw new BizException(errorMessage);
             }
+            //报账单类型id
+            Long reportTypeId = ExpenseReportTypeResult.getId();
+
+            //费用类型id
+            Long expenseTypeId = expenseTypeService.queryExpenseTypeIdByExpenseTypeCode(setOfBooksId, expenseTypeCode);
+            if (expenseTypeId == null) {
+                throw new BizException("当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseTypeCode + "\'费用类型代码");
+            }
+            //构造插入数据
+            ExpenseReportTypeExpenseType expenseReportTypeExpenseType = new ExpenseReportTypeExpenseType();
+            expenseReportTypeExpenseType.setReportTypeId(reportTypeId);
+            expenseReportTypeExpenseType.setExpenseTypeId(expenseTypeId);
+            //判断是否已存在
+            if ( expenseReportTypeExpenseTypeService.selectList(
+                    new EntityWrapper<ExpenseReportTypeExpenseType>()
+                            .eq("report_type_id",expenseReportTypeExpenseType.getReportTypeId())
+                            .eq("expense_type_id",expenseReportTypeExpenseType.getExpenseTypeId())
+            ).size() > 0 ){
+                String errorMessage = "\'" + expenseTypeCode + "\'费用类型已在\'" + expenseReportTypeCode + "\'报账单类型下";
+                throw new BizException(errorMessage);
+            }
+
+            expenseReportTypeExpenseTypeService.insert(expenseReportTypeExpenseType);
+            //修改报账单关联类型为部分类型
+            ExpenseReportTypeResult.setAllExpenseFlag(false);
+            baseMapper.updateById(ExpenseReportTypeResult);
         }
         return "SUCCESS";
     }

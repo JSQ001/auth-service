@@ -335,6 +335,7 @@ public class PeriodSetService extends ServiceImpl<PeriodSetMapper, PeriodSet> {
                 periodSetDTO.setCreatedDate(periodSet.getCreatedDate());
                 periodSetDTO.setLastUpdatedBy(periodSetDTO.getLastUpdatedBy());
                 periodSetDTO.setLastUpdatedDate(periodSetDTO.getLastUpdatedDate());
+                periodSetDTO.setVersionNumber(periodSet.getVersionNumber());
                 periodSetDTOList.add(periodSetDTO);
             });
         }

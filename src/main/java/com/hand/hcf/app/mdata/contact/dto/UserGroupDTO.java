@@ -32,5 +32,6 @@ public class UserGroupDTO extends BaseI18nDomain {
 
     private Long tenantId;
 
+    private String employeeId;
 
 }

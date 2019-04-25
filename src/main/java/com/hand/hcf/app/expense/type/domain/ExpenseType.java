@@ -39,6 +39,12 @@ public class ExpenseType extends DomainI18nEnable {
     @TableField(value = "name", condition = SqlConditionExpanse.LIKE)
     private String name;
 
+    /*
+    * 费用大类名称
+    * */
+    @TableField(exist = false)
+    private String categoryName;
+
     private String iconName;
     /**
      * 代码

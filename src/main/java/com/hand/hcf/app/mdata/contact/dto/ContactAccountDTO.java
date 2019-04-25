@@ -19,4 +19,5 @@ public class ContactAccountDTO implements Serializable {
     private Boolean isEmp;//员工/供应商标志
     private String sign;//唯一标识
     private List<BankAccountDTO> bankInfos;
+    private String phoneNumber;
 }

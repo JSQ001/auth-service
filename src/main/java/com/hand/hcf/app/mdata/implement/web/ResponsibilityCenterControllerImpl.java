@@ -1,6 +1,7 @@
 package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterGroupCO;
@@ -260,19 +261,6 @@ public class ResponsibilityCenterControllerImpl {
      * @param page 分页
      * @return
      */
-   // @Override
-    public Page<ResponsibilityCenterCO> pageDepartmentAvailableResCenterByCond(Long unitId,
-                                                                      Long companyId,
-                                                                      int page,
-                                                                      int size) {
-        Page<ResponsibilityCenterCO> mybatisPage = PageUtil.getPage(page, size);
-        List<ResponsibilityCenter> responsibilityCenterList = departmentSobResponsibilityService.listDepartmentAvailableResCenterByCond(unitId,companyId);
-        List<ResponsibilityCenterCO> responsibilityCenterCOS = mapperFacade.mapAsList(responsibilityCenterList,ResponsibilityCenterCO.class);
-        mybatisPage.setRecords(responsibilityCenterCOS);
-        return mybatisPage;
-    }
-
-    //jiu.zhao 修改三方接口 jiancheng.li
     public Page<ResponsibilityCenterCO> pageByCompanyAndDepartment(@RequestParam("unitId") Long unitId,
                                                                    @RequestParam("companyId") Long companyId,
                                                                    @RequestParam(value = "code", required = false) String code,
@@ -303,5 +291,16 @@ public class ResponsibilityCenterControllerImpl {
         mybatisPage.setRecords(responsibilityCenterCOList);
         return mybatisPage;
     }
+
+
+    public List<ResponsibilityCenterCO> listCenterCOByCodeConditionSobId(Long setOfBooksId, String code) {
+        Wrapper<ResponsibilityCenter> wrapper = new EntityWrapper<ResponsibilityCenter>()
+                .eq("responsibility_center_code", code)
+                .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
+                .eq(setOfBooksId != null, "set_of_books_id", setOfBooksId);
+        List<ResponsibilityCenter> responsibilityCenterList = responsibilityCenterService.selectList(wrapper);
+        return mapperFacade.mapAsList(responsibilityCenterList,ResponsibilityCenterCO.class);
+    }
+
 
 }

@@ -21,6 +21,8 @@ import com.hand.hcf.app.core.security.AuthoritiesConstants;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.*;
@@ -260,7 +263,7 @@ public class CompanyController {
                                                                   @RequestParam(name = "companyCodeTo", required = false) String companyCodeTo,
                                                                   @RequestParam(name = "companyGroupId", required = false) Long companyGroupId,
                                                                   Pageable pageable) throws URISyntaxException {
-        Page<CompanyDTO> page = companyService.getCompanyBySetOfBooksIdAndCondition(setOfBooksId, companyCode, name, companyCodeFrom, companyCodeTo, companyGroupId, pageable);
+        Page<CompanyDTO> page = companyService.getCompanyBySetOfBooksIdAndCondition(setOfBooksId, companyCode, name, companyCodeFrom, companyCodeTo, companyGroupId, false, pageable);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/companyId/by/condition");
         return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
     }
@@ -282,10 +285,36 @@ public class CompanyController {
                                                                    @RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
                                                                    @RequestParam(name = "enabled", required = false) Boolean enabled,
                                                                    Pageable pageable) throws URISyntaxException {
-        Page<CompanyDTO> page = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode, name, setOfBooksId, legalEntityId, enabled, pageable);
+        Page<CompanyDTO> page = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode, name, setOfBooksId, legalEntityId, enabled,false, pageable);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/companyId/by/term");
         return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
     }
+
+
+    /**
+     *
+     * @api {GET} /company/by/term/enable/dataAuth  根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限）
+     * @apiGroup Company
+     * @apiParam {Long} companyCode 公司code
+     * @apiParam {String} [name] 公司名称
+     * @apiParam {Long} [setOfBooksId] 账套id
+     * @apiParam {Long} [legalEntityId] 法人实体id
+     *
+     */
+    @ApiOperation(value = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限）", notes = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限） 开发 王帅")
+    @GetMapping(value = "/company/by/term/enable/dataAuth",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<CompanyDTO>> findCompanyByConditionEnableDataAuth(@ApiParam("公司code") @RequestParam(name = "companyCode", required = false) String companyCode,
+                                                                                 @ApiParam("公司名称")@RequestParam(name = "name", required = false) String name,
+                                                                                 @ApiParam("账套id")@RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId,
+                                                                                 @ApiParam("法人实体id")@RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
+                                                                                 @ApiParam("是否查询全部包括启用和禁用")@RequestParam(name = "enabled", required = false) Boolean enabled,
+                                                                   Pageable pageable) throws URISyntaxException {
+        Page<CompanyDTO> page = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode, name, setOfBooksId, legalEntityId, enabled,true, pageable);
+        HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/company/by/term/enable/dataAuth");
+        return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
+    }
+
 
     /**
      * @api {GET} /api/companyId/deploy/enumeration  查询未分配值列表的公司
@@ -596,9 +625,47 @@ public class CompanyController {
         Page<Company> companies = new Page<Company>();
 
         // 根据账套ID和公司名称/代码查找公司（公司名称和代码是模糊查找）
-        companies = companyService.findBySetOfBookAndNameLike(setOfBooksId, keyword, enabled,ignoreCompanyId, pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(companies, "/companyId/available");
+        companies = companyService.findBySetOfBookAndNameLike(setOfBooksId, keyword, enabled,ignoreCompanyId,false,true, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(companies, "/company/available/by/setOfBooks");
+        //headers.add("X-Total-Count", "" + companies.getTotal());
+        return new ResponseEntity<>(companies.getRecords(), headers, HttpStatus.OK);
+    }
 
+
+    @ApiOperation(value = "通过员工工号或姓名，模糊查询租户下的员工（数据权限-不和账套联动如：报账单财务查询公司条件适用）", notes = "通过员工工号或姓名，模糊查询租户下的员工（数据权限） 开发 赵柱")
+    @RequestMapping(value = "/company/available/by/setOfBooks/enable/dataAuth", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<Company>> getSetOfBookAllCompanyDataAuth(
+            @ApiParam(value = "账套id") @RequestParam() Long setOfBooksId,
+            @ApiParam(value = "keyword关键字") @RequestParam(required = false) String keyword,
+            @ApiParam(value = "启用标识") @RequestParam(value = "enabled", required = false) Boolean enabled,
+            @ApiParam(value = "忽略的公司") @RequestParam(value = "ignoreCompanyId", required = false) Long ignoreCompanyId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
+        List<Company> result = new ArrayList<Company>();
+        Page<Company> companies = new Page<Company>();
+
+        // 根据账套ID和公司名称/代码查找公司（公司名称和代码是模糊查找）
+        companies = companyService.findBySetOfBookAndNameLike(setOfBooksId, keyword, enabled,ignoreCompanyId,true,false, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(companies, "/company/available/by/setOfBooks/enable/dataAuth");
+        //headers.add("X-Total-Count", "" + companies.getTotal());
+        return new ResponseEntity<>(companies.getRecords(), headers, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "通过员工工号或姓名，模糊查询租户下的员工（数据权限-和账套联动如：会计分录公司条件适用）", notes = "通过员工工号或姓名，模糊查询租户下的员工（数据权限） 开发 赵柱")
+    @RequestMapping(value = "/company/available/by/setOfBooks/enable/dataAuth/with/setOfBooks", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<Company>> getSetOfBookAllCompanyDataAuthWithSetOfBooks(
+            @ApiParam(value = "账套id") @RequestParam() Long setOfBooksId,
+            @ApiParam(value = "keyword关键字") @RequestParam(required = false) String keyword,
+            @ApiParam(value = "启用标识") @RequestParam(value = "enabled", required = false) Boolean enabled,
+            @ApiParam(value = "忽略的公司") @RequestParam(value = "ignoreCompanyId", required = false) Long ignoreCompanyId,
+            @ApiIgnore  Pageable pageable) throws URISyntaxException {
+        Page<Company> companies = new Page<Company>();
+
+        // 根据账套ID和公司名称/代码查找公司（公司名称和代码是模糊查找）
+        companies = companyService.findBySetOfBookAndNameLike(setOfBooksId, keyword, enabled,ignoreCompanyId,true,true, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(companies, "/company/available/by/setOfBooks/enable/dataAuth/with/setOfBooks");
+        //headers.add("X-Total-Count", "" + companies.getTotal());
         return new ResponseEntity<>(companies.getRecords(), headers, HttpStatus.OK);
     }
 
@@ -729,8 +796,35 @@ public class CompanyController {
                                                                      @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
                                                                      @RequestParam(value = "isEnabled", required = false, defaultValue = "true") Boolean isEnabled,
                                                                      Pageable pageable) throws URISyntaxException {
-        Page<CompanyDTO> page = companyService.findCompanyDTOByTenantId(tenantId, infoId, companyCode, name, setOfBooksId, isEnabled, pageable);
+        Page<CompanyDTO> page = companyService.findCompanyDTOByTenantId(tenantId, infoId, companyCode, name, setOfBooksId, isEnabled,false, pageable);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/companyId/dto/by/tenant");
+        return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 根据条件分页查询公司信息（数据权限）
+     *
+     * @param tenantId
+     * @param infoId
+     * @param companyCode
+     * @param name
+     * @param setOfBooksId
+     * @param isEnabled
+     * @param pageable
+     * @return
+     * @throws URISyntaxException
+     */
+    @RequestMapping(value = "/company/dto/by/tenant/enable/dataAuth", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<CompanyDTO>> findCompanyDTOByTenantIdDataAuth(@RequestParam(value = "tenantId") Long tenantId,
+                                                                     @RequestParam(value = "infoId", required = false) Long infoId,
+                                                                     @RequestParam(value = "companyCode", required = false) String companyCode,
+                                                                     @RequestParam(value = "name", required = false) String name,
+                                                                     @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                                                                     @RequestParam(value = "isEnabled", required = false, defaultValue = "true") Boolean isEnabled,
+                                                                     Pageable pageable) throws URISyntaxException {
+        Page<CompanyDTO> page = companyService.findCompanyDTOByTenantId(tenantId, infoId, companyCode, name, setOfBooksId, isEnabled,true, pageable);
+        HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/companyId/dto/by/tenant/enable/dataAuth");
         return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
     }
 
@@ -833,6 +927,66 @@ public class CompanyController {
     }
 
 
+    /**
+     * @api {GET} /api/companyId/by/condition  根据账套id及组合条件查询公司信息(数据权限控制)
+     * @apiGroup Company
+     * @apiParam {Long} setOfBooksId 帐套ID
+     * @apiParam {String} [companyCode] 公司编码
+     * @apiParam {String} [name] 公司名，模糊查询
+     * @apiParam {String} [companyCodeFrom] 公司编码从
+     * @apiParam {String} [companyCodeTo] 公司编码到
+     * @apiUse CompanyDTO
+     * @apiSuccessExample Success-Response:
+     * [
+     * {
+     * "id": 3,
+     * "groupCompanyOid": null,
+     * "companyOid": "ccfe7be4-0e4f-4fd9-8439-07566124e924",
+     * "name": "日出东方太阳能股份有限公司",
+     * "logoURL": null,
+     * "createdDate": null,
+     * "doneRegisterLead": false,
+     * "taxId": null,
+     * "noticeType": 0,
+     * "dimissionDelayDays": 0,
+     * "passwordExpireDays": 0,
+     * "passwordRule": null,
+     * "passwordLengthMin": 0,
+     * "passwordLengthMax": 0,
+     * "passwordRepeatTimes": 0,
+     * "createDataType": 0,
+     * "companyCode": null,
+     * "address": null,
+     * "companyLevelId": "0",
+     * "companyLevelName": null,
+     * "parentCompanyId": "0",
+     * "parentCompanyName": null,
+     * "startDateActive": null,
+     * "endDateActive": null,
+     * "companyTypeId": "0",
+     * "companyTypeName": null,
+     * "setOfBooksId": "908690135607222274",
+     * "setOfBooksName": null,
+     * "legalEntityId": "0",
+     * "legalEntityName": null,
+     * "baseCurrency": "CNY",
+     * "baseCurrencyName": "人民币",
+     * "tenantId": null
+     * }
+     * ]
+     */
+    @RequestMapping(value = "/company/by/condition/enable/dataAuth", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CompanyDTO>> getCompanyByConditionEnableDataAuth(@RequestParam(name = "setOfBooksId") Long setOfBooksId,
+                                                                  @RequestParam(name = "companyCode", required = false) String companyCode,
+                                                                  @RequestParam(name = "name", required = false) String name,
+                                                                  @RequestParam(name = "companyCodeFrom", required = false) String companyCodeFrom,
+                                                                  @RequestParam(name = "companyCodeTo", required = false) String companyCodeTo,
+                                                                  @RequestParam(name = "companyGroupId", required = false) Long companyGroupId,
+                                                                  Pageable pageable) throws URISyntaxException {
+        Page<CompanyDTO> page = companyService.getCompanyBySetOfBooksIdAndCondition(setOfBooksId, companyCode, name, companyCodeFrom, companyCodeTo, companyGroupId, true, pageable);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
+    }
 
 }
 

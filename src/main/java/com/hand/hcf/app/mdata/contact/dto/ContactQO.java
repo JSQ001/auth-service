@@ -77,4 +77,8 @@ public class ContactQO {
     private Long currentContactId = null;
     @Builder.Default
     private UUID currentUserOid = null;
+    /**
+     * 数据权限
+     */
+    private String dataAuthLabel;
 }

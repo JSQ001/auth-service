@@ -488,12 +488,14 @@ public class ExpenseReportTypeDistSettingController {
     @GetMapping("/query/department/by/expenseTypeId")
     public ResponseEntity<List<DepartmentCO>> queryDepartmentByDepartmentDistRange (
             @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @RequestParam(value = "companyId",required = false) Long companyId,
             @RequestParam(value = "departmentId",required = false) Long departmentId,
             @RequestParam(value = "departmentCode",required = false) String departmentCode,
             @RequestParam(value = "departmentName",required = false) String departmentName,
             Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(expenseTypeId,departmentId,departmentCode,departmentName,page);
+        Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(
+                expenseTypeId, companyId, departmentId,departmentCode,departmentName,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders, HttpStatus.OK);
     }

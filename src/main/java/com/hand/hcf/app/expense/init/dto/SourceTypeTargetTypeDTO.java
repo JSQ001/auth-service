@@ -16,12 +16,12 @@ import java.util.List;
 @Data
 public class SourceTypeTargetTypeDTO {
 
+    @ApiModelProperty(value = "账套代码")
+    private String setOfBooksCode;
+
     @ApiModelProperty(value = "单据代码")
     private String sourceTypeCode;
 
-    @ApiModelProperty(value = "是否全选")
-    private String AllTypeFlag;
-
-    @ApiModelProperty(value = "关联类型代码列表")
-    private List<String> targetTypeCode;
+    @ApiModelProperty(value = "关联类型代码")
+    private String targetTypeCode;
 }

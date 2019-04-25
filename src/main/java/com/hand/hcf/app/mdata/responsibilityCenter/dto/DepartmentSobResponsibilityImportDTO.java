@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DepartmentSobResponsibilityImportDTO {
-    private String tenantId;
+    private String rowNumber;
     private String setOfBooksCode;
     private String companyCode;
     private String departmentCode;

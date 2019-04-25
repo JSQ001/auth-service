@@ -137,6 +137,8 @@ public class CompanyAssociateUnitService extends BaseService<CompanyAssociateUni
         List<DepartmentLovDTO> result = baseMapper.queryDepartmentLov(page, queryVO);
         if (!CollectionUtils.isEmpty(result) && queryVO.getId() != null){
             page.setTotal(1L);
+        }else{
+            page.setTotal(baseMapper.queryDepartmentLov(queryVO).size());
         }
         return result;
     }

@@ -55,9 +55,9 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
             dto.setSetOfBooksId(setOfBooksId);
             List<ExpenseType> typelist = expenseTypeMapper.selectList(
                     new EntityWrapper<ExpenseType>()
-                            .eq("set_of_books_id",setOfBooksId)
-                            .eq("code",dto.getCode())
-                            .eq("type_flag",dto.getTypeFlag())
+                        .eq("set_of_books_id",setOfBooksId)
+                        .eq("code",dto.getCode())
+                        .eq("type_flag",dto.getTypeFlag())
             );
             if (CollectionUtils.isEmpty(typelist)) {
                 stringList.add("类型代码找不到！");
@@ -87,6 +87,7 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
         int line = 1;
         for(ExpenseTypeAssignCompanyInitDTO item :dtoList){
             checkExpenseTypeInitData(item,line);
+            String lineNumber = "第" + line + "行";
             if(item.getResultMap().isEmpty()){
                 List<ExpenseTypeAssignCompany> temp = baseMapper.selectList(new EntityWrapper<ExpenseTypeAssignCompany>()
                         .eq("expense_type_id", item.getExpenseTypeId())
@@ -95,6 +96,14 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
                     ExpenseTypeAssignCompany assignCompany = new ExpenseTypeAssignCompany();
                     BeanUtils.copyProperties(item,assignCompany);
                     baseMapper.insert(assignCompany);
+                }else{
+                    //不更新，直接已存在
+                    List<String> stringList = new ArrayList<>();
+                    stringList.add("该类型已经分配过该公司");
+                    if(!org.apache.commons.collections4.CollectionUtils.isEmpty(stringList)) {
+                        item.getResultMap().put(lineNumber,stringList);
+                        resultMap.putAll(item.getResultMap());
+                    }
                 }
             }else{
                 resultMap.putAll(item.getResultMap());

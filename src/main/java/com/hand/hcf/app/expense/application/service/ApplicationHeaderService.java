@@ -1047,7 +1047,19 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                             String currencyCode,
                                                             String remarks,
                                                             Long employeeId,
-                                                            List<Long> companyId) {
+                                                            List<Long> companyId,
+                                                            Boolean dataAuthFlag) {
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "exp_application_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN, "department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "employee_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 .eq("t.status", DocumentOperationEnum.APPROVAL_PASS.getId())
                 .ne("t.closed_flag", ClosedTypeEnum.CLOSED)
@@ -1062,6 +1074,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .eq(StringUtils.hasText(currencyCode), "t.currency_code", currencyCode)
                 .like(StringUtils.hasText(remarks), "t.remarks", remarks)
                 .in(!CollectionUtils.isEmpty(companyId), "t.company_id", companyId)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("t.id", false);
         log.debug("申请单关闭查询的查询条件为：{}", wrapper.getSqlSegment());
         return wrapper;
@@ -1094,7 +1107,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                   ExportConfig exportConfig) throws IOException {
         // 获取查询条件SQL
         Wrapper<ApplicationHeader> wrapper = getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
-                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId);
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, null);
         int total = baseMapper.getCountByCondition(wrapper);
         int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
         ExcelExportHandler<ApplicationHeaderWebDTO, ApplicationHeaderClosedDTO> handler = new ExcelExportHandler<ApplicationHeaderWebDTO, ApplicationHeaderClosedDTO>() {
@@ -1344,14 +1357,14 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                                         boolean dataAuthFlag) {
 
         String dataAuthLabel = null;
-        if (dataAuthFlag) {
-            Map<String, String> map = new HashMap<>();
-            map.put(DataAuthorityUtil.TABLE_NAME, "exp_application_header");
-            map.put(DataAuthorityUtil.TABLE_ALIAS, "t");
-            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
-            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
-            map.put(DataAuthorityUtil.UNIT_COLUMN, "department_id");
-            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "applicant_id");
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"exp_application_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN,"department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"employee_id");
             dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
 

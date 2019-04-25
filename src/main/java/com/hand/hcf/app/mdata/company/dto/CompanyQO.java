@@ -23,4 +23,5 @@ public class CompanyQO {
     private String companyCodeTo;
     private Long parentCompanyId;
     private Boolean enabled;
+    private String dataAuthLabel;
 }

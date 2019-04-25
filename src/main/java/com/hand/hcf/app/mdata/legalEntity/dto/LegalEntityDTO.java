@@ -29,6 +29,8 @@ public class LegalEntityDTO implements Serializable {
 
     private String setOfBooksName;          // 账套名称
 
+    private String setOfBooksCode;          // 账套代码
+
     private UUID companyReceiptedOid;       // 法人实体oid
 
     private String entityName;              // 法人实体名称
@@ -82,5 +84,5 @@ public class LegalEntityDTO implements Serializable {
      * 主语言
      */
     private String mainLanguage;
-
+    private Integer versionNumber;
 }

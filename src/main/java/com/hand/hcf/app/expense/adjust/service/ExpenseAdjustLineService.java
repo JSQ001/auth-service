@@ -198,6 +198,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
 
             //  转化-获取第一页  单据行类型为1001
             ExpenseAdjustLine expenseAdjustLine = toExpenseAdjustLinesByBean(linesBean);
+            expenseAdjustLine.setVersionNumber(this.selectById(expenseAdjustLine.getId()).getVersionNumber());
             //  更新
             this.updateById(expenseAdjustLine);
             line = expenseAdjustLine;

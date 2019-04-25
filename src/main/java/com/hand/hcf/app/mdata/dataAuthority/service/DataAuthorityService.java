@@ -169,10 +169,14 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * 根绝登录人信息获取相关数据权限
      * @return
      */
-    public List<Map<String,List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest(){
-        // ... 需要根据登录人信息获取 关联的数据权限
-        List<Map<String,List<DataAuthValuePropertyDTO>>> list = new ArrayList<>();
-        Long functionId = Long.valueOf(HttpServletUtil.getHeaderMessage("X-Menu-Id"));
+    public List<Map<String, List<DataAuthValuePropertyDTO>>> getDataAuthValuePropertiesByRequest() {
+        //需要根据登录人信息获取 关联的数据权限
+        List<Map<String, List<DataAuthValuePropertyDTO>>> list = new ArrayList<>();
+        String headerMessage = HttpServletUtil.getHeaderMessage("X-Menu-Id");
+        if (headerMessage == null) {
+            return list;
+        }
+        Long functionId = Long.valueOf(headerMessage);
         List<Long> listDataAuth = userRoleClient.listDataAuthByFunctionId(functionId);
         Set<Long> dataAuthIds = new HashSet(listDataAuth);
         if(CollectionUtils.isNotEmpty(dataAuthIds)) {

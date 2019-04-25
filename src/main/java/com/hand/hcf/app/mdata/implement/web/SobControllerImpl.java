@@ -33,6 +33,15 @@ public class SobControllerImpl {
     }
 
     /**
+     * 根据账套code查询账套
+     * @param setOfBooksCode: 账套code
+     * @return
+     */
+    public List<SetOfBooksInfoCO> getSetOfBooksBySetOfBooksCode(@PathVariable(value = "setOfBooksCode") String setOfBooksCode) {
+        return setOfBooksService.getSetOfBooksBysetOfBooksCode(setOfBooksCode);
+    }
+
+    /**
      * (没用到)
      * 根据条件分页查询账套
      * @param setOfBooksCode 账套code
@@ -83,10 +92,5 @@ public class SobControllerImpl {
         List<SetOfBooksInfoCO> setOfBooksList = mapperFacade.mapAsList(setOfBooksService.getSetOfBooksListByIds(ids, keyWord, mybatisPage),SetOfBooksInfoCO.class);
         mybatisPage.setRecords(setOfBooksList);
         return mybatisPage;
-    }
-
-    //jiu.zhao 三方接口
-    public List<SetOfBooksInfoCO> getSetOfBooksBySetOfBooksCode(String setOfBooksCode) {
-        return this.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
     }
 }

@@ -23,5 +23,6 @@ public class SetOfBooksDTO {
     private String functionalCurrencyCode;  //  本位币
     private Boolean enabled;  //  启用标志
     private Map<String, List<Map<String, String>>> i18n;  //  多语言字段
+    private Integer versionNumber;
 
 }

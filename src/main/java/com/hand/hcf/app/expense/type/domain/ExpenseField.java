@@ -52,7 +52,7 @@ public class ExpenseField extends DomainI18nEnable {
     private Integer fieldTypeId;
 
     /**
-     * 字段数据类型 DATA LONG TEXT
+     * 字段数据类型 data LONG TEXT
      */
     @TableField(value = "field_data_type")
     private String fieldDataType;

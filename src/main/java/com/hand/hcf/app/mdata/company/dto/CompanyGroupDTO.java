@@ -20,6 +20,7 @@ public class CompanyGroupDTO {
     private String setOfBooksName;  // 账套名称
     private Boolean enabled; //  启用标志
     private Map<String, List<Map<String, String>>> i18n;  //  多语言字段
+    private Integer versionNumber;
 
 
 }

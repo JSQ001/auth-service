@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * <p>
  *
@@ -29,4 +31,12 @@ public class DepartmentLovQueryParams {
    private Integer status;
    private Boolean associateCompanyFlag;
    private Long setOfBooksId;
+   /**
+    * 部门ID集合
+    */
+   private List<Long> ids;
+   /**
+    * 数据权限
+    */
+   private String dataAuthLabel;
 }

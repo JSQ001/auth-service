@@ -1,15 +1,12 @@
 package com.hand.hcf.app.common.co;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.enums.SourceEnum;
-import com.hand.hcf.app.core.web.filter.CustomDateTimeDeserializer;
-import com.hand.hcf.app.core.web.filter.CustomDateTimeSerializer;
+import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -20,7 +17,7 @@ import java.util.List;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class VendorInfoCO implements Serializable {
+public class VendorInfoCO extends DomainObjectDTO {
 
     private String venNickname;
     private static final long serialVersionUID = 1L;
@@ -86,8 +83,6 @@ public class VendorInfoCO implements Serializable {
 
     private String notes;
 
-    @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
     private ZonedDateTime effectiveDate;
 
     private List<VendorTypeCO> venTypes;
@@ -97,22 +92,10 @@ public class VendorInfoCO implements Serializable {
     /**
      * 前端展示更新日期
      */
-    @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
     private ZonedDateTime webUpdateDate;
 
-    /**
-     * artemis openApi调用获取的创建时间
-     */
-    @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
     private ZonedDateTime createTime;
 
-    /**
-     * artemis openApi调用获取的修改时间
-     */
-    @JsonDeserialize(using = CustomDateTimeDeserializer.class)
-    @JsonSerialize(using = CustomDateTimeSerializer.class)
     private ZonedDateTime updateTime;
 
     private SourceEnum source;

@@ -126,7 +126,35 @@ public class ExpenseAdjustTypeController {
             @RequestParam(value = "enabled", required = false) Boolean enabled,
             Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        Page<ExpenseAdjustType> list = expenseAdjustTypeService.getExpenseAdjustTypeByCond(setOfBooksId, expAdjustTypeCode, expAdjustTypeName, adjustTypeCategory, enabled, page);
+        Page<ExpenseAdjustType> list = expenseAdjustTypeService.getExpenseAdjustTypeByCond(setOfBooksId, expAdjustTypeCode, expAdjustTypeName, adjustTypeCategory, enabled, page, false);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + list.getTotal());
+        headers.add("Link", "/api/expense/adjust/types/query");
+        return new ResponseEntity<>(list.getRecords(), headers, HttpStatus.OK);
+    }
+
+    /**
+     * 自定义条件查询 费用调整单类型定义(分页)
+     *
+     * @param setOfBooksId
+     * @param expAdjustTypeCode
+     * @param expAdjustTypeName
+     * @param adjustTypeCategory
+     * @param enabled
+     * @param pageable
+     * @return
+     * @throws URISyntaxException
+     */
+    @RequestMapping(value = "/query/enable/dataAuth", method = RequestMethod.GET, produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ExpenseAdjustType>> getExpenseAdjustTypeByCondEnableDataAuth(
+            @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+            @RequestParam(value = "expAdjustTypeCode", required = false) String expAdjustTypeCode,
+            @RequestParam(value = "expAdjustTypeName", required = false) String expAdjustTypeName,
+            @RequestParam(value = "adjustTypeCategory", required = false) String adjustTypeCategory,
+            @RequestParam(value = "enabled", required = false) Boolean enabled,
+            Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        Page<ExpenseAdjustType> list = expenseAdjustTypeService.getExpenseAdjustTypeByCond(setOfBooksId, expAdjustTypeCode, expAdjustTypeName, adjustTypeCategory, enabled, page, true);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + list.getTotal());
         headers.add("Link", "/api/expense/adjust/types/query");

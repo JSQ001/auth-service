@@ -33,6 +33,7 @@ public interface ExpenseAdjustHeaderMapper extends BaseMapper<ExpenseAdjustHeade
                                                                 @Param("createdBy") Long createdBy,
                                                                 @Param("unitId") Long unitId,
                                                                 @Param("companyId") Long companyId,
+                                                                @Param("dataAuthLabel") String dataAuthLabel,
                                                                 RowBounds rowBounds);
 
     /**

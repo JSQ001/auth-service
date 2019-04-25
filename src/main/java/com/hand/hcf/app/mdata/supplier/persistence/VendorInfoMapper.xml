@@ -77,6 +77,9 @@
         <if test="tenantId != null">
             AND vvi.tenant_id = #{tenantId}
         </if>
+        <if test="vendorStatus != null">
+            AND vvi.vendor_status = #{vendorStatus}
+        </if>
         <if test="bankAccount != null and bankAccount != ''">
             and exists (select 1 from ven_vendor_bank_account vvba where vvi.id = vvba.vendor_info_id
             AND vvba.bank_account LIKE concat(concat('%',#{bankAccount}),'%')
@@ -212,20 +215,7 @@
     <select id="selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage" resultMap="VendorInfoMap">
         SELECT avi.*
         FROM ven_vendor_info avi
-        WHERE EXISTS (
-            SELECT 1
-            FROM ven_relation_vendor_company arvc
-            WHERE arvc.vendor_info_id = avi.id
-            <if test="companyId != null">
-                AND arvc.company_id = #{companyId}
-            </if>
-            <if test="enabled != null">
-                AND arvc.enabled = #{enabled}
-            </if>
-        )
-        AND avi.tenant_id = #{tenantId}
-        AND avi.status = 1001
-        AND avi.vendor_status = 'APPROVED'
+        WHERE avi.tenant_id = #{tenantId}
         <if test="venNickname != null and venNickname != ''">
             AND avi.vendor_name like concat(concat('%',#{venNickname}),'%')
         </if>

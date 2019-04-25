@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
 import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.expense.adjust.domain.*;
 import com.hand.hcf.app.expense.adjust.dto.DepartmentOrUserGroupReturnDTO;
 import com.hand.hcf.app.expense.adjust.dto.ExpenseAdjustTypeDTO;
@@ -86,11 +88,19 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
      * @param page
      * @return
      */
-    public Page<ExpenseAdjustType> getExpenseAdjustTypeByCond(Long setOfBooksId, String expAdjustTypeCode, String expAdjustTypeName,String adjustTypeCategory,Boolean enabled, Page page){
+    public Page<ExpenseAdjustType> getExpenseAdjustTypeByCond(Long setOfBooksId, String expAdjustTypeCode, String expAdjustTypeName,String adjustTypeCategory,Boolean enabled, Page page, boolean dataAuthFlag){
         Page<ExpenseAdjustType> list = new Page<>();
 
         if (setOfBooksId == null){
             return list;
+        }
+
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"exp_adjust_type");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
 
         list = this.selectPage(page,
@@ -100,6 +110,7 @@ public class ExpenseAdjustTypeService extends ServiceImpl<ExpenseAdjustTypeMappe
                 .like(expAdjustTypeName != null, "exp_adjust_type_name",expAdjustTypeName, SqlLike.DEFAULT)
                 .eq(adjustTypeCategory != null,"adjust_type_category",adjustTypeCategory)
                 .eq(enabled != null, "enabled",enabled)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("enabled",false)
                 .orderBy("exp_adjust_type_code")
         );

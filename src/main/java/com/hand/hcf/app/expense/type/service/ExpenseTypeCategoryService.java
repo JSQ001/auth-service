@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.type.service;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.domain.ExpenseTypeCategory;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,8 +61,15 @@ public class ExpenseTypeCategoryService extends BaseService<ExpenseTypeCategoryM
         return this.insert(expenseTypeCategory);
     }
 
-    public List<ExpenseTypeCategory> listResult(Long setOfBooksId, Integer typeFlag) {
-        List<ExpenseTypeCategory> result = baseMapper.listCategoryAndType(setOfBooksId, typeFlag);
+    public List<ExpenseTypeCategory> listResult(Long setOfBooksId, Integer typeFlag, boolean dataAuthFlag) {
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"exp_expense_type_category");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        List<ExpenseTypeCategory> result = baseMapper.listCategoryAndType(setOfBooksId, typeFlag, dataAuthLabel);
         result  =  baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(result, ExpenseTypeCategory.class);
         return result;
     }

@@ -327,6 +327,11 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 }
             }
         }
+        List<ExpenseReportPaymentSchedule> paymentScheduleList = expenseReportPaymentScheduleService.selectList(
+                new EntityWrapper<ExpenseReportPaymentSchedule>()
+                        .eq("exp_report_header_id", headerId));
+        BigDecimal totalMoney = paymentScheduleList.stream().map(ExpenseReportPaymentSchedule::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        expenseReportHeaderDTO.setPaymentTotalAmount(totalMoney);
         // 币种
         CurrencyRateCO currencyRate = organizationService.getForeignCurrencyByCode(null, expenseReportHeaderDTO.getCurrencyCode(), expenseReportHeaderDTO.getSetOfBooksId());
         expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyName());

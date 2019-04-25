@@ -122,50 +122,59 @@
             t.status,
             t.tenant_id
         FROM
-            sys_department t
+        sys_department t
         WHERE
-            t.tenant_id = #{ew.tenantId}
-            AND t.deleted = 0
-        <if test="ew.departmentCode != null and ew.departmentCode !=''">
-            AND t.department_code like concat(concat('%', #{ew.departmentCode}) ,'%')
+        t.tenant_id = #{tenantId}
+        AND t.deleted = 0
+        <if test="departmentCode != null and departmentCode !=''">
+            AND t.department_code like concat(concat('%', #{departmentCode}) ,'%')
         </if>
-        <if test="ew.departmentCodeFrom != null and ew.departmentCodeFrom !=''">
-            AND t.department_code <![CDATA[ >= ]]> #{ew.departmentCodeFrom}
+        <if test="departmentCodeFrom != null and departmentCodeFrom !=''">
+            AND t.department_code <![CDATA[ >= ]]> #{departmentCodeFrom}
         </if>
-        <if test="ew.departmentCodeTo != null and ew.departmentCodeTo !=''">
-            AND t.department_code <![CDATA[ <= ]]> #{ew.departmentCodeTo}
+        <if test="departmentCodeTo != null and departmentCodeTo !=''">
+            AND t.department_code <![CDATA[ <= ]]> #{departmentCodeTo}
         </if>
-        <if test="ew.departmentName != null and ew.departmentName !=''">
-            AND t.name like concat(concat('%', #{ew.departmentName}) ,'%')
+        <if test="departmentName != null and departmentName !=''">
+            AND t.name like concat(concat('%', #{departmentName}) ,'%')
         </if>
-        <if test="ew.codeName != null and ew.codeName !=''">
+        <if test="dataAuthLabel!=null and dataAuthLabel !=''">
+            AND #{dataAuthLabel}
+        </if>
+        <if test="codeName != null and codeName !=''">
             AND (
-            t.name like concat(concat('%', #{ew.codeName}) ,'%')
+            t.name like concat(concat('%', #{codeName}) ,'%')
             or
-            t.department_code like concat(concat('%', #{ew.codeName}) ,'%')
+            t.department_code like concat(concat('%', #{codeName}) ,'%')
             )
         </if>
-        <if test="ew.status != null">
-            AND t.status = #{ew.status}
+        <if test="status != null">
+            AND t.status = #{status}
         </if>
-        <if test="ew.id != null">
-            AND t.id = #{ew.id}
+        <if test="id != null">
+            AND t.id = #{id}
         </if>
-        <if test="ew.associateCompanyFlag != null and ew.associateCompanyFlag">
+        <if test="ids != null and ids.size() > 0">
+            AND t.id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="associateCompanyFlag != null and associateCompanyFlag">
             AND exists (
-                select 1
-                from sys_company_associate_unit v, sys_company sc
-                where v.department_id = t.id
-                    and sc.id = v.company_id
-                    and sc.deleted = 0
-                    and sc.enabled = 1
-                <if test="ew.companyId != null">
-                    and v.company_id = #{ew.companyId}
-                </if>
-                <if test="ew.setOfBooksId != null">
-                    and sc.set_of_books_id = #{ew.setOfBooksId}
-                </if>
-                    and v.enabled = 1
+            select 1
+            from sys_company_associate_unit v, sys_company sc
+            where v.department_id = t.id
+            and sc.id = v.company_id
+            and sc.deleted = 0
+            and sc.enabled = 1
+            <if test="companyId != null">
+                and v.company_id = #{companyId}
+            </if>
+            <if test="setOfBooksId != null">
+                and sc.set_of_books_id = #{setOfBooksId}
+            </if>
+            and v.enabled = 1
             )
         </if>
     </select>

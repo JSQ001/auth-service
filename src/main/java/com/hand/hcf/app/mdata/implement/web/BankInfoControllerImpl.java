@@ -1,5 +1,7 @@
 package com.hand.hcf.app.mdata.implement.web;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.BankInfoDTO;
 import com.hand.hcf.app.mdata.bank.service.BankInfoService;
 
@@ -40,4 +42,5 @@ public class BankInfoControllerImpl  {
     public BankInfoDTO getBankDataByCode(String bankCode) {
         return mapper.map(bankInfoService.getBankDataByCode(bankCode),BankInfoDTO.class);
     }
+
 }

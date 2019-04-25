@@ -95,20 +95,20 @@ public class ModuleInitController {
 
     @PutMapping("/expenseReportTypeExpenseType")
     @ApiOperation(value = "报账单类型关联费用类型", notes = "报账单类型关联费用类型 开发:20855")
-    public String expExpenseReportTypeExpenseType(@ApiParam(value = "报账单关联费用类型") @RequestBody List<ModuleInitDTO> moduleInitDTOList) {
-        return expenseReportTypeService.expExpenseReportTypeExpenseType(moduleInitDTOList);
+    public String expExpenseReportTypeExpenseType(@ApiParam(value = "报账单关联费用类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return expenseReportTypeService.expExpenseReportTypeExpenseType(SourceTypeTargetTypeDTOS);
     }
 
     @ApiOperation(value = "费用申请单关联申请类型", notes = "费用申请单关联申请类型 开发:20855")
     @PutMapping("/expenseApplicationTypeApplicationType")
-    public String expApplicationTypeApplicationType(@ApiParam(value = "费用申请单关联申请类型") @RequestBody List<ModuleInitDTO> moduleInitDTOList) {
-        return applicationTypeService.expApplicationTypeApplicationType(moduleInitDTOList);
+    public String expApplicationTypeApplicationType(@ApiParam(value = "费用申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return applicationTypeService.expApplicationTypeApplicationType(SourceTypeTargetTypeDTOS);
     }
 
     @ApiOperation(value = "差旅申请单关联申请类型", notes = "差旅申请单关联申请类型 开发:20855")
     @PutMapping("/travelApplicationTypeApplicationType")
-    public String expTravelApplicationTypeApplicationType(@ApiParam(value = "差旅申请单关联申请类型") @RequestBody List<ModuleInitDTO> moduleInitDTOList) {
-        return travelApplicationTypeService.expTravelApplicationTypeApplicationType(moduleInitDTOList);
+    public String expTravelApplicationTypeApplicationType(@ApiParam(value = "差旅申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return travelApplicationTypeService.expTravelApplicationTypeApplicationType(SourceTypeTargetTypeDTOS);
     }
 
 

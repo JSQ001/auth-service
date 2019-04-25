@@ -529,6 +529,7 @@ public class ContactBankAccountService extends BaseService<ContactBankAccountMap
             contactAccountDTO.setJob(contactDTO.getTitle());
             contactAccountDTO.setIsEmp(true);
             contactAccountDTO.setSign(contactDTO.getUserId()+"_"+contactAccountDTO.getIsEmp());
+            contactAccountDTO.setPhoneNumber(contactService.getMobile(contactDTO.getId()));
             List<ContactBankAccountDTO> contactBankAccountDTOs = this.getContactBankAccountByUserOidNoPage(contactDTO.getUserOid());
             List<BankAccountDTO> bankInfos = contactBankAccountDTOs.stream().map(contactBankAccountDTO -> {
                 BankAccountDTO bankAccount = new BankAccountDTO();

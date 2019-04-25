@@ -43,7 +43,10 @@
             <if test="companyGroupName != null and companyGroupName != ''">
                 and c.company_group_name LIKE concat('%', concat(#{companyGroupName,jdbcType=VARCHAR}, '%'))
             </if>
-            <if test="enabled != null">
+            <if test="dataAuthLabel != null">
+                and #{dataAuthLabel}
+            </if>
+           <if test="enabled != null">
                 and c.enabled = #{enabled}
             </if>
             ORDER BY c.enabled DESC,c.company_group_code ASC

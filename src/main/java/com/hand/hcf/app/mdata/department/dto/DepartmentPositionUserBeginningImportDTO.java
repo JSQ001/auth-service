@@ -7,7 +7,7 @@ import lombok.Data;
  */
 @Data
 public class DepartmentPositionUserBeginningImportDTO {
-    private String tenantId;
+    private String rowNumber;
 
     private String positionCode;
 

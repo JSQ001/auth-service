@@ -22,7 +22,7 @@
                             t4.CURRENCY_CODE,
                             t4.EXCHANGE_RATE rate,
                             t4.AMOUNT reportAmount,
-                            (select t4.amount - coalesce(sum(BASE_AMOUNT), 0)
+                            (select t4.tax_amount - coalesce(sum(BASE_AMOUNT), 0)
                             from EXP_INPUT_TAX_LINE eitl
                             where eitl.EXP_REPORT_LINE_ID = t4.id
                             and exists
@@ -59,7 +59,7 @@
                         t.CURRENCY_CODE,
                         t.EXCHANGE_RATE rate,
                         t.AMOUNT reportAmount,
-                        (select t.amount - coalesce(sum(BASE_AMOUNT), 0)
+                        (select t.tax_amount - coalesce(sum(BASE_AMOUNT), 0)
                                 from EXP_INPUT_TAX_LINE eitl
                                 where eitl.EXP_REPORT_LINE_ID = t.id
                                 and eitl.INPUT_TAX_HEADER_ID != #{headerId}

@@ -3,9 +3,14 @@ package com.hand.hcf.app.mdata.responsibilityCenter.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.DepartmentSobResponsibility;
+import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.DepartmentSobResponsibilityDTO;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.DepartmentSobResponsibilityService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -13,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
+@Api(tags = "部门责任中心配置")
 @RestController
 @RequestMapping("/api/department/sob/responsibility")
 public class DepartmentSobResponsibilityResource {
@@ -151,5 +156,19 @@ public class DepartmentSobResponsibilityResource {
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentSobResponsibilityDTO> getDepartmentSobResponsibilityById(@PathVariable Long id){
         return ResponseEntity.ok(departmentSobResponsibilityService.getDepartmentSobResponsibilityById(id));
+    }
+
+    @ApiOperation(value = "查询部门责任中心配置默认责任中心", notes = "根据公司部门查询默认责任中心 开发：郑少锋")
+    @GetMapping("/query/default/responsibility/center")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType="query", name = "companyId", value = "公司id",
+                    required = true, dataType = "Long"),
+            @ApiImplicitParam(paramType="query", name = "departmentId", value = "部门id",
+                    required = true, dataType = "Long")
+    })
+    public ResponseEntity<ResponsibilityCenter> getDefaultResponsibilityCenter(
+            @RequestParam(value = "companyId",required = false) Long companyId,
+            @RequestParam(value = "departmentId",required = false) Long departmentId){
+        return ResponseEntity.ok(departmentSobResponsibilityService.getDefaultResponsibilityCenter(departmentId, companyId));
     }
 }

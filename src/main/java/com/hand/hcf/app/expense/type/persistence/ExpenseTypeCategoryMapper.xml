@@ -23,6 +23,9 @@
     <select id="listCategoryAndType" resultMap="BaseResultMap">
         select t.*, #{typeFlag} as typeFlag from exp_expense_type_category t where t.set_of_books_id = #{setOfBooksId}
         and t.deleted = 0
+        <if test="dataAuthLable != null and dataAuthLable != ''">
+            and #{dataAuthLable}
+        </if>
         order by t.sequence asc
 
     </select>

@@ -7,6 +7,7 @@ import com.hand.hcf.app.common.co.CompanyGroupCO;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.conver.CompanyGroupCover;
 import com.hand.hcf.app.mdata.company.domain.CompanyGroup;
@@ -29,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -196,7 +199,8 @@ public class CompanyGroupService extends ServiceImpl<CompanyGroupMapper, Company
      * @param page             分页对象
      * @return
      */
-    public Page<CompanyGroup> findCompanyGroupByCode(Long setOfBooksId, String companyGroupCode, String companyGroupName, Long tenantId, Page<CompanyGroup> page) {
+    public Page<CompanyGroup> findCompanyGroupByCode(Long setOfBooksId, String companyGroupCode, String companyGroupName,
+                                                     Long tenantId, Page<CompanyGroup> page,boolean enable) {
         List<CompanyGroup> list = companyGroupMapper.selectPage(page, new EntityWrapper<CompanyGroup>()
                 .where("deleted = false")
                 .eq(setOfBooksId != null, "set_of_books_id", setOfBooksId)
@@ -224,15 +228,27 @@ public class CompanyGroupService extends ServiceImpl<CompanyGroupMapper, Company
      * @param companyGroupCode 公司组代码
      * @param companyGroupName 公司组名称
      * @param enabled          是否启用
+     * @param tenantId         租户id
      * @param page             分页对象
-     * @return
+     * @param dataAuthFlag     是否进行权限控制
+     * @return                 公司组
      */
-    public Page<CompanyGroupDTO> findCompanyGroupByConditions(Long setOfBooksId, String companyGroupCode, String companyGroupName, Boolean enabled, Long tenantId, Page<CompanyGroupDTO> page) {
-        List<CompanyGroup> list = companyGroupMapper.findCompanyGroupByConditions(setOfBooksId, companyGroupCode, companyGroupName, enabled, tenantId, page);
+    public Page<CompanyGroupDTO> findCompanyGroupByConditions(Long setOfBooksId, String companyGroupCode, String companyGroupName
+                                                            , Boolean enabled, Long tenantId, Page<CompanyGroupDTO> page, boolean dataAuthFlag) {
+
+        String dataAuthLabel = null;
+        if (dataAuthFlag) {
+            Map<String, String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_company_group");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        List<CompanyGroup> list = companyGroupMapper.findCompanyGroupByConditions(setOfBooksId, companyGroupCode
+                , companyGroupName, enabled, tenantId, dataAuthLabel ,page);
         //  判断是否查询到数据
         if (CollectionUtils.isNotEmpty(list)) {
             List<CompanyGroupDTO> companyGroupDTOs = new ArrayList<>();
-            CompanyGroupDTO dto = null;
+            CompanyGroupDTO dto;
             for (CompanyGroup companyGroup : list) {
                 companyGroup = baseI18nService.selectOneTranslatedTableInfoWithI18n(companyGroup.getId(), CompanyGroup.class);
                 dto = new CompanyGroupDTO();

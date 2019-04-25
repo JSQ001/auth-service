@@ -80,7 +80,8 @@ public interface CompanyAssociateUnitMapper extends BaseMapper<CompanyAssociateU
      * @return List<DepartmentLovDTO>
      */
     List<DepartmentLovDTO> queryDepartmentLov(RowBounds rowBounds,
-                                              @Param("ew") DepartmentLovQueryParams queryParams);
+                                              DepartmentLovQueryParams queryParams);
+    List<DepartmentLovDTO> queryDepartmentLov(DepartmentLovQueryParams queryParams);
     /**
      * 公司lov查询
      * @param rowBounds  分页参数

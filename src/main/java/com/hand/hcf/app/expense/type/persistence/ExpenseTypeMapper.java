@@ -61,6 +61,21 @@ public interface ExpenseTypeMapper extends BaseMapper<ExpenseType> {
      */
     List<ExpenseTypeWebDTO> listByDocumentLov(ExpenseBO expenseBO);
 
+
+    /**
+     * 查询费用申请单
+     * @author sq.l
+     * @date 2019/04/22
+     *
+     * @param code
+     * @param name
+     * @param categoryName
+     * @return
+     */
+    List<ExpenseType>  selectExpenseByCode(@Param("code") String  code,
+                                           @Param("name") String name,
+                                           @Param("categoryName") String categoryName);
+
     /**
      * 报账单类型定义关联费用类型-根据费用类型代码查询费用类型id
      * @param setOfBooksId

@@ -46,6 +46,7 @@ public class LegalEntityConver {
             legalEntityDTO.setI18n(legalEntity.getI18n());
             legalEntityDTO.setAttachmentId(legalEntity.getAttachmentId());
             legalEntityDTO.setMainLanguage(legalEntity.getMainLanguage());
+            legalEntityDTO.setVersionNumber(legalEntity.getVersionNumber());
             if(null != legalEntity.getAttachmentId()){
                 ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
                 HcfOrganizationInterface organizationInterface = applicationContext.getBean(HcfOrganizationInterface.class);
@@ -87,6 +88,7 @@ public class LegalEntityConver {
             legalEntity.setMainLanguage(legalEntityDTO.getMainLanguage());
             legalEntity.setLastUpdatedDate(ZonedDateTime.now());
             legalEntity.setAttachmentId(legalEntityDTO.getAttachmentId());
+            legalEntity.setVersionNumber(legalEntityDTO.getVersionNumber());
         }
         return legalEntity;
     }

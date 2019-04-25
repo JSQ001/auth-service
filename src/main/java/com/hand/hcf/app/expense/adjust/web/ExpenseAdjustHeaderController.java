@@ -120,10 +120,40 @@ public class ExpenseAdjustHeaderController {
         }
         List<ExpenseAdjustHeaderWebDTO> result = headerService.listHeaderWebDTOByCondition(
                 documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
-                employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,page);
+                employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,false, page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + page.getTotal());
         headers.add("Link", "/api/expense/adjust/headers/query/dto");
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/query/dto/enable/dataAuth")
+    public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTOEnableDataAuth(@RequestParam(required = false) String documentNumber,
+                                                                                      @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
+                                                                                      @RequestParam(required = false,value = "status") String status,
+                                                                                      @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
+                                                                                      @RequestParam(required = false,value = "applyDateTo") String dateTimeTo,
+                                                                                      @RequestParam(required = false,value = "amountFrom") BigDecimal amountMin,
+                                                                                      @RequestParam(required = false,value = "amountTo") BigDecimal amountMax,
+                                                                                      @RequestParam(required = false,value = "applyId") Long employeeId,
+                                                                                      @RequestParam(required = false,value = "description") String description,
+                                                                                      @RequestParam(required = false,value = "adjustTypeCategory") String adjustTypeCategory,
+                                                                                      @RequestParam(required = false,value = "currency") String currencyCode,
+                                                                                      @RequestParam(required = false,value = "unitId") Long unitId,
+                                                                                      @RequestParam(required = false,value = "companyId") Long companyId,
+                                                                                      Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateTimeFrom);
+        ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTimeTo);
+        if (requisitionDateTo != null){
+            requisitionDateTo = requisitionDateTo.plusDays(1);
+        }
+        List<ExpenseAdjustHeaderWebDTO> result = headerService.listHeaderWebDTOByCondition(
+                documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
+                employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,true, page);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + page.getTotal());
+        headers.add("Link", "/api/expense/adjust/headers/query/dto/enable/dataAuth");
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 

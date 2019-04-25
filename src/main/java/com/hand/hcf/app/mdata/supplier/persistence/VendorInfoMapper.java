@@ -50,6 +50,7 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
                                              @Param("bankAccount") String bankAccount,
                                              @Param("venType") Integer venType,
                                              @Param("tenantId") String tenantId,
+                                             @Param("vendorStatus") String vendorStatus,
                                              Pagination page);
 
     /**
@@ -171,8 +172,6 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
      */
     List<VendorInfo> selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
             @Param("tenantId") Long tenantId,
-            @Param("companyId") Long companyId,
-            @Param("enabled") Boolean enabled,
             @Param("venNickname") String venNickname,
             @Param("vendorCode") String vendorCode,
             Pagination page);

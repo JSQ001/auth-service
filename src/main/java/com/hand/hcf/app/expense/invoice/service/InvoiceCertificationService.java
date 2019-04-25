@@ -1,19 +1,25 @@
 package com.hand.hcf.app.expense.invoice.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.core.domain.ExportConfig;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.common.utils.RespCode;
+import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.invoice.enums.CertificationEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -144,6 +150,52 @@ public class InvoiceCertificationService {
             },threadNumber, request, response);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 更新发票认证状态
+     * @param headerIds 发票Id信息
+     * @param status 认证状态
+     * @param approvalText 认证失败原因
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateInvoiceCertifiedStatus(List<Long> headerIds,
+                                             Integer status,
+                                             String approvalText) {
+        if(CollectionUtils.isEmpty(headerIds)){
+            return;
+        }
+        headerIds.stream().forEach(headerId-> {
+            InvoiceHead header = invoiceHeadService.selectById(headerId);
+            if (header == null) {
+                throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
+            }
+            checkCertificationStatus(status, header.getCertificationStatus());
+            //提交待认证
+            if (CertificationEnum.SUCCESS.getId().equals(status)) {
+                header.setCertificationDate(ZonedDateTime.now());
+            } else if (CertificationEnum.FAIL.getId().equals(status)) {
+                header.setCertificationReason(approvalText);
+            }
+            header.setCertificationStatus(status.longValue());
+            invoiceHeadService.updateById(header);
+        });
+    }
+
+    private void checkCertificationStatus(Integer status, Long certificationStatus) {
+        switch (status) {
+            //提交
+            case 1:
+                if (!certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId())) {
+                    throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
+                }
+                break;
+             //认证成功
+            case 4:
+                if(certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId())){
+                    throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
+                }
         }
     }
 }

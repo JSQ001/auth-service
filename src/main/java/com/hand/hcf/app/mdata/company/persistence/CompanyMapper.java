@@ -32,6 +32,7 @@ public interface CompanyMapper extends BaseMapper<Company> {
                                         @Param("companyCodeTo") String companyCodeTo,
                                         @Param("restrictionCompanyIds") List<Long> restrictionCompanyIds,
                                         @Param("legalEntityId") Long legalEntityId,
+                                        @Param("dataAuthLabel") String dataAuthLabel,
                                         Pagination page);
 
     List<Company> getCompanyWithoutEnumeration(@Param("tenantId") Long tenantId,
@@ -70,6 +71,7 @@ public interface CompanyMapper extends BaseMapper<Company> {
                                                     @Param("setOfBooksId") Long setOfBooksId,
                                                     @Param("enabled") Boolean enabled,
                                                     @Param("filter") List<Long> filter,
+                                                    @Param("dataAuthLabel") String dataAuthLabel,
                                                     Pagination page);
 
     List<CompanySobDTO> getCompaniesByTenantIdAndCondition(@Param("tenantId") Long tenantId,

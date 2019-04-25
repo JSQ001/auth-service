@@ -2440,6 +2440,121 @@
     <changeSet id="201904101819001" author="zhu.zhao">
         <dropNotNullConstraint tableName="exp_input_tax_dist" columnName="responsibility_center_id" columnDataType="bigint"/>
     </changeSet>
+    <changeSet id="201904121127001" author="shuqiang.luo">
+        <createTable tableName="invoice_expense_type_rules" remarks="预付款申请释放表">
+            <column name="tenant_id"          type="bigint"       remarks="租户ID" >
+                <constraints nullable="false"/>
+        </column>
+            <column name="set_of_books_id"    type="bigint"       remarks="账套ID">
+                <constraints nullable="false"/>
+        </column>
+            <column name="id"                 type="bigint"       remarks="主键ID" >
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_invoice_rules"/>
+         </column>
+            <column name="goods_name"         type="varchar(1000)" remarks="货物、应税劳务或服务名称">
+                <constraints nullable="false"/>
+        </column>
+            <column name="expense_type_id"    type="bigint"       remarks="费用类型ID" >
+                <constraints nullable="false"/>
+        </column>
+            <column name="enabled"            type="bigint"       remarks="状态">
+                <constraints nullable="false"/>
+        </column>
+            <column name="start_date"         type="timestamp"    remarks="有效日期从" >
+                <constraints nullable="false"/>
+        </column>
+            <column name="end_date"           type="timestamp"    remarks="有效日期至">
+                <constraints nullable="true"/>
+        </column>
+            <column name="description"        type="varchar(300)" remarks="备注" >
+                <constraints nullable="true"/>
+        </column>
+            <column name="created_date"       type="timestamp"    remarks="创建日期">
+                <constraints nullable="false"/>
+        </column>
+            <column name="created_by"         type="bigint"       remarks="创建用户ID" >
+                <constraints nullable="false"/>
+        </column>
+            <column name="last_updated_date"  type="timestamp"    remarks="最后更新日期">
+                <constraints nullable="false"/>
+        </column>
+            <column name="last_updated_by"    type="bigint"       remarks="最后更新用户ID" >
+                <constraints nullable="false"/>
+        </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="201904122028002" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules">
+            <column name="version_number" type="bigint" remarks="版本号" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904122028003" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules">
+            <column name="status" type="bigint" remarks="状态" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904122056004" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules" columnName="status"/>
+    </changeSet>
+
+    <changeSet id="201904211539001" author="shuqiang.luo">
+    <createTable tableName="invoice_expense_type_rules_temp" remarks="发票费用映射规则临时表">
+
+    <column name="row_number"          type="bigint"       remarks="序号" >
+        <constraints nullable="false"/>
+    </column>
+    <column name="goods_name"         type="varchar(1000)" remarks="货物、应税劳务或服务名称">
+        <constraints nullable="false"/>
+    </column>
+    <column name="expense_type_tode"    type="bigint"       remarks="费用类型代码" >
+        <constraints nullable="false"/>
+    </column>
+        <column name="description"        type="varchar(300)" remarks="备注" >
+            <constraints nullable="true"/>
+        </column>
+        <column name="start_date"         type="timestamp"    remarks="有效日期从" >
+            <constraints nullable="false"/>
+        </column>
+        <column name="end_date"           type="timestamp"    remarks="有效日期至">
+            <constraints nullable="true"/>
+        </column>
+    <column name="enabledStr"            type="bigint"       remarks=" 是否状态">
+        <constraints nullable="false"/>
+    </column>
+        <column name="created_date"       type="timestamp"    remarks="创建日期">
+            <constraints nullable="false"/>
+        </column>
+        <column name="created_by"         type="bigint"       remarks="创建用户ID" >
+            <constraints nullable="false"/>
+        </column>
+        <column name="last_updated_date"  type="timestamp"    remarks="最后更新日期">
+            <constraints nullable="false"/>
+        </column>
+        <column name="last_updated_by"    type="bigint"       remarks="最后更新用户ID" >
+            <constraints nullable="false"/>
+        </column>
+        <column name="ERROR_FLAG"         type="bigint"       remarks="是否错误" >
+            <constraints nullable="false"/>
+        </column>
+        <column name="ERROR_MSG"          type="varchar(3000)"  remarks="错误信息">
+            <constraints nullable="false"/>
+        </column>
+        <column name="version_number"    type="number"       remarks="版本号" >
+            <constraints nullable="false"/>
+        </column>
+        <column name="BATCH_NUMBER"    type="number"       remarks="批次号" >
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+    </changeSet>
+
+    <changeSet id="20190421228001" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+        <column name="id"                 type="bigint"       remarks="主键ID" >
+            <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_invoice_rules_temp"/>
+        </column>
+        </addColumn>
+    </changeSet>
 
     <changeSet id="201904141216001" author="zhu.zhao">
         <addColumn tableName="exp_input_tax_header">
@@ -2461,5 +2576,121 @@
         <modifyDataType tableName="exp_input_tax_header" columnName="transfer_proportion" newDataType="${amount}"/>
         <modifyDataType tableName="exp_input_tax_line" columnName="transfer_proportion" newDataType="${amount}"/>
         <modifyDataType tableName="exp_input_tax_dist" columnName="transfer_proportion" newDataType="${amount}"/>
+    </changeSet>
+
+    <changeSet id="201904231110001" author="zhu.zhao">
+        <modifyDataType tableName="exp_input_tax_header" columnName="base_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_header" columnName="base_function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_header" columnName="amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_header" columnName="function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_line" columnName="base_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_line" columnName="base_function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_line" columnName="amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_line" columnName="function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_dist" columnName="base_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_dist" columnName="base_function_amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_dist" columnName="amount" newDataType="${amount}"/>
+        <modifyDataType tableName="exp_input_tax_dist" columnName="function_amount" newDataType="${amount}"/>
+    </changeSet>
+
+    <changeSet id="201904221143001" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+        <column name="set_of_books_id"    type="bigint"    remarks="账套ID">
+            <constraints nullable="false"/>
+        </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904221206001" author="shuqiang.luo">
+        <renameColumn tableName="invoice_expense_type_rules_temp" oldColumnName="enabledStr" newColumnName="enabled_str" columnDataType="varchar(1)"></renameColumn>
+    </changeSet>
+
+    <changeSet id="201904221206002" author="shuqiang.luo">
+        <renameColumn tableName="invoice_expense_type_rules_temp" oldColumnName="expense_type_tode" newColumnName="expense_type_code" columnDataType="bigint"></renameColumn>
+    </changeSet>
+
+    <changeSet id="201904221517001" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules" columnName="start_date"/>
+        <dropColumn tableName="invoice_expense_type_rules" columnName="end_date"/>
+    </changeSet>
+
+    <changeSet id="201904221525001" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules_temp" columnName="start_date"/>
+        <dropColumn tableName="invoice_expense_type_rules_temp" columnName="end_date"/>
+    </changeSet>
+
+    <changeSet id="2019042215425002" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules">
+            <column name="start_date"         type="timestamp"    remarks="有效日期从" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date"           type="timestamp"    remarks="有效日期至">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="2019042215425003" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+            <column name="start_date"         type="varchar(30)"    remarks="有效日期从" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date"           type="varchar(30)"    remarks="有效日期至">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904221702001" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules_temp" columnName="expense_type_code"/>
+    </changeSet>
+
+    <changeSet id="201904221702002" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+            <column name="expense_type_code"         type="varchar(30)"    remarks="费用类型代码" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904221722001" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules_temp" columnName="BATCH_NUMBER"/>
+    </changeSet>
+
+    <changeSet id="201904221722002" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+            <column name="BATCH_NUMBER"         type="varchar(100)"    remarks="批次号" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904221722003" author="shuqiang.luo">
+        <dropColumn tableName="invoice_expense_type_rules_temp" columnName="ERROR_FLAG"/>
+    </changeSet>
+
+    <changeSet id="201904221722004" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+            <column name="ERROR_FLAG"         type="tinyint"    remarks="是否错误" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904221823001" author="shuqiang.luo">
+        <addColumn tableName="invoice_expense_type_rules_temp">
+            <column name="enabled"         type="bigint"    remarks="状态" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904221823002" author="shuqiang.luo">
+        <modifyDataType tableName="invoice_expense_type_rules_temp" columnName="ROW_NUMBER" newDataType="varchar(50)"></modifyDataType>
+        <modifyDataType tableName="invoice_expense_type_rules_temp" columnName="ENABLED_STR" newDataType="varchar(50)"></modifyDataType>
+    </changeSet>
+
+    <changeSet id="201904222223001" author="shuqiang.luo">
+        <modifyDataType tableName="invoice_expense_type_rules_temp" columnName="start_date" newDataType="timestamp"></modifyDataType>
+        <modifyDataType tableName="invoice_expense_type_rules_temp" columnName="end_date" newDataType="timestamp"></modifyDataType>
     </changeSet>
 </databaseChangeLog>

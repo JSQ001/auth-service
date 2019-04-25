@@ -1,5 +1,6 @@
 package com.hand.hcf.app.mdata.accounts.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -8,6 +9,7 @@ public class AccountsDTO {
     private Long id;
 
     private Long accountSetId;
+    private String accountSetCode;
     private String accountCode;
     private String accountName;
     private String accountDesc;
@@ -22,4 +24,7 @@ public class AccountsDTO {
 
     //是否被分配
     private Boolean assigned;
+
+    @JsonIgnore
+    private Long tenantId;
 }

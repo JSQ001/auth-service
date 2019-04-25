@@ -112,8 +112,16 @@ public interface RespCode {
     String INVOICE_TYPE_LINE_COLUMN_NOT_EXIST ="INVOICE_TYPE_LINE_COLUMN_NOT_EXIST"; //当前发票类型行不存在
     String INVOICR_TYPE_NUMBER_IS_INTEGER="INVOICR_TYPE_NUMBER_IS_INTEGER";//发票代码位数/发票号码位数须为正整数
 
+
+    /**
+     * 发票费用映射规则表
+     */
+    String INVOICE_EXPENSE_TYPE_RULES_ID_IS_NULL = "INVOICE_EXPENSE_TYPE_RULES_ID_IS_NULL";//发票费用映射规则表id不为空！
+
     //发票头
     String INVOICE_HEAD_ID_IS_NOT_NULL = "INVOICE_HEAD_ID_IS_NOT_NULL";//发票头id不为空！
+    String INVOICE_HEADER_IS_NULL = "INVOICE_HEADER_IS_NULL"; //发票头信息不存在！
+    String INVOICE_CERTIFICATION_STATUS_ERROR = "INVOICE_CERTIFICATION_STATUS_ERROR";//发票状态不允许进行此处操作，请检查发票状态！
     String INVOICE_HEAD_ID_IS_NULL = "INVOICE_HEAD_ID_IS_NULL";//发票头id为空！
     String INVOICE_HEAD_TENANT_ID_IS_NULL = "INVOICE_HEAD_TENANT_ID_IS_NULL";//发票头租户id为空！
     String INVOICE_HEAD_SET_OF_BOOKS_ID_IS_NULL = "INVOICE_HEAD_SET_OF_BOOKS_ID_IS_NULL";//发票头账套id为空！
@@ -257,6 +265,9 @@ public interface RespCode {
     //已有差旅类的申请大类!
     String EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE = "EXPENSE_EXPENSE_TYPE_CATEGORY_ALREADY_EXIST_TRAVEL_TYPE";
 
+    //读取文件失败
+    String READ_FILE_FAILED = "READ_FILE_FAILED";
+
     /**
      * AuditFlag审批标志-审批中
      */
@@ -281,4 +292,6 @@ public interface RespCode {
      * ReverseFlag反冲标志-反冲提交未审批
      */
     String EXPENSE_REPORT_DIST_NOT_APPROVE = "expense.report.not.approve";
+
+
 }

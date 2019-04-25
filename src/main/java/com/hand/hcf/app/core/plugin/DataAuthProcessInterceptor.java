@@ -1,11 +1,10 @@
 package com.hand.hcf.app.core.plugin;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.entity.TableFieldInfo;
 import com.baomidou.mybatisplus.entity.TableInfo;
-import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.toolkit.PluginUtils;
-import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.baomidou.mybatisplus.toolkit.TableInfoHelper;
+import com.baomidou.mybatisplus.toolkit.*;
+import com.google.gson.Gson;
 import com.hand.hcf.app.core.component.ApplicationContextUtils;
 import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
 import com.hand.hcf.app.core.exception.BizException;
@@ -15,22 +14,27 @@ import com.hand.hcf.app.core.util.ReflectHelper;
 import com.hand.hcf.app.core.util.RespCode;
 import com.hand.hcf.app.core.util.StringUtil;
 import com.hand.hcf.app.core.web.dto.DataAuthValuePropertyDTO;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.ibatis.binding.MapperMethod;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.ParamNameResolver;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
+import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,38 +42,55 @@ import java.util.stream.Collectors;
 
 /**
  * @author kai.zhang05@hand-china.com
- * @create 2018/10/12 16:01
- * @remark 数据权限
+ * @create 2019/4/23 18:14
+ * @remark
  */
 @Slf4j
-@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
+@Intercepts({@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})})
 public class DataAuthProcessInterceptor implements Interceptor {
 
     private static final Pattern compile = Pattern.compile("[\\s\\t\\n]{1,}", Pattern.CASE_INSENSITIVE);
 
     private static final String DELIMITER_DOT = ".";
 
-    private DataAuthorityMetaHandler dataAuthorityMetaHandler;
+    private static final String IDENTITIES = "1 = 1";
+
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        initMetaHandler();
-        StatementHandler statementHandler = (StatementHandler) PluginUtils.realTarget(invocation.getTarget());
-        MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
-        MappedStatement ms = (MappedStatement) metaStatementHandler.getValue("delegate.mappedStatement");
+        //参数对象
+        Object parameter = invocation.getArgs()[1];
+        MappedStatement ms = (MappedStatement) invocation.getArgs()[0];
+
+        BoundSql bound = ms.getSqlSource().getBoundSql(parameter);
         if (!SqlCommandType.SELECT.equals(ms.getSqlCommandType())) {
             return invocation.proceed();
         }
-        BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
+        return invoke(invocation,bound,ms);
+    }
+
+    private Object invoke (Invocation invocation,
+                           BoundSql boundSql,
+                        MappedStatement ms) throws Exception{
+        initMetaHandler();
         String sql = boundSql.getSql();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         MapperMethod.ParamMap<?> parameterMap;
-        if(MapperMethod.ParamMap.class.isAssignableFrom(boundSql.getParameterObject().getClass())){
-            parameterMap = (MapperMethod.ParamMap<?>) boundSql.getParameterObject();
-        }else{
+        // 参数是否为某个实体对象
+        boolean parameterIsEntity = false;
+        if(boundSql.getParameterObject() == null){
             parameterMap = new MapperMethod.ParamMap<>();
+        }else{
+            if(MapperMethod.ParamMap.class.isAssignableFrom(boundSql.getParameterObject().getClass())){
+                parameterMap = (MapperMethod.ParamMap<?>) boundSql.getParameterObject();
+            }else{
+                parameterMap = new MapperMethod.ParamMap<>();
+            }
+            if(!Map.class.isAssignableFrom(boundSql.getParameterObject().getClass())){
+                parameterIsEntity = true;
+            }
         }
-
         List<String> parameters = null;
         String methodName = ms.getId().substring(ms.getId().lastIndexOf(DELIMITER_DOT) + 1);
         if(CollectionUtils.isEmpty(parameterMappings)){
@@ -89,7 +110,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
         // 判断sql是否包含权限标志
         // sql中不包含数据权限标志，则在条件中查找，并将其替换至sql中
         if(! sql.contains(DataAuthorityUtil.DATA_AUTH_LABEL)){
-            sql = replaceDataAuthLabelInParameterToSql(sql,parameterMappings,parameters,parameterMap);
+            sql = replaceDataAuthLabelInParameterToSql(sql,parameterMappings,parameters,parameterMap,parameterIsEntity,boundSql);
         }
         //mybatis封装的基础查询方法，默认使用数据权限标记
         TableInfo tableInfo = null;
@@ -117,6 +138,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
             ReflectHelper.setFieldValue(boundSql, "sql", sql);
             ReflectHelper.setFieldValue(boundSql, "parameterMappings", parameterMappings);
             ReflectHelper.setFieldValue(boundSql, "parameterObject", parameterMap);
+            resetSqlInvocation(invocation, boundSql);
         }
         return invocation.proceed();
     }
@@ -146,10 +168,10 @@ public class DataAuthProcessInterceptor implements Interceptor {
     private void initMetaHandler(){
         ApplicationContext applicationContext = ApplicationContextUtils.getApplicationContext();
         try {
-            this.dataAuthorityMetaHandler = applicationContext.getBean(DataAuthorityMetaHandler.class);
+            this.dataAuthorityMetaHandler = applicationContext.getBean(DataAuthMetaRealization.class);
         }catch (Exception e){
             // 获取不到bean，则直接赋值默认数据
-            this.dataAuthorityMetaHandler = new DataAuthorityMetaHandler() {
+            this.dataAuthorityMetaHandler = new DataAuthMetaRealization() {
                 @Override
                 public boolean checkEnabledDataAuthority() {
                     return false;
@@ -175,8 +197,29 @@ public class DataAuthProcessInterceptor implements Interceptor {
      * @param parameterMap
      * @return
      */
-    private String replaceDataAuthLabelInParameterToSql(String sql, List<ParameterMapping> parameterMappings, List<String> parameters, MapperMethod.ParamMap<?> parameterMap){
-        Set<? extends Map.Entry<String, ?>> entries = parameterMap.entrySet();
+    private String replaceDataAuthLabelInParameterToSql(String sql,
+                                                        List<ParameterMapping> parameterMappings,
+                                                        List<String> parameters,
+                                                        MapperMethod.ParamMap<?> parameterMap,
+                                                        Boolean parameterIsEntity,
+                                                        BoundSql boundSql){
+        Set<? extends Map.Entry<String, ?>> entries = null;
+        if(MapUtils.isEmpty(parameterMap) && parameterIsEntity){
+            try {
+                Object parameterObject = boundSql.getParameterObject();
+                String paraJsonString = JSON.toJSONString(parameterObject);
+                Gson gson = new Gson();
+                Map<String,String> map = new HashMap<>();
+                map = gson.fromJson(paraJsonString, map.getClass());
+                entries = map.entrySet().stream().filter(entry -> {
+                    return parameterMappings.stream().anyMatch(parameterMapping -> entry.getKey().equals(parameterMapping.getProperty()));
+                }).collect(Collectors.toSet());
+            }catch (Exception e){
+                entries = parameterMap.entrySet();
+            }
+        }else{
+            entries = parameterMap.entrySet();
+        }
         Iterator<? extends Map.Entry<String, ?>> iterator = entries.iterator();
         while(iterator.hasNext()){
             Map.Entry<String, ?> entry = iterator.next();
@@ -207,10 +250,12 @@ public class DataAuthProcessInterceptor implements Interceptor {
                         for(int m = 0; m <= i; m ++){
                             index = sql.indexOf("?",index + 1);
                         }
-                        StringBuffer stringBuffer = new StringBuffer(sql);
-                        sql = stringBuffer.replace(index, index + 1, value.toString()).toString();
-                        if(parameterMapping != null){
-                            parameterMappings.remove(parameterMapping);
+                        if(index > 0){
+                            StringBuffer stringBuffer = new StringBuffer(sql);
+                            sql = stringBuffer.replace(index, index + 1, value.toString()).toString();
+                            if(parameterMapping != null){
+                                parameterMappings.remove(parameterMapping);
+                            }
                         }
                     }
                     iterator.remove();
@@ -319,14 +364,18 @@ public class DataAuthProcessInterceptor implements Interceptor {
                         }
                     }
                 }
-                dataAuthValuePropertyList.stream().forEach(dataAuthValueProperties -> {
+                for(Map<String, List<DataAuthValuePropertyDTO>> dataAuthValueProperties: dataAuthValuePropertyList){
                     String dataAuthSql = assembleSqlByDataAuthProperties(dataAuthMap, dataAuthValueProperties,tableInfo);
+                    if(IDENTITIES.equals(dataAuthSql)){
+                        updatedSql.reverse().append(" 1 = 1 ");
+                        return sqlBackup.replace(DataAuthorityUtil.DATA_AUTH_LABEL  + dataAuthLabel, updatedSql);
+                    }
                     if(StringUtils.isEmpty(updatedSql)){
                         updatedSql.append("(").append(dataAuthSql);
                     }else{
                         updatedSql.append(" or ").append(dataAuthSql);
                     }
-                });
+                }
                 updatedSql.append(")");
             }
         }else{
@@ -383,14 +432,18 @@ public class DataAuthProcessInterceptor implements Interceptor {
         StringBuffer stringBuffer = new StringBuffer();
         Map<String, String> defaultColumnProperties = DataAuthorityUtil.defaultColumnProperties;
         stringBuffer.append("(");
-        dataAuthValueProperties.entrySet().stream().forEach(entry -> {
+        Set<Map.Entry<String, List<DataAuthValuePropertyDTO>>> entries = dataAuthValueProperties.entrySet();
+        for(Map.Entry<String, List<DataAuthValuePropertyDTO>> entry : entries){
             log.debug("数据权限规则 {} 开始拼接条件！",entry.getKey());
             stringBuffer.append("(");
             StringBuffer first = new StringBuffer("");
-            entry.getValue().stream().forEach(dataAuthValuePropertyDTO -> {
+            List<DataAuthValuePropertyDTO> value = entry.getValue();
+            // sql中不包含 1=1
+            boolean hasNotOneEqualsOne = false;
+            for(DataAuthValuePropertyDTO dataAuthValuePropertyDTO : value){
                 // 数据范围为全选，不作为筛选条件
                 if(dataAuthValuePropertyDTO.getAllFlag()){
-                    return;
+                    continue;
                 }
                 // 数据类型
                 String dataType = dataAuthValuePropertyDTO.getDataType();
@@ -448,9 +501,10 @@ public class DataAuthProcessInterceptor implements Interceptor {
                             }
                             if(StringUtils.isEmpty(metaFieldName)){
                                 log.debug("数据类型" + dataType + "未匹配到列");
-                                return;
+                                continue;
                             }
                         }
+                        hasNotOneEqualsOne = true;
                         if(StringUtils.isNotEmpty(first.toString())){
                             stringBuffer.append("and ");
                         }else{
@@ -476,6 +530,7 @@ public class DataAuthProcessInterceptor implements Interceptor {
                         stringBuffer.append(values).append(")) ");
                         // 自定义sql
                     }else if(DataAuthFilterMethodEnum.CUSTOM_SQL.name().equals(filterMethod)){
+                        hasNotOneEqualsOne = true;
                         if(StringUtils.isNotEmpty(first.toString())){
                             stringBuffer.append("and ");
                         }else{
@@ -502,12 +557,18 @@ public class DataAuthProcessInterceptor implements Interceptor {
                         throw new BizException(RespCode.SYS_DATA_AUTHORITY_DATA_TYPE_ERROR);
                     }
                 }
-            });
+            }
+            if(! hasNotOneEqualsOne){
+                return IDENTITIES;
+            }
             stringBuffer.append(") or ");
-        });
+        }
         // 将最后一个or替换为右括号
         stringBuffer.replace(stringBuffer.length() - 4,stringBuffer.length(),")");
         String result = stringBuffer.toString();
+        if(org.apache.commons.lang3.StringUtils.isEmpty(result.replaceAll("[\\s\\t\\n\\(\\)or]",""))){
+            result = IDENTITIES;
+        }
         log.debug("数据权限筛选条件sql: {}",result);
         return result;
     }
@@ -623,9 +684,50 @@ public class DataAuthProcessInterceptor implements Interceptor {
         return null;
     }
 
+    /**
+     * 包装sql后，重置到invocation中
+     * @param invocation
+     * @param boundSql
+     * @throws SQLException
+     */
+    private void resetSqlInvocation(Invocation invocation, BoundSql boundSql) throws SQLException {
+        final Object[] args = invocation.getArgs();
+        MappedStatement statement = (MappedStatement) args[0];
+        MappedStatement newStatement = newMappedStatement(statement, new BoundSqlSqlSource(boundSql));
+        MetaObject msObject =  MetaObject.forObject(newStatement, new DefaultObjectFactory(), new DefaultObjectWrapperFactory(),new DefaultReflectorFactory());
+        msObject.setValue("sqlSource.boundSql", boundSql);
+        args[0] = newStatement;
+    }
+
+    private MappedStatement newMappedStatement(MappedStatement ms, SqlSource newSqlSource) {
+        MappedStatement.Builder builder =
+                new MappedStatement.Builder(ms.getConfiguration(), ms.getId(), newSqlSource, ms.getSqlCommandType());
+        builder.resource(ms.getResource());
+        builder.fetchSize(ms.getFetchSize());
+        builder.statementType(ms.getStatementType());
+        builder.keyGenerator(ms.getKeyGenerator());
+        if (ms.getKeyProperties() != null && ms.getKeyProperties().length != 0) {
+            StringBuilder keyProperties = new StringBuilder();
+            for (String keyProperty : ms.getKeyProperties()) {
+                keyProperties.append(keyProperty).append(",");
+            }
+            keyProperties.delete(keyProperties.length() - 1, keyProperties.length());
+            builder.keyProperty(keyProperties.toString());
+        }
+        builder.timeout(ms.getTimeout());
+        builder.parameterMap(ms.getParameterMap());
+        builder.resultMaps(ms.getResultMaps());
+        builder.resultSetType(ms.getResultSetType());
+        builder.cache(ms.getCache());
+        builder.flushCacheRequired(ms.isFlushCacheRequired());
+        builder.useCache(ms.isUseCache());
+
+        return builder.build();
+    }
+
     @Override
     public Object plugin(Object target) {
-        if (target instanceof StatementHandler) {
+        if (target instanceof Executor) {
             return Plugin.wrap(target, this);
         }
         return target;
@@ -634,5 +736,16 @@ public class DataAuthProcessInterceptor implements Interceptor {
     @Override
     public void setProperties(Properties properties) {
 
+    }
+
+    class BoundSqlSqlSource implements SqlSource {
+        private BoundSql boundSql;
+        public BoundSqlSqlSource(BoundSql boundSql) {
+            this.boundSql = boundSql;
+        }
+        @Override
+        public BoundSql getBoundSql(Object parameterObject) {
+            return boundSql;
+        }
     }
 }

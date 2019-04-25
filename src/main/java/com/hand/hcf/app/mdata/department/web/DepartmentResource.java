@@ -592,6 +592,45 @@ public class DepartmentResource {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 查询租户下所有的部门 并对部门代码名称进行模糊查询
+     * @param status
+     * @return
+     */
+    /**
+     * @api {GET}  api/department/tenant/keyWord
+     * @apiDescription  查询租户下所有部门(可选条件：部门代码、部门名称、部门状态 )
+     * @apiGroup Department
+     * @apiParam {String}  keyWord 关键词
+     * @apiParam {String} status 状态
+     * @apiParamExample {json} Request-Param:
+     *     http://localhost:8000/mdata/api//department/tenant/keyWord?page=0&size=10&keyWord=&roleType=TENANT
+     * @apiSuccessExample {json} Success-Response:
+     * [{
+    "id": "1084808485898653698",
+    "parentId": null,
+    "parentDepartmentOid": null,
+    "departmentOid": "5e6ced84-54a6-4771-aa7d-ce0190ab52cd",
+    "name": "IT部",
+    "path": "IT部",
+    "status": 101,
+    "available": false,
+    "childrenDepartment": [],
+    "pathDepth": 1,
+    "rootFlag": false,
+    "hasUsers": true,
+    "hasChildrenDepartments": true,
+    "userCounts": 2,
+    "departmentCode": "003"
+    }]
+     */
+    @RequestMapping(value = "/department/tenant/keyWord" , method = RequestMethod.GET)
+    public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsKeyWord(@RequestParam(value = "keyWord" ,required = false) String keyWord,
+                                                                         @RequestParam(value = "status",required = false) Integer status){
+        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(keyWord, keyWord, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
+        return ResponseEntity.ok(result);
+    }
+
     @RequestMapping(value = "/departments/change/list", method = RequestMethod.PUT)
     public void changeUserDepartmentList(@RequestBody @Valid DepartmentAssignUserDTO dto) {
         departmentUserService.changeUsersDepartmentList(OrgInformationUtil.getCurrentTenantId(),dto);

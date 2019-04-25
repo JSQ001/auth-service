@@ -138,7 +138,88 @@ public class ExpenseTypeCategoryController {
     @GetMapping("/query")
     public ResponseEntity<List<ExpenseTypeCategory>> queryByCondition(@RequestParam("setOfBooksId") Long setOfBooksId,
                                                                       @RequestParam(value = "typeFlag", required = false, defaultValue = "0") Integer typeFlag){
-        return ResponseEntity.ok(service.listResult(setOfBooksId, typeFlag));
+        return ResponseEntity.ok(service.listResult(setOfBooksId, typeFlag, false));
+    }
+
+    /**
+     * @api {GET} /api/expense/types/category/query/enable/dataAuth 【费用大类】 所有费用大类
+     * @apiDescription 根据账套ID费用大类(含里面申请类别或者费用类别)
+     * @apiGroup ExpenseService
+     * @apiParam (请求参数) {Long} setOfBooksId 账套ID
+     * @apiParam (请求参数) {Integer} typeFlag 类型类别 0-申请 1-费用
+     * @apiParamExample {url} 请求报文:
+     * /api/expense/types/category/query?setOfBooksId=123&typeFlag=0
+     *
+     * @apiSuccess (返回参数) {Long} id  主键id
+     * @apiSuccess (返回参数) {String} name 名称
+     * @apiSuccess (返回参数) {List} expenseTypes 费用大类下的子类
+     * @apiSuccess (返回参数) {Boolean} enabled    启用标志
+     * @apiSuccess (返回参数) {Boolean} deleted    删除标志
+     * @apiSuccess (返回参数) {Integer} versionNumber    版本号
+     * @apiSuccess (返回参数) {ZonedDateTime} createdDate  创建时间
+     * @apiSuccess (返回参数) {Long} createdBy    创建人ID
+     * @apiSuccess (返回参数) {ZonedDateTime} lastUpdatedDate    最后更新时间
+     * @apiSuccess (返回参数) {Long} lastUpdatedBy    更新人ID
+     * @apiSuccessExample {json} 返回报文:
+     *   [
+     *   {
+     *   "i18n": {
+     *   "name": [
+     *   {
+     *   "language": "en_us",
+     *   "value": "aaaa"
+     *   },
+     *   {
+     *   "language": "zh_cn",
+     *   "value": "bbb"
+     *   }
+     *   ]
+     *   },
+     *   "id": "1059677501352337410",
+     *   "deleted": false,
+     *   "createdDate": "2018-11-06T13:22:58.838+08:00",
+     *   "createdBy": "1031",
+     *   "lastUpdatedDate": "2018-11-06T13:22:58.839+08:00",
+     *   "lastUpdatedBy": "1031",
+     *   "versionNumber": 1,
+     *   "enabled": true,
+     *   "name": "bbb",
+     *   "setOfBooksId": "1037906263432859649",
+     *   "tenantId": "1022057230117146625",
+     *   "sequence": 0,
+     *   "expenseTypes": [
+     *   {
+     *   "i18n": null,
+     *   "id": "1060011184605777922",
+     *   "deleted": false,
+     *   "createdDate": "2018-11-07T11:28:55.13+08:00",
+     *   "createdBy": "1031",
+     *   "lastUpdatedDate": "2018-11-07T11:28:55.131+08:00",
+     *   "lastUpdatedBy": "1031",
+     *   "versionNumber": 1,
+     *   "enabled": true,
+     *   "name": "测试",
+     *   "iconName": "meetings",
+     *   "code": "test",
+     *   "iconUrl": "https://huilianyi-uat-static.oss-cn-shanghai.aliyuncs.com//2ec774f5-7aba-486c-bd48-cf2ae74c9d9f/expenseIcon/8a950184-2032-436f-9431-db91dad1287c-meetings.png",
+     *   "tenantId": "1022057230117146625",
+     *   "setOfBooksId": "1037906263432859649",
+     *   "sequence": 0,
+     *   "typeCategoryId": "1059677501352337410",
+     *   "typeFlag": 0,
+     *   "entryMode": false,
+     *   "attachmentFlag": null,
+     *   "sourceTypeId": null,
+     *   "priceUnit": null,
+     *   "typeCategoryName": null
+     *   }]
+     *   }
+     *   ]
+     */
+    @GetMapping("/query/enable/dataAuth")
+    public ResponseEntity<List<ExpenseTypeCategory>> queryByConditionEnableAuth(@RequestParam("setOfBooksId") Long setOfBooksId,
+                                                                      @RequestParam(value = "typeFlag", required = false, defaultValue = "0") Integer typeFlag){
+        return ResponseEntity.ok(service.listResult(setOfBooksId, typeFlag, true));
     }
 
 

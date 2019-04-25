@@ -92,4 +92,9 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      * 反冲标志
      */
     private  String reversedFlag;
+
+    /**
+     * 付款总金额
+     */
+    private  BigDecimal paymentTotalAmount;
 }
