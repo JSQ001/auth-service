@@ -59,7 +59,7 @@
 
     <select id="findAccountsCount" resultType="java.lang.Integer">
         SELECT
-        COUNT (0)
+        COUNT(0)
         FROM    sys_accounts a
         WHERE   a.deleted = FALSE
         AND     a.account_set_id = #{accountSetId}

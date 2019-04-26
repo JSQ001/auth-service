@@ -671,9 +671,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         }else{
             cashTransactionClassForOtherCO.setRange("all");
         }
-        //jiu.zhao 支付
-        //return paymentService.listCashTransactionClassByRange(cashTransactionClassForOtherCO,page);
-        return null;
+        return paymentService.listCashTransactionClassByRange(cashTransactionClassForOtherCO,page);
     }
 
     /**

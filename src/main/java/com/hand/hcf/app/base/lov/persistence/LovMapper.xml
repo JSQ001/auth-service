@@ -38,7 +38,8 @@
     <select id="getDetailInfoByCode" resultType="com.hand.hcf.app.base.lov.web.dto.LovInfoDTO">
         SELECT
             l.lov_name AS title,
-            concat('/', concat(ap.app_code,ai.req_url)) AS url,
+            /** concat('/', concat(ap.app_code,ai.req_url)) AS url, jiu.zhao 去掉lov动态拼接模块名称*/
+            ai.req_url AS url,
             ai.request_method AS method,
             l.request_column as requestColumn,
             l.response_column as responseColumn
