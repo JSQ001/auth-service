@@ -440,13 +440,27 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
 
     /**
      * 批量导入差旅申请单类型定义-关联申请类型
-     * @param moduleInitDTOList
+     * @param sourceTypeTargetTypeDTOS
      * @return
      */
     @Transactional
-    public String expTravelApplicationTypeApplicationType(List<ModuleInitDTO> moduleInitDTOList) {
-        for (ModuleInitDTO moduleInitDTO : moduleInitDTOList) {
-            String setOfBooksCode = moduleInitDTO.getSetOfBooksCode();
+    public String expTravelApplicationTypeApplicationType(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS) {
+        for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOS) {
+            //账套code
+            String setOfBooksCode = sourceTypeTargetTypeDTO.getSetOfBooksCode();
+            //申请类型代码
+            String ApplicationTypeCode = sourceTypeTargetTypeDTO.getTargetTypeCode();
+            //差旅申请单类型代码
+            String travelApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
+            if (StringUtil.isNullOrEmpty(setOfBooksCode)) {
+                throw new BizException("账套code不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(ApplicationTypeCode)) {
+                throw new BizException("申请类型代码不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(travelApplicationTypeCode)) {
+                throw new BizException("差旅申请单类型代码不可为空");
+            }
             List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
             if (setOfBooksList == null || setOfBooksList.size() == 0) {
                 throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
@@ -454,67 +468,46 @@ public class TravelApplicationTypeService extends BaseService<TravelApplicationT
             if (setOfBooksList.size() > 1) {
                 throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
             }
+            //账套id
             Long setOfBooksId = setOfBooksList.get(0).getId();
-            List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOList = moduleInitDTO.getSourceTypeTargetTypeDTOList();
-            for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOList) {
-                String allTypeFlag = sourceTypeTargetTypeDTO.getAllTypeFlag();
-                //申请类型代码列表
-                List<String> ApplicationTypeCodeList = sourceTypeTargetTypeDTO.getTargetTypeCode();
-                //差旅申请单类型代码
-                String travelApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
-                TravelApplicationType travelApplicationType = new TravelApplicationType();
-                travelApplicationType.setSetOfBooksId(setOfBooksId);
-                travelApplicationType.setCode(travelApplicationTypeCode);
-                TravelApplicationType travelApplicationTypeResult = baseMapper.selectOne(travelApplicationType);
-                if (travelApplicationTypeResult == null) {
-                    String errorMessage = new String();
-                    errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + travelApplicationTypeCode + "\'差旅申请单类型代码！";
-                    throw new BizException(errorMessage);
-                }
-                //差旅申请单类型id
-                Long travelApplicationTypeId = travelApplicationTypeResult.getId();
-                //批量插入参数
-                List<TravelApplicationTypeAssignType> travelApplicationTypeAssignTypeList = new ArrayList<>();
-                //全选类型
-                if (allTypeFlag == null) {
-                    throw new BizException("全部类型不可为空");
-                }
-                //全选
-                if (allTypeFlag.equals("Y")) {
-                    if (ApplicationTypeCodeList != null) {
-                        throw new BizException("当全部类型为'Y'时,申请类型代码无需输入");
-                    }
-                    travelApplicationTypeResult.setAllTypeFlag(true);
-                    baseMapper.updateById(travelApplicationTypeResult);
-                    //清空原有关联信息
-                    assignTypeService.delete(new EntityWrapper<TravelApplicationTypeAssignType>().eq("type_id", travelApplicationTypeId));
-                } else if (allTypeFlag.equals("N")) {
-                    if (ApplicationTypeCodeList == null || ApplicationTypeCodeList.size() == 0) {
-                        throw new BizException("当全部类型为'N'时,申请类型不可为空");
-                    }
-                    //构造批量新增的参数
-                    for (String applicationTypeCode : ApplicationTypeCodeList) {
-                        Long applicationTypeId = expenseTypeService
-                                .queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, applicationTypeCode);
-                        if (applicationTypeId == null) {
-                            throw new BizException("申请类型代码\'" + applicationTypeCode + "\'不存在");
-                        }
-                        TravelApplicationTypeAssignType travelApplicationTypeAssignType = new TravelApplicationTypeAssignType();
-                        travelApplicationTypeAssignType.setTypeId(travelApplicationTypeId);
-                        travelApplicationTypeAssignType.setRequisitionTypeId(applicationTypeId);
-                        travelApplicationTypeAssignTypeList.add(travelApplicationTypeAssignType);
-                    }
-                    travelApplicationTypeResult.setAllTypeFlag(false);
-                    baseMapper.updateById(travelApplicationTypeResult);
-                    //清空原有关联信息
-                    assignTypeService.delete(new EntityWrapper<TravelApplicationTypeAssignType>().eq("type_id", travelApplicationTypeId));
-                    //插入关联申请类型
-                    assignTypeService.insertBatch(travelApplicationTypeAssignTypeList);
-                } else {
-                    throw new BizException("全部类型输入错误,只可为 'Y' 或 'N'");
-                }
 
+            TravelApplicationType travelApplicationType = new TravelApplicationType();
+            travelApplicationType.setSetOfBooksId(setOfBooksId);
+            travelApplicationType.setCode(travelApplicationTypeCode);
+            TravelApplicationType travelApplicationTypeResult = baseMapper.selectOne(travelApplicationType);
+            if (travelApplicationTypeResult == null) {
+                String errorMessage = new String();
+                errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + travelApplicationTypeCode + "\'差旅申请单类型代码！";
+                throw new BizException(errorMessage);
             }
+            //差旅申请单类型id
+            Long travelApplicationTypeId = travelApplicationTypeResult.getId();
+
+            //申请类型id
+            Long applicationTypeId = expenseTypeService
+                    .queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, ApplicationTypeCode);
+            if (applicationTypeId == null) {
+                throw new BizException("当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + ApplicationTypeCode + "\'申请类型代码");
+            }
+            //构造插入数据
+            TravelApplicationTypeAssignType travelApplicationTypeAssignType = new TravelApplicationTypeAssignType();
+            travelApplicationTypeAssignType.setTypeId(travelApplicationTypeId);
+            travelApplicationTypeAssignType.setRequisitionTypeId(applicationTypeId);
+
+            //判断是否已存在
+            if ( assignTypeService.selectList(
+                    new EntityWrapper<TravelApplicationTypeAssignType>()
+                            .eq("type_id",travelApplicationTypeId)
+                            .eq("requisition_type_id",applicationTypeId)
+            ).size() > 0 ){
+                String errorMessage = "\'" + ApplicationTypeCode + "\'申请类型已在\'" + travelApplicationTypeCode + "\'差旅申请单类型下";
+                throw new BizException(errorMessage);
+            }
+            //修改报账单关联类型为部分类型
+            travelApplicationTypeResult.setAllTypeFlag(false);
+            baseMapper.updateById(travelApplicationTypeResult);
+            //插入数据
+            assignTypeService.insert(travelApplicationTypeAssignType);
         }
         return "SUCCESS";
     }

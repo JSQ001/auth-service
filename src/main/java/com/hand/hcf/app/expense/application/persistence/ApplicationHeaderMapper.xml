@@ -181,6 +181,8 @@
         <result column="amount" property="amount" />
         <result column="associatedAmount" property="associatedAmount" />
         <result column="remarks" property="remarks" />
+        <result column="department_id" property="departmentId" />
+        <result column="employee_id" property="employeeId" />
     </resultMap>
 
     <select id="listInfoByCondition" resultMap="ApplicationAssociateResult">
@@ -194,7 +196,9 @@
         FROM  exp_prepayment_req_release err
         WHERE err.source_doc_category = #{sourceDocumentCategory}
         AND   err.source_doc_id = t.id) as associatedAmount,
-        t.remarks
+        t.remarks,
+        t.department_id,
+        t.employee_id
         from   exp_application_header t,exp_application_type t2
         where  1 = 1
         and    t.type_id = t2.id

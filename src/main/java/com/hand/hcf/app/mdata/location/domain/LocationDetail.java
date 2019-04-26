@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @TableName("sys_location_detail")
-@ApiModel("µØµãÏêÇé")
+@ApiModel("åœ°ç‚¹è¯¦æƒ…")
 public class LocationDetail implements Serializable {
 
     @TableId
@@ -23,45 +23,45 @@ public class LocationDetail implements Serializable {
     private Long id;
 
     @TableField("code")
-    @ApiModelProperty("´úÂë")
+    @ApiModelProperty("ä»£ç ")
     private String code;
 
     @TableField("language")
-    @ApiModelProperty("ÓïÑÔ")
+    @ApiModelProperty("è¯­è¨€")
     private String language;
 
     @TableField("country")
-    @ApiModelProperty("¹ú¼Ò")
+    @ApiModelProperty("å›½å®¶")
     private String country;
 
     @TableField("state")
-    @ApiModelProperty("Ê¡")
+    @ApiModelProperty("çœ")
     private String state;
 
     @TableField("city")
-    @ApiModelProperty("³ÇÊĞ")
+    @ApiModelProperty("åŸå¸‚")
     private String city;
 
     @TableField("district")
-    @ApiModelProperty("µØÇø")
+    @ApiModelProperty("åœ°åŒº")
     private String district;
 
     @TableField("description")
-    @ApiModelProperty("ÃèÊö")
+    @ApiModelProperty("æè¿°")
     private String description;
 
     @TableField("abbreviation")
-    @ApiModelProperty("ËõĞ´")
+    @ApiModelProperty("ç¼©å†™")
     private String abbreviation;
 
     @TableField(exist = false)
-    @ApiModelProperty("µØµãÏêÇé´úÂë")
+    @ApiModelProperty("åœ°ç‚¹è¯¦æƒ…ä»£ç ")
     private LocationDetailCode locationDetailCode;
     @TableField(exist = false)
-    @ApiModelProperty("¹©Ó¦ÉÌ±ğÃû¼¯ºÏ")
+    @ApiModelProperty("ä¾›åº”å•†åˆ«åé›†åˆ")
     private List<VendorAlias> vendorAliasList;
     @TableField(exist = false)
-    @ApiModelProperty("µØµãÀà")
+    @ApiModelProperty("åœ°ç‚¹ç±»")
     private Location location;
     public LocationDetail() {
 

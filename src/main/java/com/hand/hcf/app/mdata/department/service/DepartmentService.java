@@ -24,6 +24,7 @@ import com.hand.hcf.app.mdata.contact.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
 
+import com.hand.hcf.app.mdata.department.domain.DepartmentImportDTO;
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;
@@ -47,6 +48,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -1437,7 +1439,7 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
 //        } else if (childPath.length() < parentPath.length()) {
 //            return Boolean.FALSE;
 //        } else {
-//            int i = childPath.lastIndexOf(Constants.DEPARTMENT_SPLIT);
+//            int i = childPath.lastIndexOf(PaymentConstants.DEPARTMENT_SPLIT);
 //            if (i == -1) {
 //                return Boolean.FALSE;
 //            } else {
@@ -2158,6 +2160,116 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
         }
         List<Department> departments = baseMapper.selectList(wrapper);
         return mapperFacade.mapAsList(departments,DepartmentCO.class);
+    }
+
+    public Map<String,String> importDepartment(List<DepartmentImportDTO> list) {
+        StringBuilder message = new StringBuilder();
+        Map<String,String> map = new HashMap<>(2);
+        List<Department> departmentList = new ArrayList<>();
+        list.forEach(item -> {
+            String errorMessage = "";
+            long tenantId = OrgInformationUtil.getCurrentTenantId();
+            if(StringUtils.isEmpty(item.getDepartmentCode())){
+                errorMessage += "第"+item.getRowNumber()+"行，部门代码为空\r\n";
+            }else{
+                List<Department> departments = baseMapper.selectList(new EntityWrapper<Department>()
+                        .eq("department_code", item.getParentCode()));
+                if(CollectionUtils.isNotEmpty(departments)){
+                    errorMessage += "第"+item.getRowNumber()+"行，该部门已存在\r\n";
+                }
+            }
+            if(StringUtils.isEmpty(item.getName())){
+                errorMessage += "第"+item.getRowNumber()+"行，部门名称为空\r\n";
+            }
+            if(StringUtils.isEmpty(item.getStatus())){
+                errorMessage += "第"+item.getRowNumber()+"行，部门状态为空\r\n";
+            }
+            Department parentDepartment = null;
+            if(!StringUtils.isEmpty(item.getParentCode())){
+                parentDepartment = baseMapper.findByDepartmentCodeAndTenantId(item.getParentCode(),tenantId,101);
+                if(ObjectUtils.isEmpty(parentDepartment)){
+                    errorMessage += "第"+item.getRowNumber()+"行，当前租户下下上级部门不存在\r\n";
+                }
+            }
+            if("".equals(errorMessage)){
+                Department department = new Department();
+                department.setTenantId(tenantId);
+                department.setDepartmentCode(item.getDepartmentCode());
+                department.setName(item.getName());
+                department.setParentId(parentDepartment.getId());
+                department.setStatus(Integer.valueOf(item.getStatus()));
+                departmentList.add(department);
+
+            }else{
+                message.append(errorMessage);
+            }
+        });
+        if ("".equals(message.toString())) {
+            for(Department department : departmentList){
+                baseMapper.insert(department);
+            }
+            map.put("导入成功","success");
+            return map;
+        } else {
+            map.put("导入失败","fail");
+            map.put("message",message.toString());
+            return map;
+        }
+    }
+
+    /**
+     *  根据部门code 部门名称 模糊查询部门信息
+     * @param id       账户当前部门id
+     * @param ids      手动选择id
+     * @param keyWord  关键词
+     * @return         部门信息
+     */
+    public List<Department> selectByEmpOidKeyWord(String id,List<Long> ids, String keyWord) {
+        if (id != null) {
+            ids = Collections.singletonList(departmentGroupService.selectByEmpOid(id).getDepartmentId());
+        }
+        Wrapper<Department> departmentWrapper = new EntityWrapper<Department>()
+                .in(ids != null ,"id", ids)
+                .eq("deleted", false);
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(keyWord)) {
+            departmentWrapper.andNew()
+                    .like("department_code", keyWord)
+                    .or()
+                    .like("name", keyWord);
+        }
+        return departmentMapper.selectList(departmentWrapper);
+    }
+
+    /**
+     * 通过部门id查询部门及子部门
+     * @param unitId       部门id
+     * @param keyWord      关键词
+     * @param includeOwn   是否包含本级部门
+     * @param mybatisPage  分页
+     * @return             部门信息
+     */
+    public com.baomidou.mybatisplus.plugins.Page<Department> departmentChildrenById(Long unitId,
+                                                   String keyWord,
+                                                   boolean includeOwn,
+                                                   com.baomidou.mybatisplus.plugins.Page<Department> mybatisPage) {
+        Set<Long> unitChildrenIdByUnitId = listDepartmentChildrenIdById(unitId);
+        if(includeOwn){
+            unitChildrenIdByUnitId.add(unitId);
+        }
+        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isEmpty(unitChildrenIdByUnitId)){
+            return mybatisPage.setRecords(new ArrayList<>());
+        }
+        Wrapper<Department> departmentWrapper = new EntityWrapper<Department>()
+                .in("id", unitChildrenIdByUnitId).orderBy("department_code");
+        if(! org.apache.commons.lang3.StringUtils.isEmpty(keyWord)){
+            departmentWrapper.andNew()
+                    .like("department_code", keyWord)
+                    .or()
+                    .like("name", keyWord);
+        }
+        List<Department> result = baseMapper.selectPage(mybatisPage,departmentWrapper);
+        mybatisPage.setRecords(mapperFacade.mapAsList(result,Department.class));
+        return mybatisPage;
     }
 
 }

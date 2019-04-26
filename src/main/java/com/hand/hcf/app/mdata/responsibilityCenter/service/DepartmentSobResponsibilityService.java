@@ -34,7 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -286,7 +288,7 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
         }
         if(departmentSobResponsibility != null){
             if(departmentSobResponsibility.getDefaultResponsibilityCenter() != null){
-                return responsibilityCenterService.selectById(departmentSobResponsibility.getDefaultResponsibilityCenter());
+                return responsibilityCenterService.getResponsibilityCenterById(departmentSobResponsibility.getDefaultResponsibilityCenter());
             }
         }
         return null;
@@ -337,100 +339,45 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
         }
     }
 
-    /**
-     * 根据公司、部门，获取部门可用责任中心
-     * @param departmentId
-     * @param companyId
-     * @return
-     */
-    public List<ResponsibilityCenter> listDepartmentAvailableResCenterByCond(Long departmentId, Long companyId){
-        List<ResponsibilityCenter> responsibilityCenterList = new ArrayList<>();
-        Wrapper wrapper = new EntityWrapper<DepartmentSobResponsibility>()
-                .eq("company_id",companyId)
-                .eq("department_id", departmentId);
-        DepartmentSobResponsibility departmentSobResponsibility = null;
-        List<DepartmentSobResponsibility> list = this.selectList(wrapper);
-        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(list)){
-            departmentSobResponsibility = list.get(0);
-        }
-        if(departmentSobResponsibility == null){
-            Company company = companyService.selectById(companyId);
-            wrapper = new EntityWrapper<DepartmentSobResponsibility>()
-                    .eq("set_of_books_id",company.getSetOfBooksId())
-                    .eq("department_id", departmentId)
-                    .isNull("company_id");
-            list = this.selectList(wrapper);
-            if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(list)){
-                departmentSobResponsibility = list.get(0);
-            }
-        }
-        if(departmentSobResponsibility != null){
-            //获取当前部门责任中心下可用责任中心
-            responsibilityCenterList = listDepartmentResCenter(departmentSobResponsibility);
-        }
-        return responsibilityCenterList;
-    }
-
-
-    public List<ResponsibilityCenter> listDepartmentResCenter(DepartmentSobResponsibility departmentSobResponsibility){
-        List<ResponsibilityCenter> responsibilityCenterList = new ArrayList<>();
-        Long setOfBooksId = departmentSobResponsibility.getSetOfBooksId();
-        if(departmentSobResponsibility.getAllResponsibilityCenter().equals("Y")){
-            //获取当前所选账套下所有启用的责任中心
-            responsibilityCenterList = responsibilityCenterService.selectList(
-                    new EntityWrapper<ResponsibilityCenter>()
-                            .eq("set_of_books_id",setOfBooksId)
-                            .eq("enabled",true));
-        }else {
-            //选择部分 获取当前部门所选的责任中心
-            List<Long> responsibilityCenterIdList = departmentResCenterService.selectList(
-                    new EntityWrapper<DepartmentResponsibilityCenter>()
-                            .eq("set_of_books_id",setOfBooksId)
-                            .eq("department_id",departmentSobResponsibility.getDepartmentId())
-                            .eq("relation_id",departmentSobResponsibility.getId()))
-                    .stream()
-                    .map(DepartmentResponsibilityCenter::getResponsibilityCenterId)
-                    .collect(Collectors.toList());
-            responsibilityCenterList= responsibilityCenterService.listByResponsibilityCenterConditionByIds(setOfBooksId,
-                    responsibilityCenterIdList,true);
-        }
-        return  responsibilityCenterList;
-    }
-
-    public String importDepartmentPositionUser(List<DepartmentSobResponsibilityImportDTO> list) {
-        StringBuilder message = new StringBuilder();
+    public Map<String, Object> importDepartmentSobResponsibility(List<DepartmentSobResponsibilityImportDTO> list) {
+        List<String> message = new ArrayList<>();
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
         list.forEach(item -> {
-            String errorMessage = "";
-            if (TypeConversionUtils.isEmpty(item.getTenantId())
-                    || TypeConversionUtils.isEmpty(item.getSetOfBooksCode())
+            StringBuilder errorMessage = new StringBuilder();
+            // 必输字段非空校验
+            if (TypeConversionUtils.isEmpty(item.getSetOfBooksCode())
                     || TypeConversionUtils.isEmpty(item.getDepartmentCode())
                     || TypeConversionUtils.isEmpty(item.getResponsibilityCenterCode())) {
-                errorMessage += "必输字段为空";
-                message.append(errorMessage);
+                errorMessage.append("必输字段为空;");
+                message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage));
             } else {
-                Long tenantId = TypeConversionUtils.parseLong(item.getTenantId());
+                // 账套校验
                 SetOfBooks setOfBooks = setOfBooksService.getSetOfBooksByTenantId(tenantId, item.getSetOfBooksCode());
                 if (ObjectUtils.isEmpty(setOfBooks)) {
-                    errorMessage += "当前租户不存在该账套" + item.getSetOfBooksCode();
+                    errorMessage.append("当前租户不存在该账套").append(item.getSetOfBooksCode()).append(';');
                 }
+                // 公司校验
                 CompanyCO companyCO = null;
                 if (TypeConversionUtils.isNotEmpty(item.getCompanyCode())) {
                     companyCO = companyService.getByCompanyCode(item.getCompanyCode());
                     if (ObjectUtils.isEmpty(companyCO)) {
-                        errorMessage += "当前账套不存在该公司" + item.getCompanyCode();
+                        errorMessage.append("当前账套不存在该公司").append(item.getCompanyCode()).append(';');
                     }
                 }
+                // 部门校验
                 DepartmentCO department = departmentService.getDepartmentByCodeAndTenantId(item.getDepartmentCode());
                 if (ObjectUtils.isEmpty(department)) {
-                    errorMessage += "当前租户下不存在该部门" + item.getDepartmentCode();
+                    errorMessage.append("当前租户下不存在该部门").append(item.getDepartmentCode()).append(';');
                 }
+                // 责任中心校验
                 ResponsibilityCenter responsibilityCenter = responsibilityCenterService.selectOne(
                         new EntityWrapper<ResponsibilityCenter>()
                         .eq("responsibility_center_code", item.getResponsibilityCenterCode())
                 );
                 if (ObjectUtils.isEmpty(responsibilityCenter)) {
-                    errorMessage += "当前租户下不存在该责任中心" + item.getResponsibilityCenterCode();
+                    errorMessage.append("当前租户下不存在该责任中心").append(item.getResponsibilityCenterCode()).append(';');
                 }
+                // 默认责任中心校验
                 ResponsibilityCenter defaultResponsibilityCenter = null;
                 if (TypeConversionUtils.isNotEmpty(item.getDefaultResponsibilityCenter())) {
                     defaultResponsibilityCenter = responsibilityCenterService.selectOne(
@@ -438,42 +385,105 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
                             .eq("responsibility_center_code", item.getDefaultResponsibilityCenter())
                     );
                     if (ObjectUtils.isEmpty(defaultResponsibilityCenter)) {
-                        errorMessage += "当前租户下不存在该责任中心" + item.getDefaultResponsibilityCenter();
+                        errorMessage.append("当前租户下不存在该责任中心")
+                                .append(item.getDefaultResponsibilityCenter()).append(';');
                     }
                 }
-                if ("".equals(errorMessage)) {
-                    DepartmentSobResponsibility departmentSobResponsibility = null;
-                    if (!ObjectUtils.isEmpty(defaultResponsibilityCenter)) {
-                        departmentSobResponsibility = getDepartmentSobResponsibility(tenantId, setOfBooks,
-                                companyCO, department, defaultResponsibilityCenter);
-                    }
-                    List<DepartmentResponsibilityCenter> departmentCenters = departmentResCenterService.selectList(
-                            new EntityWrapper<DepartmentResponsibilityCenter>()
-                            .eq("tenant_id", tenantId)
-                            .eq("set_of_books_id", setOfBooks.getId())
-                            .eq("department_id", department.getId())
-                    );
-                    if (departmentCenters.size() == 0) {
-                        DepartmentResponsibilityCenter departmentCenter = new DepartmentResponsibilityCenter();
-                        departmentCenter.setTenantId(tenantId);
-                        departmentCenter.setSetOfBooksId(setOfBooks.getId());
-                        departmentCenter.setDepartmentId(department.getId());
-                        if (departmentSobResponsibility != null) {
-                            departmentCenter.setRelationId(departmentSobResponsibility.getId());
-                        }
-                        departmentCenter.setResponsibilityCenterId(responsibilityCenter.getId());
-                        departmentResCenterService.insert(departmentCenter);
-                    }
+                if (!"".equals(errorMessage.toString())) {
+                    message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage));
                 } else {
-                    message.append(errorMessage);
+                    StringBuilder str = new StringBuilder();
+                    int count = baseMapper.selectCount(
+                            new EntityWrapper<DepartmentSobResponsibility>()
+                                    .eq("tenant_id", tenantId)
+                                    .eq("set_of_books_id", setOfBooks.getId())
+                                    .eq("department_id", department.getId())
+                                    .eq(TypeConversionUtils.isNotEmpty(companyCO), "company_id",
+                                            TypeConversionUtils.isNotEmpty(companyCO)?companyCO.getId():0L));
+                    if (count > 0) {
+                        str.append("当前账套")
+                                .append(setOfBooks.getSetOfBooksCode())
+                                .append("部门")
+                                .append(department.getDepartmentCode())
+                                .append("已存在责任中心配置；");
+                    }
+                    int resCount = departmentResCenterService.selectCount(
+                            new EntityWrapper<DepartmentResponsibilityCenter>()
+                                    .eq("tenant_id", tenantId)
+                                    .eq("set_of_books_id", setOfBooks.getId())
+                                    .eq("department_id", department.getId())
+                                    .eq("responsibility_center_id", responsibilityCenter.getId())
+                    );
+                    if (resCount > 0) {
+                        str.append("当前账套")
+                                .append(setOfBooks.getSetOfBooksCode())
+                                .append("部门")
+                                .append(department.getDepartmentCode())
+                                .append("已存在责任中心")
+                                .append(responsibilityCenter.getResponsibilityCenterCode())
+                                .append("分配关系；");
+                    }
+                    if (!"".equals(str.toString())) {
+                        message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), str.toString()));
+                    }
                 }
             }
         });
-        if ("".equals(message.toString())) {
-            return "导入成功";
+        Map<String, Object> result = new HashMap<>(2);
+        if (message.size() == 0) {
+            importData(list);
+            message.add("导入成功");
+            result.put("status", "success");
         } else {
-            return "导入失败："+message.toString();
+            result.put("status", "fail");
         }
+        result.put("message", message);
+        return result;
+    }
+
+    private void importData(List<DepartmentSobResponsibilityImportDTO> list) {
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        list.forEach(item -> {
+            SetOfBooks setOfBooks = setOfBooksService.getSetOfBooksByTenantId(tenantId, item.getSetOfBooksCode());
+            CompanyCO companyCO = null;
+            if (TypeConversionUtils.isNotEmpty(item.getCompanyCode())) {
+                companyCO = companyService.getByCompanyCode(item.getCompanyCode());
+            }
+            DepartmentCO department = departmentService.getDepartmentByCodeAndTenantId(item.getDepartmentCode());
+            ResponsibilityCenter responsibilityCenter = responsibilityCenterService.selectOne(
+                    new EntityWrapper<ResponsibilityCenter>()
+                            .eq("responsibility_center_code", item.getResponsibilityCenterCode())
+            );
+            ResponsibilityCenter defaultResponsibilityCenter = null;
+            if (TypeConversionUtils.isNotEmpty(item.getDefaultResponsibilityCenter())) {
+                defaultResponsibilityCenter = responsibilityCenterService.selectOne(
+                        new EntityWrapper<ResponsibilityCenter>()
+                                .eq("responsibility_center_code", item.getDefaultResponsibilityCenter())
+                );
+            }
+            // 插入部门默认责任中心表
+            DepartmentSobResponsibility departmentSobResponsibility = getDepartmentSobResponsibility(tenantId,
+                    setOfBooks, companyCO, department, defaultResponsibilityCenter);
+            List<DepartmentResponsibilityCenter> departmentCenters = departmentResCenterService.selectList(
+                    new EntityWrapper<DepartmentResponsibilityCenter>()
+                            .eq("tenant_id", tenantId)
+                            .eq("set_of_books_id", setOfBooks.getId())
+                            .eq("department_id", department.getId())
+                            .eq("responsibility_center_id", responsibilityCenter.getId())
+            );
+            // 插入部门责任中心关联关系表
+            if (departmentCenters.size() == 0) {
+                DepartmentResponsibilityCenter departmentCenter = new DepartmentResponsibilityCenter();
+                departmentCenter.setTenantId(tenantId);
+                departmentCenter.setSetOfBooksId(setOfBooks.getId());
+                departmentCenter.setDepartmentId(department.getId());
+                if (departmentSobResponsibility != null) {
+                    departmentCenter.setRelationId(departmentSobResponsibility.getId());
+                }
+                departmentCenter.setResponsibilityCenterId(responsibilityCenter.getId());
+                departmentResCenterService.insert(departmentCenter);
+            }
+        });
     }
 
     /**
@@ -507,20 +517,11 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
             if (TypeConversionUtils.isNotEmpty(companyCO)) {
                 departmentSobResponsibility.setCompanyId(companyCO.getId());
             }
-            departmentSobResponsibility.setDefaultResponsibilityCenter(defaultResponsibilityCenter.getId());
+            if (TypeConversionUtils.isNotEmpty(defaultResponsibilityCenter)) {
+                departmentSobResponsibility.setDefaultResponsibilityCenter(defaultResponsibilityCenter.getId());
+            }
             departmentSobResponsibility.setAllResponsibilityCenter("N");
             baseMapper.insert(departmentSobResponsibility);
-        } else if (count == 1) {
-            // 已经分配了默认责任中心，则更新该默认责任中心
-            departmentSobResponsibility = baseMapper.selectList(
-                    new EntityWrapper<DepartmentSobResponsibility>()
-                            .eq("tenant_id", tenantId)
-                            .eq("set_of_books_id", setOfBooks.getId())
-                            .eq("department_id", department.getId())
-                            .eq(TypeConversionUtils.isNotEmpty(companyCO), "company_id", companyCO.getId())
-            ).get(0);
-            departmentSobResponsibility.setDefaultResponsibilityCenter(defaultResponsibilityCenter.getId());
-            this.updateById(departmentSobResponsibility);
         }
         return departmentSobResponsibility;
     }

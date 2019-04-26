@@ -343,7 +343,7 @@
     </changeSet>
 
     <changeSet id="201904041438008" author="bin.xie">
-        <validCheckSum>8:0d79fa8ee29f1cdc686528ee87d424b6</validCheckSum>
+        <validCheckSum>8:b8710820afbc8fa24d0f5042c3bb4877</validCheckSum>
         <comment>初始化应用多语言数据</comment>
         <sql>truncate table sys_front_locale</sql>
         <sqlFile path="classpath:db/liquibase/base/v1.0.0/init/sys_front_locale.sql" encoding="UTF-8"/>

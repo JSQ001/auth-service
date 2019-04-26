@@ -1,7 +1,7 @@
 package com.hand.hcf.app.mdata.supplier.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hand.hcf.app.common.co.VendorInfoCO;
-
 
 import lombok.Data;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -21,7 +21,10 @@ public class VendorInfoforStatusDTO extends VendorInfoCO {
     private String vendorStatus;
 
     private String vendorBankStatus;
-
+    /**
+     * 是否启用
+     */
+    private String venTypeString;
     /**
      * 供应商模板导入功能 获取供应商类别数组
      */

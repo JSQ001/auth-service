@@ -683,8 +683,7 @@ public class OrganizationService {
                                                                    String code,
                                                                    String name,
                                                                    Page page) {
-        //jiu.zhao TODO
-        return responsibilityCenterClient.pageByCompanyAndDepartment(departmentId,companyId,code,name,page.getCurrent(),page.getSize());
+        return responsibilityCenterClient.pageByCompanyAndDepartment(departmentId,companyId,code,name,page.getCurrent() - 1,page.getSize());
     }
 
     public List<CompanyCO> listCompanyBySetOfBooksIdAndCodeAndName(Long setOfBooksId, String companyCode){
@@ -694,9 +693,21 @@ public class OrganizationService {
     public DepartmentCO getDepartmentByCodeAndTenantId(String code){
         return departmentClient.getDepartmentByCodeAndTenantId(code);
     }
-    public Page<ResponsibilityCenterCO> pageDepartmentResCenterByCond(Long departmentId, Long companyId,Page page) {
-        //jiu.zhao 修改三方接口
-        //return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page);
-        return responsibilityCenterClient.pageDepartmentAvailableResCenterByCond(departmentId,companyId,page.getCurrent() - 1, page.getSize());
+
+    public Page<DepartmentCO> pageAssociateDepartmentByCond(Long companyId,
+                                                            String departmentCode,
+                                                            String departmentName,
+                                                            List<Long> ids,
+                                                            Long setOfBooksId,
+                                                            Integer status,
+                                                            Page page) {
+        /*return companyClient.pageAssociateDepartmentByCond(companyId, departmentCode, null, null,
+                departmentName, ids, setOfBooksId, status, null, page);*/
+        return companyClient.pageAssociateDepartmentByCond(companyId, departmentCode, null, null,
+                departmentName, ids, setOfBooksId, status, null, page.getCurrent() - 1, page.getSize());
+    }
+
+    public UserGroupCO getUserGroupByCode(String userGroupCode){
+        return userClient.getUserGroupByCode(userGroupCode);
     }
 }

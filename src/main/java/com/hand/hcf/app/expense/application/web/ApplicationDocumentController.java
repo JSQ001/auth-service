@@ -329,7 +329,53 @@ public class ApplicationDocumentController {
         Page page = PageUtil.getPage(pageable);
         // 获取查询条件SQL
         Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
-                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId);
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, false);
+        //查询
+        List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 申请单关闭查询
+     *
+     * @param documentNumber
+     * @param typeId
+     * @param dateFrom
+     * @param dateTo
+     * @param amountFrom
+     * @param amountTo
+     * @param closedFlag
+     * @param currencyCode
+     * @param remarks
+     * @param companyId
+     * @param employeeId
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/header/query/closed/condition/enable/dataAuth")
+    public ResponseEntity listClosedByConditionEnableDataAuth(@RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                                @RequestParam(value = "typeId", required = false) Long typeId,
+                                                @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                                                @RequestParam(value = "dateTo", required = false) String dateTo,
+                                                @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                                @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                                @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                                                @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                                                @RequestParam(value = "remarks", required = false) String remarks,
+                                                @RequestParam(value = "companyId", required = false) List<Long> companyId,
+                                                @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                                Pageable pageable) {
+
+        ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
+        ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTo);
+        if (requisitionDateTo != null) {
+            requisitionDateTo = requisitionDateTo.plusDays(1);
+        }
+        Page page = PageUtil.getPage(pageable);
+        // 获取查询条件SQL
+        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+                requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, true);
         //查询
         List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);

@@ -56,5 +56,8 @@
         <if test="companyId != null">
             AND t.company_id = #{companyId}
         </if>
+        <if test="dataAuthLabel != null and dataAuthLabel != ''">
+            and #{dataAuthLabel}
+        </if>
     </select>
 </mapper>

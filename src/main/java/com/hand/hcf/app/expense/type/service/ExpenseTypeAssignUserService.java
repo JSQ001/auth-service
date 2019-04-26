@@ -3,6 +3,7 @@ package com.hand.hcf.app.expense.type.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SetOfBooksInfoCO;
+import com.hand.hcf.app.common.co.UserGroupCO;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
@@ -72,11 +73,33 @@ public class ExpenseTypeAssignUserService extends BaseService<ExpenseTypeAssignU
                 if(departmentCO != null){
                     dto.setUserTypeId(departmentCO.getId());
                 }else{
-                    stringList.add("适用code不存在");
+                    stringList.add("适用部门code不存在");
                 }
             }else if(AssignUserEnum.USER_GROUP.getKey().equals(dto.getApplyType())){
-                //todo 用户组无三方接口
+                UserGroupCO userGroupCO = organizationService.getUserGroupByCode(dto.getUserTypeCode());
+                if(userGroupCO != null){
+                    dto.setUserTypeId(userGroupCO.getId());
+                }else{
+                    stringList.add("适用人员组code不存在");
+                }
             }
+            if(!TypeConversionUtils.isEmpty(dto.getExpenseTypeId()) && !TypeConversionUtils.isEmpty(dto.getApplyType())) {
+                Integer tempApplyType = null;
+                if(AssignUserEnum.USER_GROUP.getKey().equals(dto.getApplyType())){
+                    tempApplyType = AssignUserEnum.USER_DEPARTMENT.getKey();
+                }else if(AssignUserEnum.USER_DEPARTMENT.getKey().equals(dto.getApplyType())){
+                    tempApplyType = AssignUserEnum.USER_GROUP.getKey();
+                }
+                List<ExpenseTypeAssignUser> temp = baseMapper.selectList(new EntityWrapper<ExpenseTypeAssignUser>()
+                        .eq("expense_type_id", dto.getExpenseTypeId())
+                        //.eq("user_type_id",item.getUserTypeId())
+                        .eq("apply_type", tempApplyType)
+                );
+                if(!CollectionUtils.isEmpty(temp)){
+                    stringList.add("已存在不同适用类型的分配数据！");
+                }
+            }
+
         }
         if(!CollectionUtils.isEmpty(stringList)){
             errorMap.put(lineNumber,stringList);
@@ -88,6 +111,7 @@ public class ExpenseTypeAssignUserService extends BaseService<ExpenseTypeAssignU
         int line = 1;
         for(ExpenseTypeAssignUserInitDTO item :dtoList){
             checkExpenseTypeInitData(item,line);
+            String lineNumber = "第" + line + "行";
             if(item.getResultMap().isEmpty()){
                 List<ExpenseTypeAssignUser> temp = baseMapper.selectList(new EntityWrapper<ExpenseTypeAssignUser>()
                         .eq("expense_type_id", item.getExpenseTypeId())
@@ -98,6 +122,14 @@ public class ExpenseTypeAssignUserService extends BaseService<ExpenseTypeAssignU
                     ExpenseTypeAssignUser assignUser = new ExpenseTypeAssignUser();
                     BeanUtils.copyProperties(item,assignUser);
                     baseMapper.insert(assignUser);
+                }else{
+                    //不更新，直接已存在
+                    List<String> stringList = new ArrayList<>();
+                    stringList.add("该类型已经分配过该适用人员组或部门");
+                    if(!org.apache.commons.collections4.CollectionUtils.isEmpty(stringList)) {
+                        item.getResultMap().put(lineNumber,stringList);
+                        resultMap.putAll(item.getResultMap());
+                    }
                 }
             }else{
                 resultMap.putAll(item.getResultMap());

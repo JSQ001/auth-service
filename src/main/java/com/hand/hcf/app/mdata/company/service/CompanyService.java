@@ -11,30 +11,29 @@ import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
+import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.*;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.RandomUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.company.domain.Company;
-import com.hand.hcf.app.mdata.company.domain.CompanyGroupAssign;
-import com.hand.hcf.app.mdata.company.domain.CompanyLevel;
-import com.hand.hcf.app.mdata.company.domain.CompanySecurity;
+import com.hand.hcf.app.mdata.company.domain.*;
 import com.hand.hcf.app.mdata.company.dto.*;
+import com.hand.hcf.app.mdata.company.persistence.CompanyLevelMapper;
 import com.hand.hcf.app.mdata.company.persistence.CompanyMapper;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyI18nService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;
 import com.hand.hcf.app.mdata.department.service.DepartmentRoleService;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
+import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
@@ -58,6 +57,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,7 +75,8 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
 
     @Autowired
     private MapperFacade mapper;
-
+    @Autowired
+    private CompanyLevelMapper companyLevelMapper;
 
     @Autowired
     private CompanyCacheService companyCacheService;
@@ -125,6 +126,9 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
 
     @Autowired
     private ContactService contactService;
+
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
     public List<Company> findAll() {
         return selectList(null);
@@ -340,7 +344,15 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
             throw new BizException(RespCode.COMPANY_6030007);
         }
         UUID uuid = UUID.randomUUID();
-
+        /*redisTemplate.execute(new RedisCallback() {
+            @Override
+            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                byte[] key = (REDIS_KEY + uuid).getBytes(Charset.forName("utf8"));
+                connection.set(key, verifyCode.getBytes(Charset.forName("utf8")));
+                connection.expire(key, CacheConstants.cacheExpireMap.get(REDIS_KEY));
+                return null;
+            }
+        });*/
         try {
             return VerifyCodeDTO.builder().attachmentOid(uuid).image(new String(Base64.getEncoder().encode(image), "UTF-8")).build();
         } catch (Exception e) {
@@ -472,8 +484,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         String departmentName = departmentPath.substring(departmentPath.lastIndexOf(Constants.DEPARTMENT_SPLIT) + 1);
         department = departmentService.findByPathAndCompanyCompanyOid(departmentPath, company.getCompanyOid(), DepartmentTypeEnum.FIND_ENABLN_DISABLE.getId());
         if (department == null) {
-            department = new Department();
-            List<Department> parentDepartments = null;
+            List<Department> parentDepartments;
             Department parentDepartment = null;
             if (departmentPath.contains(Constants.DEPARTMENT_SPLIT)) {
                 String parentPath = departmentPath.substring(0, departmentPath.lastIndexOf(Constants.DEPARTMENT_SPLIT));
@@ -585,7 +596,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return mybatisPage;
     }
 
-    public Page<CompanyDTO> getCompanyBySetOfBooksIdAndCondition(Long setOfBooksId, String companyCode, String name, String companyCodeFrom, String companyCodeTo, Long companyGroupId, Pageable pageable) {
+    public Page<CompanyDTO> getCompanyBySetOfBooksIdAndCondition(Long setOfBooksId, String companyCode, String name, String companyCodeFrom, String companyCodeTo, Long companyGroupId, boolean dataAuthFlag, Pageable pageable) {
         Page mybatisPage = PageUtil.getPage(pageable);
 
         List<Long> restrictionCompanyIds = new ArrayList<>();
@@ -593,7 +604,14 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
             List<CompanyGroupAssign> groupAssigns = companyGroupAssignService.findCompanyGroupByCompanyGroupId(companyGroupId);
             restrictionCompanyIds = groupAssigns.stream().map(CompanyGroupAssign::getCompanyId).collect(Collectors.toList());
         }
-        List<Company> companies = baseMapper.findAllBySetOfBooksId(setOfBooksId, name, companyCode, companyCodeFrom, companyCodeTo, restrictionCompanyIds, null, mybatisPage);
+        String dataAuthLabel = null;
+        if (dataAuthFlag) {
+            Map<String, String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_company");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        List<Company> companies = baseMapper.findAllBySetOfBooksId(setOfBooksId, name, companyCode, companyCodeFrom, companyCodeTo, restrictionCompanyIds, null, dataAuthLabel, mybatisPage);
         List<CompanyDTO> companyDTOs = new ArrayList<>();
         CompanyDTO companyDTO = null;
         for (Company company : companies) {
@@ -617,15 +635,25 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @param pageable：分页对象
      * @return
      */
-    public Page<CompanyDTO> findCompanyByTerm(Long tenantId, String companyCode, String name, Long setOfBooksId, Long legalEntityId, Boolean enabled, Pageable pageable) {
+    public Page<CompanyDTO> findCompanyByTerm(Long tenantId, String companyCode, String name, Long setOfBooksId, Long legalEntityId, Boolean enabled,Boolean dataAuthFlag, Pageable pageable) {
         Page mybatisPage = PageUtil.getPage(pageable);
-
-        List<Company> companies = baseMapper.getByQO(CompanyQO.builder().tenantId(tenantId).
-                setOfBooksId(setOfBooksId).
-                legalEntityId(legalEntityId).
-                companyCode(companyCode).
-                name(name).
-                enabled(enabled).build(), mybatisPage);
+        String dataAuthLabel = null;
+        if (dataAuthFlag) {
+            Map<String, String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_company");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        List<Company> companies = baseMapper.selectPage(mybatisPage, new EntityWrapper<Company>()
+                .eq(tenantId != null, "tenant_id", tenantId)
+                .eq(legalEntityId != null, "legal_entity_id", legalEntityId)
+                .eq(setOfBooksId != null, "set_of_books_id", setOfBooksId)
+                .eq(companyCode != null, "company_code", companyCode)
+                .eq(name != null, "name", name)
+                .eq(enabled != null, "enabled", enabled)
+                .and(dataAuthLabel != null, dataAuthLabel)
+                .orderBy(companyCode)
+        );
         List<CompanyDTO> companyDTOs = new ArrayList<>();
         CompanyDTO companyDTO = null;
         for (Company company : companies) {
@@ -876,25 +904,51 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @param pageable
      * @return
      */
-    public Page<Company> findBySetOfBookAndNameLike(Long setOfBooksId, String keyword, Boolean enabled, Long ignoreCompanyId, Pageable pageable) {
+    public Page<Company> findBySetOfBookAndNameLike(Long setOfBooksId,
+                                                    String keyword,
+                                                    Boolean enabled,
+                                                    Long ignoreCompanyId,
+                                                    boolean dataAuthFlag,
+                                                    boolean setOfBooksFlag,
+                                                    Pageable pageable) {
         Wrapper<Company> wrapper = new EntityWrapper<Company>();
 
-        // 账套ID
-        wrapper.eq("set_of_books_id", setOfBooksId);
+        if(dataAuthorityMetaHandler.checkEnabledDataAuthority()){
+
+        }else {
+            // 账套ID
+            wrapper.eq(setOfBooksId != null,"set_of_books_id", setOfBooksId);
+            //不包括ignoreCompanyId
+            wrapper.ne(!StringUtils.isEmpty(ignoreCompanyId), "id", ignoreCompanyId);
+        }
+        //查询条件中，公司前有账套选择，还是需要set_of_books_id条件的，
+        // 这种情况有可能会出现 set_of_books_id = 1 and set_of_books_id = 1,很尬但是数据是正确的
+        if(setOfBooksFlag){
+            // 账套ID
+            wrapper.eq(setOfBooksId != null,"set_of_books_id", setOfBooksId);
+        }
         // 公司名称和代码模糊匹配
         if (!StringUtils.isEmpty(keyword)) {
             wrapper.andNew().like("name", keyword)
                     .or().like("company_code", keyword);
         }
-        //不包括ignoreCompanyId
-        wrapper.ne(!StringUtils.isEmpty(ignoreCompanyId), "id", ignoreCompanyId);
         // 根据公司代码升序排
         wrapper.orderBy("company_code", true);
         // 根据生成的条件查找公司列表
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"sys_company");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        wrapper.and(dataAuthLabel != null,dataAuthLabel);
         List<Company> companies = baseMapper.selectList(wrapper);
 
         Page mybatisPage = PageUtil.getPage(pageable);
         mybatisPage.setRecords(companies);
+        mybatisPage.setTotal(companies.size());
         return mybatisPage;
     }
 
@@ -949,7 +1003,23 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return baseMapper.findByIdIn(companyIds);
     }
 
+    public String getCompanyRegistrationTokenForTest(UUID attachmentOid) {
+        final String[] verifyCode = {""};
+        /*redisTemplate.execute(new RedisCallback() {
+            @Override
+            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                byte[] key = (REDIS_KEY + attachmentOid).getBytes(Charset.forName("utf8"));
+                byte[] val = connection.get(key);
+                if (val == null) {
+                    throw new ValidationException(new ValidationError("token", "verifyCode not exist"));
+                }
+                verifyCode[0] = new String(val, Charset.forName("utf8"));
+                return null;
+            }
+        });*/
+        return verifyCode[0];
 
+    }
 
     public Company findCompanyByCompanyCodeAndTenantId(String companyCode, Long tenantId) {
         return baseMapper.getByQO(CompanyQO.builder().tenantId(tenantId).companyCode(companyCode).build()).get(0);
@@ -967,13 +1037,14 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
     }
 
     /**
-     *  公司权限查询 companayCode Name 模糊查询
-     * @param tenantId  租户id
-     * @param keyWord   关键词
-     * @param page      分页
-     * @return          公司list
+     * 公司权限查询 companayCode Name 模糊查询
+     *
+     * @param tenantId 租户id
+     * @param keyWord  关键词
+     * @param page     分页
+     * @return 公司list
      */
-    public List<CompanyDTO> getCompaniesByTenantId(Long tenantId, String keyWord,Page page) {
+    public List<Company> getCompaniesByTenantId(Long tenantId, String keyWord, Page page) {
         Wrapper<Company> companiesWrapper = new EntityWrapper<Company>()
                 .eq("tenant_id", tenantId);
         if (!StringUtils.isEmpty(keyWord)) {
@@ -983,13 +1054,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
                     .like("name", keyWord);
         }
         List<Company> companies = baseMapper.selectPage(page, companiesWrapper);
-        List<CompanyDTO> companyDTOs = new ArrayList<>();
-        CompanyDTO companyDTO;
-        for (Company company : companies) {
-            companyDTO = companyToCompanyDTO(company);
-            companyDTOs.add(quoteAttributeAssignment(companyDTO));
-        }
-        return companyDTOs;
+        return companies;
     }
 
     public List<CompanySobDTO> getCompaniesByTenantIdNotPage(Long tenantId) {
@@ -1127,7 +1192,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return baseMapper.getByQO(CompanyQO.builder().companyOid(companyOid).build()).get(0);
     }
 
-    public Page<CompanyDTO> findCompanyDTOByTenantId(Long tenantId, Long infoId, String companyCode, String name, Long setOfBooksId, Boolean isEnabled, Pageable pageable) {
+    public Page<CompanyDTO> findCompanyDTOByTenantId(Long tenantId, Long infoId, String companyCode, String name, Long setOfBooksId, Boolean isEnabled,boolean dataAuthFlag, Pageable pageable) {
         Page mybatisPage = PageUtil.getPage(pageable);
 
         //  已分配的ID集合
@@ -1141,8 +1206,17 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
                 filter.add(company.getId());
             }
         }
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"sys_company");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         //  分页查询公司
-        List<Company> companies = baseMapper.selectCompanyByTenantIdAndEnabled(tenantId, companyCode, name, setOfBooksId, isEnabled, filter, mybatisPage);
+        List<Company> companies = baseMapper.selectCompanyByTenantIdAndEnabled(tenantId, companyCode, name, setOfBooksId, isEnabled, filter,dataAuthLabel, mybatisPage);
 
         List<CompanyDTO> companyDTOs = new ArrayList<>();
         CompanyDTO companyDTO = null;
@@ -1728,4 +1802,133 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         setSetOfBooksName(result);
         return result;
     }
+
+    public Map<String, String> importCompany(List<CompanyImportDTO> list) {
+        Map<String, String> map = new HashMap<>(2);
+        StringBuilder message = new StringBuilder();
+        List<Company> companyList = new ArrayList<>();
+        list.forEach(item -> {
+            String errorMessage = "";
+            long tenantId = OrgInformationUtil.getCurrentTenantId();
+            SetOfBooks setOfBooks = null;
+            if (StringUtils.isEmpty(item.getSetOfBooksCode())) {
+                errorMessage += "第" + item.getRowNumber() + "行，账套代码为空\r\n";
+            } else {
+                setOfBooks = setOfBooksService.getSetOfBooksByTenantId(tenantId, item.getSetOfBooksCode());
+                if (ObjectUtils.isEmpty(setOfBooks)) {
+                    errorMessage += "第" + item.getRowNumber() + "行，当前租户下不存在该账套\r\n";
+                }
+            }
+            if (StringUtils.isEmpty(item.getCompanyCode())) {
+                errorMessage += "第" + item.getRowNumber() + "行，公司代码为空\r\n";
+            } else {
+                List<Company> companies = baseMapper.selectList(
+                        new EntityWrapper<Company>()
+                                .eq("company_code", item.getCompanyCode()));
+                if (CollectionUtils.isNotEmpty(companies)) {
+                    errorMessage += "第" + item.getRowNumber() + "行，该公司代码已存在\r\n";
+                }
+            }
+            if (StringUtils.isEmpty(item.getName())) {
+                errorMessage += "第" + item.getRowNumber() + "行，公司名称为空\r\n";
+            }
+            if (StringUtils.isEmpty(item.getLegalEntityId())) {
+                errorMessage += "第" + item.getRowNumber() + "行，法人实体为空\r\n";
+            } else {
+                LegalEntity legalEntity = legalEntityService.selectById(Long.valueOf(item.getLegalEntityId()));
+                if (!legalEntity.getTenantId().equals(tenantId)) {
+                    errorMessage += "第" + item.getRowNumber() + "行，当前租户不存在该法人\r\n";
+                }
+            }
+            if (StringUtils.isEmpty(item.getStartDateActive())) {
+                errorMessage += "第" + item.getRowNumber() + "行，有效日期从为空\r\n";
+            }
+            if (StringUtils.isEmpty(item.getEnabled())) {
+                errorMessage += "第" + item.getRowNumber() + "行，启用标志为空\r\n";
+            }
+            List<CompanyLevel> companyLevel = null;
+            if (!StringUtils.isEmpty(item.getCompanyLevelCode())) {
+                companyLevel = companyLevelMapper.selectList(new EntityWrapper<CompanyLevel>()
+                        .eq("company_level_code", item.getCompanyLevelCode())
+                        .eq("set_of_books_id", setOfBooks.getId()));
+                if (CollectionUtils.isEmpty(companyLevel)) {
+                    errorMessage += "第" + item.getRowNumber() + "行，当前账套下公司级别不存在\r\n";
+                }
+            }
+            CompanyCO companyCO = null;
+            if (!StringUtils.isEmpty(item.getParentCompanyCode())) {
+                companyCO = getByCompanyCode(item.getParentCompanyCode());
+                if (ObjectUtils.isEmpty(companyCO)) {
+                    errorMessage += "第" + item.getRowNumber() + "行，当前账套下不存在该上级公司\r\n";
+                }
+            }
+            if (!StringUtils.isEmpty(item.getEndDateActive())) {
+                try {
+                    Date startDateActive = DateUtil.stringToDate(item.getStartDateActive());
+                    Date endDateActive = DateUtil.stringToDate(item.getEndDateActive());
+                    if (endDateActive.compareTo(startDateActive) == 1) {
+                        errorMessage += "第" + item.getRowNumber() + "行，有效时间到大于有效日期从\r\n";
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if ("".equals(errorMessage)) {
+                Company company = new Company();
+                company.setTenantId(tenantId);
+                company.setSetOfBooksId(setOfBooks.getId());
+                company.setCompanyCode(item.getCompanyCode());
+                company.setName(item.getName());
+                for (CompanyLevel level : companyLevel) {
+                    company.setCompanyLevelId(level.getId());
+                }
+                company.setCompanyLevelId(Long.valueOf(item.getLegalEntityId()));
+                company.setParentCompanyId(companyCO.getId());
+                company.setStartDateActive(DateUtil.stringToZonedDateTime(item.getStartDateActive()));
+                company.setEndDateActive(DateUtil.stringToZonedDateTime(item.getEndDateActive()));
+                company.setCompanyTypeCode(item.getCompanyTypeCode());
+                company.setAddress(item.getAddress());
+                if (item.getEnabled().equals("1")) {
+                    company.setEnabled(true);
+                } else {
+                    company.setEnabled(false);
+                }
+                companyList.add(company);
+            } else {
+                message.append(errorMessage);
+            }
+        });
+        if ("".equals(message.toString())) {
+            for (Company company : companyList) {
+                baseMapper.insert(company);
+            }
+            map.put("导入成功", "success");
+            return map;
+        } else {
+            map.put("导入失败", "fail");
+            map.put("message", message.toString());
+            return map;
+        }
+    }
+
+    /**
+     *  根据关键词（公司code 公司名称）查询公司信息
+     * @param ids     公司id
+     * @param keyWord 关键词
+     * @return  公司信息
+     */
+
+    public List<Company> findCompanyByIdKeyWord(List<Long> ids, String keyWord) {
+        Wrapper<Company> companyDTOWrapper = new EntityWrapper<Company>()
+                .in("id", ids)
+                .eq("deleted", false);
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(keyWord)) {
+            companyDTOWrapper.andNew()
+                    .like("company_code", keyWord)
+                    .or()
+                    .like("name", keyWord);
+        }
+        return companyMapper.selectList(companyDTOWrapper);
+    }
+
 }

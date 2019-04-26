@@ -4,12 +4,15 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.hand.hcf.app.mdata.accounts.cover.AccountsCover;
 import com.hand.hcf.app.common.co.AccountsCO;
 import com.hand.hcf.app.common.co.QueryParameterQO;
 import com.hand.hcf.app.common.enums.RangeEnum;
+import com.hand.hcf.app.mdata.accounts.domain.AccountSet;
 import com.hand.hcf.app.mdata.accounts.domain.Accounts;
 import com.hand.hcf.app.mdata.accounts.domain.AccountsHierarchy;
 import com.hand.hcf.app.mdata.accounts.dto.AccountsDTO;
+import com.hand.hcf.app.mdata.accounts.persistence.AccountSetMapper;
 import com.hand.hcf.app.mdata.accounts.persistence.AccountsMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
@@ -45,6 +48,10 @@ public class AccountsService extends ServiceImpl<AccountsMapper,Accounts> {
     private HcfOrganizationInterface organizationInterface;
     @Autowired
     private MapperFacade mapperFacade;
+
+    @Autowired
+    private AccountSetMapper accountSetMapper;
+
     /**
      * 新建科目表明细
      *
@@ -496,5 +503,75 @@ public class AccountsService extends ServiceImpl<AccountsMapper,Accounts> {
         List<AccountsCO> accountsCOS = baseMapper.listBySetOfBooksId(wrapper, language, mybatisPage);
         mybatisPage.setRecords(accountsCOS);
         return mybatisPage;
+    }
+
+
+    /**
+     * 科目明细批量导入
+     *
+     * @param list
+     * @return
+     */
+    public String importAccountBatch(List<AccountsDTO> list) {
+
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+        for (AccountsDTO accountsDTO : list) {
+            i++;
+            if (accountsDTO.getEnabled() == null) {
+                stringBuffer.append("序号" + i + "：启用标志不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(accountsDTO.getAccountSetCode())) {
+                stringBuffer.append("序号" + i + "：科目表代码不能为空;");
+            }
+            if (accountsDTO.getSummaryFlag() == null) {
+                stringBuffer.append("序号" + i + "：汇总标志不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(accountsDTO.getAccountType())) {
+                stringBuffer.append("序号" + i + "：科目类型不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(accountsDTO.getBalanceDirection())) {
+                stringBuffer.append("序号" + i + "：余额方向不能为空;");
+            }
+
+            AccountSet accountSet = new AccountSet();
+            accountSet.setAccountSetCode(accountsDTO.getAccountSetCode());
+            accountSet.setDeleted(false);
+            accountSet = accountSetMapper.selectOne(accountSet);
+            if (accountSet == null) {
+                stringBuffer.append("序号" + i + "：科目表代码不存在;");
+            }
+
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            accountsDTO.setAccountSetId(accountSet.getId());
+            accountsDTO.setAccountDesc(accountsDTO.getAccountName());
+            accountsDTO.setTenantId(OrgInformationUtil.getCurrentTenantId());
+
+            Accounts accounts = AccountsCover.AccountsDTOToAccounts(accountsDTO);
+
+            Accounts code = new Accounts();
+            Accounts name = new Accounts();
+            code.setAccountSetId(accounts.getAccountSetId());
+            code.setAccountCode(accounts.getAccountCode());
+            name.setAccountSetId(accounts.getAccountSetId());
+            name.setAccountName(accounts.getAccountName());
+            Accounts codeResult = accountsMapper.selectOne(code);
+            Accounts nameResult = accountsMapper.selectOne(name);
+            //  查询结果不为空则有重复
+            if (codeResult != null) {
+                stringBuffer.append("序号" + i + "：科目代码已存在;");
+            }
+            if (nameResult != null) {
+                stringBuffer.append("序号" + i + "：科目名称已存在;");
+            }
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            insertAccounts(accounts);
+        }
+        return "导入成功,共导入:" + list.size() + "条";
+
     }
 }

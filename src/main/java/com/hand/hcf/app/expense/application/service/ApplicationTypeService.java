@@ -3,10 +3,12 @@ package com.hand.hcf.app.expense.application.service;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.expense.application.domain.*;
 import com.hand.hcf.app.expense.application.persistence.ApplicationTypeMapper;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeAndUserGroupDTO;
@@ -203,12 +205,22 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
      * @return
      */
     @Transactional(readOnly = true)
-    public List<ApplicationType> queryByCondition(Long setOfBooksId, String typeCode, String typeName, Boolean enabled, Page page) {
+    public List<ApplicationType> queryByCondition(Long setOfBooksId, String typeCode, String typeName, Boolean enabled, Page page, boolean dataAuthFlag) {
         ApplicationType queryParams = new ApplicationType(typeCode, setOfBooksId);
         queryParams.setTypeName(typeName);
         queryParams.setEnabled(enabled);
 
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"exp_application_type");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+
+
         List<ApplicationType> list = baseMapper.selectPage(page, new EntityWrapper<>(queryParams)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("enabled", false)
                 .orderBy("type_code", true));
 
@@ -1008,13 +1020,27 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
 
     /**
      * 批量导入费用申请单类型定义-关联申请类型
-     * @param moduleInitDTOList
+     * @param sourceTypeTargetTypeDTOS
      * @return
      */
     @Transactional
-    public String expApplicationTypeApplicationType(List<ModuleInitDTO> moduleInitDTOList) {
-        for (ModuleInitDTO moduleInitDTO : moduleInitDTOList) {
-            String setOfBooksCode = moduleInitDTO.getSetOfBooksCode();
+    public String expApplicationTypeApplicationType(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS) {
+        for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOS) {
+            //账套code
+            String setOfBooksCode = sourceTypeTargetTypeDTO.getSetOfBooksCode();
+            //申请类型代码
+            String ApplicationTypeCode = sourceTypeTargetTypeDTO.getTargetTypeCode();
+            //费用申请单类型代码
+            String expenseApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
+            if (StringUtil.isNullOrEmpty(setOfBooksCode)) {
+                throw new BizException("账套code不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(ApplicationTypeCode)) {
+                throw new BizException("申请类型代码不可为空");
+            }
+            if (StringUtil.isNullOrEmpty(expenseApplicationTypeCode)) {
+                throw new BizException("申请单类型代码不可为空");
+            }
             List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
             if (setOfBooksList == null || setOfBooksList.size() == 0) {
                 throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
@@ -1022,68 +1048,49 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
             if (setOfBooksList.size() > 1) {
                 throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
             }
+            //账套id
             Long setOfBooksId = setOfBooksList.get(0).getId();
-            List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOList = moduleInitDTO.getSourceTypeTargetTypeDTOList();
-            for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOList) {
-                String allTypeFlag = sourceTypeTargetTypeDTO.getAllTypeFlag();
-                //申请类型代码列表
-                List<String> ApplicationTypeCodeList = sourceTypeTargetTypeDTO.getTargetTypeCode();
-                //费用申请单类型代码
-                String expenseApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
-                ApplicationType expenseApplicationType = new ApplicationType();
-                expenseApplicationType.setSetOfBooksId(setOfBooksId);
-                expenseApplicationType.setTypeCode(expenseApplicationTypeCode);
-                expenseApplicationType.setBudgetFlag(null);
-                expenseApplicationType.setAssociateContract(null);
-                expenseApplicationType.setRequireInput(null);
-                ApplicationType expenseApplicationTypeResult = baseMapper.selectOne(expenseApplicationType);
-                if (expenseApplicationTypeResult == null) {
-                    String errorMessage = new String();
-                    errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseApplicationTypeCode + "\'费用申请单类型代码！";
-                    throw new BizException(errorMessage);
-                }
-                //费用申请单类型id
-                Long expenseApplicationTypeId = expenseApplicationTypeResult.getId();
-                //批量插入参数
-                List<ApplicationTypeAssignType> applicationTypeAssignTypeList = new ArrayList<>();
-                //全选类型
-                if (allTypeFlag == null) {
-                    throw new BizException("全部类型不可为空");
-                }
-                //全选
-                if (allTypeFlag.equals("Y")) {
-                    if (ApplicationTypeCodeList != null) {
-                        throw new BizException("当全部类型为'Y'时,申请类型代码无需输入");
-                    }
-                    expenseApplicationTypeResult.setAllFlag(true);
-                    baseMapper.updateById(expenseApplicationTypeResult);
-                    //清空原有关联信息
-                    assignTypeService.delete(new EntityWrapper<ApplicationTypeAssignType>().eq("application_type_id",expenseApplicationTypeId));
-                }else if(allTypeFlag.equals("N")) {
-                    if (ApplicationTypeCodeList == null || ApplicationTypeCodeList.size() == 0) {
-                        throw new BizException("当全部类型为'N'时,申请类型不可为空");
-                    }
-                    //构造批量新增的参数
-                    for (String applicationTypeCode : ApplicationTypeCodeList) {
-                        Long applicationTypeId = expenseTypeService.queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, applicationTypeCode);
-                        if (applicationTypeId == null) {
-                            throw new BizException("申请类型代码\'" + applicationTypeCode + "\'不存在");
-                        }
-                        ApplicationTypeAssignType applicationTypeAssignType = new ApplicationTypeAssignType();
-                        applicationTypeAssignType.setApplicationTypeId(expenseApplicationTypeId);
-                        applicationTypeAssignType.setExpenseTypeId(applicationTypeId);
-                        applicationTypeAssignTypeList.add(applicationTypeAssignType);
-                    }
-                    expenseApplicationTypeResult.setAllFlag(false);
-                    baseMapper.updateById(expenseApplicationTypeResult);
-                    //清空原有关联信息
-                    assignTypeService.delete(new EntityWrapper<ApplicationTypeAssignType>().eq("application_type_id",expenseApplicationTypeId));
-                    //批量插入新关联信息
-                    assignTypeService.insertBatch(applicationTypeAssignTypeList);
-                }else {
-                    throw new BizException("全部类型输入错误,只可为 'Y' 或 'N'");
-                }
+
+            ApplicationType expenseApplicationType = new ApplicationType();
+            expenseApplicationType.setSetOfBooksId(setOfBooksId);
+            expenseApplicationType.setTypeCode(expenseApplicationTypeCode);
+            expenseApplicationType.setBudgetFlag(null);
+            expenseApplicationType.setAssociateContract(null);
+            expenseApplicationType.setRequireInput(null);
+            ApplicationType expenseApplicationTypeResult = baseMapper.selectOne(expenseApplicationType);
+            if (expenseApplicationTypeResult == null) {
+                String errorMessage = new String();
+                errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseApplicationTypeCode + "\'申请单类型代码！";
+                throw new BizException(errorMessage);
             }
+            //费用申请单类型id
+            Long expenseApplicationTypeId = expenseApplicationTypeResult.getId();
+
+            //申请类型id
+            Long applicationTypeId = expenseTypeService
+                    .queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, ApplicationTypeCode);
+            if (applicationTypeId == null) {
+                throw new BizException("当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + ApplicationTypeCode + "\'申请类型代码");
+            }
+            //构造插入数据
+            ApplicationTypeAssignType applicationTypeAssignType = new ApplicationTypeAssignType();
+            applicationTypeAssignType.setApplicationTypeId(expenseApplicationTypeId);
+            applicationTypeAssignType.setExpenseTypeId(applicationTypeId);
+
+            //判断是否已存在
+            if ( assignTypeService.selectList(
+                    new EntityWrapper<ApplicationTypeAssignType>()
+                            .eq("application_type_id",applicationTypeAssignType.getApplicationTypeId())
+                            .eq("expense_type_id",applicationTypeAssignType.getExpenseTypeId())
+            ).size() > 0 ){
+                String errorMessage = "\'" + ApplicationTypeCode + "\'申请类型已在\'" + expenseApplicationTypeCode + "\'申请单类型下";
+                throw new BizException(errorMessage);
+            }
+            //修改报账单关联类型为部分类型
+            expenseApplicationTypeResult.setAllFlag(false);
+            baseMapper.updateById(expenseApplicationTypeResult);
+            //插入数据
+            assignTypeService.insert(applicationTypeAssignType);
         }
         return "SUCCESS";
     }

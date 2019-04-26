@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustLine;
@@ -25,6 +27,7 @@ import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
@@ -71,6 +74,8 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
     private WorkflowControllerImpl workflowClient;
     @Autowired
     private WorkflowControllerImpl workflowInterface;
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
     //@Value("${spring.application.name:}")
     private  String applicationName;
@@ -291,11 +296,26 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
                                                                        String currencyCode,
                                                                        Long unitId,
                                                                        Long companyId,
+                                                                       boolean dataAuthFlag,
                                                                        Page page) {
-
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "exp_adjust_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN, "unit_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "employee_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        Long currentUserId = null;
+        if (!dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
+            currentUserId = OrgInformationUtil.getCurrentUserId();
+        }
         List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, expAdjustTypeId,
                 status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax, employeeId, description, adjustTypeCategory,
-                currencyCode, OrgInformationUtil.getCurrentUserId(),unitId,companyId, page);
+                currencyCode, currentUserId ,unitId,companyId, dataAuthLabel, page);
         //isSetEmployee 暂时设置为 false
         setCompanyAndDepartmentAndEmployee(result, true, true);
 
@@ -317,7 +337,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         Page<ExpenseAdjustHeaderWebDTO> pageResult = new Page<>();
         List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, expAdjustTypeId,
                 status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax, employeeId, description, adjustTypeCategory,
-                currencyCode, OrgInformationUtil.getCurrentUserId(),unitId,companyId, page);
+                currencyCode, OrgInformationUtil.getCurrentUserId(),unitId,companyId, null, page);
         //isSetEmployee 暂时设置为 false
         setCompanyAndDepartmentAndEmployee(result, true, true);
         pageResult.setRecords(result);

@@ -219,6 +219,9 @@
             <if test="userId != null">
                 AND c.user_id = #{userId}
             </if>
+            <if test="dataAuthLabel!=null and dataAuthLabel !=''">
+                AND #{dataAuthLabel}
+            </if>
             <if test="userOid != null">
                 and c.user_oid = #{userOid}
             </if>
@@ -323,6 +326,22 @@
                 c.full_name LIKE concat('%', concat(#{keyContact}, '%'))
                 OR
                 c.employee_id LIKE concat('%', concat(#{keyContact}, '%'))
+                )
+            </if>
+            <if test="keyCompany != null and keyCompany != ''">
+                AND
+                (
+                sc.company_code LIKE concat('%', concat(#{keyCompany}, '%'))
+                OR
+                sc.name LIKE concat('%', concat(#{keyCompany}, '%'))
+                )
+            </if>
+            <if test="keyDepartment != null and keyDepartment != ''">
+                AND
+                (
+                d.department_code LIKE concat('%', concat(#{keyDepartment}, '%'))
+                OR
+                d.name LIKE concat('%', concat(#{keyDepartment}, '%'))
                 )
             </if>
             <if test="fullName != null and fullName !=''">
@@ -471,7 +490,9 @@
         <if test="companyOid != null">
             and t5.company_oid = #{companyOid}
         </if>
-
+        <if test="dataAuthLabel!=null and dataAuthLabel !=''">
+            AND #{dataAuthLabel}
+        </if>
         <if test="keyword != null and keyword != ''">
             and (t2.full_name like concat(concat('%',#{keyword}),'%')
             or t2.employee_id like concat(concat('%',#{keyword}),'%')

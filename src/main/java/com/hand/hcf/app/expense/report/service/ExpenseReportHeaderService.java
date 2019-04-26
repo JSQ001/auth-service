@@ -327,6 +327,11 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 }
             }
         }
+        List<ExpenseReportPaymentSchedule> paymentScheduleList = expenseReportPaymentScheduleService.selectList(
+                new EntityWrapper<ExpenseReportPaymentSchedule>()
+                        .eq("exp_report_header_id", headerId));
+        BigDecimal totalMoney = paymentScheduleList.stream().map(ExpenseReportPaymentSchedule::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        expenseReportHeaderDTO.setPaymentTotalAmount(totalMoney);
         // 币种
         CurrencyRateCO currencyRate = organizationService.getForeignCurrencyByCode(null, expenseReportHeaderDTO.getCurrencyCode(), expenseReportHeaderDTO.getSetOfBooksId());
         expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyName());
@@ -814,13 +819,13 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             List<ContractHeaderCO> contractHeaderCOS = contractService.listContractHeadersByIds(Arrays.asList(expenseReportHeader.getContractHeaderId()));
             if(CollectionUtils.isNotEmpty(contractHeaderCOS)) {
                 Integer contractStatus = contractHeaderCOS.get(0).getStatus();
-                if (DocumentOperationEnum.HOLD.getId().equals(contractStatus)) {
+                if (PaymentDocumentOperationEnum.HOLD.getId().equals(contractStatus)) {
                     //HOLD(6001),暂挂中
                     throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_STATUS, new Object[]{contractHeaderCOS.get(0).getContractNumber(), messageService.getMessages(RespCode.CONTRACT_STATUS_HOLD)});
-                } else if (DocumentOperationEnum.CANCEL.getId().equals(contractStatus)) {
+                } else if (PaymentDocumentOperationEnum.CANCEL.getId().equals(contractStatus)) {
                     //CANCEL(6002),已取消
                     throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_STATUS, new Object[]{contractHeaderCOS.get(0).getContractNumber(), messageService.getMessages(RespCode.CONTRACT_STATUS_CANCEL)});
-                } else if (DocumentOperationEnum.FINISH.getId().equals(contractStatus)) {
+                } else if (PaymentDocumentOperationEnum.FINISH.getId().equals(contractStatus)) {
                     //FINISH(6003),已完成
                     throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_STATUS, new Object[]{contractHeaderCOS.get(0).getContractNumber(), messageService.getMessages(RespCode.CONTRACT_STATUS_FINISH)});
                 }

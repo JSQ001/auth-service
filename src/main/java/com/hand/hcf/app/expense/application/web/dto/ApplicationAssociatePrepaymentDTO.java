@@ -28,6 +28,22 @@ public class ApplicationAssociatePrepaymentDTO {
 
     private String remarks; // 备注
 
+    /**
+     * 部门
+     * */
+    private Long departmentId;
+
+    private String departmentName;
+
+
+    private Long employeeId;
+
+    private String name;
+    /**
+     * 头像 暂无
+     * */
+    private String  iconUrl;
+
     public ApplicationAssociatePrepaymentDTO() {}
 
 }

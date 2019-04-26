@@ -16,6 +16,7 @@ public class SetOfBooksCover {
         setOfBooksDTO.setAccountSetId(setOfBooks.getAccountSetId());
         setOfBooksDTO.setFunctionalCurrencyCode(setOfBooks.getFunctionalCurrencyCode());
         setOfBooksDTO.setEnabled(setOfBooks.getEnabled());
+        setOfBooksDTO.setVersionNumber(setOfBooks.getVersionNumber());
         return setOfBooksDTO;
     }
 }

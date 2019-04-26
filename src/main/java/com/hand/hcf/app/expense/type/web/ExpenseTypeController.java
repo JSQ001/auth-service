@@ -2,7 +2,6 @@ package com.hand.hcf.app.expense.type.web;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.domain.ExpenseTypeIcon;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeIconService;
@@ -10,7 +9,9 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeAssignInfoDTO;
 import com.hand.hcf.app.expense.type.web.dto.SortBySequenceDTO;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.PageUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -979,5 +980,30 @@ public class ExpenseTypeController {
         List<ExpenseType> expenseTypes = service.queryByCondition(page, setOfBooksId, code, name, typeCategoryId, typeFlag, enabled);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/types/chooser/query");
         return new ResponseEntity<>(expenseTypes, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 查询所有费用申请单类型
+     * @author sq.l
+     * @date 2019/04/22
+     *
+     * @param code
+     * @param name
+     * @param categoryName
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/chooser/query/by/code")
+    @ApiOperation(value = "分页查询费用类型", notes = "分页查询费用类型 开发:19658")
+    public ResponseEntity selectAllExpenseType(@ApiParam(value = "费用类型代码") @RequestParam(value = "code",required = false) String code,
+                                               @ApiParam(value = "费用类型名称") @RequestParam(value = "name",required = false) String name,
+                                               @ApiParam(value = "大类名称") @RequestParam(value = "categoryName",required = false) String categoryName,
+                                               @ApiParam(value = "页码") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                               @ApiParam(value = "页数") @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+        Page myPage = PageUtil.getPage(page,size);
+        List<ExpenseType> result = service.selectExpenseByCode(code,name,categoryName);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(myPage);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 }

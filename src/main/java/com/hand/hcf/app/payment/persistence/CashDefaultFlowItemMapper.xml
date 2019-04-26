@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.CashDefaultFlowItemMapper">
+
+    <!--<resultMap id="CashFlowItemList"
+               type="com.hand.hcf.app.payment.domain.CashFlowItem">
+        <id column="id" property="id"/>
+        <result column="set_of_book_id" property="setOfBookId"/>
+        <result column="flow_code" property="flowCode"/>
+        <result column="description" property="description"/>
+        <result column="version_number" property="versionNumber"/>
+        <result column="is_enabled" property="isEnabled"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>-->
+
+    <select id="getNotSaveFlowItem" resultType="com.hand.hcf.app.payment.domain.CashFlowItem">
+        SELECT ccfi.id id,
+        ccfi.set_of_book_id setOfBookId,
+        ccfi.flow_code flowCode,
+        ccfi.description description,
+        ccfi.version_number versionNumber,
+        ccfi.enabled enabled,
+        ccfi.deleted deleted,
+        ccfi.created_date createdDate,
+        ccfi.created_by createdBy,
+        ccfi.last_updated_date lastUpdatedDate,
+        ccfi.last_updated_by lastUpdatedBy
+        FROM csh_cash_flow_item ccfi
+        WHERE ccfi.deleted = 0
+        AND ccfi.enabled = 1
+        AND ccfi.set_of_book_id = #{setOfBookId}
+        AND ccfi.id NOT IN (SELECT cdf.cash_flow_item_id FROM csh_default_flowitem cdf WHERE cdf.deleted = 0 AND cdf.transaction_class_id = #{transactionClassId})
+        <if test="flowCode!=null">
+            and ccfi.flow_code LIKE concat('%', concat(#{flowCode}, '%'))
+        </if>
+        <if test="description!=null">
+            and ccfi.description LIKE concat('%', concat(#{description}, '%'))
+        </if>
+        ORDER BY ccfi.flow_code
+    </select>
+
+    <select id="getCashDefaultFlowItemByCond" resultType="com.hand.hcf.app.payment.domain.CashDefaultFlowItem">
+        select
+          cdf.id id,
+          cdf.transaction_class_id transactionClassId,
+          cdf.cash_flow_item_id cashFlowItemId,
+          cdf.default_flag defaultFlag,
+          ccfi.flow_code cashFlowItemCode,
+          ccfi.description cashFlowItemName,
+          cdf.version_number versionNumber,
+          cdf.enabled enabled,
+          cdf.deleted deleted,
+          cdf.created_date createdDate,
+          cdf.created_by createdBy,
+          cdf.last_updated_date lastUpdatedDate,
+          cdf.last_updated_by lastUpdatedBy
+          from csh_default_flowitem cdf
+          left join csh_cash_flow_item ccfi on cdf.cash_flow_item_id = ccfi.id
+        <where>
+            <if test="transactionClassId != null">
+                and cdf.transaction_class_id = #{transactionClassId}
+            </if>
+            <if test="defaultFlag != null">
+                and cdf.default_flag = #{defaultFlag}
+            </if>
+            <if test="enabled != null">
+                and cdf.enabled = #{enabled}
+            </if>
+        </where>
+        order by ccfi.flow_code
+    </select>
+
+</mapper>

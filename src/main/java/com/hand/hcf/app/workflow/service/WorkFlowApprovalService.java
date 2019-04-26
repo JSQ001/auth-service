@@ -77,7 +77,7 @@ public class WorkFlowApprovalService {
             statusList.add(2001);//2001审核驳回
         }else if(tabNumber == 2){
             statusList.add(DocumentOperationEnum.APPROVAL.getId());//1002审批中
-            //statusList.add(DocumentOperationEnum.APPROVAL_PASS.getId());//1004审批通过
+            //statusList.add(PaymentDocumentOperationEnum.APPROVAL_PASS.getId());//1004审批通过
         }
         List<WorkFlowDocumentRef> workFlowDocumentRefList = workFlowDocumentRefMapper.selectList(
                 new EntityWrapper<WorkFlowDocumentRef>()

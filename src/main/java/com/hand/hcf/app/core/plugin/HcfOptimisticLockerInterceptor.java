@@ -91,14 +91,16 @@ public class HcfOptimisticLockerInterceptor implements Interceptor {
                 Class<?> entityClass = ClassUtils.getUserClass(et.getClass());
                 EntityField entityField = this.getVersionField(entityClass);
                 Field versionField = entityField == null ? null : entityField.getField();
-                if(versionField != null){
+                //update by chenxu
+                //TODO .....
+               /* if(versionField != null){
                     Reflector reflector = new Reflector(et.getClass());
                     Invoker versionNumber = reflector.getGetInvoker(versionField.getName());
                     Object value = versionNumber.invoke(et, new Object[]{});
                     if(value == null){
                         throw new BizException(RespCode.SYS_VERSION_NUMBER_CHANGED);
                     }
-                }
+                }*/
                 Object originalVersionVal;
                 if (versionField != null && (originalVersionVal = versionField.get(et)) != null) {
                     TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);

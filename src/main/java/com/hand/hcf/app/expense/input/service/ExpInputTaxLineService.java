@@ -7,6 +7,7 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.core.util.OperationUtil;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
@@ -122,6 +123,8 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                 expInputTaxLineMapper.insert(expInputTaxLine);
             } else if (line.getId() != null && !lineSelectFlag.equals("N")) {
                 //更新
+                ExpInputTaxLine inputTaxLine =  baseMapper.selectById(line.getId());
+                expInputTaxLine.setVersionNumber(inputTaxLine.getVersionNumber());
                 expInputTaxLineMapper.updateById(expInputTaxLine);
             } else if (line.getId() != null && lineSelectFlag.equals("N")) {
                 //删除
@@ -143,9 +146,19 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                     expInputTaxDist.setUseType(header.getUseType());
                     expInputTaxDist.setTransferProportion(header.getTransferProportion());
                     //金额计算
-                    BigDecimal tp = header.getTransferProportion();
-                    expInputTaxDist.setAmount(dist.getBaseAmount().multiply(tp).setScale(2));
-                    expInputTaxDist.setFunctionAmount(dist.getBaseFunctionAmount().multiply(tp).setScale(2));
+                    expInputTaxDist.setBaseAmount(dist.getDistTaxAmount());
+                    if(dist.getBaseFunctionAmount() != null) {
+                        expInputTaxDist.setBaseFunctionAmount(dist.getBaseFunctionAmount());
+                    }else{
+                        expInputTaxDist.setBaseFunctionAmount(dist.getDistTaxAmount());
+                    }
+                    BigDecimal tp = OperationUtil.safeDivide(header.getTransferProportion(),BigDecimal.valueOf(100),4);
+                    expInputTaxDist.setAmount(OperationUtil.safeMultiply(dist.getDistTaxAmount(),tp));
+                    if(dist.getBaseFunctionAmount() != null) {
+                        expInputTaxDist.setFunctionAmount(OperationUtil.safeMultiply(dist.getBaseFunctionAmount(),tp));
+                    }else{
+                        expInputTaxDist.setFunctionAmount(OperationUtil.safeMultiply(dist.getDistTaxAmount(),tp));
+                    }
                     //日志信息
                     expInputTaxDist.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
                     expInputTaxDist.setLastUpdatedDate(ZonedDateTime.now());

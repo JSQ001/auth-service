@@ -12,10 +12,10 @@
     <property name="CONSOLE_LOG_PATTERN"
               value="%(${LOG_LEVEL_PATTERN:-%5p})"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/mnt/app/logs/auth/auth.log</file>
+        <file>./logs/app.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 每小时滚动文件 -->
-            <fileNamePattern>/mnt/app/logs/auth/auth.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
+            <fileNamePattern>./logs/app.%d{yyyy-MM-dd_HH}.%i.log</fileNamePattern>
 
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">

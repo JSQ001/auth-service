@@ -11,6 +11,8 @@ import com.hand.hcf.app.mdata.department.dto.DepartmentDTO;
 import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -266,7 +269,29 @@ public class DepartmentGroupResource {
             deptCode = departmentCode;
         }
         Page<DepartmentGroupDepartmentCO> result = departmentGroupService.selectDepartmentByTenantIdAndEnabled(
-                OrgInformationUtil.getCurrentTenantId(),deptCode,name,leafEnable, departmentId,page);
+                OrgInformationUtil.getCurrentTenantId(),deptCode,name,leafEnable, departmentId,false,page);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + result.getTotal());
+        headers.add("Link","/api/DepartmentGroup/selectDept/enabled");
+        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "查询启用的部门（数据权限）", notes = "查询启用的部门（数据权限）开发 赵柱")
+    @Timed
+    @RequestMapping(value = "/selectDept/enabled/enable/dataAuth",method = RequestMethod.GET)
+    public ResponseEntity<List<DepartmentGroupDepartmentCO>> selectDeptEnabledDataAuth(
+            @ApiParam(value = "部门代码") @RequestParam(value = "deptCode",required = false) String deptCode,
+            @ApiParam(value = "leafEnable") @RequestParam(value = "leafEnable",required = false)Boolean leafEnable,
+            @ApiParam(value = "部门代码") @RequestParam(value = "departmentCode",required = false) String departmentCode,
+            @ApiParam(value = "部门id") @RequestParam(value = "departmentId",required = false) Long departmentId,
+            @ApiParam(value = "部门名称") @RequestParam(value = "name",required = false) String name, @ApiIgnore Pageable pageable){
+
+        Page page = PageUtil.getPage(pageable);
+        if (!StringUtils.hasText(deptCode) && StringUtils.hasText(departmentCode)){
+            deptCode = departmentCode;
+        }
+        Page<DepartmentGroupDepartmentCO> result = departmentGroupService.selectDepartmentByTenantIdAndEnabled(
+                OrgInformationUtil.getCurrentTenantId(),deptCode,name,leafEnable, departmentId,true,page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link","/api/DepartmentGroup/selectDept/enabled");

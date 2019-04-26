@@ -18,6 +18,9 @@ import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -41,6 +44,7 @@ import java.util.*;
  * @create 2019/3/5 14:45
  * @remark
  */
+@Api(tags = "报账单")
 @RestController
 @RequestMapping("/api/expense/report")
 public class ExpenseReportController {
@@ -68,10 +72,11 @@ public class ExpenseReportController {
      * queryExpenseReportPaymentScheduleByIds : 查询报账单 付款信息表 -根据ID集合查询---付款申请单财务查询使用
      */
     @GetMapping("/payment/schedule/query/ids")
-    public ResponseEntity<List<ExpenseReportPaymentScheduleDTO>> queryExpenseReportPaymentScheduleByIds(@RequestParam(required = false) String ids,
-                                                                                                        @RequestParam(required = false) Long amount,
-                                                                                                        @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
-                                                                                                        @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
+    @ApiOperation(value = "分页查询报账单", notes = "根据报账单ID集合分页查询报账单信息 开发:赵旭东")
+    public ResponseEntity<List<ExpenseReportPaymentScheduleDTO>> queryExpenseReportPaymentScheduleByIds(@ApiParam(value = "报账单ids") @RequestParam(required = false) String ids,
+                                                                                                        @ApiParam(value = "amount") @RequestParam(required = false) Long amount,
+                                                                                                        @ApiParam(value = "页") @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
+                                                                                                        @ApiParam(value = "页大小") @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
 
 
         Page mybatisPage = PageUtil.getPage(page, size);
@@ -87,13 +92,14 @@ public class ExpenseReportController {
      * queryExpenseReportLineByids : 查询报账单行表信息，根据id集合查询
      *
      */
+    @ApiOperation(value = "分页查询报账单行表信息", notes = "根据报账单ID集合分页查询报账单行表信息 开发:赵旭东")
     @GetMapping("/line/query/ids")
-    public ResponseEntity<List<ExpenseReportLine>> queryExpenseReportLineByids(@RequestParam(required = false) String ids,
-                                                                               @RequestParam(required = false) Long expenseTypeId,
-                                                                               @RequestParam(required = false) String reportLineFrom,
-                                                                               @RequestParam(required = false) String reportLineTo,
-                                                                               @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
-                                                                               @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
+    public ResponseEntity<List<ExpenseReportLine>> queryExpenseReportLineByids(@ApiParam(value = "报账单ids") @RequestParam(required = false) String ids,
+                                                                               @ApiParam(value = "费用类型") @RequestParam(required = false) Long expenseTypeId,
+                                                                               @ApiParam(value = "时间从") @RequestParam(required = false) String reportLineFrom,
+                                                                               @ApiParam(value = "时间至") @RequestParam(required = false) String reportLineTo,
+                                                                               @ApiParam(value = "页") @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
+                                                                               @ApiParam(value = "页大小") @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size){
 
         Page mybatisPage = PageUtil.getPage(page, size);
 
@@ -879,7 +885,7 @@ public class ExpenseReportController {
      */
     @PostMapping("/line/save")
     public ResponseEntity<ExpenseReportLineDTO> saveExpenseReportLine(@RequestBody @Valid ExpenseReportLineDTO dto){
-        return ResponseEntity.ok(expenseReportLineService.saveExpenseReportLine(dto));
+        return ResponseEntity.ok(expenseReportLineService.saveExpenseReportLine(dto,true));
     }
 
     /**

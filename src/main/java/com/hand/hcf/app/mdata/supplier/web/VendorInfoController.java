@@ -88,8 +88,9 @@ public class VendorInfoController {
                                                                           @RequestParam(value = "bankAccount", required = false) String bankAccount,
                                                                           @RequestParam(value = "venType", required = false) Integer venType,
                                                                           @RequestParam(value = "roleType", required = false) String roleType,
+                                                                          @RequestParam(value = "vendorStatus", required = false) String vendorStatus,
                                                                           Pageable pageable) throws URISyntaxException {
-        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfos(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
+        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfos(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType,vendorStatus, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/ven/info");
         return new ResponseEntity<>(page.getRecords(),headers,HttpStatus.OK);
     }
@@ -163,8 +164,9 @@ public class VendorInfoController {
                                                                                      @RequestParam(value = "bankAccount", required = false) String bankAccount,
                                                                                      @RequestParam(value = "venType", required = false) Integer venType,
                                                                                      @RequestParam(value = "roleType", required = false) String roleType,
+                                                                                     @RequestParam(value = "vendorStatus", required = false) String vendorStatus,
                                                                                      Pageable pageable) throws URISyntaxException {
-        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfosforApproval(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType, pageable);
+        Page<VendorInfoforStatusDTO> page = vendorInfoService.searchVendorInfosforApproval(venderTypeId, venderCode, venNickname, bankAccount, venType, roleType,vendorStatus, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/ven/info/approval");
         return new ResponseEntity<>(page.getRecords(),headers,HttpStatus.OK);
     }

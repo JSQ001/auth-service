@@ -1,6 +1,9 @@
 package com.hand.hcf.app.mdata.company.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
+import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.company.domain.CompanyAssociateUnit;
@@ -9,6 +12,7 @@ import com.hand.hcf.app.mdata.company.dto.CompanyLovDTO;
 import com.hand.hcf.app.mdata.company.dto.CompanyLovQueryParams;
 import com.hand.hcf.app.mdata.company.service.CompanyAssociateUnitService;
 import com.hand.hcf.app.mdata.contact.dto.ContactDTO;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import com.hand.hcf.app.mdata.department.dto.DepartmentLovDTO;
 import com.hand.hcf.app.mdata.department.dto.DepartmentLovQueryParams;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.ResponsibilityLovDTO;
@@ -22,7 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -38,6 +44,9 @@ import java.util.List;
 public class CompanyAssociateUnitController {
     @Autowired
     private CompanyAssociateUnitService service;
+
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
     @GetMapping("/query")
     @ApiOperation(value = "查询公司关联的部门", notes = "查询公司关联的部门 开发：谢宾")
@@ -151,6 +160,88 @@ public class CompanyAssociateUnitController {
                 .status(status)
                 .setOfBooksId(setOfBooksId)
                 .departmentName(departmentName).build();
+        List<DepartmentLovDTO> result = service.queryDepartmentLov(page, queryParams);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/query/department/lov/enable/dataAuth")
+    @ApiOperation(value = "查询部门lov-数据权限", notes = "查询部门lov-数据权限 开发：赵柱")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType="query", name = "page", value = "第几页", required = true, dataType = "int"),
+            @ApiImplicitParam(paramType="query", name = "size", value = "页数", required = true, dataType = "int")
+    })
+    public ResponseEntity<List<DepartmentLovDTO>> queryDepartmentLovDataAuth(
+            @ApiIgnore Pageable pageable,
+            @ApiParam(value = "公司id") @RequestParam(required = false) Long companyId,
+            @ApiParam(value = "部门代码") @RequestParam(required = false) String departmentCode,
+            @ApiParam(value = "部门代码从") @RequestParam(required = false) String departmentCodeFrom,
+            @ApiParam(value = "部门代码至") @RequestParam(required = false) String departmentCodeTo,
+            @ApiParam(value = "部门名称") @RequestParam(required = false) String departmentName,
+            @ApiParam(value = "部门id") @RequestParam(required = false) Long id,
+            @ApiParam(value = "账套id") @RequestParam(required = false) Long setOfBooksId,
+            @ApiParam(value = "部门状态") @RequestParam(required = false) Integer status,
+            @ApiParam("部门代码/名称") @RequestParam(required = false) String codeName){
+        Page page = PageUtil.getPage(pageable);
+        Long currentTenantId = LoginInformationUtil.getCurrentTenantId();
+        String dataAuthLabel = null;
+        Map<String,String> map = new HashMap<>();
+        map.put(DataAuthorityUtil.TABLE_NAME,"sys_department");
+        map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+        map.put(DataAuthorityUtil.SOB_COLUMN,
+                DataAuthorityUtil.getColumnDataAuthTypeLabelValue(
+                        "set_of_books_id",
+                        DataAuthFilterMethodEnum.CUSTOM_SQL,
+                        "select 1\n" +
+                                "            from sys_company_associate_unit v, sys_company sc\n" +
+                                "            where v.department_id = t.id\n" +
+                                "            and sc.id = v.company_id\n" +
+                                "            and sc.deleted = 0\n" +
+                                "            and sc.enabled = 1 and {sc}"
+                )
+        );
+        map.put(DataAuthorityUtil.COMPANY_COLUMN,
+                DataAuthorityUtil.getColumnDataAuthTypeLabelValue(
+                        "id",
+                        DataAuthFilterMethodEnum.CUSTOM_SQL,
+                        "select 1\n" +
+                                "            from sys_company_associate_unit v, sys_company sc\n" +
+                                "            where v.department_id = t.id\n" +
+                                "            and sc.id = v.company_id\n" +
+                                "            and sc.deleted = 0\n" +
+                                "            and sc.enabled = 1 and {sc}"
+                )
+        );
+        map.put(DataAuthorityUtil.UNIT_COLUMN,"id");
+        dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        DepartmentLovQueryParams queryParams = new DepartmentLovQueryParams();
+        if(dataAuthorityMetaHandler.checkEnabledDataAuthority()){
+            queryParams = DepartmentLovQueryParams.builder()
+                    .companyId(companyId)
+                    .codeName(codeName)
+                    .departmentCode(departmentCode)
+                    .departmentCodeFrom(departmentCodeFrom)
+                    .departmentCodeTo(departmentCodeTo)
+                    //.id(id)
+                    .tenantId(currentTenantId)
+                    .status(status)
+                    //.setOfBooksId(setOfBooksId)
+                    .dataAuthLabel(dataAuthLabel)
+                    .departmentName(departmentName).build();
+        }else{
+            queryParams = DepartmentLovQueryParams.builder()
+                    .companyId(companyId)
+                    .codeName(codeName)
+                    .departmentCode(departmentCode)
+                    .departmentCodeFrom(departmentCodeFrom)
+                    .departmentCodeTo(departmentCodeTo)
+                    .id(id)
+                    .tenantId(currentTenantId)
+                    .status(status)
+                    .setOfBooksId(setOfBooksId)
+                    //.dataAuthLabel(dataAuthLabel)
+                    .departmentName(departmentName).build();
+        }
         List<DepartmentLovDTO> result = service.queryDepartmentLov(page, queryParams);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);

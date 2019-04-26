@@ -6,9 +6,12 @@ import com.hand.hcf.app.common.co.VendorBankAccountCO;
 import com.hand.hcf.app.common.enums.SourceEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.BankAccountDTO;
+import com.hand.hcf.app.mdata.bank.service.BankInfoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
+import com.hand.hcf.app.mdata.implement.web.BankInfoControllerImpl;
 import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;
@@ -48,6 +51,9 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
 
     @Autowired
     private VendorBankAccountMapper vendorBankAccountMapper;
+
+    @Autowired
+    private BankInfoService bankInfoService;
 
     private static final String GO = "go";
 
@@ -123,76 +129,118 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
         return result;
     }
 
-    public Map<String,String> createOrUpdateVendorBankAccountBatch(List<VendorBankAccountCO> vendorBankAccountCOList) {
-            Map<String,String> map = new HashMap<>(16);
+    /**
+     * 通过模板批量导入银行帐号
+     *
+     * @param vendorBankAccountCOList 银行帐号list
+     * @return 校验失败结果
+     */
+    public Map<String, StringBuilder> createOrUpdateVendorBankAccountBatch(List<VendorBankAccountCO> vendorBankAccountCOList) {
+        Map<String, StringBuilder> errorMap = new HashMap<>(16);
+        Long currentUserId = OrgInformationUtil.getCurrentUserId();
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        ZonedDateTime dateTime = ZonedDateTime.now();
+        Map<String, Boolean> trueOrFalse = new HashMap<>(2);
+        trueOrFalse.put("是", true);
+        trueOrFalse.put("否", false);
+        Map<String, Integer> statusMap = new HashMap<>(2);
+        statusMap.put("启用", 1001);
+        statusMap.put("禁用", 1002);
         for (int i = 0; i < vendorBankAccountCOList.size(); i++) {
+            StringBuilder errorMes = new StringBuilder();
             VendorBankAccountCO t = vendorBankAccountCOList.get(i);
-            if (t.getVenBankNumberName()==null||t.getBankAccount()==null||t.getBankCode()==null){
-                map.put("第"+(i+1)+"行数据","银行");
+            if (t.getVenBankNumberName() == null || t.getBankAccount() == null || t.getBankCode() == null ||
+                    t.getEnabledString() == null || t.getPrimaryFlagString() == null) {
+                errorMes.append("信息有空值");
             }
-        }
-        vendorBankAccountCOList.forEach(t->{
-
-            VendorBankAccountCO result;
-            VendorInfo vendorInfo = vendorInfoMapper.selectById(t.getVenInfoId());
-            if (vendorInfo == null) {
-                throw new BizException(RespCode.SUPPLIER_NOT_EXISTS);
+            //校验银行账号长度为15-19
+            if(t.getBankAccount().length()<15 || t.getBankAccount().length()>19){
+                errorMes.append("银行账号长度不为15-19");
+            }
+            BankInfo bankInfo = bankInfoService.findOneByTenantIdAndBankCode(tenantId, t.getBankCode());
+            if (bankInfo == null) {
+                errorMes.append("银行Code信息无效");
             } else {
-                validateVendorBankAccountCO(t);
-                Long currentUserId = OrgInformationUtil.getCurrentUserId();
+                //赋值银行信息
+                t.setBankName(bankInfo.getBankName());
+                t.setCountry(bankInfo.getCountryName());
+                t.setBankAddress(bankInfo.getOpenAccount());
+            }
+            // 转化是否启用状态
+            Integer status = statusMap.get(t.getEnabledString());
+            if (status == null) {
+                errorMes.append("是否启用状态无效");
+            } else {
+                t.setVenType(status);
+            }
+
+            //转换是否主账户
+            Boolean primaryFlag = trueOrFalse.get(t.getPrimaryFlagString());
+            t.setPrimaryFlag(primaryFlag);
+            //获取供应商信息
+            List<VendorInfo> vendorInfos = vendorInfoMapper.selectVendorInfosByTenantIdAndVendorNameAndVendorId(String.valueOf(tenantId), null, t.getVenInfoId());
+            if (vendorInfos.isEmpty()) {
+                errorMes.append("供应商信息有错");
+            } else {
+                VendorInfo vendorInfo = vendorInfos.get(0);
+                t.setVenInfoId(String.valueOf(vendorInfo.getId()));
                 t.setVenInfoName(vendorInfo.getVendorName());
-                // 供应商编码替代了供应商标识
+                // 供应商编码替代供应商标识
                 t.setVenNickOid(vendorInfo.getVendorCode());
                 if (StatusEnum.DISABLE == StatusEnum.parse(vendorInfo.getStatus())) {
-                    throw new BizException(RespCode.SUPPLIER_DISABLED);
-                } else {
-                    validateBankAccountDuplication(t);
-                    List<VendorBankAccount> vendorBankAccountList = baseMapper.selectVendorBankAccountsByConditions(t.getVenInfoId(), Boolean.TRUE, StatusEnum.ENABLE.getId());
-                    if (GO.equals(t.getConstraintFlag())) {
-                        if (!CollectionUtils.isEmpty(vendorBankAccountList)) {
-                            vendorBankAccountList.forEach(vendorBankAccount -> {
-                                if (t.getId() == null || !vendorBankAccount.getId().equals(t.getId())) {
-                                    vendorBankAccount.setPrimaryFlag(Boolean.FALSE);
-                                    vendorBankAccount.setVendorBankStatus(VendorStatusEnum.EDITOR.getVendorStatus());
-                                    super.updateById(vendorBankAccount);
-                                }
-                            });
-                        }
-                    } else if (t.getPrimaryFlag() && StatusEnum.ENABLE == StatusEnum.parse(vendorInfo.getStatus())) {
-                        boolean check = !CollectionUtils.isEmpty(vendorBankAccountList) && (vendorBankAccountList.size() > 1 || t.getId() == null || !vendorBankAccountList.get(0).getId().equals(t.getId()));
-                        if (check) {
-                            t.setConstraintFlag(FALSE);
-                            t.setMesBankName(vendorBankAccountList.get(0).getBankName());
-                            t.setMesVenBankNumberName(vendorBankAccountList.get(0).getVenBankNumberName());
-                            throw new BizException(RespCode.SUPPLIER_ENABLED_MASTER_ACCOUNT_EXISTS);
-                        }
-                    }
-                    VendorBankAccount vendorBankAccount = VendorBankAccountAdapter.vendorBankAccountCOToVendorBankAccount(t);
-                    // 中控上面维护供应商银行账号，地址即为开户行城市[和产品 客户确认过，这是以前老供应商逻辑]
-                    // 表单上单独维护供应商银行账号，地址即为开户行城市
-                    if (t.getId() == null) {
-                        vendorBankAccount.setVendorBankStatus(VendorStatusEnum.EDITOR.getVendorStatus());
-                        baseMapper.insert(vendorBankAccount);
-                    } else {
-                        vendorBankAccount.setVendorBankStatus(VendorStatusEnum.EDITOR.getVendorStatus());
-                        // isDeleted isEnable 没有用到，也没删除
-                        super.updateById(vendorBankAccount);
-                    }
-                    result = VendorBankAccountAdapter.vendorBankAccountToVendorBankAccountCO(baseMapper.selectById(vendorBankAccount.getId()));
-
+                    errorMes.append("供应商已禁用，无法维护供应商银行账号信息");
                 }
-
-                if (result != null) {
-                    // 维护供应商银行账号信息成功后，需要同步供应商的最后修改人信息
-                    // vendorInfo.setLastUpdatedByEmployeeId(vendorBankAccountCO.getVenOperatorNumber());
-                    // vendorInfo.setLastUpdatedByName(vendorBankAccountCO.getVenOperatorName());
-                    vendorInfo.setLastUpdatedBy(currentUserId);
-                    vendorInfo.setLastUpdatedDate(ZonedDateTime.now());
-                    vendorInfoMapper.updateById(vendorInfo);
+                //校验租户级别，同一个供应商下，银行账号不能重复
+                List<VendorBankAccount> vendorBankAccounts = baseMapper.selectVendorBankAccountsByBankAccountAndVendorInfoId(t.getBankAccount(), t.getVenInfoId());
+                boolean check = !CollectionUtils.isEmpty(vendorBankAccounts) && (vendorBankAccounts.size() > 1 ||
+                        t.getId() == null || !vendorBankAccounts.get(0).getId().equals(t.getId()));
+                if (check) {
+                    errorMes.append("供应商银行账号已被占用");
+                }
+                List<VendorBankAccount> vendorBankAccountList = baseMapper.selectVendorBankAccountsByConditions(
+                        t.getVenInfoId(), Boolean.TRUE, StatusEnum.ENABLE.getId());
+                if (GO.equals(t.getConstraintFlag())) {
+                    if (!CollectionUtils.isEmpty(vendorBankAccountList)) {
+                        vendorBankAccountList.forEach(vendorBankAccount -> {
+                            if (t.getId() == null || !vendorBankAccount.getId().equals(t.getId())) {
+                                vendorBankAccount.setPrimaryFlag(Boolean.FALSE);
+                                vendorBankAccount.setVendorBankStatus(VendorStatusEnum.EDITOR.getVendorStatus());
+                                updateById(vendorBankAccount);
+                            }
+                        });
+                    }
+                } else if (t.getPrimaryFlag() && StatusEnum.ENABLE == StatusEnum.parse(vendorInfo.getStatus())) {
+                    check = !CollectionUtils.isEmpty(vendorBankAccountList) && (vendorBankAccountList.size() > 1
+                            || t.getId() == null || !vendorBankAccountList.get(0).getId().equals(t.getId()));
+                    if (check) {
+                        t.setConstraintFlag(FALSE);
+                        t.setMesBankName(vendorBankAccountList.get(0).getBankName());
+                        t.setMesVenBankNumberName(vendorBankAccountList.get(0).getVenBankNumberName());
+                        errorMes.append("已存在启用的主账户");
+                    }
                 }
             }
-        });
-        return map;
+            //赋默认值
+            t.setCreatedDate(dateTime);
+            t.setCreatedBy(currentUserId);
+            if (!("".contentEquals(errorMes))){
+                errorMap.put("第" + (i + 1) + "行",errorMes);
+            }
+        }
+        //如果有报错信息则返回信息部进行插入操作
+        if (!errorMap.isEmpty()) {
+            return errorMap;
+        }
+        //插库
+        for (VendorBankAccountCO vendorBankAccountCO : vendorBankAccountCOList) {
+            VendorBankAccount vendorBankAccount = VendorBankAccountAdapter.vendorBankAccountCOToVendorBankAccount(vendorBankAccountCO);
+            if (vendorBankAccount != null) {
+                vendorBankAccount.setVendorBankStatus(VendorStatusEnum.APPROVED.getVendorStatus());
+                baseMapper.insert(vendorBankAccount);
+            }
+        }
+        errorMap.put("success", new StringBuilder("导入成功"));
+        return errorMap;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
@@ -209,7 +257,7 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public List<VendorBankAccountCO> searchVendorBankAccounts(String vendorInfoId) {
-        List<VendorBankAccountCO> result = new ArrayList<>();
+        List<VendorBankAccountCO> result;
         VendorInfo vendorInfo = vendorInfoMapper.selectById(vendorInfoId);
         if (vendorInfo == null) {
             throw new BizException(RespCode.SUPPLIER_NOT_EXIST);
@@ -348,6 +396,10 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
         }
     }
 
+    /**
+     *  校验银行信息为空
+     * @param vendorBankAccountCO
+     */
     public void validateVendorBankAccountCO(VendorBankAccountCO vendorBankAccountCO) {
         MyStringUtils.deleteStringTypeFieldTrim(vendorBankAccountCO);
         if (StringUtils.isBlank(vendorBankAccountCO.getBankName())) {
@@ -404,11 +456,10 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
      * @param queryPage
      * @return
      */
-    public List<VendorAccountDTO> getVendorByCompanyIdAndNameAndCode(
-            Long companyId, Boolean enabled, String name, String code, Page queryPage) {
+    public List<VendorAccountDTO> getVendorByCompanyIdAndNameAndCode(String name, String code, Page queryPage) {
         List<VendorInfo> vendorInfos = vendorInfoMapper
                 .selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
-                        OrgInformationUtil.getCurrentTenantId(),companyId, enabled, name, code, queryPage);
+                        OrgInformationUtil.getCurrentTenantId(), name, code, queryPage);
         List<VendorAccountDTO> result = new ArrayList<>(32);
         vendorInfos.stream().forEach(vendorInfo -> {
             VendorAccountDTO vendorAccountDTO = new VendorAccountDTO();

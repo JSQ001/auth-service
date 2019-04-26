@@ -7,6 +7,7 @@ import com.hand.hcf.app.common.co.DepartmentGroupCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.dto.CompanyBatchQueryDTO;
@@ -471,10 +472,20 @@ public class DepartmentGroupService extends ServiceImpl<DepartmentGroupMapper, D
             String name,
             Boolean leafEnable,
             Long departmentId,
+            boolean dataAuthFlag,
             Page<DepartmentGroupDepartmentCO> page) {
         page.getRecords();
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"sys_department");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"ad");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN,"id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         List<DepartmentGroupDepartmentCO> list = departmentGroupMapper.selectDepartmentByTenantIdAndEnabled(
-                tenantId, deptCode, name, leafEnable, departmentId, page);
+                tenantId, deptCode, name, leafEnable, departmentId,dataAuthLabel, page);
         list.stream().map(u -> {
             Department one = departmentService.selectOnebyId(u.getDepartmentId());
             if (one != null) {

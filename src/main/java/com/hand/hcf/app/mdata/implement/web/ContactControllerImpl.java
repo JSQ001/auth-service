@@ -1,14 +1,18 @@
 package com.hand.hcf.app.mdata.implement.web;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
 import com.hand.hcf.app.mdata.contact.domain.ContactBankAccount;
+import com.hand.hcf.app.mdata.contact.domain.UserGroup;
 import com.hand.hcf.app.mdata.contact.service.ContactBankAccountService;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.contact.service.UserGroupService;
 import com.hand.hcf.app.mdata.contact.web.adapter.UserAdapter;
 import lombok.extern.slf4j.Slf4j;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +35,8 @@ public class ContactControllerImpl {
     private UserGroupService userGroupService;
     @Autowired
     private ContactBankAccountService contactBankAccountService;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     /**
      * 根据员工id集合查询员工信息
@@ -295,6 +301,12 @@ public class ContactControllerImpl {
             }
         }
         return null;
+    }
+
+    public UserGroupCO getUserGroupByCode(@RequestParam("userGroupCode") String userGroupCode) {
+        return mapperFacade.map(userGroupService
+                .selectOne(new EntityWrapper<UserGroup>().eq("code", userGroupCode)
+                        .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())), UserGroupCO.class);
     }
 
 }

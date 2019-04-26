@@ -31,7 +31,8 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
     private HcfOrganizationInterface hcfOrganizationInterface;
 
     public List<DataAuthTableProperty> getDataAuthTablePropertiesByTableName(String tableName){
-        return dataAuthTablePropertyMapper.selectList(new EntityWrapper<DataAuthTableProperty>().eq("table_name", tableName)
+        String tableNameLower = tableName.toLowerCase();
+        return dataAuthTablePropertyMapper.selectList(new EntityWrapper<DataAuthTableProperty>().eq("table_name", tableNameLower).and()
                 .eq("enabled", true));
     }
 
@@ -41,6 +42,8 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
      * @return
      */
     public DataAuthTableProperty createDataAuthTableProperty(DataAuthTableProperty dataAuthTableProperty){
+        String tableNameLower = dataAuthTableProperty.getTableName().toLowerCase();
+        dataAuthTableProperty.setTableName(tableNameLower);
         if (dataAuthTablePropertyMapper.selectList(
                 new EntityWrapper<DataAuthTableProperty>()
                 .eq("table_name",dataAuthTableProperty.getTableName())
@@ -67,6 +70,8 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
      * @return
      */
     public DataAuthTableProperty updateDataAuthTableProperty(DataAuthTableProperty dataAuthTableProperty){
+        String tableNameLower = dataAuthTableProperty.getTableName().toLowerCase();
+        dataAuthTableProperty.setTableName(tableNameLower);
         DataAuthTableProperty oldDataAuthTableProperty = dataAuthTablePropertyMapper.selectById(dataAuthTableProperty.getId());
 //        if (!oldDataAuthTableProperty.getTableName().equals(dataAuthTableProperty.getTableName()) &&
 //                !oldDataAuthTableProperty.getDataType().equals(dataAuthTableProperty.getDataType())) {
@@ -103,6 +108,7 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
      * @return
      */
     public List<DataAuthTableProperty> getDataAuthTablePropertyByCond(String tableName, String dataType, String filterMethod, String columnName, Page page){
+        tableName = tableName.toLowerCase();
         List<DataAuthTableProperty> list = new ArrayList<>();
         list = dataAuthTablePropertyMapper.selectPage(page,
                     new EntityWrapper<DataAuthTableProperty>()

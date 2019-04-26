@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DepartmentPositionImportDTO {
 
-    private String tenantId;
+    private String rowNumber;
 
     private String positionCode;
 

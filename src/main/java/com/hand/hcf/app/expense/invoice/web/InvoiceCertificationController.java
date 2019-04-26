@@ -148,4 +148,22 @@ public class InvoiceCertificationController {
                 isSubmit);
     }
 
+
+
+    @ApiOperation(value = "更新发票认证状态", notes = "更新发票认证状态 开发:郑少锋")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType="query", name = "headerId", value = "发票头Id",
+                    required = false, dataType = "List<Long>"),
+            @ApiImplicitParam(paramType="query", name = "status", value = "认证状态",
+                    required = false, dataType = "Integer"),
+            @ApiImplicitParam(paramType="query", name = "approvalText", value = "认证失败原因",
+                    required = false, dataType = "String")
+    })
+    @PutMapping("/update/certified/status")
+    public void updateInvoiceCertifiedStatus(
+            @ApiIgnore @RequestBody List<Long> headerId,
+            @RequestParam("status") Integer status,
+            @RequestParam(value = "approvalText",required = false) String approvalText) {
+        invoiceCertificationService.updateInvoiceCertifiedStatus(headerId,status, approvalText);
+    }
 }

@@ -8,6 +8,9 @@ import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.SetOfBooksInfoCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.expense.common.utils.StringUtil;
 import com.hand.hcf.app.mdata.accounts.domain.AccountSet;
 import com.hand.hcf.app.mdata.accounts.service.AccountSetService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -44,7 +47,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by fanfuqiang 2018/11/20
@@ -104,19 +112,19 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
         if (setOfBooks.getId() != null) {
             throw new BizException(RespCode.SETOFBOOKS_ID_NULL);
         }
-        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksCode())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksCode())) {
             throw new BizException(RespCode.SETOFBOOKS_CODE_NULL);
         }
-        if (StringUtils.isEmpty(setOfBooks.getPeriodSetCode())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getPeriodSetCode())) {
             throw new BizException(RespCode.SETOFBOOKS_PERIODSETCODE_NULL);
         }
-        if (StringUtils.isEmpty(setOfBooks.getFunctionalCurrencyCode())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getFunctionalCurrencyCode())) {
             throw new BizException(RespCode.SETOFBOOKS_FCURRENCYCODE_NULL);
         }
         if (setOfBooks.getAccountSetId() == null) {
             throw new BizException(RespCode.SETOFBOOKS_18007);
         }
-        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksName())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksName())) {
             throw new BizException(RespCode.SETOFBOOKS_NAME_NULL);
         }
         //  校验是否获取到租户ID
@@ -181,11 +189,11 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
             throw new BizException(RespCode.SETOFBOOKS_18002);
         }
         //  检查是否输入账套代码
-        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksCode())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksCode())) {
             throw new BizException(RespCode.SETOFBOOKS_CODE_NULL);
         }
         //  检查是否输入账套名称
-        if (StringUtils.isEmpty(setOfBooks.getSetOfBooksName())) {
+        if (StringUtil.isNullOrEmpty(setOfBooks.getSetOfBooksName())) {
             throw new BizException(RespCode.SETOFBOOKS_NAME_NULL);
         }
         //  如果改变状态为禁用时,需要检查账套下是否存在法人
@@ -283,6 +291,27 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
 
 
     /**
+     * 根据关键词查询账套信息 关键词为账套code或账套name
+     * @param ids             账套id
+     * @param keyWord         关键词
+     * @return                账套
+     */
+    public List<SetOfBooks> getSetOfBooksListByIdKeyWord(List<Long> ids,
+                                                        String keyWord) {
+        Wrapper<SetOfBooks> setOfBooksWrapper = new EntityWrapper<SetOfBooks>()
+                .in("id", ids)
+                .eq("deleted", false)
+                .orderBy("set_of_books_code");
+        if (!StringUtils.isEmpty(keyWord)) {
+            setOfBooksWrapper.andNew()
+                    .like("set_of_books_code", keyWord)
+                    .or()
+                    .like("set_of_books_name", keyWord);
+        }
+        return setOfBooksMapper.selectList(setOfBooksWrapper);
+    }
+
+    /**
      * 分页查询 账套DTO条件查询
      *
      * @param setOfBooksCode 账套代码
@@ -292,14 +321,22 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
      * @param page           分页对象
      * @return
      */
-    public Page<SetOfBooksDTO> findSetOfBooksDTO(String setOfBooksCode, String setOfBooksName, Boolean enabled, String roleType, Long tenantId, Page<SetOfBooksDTO> page) {
-        List<SetOfBooks> list = new ArrayList<>();
+    public Page<SetOfBooksDTO> findSetOfBooksDTO(String setOfBooksCode, String setOfBooksName, Boolean enabled, String roleType, Long tenantId,Boolean dataAuthFlag,  Page<SetOfBooksDTO> page) {
+        List<SetOfBooks> list;
+        String dataAuthLabel = null;
+        if (dataAuthFlag) {
+            Map<String, String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_set_of_books");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         //  判断是否传入这个参数,并且权限也是租户管理员
         list = setOfBooksMapper.selectPage(page, new EntityWrapper<SetOfBooks>()
                 .where("deleted = false")
                 .eq(enabled != null, "enabled", enabled)
                 .like("set_of_books_code", setOfBooksCode)
                 .like("set_of_books_name", setOfBooksName)
+                .and(dataAuthLabel != null , dataAuthLabel)
                 .eq("tenant_id", tenantId)
                 .orderBy("enabled",false)
                 .orderBy("set_of_books_code")
@@ -374,14 +411,22 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
     /**
      * 根据租户ID，获取账套
      *
-     * @param tenantId
+     * @param tenantId 租户id
+     * @param dataAuthFlag 是否启用数据权限
      * @return
      */
-    public List<SetOfBooks> getListByTenantId(Long tenantId) {
-        Map<String, Object> map = new HashMap<>(16);
-        map.put("tenant_id", tenantId);
-        map.put("enabled", true);
-        List<SetOfBooks> setOfBooksList = selectByMap(map);
+    public List<SetOfBooks> getListByTenantId(Long tenantId,boolean dataAuthFlag) {
+        String dataAuthLabel = null;
+        if (dataAuthFlag){
+            Map<String,String> dataAuthLabelMap = new HashMap<>(2);
+            dataAuthLabelMap.put(DataAuthorityUtil.TABLE_NAME,"sys_set_of_books");
+            dataAuthLabelMap.put(DataAuthorityUtil.SOB_COLUMN,"id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(dataAuthLabelMap);
+        }
+        List<SetOfBooks> setOfBooksList = selectList(new EntityWrapper<SetOfBooks>()
+                .eq("tenant_id", tenantId)
+                .eq("enabled", true)
+                .and(dataAuthLabel != null, dataAuthLabel));
         setOfBooksList = baseI18nService.convertListByLocale(setOfBooksList);
         return setOfBooksList;
     }
@@ -412,6 +457,20 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
     public SetOfBooks getSetOfBooksById(Long id) {
         SetOfBooks setOfBooks = selectById(id);
         return baseI18nService.convertOneByLocale(setOfBooks);
+    }
+
+    /**
+     * 根据账套code查询账套
+     * @param setOfBooksCode: 账套code
+     * @return
+     */
+    public List<SetOfBooksInfoCO> getSetOfBooksBysetOfBooksCode(String setOfBooksCode) {
+        List<SetOfBooks> setOfBooksList = setOfBooksMapper.selectList(new EntityWrapper<SetOfBooks>()
+                .eq("set_of_books_code", setOfBooksCode)
+                .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
+                .eq("enabled", 1)
+                .eq("deleted", 0));
+        return this.setOfBooksToInfoCO(setOfBooksList);
     }
 
     public SetOfBooksDTO getSetOfBooksDTOById(Long id) {
@@ -602,7 +661,7 @@ public class SetOfBooksService extends ServiceImpl<SetOfBooksMapper, SetOfBooks>
             result = baseI18nService.convertListByLocale(result);
             return result;
         } else {
-            return getListByTenantId(tenantId);
+            return getListByTenantId(tenantId,false);
         }
     }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.EsCashTransactionClassMapper">
+    <resultMap id="EsBaseResultMap" type="com.hand.hcf.app.payment.web.dto.EsCashTransactionClassDTO">
+        <id column="id" property="id"></id>
+        <result column="set_of_book_id" property="setOfBookId"></result>
+        <result column="type_code" property="typeCode"></result>
+        <result column="class_code" property="classCode"></result>
+        <result column="description" property="description"></result>
+        <result column="enabled" property="enabled"></result>
+        <result column="deleted" property="deleted"></result>
+    </resultMap>
+    <select id="selectAllCashTransactionClass" resultMap="EsBaseResultMap">
+        SELECT
+            id,
+            set_of_book_id,
+            type_code,
+            class_code,
+            description,
+            enabled,
+            deleted
+        FROM
+            csh_transaction_class
+    </select>
+</mapper>

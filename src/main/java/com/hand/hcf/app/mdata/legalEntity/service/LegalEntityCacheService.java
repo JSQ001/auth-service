@@ -19,33 +19,25 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-@CacheConfig(cacheNames = {CacheConstants.LEGAL_ENTITY})
 public class LegalEntityCacheService {
     @Autowired
     private LegalEntityMapper legalEntityMapper;
 
-    @Autowired
-    private BaseI18nService baseI18nService;
 
-    //jiu.zhao redis
-    //@Cacheable(key = "#legalEntityOid.toString()")
     public LegalEntity getLegalEntityByOid(UUID legalEntityOid) {
         LegalEntity param = new LegalEntity();
         param.setLegalEntityOid(legalEntityOid);
         return legalEntityMapper.selectOne(param);
     }
 
-    @CacheEvict(key = "#tenantId.toString()")
     public void evictTenantLegalEntity(Long tenantId) {
 
     }
 
-    @CachePut(key = "#legalEntity.id.toString()")
     public LegalEntity reloadCacheLegalEntityById(LegalEntity legalEntity) {
         return legalEntity;
     }
 
-    @CachePut(key = "#legalEntity.legalEntityOid.toString()")
     public LegalEntity reloadCacheLegalEntityByOid(LegalEntity legalEntity) {
         return legalEntity;
     }

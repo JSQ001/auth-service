@@ -313,7 +313,8 @@ public class CompanyGroupResource {
                                                                      @RequestParam(required = false) String companyGroupName,
                                                                      Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        Page<CompanyGroup> result = companyGroupService.findCompanyGroupByCode(setOfBooksId, companyGroupCode, companyGroupName, OrgInformationUtil.getCurrentTenantId(), page);
+        Page<CompanyGroup> result = companyGroupService.findCompanyGroupByCode(setOfBooksId, companyGroupCode, companyGroupName
+                                                                 , OrgInformationUtil.getCurrentTenantId(), page,false);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/companyId/group/assign/query");
@@ -368,7 +369,8 @@ public class CompanyGroupResource {
                                                                             @RequestParam(required = false) Boolean enabled,
                                                                             Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        Page<CompanyGroupDTO> result = companyGroupService.findCompanyGroupByConditions(setOfBooksId, companyGroupCode, companyGroupName, enabled, OrgInformationUtil.getCurrentTenantId(), page);
+        Page<CompanyGroupDTO> result = companyGroupService.findCompanyGroupByConditions(setOfBooksId, companyGroupCode,
+                           companyGroupName, enabled, OrgInformationUtil.getCurrentTenantId(), page,false);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/companyId/group/assign/query/dto");
@@ -420,13 +422,67 @@ public class CompanyGroupResource {
     public ResponseEntity<List<CompanyGroupDTO>> findCompanyGroupDTO(@RequestParam(required = false) Long setOfBooksId,
                                                                      @RequestParam(required = false) String companyGroupCode,
                                                                      @RequestParam(required = false) String companyGroupName,
-                                                                     Pageable pageable) throws URISyntaxException {
+                                                                     Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
         Long currentTenantID = OrgInformationUtil.getCurrentTenantId();
-        Page<CompanyGroupDTO> result = companyGroupService.findCompanyGroupByConditions(setOfBooksId, companyGroupCode, companyGroupName, null, currentTenantID, page);
+        Page<CompanyGroupDTO> result = companyGroupService.findCompanyGroupByConditions(setOfBooksId, companyGroupCode,
+                                               companyGroupName, null, currentTenantID, page,false);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
-        headers.add("Link", "/api/companyId/group/assign/query/dto");
+        headers.add("Link", "/api/company/group/query/dto");
+        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/companyId/group/query/dto/ 数据权限-公司组条件查询-分页查询
+     * @apiGroup CompanyGroupDTO
+     * @apiParam {Long} [setOfBooksId] 账套ID
+     * @apiParam {String} [companyGroupCode] 公司组代码
+     * @apiParam {String} [companyGroupName] 公司组描述
+     * @apiSuccess {Object[]} CompanyGroupDTO  公司组实体DTO集合
+     * @apiSuccess {Long} id   公司组ID
+     * @apiSuccess {String} companyGroupCode   公司组代码
+     * @apiSuccess {String} companyGroupName   公司组描述
+     * @apiSuccess {Long}   setOfBooksId       账套ID
+     * @apiSuccess {String} setOfBooksCode     账套代码
+     * @apiSuccess {Boolean} enabled           启用标志
+     * @apiSuccessExample {json} Success-Result
+     * [
+     * {
+     * "id": "912966380293246978",
+     * "companyGroupCode": "test_code_001yy",
+     * "companyGroupName": "test_name_001yy",
+     * "setOfBooksId": "912229041627488258",
+     * "setOfBooksCode": "set_of_books_code_001skt",
+     * "i18n": {
+     * "companyGroupName": [
+     * {
+     * "language": "en",
+     * "value": "en_name"
+     * },
+     * {
+     * "language": "zh_cn",
+     * "value": "中文_name"
+     * }
+     * ]
+     * },
+     * "enabled": false
+     * }
+     * ]
+     */
+    @RequestMapping(value = "/query/dto/enable/dataAuth", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<List<CompanyGroupDTO>> findCompanyGroupDTOEnableDataAuth(@RequestParam(required = false) Long setOfBooksId,
+                                                                     @RequestParam(required = false) String companyGroupCode,
+                                                                     @RequestParam(required = false) String companyGroupName,
+                                                                     Pageable pageable) {
+        Page page = PageUtil.getPage(pageable);
+        Long currentTenantID = OrgInformationUtil.getCurrentTenantId();
+        Page<CompanyGroupDTO> result = companyGroupService.findCompanyGroupByConditions(setOfBooksId, companyGroupCode,
+                                       companyGroupName, null, currentTenantID, page,true);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + result.getTotal());
+        headers.add("Link", "/api/company/group/query/dto/enable/dataAuth");
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
     }
 

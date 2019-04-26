@@ -1,7 +1,7 @@
 package com.hand.hcf.app.core.security;
 
 /**
- * Constants for Spring Security authorities.
+ * PaymentConstants for Spring Security authorities.
  */
 public final class AuthoritiesConstants {
 

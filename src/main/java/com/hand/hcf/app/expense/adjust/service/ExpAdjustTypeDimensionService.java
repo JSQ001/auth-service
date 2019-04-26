@@ -56,12 +56,21 @@ public class ExpAdjustTypeDimensionService extends BaseService<ExpAdjustTypeDime
             if (e.getHeaderFlag() == null){
                 e.setHeaderFlag(false);
             }
+            if(e.getId() != null){
+                this.updateById(e);
+            }else {
+               try {
+                   this.insert(e);
+               }catch (DataAccessException es){
+                   throw new BizException(RespCode.EXPENSE_APPLICATION_DIMENSION_DUPLICATE);
+               }
+            }
         });
-        try{
-            this.insertOrUpdateBatch(dimensions);
-        }catch (DataAccessException e){
-            throw new BizException(RespCode.EXPENSE_APPLICATION_DIMENSION_DUPLICATE);
-        }
+//        try{
+//            this.insertOrUpdateBatch(dimensions);
+//        }catch (DataAccessException e){
+//            throw new BizException(RespCode.EXPENSE_APPLICATION_DIMENSION_DUPLICATE);
+//        }
         return dimensions;
     }
 

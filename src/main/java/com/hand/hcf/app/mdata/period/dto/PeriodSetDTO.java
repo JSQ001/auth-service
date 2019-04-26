@@ -34,4 +34,5 @@ public class PeriodSetDTO {
     protected Long lastUpdatedBy;
     @TableField(exist = false)
     private Map<String, List<Map<String, String>>> i18n;
+    private Integer versionNumber;
 }

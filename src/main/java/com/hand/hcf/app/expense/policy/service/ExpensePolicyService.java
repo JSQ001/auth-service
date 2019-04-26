@@ -558,7 +558,7 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
                                 ? Arrays.asList(dynamicField.getValue().split(","))
                                     .stream().map(e -> Long.valueOf(e)).collect(Collectors.toList())
                                 : new ArrayList<>();
-                        fieldDTOPeople = dynamicField.getValue() != null
+                        fieldDTOPeople = fieldDTO.getFieldValue() != null
                                 ? Arrays.asList(fieldDTO.getFieldValue().split(","))
                                     .stream().map(e -> Long.valueOf(e)).collect(Collectors.toList())
                                 : new ArrayList<>();
@@ -704,7 +704,7 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
         }
     }
 
-    public void checkExpensePolicyInitData(ExpensePolicyInitDTO dto, int line) {
+    public void checkExpensePolicyInitData(ExpensePolicyInitDTO dto,int line) {
         Map<String,List<String>> errorMap = new HashMap<>(16);
         String lineNumber = "第"+line+"行";
         List<String> stringList = new ArrayList<>();

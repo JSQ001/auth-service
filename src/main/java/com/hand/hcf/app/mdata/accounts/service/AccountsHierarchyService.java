@@ -4,10 +4,14 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.mdata.accounts.domain.AccountSet;
 import com.hand.hcf.app.mdata.accounts.domain.Accounts;
 import com.hand.hcf.app.mdata.accounts.domain.AccountsHierarchy;
 import com.hand.hcf.app.mdata.accounts.dto.AccountsHierarchyDTO;
+import com.hand.hcf.app.mdata.accounts.persistence.AccountSetMapper;
 import com.hand.hcf.app.mdata.accounts.persistence.AccountsHierarchyMapper;
+import com.hand.hcf.app.mdata.accounts.persistence.AccountsMapper;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.mdata.utils.StringUtil;
@@ -39,6 +43,10 @@ public class AccountsHierarchyService extends ServiceImpl<AccountsHierarchyMappe
     private BaseI18nService baseI18nService;
     @Autowired
     private HcfOrganizationInterface organizationInterface;
+    @Autowired
+    private AccountsMapper accountsMapper;
+    @Autowired
+    private AccountSetMapper accountSetMapper;
 
     /**
      * 新建子科目
@@ -217,5 +225,90 @@ public class AccountsHierarchyService extends ServiceImpl<AccountsHierarchyMappe
             page.setRecords(list);
         }
         return page;
+    }
+
+
+    /**
+     * 科目层级批量导入
+     *
+     * @param list
+     * @return
+     */
+    public String importAccountsHierarchyBatch(List<AccountsHierarchyDTO> list) {
+
+        AccountsHierarchy accountsHierarchy;
+        Accounts accounts;
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+        for (AccountsHierarchyDTO accountsHierarchyDTO : list) {
+            i++;
+            if (StringUtil.isNullOrEmpty(accountsHierarchyDTO.getParentAccountCode())) {
+                stringBuffer.append("序号" + i + "：汇总科目不能为空;");
+            }
+
+            if (StringUtil.isNullOrEmpty(accountsHierarchyDTO.getAccountCode())) {
+                stringBuffer.append("序号" + i + "：子科目不能为空;");
+            }
+
+            accountsHierarchy = new AccountsHierarchy();
+            accounts = new Accounts();
+
+            AccountSet accountSet = new AccountSet();
+            accountSet.setAccountSetCode(accountsHierarchyDTO.getAccountSetCode());
+            accountSet = accountSetMapper.selectOne(accountSet);
+            if (accountSet == null) {
+                stringBuffer.append("序号" + i + ":科目表代码不存在;");
+            }
+
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+
+            //获取父科目id
+            accounts.setAccountSetId(accountSet.getId());
+            accounts.setAccountCode(accountsHierarchyDTO.getParentAccountCode());
+            accounts.setDeleted(false);
+            accounts = accountsMapper.selectOne(accounts);
+            if (accounts == null) {
+                stringBuffer.append("序号" + i + "：汇总科目代码不存在或不在当前科目表下;");
+            } else {
+                if (!accounts.getSummaryFlag()) {
+                    stringBuffer.append("序号" + i + "：该科目不是汇总科目;");
+                }
+                accountsHierarchy.setParentAccountId(accounts.getId());
+            }
+
+            //获取子科目id
+            Accounts subAccounts = new Accounts();
+            subAccounts.setAccountCode(accountsHierarchyDTO.getAccountCode());
+            subAccounts.setDeleted(false);
+            subAccounts.setAccountSetId(accountSet.getId());
+            subAccounts = accountsMapper.selectOne(accounts);
+            if (subAccounts == null) {
+                stringBuffer.append("序号" + i + "：子科目代码不存在或不在当前科目表下;");
+            } else {
+                accountsHierarchy.setSubAccountId(subAccounts.getId());
+            }
+
+            if (accounts != null && subAccounts != null) {
+                //  查询判断是否重复
+                AccountsHierarchy selectResult = accountsHierarchyService.selectOne(new EntityWrapper<AccountsHierarchy>()
+                        .where("deleted = false")
+                        .eq("parent_account_id", accountsHierarchy.getParentAccountId())
+                        .eq("sub_account_id", accountsHierarchy.getSubAccountId())
+                );
+                //  查询结果不为空则有重复
+                if (selectResult != null) {
+                    stringBuffer.append("序号" + i + "：科目层级已存在;");
+                }
+            }
+            accountsHierarchy.setTenantId(OrgInformationUtil.getCurrentTenantId());
+
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            accountsHierarchyMapper.insert(accountsHierarchy);
+        }
+        return "导入成功,共导入:" + list.size() + "条";
     }
 }

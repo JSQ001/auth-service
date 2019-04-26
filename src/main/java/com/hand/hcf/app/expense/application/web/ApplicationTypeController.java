@@ -266,7 +266,65 @@ public class ApplicationTypeController {
                                                                   @RequestParam(value = "enabled", required = false) Boolean enabled,
                                                                   Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-        List<ApplicationType> list = service.queryByCondition(setOfBooksId, typeCode, typeName,enabled, page);
+        List<ApplicationType> list = service.queryByCondition(setOfBooksId, typeCode, typeName,enabled, page,false);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(list, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * @api {GET} /api/expense/application/type/query/enable/dataAuth 【申请单类型】条件查询
+     * @apiDescription  界面分页可以根据条件查询
+     * @apiGroup ExpenseService
+     * @apiParam (请求参数) {Long} setOfBooksId  账套Id
+     * @apiParam (请求参数) {String} [typeCode]  申请单类型代码
+     * @apiParam (请求参数) {String} [typeName]  申请单类型名称
+     * @apiParam (请求参数) {Boolean} [enabled]  是否启用
+     * @apiParam (请求参数) {Integer} [page]  当前页数从0开始 默认 0
+     * @apiParam (请求参数) {Boolean} [size]  每页大小 默认20
+     * @apiParamExample {url} 请求报文:
+     * /api/expense/application/type/query/enable/dataAuth?page=0&size=10&setOfBooksId=12544445&typeCode=&typeName=&enabled=
+     * @apiSuccess (返回对象) {Long} setOfBooksId  账套Id
+     * @apiSuccess (返回对象) {String} setOfBooksName  账套名称
+     * @apiSuccess (返回对象) {Long} id  申请单类型Id
+     * @apiSuccess (返回对象) {Boolean} enabled  是否启用
+     * @apiSuccess (返回对象) {String} typeCode  代码
+     * @apiSuccess (返回对象) {String} typeName  类型名称
+     * @apiSuccess (返回对象) {String} formOid  关联表单Oid
+     * @apiSuccess (返回对象) {Integer} formType  单据大类 默认为 801009
+     * @apiSuccess (返回对象) {String} formName  关联表单名称
+     * @apiSuccess (返回对象) {Boolean} budgetFlag  是否预算管控
+     * @apiSuccess (返回对象) {Boolean} allFlag  是否关联全部申请类型
+     * @apiSuccess (返回对象) {Boolean} requireInput  合同是否必输
+     * @apiSuccess (返回对象) {Boolean} associateContract  是否关联合同
+     * @apiSuccessExample {json} 返回报文:
+     * [
+     *     {
+     *         "id": "1076017251497086977",
+     *         "enabled": true,
+     *         "typeCode": "123456",
+     *         "typeName": "654321",
+     *         "setOfBooksId": "1037906263432859649",
+     *         "setOfBooksName": "PANNGPANG_SOB-胖成一个大熊猫账套",
+     *         "tenantId": "1034363055694327809",
+     *         "formOid": "2489af52-4548-4207-a852-bbbacc9dddca",
+     *         "formName": null,
+     *         "formType": null,
+     *         "budgetFlag": false,
+     *         "allFlag": false,
+     *         "associateContract": true,
+     *         "requireInput": true,
+     *         "applyEmployee": "101"
+     *     }
+     * ]
+     */
+    @GetMapping("/query/enable/dataAuth")
+    public ResponseEntity<List<ApplicationType>> queryByConditionEnableDataAuth(@RequestParam("setOfBooksId") Long setOfBooksId,
+                                                                  @RequestParam(value = "typeCode", required = false) String typeCode,
+                                                                  @RequestParam(value = "typeName", required = false) String typeName,
+                                                                  @RequestParam(value = "enabled", required = false) Boolean enabled,
+                                                                  Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<ApplicationType> list = service.queryByCondition(setOfBooksId, typeCode, typeName,enabled, page,true);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(list, httpHeaders, HttpStatus.OK);
     }

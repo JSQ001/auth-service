@@ -105,7 +105,7 @@
     </select>
     <select id="listByDocumentLov" resultMap="ExpenseTypeWebMap" parameterType="com.hand.hcf.app.expense.type.bo.ExpenseBO">
         SELECT
-            temp.*,(select name  from exp_expense_type_category eetc where eetc.id = temp.type_category_id) type_category_name
+            temp.*
         FROM
             (SELECT
                 v.*,
@@ -244,6 +244,22 @@
         AND t.code = #{applicationTypeCode}
     </select>
 
+    <select id="selectExpenseByCode" resultType="com.hand.hcf.app.expense.type.domain.ExpenseType">
+        select  eet.id,eet.code,eet.name,eetc.name categoryName from  exp_expense_type_category eetc , exp_expense_type eet
+        where  eetc.id=eet.type_category_id
+        AND   eet.ENABLED = 1
+        <if test="code !=null ">
+            AND eet.code = #{code}
+        </if>
+        <if test="name != null ">
+            AND eet.name = #{name}
+        </if>
+        <if test="categoryName != null ">
+            AND eetc.name = #{categoryName}
+        </if>
+    </select>
+
+
     <resultMap id="ExpenseTypeWebMap" type="com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO">
         <id column="id" property="id" />
         <result column="name" property="name"/>
@@ -262,7 +278,6 @@
         <result property="amount" column="amount"/>
         <result property="travelTypeCode" column="travel_type_code"/>
         <result property="userGroupFlag" column="user_group_flag"/>
-        <result property="typeCategoryName" column="type_category_name"/>
         <collection property="userGroupIds" ofType="java.lang.Long">
             <result column="user_type_id"/>
         </collection>

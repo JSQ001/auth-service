@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.payment.persistence.CashPaymentMethodMapper">
+
+    <select id="getById" resultType="com.hand.hcf.app.payment.domain.CashPaymentMethod">
+        SELECT
+          c.id id,
+          c.payment_method_code paymentMethodCode,
+          c.tenant_id tenantId,
+          c.payment_method_category paymentMethodCategory,
+          c.description description
+        FROM
+          csh_payment_method c
+        WHERE
+          c.id = #{id}
+          <if test="paymentMethod !=null and paymentMethod != ''">
+              AND
+              c.payment_method_category LIKE  concat('%', concat(#{paymentMethod,jdbcType=VARCHAR}, '%'))
+          </if>
+    </select>
+</mapper>

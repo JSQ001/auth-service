@@ -51,6 +51,7 @@ public interface ContactMapper extends BaseMapper<Contact> {
     String varifyEmailExsits(@Param("email") String email);
 
     List<UserDTO> listByKeywordAndCond(Page page, ContactQO contactQO);
+    List<UserDTO> listByKeywordAndCond(ContactQO contactQO);
 
     List<ContactCO> listCOByCondition(@Param("ew") Wrapper<ContactCO> wrapper);
     List<ContactCO> listCOByCondition(@Param("ew") Wrapper<ContactCO> wrapper, RowBounds rowBounds);

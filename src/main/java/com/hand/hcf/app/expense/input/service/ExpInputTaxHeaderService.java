@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.plugins.Page;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
+import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
@@ -25,6 +27,7 @@ import com.hand.hcf.app.expense.input.persistence.ExpInputTaxHeaderMapper;
 import com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper;
 import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,11 +75,27 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
 
     @Autowired
     private AccountingService accountingService;
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
 
-    public Page<ExpInputTaxHeaderDTO> queryHeader(Long applicantId, String transferType, String useType, String transferDateFrom, String transferDateTo, String status, BigDecimal amountFrom, BigDecimal amountTo, String description, String documentNumber, Long companyId, Long departmentId, Page page) {
-        List<ExpInputTaxHeader> expInputTaxHeaders = expInputTaxHeaderMapper.selectPage(page, new EntityWrapper<ExpInputTaxHeader>()
-                .eq("applicant_id", applicantId != null ? applicantId : OrgInformationUtil.getUser().getId())
+    public Page<ExpInputTaxHeaderDTO> queryHeader(Long applicantId, String transferType, String useType,
+                                                  String transferDateFrom, String transferDateTo,
+                                                  String status, BigDecimal amountFrom, BigDecimal amountTo,
+                                                  String description, String documentNumber, Long companyId, Long departmentId,
+                                                  boolean dataAuthFlag, Page page) {
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "exp_input_tax_header");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN, "department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "applicant_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+        Wrapper wrapper = new EntityWrapper<ExpInputTaxHeader>()
+                .eq(applicantId != null,"applicant_id", applicantId)
                 .eq(transferType != null, "transfer_type", transferType)
                 .eq(useType != null, "use_type", useType)
                 .eq(status != null, "status", status)
@@ -88,7 +107,11 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                 .like(documentNumber != null, "document_number", documentNumber)
                 .eq(companyId != null, "company_id", companyId)
                 .eq(departmentId != null, "department_id", departmentId)
-        );
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel);
+        if (!dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
+            wrapper = wrapper.eq(applicantId == null, "applicant_id", OrgInformationUtil.getCurrentUserId());
+        }
+        List<ExpInputTaxHeader> expInputTaxHeaders = expInputTaxHeaderMapper.selectPage(page, wrapper);
         List<ExpInputTaxHeaderDTO> headers = mapperFacade.mapAsList(expInputTaxHeaders, ExpInputTaxHeaderDTO.class);
         //设置 名称（公司，部门，员工）
         setDesc(headers);
@@ -264,14 +287,26 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         }
     }
 
-    public List<ExpInputTaxHeaderDTO> queryExpInputFinance(Page page, Long companyId, Long unitId, Long applyId, Long status,
-                                                           String transferType, String useType, String currencyCode,
-                                                           BigDecimal amountFrom, BigDecimal amountTo, String reverseFlag, String remark,
-                                                           ZonedDateTime creatDateFrom, ZonedDateTime creatDateTo, ZonedDateTime auditDateFrom,
-                                                           ZonedDateTime auditDateTo, Long tenantId, String documentNumber) {
+    public List<ExpInputTaxHeaderDTO> queryExpInputFinance(
+            Page page, Long companyId, Long unitId, Long applyId, Long status,
+            String transferType, String useType, String currencyCode,
+            BigDecimal amountFrom, BigDecimal amountTo, String reverseFlag, String remark,
+            ZonedDateTime creatDateFrom, ZonedDateTime creatDateTo, ZonedDateTime auditDateFrom,
+            ZonedDateTime auditDateTo, Long tenantId, String documentNumber, boolean dataAuthFlag) {
 
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME, "exp_input_tax_header");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"t");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN, "company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN, "department_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "applicant_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
-                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber);
+                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber, dataAuthLabel);
         List<ExpInputTaxHeaderDTO> expInputFinances = baseMapper.queryExpInputFinance(page, wrapper);
         setDesc(expInputFinances);
         setSysCodeValue(expInputFinances);
@@ -345,7 +380,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                                 ExportConfig exportConfig) throws IOException {
         //获取查询的Sql
         Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
-                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber);
+                reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber, null);
         //获取 查询的总数
         int total = baseMapper.getCountByCondition(wrapper);
         int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
@@ -396,7 +431,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                                                               ZonedDateTime auditDateFrom,
                                                               ZonedDateTime auditDateTo,
                                                               Long tenantId,
-                                                              String documentNumber) {
+                                                              String documentNumber,
+                                                              String dataAuthLabel) {
         Wrapper<ExpInputTaxHeader> wrapper = new EntityWrapper<ExpInputTaxHeader>()
                 .eq(companyId != null, "t.company_id", companyId)
                 .eq(unitId != null, "t.department_id", unitId)
@@ -415,6 +451,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                 .lt(auditDateTo != null, "t.audit_date", auditDateTo)
                 .eq(tenantId != null, "t.tenant_id", tenantId)
                 .like(StringUtils.hasText(documentNumber), "t.document_number", documentNumber)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("t.document_number", false);
         return wrapper;
     }

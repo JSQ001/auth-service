@@ -3,6 +3,9 @@ package com.hand.hcf.app.mdata.contact.web;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.AttachmentCO;
+import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
+import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
@@ -11,6 +14,7 @@ import com.hand.hcf.app.mdata.contact.domain.Contact;
 import com.hand.hcf.app.mdata.contact.dto.*;
 import com.hand.hcf.app.mdata.contact.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import com.hand.hcf.app.mdata.utils.HeaderUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -24,10 +28,7 @@ import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import io.micrometer.core.annotation.Timed;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +40,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +67,9 @@ public class ContactResource {
 
     @Autowired
     private ExcelExportService excelExportService;
+
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
 
     /**
      * GET  /contacts/:id -> get the "id" contact.
@@ -680,6 +682,53 @@ public class ContactResource {
                 .build(),page);
 
         return new ResponseEntity<>(result, PageUtil.getTotalHeader(page), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "通过员工工号或姓名，模糊查询租户下的员工（数据权限）不和账套联动情况下查询人员",
+            notes = "通过员工工号或姓名，模糊查询租户下的员工（数据权限） 开发 赵柱")
+    @RequestMapping("/select/user/by/name/or/code/enable/dataAuth")
+    public ResponseEntity<List<UserDTO>> selectByInfoLikeDataAuth(
+            @ApiParam(value = "keyword关键字") @RequestParam(value = "keyword", required = false) String key,
+            @ApiParam(value = "账套id") @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        String dataAuthLabel = null;
+        Map<String,String> map = new HashMap<>();
+        map.put(DataAuthorityUtil.TABLE_NAME,"sys_contact");
+        map.put(DataAuthorityUtil.TABLE_ALIAS,"t2");
+        map.put(DataAuthorityUtil.SOB_COLUMN,
+                DataAuthorityUtil.getColumnDataAuthTypeLabelValue(
+                        "set_of_books_id",
+                        DataAuthFilterMethodEnum.CUSTOM_SQL,
+                        "select 1 from dual where {t5}  "
+                        )
+                );
+        map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+        map.put(DataAuthorityUtil.UNIT_COLUMN,
+                DataAuthorityUtil.getColumnDataAuthTypeLabelValue(
+                        "id",
+                        DataAuthFilterMethodEnum.CUSTOM_SQL,
+                        "select 1 from dual where {t4} "
+                )
+        );
+        map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"user_id");
+        dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        List<UserDTO> result = new ArrayList<>();
+        if(dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
+            result = contactService.pageUserDTOByQO(ContactQO.builder()
+                    .tenantId(OrgInformationUtil.getCurrentTenantId())
+                    .keyContact(key)
+                    .dataAuthLabel(dataAuthLabel)
+                    .build(),page);
+        }else {
+            result = contactService.pageUserDTOByQO(ContactQO.builder()
+                    .tenantId(OrgInformationUtil.getCurrentTenantId())
+                    .setOfBooksId(setOfBooksId)
+                    .keyContact(key)
+                    .build(), page);
+        }
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 
 

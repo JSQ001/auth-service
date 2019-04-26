@@ -128,7 +128,7 @@ public class WorkFlowEventPublishService {
         if(workFlowDocumentRef != null){
             workFlowDocumentRef.setEventConfirmStatus(true);
             workFlowDocumentRefService.updateById(workFlowDocumentRef);
-            if(workFlowDocumentRef.getStatus().equals(DocumentOperationEnum.APPROVAL_REJECT.getId()) || workFlowDocumentRef.getStatus().equals(DocumentOperationEnum.WITHDRAW.getId())){
+            if(workFlowDocumentRef.getStatus().equals(PaymentDocumentOperationEnum.APPROVAL_REJECT.getId()) || workFlowDocumentRef.getStatus().equals(PaymentDocumentOperationEnum.WITHDRAW.getId())){
                 // 拒绝或撤回时，清除当前审批人
                 workflowApproversService.deleteByRefIdAndNodeOid(workFlowDocumentRef.getId(), workFlowDocumentRef.getApprovalNodeOid());
             }

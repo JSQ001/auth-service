@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.legalEntity.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 /*import com.hand.hcf.app.client.attachment.AttachmentCO;*/
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.common.co.CompanyCO;
@@ -11,6 +12,7 @@ import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
@@ -19,6 +21,7 @@ import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
 import com.hand.hcf.app.mdata.legalEntity.persistence.LegalEntityMapper;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
+import com.hand.hcf.app.mdata.setOfBooks.persistence.SetOfBooksMapper;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
@@ -68,6 +71,10 @@ public class LegalEntityService extends BaseService<LegalEntityMapper,LegalEntit
 
     @Autowired
     private HcfOrganizationInterface organizationInterface;
+
+    @Autowired
+    private SetOfBooksMapper setOfBooksMapper;
+
     /**
      * 新增或修改法人实体
      *
@@ -747,5 +754,99 @@ public class LegalEntityService extends BaseService<LegalEntityMapper,LegalEntit
             }
         }
         return myBatisPage;
+    }
+
+
+    /**
+     * 法人实体批量导入
+     *
+     * @param list
+     * @return
+     */
+    public String importLegalEntityBatch(List<LegalEntityDTO> list) {
+
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+        for (LegalEntityDTO legalEntityDTO : list) {
+            i++;
+            //法人实体名称
+            if (legalEntityDTO.getEntityName() == null) {
+                stringBuffer.append("序号" + i + "：法人实体名称不能为空;");
+            }
+            //开户行
+            if (legalEntityDTO.getAccountBank() == null) {
+                stringBuffer.append("序号" + i + "：开户行不能为空;");
+            }
+            //地址
+            if (legalEntityDTO.getAddress() == null) {
+                stringBuffer.append("序号" + i + "：地址不能为空;");
+            }
+            //电话
+            if (legalEntityDTO.getTelePhone() == null) {
+                stringBuffer.append("序号" + i + "：电话不能为空;");
+            }
+            //纳税人识别号
+            if (legalEntityDTO.getTaxpayerNumber() == null) {
+                stringBuffer.append("序号" + i + "：纳税人识别号不能为空;");
+            }
+            //银行卡号
+            if (legalEntityDTO.getAccountNumber() == null) {
+                stringBuffer.append("序号" + i + "：银行卡号不能为空;");
+            }
+            //账套
+            if (legalEntityDTO.getSetOfBooksCode() == null) {
+                stringBuffer.append("序号" + i + "：帐套不能为空;");
+            }
+
+            LegalEntity legalEntity;
+
+
+            //纳税人识别号唯一性校验
+            if (isValidationEntityTaxpayerNumber(legalEntityDTO.getTaxpayerNumber())) {
+                stringBuffer.append("序号" + i + "：纳税人识别号已存在;");
+            }
+
+            if (isValidationEntityName(OrgInformationUtil.getCurrentTenantId(), legalEntityDTO.getEntityName())) {
+                stringBuffer.append("序号" + i + "：法人实体已存在;");
+            }
+
+            if (isValidationEntityAccountNumber(legalEntityDTO.getAccountNumber())) {
+                stringBuffer.append("序号" + i + "：法人银行卡号已存在;");
+            }
+            //校验账套为租户下账套
+            SetOfBooks target = new SetOfBooks();
+            target.setSetOfBooksCode(legalEntityDTO.getSetOfBooksCode());
+            target.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            SetOfBooks setOfBooks = setOfBooksMapper.selectOne(target);
+
+            if (setOfBooks == null) {
+                stringBuffer.append("序号" + i + "：帐套不是当前租户下帐套;");
+            }else{
+                legalEntityDTO.setSetOfBooksId(setOfBooks.getId());
+            }
+
+
+
+            //取上级法人id
+            if (StringUtils.isNotEmpty(legalEntityDTO.getParentLegalEntityName())) {
+                legalEntity = new LegalEntity();
+                legalEntity.setEntityName(legalEntityDTO.getParentLegalEntityName());
+                legalEntity.setSetOfBooksId(setOfBooks.getId());
+                legalEntity.setTenantId(OrgInformationUtil.getCurrentTenantId());
+                legalEntity = legalEntityMapper.selectOne(legalEntity);
+                if (legalEntity == null) {
+                    stringBuffer.append("序号" + i + "：上级法人在当前帐套下不存在;");
+                } else {
+                    legalEntityDTO.setParentLegalEntityId(legalEntity.getParentLegalEntityId());
+                }
+            }
+
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            addOrUpdateLegalEntity(legalEntityDTO, OrgInformationUtil.getCurrentTenantId(), true);
+
+        }
+        return "导入成功,共导入" + list.size() + "条";
     }
 }

@@ -11,6 +11,8 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.expense.common.utils.StringUtil;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.domain.*;
 import com.hand.hcf.app.mdata.contact.dto.*;
 import com.hand.hcf.app.mdata.contact.persistence.*;
@@ -90,6 +92,8 @@ public class UserGroupService extends BaseService<UserGroupMapper,UserGroup> {
     @Autowired
     private DepartmentUserService departmentUserService;
 
+    @Autowired
+    private ContactMapper contactMapper;
 
     public UserGroupDTO createUserGroupV2(UserGroupDTO userGroupDTO, boolean isTenant) {
 
@@ -1234,4 +1238,140 @@ public class UserGroupService extends BaseService<UserGroupMapper,UserGroup> {
         return list;
 
     }
+
+
+    /**
+     * 人员组导入
+     *
+     * @param userGroupDTOS
+     * @return
+     */
+    public String importUserGroup(List<UserGroupDTO> userGroupDTOS) {
+
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+
+        for (UserGroupDTO userGroupDTO : userGroupDTOS) {
+            i++;
+            userGroupDTO.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            if (StringUtil.isNullOrEmpty(userGroupDTO.getCode())) {
+                stringBuffer.append("序号" + i + ":人员组代码不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(userGroupDTO.getName())) {
+                stringBuffer.append("序号" + i + ":人员组名称不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(userGroupDTO.getComment())) {
+                stringBuffer.append("序号" + i + ":人员组描述不能为空;");
+            }
+            if (userGroupDTO.getEnabled() == null) {
+                stringBuffer.append("序号" + i + ":启用标志不能为空;");
+            }
+
+            boolean isTenant = true;
+            userGroupDTO.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            if (!OrgInformationUtil.hasTenantAuthority("TENANT")) {
+                isTenant = false;
+                userGroupDTO.setCompanyOid(OrgInformationUtil.getCurrentCompanyOid());
+            }
+
+
+            UserGroup userGroup = new UserGroup();
+            BeanUtils.copyProperties(userGroupDTO, userGroup);
+            userGroup.setComments(userGroupDTO.getComment());
+
+            if (!StringUtils.isEmpty(userGroup.getName()) && userGroup.getName().length() > NAME_SIZE) {
+                stringBuffer.append("序号" + i + ":人员组名称长度不能超过50位;");
+            }
+            if (!StringUtils.isEmpty(userGroup.getComments()) && userGroup.getComments().length() > DESCRIPTION_SIZE) {
+                stringBuffer.append("序号" + i + ":人员组描述长度不能超过100位;");
+            }
+
+            String code = userGroup.getCode();
+
+            if (code.length() > 36) {
+                stringBuffer.append("序号" + i + ":编码长度不能超过36位;");
+            } else if (PatternMatcherUtil.isChineseCharacterRegex(code)) {
+                stringBuffer.append("序号" + i + ":编码不能包含中文");
+            } else if (!PatternMatcherUtil.validateCodeRegex(code)) {
+                stringBuffer.append("序号" + i + ":编码不能包含非法字符");
+            }
+
+            if (isTenant) {
+                // 校验租户人员组名称属性
+                UserGroup nameUserGroup = this.selectTenantUsergroupByName(userGroup.getName(), userGroup.getTenantId(), true);
+                if (nameUserGroup != null) {
+                    stringBuffer.append("序号" + i + ":人员组名称已经存在;");
+                }
+                userGroup.setCompanyOid(null);
+
+                // 校验租户人员组代码属性
+                UserGroup existCodeTenantUserGroup = this.selectTenantUserGroupByCode(userGroup.getCode(), userGroup.getTenantId(), true);
+                if (existCodeTenantUserGroup != null) {
+                    stringBuffer.append("序号" + i + ":人员组代码已经存在;");
+                }
+            } else {
+                //校验公司人员组名称属性
+                UserGroup nameUserGroup = this.findTopOneByCompanyOidAndName(userGroup.getCompanyOid(), userGroup.getName());
+                if (nameUserGroup != null) {
+                    stringBuffer.append("序号" + i + ":人员组名称已经存在;");
+                }
+                //校验公司人员组代码属性
+                UserGroup codeExist = this.findTopOneByCompanyOidAndCode(userGroup.getCompanyOid(), userGroup.getCode());
+                if (codeExist != null) {
+                    stringBuffer.append("序号" + i + ":人员组代码已经存在;");
+                }
+            }
+
+            userGroup.setCompanyOid(null);
+            userGroup.setUserGroupOid(UUID.randomUUID());
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            saveUserGroup(userGroup);
+        }
+        return "导入成功,共导入" + userGroupDTOS.size() + "条";
+    }
+
+
+    /**
+     * 员工组下员工导入
+     * @param userGroupDTOS
+     * @return
+     */
+    public String importUserGroupUsersBatch(List<UserGroupDTO> userGroupDTOS) {
+
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+        for (UserGroupDTO userGroupDTO : userGroupDTOS) {
+            i++;
+            if (StringUtil.isNullOrEmpty(userGroupDTO.getCode())) {
+                stringBuffer.append("序号" + i + ":人员组代码不能为空;");
+            }
+            if (StringUtil.isNullOrEmpty(userGroupDTO.getEmployeeId())) {
+                stringBuffer.append("序号" + i + ":员工工号不能为空;");
+            }
+
+            UserGroup userGroup =  new UserGroup();
+            userGroup.setCode(userGroupDTO.getCode());
+            userGroup.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            userGroup = userGroupMapper.selectOne(userGroup);
+            if (userGroup == null) {
+                stringBuffer.append("序号" + i + ":人员组不存在或不在当前租户下;");
+            }
+            Contact contact = new Contact();
+            contact.setEmployeeId(userGroupDTO.getEmployeeId());
+            contact.setTenantId(OrgInformationUtil.getCurrentTenantId());
+            contact = contactMapper.selectOne(contact);
+            if (contact == null) {
+                stringBuffer.append("序号" + i + ":员工工号不存在或不在当前租户下;");
+            }
+            if (stringBuffer.toString().length() > 0) {
+                throw new RuntimeException(stringBuffer.toString());
+            }
+            userGroupUserMapper.associateUsersToGroup(IdWorker.getId(), userGroup.getId(), null, contact.getUserOid());
+        }
+        return "导入成功,共导入" + userGroupDTOS.size() + "条";
+    }
+
+
 }

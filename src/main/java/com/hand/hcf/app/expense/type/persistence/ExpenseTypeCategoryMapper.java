@@ -17,5 +17,6 @@ import java.util.List;
 public interface ExpenseTypeCategoryMapper extends BaseMapper<ExpenseTypeCategory> {
 
     List<ExpenseTypeCategory> listCategoryAndType(@Param("setOfBooksId") Long setOfBooksId,
-                                                  @Param("typeFlag") Integer typeFlag);
+                                                  @Param("typeFlag") Integer typeFlag,
+                                                  @Param("dataAuthLable") String dataAuthLable);
 }

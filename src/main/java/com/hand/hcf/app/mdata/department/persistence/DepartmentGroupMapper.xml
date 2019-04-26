@@ -508,6 +508,9 @@
         <if test="name != '' and name !=null">
             AND ad.name LIKE concat('%', concat(#{name,jdbcType=VARCHAR}, '%'))
         </if>
+        <if test="dataAuthLabel != null and dataAuthLabel != ''">
+            and #{dataAuthLabel}
+        </if>
         <if test="leafEnable != null and leafEnable == 1">
             AND (SELECT COUNT(1) FROM sys_department dd WHERE dd.parent_id = ad.id and dd.status!=103) = 0
         </if>

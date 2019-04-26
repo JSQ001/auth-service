@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
@@ -423,38 +424,41 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
      * @param page
      * @return
      */
-    public Page<DepartmentCO> queryDepartmentByExpenseTypeId(Long expenseTypeId,Long departmentId, String departmentCode, String departmentName, Page page){
+    public Page<DepartmentCO> queryDepartmentByExpenseTypeId(
+            Long expenseTypeId,Long companyId,Long departmentId, String departmentCode, String departmentName, Page page){
         Page<DepartmentCO> result = new Page<>();
         ExpenseReportTypeDistSetting reportTypeDistSetting = selectOne(new EntityWrapper<ExpenseReportTypeDistSetting>().eq("report_type_id", expenseTypeId));
         if(reportTypeDistSetting.getDepartmentDistFlag() != null) {
            if (reportTypeDistSetting.getDepartmentDistFlag()) {
                String departmentDistRange = reportTypeDistSetting.getDepartmentDistRange();
                if ("ALL_DEP_IN_TENANT".equals(departmentDistRange)) {
-                   //等三方接口
-                   return organizationService.pageDepartmentByTenantId(departmentCode, departmentName, null, null, page);
+                   return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
+                           departmentName, null, null,  101, page);
                    //查询 账套下所有部门
                } else if ("ALL_DEP_IN_SOB".equals(departmentDistRange)) {
-                   //等公司与部门建立联系之后再补充代码
+                   return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
+                           departmentName, null, OrgInformationUtil.getCurrentSetOfBookId(),  101, page);
                    //查询 公司下所有部门
                } else if ("ALL_DEP_IN_COM".equals(departmentDistRange)) {
-                   //等公司与部门建立联系之后再补充代码
+                   if (companyId == null) {
+                       return new Page<>();
+                   } else {
+                       return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
+                               departmentName, null, null, 101, page);
+                   }
                    // 自定义范围
                } else if ("CUSTOM_RANGE".equals(departmentDistRange)) {
                    List<Long> collect = expenseReportTypeDistRangeService.selectList(
                            new EntityWrapper<ExpenseReportTypeDistRange>().eq("report_type_id", expenseTypeId)
                                    .eq("dist_dimension", "DEPARTMENT")).stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
-                   organizationService.pageDepartmentsByCond(departmentCode,
-                           null,
-                           null,
-                           departmentName,
-                           collect,
-                           null,
-                           page);
+                   return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
+                           departmentName, collect, null, 101, page);
                }
            }else {
                //不参与分摊:获取当前的单据头部门信息
                if (departmentId != null) {
                    DepartmentCO departmentCO = organizationService.getDepartmentById(departmentId);
+                   result.setTotal(1);
                    result.setRecords(Collections.singletonList(departmentCO));
                }
            }
@@ -493,34 +497,50 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
             // 部门对应的责任中心
             }else if ("DEP_RES_CENTER".equals(respCenterDistRange)){
                 if(companyId != null && departmentId != null){
-                    Page<ResponsibilityCenterCO> resCenters = organizationService.pageByCompanyAndDepartment(
-                            departmentId,
-                            companyId,
-                            responsibilityCenterCode,
-                            responsibilityCenterCodeName,
-                            page
-                            );
-                    if(resCenters != null){
-                        return resCenters;
-                    }
+                        Page<ResponsibilityCenterCO> resCenters = organizationService.pageByCompanyAndDepartment(
+                                departmentId,
+                                companyId,
+                                responsibilityCenterCode,
+                                responsibilityCenterCodeName,
+                                page
+                        );
+                        if(resCenters != null){
+                            return resCenters;
+                        }
                 }
             // 自定义范围
             }else if ("CUSTOM_RANGE".equals(respCenterDistRange)){
                 List<Long> collect = expenseReportTypeDistRangeService.selectList(
                         new EntityWrapper<ExpenseReportTypeDistRange>().eq("report_type_id", expenseTypeId)
-                                .eq("dist_dimension", "RESPONSIBILITY_CENTER")).stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
-                return organizationService.pageByResponsibilityCenterByCond(OrgInformationUtil.getCurrentSetOfBookId(),
+                                .eq("dist_dimension", "RESPONSIBILITY_CENTER"))
+                        .stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
+                List<ResponsibilityCenterCO> resCenters = organizationService.pageByCompanyAndDepartment(
+                        departmentId,
+                        companyId,
                         responsibilityCenterCode,
-                        null,
-                        null,
                         responsibilityCenterCodeName,
-                        null,
-                        null,
-                        collect,
-                        page);
+                        page
+                ).getRecords();
+                if(CollectionUtils.isEmpty(resCenters) || CollectionUtils.isEmpty(collect)){
+                    return null;
+                }
+                List<Long> resCenterId = resCenters.stream().map(ResponsibilityCenterCO::getId).collect(Collectors.toList());
+                collect.removeAll(resCenterId);
+               return organizationService.pageByResponsibilityCenterByCond(null,
+                       responsibilityCenterCode,
+                       null,
+                       null,
+                       responsibilityCenterCodeName,
+                       null,
+                       true,
+                       collect,
+                       page);
             }
+        }else{
+           ResponsibilityCenterCO responsibilityCenterCO = organizationService.getDefaultResponsibilityCenter(companyId,departmentId);
+           page.setRecords(Collections.singletonList(responsibilityCenterCO));
         }
 
-        return new Page<>();
+        return page;
     }
 }

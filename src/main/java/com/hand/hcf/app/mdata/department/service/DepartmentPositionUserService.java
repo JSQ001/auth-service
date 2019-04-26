@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
@@ -38,10 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
@@ -50,7 +48,8 @@ import java.util.concurrent.FutureTask;
 public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositionUserMapper,DepartmentPositionUser> {
     private final Logger log = LoggerFactory.getLogger(DepartmentPositionUserService.class);
 
-
+    private final String TRUE = "Y";
+    private final String FALSE = "N";
     @Autowired
     private DepartmentPositionUserMapper departmentPositionUserMapper;
     @Autowired
@@ -528,64 +527,95 @@ public class DepartmentPositionUserService extends ServiceImpl<DepartmentPositio
         return null;
     }
 
-    public String importDepartmentPositionUser(List<DepartmentPositionUserBeginningImportDTO> list) {
-        StringBuilder errorMessage = new StringBuilder();
+    /**
+     * 校验参数值是否为Y或者N
+     *
+     * @param s 待校验参数
+     * @return 是否为Y或者N
+     */
+    private boolean yAndNValueCheck(String s) {
+        if (TypeConversionUtils.isNotEmpty(s)) {
+            return !TRUE.equals(s) && !FALSE.equals(s);
+        }
+        return false;
+    }
+
+    public Map<String, Object> importDepartmentPositionUser(List<DepartmentPositionUserBeginningImportDTO> list) {
+        final Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        List<String> message = new ArrayList<>();
+        List<DepartmentPositionUser> departmentPositionUsers = new ArrayList<>();
         list.forEach(item -> {
-            Long tenantId = TypeConversionUtils.parseLong(item.getTenantId());
-            // 校验部门角色是否存在
-            DepartmentPosition departmentPosition = departmentPositionService.getPostionByCode(
-                    tenantId, item.getPositionCode());
-            if (ObjectUtils.isEmpty(departmentPosition)) {
-                errorMessage.append("账套下不存在该部门角色").append(item.getPositionCode());
+            StringBuilder errorMessage = new StringBuilder();
+            // 必输字段非空校验
+            if (TypeConversionUtils.isEmpty(item.getPositionCode()) ||
+                    TypeConversionUtils.isEmpty(item.getDepartmentCode()) ||
+                    TypeConversionUtils.isEmpty(item.getUserCode()) ||
+                    TypeConversionUtils.isEmpty(item.getEnabled())) {
+                errorMessage.append("必输字段为空;");
+                message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage.toString()));
             } else {
+                // 启用标志取值校验
+                if (yAndNValueCheck(item.getEnabled())) {
+                    errorMessage.append("启用标志字段值错误，只能为Y或者N;");
+                }
+                // 删除标志取值校验
+                if (yAndNValueCheck(item.getDeleted())) {
+                    errorMessage.append("删除标志字段取值错误，只能为Y或者N;");
+                }
+                // 校验部门角色是否存在
+                DepartmentPosition departmentPosition = departmentPositionService.getPostionByCode(
+                        tenantId, item.getPositionCode());
+                if (ObjectUtils.isEmpty(departmentPosition)) {
+                    errorMessage.append("当前租户下不存在该部门角色").append(item.getPositionCode()).append(';');
+                }
+                // 校验部门是否存在
                 Department department = departmentMapper.findByDepartmentCodeAndTenantId(item.getDepartmentCode(),
                         tenantId, null);
                 if (ObjectUtils.isEmpty(department)) {
-                    errorMessage.append("租户下不存在该部门").append(item.getDepartmentCode());
+                    errorMessage.append("当前租户下不存在该部门").append(item.getDepartmentCode()).append(';');
+                }
+                // 校验用户是否存在
+                ContactCO userCO = contactClient.getByUserCode(item.getUserCode());
+                if (ObjectUtils.isEmpty(userCO)) {
+                    errorMessage.append("当前租户下不存在该用户").append(item.getUserCode()).append(';');
+                }
+                // 查看是否存在错误信息
+                if (!"".equals(errorMessage.toString())) {
+                    message.add(String.format("第%s行存在错误：%s", item.getRowNumber(), errorMessage.toString()));
                 } else {
-                    ContactCO userCO = contactClient.getByUserCode(item.getUserCode());
-
-                    if (ObjectUtils.isEmpty(userCO)) {
-                        errorMessage.append("账套下不存在该用户").append(item.getUserCode());
-                    } else {
-                        int count = baseMapper.selectCount(
-                                new EntityWrapper<DepartmentPositionUser>()
-                                        .eq("tenant_id", tenantId)
-                                        .eq("position_id", departmentPosition.getId())
-                                        .eq("department_id", department.getId())
-                        );
-                        // 当前部门角色尚未分配人员，则插入一条数据
-                        if (count == 0) {
-                            DepartmentPositionUser departmentPositionUser = new DepartmentPositionUser();
-                            departmentPositionUser.setTenantId(tenantId);
-                            departmentPositionUser.setPositionId(departmentPosition.getId());
-                            departmentPositionUser.setDepartmentId(department.getId());
-                            departmentPositionUser.setUserId(
-                                    contactService.getUserDTOByUserOid(userCO.getUserOid()).getId());
-                            departmentPositionUser.setEnabled("Y".equals(item.getEnabled()));
-                            baseMapper.insert(departmentPositionUser);
-                        }
-                        // 当前部门角色已分配人员，则更新该条数据
-                        else if (count == 1) {
-                            DepartmentPositionUser departmentPositionUser = baseMapper.selectList(
-                                    new EntityWrapper<DepartmentPositionUser>()
-                                            .eq("tenant_id", tenantId)
-                                            .eq("position_id", departmentPosition.getId())
-                                            .eq("department_id", department.getId())
-                            ).get(0);
-                            departmentPositionUser.setUserId(
-                                    contactService.getUserDTOByUserOid(userCO.getUserOid()).getId());
-                            departmentPositionUser.setEnabled("Y".equals(item.getEnabled()));
-                            this.updateById(departmentPositionUser);
-                        }
+                    int count = baseMapper.selectCount(
+                            new EntityWrapper<DepartmentPositionUser>()
+                                    .eq("tenant_id", tenantId)
+                                    .eq("position_id", departmentPosition.getId())
+                                    .eq("department_id", department.getId())
+                    );
+                    // 当前部门角色尚未分配人员，则插入一条数据
+                    if (count == 0) {
+                        DepartmentPositionUser positionUser = new DepartmentPositionUser();
+                        positionUser.setTenantId(tenantId);
+                        positionUser.setPositionId(departmentPosition.getId());
+                        positionUser.setDepartmentId(department.getId());
+                        positionUser.setUserId(contactService.getUserDTOByUserOid(userCO.getUserOid()).getId());
+                        positionUser.setEnabled("Y".equals(item.getEnabled()));
+                        departmentPositionUsers.add(positionUser);
+                    }
+                    // 当前部门角色已分配人员，则直接报错
+                    else if (count == 1) {
+                        message.add(String.format("第%s行存在错误：当前租户下%s部门已分配%s部门角色",
+                                item.getRowNumber(), item.getDepartmentCode(), item.getPositionCode()));
                     }
                 }
             }
         });
-        if ("".equals(errorMessage.toString())) {
-            return "导入成功！";
+        Map<String, Object> result = new HashMap<>(2);
+        if (message.size() == 0) {
+            this.insertBatch(departmentPositionUsers);
+            message.add("导入成功！");
+            result.put("status", "success");
         } else {
-            return "导入失败！"+errorMessage.toString();
+            result.put("status", "fail");
         }
+        result.put("message", message);
+        return result;
     }
 }

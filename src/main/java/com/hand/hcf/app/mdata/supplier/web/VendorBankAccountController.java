@@ -123,8 +123,6 @@ public class VendorBankAccountController {
      */
     @ApiOperation(value = "分页查询供应商银行信息", notes = "分页查询获取供应商银行信息")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "companyId", value = "公司ID", dataType = "Long"),
-            @ApiImplicitParam(name = "enabled", value = "是否启用", dataType = "Boolean"),
             @ApiImplicitParam(name = "name", value = "名称", dataType = "String"),
             @ApiImplicitParam(name = "code", value = "代码", dataType = "String"),
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
@@ -132,15 +130,13 @@ public class VendorBankAccountController {
     })
     @RequestMapping(value = "/vendor/account/by/companyId/name/code", method = RequestMethod.GET)
     public ResponseEntity<List<VendorAccountDTO>> getVendorByCompanyIdAndNameAndCode(
-            @RequestParam(value = "companyId",required = false) Long companyId,
-            @RequestParam(value = "enabled",required = false) Boolean enabled,
             @RequestParam(value = "name",required = false) String name,
             @RequestParam(value = "code",required = false) String code,
             @RequestParam(value = "page",defaultValue = "0") int page,
             @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
         List<VendorAccountDTO> result = vendorBankAccountService.getVendorByCompanyIdAndNameAndCode(
-                companyId, enabled, name, code, queryPage);
+                name, code, queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
     }

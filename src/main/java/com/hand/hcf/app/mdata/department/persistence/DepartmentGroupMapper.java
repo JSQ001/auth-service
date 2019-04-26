@@ -131,6 +131,7 @@ public interface DepartmentGroupMapper extends BaseMapper<DepartmentGroup> {
             @Param("name") String name,
             @Param("leafEnable") Boolean leafEnable,
             @Param("departmentId") Long departmentId,
+            @Param("dataAuthLabel") String dataAuthLabel,
             Pagination page
     );
 

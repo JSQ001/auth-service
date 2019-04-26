@@ -15,6 +15,7 @@ public class CompanyGroupCover {
         dto.setCompanyGroupName(companyGroup.getCompanyGroupName());
         dto.setSetOfBooksId(companyGroup.getSetOfBooksId());
         dto.setEnabled(companyGroup.getEnabled());
+        dto.setVersionNumber(companyGroup.getVersionNumber());
         return dto;
     }
 }

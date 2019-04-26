@@ -4,4 +4,4 @@ spring:
   liquibase:
     change-log: classpath:db/liquibase/master.xml
   profiles:
-    active: dev
+    active: prod

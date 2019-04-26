@@ -1,20 +1,21 @@
 package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.CompanyCO;
-import com.hand.hcf.app.common.co.CompanyConfigurationCO;
-import com.hand.hcf.app.common.co.CompanyGroupCO;
-import com.hand.hcf.app.common.co.CompanyLevelCO;
-import com.hand.hcf.app.mdata.company.service.CompanyConfigurationService;
-import com.hand.hcf.app.mdata.company.service.CompanyGroupService;
-import com.hand.hcf.app.mdata.company.service.CompanyLevelService;
-import com.hand.hcf.app.mdata.company.service.CompanyService;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.mdata.company.dto.CompanyLovDTO;
+import com.hand.hcf.app.mdata.company.dto.CompanyLovQueryParams;
+import com.hand.hcf.app.mdata.company.service.*;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
+import com.hand.hcf.app.mdata.department.dto.DepartmentLovDTO;
+import com.hand.hcf.app.mdata.department.dto.DepartmentLovQueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -42,6 +43,8 @@ public class CompanyControllerImpl {
     private ContactService contactService;
     @Autowired
     private CompanyLevelService companyLevelService;
+    @Autowired
+    private CompanyAssociateUnitService companyAssociateUnitService;
 
 
     /**
@@ -407,5 +410,116 @@ public class CompanyControllerImpl {
                                              @RequestParam(value = "enabled",required = false) Boolean enabled,
                                              @RequestBody(required = false) List<Long> ids) {
         return companyService.listCompanyByCond(companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, enabled, ids);
+    }
+
+    /**
+     * 查询公司lov
+     *
+     * @param id              公司id
+     * @param companyCode     公司代码
+     * @param companyCodeFrom 公司代码从
+     * @param companyCodeTo   公司代码至
+     * @param companyName     公司名称
+     * @param departmentId    部门id
+     * @param enabled         公司状态
+     * @param setOfBooksId    账套Id
+     * @param codeName        公司代码/名称
+     * @param page
+     * @param size
+     * @return
+     */
+    public Page<CompanyCO> pageAssociateCompanyByCond(@RequestParam(required = false) Long id,
+                                                      @RequestParam(required = false) String companyCode,
+                                                      @RequestParam(required = false) String companyCodeFrom,
+                                                      @RequestParam(required = false) String companyCodeTo,
+                                                      @RequestParam(required = false) String companyName,
+                                                      @RequestParam(required = false) Long departmentId,
+                                                      @RequestParam(required = false) Boolean enabled,
+                                                      @RequestParam(required = false) Long setOfBooksId,
+                                                      @RequestParam(required = false) String codeName,
+                                                      @RequestParam(required = false, defaultValue = "0") int page,
+                                                      @RequestParam(required = false, defaultValue = "10") int size) {
+        Page mybatisPage = PageUtil.getPage(page, size);
+        CompanyLovQueryParams queryParams = CompanyLovQueryParams.builder()
+                .id(id)
+                .codeName(codeName)
+                .companyCode(companyCode)
+                .companyCodeFrom(companyCodeFrom)
+                .companyCodeTo(companyCodeTo)
+                .departmentId(departmentId)
+                .tenantId(LoginInformationUtil.getCurrentTenantId())
+                .enabled(enabled)
+                .setOfBooksId(setOfBooksId)
+                .companyName(companyName).build();
+        List<CompanyLovDTO> companyLovDTOList = companyAssociateUnitService.queryCompanyLov(mybatisPage, queryParams);
+        List<CompanyCO>  result = new ArrayList<>();
+        for (CompanyLovDTO lov: companyLovDTOList) {
+            result.add(CompanyCO.builder()
+                    .id(lov.getId())
+                    .companyOid(UUID.fromString(lov.getCompanyOid()))
+                    .name(lov.getCompanyName())
+                    .companyCode(lov.getCompanyCode())
+                    .build());
+        }
+        Page<CompanyCO> resultPage = new Page();
+        resultPage.setRecords(result);
+        resultPage.setTotal(mybatisPage.getTotal());
+        return resultPage;
+    }
+
+    /**
+     * 查询部门lov
+     *
+     * @param companyId          公司id
+     * @param departmentCode     部门代码
+     * @param departmentCodeFrom 部门代码从
+     * @param departmentCodeTo   部门代码至
+     * @param departmentName     部门名称
+     * @param ids                部门id集合
+     * @param setOfBooksId       账套id
+     * @param status             部门状态
+     * @param codeName           部门代码/名称
+     * @param page
+     * @param size
+     * @return
+     */
+    public Page<DepartmentCO> pageAssociateDepartmentByCond(@RequestParam(required = false) Long companyId,
+                                                            @RequestParam(required = false) String departmentCode,
+                                                            @RequestParam(required = false) String departmentCodeFrom,
+                                                            @RequestParam(required = false) String departmentCodeTo,
+                                                            @RequestParam(required = false) String departmentName,
+                                                            @RequestBody(required = false) List<Long> ids,
+                                                            @RequestParam(required = false) Long setOfBooksId,
+                                                            @RequestParam(required = false) Integer status,
+                                                            @RequestParam(required = false) String codeName,
+                                                            @RequestParam(required = false, defaultValue = "0") int page,
+                                                            @RequestParam(required = false, defaultValue = "10") int size) {
+        Page mybatisPage = PageUtil.getPage(page, size);
+        DepartmentLovQueryParams queryParams = DepartmentLovQueryParams.builder()
+                .companyId(companyId)
+                .codeName(codeName)
+                .departmentCode(departmentCode)
+                .departmentCodeFrom(departmentCodeFrom)
+                .departmentCodeTo(departmentCodeTo)
+                .ids(ids)
+                .tenantId(LoginInformationUtil.getCurrentTenantId())
+                .status(status)
+                .setOfBooksId(setOfBooksId)
+                .departmentName(departmentName).build();
+        List<DepartmentLovDTO> departmentLovDTOList = companyAssociateUnitService.queryDepartmentLov(mybatisPage, queryParams);
+        List<DepartmentCO> result = new ArrayList<>();
+        for (DepartmentLovDTO lov: departmentLovDTOList) {
+            result.add(DepartmentCO.builder()
+                    .id(lov.getId())
+                    .name(lov.getDepartmentName())
+                    .departmentCode(lov.getDepartmentCode())
+                    .path(lov.getDepartmentPath())
+                    .departmentOid(UUID.fromString(lov.getDepartmentOid()))
+                    .build());
+        }
+        Page<DepartmentCO> resultPage = new Page();
+        resultPage.setRecords(result);
+        resultPage.setTotal(mybatisPage.getTotal());
+        return resultPage;
     }
 }

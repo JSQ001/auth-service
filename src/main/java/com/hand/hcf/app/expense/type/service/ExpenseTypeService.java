@@ -52,6 +52,9 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
     private BaseI18nService baseI18nService;
     @Autowired
     private ExpenseFieldService expenseFieldService;
+
+    @Autowired
+    private  ExpenseTypeMapper expenseTypeMapper;
     @Autowired
     private ExpenseTypeAssignCompanyService assignCompanyService;
     @Autowired
@@ -124,7 +127,6 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
         if (!expenseType.getTypeFlag().equals(dto.getTypeFlag())){
             throw new BizException(RespCode.EXPENSE_TYPE_ERROR);
         }
-        dto.setVersionNumber(expenseType.getVersionNumber());
         checkType(dto);
         dto.setDeleted(Boolean.FALSE);
         this.updateById(dto);
@@ -428,12 +430,6 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     .showOnList(e.getShowOnList())
                     .showValue(null)
                     .build();
-            if (FieldType.CUSTOM_ENUMERATION.getId().equals(e.getFieldTypeId())){
-                List<SysCodeValueCO> sysCodeValueCOS = organizationService.listSysCodeValueCOByOid(e.getCustomEnumerationOid());
-                // 为值列表，则设置值列表的相关值
-                List<OptionDTO> options = sysCodeValueCOS.stream().map(OptionDTO::createOption).collect(Collectors.toList());
-                fieldDTO.setOptions(options);
-            }
             return fieldDTO;
         }).collect(Collectors.toList());
         return fieldDTOS;
@@ -620,6 +616,22 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
         return expenseTypeWebDTOS;
     }
 
+    /**
+     * 查询费用申请单
+     * @author sq.l
+     * @date 2019/04/22
+     *
+     * @param code
+     * @param name
+     * @param categoryName
+     * @return
+     */
+    public List<ExpenseType> selectExpenseByCode(String code,String name,String categoryName){
+        List<ExpenseType> expenseType = expenseTypeMapper.selectExpenseByCode(code,name,categoryName);
+        return expenseType;
+    }
+
+
     public void checkExpenseTypeInitData(ExpenseTypeInitDTO dto,int line){
         Map<String,List<String>> errorMap = new HashMap<>(16);
         String lineNumber = "第"+line+"行";
@@ -733,6 +745,8 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     if (null == expenseTypeTemp || expenseTypeTemp.getDeleted()) {
                         stringList.add("校验数据存不存在或者已删除！");
                     }
+                    //不更新，直接已存在
+                    stringList.add("该账套下类型代码已存在！");
                     if(!CollectionUtils.isEmpty(stringList)) {
                         item.getResultMap().put(lineNumber,stringList);
                         resultMap.putAll(item.getResultMap());
