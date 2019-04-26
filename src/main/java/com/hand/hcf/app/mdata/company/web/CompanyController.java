@@ -154,7 +154,7 @@ public class CompanyController {
      * }
      */
     @RequestMapping(value = "/company/my/clientInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Secured(AuthoritiesConstants.COMPANY_ADMIN)
+    //@Secured(AuthoritiesConstants.COMPANY_ADMIN)
     public ResponseEntity<ClientCO> getMyCompanyClient(@RequestParam(value = "roleType", required = false) String roleType) {
         List<ClientCO> companyClient = null;
         if (OrgInformationUtil.hasTenantAuthority(roleType)) {

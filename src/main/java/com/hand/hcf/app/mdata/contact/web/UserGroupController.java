@@ -43,7 +43,7 @@ public class UserGroupController {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
+    //@Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
     public ResponseEntity<UserGroupDTO> createUserGroup(@RequestBody UserGroupDTO dto,
                                                         @RequestParam(value = "roleType", required = false) String roleType) {
         boolean isTenant = true;
@@ -63,7 +63,7 @@ public class UserGroupController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
+    //@Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
     public ResponseEntity<UserGroupDTO> updateUserGroup(@RequestBody UserGroupDTO dto,
                                                         @RequestParam(value = "roleType", required = false) String roleType) {
 
@@ -167,7 +167,7 @@ public class UserGroupController {
     }
 
     @RequestMapping(value = "/check", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
+    //@Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
     public Boolean checkUserGroup(@RequestBody UserGroupDTO dto,
                                   @RequestParam(value = "roleType", required = false) String roleType) {
         UserGroup exist;
@@ -180,7 +180,7 @@ public class UserGroupController {
     }
 
     @RequestMapping(value = "/status", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
+    //@Secured(value = AuthoritiesConstants.COMPANY_ADMIN)
     public ResponseEntity<UserGroupDTO> updateUserGroupEnabled(@RequestBody UserGroupDTO dto,
                                                                @RequestParam(value = "roleType", required = false) String roleType) {
         boolean isTenant = true;

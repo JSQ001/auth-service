@@ -203,7 +203,8 @@ public class CompanyBankService extends ServiceImpl<CompanyBankMapper, CompanyBa
         wrapper.eq("deleted", false);
         wrapper.eq("tenant_id", OrgInformationUtil.getCurrentTenantId());
         wrapper.eq(StringUtils.isNotEmpty(currency), "currency_code", currency);
-        wrapper.and(dataAuthLabel);
+        //jiu.zhao TODO
+        //wrapper.and(dataAuthLabel);
         wrapper.orderBy("set_of_books_code");
         wrapper.orderBy("company_code");
         wrapper.orderBy("bank_account_number");

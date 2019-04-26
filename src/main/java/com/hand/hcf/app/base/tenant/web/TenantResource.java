@@ -102,7 +102,7 @@ public class TenantResource {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    @Secured(AuthoritiesConstants.ROLE_TENANT_ADMIN)
+    //@Secured(AuthoritiesConstants.ROLE_TENANT_ADMIN)
     public ResponseEntity<Tenant> getTenant(){
         Tenant tenant=userService.findCurrentTenantByUSerOid(LoginInformationUtil.getCurrentUserOid());
         return ResponseEntity.ok(tenant);
