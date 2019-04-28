@@ -2,6 +2,8 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.userRole.domain.*;
 import com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO;
 import com.hand.hcf.app.base.userRole.persistence.ContentFunctionRelationMapper;
@@ -38,12 +40,17 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
     @Autowired
     private  FunctionPageRelationService functionPageRelationService;
 
+    @Autowired
+    private TenantService tenantService;
+
     /**
      * 批量新增 目录功能关联
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public List<ContentFunctionRelation> createContentFunctionRelationBatch(List<ContentFunctionRelation> list){
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
+        Tenant tenant = tenantService.getTenantById(tenantId);
         list.stream().forEach(contentFunctionRelation -> {
             //校验数据
             ContentList contentList = contentListService.selectById(contentFunctionRelation.getContentId());
@@ -68,23 +75,30 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
             ).size() > 0 ){
                 throw new BizException(RespCode.CONTENT_FUNCTION_RELATION_EXIST);
             }
-            //插入数据
-            List<Long> pageIdList = functionPageRelationService.selectList(
-                    new EntityWrapper<FunctionPageRelation>()
-                            .eq("function_id",functionList.getId())
-            ).stream().map(FunctionPageRelation::getPageId).collect(Collectors.toList());
-            if (pageIdList.size() > 0){
-                for (Long pageId : pageIdList) {
-                    PageList pageList = pageListService.selectById(pageId);
-                    if (parentContentList != null) {
-                        pageList.setContentRouter(parentContentList.getContentRouter() + contentList.getContentRouter());
-                    }else {
-                        pageList.setContentRouter(contentList.getContentRouter());
-                    }
-                    pageListService.updateAllColumnById(pageList);
+
+            contentFunctionRelationMapper.insert(contentFunctionRelation);
+
+            // 如果是系统租户则需要将目录关联功能映射关系分配给所有租户
+            if(tenant.getSystemFlag()){
+                Long sourceContentId = contentFunctionRelation.getContentId();
+                Long sourceFunctionId = contentFunctionRelation.getFunctionId();
+                List<Tenant> tenants = tenantService.findAll()
+                        .stream()
+                        .filter(e -> !e.getId().equals(tenantId)).collect(Collectors.toList());
+                if (tenants.size() > 0) {
+                    List<ContentFunctionRelation> contentFunctionRelations = tenants.stream().map(domain -> {
+                        ContentFunctionRelation contentFunctionRelation1 = new ContentFunctionRelation();
+                        ContentList contentList1 = contentListService.getContentListByTenantIdAndSourceId(domain.getId(),sourceContentId);
+                        FunctionList functionList1 = functionListService.getFunctionByTenantIdAndSourceId(domain.getId(),sourceFunctionId);
+                        contentFunctionRelation1.setContentId(contentList1.getId());
+                        contentFunctionRelation1.setFunctionId(functionList1.getId());
+                        return contentFunctionRelation1;
+                    }).collect(Collectors.toList());
+                    this.insertBatch(contentFunctionRelations);
                 }
             }
-            contentFunctionRelationMapper.insert(contentFunctionRelation);
+
+
         });
         return list;
     }
@@ -93,7 +107,7 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
      * 批量物理删除 目录功能关联
      * @param idList
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteContentFunctionRelationBatch(List<Long> idList){
         idList.stream().forEach(id -> {
             //校验数据
@@ -127,6 +141,26 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
             }
             //关联关系改为物理删除
             contentFunctionRelationMapper.deleteById(contentFunctionRelation);
+
+            Long tenantId = contentList.getTenantId();
+            Tenant tenant = tenantService.selectById(tenantId);
+            if(tenant.getSystemFlag()){
+                List<Long> functionIds = functionListService.selectList(
+                        new EntityWrapper<FunctionList>()
+                                .eq("source_id", contentFunctionRelation.getFunctionId())
+                ).stream().map(FunctionList::getId).collect(Collectors.toList());
+                if(functionIds.size() > 0) {
+                    functionIds.stream().forEach(functionId -> {
+                        List<Long> ids = contentFunctionRelationMapper.selectList(
+                                new EntityWrapper<ContentFunctionRelation>()
+                                        .eq("function_id", functionId)
+                        ).stream().map(ContentFunctionRelation::getId).collect(Collectors.toList());
+                        if (ids.size() > 0) {
+                            this.deleteBatchIds(ids);
+                        }
+                    });
+                }
+            }
         });
     }
 

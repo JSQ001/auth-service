@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.userRole.domain.ContentFunctionRelation;
 import com.hand.hcf.app.base.userRole.domain.ContentList;
@@ -15,6 +16,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +31,6 @@ import java.util.stream.Collectors;
  * @date: 2019/1/29
  */
 @Service
-@Transactional
 public class ContentListService extends BaseService<ContentListMapper, ContentList> {
     @Autowired
     private ContentListMapper contentListMapper;
@@ -44,6 +45,8 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
     private FunctionPageRelationMapper functionPageRelationMapper;
     @Autowired
     private PageListMapper pageListMapper;
+    @Autowired
+    private MapperFacade mapperFacade;
 
     /**
      * 新增 目录
@@ -51,8 +54,10 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
      * @param contentList
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ContentList createContentList(ContentList contentList) {
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
+        Tenant tenant = tenantService.getTenantById(tenantId);
         if (contentList.getId() != null) {
             throw new BizException(RespCode.CONTENT_LIST_EXIST);
         }
@@ -73,7 +78,7 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
         if (contentList.getSequenceNumber() == null) {
             throw new BizException(RespCode.CONTENT_LIST_SEQUENCE_NUMBER_IS_NULL);
         }
-        contentList.setTenantId(LoginInformationUtil.getCurrentTenantId());
+        contentList.setTenantId(tenantId);
         if (contentListMapper.selectList(
                 new EntityWrapper<ContentList>()
                         .eq("content_name", contentList.getContentName())
@@ -81,8 +86,25 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
         ).size() > 0) {
             throw new BizException(RespCode.CONTENT_LIST_CONTENT_ROUTER_REPEAT);
         }
-        contentListMapper.insert(contentList);
-        return contentListMapper.selectById(contentList);
+        this.insert(contentList);
+        // 如果是系统租户，则将菜单分配给其他的租户
+        if (tenant.getSystemFlag()) {
+            Long sourceId = contentList.getId();
+            List<Tenant> tenants = tenantService.findAll()
+                    .stream()
+                    .filter(e -> !e.getId().equals(tenantId)).collect(Collectors.toList());
+            if (tenants.size() > 0) {
+                List<ContentList> contentLists = tenants.stream().map(domain -> {
+                    ContentList contentList1 = mapperFacade.map(contentList, ContentList.class);
+                    contentList1.setId(null);
+                    contentList1.setTenantId(domain.getId());
+                    contentList1.setSourceId(sourceId);
+                    return contentList1;
+                }).collect(Collectors.toList());
+                this.insertBatch(contentLists);
+            }
+        }
+        return contentList;
     }
 
     /**
@@ -90,6 +112,7 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
      *
      * @param id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteContentListById(Long id) {
         ContentList contentList = contentListMapper.selectById(id);
         if (contentList == null) {
@@ -135,8 +158,28 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
             }
             contentFunctionRelationService.deleteBatchIds(contentFunctionRelationList);
         }
-
         deleteById(contentList);
+        Long tenantId = contentList.getTenantId();
+        Tenant tenant = tenantService.selectById(tenantId);
+        //如果是系统租户则删除所有租户下的功能及目录关联关系表
+        if(tenant.getSystemFlag()){
+            List<Long> contentIds = contentListMapper.selectList(
+                    new EntityWrapper<ContentList>()
+                            .eq("source_id", id)
+            ).stream().map(ContentList::getId).collect(Collectors.toList());
+            if(contentIds.size() > 0) {
+                contentIds.stream().forEach(contentId -> {
+                    List<Long> ids = contentFunctionRelationService.selectList(
+                            new EntityWrapper<ContentFunctionRelation>()
+                                    .eq("content_id", contentId)
+                    ).stream().map(ContentFunctionRelation::getId).collect(Collectors.toList());
+                    if (ids.size() > 0) {
+                        contentFunctionRelationService.deleteBatchIds(ids);
+                    }
+                });
+                this.deleteBatchIds(contentIds);
+            }
+        }
     }
 
     /**
@@ -145,6 +188,7 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
      * @param contentList
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ContentList updateContentList(ContentList contentList) {
         ContentList oldContentList = contentListMapper.selectById(contentList.getId());
         if (oldContentList == null) {
@@ -251,6 +295,7 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
      * @param tenantId
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public void initTenantContent(Long tenantId) {
         List<ContentList> contentLists = this.selectList(
                 new EntityWrapper<ContentList>()
@@ -271,5 +316,17 @@ public class ContentListService extends BaseService<ContentListMapper, ContentLi
 
             contentFunctionRelationService.insertBatch(functionPageRelations);
         }
+    }
+
+    /**
+     * 根据来源id和租户id获得目录
+     * @param tenantId
+     * @param sourceId
+     * @return
+     */
+    public ContentList getContentListByTenantIdAndSourceId(Long tenantId, Long sourceId) {
+        return this.selectOne(new EntityWrapper<ContentList>()
+                .eq("source_id", sourceId)
+                .eq("tenant_id", tenantId));
     }
 }

@@ -3,10 +3,10 @@ package com.hand.hcf.app.base.code.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.code.domain.SysCode;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
+import com.hand.hcf.app.base.code.enums.SysCodeEnum;
 import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.code.service.SysCodeValueService;
 import com.hand.hcf.app.base.code.service.SysCodeValueTempService;
-import com.hand.hcf.app.base.system.enums.SysCodeEnum;
 import com.hand.hcf.app.base.util.FileUtil;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -246,7 +246,7 @@ public class SysCodeController {
                                           @RequestParam(value = "value",required = false) String value){
         Page page = PageUtil.getPage(pageable);
         List<SysCodeValue> result = sysCodeService.pageSysCodeValueByCondition(page, code, codeFrom, codeTo, value);
-        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/custom/enumeration/system/by/type/condition");
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 

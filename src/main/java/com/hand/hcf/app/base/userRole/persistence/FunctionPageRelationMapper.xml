@@ -6,7 +6,8 @@
 
     <select id="filterFunctionPageRelationByCond" resultType="com.hand.hcf.app.base.userRole.domain.PageList">
         SELECT * FROM sys_page_list spl WHERE spl.id NOT IN (
-          SELECT sfpr.page_id FROM sys_function_page_relation sfpr
+        SELECT sfpr.page_id FROM sys_function_page_relation sfpr, sys_function_list a
+        where sfpr.function_id = a.id and a.tenant_id = #{tenantId}
             GROUP BY sfpr.page_id
         )
         AND spl.deleted = false

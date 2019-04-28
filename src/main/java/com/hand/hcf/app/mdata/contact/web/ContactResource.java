@@ -660,7 +660,6 @@ public class ContactResource {
             method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    // @PreAuthorize("hasRole('" + AuthoritiesConstants.USER + "')")
     public ResponseEntity<Void> moveCompanyUsers(@RequestBody UserMoveDTO userMoveDTO) {
         log.debug("REST request to move CompanyReceipted users from : {}, to: {}", userMoveDTO.getCompanyOidFrom(), userMoveDTO.getCompanyOidTo());
         contactService.moveCompanyUsers(userMoveDTO.getCompanyOidFrom(), userMoveDTO.getUserOids(), userMoveDTO.getCompanyOidTo(), userMoveDTO.getSelectMode());
@@ -717,14 +716,14 @@ public class ContactResource {
         if(dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
             result = contactService.pageUserDTOByQO(ContactQO.builder()
                     .tenantId(OrgInformationUtil.getCurrentTenantId())
-                    .keyContact(key)
+                    .keywordCodeName(key)
                     .dataAuthLabel(dataAuthLabel)
                     .build(),page);
         }else {
             result = contactService.pageUserDTOByQO(ContactQO.builder()
                     .tenantId(OrgInformationUtil.getCurrentTenantId())
                     .setOfBooksId(setOfBooksId)
-                    .keyContact(key)
+                    .keywordCodeName(key)
                     .build(), page);
         }
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);

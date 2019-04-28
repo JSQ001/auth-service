@@ -125,6 +125,7 @@ public class VendorBankAccountController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "name", value = "名称", dataType = "String"),
             @ApiImplicitParam(name = "code", value = "代码", dataType = "String"),
+            @ApiImplicitParam(name = "vendorStatus", value = "状态(审批通过、拒绝、编辑中，如为空则默认查询审批通过的)", dataType = "String"),
             @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
@@ -132,11 +133,12 @@ public class VendorBankAccountController {
     public ResponseEntity<List<VendorAccountDTO>> getVendorByCompanyIdAndNameAndCode(
             @RequestParam(value = "name",required = false) String name,
             @RequestParam(value = "code",required = false) String code,
+            @RequestParam(value = "vendorStatus",required = false) String vendorStatus,
             @RequestParam(value = "page",defaultValue = "0") int page,
             @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
         List<VendorAccountDTO> result = vendorBankAccountService.getVendorByCompanyIdAndNameAndCode(
-                name, code, queryPage);
+                name, code, vendorStatus ,queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
     }
@@ -146,7 +148,7 @@ public class VendorBankAccountController {
     /**
      * 对供应商下银行状态进行操作
      *提交，审批和拒绝
-     * @param vendorBankAccountCO
+     * @param VendorBankAccountCO
      * @return
      * @throws URISyntaxException
      */

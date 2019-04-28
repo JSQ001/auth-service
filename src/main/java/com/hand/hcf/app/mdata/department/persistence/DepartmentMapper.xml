@@ -199,6 +199,48 @@
         order by d.department_code
     </select>
 
+
+    <select id="findTenantAllDepartmentKeyWords" resultMap="DepartemntTreeResultMap">
+        SELECT d.id,
+        d.parent_id,
+        case
+        when i18n.name is null or i18n.name = ''
+        then d.name
+        else i18n.name
+        end as name,
+        coalesce(d.department_code, 'ZZZZ9999'),
+        d.path,
+        d.department_code,
+        d.department_oid,
+        d.status,
+        dd.department_oid as parent_department_oid,
+        case when (SELECT COUNT(1) FROM sys_department cd WHERE cd.parent_id = d.id and cd.status!=103)>0 then 1 else 0 end  AS
+        hasChildrenDepartments,
+        case when  (SELECT COUNT(1) FROM sys_contact u INNER JOIN sys_department_user du ON du.user_id = u.user_id
+        INNER JOIN sys_department ddd ON ddd.id = du.department_id
+        WHERE ddd.id = d.id )>0 then 1 else 0 end AS hasUsers,
+        (SELECT COUNT(1) FROM sys_contact u INNER JOIN sys_department_user du ON du.user_id = u.user_id
+        INNER JOIN sys_department ddd ON ddd.id = du.department_id
+        WHERE ddd.id = d.id ) AS userCounts
+        from sys_department d LEFT JOIN sys_department dd on d.parent_id = dd.id
+        LEFT JOIN sys_department_i18n  i18n ON i18n.id = d.id and i18n.language = #{language}
+        where d.tenant_id = #{tenantId}
+        <if test="status != null">
+            and d.status = #{status}
+        </if>
+        <if test="status == null">
+            and d.status != 103
+        </if>
+        <if test="code != null and code != ''">
+            AND d.department_code like concat(concat('%',#{code}),'%')
+        </if>
+        <if test="name != null and name != ''">
+            OR d.name like concat(concat('%',#{name}),'%')
+        </if>
+        order by d.department_code
+    </select>
+
+
     <select id="selectByDepartmentOidAndStatus" resultMap="DepartmentAssociationResultMap">
         SELECT * FROM sys_department where department_oid = #{departmentOid}
         <if test="status != null">

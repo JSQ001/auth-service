@@ -410,19 +410,6 @@ public class SetOfBooksResource {
     }
 
 
-    /**
-     * 初始化账套信息
-     *
-     * @return
-     */
-    @RequestMapping(value = "/init", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional
-    @Timed
-    // @PreAuthorize("hasRole('" + AuthoritiesConstants.ADMIN + "')")
-    public ResponseEntity<Void> initSetOfBooks() {
-        /*setOfBooksService.initSetOfBooks();*/
-        return ResponseEntity.ok().build();
-    }
 
     @RequestMapping(value = "/i18n/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, SetOfBooks>> getSetOfBooki18n(@PathVariable Long id) {

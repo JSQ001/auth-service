@@ -1,6 +1,7 @@
 package com.hand.hcf.app.base.user.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.user.dto.PasswordUpdateDTO;
 import com.hand.hcf.app.base.user.dto.UserDTO;
 import com.hand.hcf.app.base.user.dto.UserQO;
 import com.hand.hcf.app.base.user.service.UserService;
@@ -9,6 +10,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -333,15 +336,11 @@ public class UserController {
     }
 
 
-
-    @RequestMapping(value = "/invite", method = RequestMethod.POST)
-    @Timed
-    // @PreAuthorize("hasAnyRole('" + AuthoritiesConstants.COMPANY_ADMIN + "','" + AuthoritiesConstants.ADMIN + "')")
-    public ResponseEntity<Void> noticeUser(@RequestBody List<UUID> userOids) {
-        userService.inviteUser(userOids,LoginInformationUtil.getCurrentUserId());
-        return ResponseEntity.ok().build();
+    @ApiOperation(value = "更改密码用户当前密码", notes = "更改密码用户当前密码 开发：谢宾")
+    @PostMapping("/update/password")
+    public ResponseEntity<Boolean> updatePassword(@Valid @RequestBody PasswordUpdateDTO dto){
+        return ResponseEntity.ok(userService.updatePassword(dto));
     }
-
 
 }
 

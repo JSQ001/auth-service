@@ -163,17 +163,18 @@ public interface VendorInfoMapper extends BaseMapper<VendorInfo> {
     /**
      * 根据租户id、公司id和供应商名称,代码【模糊】分页查询
      * 按代码升序
-     * @param tenantId
-     * @param companyId
-     * @param venNickname
-     * @param vendorCode
-     * @param page
-     * @return
+     * @param vendorStatus 审批状态
+     * @param tenantId     租户id
+     * @param venNickname  名称
+     * @param vendorCode   code
+     * @param page         分页信息
+     * @return  供应商及银行信息
      */
     List<VendorInfo> selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
             @Param("tenantId") Long tenantId,
             @Param("venNickname") String venNickname,
             @Param("vendorCode") String vendorCode,
+            @Param("vendorStatus") String vendorStatus,
             Pagination page);
 
     /**

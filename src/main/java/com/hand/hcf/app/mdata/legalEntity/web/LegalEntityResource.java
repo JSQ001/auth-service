@@ -479,28 +479,6 @@ public class LegalEntityResource {
         return ResponseEntity.ok(legalEntityDTO);
     }
 
-//    /**
-//     * 法人实体二维码初始化
-//     * @return
-//     */
-//    @RequestMapping(value = "/legalentitys/qrcode/init",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
-//    @Timed
-//    public ResponseEntity<Void> initLegalEntityQrCode(){
-//        legalEntityService.initLegalEntityQrCode();
-//        return ResponseEntity.ok().build();
-//    }
 
-    /**
-     * 初始化法人实体信息接口
-     * @return
-     */
-//    @RequestMapping(value = "/legalentitys/init",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
-//    @Transactional
-//    @Timed
-//    // @PreAuthorize("hasRole('" + AuthoritiesConstants.ADMIN + "')")
-//    public ResponseEntity<Void> initLegalEntity(){
-//        legalEntityService.initLegalEntity(OrgInformationUtil.getCurrentUserO                                                                                          ID());
-//        return ResponseEntity.ok().build();
-//    }
 }
 

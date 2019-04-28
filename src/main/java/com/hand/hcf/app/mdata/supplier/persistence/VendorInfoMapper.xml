@@ -222,6 +222,12 @@
         <if test="vendorCode != null and vendorCode != ''">
             AND avi.vendor_code like concat(concat('%',#{vendorCode}),'%')
         </if>
+        <if test="vendorStatus != null">
+            AND avi.vendor_status = #{vendorStatus}
+        </if>
+        <if test="vendorStatus == null">
+            AND avi.vendor_status = 'APPROVED'
+        </if>
         ORDER BY avi.vendor_code
     </select>
 

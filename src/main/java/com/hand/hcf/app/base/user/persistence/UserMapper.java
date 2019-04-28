@@ -34,4 +34,6 @@ public interface UserMapper extends BaseMapper<User> {
     void updateUserLockStatus(@Param("userId") Long userId,
                               @Param("lockStatus") Integer lockStatus);
 
+    Integer checkLogin(@Param("keyWord") String keyWord,
+                       @Param("id") Long id);
 }

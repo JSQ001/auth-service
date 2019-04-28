@@ -69,4 +69,9 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      * @return count值
      */
     Integer dataAuthHasUsed(@Param("dataAuthority_id") Long id);
+
+    /**
+     * jiu.zhao 根据数据权限ID获取数据权限code和name
+     */
+    UserAssignRoleDataAuthority getDataAuthName(@Param("id") Long id);
 }

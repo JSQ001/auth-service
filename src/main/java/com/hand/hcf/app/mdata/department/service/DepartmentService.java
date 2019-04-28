@@ -50,11 +50,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /*import com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO;*/
@@ -1363,6 +1373,11 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
         List<DepartmentTreeDTO> departmentTrees = departmentMapper.findTenantAllDepartment(code, name, currentTenantID, status, language);
         return departmentTrees;
     }
+
+
+    public List<DepartmentTreeDTO> getTenantDepartmentAllKeyWords(String code, String name, Long currentTenantID, Integer status, String language) {
+        return departmentMapper.findTenantAllDepartmentKeyWords(code, name, currentTenantID, status, language);
+    }
     //------------------------------------ department mybatis refactor begin---------------------------------------//
 
     public Department selectByDepartmentOid(UUID departmentOid) {
@@ -2272,5 +2287,37 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
         return mybatisPage;
     }
 
+    public List<DepartmentTreeDTO> getSubsidiaryDepartmentAllKeyWords(String code, String name, Long currentTenantId, Integer status, String language) {
+        if (!StringUtils.isEmpty(code) || !StringUtils.isEmpty(name)) {
+            return departmentMapper.findTenantAllDepartmentKeyWords(code, name, currentTenantId, status, language);
+        }
+        List<DepartmentTreeDTO> departmentTreeDTOS = departmentMapper.findTenantAllDepartmentKeyWords(code, name, currentTenantId, status, language);
+        return getTreeCategory(departmentTreeDTOS);
+    }
+
+    private List<DepartmentTreeDTO> getTreeCategory(List<DepartmentTreeDTO> companys) {
+        //过滤顶级分类
+        List<DepartmentTreeDTO> top = companys.stream().filter(x -> StringUtils.isEmpty(x.getParentId())).collect(Collectors.toList());
+        //过滤子分类
+        List<DepartmentTreeDTO> children = companys.stream().filter(x -> !StringUtils.isEmpty(x.getParentId())).collect(Collectors.toList());
+        //parentId作为key，子级作为value组成的map
+        Map<Long, List<DepartmentTreeDTO>> allMap = children.stream().collect(Collectors.groupingBy(DepartmentTreeDTO::getParentId));
+        //递归查询
+        return treeCategoryData(top, allMap);
+    }
+
+    private List<DepartmentTreeDTO> treeCategoryData(List<DepartmentTreeDTO> top, Map<Long, List<DepartmentTreeDTO>> allMap) {
+        //遍历
+        top.forEach(category -> {
+            List<DepartmentTreeDTO> temp = allMap.get(category.getId());
+            if (temp != null && !temp.isEmpty()) {
+                category.setChildrenDepartment(temp);
+                treeCategoryData(category.getChildrenDepartment(), allMap);
+            } else {
+                category.setChildrenDepartment(new ArrayList<>());
+            }
+        });
+        return top;
+    }
 }
 

@@ -66,7 +66,10 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
      * 保存数据权限
      */
     @Transactional
-    public DataAuthority saveDataAuthority(DataAuthority entity){
+    public DataAuthority saveDataAuthority(DataAuthority entity) {
+        if (entity.getTenantId() == null) {
+            entity.setTenantId(OrgInformationUtil.getCurrentTenantId());
+        }
         Integer integer = dataAuthorityMapper.selectCount(new EntityWrapper<DataAuthority>()
                 .eq("tenant_id", entity.getTenantId())
                 .eq("data_authority_code", entity.getDataAuthorityCode())
@@ -183,18 +186,18 @@ public class DataAuthorityService extends BaseService<DataAuthorityMapper,DataAu
             List<DataAuthority> dataAuthorityByIds = getDataAuthorityByIds(dataAuthIds);
             // 由于规则与规则之间为or关系，且多个数据结构之间也为or管线，所以只要有一个规则所有取值范围为全部，则表示其他规则全部无效，直接取全部值
             // 考虑到数据权限配置的数据量不会很大，在获取明细值之前判断，减少查询时间
-            boolean all = dataAuthorityByIds.stream().anyMatch(dataAuthority -> {
-                List<DataAuthorityRule> dataAuthorityRules = dataAuthority.getDataAuthorityRules();
-                if (CollectionUtils.isNotEmpty(dataAuthorityRules)) {
-                    return dataAuthorityRules.stream().anyMatch(dataAuthorityRule -> {
-                        return dataAuthorityRule.getDataAuthorityRuleDetails().stream().allMatch(dataAuthorityRuleDetail -> "1001".equals(dataAuthorityRuleDetail.getDataScope()));
-                    });
-                }
-                return false;
-            });
-            if (all) {
-                return list;
-            }
+//            boolean all = dataAuthorityByIds.stream().anyMatch(dataAuthority -> {
+//                List<DataAuthorityRule> dataAuthorityRules = dataAuthority.getDataAuthorityRules();
+//                if (CollectionUtils.isNotEmpty(dataAuthorityRules)) {
+//                    return dataAuthorityRules.stream().anyMatch(dataAuthorityRule -> {
+//                        return dataAuthorityRule.getDataAuthorityRuleDetails().stream().allMatch(dataAuthorityRuleDetail -> "1001".equals(dataAuthorityRuleDetail.getDataScope()));
+//                    });
+//                }
+//                return false;
+//            });
+//            if (all) {
+//                return list;
+//            }
             dataAuthIds.stream().forEach(dataAuthId -> {
                 DataAuthority dataAuthorityById = getDataAuthorityById(dataAuthId);
                 if (dataAuthorityById != null && dataAuthorityById.getEnabled()) {

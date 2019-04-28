@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.base.code.domain.SysCode;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.domain.SysCodeValueTemp;
+import com.hand.hcf.app.base.code.enums.SysCodeEnum;
+import com.hand.hcf.app.base.code.persistence.SysCodeMapper;
 import com.hand.hcf.app.base.code.persistence.SysCodeValeMapper;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.persistence.TenantMapper;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
@@ -29,6 +33,10 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
     private BaseI18nService baseI18nService;
     @Autowired
     private SysCodeValueTempService tempService;
+    @Autowired
+    private TenantMapper tenantMapper;
+    @Autowired
+    private SysCodeMapper sysCodeMapper;
 
     public SysCodeValue getById(Long id) {
         SysCodeValue sysCodeValue = baseI18nService.selectOneTranslatedTableInfoWithI18n(id, SysCodeValue.class);
@@ -56,6 +64,7 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
                 .eq("batch_number", transactionUUID)
                 .eq("error_flag", 0));
         if (!CollectionUtils.isEmpty(temps)) {
+            SysCode sysCode = sysCodeMapper.selectById(temps.get(0).getCodeId());
             List<SysCodeValue> collect = temps.stream().map(e -> {
                 SysCodeValue item = new SysCodeValue();
                 item.setEnabled("Y".equals(e.getEnabledStr()));
@@ -66,10 +75,37 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
                 return item;
             }).collect(Collectors.toList());
             this.insertBatch(collect);
+            initOtherTenantBatch(sysCode, collect);
         }
         tempService.deleteTemp(transactionUUID);
         return true;
     }
+    private void initOtherTenantBatch(SysCode sysCode, List<SysCodeValue> sysCodeValues) {
+        Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
+        if (tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
+            List<SysCode> codes = sysCodeMapper.selectList(new EntityWrapper<SysCode>()
+                    .eq("code", sysCode.getCode()));
+            if (!org.springframework.util.CollectionUtils.isEmpty(codes)) {
+                sysCodeValues.forEach(v -> {
+                    List<SysCodeValue> collect = codes
+                            .stream()
+                            .filter(e -> !e.getTenantId().equals(sysCode.getTenantId()))
+                            .map(e -> {
+                        SysCodeValue tmp = new SysCodeValue();
+                        tmp.setCodeId(e.getId());
+                        tmp.setName(v.getName());
+                        tmp.setRemark(v.getRemark());
+                        tmp.setValue(v.getValue());
+                        return tmp;
+                    }).collect(Collectors.toList());
+
+                    this.insertBatch(collect);
+                });
+            }
+        }
+    }
+
+
     @Transactional(rollbackFor = Exception.class)
     public boolean initTenantBySysCode(SysCode sysCode,Long codeId) {
         List<SysCodeValue> sysCodeValues = this.selectList(new EntityWrapper<SysCodeValue>()

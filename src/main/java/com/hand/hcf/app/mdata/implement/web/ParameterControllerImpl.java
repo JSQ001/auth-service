@@ -68,11 +68,15 @@ public class ParameterControllerImpl {
                     .eq("parameter_level", ParameterLevel.TENANT)
                     .eq("tenant_id", tenantId));
         }
+        if (parameterSetting == null) {
+            return null;
+        }
         String result = null;
         if(ParameterValueTypeEnum.VALUE_LIST.equals(parameter.getParameterValueType())){
             result = parameterValuesService.selectById(parameterSetting.getParameterValueId()).getParameterValueCode();
         }else if(ParameterValueTypeEnum.API.equals(parameter.getParameterValueType())){
             Page basicPage = PageUtil.getPage(0, 10);
+            basicPage.setSearchCount(false);
             List<BasicCO> values = parameterValuesService.pageParameterValuesByCond(parameterCode,parameterSetting.getParameterValueId(),parameterSetting.getParameterLevel(),parameterSetting.getSetOfBooksId(),parameterSetting.getCompanyId(),null,null,basicPage);
             if(values != null && values.size() > 0){
                 result = values.get(0).getCode();

@@ -3,6 +3,7 @@
 package com.hand.hcf.app.base.user.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
@@ -10,17 +11,13 @@ import com.hand.hcf.app.base.system.constant.Constants;
 import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.system.domain.PasswordHistory;
 import com.hand.hcf.app.base.system.enums.DeviceVerificationStatus;
-import com.hand.hcf.app.base.system.service.MessageTranslationService;
 import com.hand.hcf.app.base.system.service.PasswordHistoryService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.user.constant.AccountConstants;
 import com.hand.hcf.app.base.user.domain.SMSToken;
 import com.hand.hcf.app.base.user.domain.User;
 import com.hand.hcf.app.base.user.domain.UserLoginBind;
-import com.hand.hcf.app.base.user.dto.PasswordRuleDTO;
-import com.hand.hcf.app.base.user.dto.UserDTO;
-import com.hand.hcf.app.base.user.dto.UserQO;
-import com.hand.hcf.app.base.user.dto.UserRoleListDTO;
+import com.hand.hcf.app.base.user.dto.*;
 import com.hand.hcf.app.base.user.enums.SMSTokenType;
 import com.hand.hcf.app.base.user.enums.UserLockedEnum;
 import com.hand.hcf.app.base.user.persistence.UserLoginBindMapper;
@@ -47,12 +44,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.hand.hcf.app.base.user.constant.AccountConstants.*;
 
 @Slf4j
 @Service
@@ -61,42 +55,18 @@ import static com.hand.hcf.app.base.user.constant.AccountConstants.*;
 public class UserService extends BaseService<UserMapper, User> {
 
     @Autowired
-    MapperFacade mapper;
-
-    @Autowired
-    private UserCacheableService userCacheableService;
-
-    @Autowired
-    UserAuthorityService userAuthorityService;
+    private MapperFacade mapper;
 
     @Autowired
     private UserRoleService userRoleService;
     @Autowired
-    UserLoginBindMapper userLoginBindMapper;
+    private UserLoginBindMapper userLoginBindMapper;
 
     @Autowired
-    PasswordHistoryService passwordHistoryService;
-
-    @Autowired
-    AttachmentService attachmentService;
-
-    @Autowired
-    SMSTokenService smsTokenService;
-
-    @Autowired
-    MessageTranslationService messageTranslationService;
+    private PasswordHistoryService passwordHistoryService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    private final static String[] ruleRegex = new String[4];
-
-    static {
-        ruleRegex[0] = REGEX_LOWER_CASE;
-        ruleRegex[1] = REGEX_UPPER_CASE;
-        ruleRegex[2] = REGEX_NUM;
-        ruleRegex[3] = REGEX_SPECIAL_CHAR;
-    }
 
     /**
      * listByQO tenant by userOid
@@ -150,30 +120,12 @@ public class UserService extends BaseService<UserMapper, User> {
         return getDTOByQO(UserQO.builder().login(login).build());
     }
 
-    public void save(UserDTO user) {
-        updateById(userDtoToUser(user));
-    }
 
     public List<UserLoginBind> getUserLoginBindInfo(UUID userOid) {
 
         return userLoginBindMapper.selectList(new EntityWrapper<UserLoginBind>()
                 .eq("user_oid", userOid)
                 .eq("is_active", true));
-    }
-
-    public Optional<User> getByMobile(String mobile) {
-        return Optional.ofNullable(getByQO(UserQO.builder().mobile(mobile).build()));
-    }
-
-
-    /**
-     * 用户切换语言
-     *
-     * @param user
-     */
-    @CacheEvict(key = "#user.id.toString()")
-    public void updateUserLanguage(UserDTO user) {
-        save(user);
     }
 
 
@@ -234,13 +186,11 @@ public class UserService extends BaseService<UserMapper, User> {
                                          Long tenantId,
                                          Boolean isInactiveSearch,
                                          Page page) {
-
-        List<UserDTO> list = pageDTOByQO(page, UserQO.builder()
+        return pageDTOByQO(page, UserQO.builder()
                 .keyword(keyword)
                 .tenantId(tenantId)
                 .isInactiveSearch(isInactiveSearch)
                 .build());
-        return list;
     }
 
 
@@ -267,136 +217,6 @@ public class UserService extends BaseService<UserMapper, User> {
         return listr;
     }
 
-
-    public SMSToken getActivationToken(String mobile) {
-        return this.getByMobile(mobile)
-                .map(user -> {
-                    if (user.getActivated()) {
-                        throw new BizException(RespCode.USER_ALREADY_ACTIVATED);
-                    }
-                    List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(mobile, SMSTokenType.ACTIVATE_USER.getId());
-                    SMSToken token = null;
-                    if (tokens != null) {
-                        for (SMSToken t : tokens) {
-                            if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                                token = t;
-                                break;
-                            }
-                        }
-                    }
-                    if (token == null) {
-                        token = new SMSToken(user.getUserOid(), SMSTokenType.ACTIVATE_USER.getId(), RandomUtil.generateActivationKey(), ZonedDateTime.now().plusMinutes(10), mobile);
-                    } else if (token.getExpireTime().minusMinutes(9).isBefore(ZonedDateTime.now())) {
-                        token.setExpireTime(ZonedDateTime.now().plusMinutes(10));
-                    } else {
-                        throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-                    }
-                    smsTokenService.insertOrUpdate(token);
-                    return token;
-                }).orElseThrow(() -> new BizException(RespCode.USER_NOT_EXIST));
-    }
-
-    public SMSToken getActivationTokenByEmail(String email) {
-        return this.getByEmail(email)
-                .map(user -> {
-                    if (user.getActivated()) {
-                        throw new BizException(RespCode.USER_ALREADY_ACTIVATED);
-                    }
-                    List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(email, SMSTokenType.ACTIVATE_USER.getId());
-                    SMSToken token = null;
-
-                    if (tokens != null) {
-                        for (SMSToken t : tokens) {
-                            if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                                token = t;
-                                break;
-                            }
-                        }
-                    }
-                    if (token == null) {
-                        token = new SMSToken(user.getUserOid(), SMSTokenType.ACTIVATE_USER.getId(), RandomUtil.generateActivationKey(), ZonedDateTime.now().plusMinutes(30), email);
-                    } else if (token.getExpireTime().minusMinutes(29).isBefore(ZonedDateTime.now())) {
-                        token.setTokenValue(RandomUtil.generateActivationKey());
-                        token.setExpireTime(ZonedDateTime.now().plusMinutes(30));
-                    } else {
-                        throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-                    }
-                    smsTokenService.insertOrUpdate(token);
-                    return token;
-                }).orElseThrow(() -> new BizException(RespCode.USER_EMAIL_NOT_EXISTS));
-    }
-
-    public SMSToken getRestPasswordTokenByEmail(String email) {
-        return this.getByEmail(email)
-                .map(user -> {
-                    List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(email, SMSTokenType.RESET_PASSWORD.getId());
-                    SMSToken token = null;
-
-                    if (tokens != null) {
-                        for (SMSToken t : tokens) {
-                            if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                                token = t;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (token == null) {
-                        token = new SMSToken(user.getUserOid(), SMSTokenType.RESET_PASSWORD.getId(), RandomUtil.generateActivationKey(), ZonedDateTime.now().plusMinutes(30), email);
-                    } else if (token.getExpireTime().minusMinutes(29).isBefore(ZonedDateTime.now())) {
-                        token.setTokenValue(RandomUtil.generateActivationKey());
-                        token.setExpireTime(ZonedDateTime.now().plusMinutes(30));
-                    } else {
-                        throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-                    }
-                    smsTokenService.insertOrUpdate(token);
-                    return token;
-                }).orElseThrow(() -> new BizException(RespCode.USER_EMAIL_NOT_EXISTS));
-    }
-
-    public SMSToken getRegisterToken(String mobile) {
-        List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(mobile, SMSTokenType.REGISTER_COMPANY.getId());
-        SMSToken token = null;
-
-        if (tokens != null) {
-            for (SMSToken t : tokens) {
-                if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                    token = t;
-                    break;
-                }
-            }
-        }
-
-        if (token == null) {
-            token = new SMSToken(null, SMSTokenType.REGISTER_COMPANY.getId(), RandomUtil.generateSMSToken(), ZonedDateTime.now().plusMinutes(10), mobile);
-        } else if (token.getExpireTime().minusMinutes(9).isBefore(ZonedDateTime.now())) {
-            token.setExpireTime(ZonedDateTime.now().plusMinutes(10));
-        } else {
-            throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-        }
-        smsTokenService.insertOrUpdate(token);
-        return token;
-    }
-
-    public void activateRegistration(String mobile, String tokenValue, String newPassword) {
-        SMSToken token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, mobile, SMSTokenType.ACTIVATE_USER.getId());
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-
-        User user = this.getByUserOid(token.getUserOid());
-        if (user == null) {
-            throw new ObjectNotFoundException(User.class, token.getUserOid());
-        }
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-        user.setActivated(true);
-        user.setActivatedDate(ZonedDateTime.now());
-        this.saveUser(user);
-        smsTokenService.deleteById(token);
-
-    }
 
     public Boolean updateStatus(Long userId, UserStatusEnum status) {
         User user = getById(userId);
@@ -425,359 +245,7 @@ public class UserService extends BaseService<UserMapper, User> {
             saveUser(u);
             log.debug("Changed Information for User: {}", u);
         });
-
         return true;
-
-    }
-
-    public void changePassword(String oldPassword, String newPassword) {
-        User user = this.getByUserOid(LoginInformationUtil.getCurrentUserOid());
-        if (user != null) {
-            if (!user.getActivated()) {
-                throw new BizException(RespCode.USER_NOT_ACTIVATE);
-            }
-            if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
-                throw new BizException(RespCode.USER_OLD_PASS_WRONG);
-            }
-            user.setPasswordHash(passwordEncoder.encode(newPassword));
-            user.setPasswordHashLastUpdatedDate(ZonedDateTime.now());
-            //重置密码后，设置强制重置为false
-            user.setResetPassword(false);
-            saveUser(user);
-            log.debug("Changed password for User: {}", user);
-            this.evictUserCache(user);//失效缓存
-        }
-
-    }
-
-    public void changePasswordNew(User currentUser, String oldPassword, String newPassword) {
-        this.changePassword(currentUser, oldPassword, newPassword);
-    }
-
-    /**
-     * @param currentUser
-     * @param oldPassword
-     * @param newPassword
-     */
-    public void changePassword(User currentUser, String oldPassword, String newPassword) {
-        //可选不输入原密码
-        if (!StringUtils.isEmpty(oldPassword)) {
-            if (!passwordEncoder.matches(oldPassword, currentUser.getPasswordHash())) {
-                throw new BizException(RespCode.USER_OLD_PASS_WRONG);
-            }
-        }
-        String passwordEncode = passwordEncoder.encode(newPassword);
-        currentUser.setPasswordHash(passwordEncode);
-        currentUser.setPasswordHashLastUpdatedDate(ZonedDateTime.now());
-        currentUser.setResetPassword(false);
-        saveUser(currentUser);
-        reloadUserCache(currentUser);
-        //修改密码成功记录修改密码历史
-        PasswordHistory passwordHistory = new PasswordHistory();
-        passwordHistory.setUserOid(currentUser.getUserOid());
-        passwordHistory.setPasswordHash(passwordEncode);
-        passwordHistoryService.insert(passwordHistory);
-        log.debug("Changed password for User: {}", currentUser);
-
-    }
-
-    public boolean checkPasswordFormat(String newPassword, PasswordRuleDTO passwordRuleDTO) {
-        log.info("check new password format by param passwordRule = {}", passwordRuleDTO);
-        String passwordRule = AccountConstants.DEFAULT_PASSWORD_RULE;
-        if (passwordRuleDTO != null) {
-            passwordRule = passwordRuleDTO.getPasswordRule();
-        }
-        String[] checkRule = passwordRule.split("");
-        boolean checkOK = true;
-        for (int i = 0; i < checkRule.length; i++) {
-            if (AccountConstants.INCLUDE_FLAG_CHAR.equals(checkRule[i])) {
-                if (!newPassword.matches(ruleRegex[i])) {
-                    checkOK = false;
-                    break;
-                }
-            }
-        }
-        return checkOK;
-    }
-
-    public boolean checkPasswordLength(String newPassword, PasswordRuleDTO passwordRuleDTO) {
-        log.info("start to check password length,and this rule is CompanySecurity={}", passwordRuleDTO);
-        int lengthMix = AccountConstants.DEFAULT_PASSWORD_LENGTH_MIN;
-        int lengthMax = AccountConstants.DEFAULT_PASSWORD_LENGTH_MAX;
-        if (passwordRuleDTO != null) {
-            lengthMix = passwordRuleDTO.getPasswordLengthMin();
-            lengthMax = passwordRuleDTO.getPasswordLengthMax();
-        }
-        if (!StringUtils.isEmpty(newPassword) && lengthMix <= newPassword.length() && lengthMax >= newPassword.length()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean checkNewPasswordRepeatTimes(String newPassword, PasswordRuleDTO passwordRuleDTO, UUID userOId) {
-        if (passwordRuleDTO.getPasswordRepeatTimes() <= 0) {
-            return true;
-        }
-        //由于原始密码被encode，每次加密的密文不一致，所以不能以加密的密文查询
-        List<PasswordHistory> passwordHistorys = passwordHistoryService.listPasswordHistory(userOId);
-        if (passwordHistorys == null || passwordHistorys.size() <= 0) {
-            return true;
-        } else {
-            boolean isOK = true;
-            if (passwordHistorys.size() >= passwordRuleDTO.getPasswordRepeatTimes()) {
-                for (int i = 0; i < passwordRuleDTO.getPasswordRepeatTimes(); i++) {
-                    if (passwordEncoder.matches(newPassword, passwordHistorys.get(i).getPasswordHash())) {
-                        isOK = false;
-                        break;
-                    }
-                }
-
-            } else {
-                for (int i = 0; i < passwordHistorys.size(); i++) {
-                    if (passwordEncoder.matches(newPassword, passwordHistorys.get(i).getPasswordHash())) {
-                        isOK = false;
-                        break;
-                    }
-                }
-            }
-            return isOK;
-        }
-    }
-
-    public void changePasswordCheckNew(Long tenantId, UUID userOid, String newPassword) {
-
-        this.changePasswordCheck(tenantId, userOid, newPassword);
-    }
-
-    public PasswordRuleDTO getPasswordRule(Long tenantId) {
-        return new PasswordRuleDTO();
-    }
-
-    public void changePasswordCheck(Long tenantId, UUID userOid, String newPassword) {
-        PasswordRuleDTO passwordRule = getPasswordRule(tenantId);
-
-        //验证密码长度
-        if (!this.checkPasswordLength(newPassword, passwordRule)) {
-            throw new BizException(RespCode.USER_PASS_LENGTH_WRONG);
-        }
-        //验证密码格式
-        if (!this.checkPasswordFormat(newPassword, passwordRule)) {
-            throw new BizException(RespCode.USER_PASS_FORMAT_WRONG);
-        }
-        //验证密码和之前的密码相同的次数，不能超过设置的密码的重复次数
-        if (!this.checkNewPasswordRepeatTimes(newPassword, passwordRule, userOid)) {
-            throw new BizException(RespCode.USER_PASS_REPAT_WRONG);
-        }
-    }
-
-    /**
-     * 公共调用修改密码(已加密)
-     *
-     * @param companyOid
-     * @param login
-     * @param newPassword
-     */
-    public void implementChangePassword(UUID companyOid, UUID userOid, String login, String newPassword) {
-
-        Optional<User> user = Optional.empty();
-        String msg = "";
-        if (userOid != null) {
-            user = Optional.of(this.getByUserOid(userOid));
-            msg = userOid.toString();
-        } else if (!StringUtils.isEmpty(login)) {
-            user = this.getByLogin(login);
-            msg = login;
-        }
-        if (!user.isPresent()) {
-            throw new ObjectNotFoundException(User.class, msg);
-        }
-        //重置密码时，将用户锁定状态重置
-        user.ifPresent(u -> {
-            u.setPasswordHash(newPassword);
-            u.setPasswordHashLastUpdatedDate(ZonedDateTime.now());
-            u.setPasswordAttempt(0);
-            u.setLockStatus(UserLockedEnum.UNLOCKED.getId());
-            saveUser(u);
-        });
-    }
-
-
-    public SMSToken getResetPasswordToken(String mobile) {
-        return this.getByMobile(mobile)
-                .map(user -> {
-                    if (!user.getActivated()) {
-                        throw new BizException(RespCode.USER_NOT_ACTIVATE);
-                    }
-                    PasswordRuleDTO passwordRule = getPasswordRule(LoginInformationUtil.getCurrentTenantId());
-                    boolean allowReset = Constants.FALSE;
-                    if (passwordRule != null) {
-
-                        //allowReset为true时表示不允许重置密码
-                        allowReset = passwordRule.getAllowReset();
-
-                    }
-                    if (allowReset) {
-                        throw new BizException(RespCode.USER_PASS_NOT_ALLOW_RESET);
-                    }
-                    List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(mobile, SMSTokenType.RESET_PASSWORD.getId());
-                    SMSToken token = null;
-
-                    if (tokens != null) {
-                        for (SMSToken t : tokens) {
-                            if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                                token = t;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (token == null) {
-                        token = new SMSToken(user.getUserOid(), SMSTokenType.RESET_PASSWORD.getId(), RandomUtil.generateActivationKey(), ZonedDateTime.now().plusMinutes(10), mobile);
-                    } else if (token.getExpireTime().minusMinutes(9).isBefore(ZonedDateTime.now())) {
-                        token.setExpireTime(ZonedDateTime.now().plusMinutes(10));
-                    } else {
-                        throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-                    }
-                    smsTokenService.insertOrUpdate(token);
-                    return token;
-                }).orElseThrow(() -> new BizException(RespCode.USER_NOT_EXIST));
-    }
-
-    public void checkSmsResetPassword(String mobile, String tokenValue) {
-        log.debug("checkSmsResetPassword token {}", tokenValue);
-        SMSToken token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, mobile, SMSTokenType.RESET_PASSWORD.getId());
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-    }
-
-    public void checkSmsActivationToken(String mobile, String tokenValue) {
-        log.debug("checkSmsActivationToken token{}", tokenValue);
-        SMSToken token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, mobile, SMSTokenType.ACTIVATE_USER.getId());
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-    }
-
-
-    public void smsResetPassword(String mobile, String tokenValue, String newPassword) {
-        log.debug("smsResetPassword user password for reset smsToken {}", tokenValue);
-        SMSToken token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, mobile, SMSTokenType.RESET_PASSWORD.getId());
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-
-        User user = this.getByUserOid(token.getUserOid());
-        if (user == null) {
-            throw new ObjectNotFoundException(User.class, token.getUserOid());
-        }
-        String encryptedPassword = passwordEncoder.encode(newPassword);
-        user.setPasswordHash(encryptedPassword);
-        user.setLockStatus(UserLockedEnum.UNLOCKED.getId());
-        user.setPasswordAttempt(0);
-        saveUser(user);
-        smsTokenService.deleteById(token);
-    }
-
-    public void emailResetPassword(String email, String tokenValue, String newPassword) {
-        log.debug("smsResetPassword user password for reset smsToken {}", tokenValue);
-        Optional<User> user = this.getByEmail(email);
-        SMSToken token;
-        if (user.isPresent()) {
-            token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, email, SMSTokenType.RESET_PASSWORD.getId());
-        } else {
-            throw new ObjectNotFoundException(User.class, "user.not.found");
-        }
-
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-        String encryptedPassword = passwordEncoder.encode(newPassword);
-        user.get().setPasswordHash(encryptedPassword);
-        user.get().setLockStatus(UserLockedEnum.UNLOCKED.getId());
-        user.get().setPasswordAttempt(0);
-        saveUser(user.get());
-    }
-
-    public SMSToken getAddMobileTokenV2(String mobile) {
-        return this.getAddMobileToken(mobile);
-    }
-
-    public SMSToken getAddMobileToken(String mobile) {
-        Optional<User> optional = this.getByMobile(mobile);
-        if (optional.isPresent()) {
-            throw new BizException(RespCode.USER_MOBILE_EXISTS);
-        }
-        List<SMSToken> tokens = smsTokenService.findByToUserAndTypeID(mobile, SMSTokenType.ADD_MOBILE.getId());
-        SMSToken token = null;
-
-        if (tokens != null) {
-            for (SMSToken t : tokens) {
-                if (t.getExpireTime().isAfter(ZonedDateTime.now())) {
-                    token = t;
-                    break;
-                }
-            }
-        }
-
-        if (token == null) {
-            token = new SMSToken(LoginInformationUtil.getCurrentUserOid(), SMSTokenType.ADD_MOBILE.getId(), RandomUtil.generateActivationKey(), ZonedDateTime.now().plusMinutes(10), mobile);
-        } else if (token.getExpireTime().minusMinutes(9).isBefore(ZonedDateTime.now())) {
-            token.setExpireTime(ZonedDateTime.now().plusMinutes(10));
-        } else {
-            throw new BizException(RespCode.USER_SEND_SMS_TOO_MANY);
-        }
-        smsTokenService.insertOrUpdate(token);
-        return token;
-    }
-
-    public void checkSmsAddMobileTokenV2(String mobile, String tokenValue) {
-        this.checkSmsActivationToken(mobile, tokenValue);
-    }
-
-    public void checkSmsAddMobileToken(String mobile, String tokenValue) {
-        log.debug("checkSmsAddMobileToken token{}", tokenValue);
-        SMSToken token = smsTokenService.findByTokenValueAndToUserAndTypeID(tokenValue, mobile, SMSTokenType.ADD_MOBILE.getId());
-        if (token == null) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_NOT_EXISTS);
-        } else if (token.getExpireTime().isBefore(ZonedDateTime.now())) {
-            throw new BizException(RespCode.USER_ACTIVATION_TOKEN_EXPIRED);
-        }
-    }
-
-
-    public void inviteUser(List<UUID> userOids, Long currentUserId) {
-        List<User> userList = listByUserOidIn(userOids);
-        noticeUsers(userList, currentUserId);
-    }
-
-    private int getNoticeType() {
-        return AccountConstants.NOTICE_TYPE_EMAIL;
-    }
-
-    private void noticeUsers(List<User> userList, Long currentUserId) {
-        Long tenantId = null;
-        for (User user : userList) {
-            int noticeType = getNoticeType();
-           /* if (AccountConstants.NOTICE_TYPE_EMAIL == noticeType) {
-                mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
-            }
-            if (AccountConstants.NOTICE_TYPE_EMAIL_AND_MOBILE == noticeType) {
-                mailService.sendInvitationEmail(user.getEmail(), user.getUserName(), null, new Locale(user.getLanguage()));
-            }*/
-            if (tenantId == null) {
-                tenantId = user.getTenantId();
-            }
-        }
 
     }
 
@@ -791,7 +259,7 @@ public class UserService extends BaseService<UserMapper, User> {
         if (userOid == null) {
             return null;
         } else {
-            return userCacheableService.getByUserOid(userOid);
+            return this.selectOne(this.getWrapper().eq("user_oid", userOid.toString()));
         }
     }
 
@@ -805,32 +273,9 @@ public class UserService extends BaseService<UserMapper, User> {
         if (userOid == null) {
             return null;
         } else {
-            return userToUserDto(userCacheableService.getByUserOid(userOid));
+            return userToUserDto(this.getByUserOid(userOid));
         }
     }
-
-
-    public List<User> listByUserOidIn(List<UUID> userOids) {
-        return selectList(new EntityWrapper<User>().in("user_oid", userOids));
-
-
-    }
-
-
-    /**
-     * 获取用户主语言
-     *
-     * @param user
-     * @return
-     */
-    public String getLanguageByUser(User user) {
-        String language = Constants.DEFAULT_LANGUAGE;
-        if (user != null) {
-            language = user.getLanguage();
-        }
-        return language;
-    }
-
 
     public Set<Authority> findUserAuthorities(UUID userOid) {
         return baseMapper.listAuthorities(null, userOid);
@@ -838,7 +283,6 @@ public class UserService extends BaseService<UserMapper, User> {
 
     public User saveUser(User user) {
         super.insertOrUpdate(user);
-        this.evictUserCache(user);
         return user;
     }
 
@@ -852,58 +296,22 @@ public class UserService extends BaseService<UserMapper, User> {
                 , LoginInformationUtil.getCurrentTenantId()));
     }
 
-
     public List<UserCO> saveUserCOList(List<UserCO> users) {
         return users.stream().map(u -> saveUserCO(u)).collect(Collectors.toList());
     }
 
-    //    @Cacheable(key="#email")
-    public Optional<User> getByEmail(String email) {
-        if (StringUtils.isEmpty(email)) {
-            throw new BizException(RespCode.EMAIL_IS_NULL);
-        }
-        return Optional.ofNullable(getByQO(UserQO.builder().email(email).build()));
-    }
-
-
-    public void evictUserCache(User user) {
-        if (user.getId() != null) {
-            userCacheableService.evictCacheUserByUserId(user);
-        }
-        if (user.getUserOid() != null) {
-            userCacheableService.evictCacheUserByUserOid(user);
-        }
-
-        if (user.getEmail() != null) {
-            userCacheableService.evictCacheUserByEmail(user.getEmail());
-        }
-    }
-
-    @Transactional
-    public User save(User user) {
-        super.insertOrUpdate(user);
-        user = getByUserOid(user.getUserOid());
-        this.evictUserCache(user);
-        return user;
-    }
 
     public User getById(Long userId) {
         if (userId == null) {
             return null;
         }
-        return userCacheableService.getById(userId);
+        return this.selectById(userId);
     }
 
-    public Boolean manualUnlockUser(Long userId) {
-        unlockUser(userId);
-        return Boolean.TRUE;
-    }
 
-    @Transactional
     public void unlockUser(Long userId) {
         baseMapper.updateUserLockStatus(userId, UserLockedEnum.UNLOCKED.getId());
     }
-
 
     /**
      * 根据账号查询用户
@@ -916,68 +324,16 @@ public class UserService extends BaseService<UserMapper, User> {
 
     }
 
-    /**
-     * 根据用户Oid查询未删除用户
-     *
-     * @param userOid：用户Oid
-     * @return
-     */
-    public User getByUserOidAndIsDeletedFalse(UUID userOid) {
-        return getByQO(UserQO.builder().userOid(userOid).build());
-
-    }
-
-
-    public Map<String, Object> getMobileStatusByUserOid(UUID userOid) {
-        User user = getByUserOid(userOid);
-        if (user == null) {
-            throw new BizException(RespCode.USER_NOT_EXIST);
-        }
-        return getMobileStatus(user.getMobile());
-    }
-
-    public Map<String, Object> getMobileStatus(String mobile) {
-
-        Map<String, Object> retMap = new HashMap<>();
-        if (StringUtils.isEmpty(mobile)) {
-            retMap.put("status", "not.set");
-            return retMap;
-        }
-
-        List<UserLoginBind> userLoginBinds = userLoginBindMapper.selectList(
-                new EntityWrapper<UserLoginBind>()
-                        .eq("login", mobile)
-                        .eq("is_active", true));
-        if (userLoginBinds == null || userLoginBinds.size() <= 0) {
-            retMap.put("status", "not.validate");
-            retMap.put("mobile", mobile);
-            return retMap;
-        }
-        retMap.put("status", "activated");
-        retMap.put("mobile", mobile);
-        return retMap;
-    }
 
     public UserDTO getAccountInfo(String appVersion, String client, String clientVersion, boolean nativeApp) {
-        User user = userCacheableService.getByUserOid(LoginInformationUtil.getCurrentUserOid());
-
+        User user = this.getByUserOid(LoginInformationUtil.getCurrentUserOid());
         UserDTO userDTO = userToUserDto(user);
-
         if (userDTO != null) {
             // 默认情况下，如果是原生app则开启，旧版app不开启
-            userDTO.setDeviceValidate(DeviceVerificationStatus.DEFAULT.name().equals(user.getDeviceVerificationStatus()) ? nativeApp : DeviceVerificationStatus.OPENED.name().equals(user.getDeviceVerificationStatus()));
+            userDTO.setDeviceValidate(DeviceVerificationStatus.DEFAULT.name().equals(user.getDeviceVerificationStatus())
+                    ? nativeApp : DeviceVerificationStatus.OPENED.name().equals(user.getDeviceVerificationStatus()));
         }
         return userDTO;
-    }
-
-
-    public void reloadUserCache(User user) {
-        if (user.getId() != null) {
-            userCacheableService.reloadCacheUserByUserId(user);
-        }
-        if (user.getUserOid() != null) {
-            userCacheableService.reloadCacheUserByUserOid(user);
-        }
     }
 
 
@@ -990,13 +346,14 @@ public class UserService extends BaseService<UserMapper, User> {
     }
 
     public UserRoleListDTO userDtoToUserRoleList(UserDTO userDTO) {
-
         UserRoleListDTO userRoleListDTO = new UserRoleListDTO();
-        Page pp = PageUtil.getPage(0, 1000);//为了取用户的全量角色，正常不会有一个用户超过1000角色
-        List<Role> listRole = userRoleService.getRolesByCond(userDTO.getId(), null, null, "ASSIGNED", pp);
+        //为了取用户的全量角色，正常不会有一个用户超过1000角色
+        Page pp = PageUtil.getPage(0, 1000);
+        pp.setSearchCount(false);
+        List<Role> listRole = userRoleService.getRolesByCond(userDTO.getId(),
+                null, null, "ASSIGNED", pp);
         mapper.map(userDTO, userRoleListDTO);
         userRoleListDTO.setRoleList(listRole);
-
         return userRoleListDTO;
     }
 
@@ -1077,12 +434,8 @@ public class UserService extends BaseService<UserMapper, User> {
     @Transactional
    //@SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
     public User createOrUpdate(User user, Long currentUserId, Long tenantId) {
-
-
         String email = user.getEmail();
         String mobile = user.getMobile();
-
-
         if (user.getId() == null) {
             //insert
             user.setUserOid(UUID.randomUUID());
@@ -1093,7 +446,7 @@ public class UserService extends BaseService<UserMapper, User> {
 
             if (StringUtils.isEmpty(user.getLogin())) {
                 throw new BizException(RespCode.USER_LOGIN_NOT_NULL);
-            } else if (verifyLoginExsits(user)) {
+            } else if (SqlHelper.retBool(baseMapper.checkLogin(user.getLogin(), null))) {
                 throw new BizException(RespCode.USER_LOGIN_EXISTS);
             }
 
@@ -1103,18 +456,18 @@ public class UserService extends BaseService<UserMapper, User> {
 
             if (StringUtils.isEmpty(email)) {
                 throw new BizException(RespCode.EMAIL_IS_NULL);
-            } else if (verifyEmailExsits(user)) {
+            } else if (SqlHelper.retBool(baseMapper.checkLogin(user.getEmail(), null))) {
                 throw new BizException(RespCode.USER_EMAIL_EXISTS);
             }
 
             if (!StringUtils.isEmpty(mobile)) {
-                if (verifyMobileExsits(user)) {
+                if (SqlHelper.retBool(baseMapper.checkLogin(user.getMobile(), null))) {
                     throw new BizException(RespCode.USER_MOBILE_EXISTS);
                 }
             }
             String password = user.getPassword();
             if (StringUtils.isEmpty(password)) {
-                password = DEFAULT_PASSWORD;
+                password = AccountConstants.DEFAULT_PASSWORD;
             }
             user.setPasswordHash(passwordEncoder.encode(password));
 
@@ -1135,14 +488,13 @@ public class UserService extends BaseService<UserMapper, User> {
 
             //修改邮箱
             if (!StringUtils.isEmpty(email) && !email.equalsIgnoreCase(oldUser.getEmail())) {
-                if (verifyEmailExsits(user)) {
+                if (SqlHelper.retBool(baseMapper.checkLogin(user.getEmail(), null))) {
                     throw new BizException(RespCode.USER_EMAIL_EXISTS);
                 }
-                userCacheableService.evictCacheUserByEmail(oldUser.getEmail());
             }
             //修改手机号
             if (!StringUtils.isEmpty(mobile) && !mobile.equalsIgnoreCase(oldUser.getMobile())) {
-                if (verifyMobileExsits(user)) {
+                if (SqlHelper.retBool(baseMapper.checkLogin(user.getMobile(), null))) {
                     throw new BizException(RespCode.USER_MOBILE_EXISTS);
                 }
             }
@@ -1157,38 +509,6 @@ public class UserService extends BaseService<UserMapper, User> {
     }
 
 
-    public Boolean verifyLoginExsits(User user) {
-        if (selectCount(new EntityWrapper<User>()
-                .eq("login", user.getLogin())
-                .ne("id", user.getId())
-        ) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public Boolean verifyEmailExsits(User user) {
-        if (selectCount(new EntityWrapper<User>()
-                .eq("email", user.getEmail())
-                .ne("id", user.getId())
-        ) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public Boolean verifyMobileExsits(User user) {
-        if (selectCount(new EntityWrapper<User>()
-                .eq("mobile", user.getMobile())
-                .ne("id", user.getId())
-        ) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public UserCO userToUserCO(User user) {
         UserCO userCO = new UserCO();
@@ -1206,5 +526,28 @@ public class UserService extends BaseService<UserMapper, User> {
         return user;
     }
 
-
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePassword(PasswordUpdateDTO dto) {
+        User user = this.selectById(LoginInformationUtil.getCurrentUserId());
+        if (user == null) {
+            throw new BizException(RespCode.USER_NOT_EXIST);
+        }
+        // 校验密码是否正确
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPasswordHash())) {
+            throw new BizException(RespCode.USER_OLD_PASS_WRONG);
+        }
+        if (!dto.getConfirmPassword().equals(dto.getNewPassword())) {
+            throw new BizException(RespCode.USER_PASS_FORMAT_WRONG);
+        }
+        String passwordEncode = passwordEncoder.encode(dto.getNewPassword());
+        user.setPasswordHash(passwordEncode);
+        user.setPasswordHashLastUpdatedDate(ZonedDateTime.now());
+        user.setResetPassword(false);
+        //修改密码成功记录修改密码历史
+        PasswordHistory passwordHistory = new PasswordHistory();
+        passwordHistory.setUserOid(user.getUserOid());
+        passwordHistory.setPasswordHash(passwordEncode);
+        passwordHistoryService.insert(passwordHistory);
+        return this.updateById(user);
+    }
 }

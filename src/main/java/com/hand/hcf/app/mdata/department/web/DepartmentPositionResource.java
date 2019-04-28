@@ -28,7 +28,6 @@ public class DepartmentPositionResource {
     @Autowired
     private BaseI18nService baseI18nService;
 
-    //@Secured(AuthoritiesConstants.ADMIN)
     @RequestMapping(value = "/init", method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> initTenant() {

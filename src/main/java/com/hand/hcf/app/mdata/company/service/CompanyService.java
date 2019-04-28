@@ -1643,6 +1643,62 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         return mybatisPage;
     }
 
+    public List<CompanyDTO> listConditionKeyWordAndEnabled(String keyWord, Boolean enabled) {
+        Long currentTenantId = OrgInformationUtil.getCurrentTenantId();
+        List<CompanyCO> companyCOS;
+        List<CompanyDTO> result;
+        Wrapper<CompanyCO> wrapper = new EntityWrapper<CompanyCO>().eq("t.tenant_id", currentTenantId)
+                .eq(enabled != null, "t.enabled", enabled);
+        if (StringUtils.hasText(keyWord)) {
+            wrapper.andNew()
+                    .like(StringUtils.hasText(keyWord), "t.name", keyWord)
+                    .or(StringUtils.hasText(keyWord), "t.company_code like concat(concat('%',{0}),'%')", keyWord);
+            companyCOS = baseMapper.listCompanyCO(wrapper);
+            return mapper.mapAsList(companyCOS,CompanyDTO.class);
+        }
+        companyCOS = baseMapper.listCompanyCO(wrapper);
+        result = mapper.mapAsList(companyCOS, CompanyDTO.class);
+        if (CollectionUtils.isNotEmpty(result)) {
+            result.forEach(t -> {
+                Set<Long> subsidiary = getCompanyChildrenIdByCompanyIds(Collections.singleton(t.getId()), null);
+                if (!subsidiary.isEmpty()) {
+                    Wrapper<CompanyCO> wrappers = new EntityWrapper<CompanyCO>().in("id", subsidiary);
+                    List<CompanyCO> companys = baseMapper.listCompanyCO(wrappers);
+                    t.setSubsidiary(mapper.mapAsList(companys, CompanyDTO.class));
+                }
+            });
+        }
+        //进行分组
+        return getTreeCategory(result);
+    }
+
+    private List<CompanyDTO> getTreeCategory(List<CompanyDTO> companys) {
+        //过滤顶级分类
+        List<CompanyDTO> top = companys.stream().filter(x -> StringUtils.isEmpty(x.getParentCompanyId())).collect(Collectors.toList());
+        //过滤子分类
+        List<CompanyDTO> children = companys.stream().filter(x -> !StringUtils.isEmpty(x.getParentCompanyId())).collect(Collectors.toList());
+        //parentId作为key，子级作为value组成的map
+        Map<Long, List<CompanyDTO>> allMap = children.stream().collect(Collectors.groupingBy(CompanyDTO::getParentCompanyId));
+        //递归查询
+
+       return treeCategoryData(top, allMap);
+    }
+
+    private List<CompanyDTO> treeCategoryData(List<CompanyDTO> top, Map<Long, List<CompanyDTO>> allMap) {
+        //遍历
+        top.forEach(category -> {
+            List<CompanyDTO> temp = allMap.get(category.getId());
+            if (temp != null && !temp.isEmpty()) {
+                category.setSubsidiary(temp);
+                treeCategoryData(category.getSubsidiary(), allMap);
+            } else {
+                category.setSubsidiary(new ArrayList<>());
+            }
+        });
+        return top;
+    }
+
+
     public Page<CompanyCO> pageByCompanyIdsConditionByKeyWord(List<Long> companyIds, String keyWord, Page<CompanyCO> mybatisPage) {
         Wrapper<CompanyCO> wrapper = new EntityWrapper<CompanyCO>().in("t.id", companyIds)
                 .andNew()

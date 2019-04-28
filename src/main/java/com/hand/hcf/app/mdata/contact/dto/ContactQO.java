@@ -51,6 +51,10 @@ public class ContactQO {
      */
     private String keyDepartment;
     private String keyword;//模糊查询关键字
+    /**
+     * 关键字只有员工工号、姓名
+     */
+    private String keywordCodeName;
     @Builder.Default
     private Boolean fuzzy = false;//模糊查询
     @Builder.Default

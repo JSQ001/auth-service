@@ -48,7 +48,7 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
         }
         if ( frontLocaleMapper.selectList(
                 new EntityWrapper<FrontLocale>()
-                        .eq("key_code",frontLocale.getKeyCode())
+                        .eq("key_code",frontLocale.getKeyCode().trim())
                         .eq("language",frontLocale.getLanguage())
                         .eq("tenant_id",tenantId)
         ).size() > 0 ){
@@ -60,10 +60,14 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
             tenants.stream().forEach(domain -> {
                 frontLocale.setId(null);
                 frontLocale.setTenantId(domain.getId());
+                // 去除空格
+                frontLocale.setKeyCode(frontLocale.getKeyCode().trim());
                 frontLocaleMapper.insert(frontLocale);
             });
         }else{
             frontLocale.setTenantId(tenantId);
+            // 去除空格
+            frontLocale.setKeyCode(frontLocale.getKeyCode().trim());
             frontLocaleMapper.insert(frontLocale);
         }
         return frontLocale;
@@ -94,6 +98,8 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
         if (frontLocale.getId() == null){
             throw new BizException(RespCode.FRONT_LOCALE_NOT_EXIST);
         }
+        // 去除空格
+        frontLocale.setKeyCode(frontLocale.getKeyCode().trim());
         frontLocaleMapper.updateAllColumnById(frontLocale);
         return frontLocale;
     }

@@ -2,18 +2,22 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.userRole.domain.*;
 import com.hand.hcf.app.base.userRole.persistence.ContentFunctionRelationMapper;
 import com.hand.hcf.app.base.userRole.persistence.FunctionPageRelationMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -34,13 +38,16 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
     private  ContentListService contentListService;
     @Autowired
     private  ContentFunctionRelationMapper contentFunctionRelationMapper;
-
+    @Autowired
+    private TenantService tenantService;
     /**
      * 批量新增 功能页面关联
      * @return
      */
     @Transactional
     public List<FunctionPageRelation> createFunctionPageRelationBatch(List<FunctionPageRelation> list){
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
+        Tenant tenant = tenantService.getTenantById(tenantId);
         list.stream().forEach(functionPageRelation -> {
             //校验数据
             FunctionList functionList = functionListService.selectById(functionPageRelation.getFunctionId());
@@ -72,19 +79,25 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
                 if (contentList == null){
                     throw new BizException(RespCode.CONTENT_LIST_NOT_EXIST);
                 }
-                if (contentList.getParentId() != null){
-                    ContentList parentContentList = contentListService.selectById(contentList.getParentId());
-                    if (parentContentList == null){
-                        throw new BizException(RespCode.CONTENT_LIST_PARENT_CONTENT_NOT_EXIST);
-                    }
-                    pageList.setContentRouter(parentContentList.getContentRouter() + contentList.getContentRouter());
-                }else {
-                    pageList.setContentRouter(contentList.getContentRouter());
+            }
+            this.insert(functionPageRelation);
+            // 如果是系统租户则需要将目录关联功能映射关系分配给所有租户
+            if(tenant.getSystemFlag()){
+                Long sourceFunctionId = functionPageRelation.getFunctionId();
+                List<Tenant> tenants = tenantService.findAll()
+                        .stream()
+                        .filter(e -> !e.getId().equals(tenantId)).collect(Collectors.toList());
+                if (tenants.size() > 0) {
+                    List<FunctionPageRelation> functionPageRelations = tenants.stream().map(domain -> {
+                        FunctionPageRelation functionPageRelation1 = new FunctionPageRelation();
+                        FunctionList functionList1 = functionListService.getFunctionByTenantIdAndSourceId(domain.getId(),sourceFunctionId);
+                        functionPageRelation1.setPageId(pageList.getId());
+                        functionPageRelation1.setFunctionId(functionList1.getId());
+                        return functionPageRelation1;
+                    }).collect(Collectors.toList());
+                    this.insertBatch(functionPageRelations);
                 }
             }
-
-            pageListService.updateAllColumnById(pageList);
-            functionPageRelationMapper.insert(functionPageRelation);
         });
         return list;
     }
@@ -93,7 +106,7 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
      * 批量物理删除 功能页面关联
      * @param idList
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFunctionPageRelationBatch(List<Long> idList){
         idList.stream().forEach(id -> {
             //校验数据
@@ -114,6 +127,28 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
             pageListService.updateAllColumnById(pageList);
             //关联表里的改为物理删除
             functionPageRelationMapper.deleteById(functionPageRelation);
+
+            FunctionList functionList = functionListService.selectById(functionPageRelation.getFunctionId());
+            Long tenantId = functionList.getTenantId();
+            Tenant tenant = tenantService.selectById(tenantId);
+            if(tenant.getSystemFlag()){
+                List<Long> functionIds = functionListService.selectList(
+                        new EntityWrapper<FunctionList>()
+                                .eq("source_id", functionList.getId())
+                ).stream().map(FunctionList::getId).collect(Collectors.toList());
+                if(functionIds.size() > 0) {
+                    functionIds.stream().forEach(functionId -> {
+                        List<Long> ids = functionPageRelationMapper.selectList(
+                                new EntityWrapper<FunctionPageRelation>()
+                                        .eq("function_id", functionId)
+                                        .eq("page_id",functionPageRelation.getPageId())
+                        ).stream().map(FunctionPageRelation::getId).collect(Collectors.toList());
+                        if (ids.size() > 0) {
+                            this.deleteBatchIds(ids);
+                        }
+                    });
+                }
+            }
         });
     }
 
@@ -154,7 +189,8 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
      * @return
      */
     public List<PageList> filterFunctionPageRelationByCond(String pageName,Page page){
-        List<PageList> result = functionPageRelationMapper.filterFunctionPageRelationByCond( pageName, page);
+        Long tenantId = LoginInformationUtil.getCurrentTenantId();
+        List<PageList> result = functionPageRelationMapper.filterFunctionPageRelationByCond( pageName, tenantId, page);
         return result;
     }
 }

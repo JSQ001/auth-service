@@ -8,4 +8,14 @@
     <select id="getNotExistsTenantId" resultType="java.lang.Long">
       select t.id from sys_tenant t where not exists(select 1 from sys_code v where t.id = v.tenant_id)
     </select>
+    <select id="listNotExistsTenantIdByCode" resultType="java.lang.Long">
+        select t.id from sys_tenant t where not exists(select 1 from sys_code v where t.id = v.tenant_id and v.code = #{code})
+    </select>
+    <select id="checkValueExists" resultType="java.lang.Integer">
+        SELECT COUNT(0)
+          FROM sys_code_value t, sys_code v
+        WHERE t.code_id = v.id
+           AND v.code = #{code}
+           AND t.value = #{value}
+    </select>
 </mapper>

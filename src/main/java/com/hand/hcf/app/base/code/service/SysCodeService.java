@@ -1,14 +1,17 @@
 package com.hand.hcf.app.base.code.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.code.domain.SysCode;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.domain.SysCodeValueTemp;
 import com.hand.hcf.app.base.code.dto.SysCodeValueDTO;
+import com.hand.hcf.app.base.code.enums.SysCodeEnum;
 import com.hand.hcf.app.base.code.persistence.SysCodeMapper;
-import com.hand.hcf.app.base.system.enums.SysCodeEnum;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.persistence.TenantMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -56,6 +59,9 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
     private SysCodeValueTempService sysCodeValueTempService;
     @Autowired
     private ExcelImportService excelImportService;
+    @Autowired
+    private TenantMapper tenantMapper;
+
 
     private Wrapper<SysCode> initWrapper(){
         Wrapper<SysCode> wrapper = new EntityWrapper<SysCode>()
@@ -158,13 +164,16 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         if (!StringUtils.hasText(sysCode.getCode())){
             throw new BizException(RespCode.SYS_CODE_CODE_IS_NULL);
         }
+        boolean isInit = false;
         SysCode selectOne;
         if ("system".equalsIgnoreCase(systemFlag)){
+            Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
             // 如果是系统管理员, 得看这个代码是不是存在所以的租户
             selectOne = this.selectOne(this.getWrapper().eq("code", sysCode.getCode()));
-            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag())){
+            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag()) && tenant.getSystemFlag()){
                 sysCode.setTenantId(-1L);
             }else{
+                isInit = true;
                 sysCode.setTenantId(LoginInformationUtil.getCurrentTenantId());
             }
         }else {
@@ -182,6 +191,23 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
             this.insert(sysCode);
         }catch (DuplicateKeyException e){
             throw new BizException(RespCode.SYS_CODE_CODE_IS_EXISTS);
+        }
+        // 如果是系统初始化就要初始化给所有的租户
+        if (isInit){
+            List<Long> tenantIds = baseMapper.listNotExistsTenantIdByCode(sysCode.getCode());
+            if (!CollectionUtils.isEmpty(tenantIds)){
+                List<SysCode> collect = tenantIds.stream().map(e -> {
+                    SysCode tmp = new SysCode();
+                    tmp.setCode(sysCode.getCode());
+                    tmp.setCodeOid(UUID.randomUUID().toString());
+                    tmp.setName(sysCode.getName());
+                    tmp.setTypeFlag(sysCode.getTypeFlag());
+                    tmp.setTenantId(e);
+                    tmp.setId(null);
+                    return tmp;
+                }).collect(Collectors.toList());
+                this.insertBatch(collect);
+            }
         }
         return sysCode;
     }
@@ -212,6 +238,8 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         }
         sysCodeValue.setId(null);
         sysCodeValue.setCodeId(sysCode.getId());
+        // 判断是不是租户初始化的，初始化的值列表需要给已有的租户
+        initOtherTenant(sysCode, sysCodeValue);
         try {
             itemService.insert(sysCodeValue);
         }catch (DuplicateKeyException e){
@@ -219,6 +247,33 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         }
         return true;
     }
+
+    private void initOtherTenant(SysCode sysCode, SysCodeValue sysCodeValue) {
+        Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
+        if (tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
+            if (SqlHelper.retBool(baseMapper.checkValueExists(sysCode.getCode(), sysCodeValue.getValue()))) {
+                throw new BizException(RespCode.SYS_CODE_VALE_CODE_IS_EXISTS);
+            }
+            List<SysCode> codes = this.selectList(this.getWrapper().eq("code", sysCode.getCode()));
+            if (!CollectionUtils.isEmpty(codes)) {
+                List<SysCodeValue> collect = codes
+                        .stream()
+                        .filter(e -> !e.getTenantId().equals(sysCode.getTenantId()))
+                        .map(e -> {
+                    SysCodeValue tmp = new SysCodeValue();
+                    tmp.setCodeId(e.getId());
+                    tmp.setName(sysCodeValue.getName());
+                    tmp.setRemark(sysCodeValue.getRemark());
+                    tmp.setValue(sysCodeValue.getValue());
+                    return tmp;
+                }).collect(Collectors.toList());
+
+                itemService.insertBatch(collect);
+            }
+        }
+    }
+
+
 
     public List<SysCodeValue> listAllSysCodeValueBySysCode(String code) {
         SysCode sysCode = getByCode(code);
@@ -308,7 +363,7 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
 
             @Override
             public List<SysCodeValueTemp> persistence(List<SysCodeValueTemp> list) {
-                list.stream().forEach(e -> {
+                list.forEach(e -> {
                     e.setErrorDetail("");
                     e.setErrorFlag(false);
                     e.setBatchNumber(batchNumber.toString());
@@ -341,7 +396,12 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
             }
         };
         excelImportService.importExcel(in, false,2,excelImportHandler);
-        sysCodeValueTempService.checkData(batchNumber, sysCode.getId());
+        Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
+        boolean initFlag = false;
+        if (tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
+            initFlag = true;
+        }
+        sysCodeValueTempService.checkData(batchNumber, sysCode.getId(), initFlag, sysCode.getCode());
 
         return batchNumber;
     }
