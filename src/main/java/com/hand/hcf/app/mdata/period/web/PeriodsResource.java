@@ -150,8 +150,8 @@ public class PeriodsResource {
         Boolean result=false;
         byte[] lockKey = (OrgInformationUtil.getCurrentUserOid() + String.valueOf(periodID)).getBytes(Charset.forName("utf8"));
         Boolean locked = false;
-        /*try {
-            //check
+        try {
+            /*//check
             locked = (Boolean) redisTemplate.execute(new RedisCallback() {
                 @Override
                 public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
@@ -167,10 +167,10 @@ public class PeriodsResource {
                     e.printStackTrace();
                 }
                 throw new BizException(RespCode.REQUEST_FREQUENCY_TOO_FAST, "处理中，请勿连续点击");
-            }
+            }*/
             result=  periodsService.openPeriodByPeriodIdAndPeriodSetIdAndTenantId(periodID,periodSetId,setOfBooksId);
         } finally {
-            if (locked) {
+            /*if (locked) {
                 redisTemplate.execute(new RedisCallback() {
                     @Override
                     public Object doInRedis(RedisConnection connection) throws DataAccessException {
@@ -178,8 +178,8 @@ public class PeriodsResource {
                         return null;
                     }
                 });
-            }
-        }*/
+            }*/
+        }
         return ResponseEntity.ok(result);
     }
     /**
