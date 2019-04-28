@@ -14,16 +14,16 @@ import java.util.List;
 public interface CompanyGroupMapper extends BaseMapper<CompanyGroup> {
 
     /**
-     * ¸ù¾İÌõ¼ş·ÖÒ³²éÑ¯ ¹«Ë¾×éDTOÌõ¼ş²éÑ¯
+     * æ ¹æ®æ¡ä»¶åˆ†é¡µæŸ¥è¯¢ å…¬å¸ç»„DTOæ¡ä»¶æŸ¥è¯¢
      *
-     * @param setOfBooksId     ÕËÌ×ID
-     * @param companyGroupCode ¹«Ë¾×é´úÂë
-     * @param companyGroupName ¹«Ë¾×éÃû³Æ
-     * @param enabled          ÊÇ·ñÆôÓÃ
-     * @param tenantId         ×â»§id
-     * @param page             ·ÖÒ³¶ÔÏó
-     * @param dataAuthLabel    È¨ÏŞ¿ØÖÆ
-     * @return                 ¹«Ë¾×é
+     * @param setOfBooksId     è´¦å¥—ID
+     * @param companyGroupCode å…¬å¸ç»„ä»£ç 
+     * @param companyGroupName å…¬å¸ç»„åç§°
+     * @param enabled          æ˜¯å¦å¯ç”¨
+     * @param tenantId         ç§Ÿæˆ·id
+     * @param page             åˆ†é¡µå¯¹è±¡
+     * @param dataAuthLabel    æƒé™æ§åˆ¶
+     * @return                 å…¬å¸ç»„
      */
     List<CompanyGroup> findCompanyGroupByConditions(@Param("setOfBooksId") Long setOfBooksId,
                                                     @Param("companyGroupCode") String companyGroupCode,
