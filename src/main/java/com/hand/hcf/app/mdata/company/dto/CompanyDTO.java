@@ -130,5 +130,9 @@ public class CompanyDTO implements Serializable {
 
     private Boolean companyUnitFlag;
 
+    /**
+     * 子公司列表
+     */
+    private List<CompanyDTO> subsidiary;
 
 }

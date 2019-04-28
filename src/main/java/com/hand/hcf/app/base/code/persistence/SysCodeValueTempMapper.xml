@@ -12,6 +12,12 @@
         where batch_number = #{batchNumber}
           and (value in  (select a.value from  sys_code_value a where a.code_id = #{codeId})
               or (value in (select b.value from sys_code_value_temp b where b.batch_number = #{batchNumber} group by b.value having count(0) > 1 ))
+            <if test="initFlag">
+             or (value in (SELECT cv.value
+                FROM sys_code_value cv, sys_code c
+                WHERE cv.code_id = c.id
+                AND v.code = #{code}))
+            </if>
             )
     </update>
 
@@ -44,7 +50,7 @@
 
 
     <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
-        <result column="row_index" property="index"/>
+        <result column="rowIndex" property="index"/>
         <result column="error_msg" property="error"/>
     </resultMap>
 </mapper>

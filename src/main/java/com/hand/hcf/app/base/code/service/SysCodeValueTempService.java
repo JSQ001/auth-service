@@ -41,8 +41,8 @@ import java.util.UUID;
 public class SysCodeValueTempService extends BaseService<SysCodeValueTempMapper, SysCodeValueTemp> {
 
     @Transactional(rollbackFor = Exception.class)
-    public void checkData(UUID batchNumber, Long customEnumerationId) {
-        baseMapper.checkData(batchNumber.toString(),customEnumerationId);
+    public void checkData(UUID batchNumber, Long customEnumerationId, boolean initFlag, String code) {
+        baseMapper.checkData(batchNumber.toString(), customEnumerationId, initFlag, code);
     }
 
     public ImportResultDTO queryImportResultInfo(String transactionUUID) {

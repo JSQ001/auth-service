@@ -110,6 +110,16 @@
             and u.user_oid =#{userOid}
         </if>
     </select>
+    <select id="checkLogin" resultType="java.lang.Integer">
+        SELECT COUNT(0)
+          FROM sys_user t
+         WHERE (t.login = #{keyWord}
+            OR t.email = {keyWord}
+            OR t.mobile = {keyWord})
+            <if test="id != null">
+                AND id <![CDATA[ <> ]]> #{id}
+            </if>
+    </select>
 
     <update id="updateUserLockStatus">
         UPDATE sys_user set lock_status = #{lockStatus} ,lock_date_deadline = null ,password_attempt = 0 where id = #{userId}

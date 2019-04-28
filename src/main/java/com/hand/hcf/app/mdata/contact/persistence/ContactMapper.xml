@@ -499,6 +499,10 @@
             or t2.email like concat(concat('%',#{keyword}),'%')
             or p.phone_number like concat(concat('%',#{keyword}),'%') )
         </if>
+        <if test="keywordCodeName != null and keywordCodeName != ''">
+            and (t2.full_name like concat(concat('%',#{keywordCodeName}),'%')
+            or t2.employee_id like concat(concat('%',#{keywordCodeName}),'%'))
+        </if>
         <if test="status != null and status != ''">
             and t2.status = #{status}
         </if>

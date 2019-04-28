@@ -86,7 +86,9 @@ public class CurrencyControllerImpl {
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
         CurrencyRateCO co = new CurrencyRateCO();
         CurrencyRateDTO dto = currencyRateService.getCurrencyRateByOtherAndBaseCurrency(setOfBooksId,tenantId,code,otherCode,language);
-        mapperFacade.map(dto,co);
+        if (dto != null) {
+            mapperFacade.map(dto,co);
+        }
         return co;
     }
 

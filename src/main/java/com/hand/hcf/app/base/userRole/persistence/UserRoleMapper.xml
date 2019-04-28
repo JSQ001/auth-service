@@ -69,17 +69,12 @@
         SELECT
         sur.*,
         sr.role_code,
-        sr.role_name,
-        sda.data_authority_code,
-        sda.data_authority_name
+        sr.role_name
         FROM
         sys_user_role sur
         left join
         sys_role sr
         on sur.role_id = sr.id
-        left join
-        sys_data_authority sda
-        on sur.data_authority_id = sda.id
         WHERE sr.enabled = 1
         AND sr.deleted = 0
         AND sur.enabled = 1
@@ -128,5 +123,16 @@
     <select id="dataAuthHasUsed" resultType="java.lang.Integer">
         SELECT COUNT(1) FROM SYS_USER_ROLE SUR
         WHERE SUR.DATA_AUTHORITY_ID = #{dataAuthority_id}
+    </select>
+
+    <select id="getDataAuthName" resultType="com.hand.hcf.app.base.userRole.dto.UserAssignRoleDataAuthority">
+            SELECT
+                d.data_authority_code,
+                d.data_authority_name,
+                d.description
+            FROM
+                sys_data_authority d
+            WHERE
+                d.id = #{id}
     </select>
 </mapper>

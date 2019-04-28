@@ -93,9 +93,12 @@
             a.application_id as applicationId
         FROM
             sys_function_list a
-        LEFT JOIN
-            sys_content_function_rel b
-                ON a.id = b.function_id
+        LEFT JOIN (SELECT cf.*
+        FROM sys_content_list a, sys_content_function_rel cf
+        WHERE a.id = cf.content_id
+        and a.deleted = 0
+        AND a.tenant_id = ${tenantId}) b
+        ON a.id = b.function_id
         LEFT JOIN
             sys_content_list c
                 ON b.content_id = c.id

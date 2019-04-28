@@ -119,8 +119,6 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
 
             if (result != null) {
                 // 维护供应商银行账号信息成功后，需要同步供应商的最后修改人信息
-                // vendorInfo.setLastUpdatedByEmployeeId(vendorBankAccountCO.getVenOperatorNumber());
-                // vendorInfo.setLastUpdatedByName(vendorBankAccountCO.getVenOperatorName());
                 vendorInfo.setLastUpdatedBy(currentUserId);
                 vendorInfo.setLastUpdatedDate(ZonedDateTime.now());
                 vendorInfoMapper.updateById(vendorInfo);
@@ -449,17 +447,17 @@ public class VendorBankAccountService extends BaseService<VendorBankAccountMappe
     }
 
     /**
-     * 查询某公司下的、启用状态为启用的、审核状态为审核通过的租户下的供应商
-     * @param companyId
-     * @param name
-     * @param code
-     * @param queryPage
-     * @return
+     *  查询某公司下的、启用状态为启用的、审核状态为审核通过的租户下的供应商
+     * @param vendorStatus 审批状态
+     * @param name 名称
+     * @param code 代码
+     * @param queryPage 分页信息
+     * @return  供应商及银行信息
      */
-    public List<VendorAccountDTO> getVendorByCompanyIdAndNameAndCode(String name, String code, Page queryPage) {
+    public List<VendorAccountDTO> getVendorByCompanyIdAndNameAndCode(String name, String code, String vendorStatus ,Page queryPage) {
         List<VendorInfo> vendorInfos = vendorInfoMapper
                 .selectVendorInfosByTenantIdCompanyIdAndVendorNameAndCodeForPage(
-                        OrgInformationUtil.getCurrentTenantId(), name, code, queryPage);
+                        OrgInformationUtil.getCurrentTenantId(), name, code,vendorStatus, queryPage);
         List<VendorAccountDTO> result = new ArrayList<>(32);
         vendorInfos.stream().forEach(vendorInfo -> {
             VendorAccountDTO vendorAccountDTO = new VendorAccountDTO();

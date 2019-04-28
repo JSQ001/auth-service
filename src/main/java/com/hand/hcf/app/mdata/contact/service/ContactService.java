@@ -127,21 +127,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         return mapper.map(contact, ContactDTO.class);
     }
 
-    /**
-     * Save a contact.
-     *
-     * @return the persisted entity
-     */
-    public ContactDTO save(ContactDTO contactDTO) {
 
-        Contact contact = contactDTOToContact(contactDTO);
-        //邮箱不为空时校验邮箱格式
-        if (!StringUtils.isEmpty(contact.getEmail()) && !EmailValidator.getInstance().isValid(contact.getEmail())) {
-            throw new ValidationException(new ValidationError("email", "email is error!"));
-        }
-        super.insert(contact);
-        return contactToContactDTO(contact);
-    }
 
     public Contact getOneByEmployeeId(String employeeId){
         Contact contact = this.selectOne(new EntityWrapper<Contact>().eq("employee_id",employeeId));
@@ -543,7 +529,9 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         String countryCode = userDTO.getCountryCode();
         String fullName = userDTO.getFullName();
         String employeeId = userDTO.getEmployeeId();
-
+        if (!StringUtils.hasText(mobile)) {
+            throw new BizException("6052008");
+        }
         boolean isCreateUser = false;
         boolean isCreateMobile = false;//是否创建手机号
         boolean isModifyMobile = false;//是否修改手机号
@@ -560,7 +548,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             if (isEmployeeIdExists != null) {
                 throw new BizException(RespCode.EMPLOYEE_ID_EXISTS);
             }
-            String login = employeeId;
             user = new UserCO();
             contact = new Contact();
             departmentUser = new DepartmentUser();
@@ -578,7 +565,7 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                 isCreateMobile = true;
             }
             //保存至User
-            user.setLogin(login);
+            user.setLogin(mobile);
             user.setLanguage(OrgInformationUtil.getCurrentLanguage());
             user.setTenantId(tenantId);
             user.setPhoneNumber(mobile);
@@ -643,6 +630,13 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             }else{
                 phoneService.delete(new EntityWrapper<Phone>().eq("contact_id",contact.getId()));
             }
+            //更新姓名,手机或邮箱至用户
+            UserCO userCO = new UserCO();
+            userCO.setId(contact.getUserId());
+            userCO.setUserName(fullName);
+            userCO.setPhoneNumber(mobile);
+            userCO.setEmail(email);
+            hcfOrganizationInterface.saveUser(userCO);
         }
 
         contact.setCorporationOid(corporationOID);
@@ -731,16 +725,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         }else if(isModifyMobile){
             phoneService.updateByContactId(contact.getId(),mobile,countryCode);
         }
-        //更新姓名,手机或邮箱至用户
-        if(!isCreateUser && (isCreateMobile || isModifyMobile || isModifyEmail || isModifyName)){
-            UserCO userCO = new UserCO();
-            userCO.setId(contact.getUserId());
-            userCO.setUserName(fullName);
-            userCO.setPhoneNumber(mobile);
-            userCO.setEmail(email);
-            hcfOrganizationInterface.saveUser(userCO);
-        }
-
         //保存至DepartmentUser
         if (isCreateUser) {
             departmentUser.setUserId(contact.getUserId());

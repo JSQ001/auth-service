@@ -33,16 +33,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.*;
-
-/*import com.hand.hcf.app.client.oauth.ClientCO;*/
-
 /**
  * @author kai.zhang05@hand-china.com
  * @create 2019/3/1 14:15
@@ -925,6 +921,19 @@ public class CompanyController {
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders,HttpStatus.OK);
     }
+
+    /**
+     * 查询租户下的公司信息 递归返回子公司
+     *
+     */
+    @GetMapping(value = "/all/subsidiary/company/by/tenantId",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "查询租户下的全量公司信息，递归返回子公司", notes = "无分页，不查询禁用的，递归返回子公司")
+    @Timed
+    public ResponseEntity<List<CompanyDTO>> findAllSubsidiaryCompanyByTenantId(@ApiParam(value = "查询关键词") @RequestParam(required = false) String keyWord,
+                                                                    @ApiParam(value = "是否禁用")   @RequestParam(value = "enabled", required = false ,defaultValue = "true") Boolean enabled) {
+        return  ResponseEntity.ok(companyService.listConditionKeyWordAndEnabled(keyWord, enabled));
+    }
+
 
 
     /**

@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.lov.service.LovService;
 import com.hand.hcf.app.base.userRole.domain.Role;
 import com.hand.hcf.app.base.userRole.domain.UserRole;
 import com.hand.hcf.app.base.userRole.dto.UserAssignRoleDTO;
@@ -14,12 +15,14 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +35,9 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
     private final UserRoleMapper userRoleMapper;
 
     private final RoleService roleService;
+
+    @Autowired
+    private LovService lovService;
 
     public UserRoleService(UserRoleMapper roleMapper, RoleService roleService) {
         this.userRoleMapper = roleMapper;
@@ -275,9 +281,19 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                                                                          ZonedDateTime validDateFrom,
                                                                          ZonedDateTime validDateTo,
                                                                          Page page) {
-        List<UserAssignRoleDataAuthority> result = null;
-        result = userRoleMapper.listSelectedUserRolesByCond(userId, roleCode, roleName, dataAuthorityName, validDateFrom, validDateTo, page);
-        return result;
+        List<UserAssignRoleDataAuthority>  list =  userRoleMapper.listSelectedUserRolesByCond(userId, roleCode, roleName, dataAuthorityName, validDateFrom, validDateTo, page);
+        list.parallelStream().forEach(t->{
+            //从主数据模块查询数据权限信息
+            /*Map<String,String > m = (Map<String, String>) lovService.getObjectByLovCode("mdata_user_all", String.valueOf(t.getDataAuthorityId()));
+            t.setDataAuthorityName(m.get("dataAuthorityName"));
+            t.setDataAuthorityCode(m.get("dataAuthorityCode"));*/
+            //jiu.zhao 修改LOV动态获取的实现方式
+            Long id = t.getDataAuthorityId();
+            UserAssignRoleDataAuthority data = userRoleMapper.getDataAuthName(id);
+            t.setDataAuthorityName(data.getDataAuthorityName());
+            t.setDataAuthorityCode(data.getDataAuthorityCode());
+        });
+        return list;
     }
 
     /**

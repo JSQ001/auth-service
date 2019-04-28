@@ -53,7 +53,7 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
         }
         if ( serveLocaleMapper.selectList(
                 new EntityWrapper<ServeLocale>()
-                        .eq("key_code",serveLocale.getKeyCode())
+                        .eq("key_code",serveLocale.getKeyCode().trim())
                         .eq("language",serveLocale.getLanguage())
                         .eq("tenant_id",tenantId)
         ).size() > 0 ){
@@ -64,11 +64,15 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
             List<Tenant> tenants = tenantService.findAll();
             tenants.stream().forEach(domain -> {
                     serveLocale.setId(null);
+                    // 去除空格
+                    serveLocale.setKeyCode(serveLocale.getKeyCode().trim());
                     serveLocale.setTenantId(domain.getId());
                     serveLocaleMapper.insert(serveLocale);
             });
         }else{
             serveLocale.setTenantId(tenantId);
+            // 去除空格
+            serveLocale.setKeyCode(serveLocale.getKeyCode().trim());
             serveLocaleMapper.insert(serveLocale);
         }
         return serveLocale;
@@ -99,6 +103,8 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
         if (serveLocale.getId() == null){
             throw new BizException(RespCode.SERVE_LOCALE_NOT_EXIST);
         }
+        // 去除空格
+        serveLocale.setKeyCode(serveLocale.getKeyCode().trim());
         serveLocaleMapper.updateAllColumnById(serveLocale);
         return serveLocale;
     }

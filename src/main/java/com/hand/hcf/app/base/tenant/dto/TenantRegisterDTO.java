@@ -15,7 +15,6 @@ import lombok.Data;
 @Data
 public class TenantRegisterDTO extends Tenant {
 
-    private String login;
     private String password;
     private String passwordConfirm;
     private String fullName;

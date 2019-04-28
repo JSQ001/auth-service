@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.tenant.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
@@ -25,6 +26,7 @@ import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.common.co.AttachmentCO;
+import com.hand.hcf.app.common.co.CarryMessageCO;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
@@ -34,6 +36,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -84,7 +88,8 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private FunctionListService functionListService;
     @Autowired
     private ContentListService contentListService;
-
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
     /**
      * save tenant
      *
@@ -297,27 +302,43 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
         tenant.setStatus("1001");
         tenant.setId(null);
         this.insert(tenant);
-        //初始化前端多语言
-        frontLocaleService.initFrontLocale(tenant.getId());
-        // 初始化后端多语言
-        serveLocaleService.initServeLocale(tenant.getId());
-
         register.setId(tenant.getId());
-
         // 初始化用户
         User user = initUser(register);
         // 初始化角色
         Role role = roleService.initRoleByTenant(tenant);
-
         // 初始化菜单、功能
         functionListService.initTenantFunction(tenant.getId());
         contentListService.initTenantContent(tenant.getId());
         // 初始化角色关联菜单
         roleFunctionService.initRoleFunctionByTenant(role);
         // 初始化用户角色
-        initUserRole(role, user);
+        Long dataAuthId = IdWorker.getId();
+        initUserRole(role, user, dataAuthId);
         // 初始化值列表
         sysCodeService.init();
+        //初始化前端多语言
+        frontLocaleService.initFrontLocale(tenant.getId());
+        // 初始化后端多语言
+        serveLocaleService.initServeLocale(tenant.getId());
+
+        // 发布消息到mdata
+        Map<String, Object> dataMap = new HashMap<>(16);
+        dataMap.put("userId", user.getId());
+        dataMap.put("dataAuthId", dataAuthId);
+        dataMap.put("email", register.getEmail());
+        dataMap.put("mobile", register.getMobile());
+        dataMap.put("fullName", register.getFullName());
+        dataMap.put("employeeId", register.getEmployeeId());
+        dataMap.put("userOid", user.getUserOid().toString());
+        CarryMessageCO messageCO = new CarryMessageCO();
+        messageCO.setUserBean(LoginInformationUtil.getUser());
+        messageCO.setTenantId(tenant.getId());
+        messageCO.setDataMap(dataMap);
+        //jiu.zhao TODO
+        /*CustomRemoteEvent event = new CustomRemoteEvent(
+                this, applicationName+":**", "mdata", messageCO);
+        applicationEventPublisher.publishEvent(event);*/
         return true;
     }
 
@@ -327,30 +348,35 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
        roleFunctionService.initRoleFunction(tenantId);
     }
 
-    private void initUserRole(Role role, User user) {
+    private void initUserRole(Role role, User user, Long dataAuthId) {
         UserRole userRole = new UserRole();
         userRole.setRoleId(role.getId());
         userRole.setUserId(user.getId());
+        userRole.setDataAuthorityId(dataAuthId);
+        userRole.setValidDateFrom(ZonedDateTime.now());
         userRole.setValidDateFrom(ZonedDateTime.now());
         userRole.setEnabled(Boolean.TRUE);
         userRoleService.insert(userRole);
     }
-
-
 
     private User initUser( TenantRegisterDTO register) {
         if (register.getPassword() == null || !register.getPassword().equals(register.getPasswordConfirm())){
             throw new BizException(RespCode.TENANT_ADMIN_PASSWORD_IS_ERROR);
         }
         //login唯一性校验
-        Integer exists = userService.selectCount(new EntityWrapper<User>().eq("login",register.getLogin()));
-        if (exists != null && exists > 0){
+        int exists = userService.selectCount(new EntityWrapper<User>().eq("login", register.getMobile()));
+        if (exists > 0){
             throw new BizException(RespCode.USER_LOGIN_EXISTS);
+        }
+        // 邮箱唯一性校验
+        exists = userService.selectCount(new EntityWrapper<User>().eq("email", register.getEmail()));
+        if (exists > 0){
+            throw new BizException(RespCode.USER_EMAIL_EXISTS);
         }
         String passwordHash = passwordEncoder.encode(register.getPassword());
         User user = new User();
         user.setCreatedType(CreatedTypeEnum.INIT_TENANT);
-        user.setLogin(register.getLogin());
+        user.setLogin(register.getMobile());
         user.setTenantId(register.getId());
         user.setUserOid(UUID.randomUUID());
         user.setActivated(Boolean.TRUE);

@@ -16,6 +16,7 @@ import java.util.List;
  */
 public interface FunctionPageRelationMapper extends BaseMapper<FunctionPageRelation>{
     List<PageList> filterFunctionPageRelationByCond(@Param("pageName") String pageName,
+                                                    @Param("tenantId") Long tenantId,
                                                     Page page);
 
     List<FunctionPageRelation> listRelationByTenant(@Param("tenantId")  Long tenantId);

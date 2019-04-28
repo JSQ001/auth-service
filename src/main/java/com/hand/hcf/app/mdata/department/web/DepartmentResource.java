@@ -13,6 +13,7 @@ import com.hand.hcf.app.mdata.utils.HeaderUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -627,9 +628,23 @@ public class DepartmentResource {
     @RequestMapping(value = "/department/tenant/keyWord" , method = RequestMethod.GET)
     public ResponseEntity<List<DepartmentTreeDTO>> getDepartmentsKeyWord(@RequestParam(value = "keyWord" ,required = false) String keyWord,
                                                                          @RequestParam(value = "status",required = false) Integer status){
-        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAll(keyWord, keyWord, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
+        List<DepartmentTreeDTO> result = departmentService.getTenantDepartmentAllKeyWords(keyWord, keyWord, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * 查询租户下所有的部门 并对部门代码名称进行模糊查询
+     * @param status
+     * @return
+     */
+    @GetMapping(value = "/all/subsidiary/department/by/tenantId")
+    @ApiOperation(value = "查询租户下的全量部门信息，递归返回子部门", notes = "无分页，不查询禁用的，递归返回子部门")
+    public ResponseEntity<List<DepartmentTreeDTO>> getAllSubsidiaryDepartmentsKeyWord(@RequestParam(value = "keyWord" ,required = false) String keyWord,
+                                                                                      @RequestParam(value = "status",required = false) Integer status){
+        List<DepartmentTreeDTO> result = departmentService.getSubsidiaryDepartmentAllKeyWords(keyWord, keyWord, OrgInformationUtil.getCurrentTenantId(),status,OrgInformationUtil.getCurrentLanguage());
+        return ResponseEntity.ok(result);
+    }
+
 
     @RequestMapping(value = "/departments/change/list", method = RequestMethod.PUT)
     public void changeUserDepartmentList(@RequestBody @Valid DepartmentAssignUserDTO dto) {

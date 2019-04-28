@@ -15,7 +15,9 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface SysCodeValueTempMapper extends BaseMapper<SysCodeValueTemp> {
     void checkData(@Param("batchNumber") String batchNumber,
-                   @Param("codeId") Long customEnumerationId);
+                   @Param("codeId") Long customEnumerationId,
+                   @Param("initFlag") Boolean initFlag,
+                   @Param("code") String code);
 
     ImportResultDTO queryImportResultInfo(@Param("transactionOid") String transactionOid);
 }
