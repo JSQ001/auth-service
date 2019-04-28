@@ -103,6 +103,8 @@ public class RuleApproverService extends BaseService<RuleApproverMapper,RuleAppr
         EntityWrapper<RuleApprover> wrapper = new EntityWrapper<RuleApprover>();
         wrapper.eq("rule_notice_id", ruleNoticeId);
         wrapper.eq("status",RuleApprovalEnum.VALID.getId());
+        wrapper.orderBy("id", true);
+
         List<RuleApprover> ruleApproverList = selectList(wrapper);
         return ruleApproverList;
     }

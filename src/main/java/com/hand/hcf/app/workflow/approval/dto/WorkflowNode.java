@@ -12,25 +12,24 @@ import java.util.UUID;
  * @date 2019/04/07
  */
 public class WorkflowNode {
+    /*
+    只提供获取/设置通用的字段
+     */
+
     private RuleApprovalNode ruleApprovalNode;
-    /** 实例 */
+    /** 节点关联的实例 */
     private WorkflowInstance instance;
     /** 规则 */
     private WorkflowRule rule;
 
-    /** 审批节点 */
+    /** 节点类型-审批节点 */
     public static final Integer TYPE_USER = RuleApprovalEnum.NODE_TYPE_APPROVAL.getId();
-    /** 机器人节点 */
+    /** 节点类型-机器人节点 */
     public static final Integer TYPE_ROBOT = RuleApprovalEnum.NODE_TYPE_ROBOT.getId();
-    /** 结束节点 */
+    /** 节点类型-结束节点 */
     public static final Integer TYPE_END = RuleApprovalEnum.NODE_TYPE_EED.getId();
-    /** 通知节点 */
+    /** 节点类型-通知节点 */
     public static final Integer TYPE_NOTICE = RuleApprovalEnum.NODE_TYPE_NOTICE.getId();
-
-    /** 审批通过 */
-    public static final String ACTION_APPROVAL_PASS = String.valueOf(RuleConstants.ACTION_APPROVAL_PASS);
-    /** 审批驳回 */
-    public static final String ACTION_APPROVAL_REJECT = String.valueOf(RuleConstants.ACTION_APPROVAL_REJECT);
 
     public WorkflowNode(RuleApprovalNode ruleApprovalNode, WorkflowInstance instance) {
         this.ruleApprovalNode = ruleApprovalNode;
@@ -42,44 +41,58 @@ public class WorkflowNode {
         return ruleApprovalNode;
     }
 
+    /**
+     * 返回节点关联的实例
+     *
+     * @return
+     */
     public WorkflowInstance getInstance() {
         return instance;
     }
 
+    /**
+     * 返回节点的规则
+     *
+     * @return
+     */
     public WorkflowRule getRule() {
         return rule;
     }
 
+    /**
+     * 返回节点id
+     *
+     * @return
+     */
     public Long getId() {
         return ruleApprovalNode.getId();
     }
 
+    /**
+     * 返回节点oid
+     *
+     * @return
+     */
     public UUID getNodeOid() {
         return ruleApprovalNode.getRuleApprovalNodeOid();
     }
 
+    /**
+     * 返回节点名称
+     *
+     * @return
+     */
     public String getName() {
-        return ruleApprovalNode.getName();
+        return ruleApprovalNode.getRemark();
     }
 
+    /**
+     * 返回节点类型
+     *
+     * @return
+     */
     public Integer getType() {
         return ruleApprovalNode.getTypeNumber();
-    }
-
-    public UUID getChainOid() {
-        return ruleApprovalNode.getRuleApprovalChainOid();
-    }
-
-    public Integer getSequence() {
-        return ruleApprovalNode.getSequenceNumber();
-    }
-
-    public String getApprovalAction() {
-        return ruleApprovalNode.getApprovalActions();
-    }
-
-    public String getApprovalText() {
-        return ruleApprovalNode.getComments();
     }
 
 }

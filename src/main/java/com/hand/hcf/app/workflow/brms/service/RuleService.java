@@ -1082,6 +1082,14 @@ public class RuleService {
                     }
                     RuleApprovalNodeDTO ruleApprovalNodeDTOResult = mapper.map(existRuleApprovalNode, RuleApprovalNodeDTO.class);
                     ruleApprovalNodeDTOResult.setNotifyInfo(notifyInfo);
+                    //
+                    ruleApprovalNodeDTOResult.setNotifyMethod(getRuleApprovalNodeNotifyMethods(existRuleApprovalNode));
+                    ruleApprovalNodeDTOResult.setCustomNodes(getRuleApprovalNodeReturnNodes(existRuleApprovalNode));
+                    // 审批流通知节点
+                    List<RuleNotice> ruleNoticeList = ruleNoticeService.listByNodeId(existRuleApprovalNode.getId());
+                    List<RuleNoticeDTO> ruleNoticeDTOList = ruleNoticeService.toRuleNoticeDTOList(ruleNoticeList);
+                    ruleApprovalNodeDTOResult.setRuleNotices(ruleNoticeDTOList);
+                    //
                     ruleApprovalNodeDTOs.add(ruleApprovalNodeDTOResult);
                 });
 
@@ -1846,7 +1854,7 @@ public class RuleService {
      * @param ruleApprovalNode
      * @return
      */
-    protected List<ReturnNode> getRuleApprovalNodeReturnNodes(RuleApprovalNode ruleApprovalNode) {
+    public List<ReturnNode> getRuleApprovalNodeReturnNodes(RuleApprovalNode ruleApprovalNode) {
         if (ruleApprovalNode == null) {
             throw new IllegalArgumentException("ruleApprovalNode null");
         }

@@ -1,41 +1,30 @@
 package com.hand.hcf.app.workflow.approval.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
+import com.hand.hcf.app.workflow.approval.dto.*;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowPassTaskAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowRejectTaskAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowSubmitInstanceAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowWithdrawInstanceAction;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
-import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
-import com.hand.hcf.app.workflow.brms.dto.RuleApproverDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
-import com.hand.hcf.app.workflow.brms.service.RuleService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.AssembleBrmsParamsRespDTO;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationTypeEnum;
+import com.hand.hcf.app.workflow.enums.RejectTypeEnum;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
-import com.hand.hcf.app.workflow.service.DefaultWorkflowIntegrationServiceImpl;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
+import com.hand.hcf.app.workflow.util.CheckUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -43,11 +32,12 @@ import java.util.UUID;
  */
 @Service
 public class WorkflowBaseService {
-    @Autowired
-    private WorkFlowDocumentRefService workFlowDocumentRefService;
+    /*
+    只提供通用的方法
+     */
 
     @Autowired
-    private DefaultWorkflowIntegrationServiceImpl defaultWorkflowIntegrationService;
+    private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
     private ApprovalChainService approvalChainService;
@@ -58,31 +48,23 @@ public class WorkflowBaseService {
     @Autowired
     private RuleApprovalNodeService ruleApprovalNodeService;
 
-    @Autowired
-    private RuleService ruleService;
-
-    @Autowired
-    private WorkflowFindUserService workflowFindUserService;
-
     /**
      * 根据实例和用户查找任务并返回
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
-     * @param user
-     * @return
+     * @param instance 实例
+     * @param user 审批人
+     * @return 没有找到任务则返回null
      */
     public WorkflowTask findTask(WorkflowInstance instance, WorkflowUser user) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(user, "user null");
-        Assert.notNull(instance.getEntityType(), "instance.entityType null");
-        Assert.notNull(instance.getEntityOid(), "instance.entityOid null");
-        Assert.notNull(user.getUserOid(), "user.userOid null");
-        Integer entityType = instance.getEntityType();
-        UUID entityOid = instance.getEntityOid();
-        UUID userOid = user.getUserOid();
+        CheckUtil.notNull(instance, "instance null");
+        CheckUtil.notNull(user, "user null");
+        Integer entityType = CheckUtil.notNull(instance.getEntityType(), "instance.entityType null");
+        UUID entityOid = CheckUtil.notNull(instance.getEntityOid(), "instance.entityOid null");
+        UUID userOid = CheckUtil.notNull(user.getUserOid(), "user.userOid null");
 
+        // 根据实例和用户获取任务
         ApprovalChain approvalChain = approvalChainService.getByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApproverOid(
                 entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), true, userOid);
         WorkflowTask task = null;
@@ -92,7 +74,7 @@ public class WorkflowBaseService {
             UUID ruleApprovalNodeOid = approvalChain.getRuleApprovalNodeOid();
             RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getRuleApprovalNode(ruleApprovalNodeOid);
             WorkflowNode node = new WorkflowNode(ruleApprovalNode, instance);
-            // 创建任务
+            // 创建任务对象
             task = new WorkflowTask(approvalChain, instance, node, user);
         }
 
@@ -100,94 +82,21 @@ public class WorkflowBaseService {
     }
 
     /**
-     * 返回下一个节点
-     * @author mh.z
-     * @date 2019/04/07
-     *
-     * @param instance
-     * @param node
-     * @return
-     */
-    public WorkflowNode findNext(WorkflowInstance instance, WorkflowNode node) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(instance.getFormOid(), "instance.formOid null");
-        Assert.notNull(instance.getApplicantOid(), "instance.applicantOid null");
-        UUID formOid = instance.getFormOid();
-        UUID applicantOid = instance.getApplicantOid();
-
-        UUID ruleApprovalChainOid = null;
-        Integer ruleApprovalNodeSequence = null;
-
-        if (node == null) {
-            RuleApprovalChainDTO ruleApprovalChainDTO = ruleService.getApprovalChainByFormOid(formOid, applicantOid,
-                    false, false, false);
-            ruleApprovalChainOid = ruleApprovalChainDTO.getRuleApprovalChainOid();
-            ruleApprovalNodeSequence = 0;
-        } else {
-            ruleApprovalChainOid = node.getChainOid();
-            ruleApprovalNodeSequence = node.getSequence();
-        }
-
-        RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getNextByRuleApprovalChainOid(ruleApprovalChainOid, ruleApprovalNodeSequence);
-        WorkflowNode nextNode = new WorkflowNode(ruleApprovalNode, instance);
-        return nextNode;
-    }
-
-    /**
-     * 返回满足审批条件的用户
-     * @author mh.z
-     * @date 2019/04/07
-     *
-     * @param node
-     * @return
-     */
-    public List<WorkflowUser> findUsers(WorkflowNode node) {
-        Assert.notNull(node, "node null");
-        Assert.notNull(node.getId(), "node.id null");
-        Assert.notNull(node.getInstance(), "node.instance null");
-
-        Long nodeId = node.getId();
-        RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.selectById(nodeId);
-        WorkflowInstance instance = node.getInstance();
-        Long instanceId = instance.getId();
-        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.selectById(instanceId);
-
-        AssembleBrmsParamsRespDTO assembleBrmsParamsRespDTO = defaultWorkflowIntegrationService.assembleNewBrmsParams(workFlowDocumentRef);
-        List<FormValueDTO> formValueDTOList = assembleBrmsParamsRespDTO.getFormValueDTOS();
-        Map<String, Object> entityData = assembleBrmsParamsRespDTO.getEntityData();
-        // 获取满足条件的规则审批人
-        List<RuleApproverDTO> ruleUserList = workflowFindUserService.getRuleUserList(workFlowDocumentRef, ruleApprovalNode, formValueDTOList, entityData);
-        // 根据规则审批人找到具体用户
-        List<UUID> userOidList = workflowFindUserService.getUserOidList(workFlowDocumentRef, ruleApprovalNode, ruleUserList, formValueDTOList);
-
-        List<WorkflowUser> userList = new ArrayList<WorkflowUser>();
-        WorkflowUser user = null;
-        for (UUID userOid : userOidList) {
-            user = new WorkflowUser(userOid);
-            userList.add(user);
-        }
-
-        return userList;
-    }
-
-    /**
      * 统计任务数
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param node
-     * @param approvalStatus
-     * @return
+     * @param node 节点
+     * @param approvalStatus 任务的审批状态
+     * @return 任务数
      */
     public int countTasks(WorkflowNode node, Integer approvalStatus) {
-        Assert.notNull(node, "node null");
-        Assert.notNull(approvalStatus, "approvalStatus null");
-        Assert.notNull(node.getInstance(), "node.instance null");
-        Assert.notNull(node.getNodeOid(), "node.nodeOid null");
-        WorkflowInstance instance = node.getInstance();
+        CheckUtil.notNull(node, "node null");
+        CheckUtil.notNull(approvalStatus, "approvalStatus null");
+        UUID nodeOid = CheckUtil.notNull(node.getNodeOid(), "node.nodeOid null");
+        WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "node.instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
-        UUID nodeOid = node.getNodeOid();
 
         int taskTotal = doCountTasks(entityType, entityOid, nodeOid, approvalStatus);
         return taskTotal;
@@ -198,12 +107,12 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
-     * @param approvalStatus
-     * @return
+     * @param instance 实例
+     * @param approvalStatus 任务的审批状态
+     * @return 任务数
      */
     public int countTasks(WorkflowInstance instance, Integer approvalStatus) {
-        Assert.notNull(instance, "instance null");
+        CheckUtil.notNull(instance, "instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
@@ -216,14 +125,12 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param node
+     * @param node 节点
      */
     public void clearUnfinishedTasks(WorkflowNode node) {
-        Assert.notNull(node, "node null");
-        Assert.notNull(node.getNodeOid(), "node.nodeOid null");
-        Assert.notNull(node.getInstance(), "node.instance null");
-        UUID nodeOid = node.getNodeOid();
-        WorkflowInstance instance = node.getInstance();
+        CheckUtil.notNull(node, "node null");
+        UUID nodeOid = CheckUtil.notNull(node.getNodeOid(), "node.nodeOid null");
+        WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "node.instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
@@ -235,14 +142,12 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param node
+     * @param node 节点
      */
     public void clearAllTasks(WorkflowNode node) {
-        Assert.notNull(node, "node null");
-        Assert.notNull(node.getNodeOid(), "node.nodeOid null");
-        Assert.notNull(node.getInstance(), "node.instance null");
-        UUID nodeOid = node.getNodeOid();
-        WorkflowInstance instance = node.getInstance();
+        CheckUtil.notNull(node, "node null");
+        UUID nodeOid = CheckUtil.notNull(node.getNodeOid(), "node.nodeOid null");
+        WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "node.instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
@@ -254,10 +159,10 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
+     * @param instance 实例
      */
     public void clearUnfinishedTasks(WorkflowInstance instance) {
-        Assert.notNull(instance, "instance null");
+        CheckUtil.notNull(instance, "instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
@@ -269,10 +174,10 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
+     * @param instance 实例
      */
     public void clearAllTasks(WorkflowInstance instance) {
-        Assert.notNull(instance, "instance null");
+        CheckUtil.notNull(instance, "instance null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
@@ -284,22 +189,17 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param task
+     * @param task 任务
      */
     public void updateTask(WorkflowTask task) {
-        Assert.notNull(task, "task null");
-        Assert.notNull(task.getId(), "task.id null");
-        Assert.notNull(task.getApprovalChain(), "task.approvalChain null");
-        Assert.notNull(task.getStatus(), "task.status null");
-        Long taskId = task.getId();
-        ApprovalChain taskApprovalChain = task.getApprovalChain();
-        Integer taskStatus = task.getStatus();
+        CheckUtil.notNull(task, "task null");
+        ApprovalChain approvalChain = CheckUtil.notNull(task.getApprovalChain(), "task.approvalChain null");
 
-        ApprovalChain approvalChain = approvalChainService.selectById(taskId);
-        // 设置状态
-        approvalChain.setStatus(taskStatus);
-        approvalChain.setCurrentFlag(taskApprovalChain.getCurrentFlag());
-        approvalChain.setFinishFlag(taskApprovalChain.getFinishFlag());
+        Long approvalChainId = approvalChain.getId();
+        ApprovalChain approvalChainPO = approvalChainService.selectById(approvalChainId);
+
+        // 更新版本号
+        approvalChain.setVersionNumber(approvalChainPO.getVersionNumber());
         // 更新任务
         approvalChainService.save(approvalChain);
     }
@@ -309,57 +209,68 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
-     * @return
+     * @param instance 实例
      */
-    public WorkflowInstance updateInstance(WorkflowInstance instance) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(instance.getId(), "instance.id null");
-        Assert.notNull(instance.getApprovalStatus(), "instance.approvalStatus null");
-        Long instanceId = instance.getId();
-        Integer instanceStatus = instance.getApprovalStatus();
+    public void updateInstance(WorkflowInstance instance) {
+        CheckUtil.notNull(instance, "instance null");
+        Integer approvalStatus = CheckUtil.notNull(
+                instance.getApprovalStatus(), "instance.approvalStatus null");
+        WorkFlowDocumentRef workFlowDocumentRef = CheckUtil.notNull(
+                instance.getWorkFlowDocumentRef(), "instance.workFlowDocumentRef null");
 
-        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.selectById(instanceId);
-        // 设置实例的状态
-        workFlowDocumentRef.setStatus(instanceStatus);
-        // 更新实例的状态
+        Long workFlowDocumentRefId = workFlowDocumentRef.getId();
+        WorkFlowDocumentRef workFlowDocumentRefPO = workFlowDocumentRefService.selectById(workFlowDocumentRefId);
+
+        if (WorkflowInstance.APPROVAL_STATUS_REJECT.equals(approvalStatus)) {
+            // 驳回情况下记录驳回的原因
+            String rejectType = RejectTypeEnum.APPROVAL_REJECT.getId().toString();
+            workFlowDocumentRef.setLastRejectType(rejectType);
+            workFlowDocumentRef.setRejectType(rejectType);
+        } else if (WorkflowInstance.APPROVAL_STATUS_WITHDRAW.equals(approvalStatus)) {
+            // 撤销情况下记录撤销的原因
+            String rejectType = RejectTypeEnum.WITHDRAW.getId().toString();
+            workFlowDocumentRef.setLastRejectType(rejectType);
+            workFlowDocumentRef.setRejectType(rejectType);
+        }
+
+        // 更新版本号
+        workFlowDocumentRef.setVersionNumber(workFlowDocumentRefPO.getVersionNumber());
+        // 更新实例
         workFlowDocumentRefService.updateById(workFlowDocumentRef);
-
-        instance = new WorkflowInstance(workFlowDocumentRef);
-        return instance;
     }
 
     /**
-     * 保存任务
+     * 创建任务
      * @author mh.z
-     * @date 2019/04/07
+     * @date 2019/04/21
      *
-     * @param node
-     * @param user
+     * @param node 节点
+     * @param user 审批人
+     * @return 任务
      */
-    public void saveTask(WorkflowNode node, WorkflowUser user) {
-        Assert.notNull(node, "node null");
-        Assert.notNull(user, "user null");
-        Assert.notNull(node.getInstance(), "node.instance null");
-        Assert.notNull(node.getType(), "node.type null");
-        Assert.notNull(node.getRule(), "node.rule null");
+    public WorkflowTask createTask(WorkflowNode node, WorkflowUser user) {
+        CheckUtil.notNull(node, "node null");
+        CheckUtil.notNull(user, "user null");
+        CheckUtil.notNull(node.getInstance(), "node.instance null");
+        CheckUtil.notNull(node.getType(), "node.type null");
+        CheckUtil.notNull(node.getRule(), "node.rule null");
 
         WorkflowInstance instance = node.getInstance();
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
         UUID nodeOid = node.getNodeOid();
-        Integer nodeSequence = node.getSequence();
+        Integer nodeSequence = node.getRuleApprovalNode().getSequenceNumber();
         WorkflowRule rule = node.getRule();
-        Integer countersign = rule.getCountersignRule();
+        Integer countersignRule = rule.getCountersignRule();
         Integer nodeType = node.getType();
         UUID userOid = user.getUserOid();
         ZonedDateTime now = ZonedDateTime.now();
-        Assert.notNull(entityType, "node.instance.entityType null");
-        Assert.notNull(entityOid, "node.instance.entityOid null");
-        Assert.notNull(nodeOid, "node.nodeOid null");
-        Assert.notNull(nodeSequence, "node.sequence null");
-        Assert.notNull(countersign, "node.countersign null");
-        Assert.notNull(userOid, "user.userOid null");
+        CheckUtil.notNull(entityType, "node.instance.entityType null");
+        CheckUtil.notNull(entityOid, "node.instance.entityOid null");
+        CheckUtil.notNull(nodeOid, "node.nodeOid null");
+        CheckUtil.notNull(nodeSequence, "node.sequence null");
+        CheckUtil.notNull(countersignRule, "node.countersignRule null");
+        CheckUtil.notNull(userOid, "user.userOid null");
 
         ApprovalChain approvalChain = new ApprovalChain();
         approvalChain.setEntityType(entityType);
@@ -367,7 +278,7 @@ public class WorkflowBaseService {
         approvalChain.setSequence(nodeSequence);
         approvalChain.setCountersignType(null);
         // 会签规则
-        approvalChain.setCountersignRule(countersign);
+        approvalChain.setCountersignRule(countersignRule);
 
         approvalChain.setApproverOid(userOid);
         approvalChain.setCurrentFlag(true);
@@ -380,19 +291,46 @@ public class WorkflowBaseService {
             approvalChain.setNoticed(false);
         }
 
-
         approvalChain.setApportionmentFlag(false);
         approvalChain.setRuleApprovalNodeOid(nodeOid);
         approvalChain.setProxyFlag(false);
-        approvalChain.setAddSign(null);
+        approvalChain.setAddSign(0);
         approvalChain.setInvoiceAllowUpdateType(RuleApprovalEnum.NODE_INVOICE_ALLOW_UPDATE_TYPE_NOT_ALLOW.getId());
         approvalChain.setSourceApprovalChainId(null);
         approvalChain.setAllFinished(false);
         approvalChain.setCreatedDate(now);
         approvalChain.setLastUpdatedDate(now);
 
+        WorkflowTask task = new WorkflowTask(approvalChain, instance, node, user);
+        return task;
+    }
+
+    /**
+     * 保存任务
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param task 任务
+     */
+    public void saveTask(WorkflowTask task) {
+        CheckUtil.notNull(task, "task null");
+        ApprovalChain approvalChain = CheckUtil.notNull(task.getApprovalChain(), "task.approvalChain null");
+
         // 保存任务
         approvalChainService.save(approvalChain);
+    }
+
+    /**
+     * 保存任务
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param node
+     * @param user
+     */
+    public void saveTask(WorkflowNode node, WorkflowUser user) {
+        WorkflowTask task = createTask(node, user);
+        saveTask(task);
     }
 
     /**
@@ -400,50 +338,70 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param task
-     * @param actionName
-     * @param remark
+     * @param task 任务
+     * @param operation 操作
+     * @param remark 备注
      */
-    public void saveHistory(WorkflowTask task, String actionName, String remark) {
-        Assert.notNull(task, "task null");
-        Assert.notNull(actionName, "actionName null");
-        Assert.notNull(task.getInstance(), "task.instance null");
-        Assert.notNull(task.getUser(), "task.user null");
-        Assert.notNull(task.getNode(), "task.node null");
+    public void saveHistory(WorkflowTask task, String operation, String remark) {
+        CheckUtil.notNull(task, "task null");
+        CheckUtil.notNull(operation, "operation null");
+        CheckUtil.notNull(task.getInstance(), "task.instance null");
+        CheckUtil.notNull(task.getUser(), "task.user null");
+        CheckUtil.notNull(task.getNode(), "task.node null");
 
         WorkflowInstance instance = task.getInstance();
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
         WorkflowNode node = task.getNode();
         UUID nodeOid = node.getNodeOid();
+        WorkflowRule rule = node.getRule();
         WorkflowUser user = task.getUser();
         UUID userOid = user.getUserOid();
-        Assert.notNull(entityType, "task.instance.entityType null");
-        Assert.notNull(entityOid, "task.instance.entityOid null");
-        Assert.notNull(nodeOid, "task.node.nodeOid null");
-        Assert.notNull(userOid, "task.user.userOid null");
+        CheckUtil.notNull(entityType, "task.instance.entityType null");
+        CheckUtil.notNull(entityOid, "task.instance.entityOid null");
+        CheckUtil.notNull(nodeOid, "task.node.nodeOid null");
+        CheckUtil.notNull(rule, "task.node.rule null");
+        CheckUtil.notNull(userOid, "task.user.userOid null");
 
         ApprovalHistory approvalHistory = new ApprovalHistory();
         ZonedDateTime now = ZonedDateTime.now();
         approvalHistory.setEntityType(entityType);
         approvalHistory.setEntityOid(entityOid);
 
-        if (WorkflowPassTaskAction.ACTION_NAME.equals(actionName)) {
+        if (WorkflowPassTaskAction.ACTION_NAME.equals(operation)) {
             // 审批通过
             approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
             approvalHistory.setOperation(ApprovalOperationEnum.APPROVAL_PASS.getId());
-        } else if (WorkflowRejectTaskAction.ACTION_NAME.equals(actionName)) {
+        } else if (WorkflowRejectTaskAction.ACTION_NAME.equals(operation)) {
             // 审批驳回
             approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
             approvalHistory.setOperation(ApprovalOperationEnum.APPROVAL_REJECT.getId());
+        } else if (ApprovalOperationEnum.APPROVAL_TRANSFER.getId().toString().equals(operation)) {
+            // 转交
+            approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
+            approvalHistory.setOperation(ApprovalOperationEnum.APPROVAL_TRANSFER.getId());
+        } else if (ApprovalOperationEnum.APPROVAL_RETURN.getId().toString().equals(operation)) {
+            // 退回
+            approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
+            approvalHistory.setOperation(ApprovalOperationEnum.APPROVAL_RETURN.getId());
+        } else if (ApprovalOperationEnum.ADD_COUNTERSIGN.getId().toString().equals(operation)) {
+            // 加签
+            approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
+            approvalHistory.setOperation(ApprovalOperationEnum.ADD_COUNTERSIGN.getId());
         } else {
-            throw new IllegalArgumentException(String.format("actionName(%s) invalid", actionName));
+            throw new IllegalArgumentException(String.format("operation(%s) invalid", operation));
         }
 
         approvalHistory.setRefApprovalChainId(task.getId());
+        // 申请人oid
+        approvalHistory.setCurrentApplicantOid(instance.getApplicantOid());
+        // 节点信息
+        approvalHistory.setRuleApprovalNodeOid(nodeOid);
         approvalHistory.setApprovalNodeOid(nodeOid);
         approvalHistory.setApprovalNodeName(node.getName());
+        // 操作描述
         approvalHistory.setOperationDetail(remark);
+        // 操作人oid
         approvalHistory.setOperatorOid(userOid);
         approvalHistory.setCreatedDate(now);
         approvalHistory.setLastUpdatedDate(now);
@@ -455,39 +413,40 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
-     * @param user
-     * @param actionName
-     * @param remark
+     * @param instance 实例
+     * @param user 操作人
+     * @param operation 操作
+     * @param remark 备注
      */
-    public void saveHistory(WorkflowInstance instance, WorkflowUser user, String actionName, String remark) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(user, "user null");
-        Assert.notNull(instance.getEntityType(), "instance.entityType null");
-        Assert.notNull(instance.getEntityOid(), "instance.entityOid null");
-        Assert.notNull(user.getUserOid(), "user.userOid null");
-        Integer entityType = instance.getEntityType();
-        UUID entityOid = instance.getEntityOid();
-        UUID userOid = user.getUserOid();
+    public void saveHistory(WorkflowInstance instance, WorkflowUser user, String operation, String remark) {
+        CheckUtil.notNull(instance, "instance null");
+        CheckUtil.notNull(user, "user null");
+        Integer entityType = CheckUtil.notNull(instance.getEntityType(), "instance.entityType null");
+        UUID entityOid = CheckUtil.notNull(instance.getEntityOid(), "instance.entityOid null");
+        UUID userOid = CheckUtil.notNull(user.getUserOid(), "user.userOid null");
 
         ApprovalHistory approvalHistory = new ApprovalHistory();
         ZonedDateTime now = ZonedDateTime.now();
         approvalHistory.setEntityType(entityType);
         approvalHistory.setEntityOid(entityOid);
 
-        if (WorkflowSubmitInstanceAction.ACTION_NAME.equals(actionName)) {
+        if (WorkflowSubmitInstanceAction.ACTION_NAME.equals(operation)) {
             // 提交工作流
             approvalHistory.setOperationType(ApprovalOperationTypeEnum.SELF.getId());
             approvalHistory.setOperation(ApprovalOperationEnum.SUBMIT_FOR_APPROVAL.getId());
-        } else if (WorkflowWithdrawInstanceAction.ACTION_NAME.equals(actionName)) {
+        } else if (WorkflowWithdrawInstanceAction.ACTION_NAME.equals(operation)) {
             // 撤回工作流
             approvalHistory.setOperationType(ApprovalOperationTypeEnum.SELF.getId());
             approvalHistory.setOperation(ApprovalOperationEnum.WITHDRAW.getId());
         } else {
-            throw new IllegalArgumentException(String.format("actionName(%s) invalid", actionName));
+            throw new IllegalArgumentException(String.format("operation(%s) invalid", operation));
         }
 
+        // 申请人oid
+        approvalHistory.setCurrentApplicantOid(instance.getApplicantOid());
+        // 操作描述
         approvalHistory.setOperationDetail(remark);
+        // 操作人oid
         approvalHistory.setOperatorOid(userOid);
         approvalHistory.setCreatedDate(now);
         approvalHistory.setLastUpdatedDate(now);
@@ -499,14 +458,12 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param instance
+     * @param instance 要加锁的实例
      */
     public void lockInstance(WorkflowInstance instance) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(instance.getEntityType(), "instance.entityType null");
-        Assert.notNull(instance.getEntityOid(), "instance.entityOid null");
-        Integer entityType = instance.getEntityType();
-        UUID entityOid = instance.getEntityOid();
+        CheckUtil.notNull(instance, "instance null");
+        Integer entityType = CheckUtil.notNull(instance.getEntityType(), "instance.entityType null");
+        UUID entityOid = CheckUtil.notNull(instance.getEntityOid(), "instance.entityOid null");
 
         EntityWrapper<WorkFlowDocumentRef> wrapper = new EntityWrapper<WorkFlowDocumentRef>();
         wrapper.eq("document_oid", entityOid);
@@ -514,10 +471,21 @@ public class WorkflowBaseService {
         workFlowDocumentRefService.updateForSet("version_number = version_number", wrapper);
     }
 
+    /**
+     * 统计任务数
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param ruleApprovalNodeOid  节点oid（null则统计整个实例满足条件的任务数）
+     * @param approvalStatus 任务的审批状态
+     * @return 任务数
+     */
     private int doCountTasks(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Integer approvalStatus) {
-        Assert.notNull(entityType, "entityType null");
-        Assert.notNull(entityOid, "entityOid null");
-        Assert.notNull(approvalStatus, "approvalStatus null");
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
+        CheckUtil.notNull(approvalStatus, "approvalStatus null");
 
         EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
 
@@ -541,9 +509,19 @@ public class WorkflowBaseService {
         return taskTotal;
     }
 
+    /**
+     * 清除任务
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param ruleApprovalNodeOid 节点oid（null则清除整个实例满足条件的任务数）
+     * @param currentFlag true当前任务，false不是当前任务，null不过滤该条件
+     */
     private void doClearTask(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Boolean currentFlag) {
-        Assert.notNull(entityType, "entityType null");
-        Assert.notNull(entityOid, "entityOid null");
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
 
         EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
         wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);

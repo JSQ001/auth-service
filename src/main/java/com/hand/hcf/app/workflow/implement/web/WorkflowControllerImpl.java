@@ -48,7 +48,8 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
     public ApprovalHistoryCO saveHistory(@RequestBody CommonApprovalHistoryCO commonApprovalHistoryDTO) {
         ApprovalHistory approvalHistory = new ApprovalHistory();
         //默认的操作类型
-        approvalHistory.setOperationType(1000);
+        approvalHistory.setOperationType(commonApprovalHistoryDTO.getOperationType() != null
+                ? commonApprovalHistoryDTO.getOperationType() : 1000);
         approvalHistory.setLastUpdatedDate(ZonedDateTime.now());
         approvalHistory.setCreatedDate(ZonedDateTime.now());
         approvalHistory.setRemark("第三方接口插入审批记录");
@@ -268,6 +269,10 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
         return documentOidList;
     }
 
+    public void deleteApprovalDocument(Integer entityType, UUID entityOid) {
+        workFlowDocumentRefService.deleteApprovalDocument(entityType, entityOid);
+    }
+
     /**
      * @author lsq
      * @date 2019/03/29
@@ -282,10 +287,5 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
                                                @RequestParam(value = "entityOid")UUID entityOid) {
         List<ContactCO> contactCOList = workFlowDocumentRefService.listCurrentApprover(entityType, entityOid);
         return contactCOList;
-    }
-	
-	public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> formIds) {
-        List<ApprovalFormCO> approvalFormCOList = this.listApprovalFormByIds(formIds);
-        return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
     }
 }

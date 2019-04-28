@@ -5,6 +5,7 @@ import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +27,11 @@ public class HcfWorkflowInterface {
      */
     public ApprovalFormCO getFormNameByFormId(Long id) {
 
-        List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormsByIds(Arrays.asList(id));
+        //List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormsByIds(Arrays.asList(id));
+        //jiu.zhao 修改三方接口
+        List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormByIds(Arrays.asList(id));
+        approvalFormCOList = (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
+
         if (approvalFormCOList.size() != 0) {
             return approvalFormCOList.get(0);
         } else {
@@ -35,6 +40,8 @@ public class HcfWorkflowInterface {
     }
 
     public List<ApprovalFormCO> listApprovalFormByFormIds(List<Long> ids) {
-        return workflowClient.listApprovalFormsByIds(ids);
+        //return workflowClient.listApprovalFormsByIds(ids);
+        List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormByIds(ids);
+        return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
     }
 }

@@ -43,6 +43,8 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
 
     @Autowired
     private ContactControllerImpl contactClient;
+	@Autowired
+    private ApprovalHistoryService approvalHistoryService;
 
     /**
      * 存在，则更新，不存在，则插入
@@ -355,6 +357,28 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
         // 获取用户信息
         List<ContactCO> contactCOList = contactClient.listByUserOids(userOidStrList);
         return contactCOList;
+    }
+
+    /**
+     * 删除实例
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param entityType
+     * @param entityOid
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteApprovalDocument(Integer entityType, UUID entityOid) {
+        if (entityOid == null) {
+            throw new IllegalArgumentException("entityOid null");
+        }
+
+        // 删除任务
+        approvalChainService.deleteByEntityTypeAndEntityOid(entityType, entityOid);
+        // 删除实例
+        deleteByDocumentOidAndDocumentCategory(entityOid.toString(), entityType);
+        // 删除历史
+        approvalHistoryService.deleteByEntityTypeAndEntityOid(entityType, entityOid);
     }
 
 }

@@ -31,6 +31,7 @@ public class RuleNoticeActionService extends BaseService<RuleNoticeActionMapper,
     public List<RuleNoticeAction> listByNoticeId(Long ruleNoticeId) {
         EntityWrapper<RuleNoticeAction> wrapper = new EntityWrapper<RuleNoticeAction>();
         wrapper.eq("rule_notice_id", ruleNoticeId);
+        wrapper.orderBy("id", true);
 
         List<RuleNoticeAction> ruleNoticeActionList = selectList(wrapper);
         return ruleNoticeActionList;

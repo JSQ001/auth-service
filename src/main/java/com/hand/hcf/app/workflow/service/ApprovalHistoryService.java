@@ -675,6 +675,8 @@ public class ApprovalHistoryService extends BaseService<ApprovalHistoryMapper, A
                         result = approvalHistoryService.isAddSignHistory(u.getCountersignType(), u.getOperation()) + "审批驳回";
                     } else if (ApprovalOperationEnum.ADD_COUNTERSIGN.getId().equals(u.getOperation())) {
                         result = approvalHistoryService.isAddSignHistory(u.getCountersignType(), u.getOperation()) + approvalHistoryService.getAddSignDetailHistory(u.getCountersignType(), u.getOperationDetail());
+                    } else if (ApprovalOperationEnum.APPROVAL_TRANSFER.getId().equals(u.getOperation())){
+                        result = approvalHistoryService.isAddSignHistory(u.getCountersignType(), u.getOperation()) + "转交";
                     }
                     break;
                 case 1003:
@@ -843,4 +845,36 @@ public class ApprovalHistoryService extends BaseService<ApprovalHistoryMapper, A
         }
         return approvalHistoryList;
     }
+
+    /**
+     * 删除历史
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param entityType
+     * @param entityOid
+     */
+    public void deleteByEntityTypeAndEntityOid(Integer entityType, UUID entityOid) {
+        EntityWrapper<ApprovalHistory> wrapper = new EntityWrapper<ApprovalHistory>();
+        wrapper.eq("entity_type", entityType);
+        wrapper.eq("entity_oid", entityOid);
+        delete(wrapper);
+    }
+
+    /**
+     * 获取任务的审批历史
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param refApprovalChainId
+     * @return
+     */
+    public ApprovalHistory getByApprovalChainId(Long refApprovalChainId) {
+        EntityWrapper<ApprovalHistory> wrapper = new EntityWrapper<ApprovalHistory>();
+        wrapper.eq("ref_approval_chain_id", refApprovalChainId);
+
+        ApprovalHistory approvalHistory = selectOne(wrapper);
+        return approvalHistory;
+    }
+
 }

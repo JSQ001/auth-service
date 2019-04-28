@@ -1,7 +1,7 @@
 package com.hand.hcf.app.workflow.approval.util;
 
 /**
- * 工作流执行动作
+ * 工作流动作
  * @author mh.z
  * @date 2019/04/07
  */

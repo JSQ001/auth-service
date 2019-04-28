@@ -26,5 +26,5 @@ public class CommonApprovalHistoryCO {
     private UUID operatorOid;//操作人Oid
 
     private String operationDetail;//处理意见
-
+    private Integer operationType;
 }

@@ -3,11 +3,13 @@ package com.hand.hcf.app.workflow.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
+import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.constant.FormConstants;
+import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowApprovers;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
@@ -52,6 +54,9 @@ public class WorkFlowApprovalService {
 
     @Autowired
     private MapperFacade mapperFacade;
+
+    @Autowired
+    private ApprovalChainService approvalChainService;
 
 
     public Map<String, Set<UUID>> getRuleApproverUserOIDs(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
@@ -130,11 +135,15 @@ public class WorkFlowApprovalService {
                         }
                     }
                 }else if(tabNumber == 2){
+                    Integer entityType = workFlowDocumentRef.getDocumentCategory();
+                    UUID entityOid = workFlowDocumentRef.getDocumentOid();
+                    List<ApprovalChain> approvalChainList = approvalChainService.listCurrrentByEntityTypeAndEntityOid(
+                            entityType, entityOid);
+
                     //对于未完成单据，rejecterName是指当前审批人
-                    List<WorkFlowApprovers> workFlowApprovers = workFlowRefApproversService.getWorkflowApproversByRefIdAndNodeOid(workFlowDocumentRef.getId(),workFlowDocumentRef.getApprovalNodeOid());
                     StringBuilder sb = new StringBuilder();
-                    for(WorkFlowApprovers workFlowApproversl : workFlowApprovers){
-                        UserApprovalDTO userDTO =baseClient.getUserByUserOid(workFlowApproversl.getApproverOid());
+                    for(ApprovalChain approvalChain : approvalChainList){
+                        UserApprovalDTO userDTO =baseClient.getUserByUserOid(approvalChain.getApproverOid());
                         if (userDTO != null) {
                             sb.append(userDTO.getFullName()+",");
                         }
@@ -245,6 +254,12 @@ public class WorkFlowApprovalService {
             }
             if (workFlowDocumentRef.getDocumentOid() != null) {
                 workFlowDocumentRefDTO.setEntityOid(workFlowDocumentRef.getDocumentOid());
+            }
+
+            if (workFlowDocumentRef.getApplicantOid() != null){
+                DepartmentCO departmentCO = baseClient.getDepartmentByUserOid(workFlowDocumentRef.getApplicantOid());
+                workFlowDocumentRefDTO.setDepartmentId(departmentCO.getId());
+                workFlowDocumentRefDTO.setDepartmentName(departmentCO.getName());
             }
             list.add(workFlowDocumentRefDTO);
         }
@@ -397,11 +412,15 @@ public class WorkFlowApprovalService {
                         }
                     }
                 }else if(tabNumber == 2){
+                    Integer entityType = workFlowDocumentRef.getDocumentCategory();
+                    UUID entityOid = workFlowDocumentRef.getDocumentOid();
+                    List<ApprovalChain> approvalChainList = approvalChainService.listCurrrentByEntityTypeAndEntityOid(
+                            entityType, entityOid);
+
                     //对于未完成单据，rejecterName是指当前审批人
-                    List<WorkFlowApprovers> workFlowApprovers = workFlowRefApproversService.getWorkflowApproversByRefIdAndNodeOid(workFlowDocumentRef.getId(),workFlowDocumentRef.getApprovalNodeOid());
                     StringBuilder sb = new StringBuilder();
-                    for(WorkFlowApprovers workFlowApproversl : workFlowApprovers){
-                        UserApprovalDTO userDTO =baseClient.getUserByUserOid(workFlowApproversl.getApproverOid());
+                    for(ApprovalChain approvalChain : approvalChainList){
+                        UserApprovalDTO userDTO =baseClient.getUserByUserOid(approvalChain.getApproverOid());
                         if (userDTO != null) {
                             sb.append(userDTO.getFullName()+",");
                         }

@@ -144,4 +144,30 @@ public interface WorkFlowDocumentRefMapper extends BaseMapper<WorkFlowDocumentRe
                                                         @Param("amountTo") Double amountTo,
                                                         @Param("tabNumber") int tabNumber,
                                                         RowBounds rowBounds);
+
+    /**
+     * 审批流监控单据
+     * @param booksID
+     * @param documentCategory
+     * @param createdBy
+     * @param status
+     * @param startDate
+     * @param endDate
+     * @param lastApproverOid
+     * @param formName
+     * @param rowBounds
+     * @return
+     */
+    List<WorkFlowDocumentRef> pageWorkflowMonitorByCond(@Param("booksID") Long booksID,
+                                                                   @Param("documentCategory") Integer documentCategory,
+                                                                   @Param("createdBy") Long createdBy,
+                                                                   @Param("status") Integer status,
+                                                                   @Param("documentNumber") String documentNumber,
+                                                                   @Param("startDate") ZonedDateTime startDate,
+                                                                   @Param("endDate") ZonedDateTime endDate,
+                                                                   @Param("lastApproverOid") UUID lastApproverOid,
+                                                                   @Param("formName") String formName,
+                                                                   RowBounds rowBounds
+    );
+
 }

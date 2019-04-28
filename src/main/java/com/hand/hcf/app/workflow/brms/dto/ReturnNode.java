@@ -15,4 +15,6 @@ public class ReturnNode {
 
     /** 节点名称 */
     private String remark;
+
+    private Boolean backable;
 }

@@ -410,7 +410,9 @@ public class OrganizationService {
 
 
     public List<ApprovalFormCO> listApprovalFormsByIds(List<Long> ids){
-        return workflowClient.listApprovalFormsByIds(ids);
+        //jiu.zhao 修改三方接口
+        List<ApprovalFormCO> approvalFormCOList = workflowClient.listApprovalFormByIds(ids);
+        return (List)(approvalFormCOList != null && approvalFormCOList.size() != 0 ? approvalFormCOList : new ArrayList());
     }
 
     /**

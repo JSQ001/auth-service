@@ -10,9 +10,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum BackTypeEnum {
     //从退回节点重新开始
-    START(0),
-    //直接调回当前节点
-    CURRENT(1);
+    START(1001),
+    //直接跳回当前节点
+    CURRENT(1002);
 
     private Integer value;
 

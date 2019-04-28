@@ -15,6 +15,7 @@ public enum ApprovalOperationEnum implements SysEnum {
     , APPROVAL_PASS(2001 ,"approval.history.pass") // 审批通过
     , APPROVAL_REJECT(2002 ,"approval.history.reject") // 审批驳回
     , APPROVAL_INVOICE_REJECT(2003 ,"approval.history.invoice.reject") // 审批驳回费用
+    , APPROVAL_RETURN(2004 ,"approval.history.return") // 审批驳回
     , AUDIT_PASS(3001 ,"approval.history.audit.pass") // 审核通过
     , AUDIT_REJECT(3002 ,"approval.history.audit.reject") // 审核驳回
     , AUDIT_RECEIVE(3003 ,"approval.history.finance.receive") // 财务已收单
@@ -22,6 +23,7 @@ public enum ApprovalOperationEnum implements SysEnum {
     , AUDIT_BACK(3005 ,"approval.history.finance.back")  //退单
     , AUDIT_NOTICE(3006 ,"approval.history.finance.notice") //审核通知
     , AUDIT_SEND(3007 ,"approval.history.finance.send")  //寄出
+    ,APPROVAL_TRANSFER(3008 , "approval.history.transfer")//转交
     , PAYMENT_IN_PROCESS(4000 ,"approval.history.finance.payment.process")//付款中确认
     , FINANCE_LOANED(4001 ,"approval.history.finance.loaned")//财务已付款
     , FINANCE_FAILED(4002 ,"approval.history.finance.loanFailed")//财务付款失败

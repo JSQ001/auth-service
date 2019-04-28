@@ -9,24 +9,28 @@ import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
  * @date 2019/04/07
  */
 public class WorkflowTask {
+    /*
+    只提供获取/设置通用的字段
+     */
+
     private ApprovalChain approvalChain;
-    /** 实例 */
+    /** 任务关联的实例 */
     private WorkflowInstance instance;
-    /** 节点 */
+    /** 任务关联的节点 */
     private WorkflowNode node;
-    /** 用户 */
+    /** 任务关联的用户 */
     private WorkflowUser user;
 
-    /** 未激活 */
+    /** 审批状态-未激活 */
     public static final Integer APPROVAL_STATUS_GENERAL = 1000;
-    /** 审批中 */
+    /** 审批状态-审批中 */
     public static final Integer APPROVAL_STATUS_APPROVAL = 2000;
-    /** 已审批 */
+    /** 审批状态-已审批 */
     public static final Integer APPROVAL_STATUS_APPROVED = 3000;
 
-    /** 记录有效 */
+    /** 任务状态-记录有效 */
     public static final Integer STATUS_NORMAL = ApprovalChainStatusEnum.NORMAL.getId();
-    /** 记录无效 */
+    /** 任务状态-记录无效 */
     public static final Integer STATUS_INVALID = ApprovalChainStatusEnum.INVALID.getId();
 
     public WorkflowTask(ApprovalChain approvalChain, WorkflowInstance instance, WorkflowNode node, WorkflowUser user) {
@@ -36,34 +40,73 @@ public class WorkflowTask {
         this.user = user;
     }
 
-    public WorkflowInstance getInstance() {
-        return instance;
-    }
-
-    public WorkflowNode getNode() {
-        return node;
-    }
-
-    public WorkflowUser getUser() {
-        return user;
-    }
-
     public ApprovalChain getApprovalChain() {
         return approvalChain;
     }
 
+    public void setApprovalChain(ApprovalChain approvalChain) {
+        this.approvalChain = approvalChain;
+    }
+
+    /**
+     * 返回任务关联的实例
+     *
+     * @return
+     */
+    public WorkflowInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * 返回任务关联的节点
+     *
+     * @return
+     */
+    public WorkflowNode getNode() {
+        return node;
+    }
+
+    /**
+     * 返回任务关联的用户
+     *
+     * @return
+     */
+    public WorkflowUser getUser() {
+        return user;
+    }
+
+    /**
+     * 返回任务id
+     *
+     * @return
+     */
     public Long getId() {
         return approvalChain.getId();
     }
 
+    /**
+     * 返回任务状态
+     *
+     * @return
+     */
     public Integer getStatus() {
         return approvalChain.getStatus();
     }
 
+    /**
+     * 设置任务状态
+     *
+     * @param status
+     */
     public void setStatus(Integer status) {
         approvalChain.setStatus(status);
     }
 
+    /**
+     * 返回审批状态
+     *
+     * @return
+     */
     public Integer getApprovalStatus() {
         Integer approvalStatus = null;
         Boolean currentFlag = approvalChain.getCurrentFlag();
@@ -83,6 +126,11 @@ public class WorkflowTask {
         return approvalStatus;
     }
 
+    /**
+     * 设置审批状态
+     *
+     * @param approvalStatus
+     */
     public void setApprovalStatus(Integer approvalStatus) {
         Boolean currentFlag = null;
         Boolean finishFlag = null;

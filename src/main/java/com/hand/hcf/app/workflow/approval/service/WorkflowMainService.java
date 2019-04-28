@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Collection;
+import java.util.Stack;
+
 /**
  * @author mh.z
  * @date 2019/04/07
@@ -20,20 +23,28 @@ public class WorkflowMainService {
 
     /**
      * 运行工作流
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/07
      *
-     * @param action
-     * @return
+     * @param start
      */
-    public String runWorkflow(WorkflowAction action) {
-        Assert.notNull(action, "action null");
+    public boolean runWorkflow(WorkflowAction start) {
+        Assert.notNull(start, "start null");
 
-        StringBuffer message = new StringBuffer("workflow log\n");
-        WorkflowAction current = action;
-        WorkflowResult result = null;
-        Object entity = null;
+        StringBuffer buffer = new StringBuffer("workflow trace\n");
+        Stack<WorkflowAction> stack = new Stack<WorkflowAction>();
         int loopCount = 0;
         int loopMax = 100;
 
+        Object current = start;
+        WorkflowAction action = null;
+        WorkflowResult result = null;
+
+        // 通过这个循环实现动作链，循环里在调用动作的执行方法后会获取到下一个动作（null则没有下一个动作），
+        // 比如有这样一条动作链WorkflowSubmitInstance -> WorkflowNextNodeAction -> null，
+        // 循环里会调用WorkflowSubmitInstance.execute执行动作并获取到下一个动作WorkflowNextNodeAction，
+        // 接着调用WorkflowNextNodeAction.execute执行动作并获取到下一个动作null（循环结束）
         try {
             while (current != null) {
                 // 防止死循环
@@ -42,48 +53,77 @@ public class WorkflowMainService {
                     throw new RuntimeException("loop fail");
                 }
 
-                message.append(current.getName());
-
-                // 下个动作
-                result = current.execute();
-                current = result.getNext();
-                entity = result.getEntity();
-                // END 下个动作
-
-                message.append("[");
-                message.append(getId(entity));
-                message.append("] -> ");
-                message.append(result.getStatus());
-                message.append(" -> ");
-
-                if (current != null) {
-                    message.append(current.getName());
+                if (current instanceof Collection) {
+                    Collection<WorkflowAction> actionList = (Collection<WorkflowAction>) current;
+                    pushStack(stack, actionList);
+                    buffer.append(String.format("@queue +%s -> %s\n", actionList.size(), stack.size()));
+                    action = stack.pop();
+                    buffer.append(String.format("@queue -1 -> %s\n", stack.size()));
                 } else {
-                    message.append("null");
+                    action = (WorkflowAction) current;
                 }
 
-                message.append("\n");
+                result = action.execute();
+                traceMessage(buffer, action, result);
+                current = result.getNext();
+
+                if (current == null && stack.size() > 0) {
+                    current = stack.pop();
+                    buffer.append(String.format("@queue -1 -> %s\n", stack.size()));
+                }
             }
         } finally {
-            logger.info(message.toString());
+            logger.info(buffer.toString());
         }
 
-        String status = result.getStatus();
-        return status;
+        return true;
     }
 
-    private Object getId(Object entity) {
-        Object id = null;
+    /**
+     * @param stack
+     * @param actions
+     */
+    protected void pushStack(Stack<WorkflowAction> stack, Collection<WorkflowAction> actions) {
+        WorkflowAction[] array = actions.toArray(new WorkflowAction[0]);
 
+        for (int i = array.length - 1; i >= 0; i--) {
+            stack.push(array[i]);
+        }
+    }
+
+    /**
+     * @param buffer
+     * @param action
+     * @param result
+     */
+    protected void traceMessage(StringBuffer buffer, WorkflowAction action, WorkflowResult result) {
+        buffer.append("action:");
+        buffer.append(action.getName());
+        buffer.append('[');
+
+        Object entity = result.getEntity();
         if (entity instanceof WorkflowTask) {
-            id = ((WorkflowTask) entity).getId();
+            buffer.append(((WorkflowTask) entity).getId());
         } else if (entity instanceof WorkflowNode) {
-            id = ((WorkflowNode) entity).getId();
+            buffer.append(((WorkflowNode) entity).getId());
         } else if (entity instanceof WorkflowInstance) {
-            id = ((WorkflowInstance) entity).getId();
+            buffer.append(((WorkflowInstance) entity).getId());
         }
 
-        return id;
+        buffer.append("] -> status:");
+        buffer.append(result.getStatus());
+        buffer.append(" -> next:");
+
+        Object next = result.getNext();
+        if (next == null) {
+            buffer.append("null");
+        } else if (next instanceof WorkflowAction) {
+            buffer.append(((WorkflowAction) next).getName());
+        } else {
+            buffer.append("action batch");
+        }
+
+        buffer.append('\n');
     }
 
 }

@@ -9,6 +9,12 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
+import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
+import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
+import com.hand.hcf.app.workflow.dto.TransferDTO;
+import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkflowTransfer;
@@ -20,8 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
+import javax.inject.Inject;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -41,6 +50,17 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
     @Autowired
     private MapperFacade mapper;
 
+    @Inject
+    private ApprovalChainService approvalChainService;
+
+    @Inject
+    private WorkFlowDocumentRefService workFlowDocumentRefService;
+
+    @Autowired
+    private WorkflowBaseService workflowBaseService;
+
+    @Autowired
+    private ContactControllerImpl contactClient;
     /**
      * 新增转交
      * @param workflowTransfer
@@ -151,6 +171,66 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
         }
         baseMapper.updateAllColumnById(workflowTransfer);
         return workflowTransfer;
+    }
+
+    /**
+     * 转交单据
+     * @param tenantId
+     * @param userOid
+     * @param dto
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void transferDeliver(Long tenantId, UUID userOid, TransferDTO dto){
+        Assert.notNull(dto.getEntityOid(), "dto.entityOid null");
+        Assert.notNull(dto.getEntityType(), "dto.entityType null");
+        Assert.notNull(dto.getUserOid(), "dto.userOid null");
+
+        //加载审批任务
+        WorkflowUser user = new WorkflowUser(userOid);
+        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(dto.getEntityOid(), dto.getEntityType());
+
+        WorkflowTask task = workflowBaseService.findTask(new WorkflowInstance(workFlowDocumentRef), user);
+        if(task == null){
+            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_NOT_EXIST);
+        }
+
+        WorkflowNode node = task.getNode();
+        WorkflowRule rule = node.getRule();
+
+        //判断节点是否可以转交
+        if (!Boolean.TRUE.equals(rule.getTransferFlag())) {
+            throw new BizException(ExceptionCode.WORKFLOW_NODE_CANNOT_BE_FORWARDED);
+        }
+
+        //设置当前审批任务为无效
+        task.setStatus(WorkflowTask.STATUS_INVALID);
+        workflowBaseService.updateTask(task);
+
+       //创建新的审批任务
+        UUID userOidDeliver = dto.getUserOid();
+        String remark = dto.getRemark();
+
+        WorkflowUser deliverUser = new WorkflowUser(userOidDeliver);
+
+        workflowBaseService.saveTask(node,deliverUser);
+
+        //ContactCO contactCO = contactClient.getByUserOid(userOidDeliver.toString());
+        //jiu.zhao 修改三方接口
+        ContactCO contactCO = contactClient.getByUserOid(userOidDeliver);
+        if(!contactCO.getTenantId().equals(tenantId)){
+            throw new BizException(ExceptionCode.WORKFLOW_TENANT_NOT_OPENING);
+        }
+
+        //保存历史
+        workflowBaseService.saveHistory(task, ApprovalOperationEnum.APPROVAL_TRANSFER.getId().toString(), deliverRemark(contactCO.getFullName(), contactCO.getEmployeeCode(), remark));
+    }
+
+    /**
+     * 返回转交历史记录
+     * @return
+     */
+    public String deliverRemark(String fullName, String employeeCode, String remark){
+        return "转交至 " + fullName+"-"+employeeCode + "，理由 " + remark;
     }
 
 }

@@ -89,4 +89,9 @@ public class WorkFlowDocumentRefDTO {
     @ApiModelProperty(value="单据类型id")
     private Long documentTypeId;
 
+    @ApiModelProperty(value = "申请人部门id")
+    private Long departmentId;
+
+    @ApiModelProperty(value = "申请人部门名称")
+    private String departmentName;
 }

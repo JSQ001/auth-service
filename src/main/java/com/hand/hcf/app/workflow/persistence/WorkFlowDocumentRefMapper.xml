@@ -254,8 +254,8 @@
             <when test="tabNumber == 1">
                   AND dr.status = 1005
                   AND ac.status = 1001
-                  AND ac.current_flag = 1
-                  AND ac.finish_flag = 0
+                  AND ac.current_flag = 0
+                  AND ac.finish_flag = 1
                   AND ac.all_finished = 0
             </when>
             <when test="tabNumber == 2">
@@ -321,5 +321,51 @@
                   ORDER BY dr.document_number
             </when>
         </choose>
+    </select>
+
+    <select id="pageWorkflowMonitorByCond" parameterType="java.util.Map"  resultType="com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef">
+        SELECT b.*
+        FROM sys_approval_form a
+        INNER JOIN
+        sys_wfl_document_ref b
+        ON a.FORM_OID = b.FORM_OID
+        WHERE 1=1
+        <!-- 账套 -->
+        <if test="booksID != null">
+            AND b.set_of_books_id = #{booksID}
+        </if>
+        <!-- 单据大类 -->
+        <if test="documentCategory != null">
+            AND b.document_category = #{documentCategory}
+        </if>
+        <!-- 创建人 -->
+        <if test="createdBy != null">
+            AND b.CREATED_BY = #{createdBy}
+        </if>
+        <!-- 单据状态 -->
+        <if test="status != null">
+            AND b.status = #{status}
+        </if>
+        <!-- 单据编号 -->
+        <if test="documentNumber != null">
+            AND b.document_number = #{documentNumber}
+        </if>
+        <!-- 申请日期到 -->
+        <if test="startDate != null">
+            <![CDATA[ AND b.applicant_date >= #{startDate} ]]>
+        </if>
+        <!-- 申请日期至 -->
+        <if test="endDate != null">
+            <![CDATA[ AND b.applicant_date < #{endDate} ]]>
+        </if>
+        <!-- 审批人 -->
+        <if test="lastApproverOid != null">
+            AND  b.last_approver_oid = #{lastApproverOid}
+        </if>
+        <!-- 审批流名称 -->
+        <if test="formName != null">
+            AND a.form_name LIKE #{formName}
+        </if>
+        ORDER BY b.applicant_date ASC
     </select>
 </mapper>

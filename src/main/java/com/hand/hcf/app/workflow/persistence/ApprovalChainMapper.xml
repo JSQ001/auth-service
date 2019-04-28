@@ -28,19 +28,18 @@
         id = #{approvalChainId};
     </select>
 
-    <select id="listApprovalNodeByBack" resultType="com.hand.hcf.app.workflow.dto.ApprovalNodeDTO">
-        select an.* from SYS_RULE_APPROVAL_NODE  an where
-        exists (
-        select 1
-        from SYS_APPROVAL_CHAIN c,
-        SYS_RULE_APPROVAL_NODE n
-        where c.RULE_APPROVAL_NODE_OID = n.RULE_APPROVAL_NODE_OID
-        and n.RULE_APPROVAL_CHAIN_OID=an.RULE_APPROVAL_CHAIN_OID
-        and an.SEQUENCE_NUMBER <![CDATA[ <= ]]> n.SEQUENCE_NUMBER
-        and c.ENTITY_TYPE = #{entityType}
-        and c.ENTITY_OID = #{entityOid} ) order by SEQUENCE_NUMBER
+    <select id="listWaitActiveApprovalChain" resultType="com.hand.hcf.app.workflow.domain.ApprovalChain">
+        SELECT *
+        FROM sys_approval_chain ac
+        WHERE 1 = 1
+        AND ((ac.source_approval_chain_id = #{sourceApprovalChainId} and ac.add_sign = 1)
+        OR ac.id = #{sourceApprovalChainId})
+        AND ac.sequence_number = #{sequenceNumber}
+        AND ac.finish_flag = false
+        AND ac.current_flag = false
+        AND ac.status = 1000
+        AND ac.entity_oid = #{entityOid}
+        AND ac.entity_type = #{entityType}
     </select>
-
-
 
 </mapper>

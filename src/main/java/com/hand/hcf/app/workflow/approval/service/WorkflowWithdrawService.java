@@ -3,6 +3,7 @@ package com.hand.hcf.app.workflow.approval.service;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
+import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowWithdrawInstanceAction;
@@ -40,12 +41,18 @@ public class WorkflowWithdrawService {
     @Autowired
     private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
+    @Autowired
+    private WorkflowActionService workflowActionService;
+
     /**
      * 撤回工作流
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/07
      *
-     * @param userOid
-     * @param approvalReqDTO
-     * @return
+     * @param userOid 审批人oid
+     * @param approvalReqDTO 要撤回的单据
+     * @return 撤回的结果
      */
     //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
@@ -77,71 +84,45 @@ public class WorkflowWithdrawService {
 
     /**
      * 撤回工作流
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/07
      *
-     * @param entityType
-     * @param entityOid
-     * @param userOid
-     * @param approvalText
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param userOid 审批人oid
+     * @param approvalText 审批意见
      */
     protected void doWithdrawWorkflow(Integer entityType, UUID entityOid, UUID userOid, String approvalText) {
         Assert.notNull(entityType, "entityType null");
         Assert.notNull(entityOid, "entityOid null");
         Assert.notNull(userOid, "userOid null");
 
+        // 查找要撤回的实例
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
         if (workFlowDocumentRef == null) {
-            throw new BizException(ErrorConstants.NOT_FIND_THE_INSTANCE);
+            throw new BizException(MessageConstants.NOT_FIND_THE_INSTANCE);
         }
 
         UUID submitterOid = workFlowDocumentRef.getSubmittedBy();
-        Integer approvalStatus = workFlowDocumentRef.getStatus();
+        // 暂定只能提交人可以撤回实例
         if (!userOid.equals(submitterOid)) {
-            // 暂定只能提交人可以撤回实例
-            throw new BizException(ErrorConstants.NOT_FIND_THE_INSTANCE);
-        } else if (!DocumentOperationEnum.APPROVAL.getId().equals(approvalStatus)) {
-            // 只能撤回审批中的实例
-            throw new BizException(ErrorConstants.INSTANCE_STATUS_CANNOT_WITHDRAW);
+            throw new BizException(MessageConstants.NOT_FIND_THE_INSTANCE);
         }
 
         WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
-        WorkflowWithdrawInstanceAction action = new WorkflowWithdrawInstanceAction(this, instance, user, approvalText);
+        WorkflowWithdrawInstanceAction action = new WorkflowWithdrawInstanceAction(workflowActionService, instance, user, approvalText);
 
-        // 同个实例的提交/撤回/通过/驳回等操作不支持并发
+        // 对同个实例的操作不支持并发
         workflowBaseService.lockInstance(instance);
-
         // 撤回实例
         workflowMainService.runWorkflow(action);
+
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
         // 通知审批结果
         workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
-    }
-
-    /**
-     * 撤回实例
-     *
-     * @param instance
-     * @param user
-     * @param remark
-     * @return
-     */
-    public WorkflowResult withdrawInstance(WorkflowInstance instance, WorkflowUser user, String remark) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(user, "user null");
-
-        // 清除跟实例关联的所有任务
-        workflowBaseService.clearAllTasks(instance);
-        // 更新实例的状态成撤回
-        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_WITHDRAW);
-        workflowBaseService.updateInstance(instance);
-        // 保存撤回的历史
-        workflowBaseService.saveHistory(instance, user, WorkflowWithdrawInstanceAction.ACTION_NAME, remark);
-
-        WorkflowResult result = new WorkflowResult();
-        result.setStatus(WorkflowWithdrawInstanceAction.RESULT_WITHDRAW_SUCCESS);
-        result.setEntity(instance);
-        return result;
     }
 
 }

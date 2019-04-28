@@ -46,9 +46,9 @@ public enum RuleApprovalEnum implements SysEnum {
 
     //重复规则
     //重复规则-跳过审批
-    RULE_REPEAR_SKIP(4001),//defaut
+    RULE_REPEAR_SKIP(4002),//defaut
     //重复规则-审批
-    RULE_REPEAR_APPROVAL(4002),
+    RULE_REPEAR_APPROVAL(4001),
 
     //包含提交人规则
     //跳过

@@ -7,6 +7,7 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.approval.service.WorkflowPassService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowRejectService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowReturnService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowWithdrawService;
 import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
@@ -21,10 +22,7 @@ import com.hand.hcf.app.workflow.dto.TransferDTO;
 import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
-import com.hand.hcf.app.workflow.service.ApprovalChainService;
-import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
-import com.hand.hcf.app.workflow.service.WorkFlowApprovalService;
-import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
+import com.hand.hcf.app.workflow.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -40,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.inject.Inject;
 import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -73,8 +72,10 @@ public class WorkFlowApproveController {
     private WorkflowWithdrawService approvalWithdrawService;
 
     @Autowired
-    private ApprovalChainService approvalChainService;
+    private WorkflowReturnService workflowReturnService;
 
+    @Inject
+    private WorkflowTransferService workflowTransferService;
 
     @ApiOperation(value = "审批通过", notes = "通过待审批单据", tags = {"approval"})
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
@@ -105,10 +106,9 @@ public class WorkFlowApproveController {
     @RequestMapping(value = "/countersign", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> counterSign(
             @ApiParam(value = "单据加签信息") @Valid @RequestBody CounterSignDTO counterSignDTO) {
-        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
-        approvalResDTO.setSuccessNum(0);
-        //todo
-        return ResponseEntity.ok(approvalResDTO);
+        UUID userOid = OrgInformationUtil.getCurrentUserOid();
+        // TODO
+        return null;
     }
 
     @ApiOperation(value = "审批转交", notes = "审批转交", tags = {"approval"})
@@ -117,6 +117,7 @@ public class WorkFlowApproveController {
             @ApiParam(value = "单据转交信息") @Valid @RequestBody TransferDTO transferDTO) {
         ApprovalResDTO approvalResDTO = new ApprovalResDTO();
         approvalResDTO.setSuccessNum(0);
+        workflowTransferService.transferDeliver(OrgInformationUtil.getCurrentTenantId(), OrgInformationUtil.getCurrentUserOid(),transferDTO);
         //todo
         return ResponseEntity.ok(approvalResDTO);
     }
@@ -126,10 +127,9 @@ public class WorkFlowApproveController {
     @RequestMapping(value = "/back", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> sendBack(
             @ApiParam(value = "单据退回节点") @Valid @RequestBody SendBackDTO sendBackDTO) {
-        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
-        approvalResDTO.setSuccessNum(0);
+
         //todo
-        return ResponseEntity.ok(approvalResDTO);
+        return ResponseEntity.ok(workflowReturnService.returnWorkflow(LoginInformationUtil.getCurrentUserOid(),sendBackDTO));
     }
 
 
@@ -149,7 +149,7 @@ public class WorkFlowApproveController {
     public ResponseEntity<BackNodesDTO> listApprovalNodeByBack(
             @ApiParam(value = "单据类型") @RequestParam Integer entityType,
             @ApiParam(value = "单据oid") @RequestParam UUID entityOid) {
-        return ResponseEntity.ok(approvalChainService.listApprovalNodeByBack(entityType,entityOid));
+        return ResponseEntity.ok(workflowReturnService.listApprovalNodeByBack(entityType,entityOid));
     }
 
     /**

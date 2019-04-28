@@ -11,11 +11,12 @@ import java.util.UUID;
 public class TransferDTO {
 
     @ApiModelProperty(value = "单据OID")
-    private String entityOid;
+    private UUID entityOid;
     @ApiModelProperty(value = "单据大类")
     private Integer entityType;
 
-    @ApiModelProperty(value = "加签人员OID")
+
+    @ApiModelProperty(value = "指定人员OID")
     private UUID userOid;
 
     @ApiModelProperty(value = "备注")

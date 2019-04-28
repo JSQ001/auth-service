@@ -5,17 +5,22 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
+import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowNextNodeAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowSubmitInstanceAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
+import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
+import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
 import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
+import com.hand.hcf.app.workflow.service.ApprovalFormService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -46,13 +52,19 @@ public class WorkflowSubmitService {
     private WorkflowBaseService workflowBaseService;
 
     @Autowired
-    private WorkflowMoveNodeService workflowMoveNodeService;
+    private ApprovalFormService approvalFormService;
+
+    @Autowired
+    private WorkflowActionService workflowActionService;
 
     /**
      * 提交工作流
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/07
      *
-     * @param approvalDocumentCO
-     * @return
+     * @param approvalDocumentCO 提交的数据
+     * @return 提交的结果
      */
     //@LcnTransaction
     @Transactional(rollbackFor = Exception.class)
@@ -62,21 +74,27 @@ public class WorkflowSubmitService {
         UUID entityOid = workFlowDocumentRef.getDocumentOid();
         UUID submitterOid = workFlowDocumentRef.getSubmittedBy();
 
-
-        WorkFlowDocumentRef workFlowDocumentRefPO = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
+        WorkFlowDocumentRef workFlowDocumentRefPO = workFlowDocumentRefService
+                .getByDocumentOidAndDocumentCategory(entityOid, entityType);
         // 不能提交审批中和已通过的实例
         if (workFlowDocumentRefPO != null) {
             Integer status = workFlowDocumentRefPO.getStatus();
             if (DocumentOperationEnum.APPROVAL.getId().equals(status)
                     || DocumentOperationEnum.APPROVAL_PASS.getId().equals(status)) {
-                throw new BizException(ErrorConstants.INSTANCE_STATUS_CANNOT_SUBMIT);
+                throw new BizException(MessageConstants.INSTANCE_STATUS_CANNOT_SUBMIT);
             }
         }
 
-        // 保存实例
+        // 保存要提交的实例
         if (workFlowDocumentRefPO != null) {
             workFlowDocumentRef.setId(workFlowDocumentRefPO.getId());
             workFlowDocumentRef.setVersionNumber(workFlowDocumentRefPO.getVersionNumber());
+
+            // 保留最后驳回类型
+            workFlowDocumentRef.setLastRejectType(workFlowDocumentRefPO.getLastRejectType());
+            // 保留提交后跳到的节点id
+            workFlowDocumentRef.setJumpNodeId(workFlowDocumentRefPO.getJumpNodeId());
+            // 更新实例
             workFlowDocumentRef = workFlowDocumentRefService.updateSysWorkFlowDocumentRef(workFlowDocumentRef);
         } else {
             workFlowDocumentRef = workFlowDocumentRefService.createSysWorkFlowDocumentRef(workFlowDocumentRef);
@@ -87,13 +105,13 @@ public class WorkflowSubmitService {
         // WorkflowUser
         WorkflowUser user = new WorkflowUser(submitterOid);
         // WorkflowSubmitInstanceAction
-        WorkflowSubmitInstanceAction action = new WorkflowSubmitInstanceAction(this, instance, user, null);
+        WorkflowSubmitInstanceAction action = new WorkflowSubmitInstanceAction(workflowActionService, instance, user, null);
 
-        // 同个实例的提交/撤回/通过/驳回等操作不支持并发
+        // 对同个实例的操作不支持并发
         workflowBaseService.lockInstance(instance);
-
         // 提交实例
         workflowMainService.runWorkflow(action);
+
         // 获取状态
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
         Integer status = workFlowDocumentRef.getStatus();
@@ -106,47 +124,15 @@ public class WorkflowSubmitService {
         return approvalResultCO;
     }
 
-    /**
-     * 提交实例
-     *
-     * @param instance
-     * @param user
-     * @param remark
-     * @return
-     */
-    public WorkflowResult submitInstance(WorkflowInstance instance, WorkflowUser user, String remark) {
-        Assert.notNull(instance, "instance null");
-        Assert.notNull(instance.getApprovalStatus(), "instance.approvalStatus null");
-        Integer status = instance.getApprovalStatus();
-
-        // 不能提交审批中和已经通过的实例
-        if (WorkflowInstance.APPROVAL_STATUS_APPROVAL.equals(status)
-                || WorkflowInstance.APPROVAL_STATUS_PASS.equals(status)) {
-            throw new BizException(ErrorConstants.INSTANCE_STATUS_CANNOT_SUBMIT);
-        }
-
-        // 更新实例的状态
-        instance.setApprovalStatus(WorkflowInstance.APPROVAL_STATUS_APPROVAL);
-        workflowBaseService.updateInstance(instance);
-
-        // 保存提交的历史
-        workflowBaseService.saveHistory(instance, user, WorkflowSubmitInstanceAction.ACTION_NAME, remark);
-
-        WorkflowResult result = new WorkflowResult();
-        // 下个动作是移到下个节点
-        WorkflowNextNodeAction action = new WorkflowNextNodeAction(workflowMoveNodeService, instance, null);
-        result.setStatus(WorkflowSubmitInstanceAction.RESULT_SUBMIT_SUCCESS);
-        result.setEntity(instance);
-        result.setNext(action);
-        return result;
-    }
 
     /**
+     * 创建实例对象
+     * @version 1.0
      * @author mh.z
-     * @date 2019/04/06
+     * @date 2019/04/07
      *
-     * @param approvalDocumentCO
-     * @return
+     * @param approvalDocumentCO 提交的数据
+     * @return 实例对象
      */
     protected WorkFlowDocumentRef toDomain(ApprovalDocumentCO approvalDocumentCO) {
         Assert.notNull(approvalDocumentCO, "approvalDocumentCO null");
@@ -154,9 +140,8 @@ public class WorkflowSubmitService {
         Assert.notNull(approvalDocumentCO.getDocumentOid(), "approvalDocumentCO.documentOid null");
         Assert.notNull(approvalDocumentCO.getDocumentCategory(), "approvalDocumentCO.documentCategory null");
         Assert.notNull(approvalDocumentCO.getSubmittedBy(), "approvalDocumentCO.submittedBy null");
-        Assert.notNull(approvalDocumentCO.getFormOid(), "approvalDocumentCO.formOid null");
-        //jiu.zhao application name
-		//Assert.notNull(approvalDocumentCO.getDestinationService(), "approvalDocumentCO.destinationService null");
+        //jiu.zhao 不需要
+        //Assert.notNull(approvalDocumentCO.getDestinationService(), "approvalDocumentCO.destinationService null");
 
         WorkFlowDocumentRef workFlowDocumentRef = new WorkFlowDocumentRef();
         BeanUtils.copyProperties(approvalDocumentCO, workFlowDocumentRef);
@@ -164,6 +149,22 @@ public class WorkflowSubmitService {
         UUID unitOid = workFlowDocumentRef.getUnitOid();
         Long companyId = workFlowDocumentRef.getCompanyId();
         ZonedDateTime now = ZonedDateTime.now();
+
+        // 如果提交参数里没有formOid则根据单据大类获取（没有或多于一个表单则报错）
+        UUID formOid = workFlowDocumentRef.getFormOid();
+        if (formOid == null) {
+            Long tenantId = OrgInformationUtil.getCurrentTenantId();
+            Integer formTypeId = approvalDocumentCO.getDocumentCategory();
+            List<ApprovalForm> approvalFormList = approvalFormService.listByTenantAndType(tenantId, formTypeId, RuleApprovalEnum.VALID.getId());
+
+            if (approvalFormList.size() != 1) {
+                throw new BizException(MessageConstants.FAIL_TO_GET_FORM_BY_TYPE);
+            }
+
+            ApprovalForm approvalForm = approvalFormList.get(0);
+            formOid = approvalForm.getFormOid();
+            workFlowDocumentRef.setFormOid(formOid);
+        }
 
         // 申请人
         if (applicantOid != null) {
@@ -187,6 +188,7 @@ public class WorkflowSubmitService {
             workFlowDocumentRef.setCompanyCode(companyCO.getCompanyCode());
             workFlowDocumentRef.setCompanyName(companyCO.getName());
             workFlowDocumentRef.setTenantId(companyCO.getTenantId());
+            workFlowDocumentRef.setSetOfBooksId(companyCO.getSetOfBooksId());
         }
 
         // 单据名称

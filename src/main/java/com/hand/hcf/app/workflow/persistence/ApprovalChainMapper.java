@@ -29,14 +29,19 @@ public interface ApprovalChainMapper extends BaseMapper<ApprovalChain> {
      */
     ApprovalChain getApprovalChainById(@Param("approvalChainId") Long approvalChainId);
 
-
     /**
-     * 通过chainID 获取可退回审批节点
+     * 查找待激活的任务
+     * @author mh.z
+     * @date 2019/04/22
+     *
      * @param entityType
      * @param entityOid
+     * @param sourceApprovalChainId
+     * @param sequenceNumber
      * @return
      */
-    List<ApprovalNodeDTO> listApprovalNodeByBack(@Param("entityType") Integer entityType,
-                                                 @Param("entityOid") UUID entityOid
-                                      );
+    List<ApprovalChain> listWaitActiveApprovalChain(@Param("entityType") Integer entityType,
+                                                    @Param("entityOid") UUID entityOid,
+                                                    @Param("sourceApprovalChainId") Long sourceApprovalChainId,
+                                                    @Param("sequenceNumber") Integer sequenceNumber);
 }

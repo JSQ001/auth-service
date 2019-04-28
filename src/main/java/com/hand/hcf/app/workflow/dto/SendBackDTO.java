@@ -12,7 +12,7 @@ import java.util.UUID;
 public class SendBackDTO {
 
     @ApiModelProperty(value = "单据OID")
-    private String entityOid;
+    private UUID entityOid;
     @ApiModelProperty(value = "单据大类")
     private Integer entityType;
 
@@ -21,5 +21,8 @@ public class SendBackDTO {
 
     @ApiModelProperty(value = "退回审批类型")
     private BackTypeEnum backTypeEnum;
+
+    @ApiModelProperty(value="退回意见")
+    private String approvalText;
 
 }

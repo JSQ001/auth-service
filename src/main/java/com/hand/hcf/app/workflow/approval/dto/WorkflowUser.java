@@ -8,6 +8,10 @@ import java.util.UUID;
  * @date 2019/04/07
  */
 public class WorkflowUser {
+    /*
+    只提供获取/设置通用的字段
+     */
+
     /** 用户oid */
     private UUID userOid;
 
@@ -15,6 +19,11 @@ public class WorkflowUser {
         this.userOid = userOid;
     }
 
+    /**
+     * 返回用户oid
+     *
+     * @return
+     */
     public UUID getUserOid() {
         return userOid;
     }

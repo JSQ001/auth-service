@@ -39,7 +39,11 @@ public enum ApprovalOperationTypeEnum implements SysEnum {
     /**
      * 订票申请价格审核人
      */
-    TRAVEL_BOOKER_PRICE_AUDITOR(1008)
+    TRAVEL_BOOKER_PRICE_AUDITOR(1008),
+    /**
+     * 工作台流程日志
+     */
+    WORKBENCH_LOGS(1009)
     ;
 
     private Integer id;

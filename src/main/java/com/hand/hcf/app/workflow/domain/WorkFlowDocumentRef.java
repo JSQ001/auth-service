@@ -2,6 +2,7 @@ package com.hand.hcf.app.workflow.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.domain.Domain;
@@ -114,6 +115,11 @@ public class WorkFlowDocumentRef extends Domain {
     @TableField("document_id")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long documentId;// 单据的ID
+
+    @TableField("set_of_books_id")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long setOfBooksId;
+
     @TableField("tenant_id")
     @JsonSerialize(using = ToStringSerializer.class)
     private Long tenantId;
@@ -139,6 +145,6 @@ public class WorkFlowDocumentRef extends Domain {
     private Integer withdrawRule;
 
     @ApiModelProperty(value = "跳到的节点id")
-    @TableField("jump_node_id")
+    @TableField(value = "jump_node_id", strategy = FieldStrategy.IGNORED)
     private Long jumpNodeId;
 }

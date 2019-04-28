@@ -2,14 +2,17 @@ package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.workflow.brms.service.RuleService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
 import com.hand.hcf.app.workflow.dto.BackNodesDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.persistence.ApprovalChainMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +22,9 @@ import java.util.UUID;
 @Service
 @Transactional
 public class ApprovalChainService extends BaseService<ApprovalChainMapper, ApprovalChain> {
+
+   @Autowired
+   RuleService ruleService;
 
     public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndFinishFlagAndCountersignType(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, boolean finishFlag, Integer countersignType) {
         return selectList(new EntityWrapper<ApprovalChain>()
@@ -120,6 +126,24 @@ public class ApprovalChainService extends BaseService<ApprovalChainMapper, Appro
          return selectList(new EntityWrapper<ApprovalChain>()
                 .eq("entity_type", entityType)
                 .in("entity_oid", entityOids)
+        );
+    }
+
+    /**
+     * 根据类型和oid返回当前的approvalChain
+     * author mh.z
+     * @date 2019/04/17
+     *
+     * @param entityType
+     * @param entityOid
+     * @return
+     */
+    public List<ApprovalChain> listCurrrentByEntityTypeAndEntityOid(Integer entityType, UUID entityOid) {
+        return selectList(new EntityWrapper<ApprovalChain>()
+                .eq("current_flag", 1)
+                .eq("entity_type", entityType)
+                .eq("entity_oid", entityOid)
+                .eq("status", ApprovalChainStatusEnum.NORMAL.getId())
         );
     }
 
@@ -254,10 +278,65 @@ public class ApprovalChainService extends BaseService<ApprovalChainMapper, Appro
         baseMapper.updateAllFinshTrueById(id);
     }
 
-    public BackNodesDTO listApprovalNodeByBack(Integer entityType, UUID entityOid){
-        BackNodesDTO backNodesDTO=new BackNodesDTO();
-        backNodesDTO.setApprovalNodeDTOList(baseMapper.listApprovalNodeByBack(entityType,entityOid));
-        backNodesDTO.setBackFlag(Boolean.TRUE);
-        return backNodesDTO;
+    /**
+     * 查找待激活的任务
+     * @author mh.z
+     * @date 2019/04/22
+     *
+     * @param entityType
+     * @param entityOid
+     * @param sourceApprovalChainId
+     * @param sequenceNumber
+     * @return
+     */
+    public List<ApprovalChain> listWaitActiveApprovalChain(Integer entityType, UUID entityOid,
+                                                           Long sourceApprovalChainId, Integer sequenceNumber) {
+        return baseMapper.listWaitActiveApprovalChain(entityType, entityOid, sourceApprovalChainId, sequenceNumber);
     }
+
+    /**
+     * 查找最近一次审批过的任务（同单据同审批人）
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param entityType
+     * @param entityOid
+     * @param userOid
+     * @param submitDate
+     * @return
+     */
+    public ApprovalChain getLastApprovalChain(Integer entityType, UUID entityOid, UUID userOid, ZonedDateTime submitDate) {
+        EntityWrapper<ApprovalChain> entity = new EntityWrapper<ApprovalChain>();
+        entity.eq("finish_flag",true);
+        entity.eq("approver_oid", userOid);
+        entity.eq("entity_oid", entityOid);
+        entity.eq("entity_type", entityType);
+        entity.ge("created_date", submitDate);
+        entity.orderBy("last_updated_date", false);
+
+        List<ApprovalChain> approvalChainList = selectList(entity);
+        ApprovalChain approvalChain = null;
+
+        if (approvalChainList.size() > 0) {
+            approvalChain = approvalChainList.get(0);
+        }
+
+        return approvalChain;
+    }
+
+    /**
+     * 删除任务
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param entityType
+     * @param entityOid
+     */
+    public void deleteByEntityTypeAndEntityOid(Integer entityType, UUID entityOid) {
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq("entity_type", entityType);
+        wrapper.eq("entity_oid", entityOid);
+        delete(wrapper);
+    }
+
 }

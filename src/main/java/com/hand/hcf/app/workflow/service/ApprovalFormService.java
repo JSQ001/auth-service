@@ -2,7 +2,9 @@ package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.DepartmentPositionCO;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
@@ -14,6 +16,7 @@ import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.ApprovalFormPropertyConstants;
+import com.hand.hcf.app.workflow.constant.FormConstants;
 import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.dto.*;
@@ -51,6 +54,8 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
     @Autowired
     private MapperFacade mapper;
 
+    @Autowired
+    private CommonControllerImpl organizationInterface;
     /**
      * 查询单个表单
      *
@@ -255,9 +260,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         if (StringUtils.isEmpty(approvalFormDTO.getFormName())) {
             throw new BizException(ExceptionCode.SYS_PARAM_CANT_BE_NULL, new Object[]{"formName"});
         }
-        if (StringUtils.isEmpty(approvalFormDTO.getRemark())) {
-            throw new BizException(ExceptionCode.SYS_PARAM_CANT_BE_NULL, new Object[]{"remark"});
-        }
+
         ApprovalForm approvalForm = approvalFormDTOToForm(approvalFormDTO);
 
 
@@ -271,6 +274,17 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         approvalForm.setId(null);
 
         approvalForm.setApprovalMode(ApprovalMode.CUSTOM.getId());
+
+        Boolean withdrawFlag = approvalForm.getWithdrawFlag();
+        // 默认允许撤回
+        if (withdrawFlag == null) {
+            approvalForm.setWithdrawFlag(true);
+        }
+
+        if (Boolean.TRUE.equals(withdrawFlag) && approvalForm.getWithdrawRule() == null) {
+            // 默认无审批记录时可撤回
+            approvalForm.setWithdrawRule(RuleConstants.RULE_WITHDRAW_NONE_APPROVAL_HISTORY);
+        }
 
         try {
             insert(approvalForm);//保存customForm和formI18n
@@ -361,7 +375,19 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         //list = baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(list, ApprovalForm.class);
 
         if (CollectionUtils.isNotEmpty(list)) {
-            List<ApprovalFormDTO> approvalFormDTOList = list.stream().map(c -> approvalFormToFormDTO(c)).collect(Collectors.toList());
+            //获取审批类型
+            Map<String,String> categoryMap = new HashMap<>();
+            List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+            for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
+                categoryMap.put(sysCodeValueCO.getValue(),sysCodeValueCO.getName());
+            }
+            List<ApprovalFormDTO> approvalFormDTOList = new ArrayList<>();
+            for (ApprovalForm approvalForm : list) {
+                ApprovalFormDTO approvalFormDTO = approvalFormToFormDTO(approvalForm);
+                approvalFormDTO.setFormTypeName(categoryMap.get(String.valueOf(approvalFormDTO.getFormType())));
+                approvalFormDTOList.add(approvalFormDTO);
+            }
+            //List<ApprovalFormDTO> approvalFormDTOList = list.stream().map(c -> approvalFormToFormDTO(c)).collect(Collectors.toList());
             return approvalFormDTOList;
         }
         return new ArrayList<>();
@@ -592,7 +618,21 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         if (!StringUtils.isEmpty(dto.getRemark())) {
             persistent.setRemark(dto.getRemark());
         }
+        //撤回模式
+        if(dto.getApprovalMode()!=null){
+            persistent.setApprovalMode(dto.getApprovalMode());
+        }
         persistent.setReferenceOid(dto.getReferenceOid());
+
+        // 允许撤回
+        if (dto.getWithdrawFlag() != null) {
+            persistent.setWithdrawFlag(dto.getWithdrawFlag());
+        }
+
+        // 撤回模式
+        if (dto.getWithdrawRule() != null) {
+            persistent.setWithdrawRule(dto.getWithdrawRule());
+        }
 
         //表单更新
         persistent.setI18n(dto.getI18n());
@@ -607,7 +647,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
     }
 
     /**
-     * 更新表单--合并service
+     * 更新表单--合 并service
      *
      * @param customFormMergeDTO
      * @param userOID
@@ -640,6 +680,26 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         return result;
     }
 
+    /**
+     * 根据租户和类型获取表单并返回
+     * @author mh.z
+     * @date 2019/04/14
+     *
+     * @param tenantId
+     * @param formTypeId
+     * @param valid
+     * @return
+     */
+    public List<ApprovalForm> listByTenantAndType(Long tenantId, Integer formTypeId, Integer valid) {
+        EntityWrapper<ApprovalForm> wrapper = new EntityWrapper<ApprovalForm>();
+        wrapper.eq("valid", valid);
+        wrapper.eq("form_type_id", formTypeId);
+        wrapper.eq("tenant_id", tenantId);
+
+        List<ApprovalForm> approvalFormList = selectList(wrapper);
+        return approvalFormList;
+    }
+
 
     public static ApprovalFormDTO approvalFormToFormDTO(ApprovalForm approvalForm) {
         if (approvalForm == null) {
@@ -663,8 +723,9 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         result.setIconUrl(approvalForm.getIconUrl());
         result.setFromType(approvalForm.getFromType());
         result.setApprovalMode(approvalForm.getApprovalMode());
+        result.setWithdrawRule(approvalForm.getWithdrawRule());
+        result.setWithdrawFlag(approvalForm.getWithdrawFlag());
         result.setI18n(approvalForm.getI18n());
-
         return result;
     }
 
@@ -691,6 +752,8 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         approvalForm.setId(approvalFormDTO.getId());
         approvalForm.setSubmitFlag(approvalFormDTO.getSubmitFlag());
         approvalForm.setApprovalMode(approvalFormDTO.getApprovalMode());
+        approvalForm.setWithdrawFlag(approvalFormDTO.getWithdrawFlag());
+        approvalForm.setWithdrawRule(approvalFormDTO.getWithdrawRule());
 
         return approvalForm;
     }

@@ -42,6 +42,6 @@ public class ApprovalNodeDTO {
     private Integer sequenceNumber;
 
     @ApiModelProperty(value="是否可退回")
-    private Boolean backable;
+    private Boolean backable=Boolean.TRUE;
 
 }

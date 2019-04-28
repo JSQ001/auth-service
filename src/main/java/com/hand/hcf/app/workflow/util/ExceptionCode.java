@@ -28,7 +28,12 @@ public class ExceptionCode implements com.hand.hcf.app.core.util.RespCode {
     //工作流
     public static final String WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT="WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT";
     public static final String WORKFLOW_TRANSFER_NOT_EXIST="WORKFLOW_TRANSFER_NOT_EXIST";
-
+    public static final String WORKFLOW_NODE_CANNOT_BE_FORWARDED="WORKFLOW_NODE_CANNOT_BE_FORWARDED";
+    public static final  String WORKFLOW_RULEAPPROVALNODE_NOT_EXIST = "WORKFLOW_RULEAPPROVALNODE_NOT_EXIST";
+    /**
+     * 只能转交给当前租户下启用的员工
+     */
+    public static final String WORKFLOW_TENANT_NOT_OPENING="WORKFLOW_TENANT_NOT_OPENING";
     //快捷回复
     public static final String QUICK_REPLY_REPLY_MORE_THAN_500 = "QUICK_REPLY_REPLY_MORE_THAN_500";//快捷回复信息大于500!
 }

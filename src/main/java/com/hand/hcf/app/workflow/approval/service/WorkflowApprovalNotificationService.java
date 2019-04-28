@@ -53,7 +53,8 @@ public class WorkflowApprovalNotificationService {
             return;
         }
 
-       /* WorkflowCustomRemoteEvent workflowCustomRemoteEvent = createWorkflowCustomRemoteEvent(workFlowDocumentRef);
+        //jiu.zhao TODO
+        /*WorkflowCustomRemoteEvent workflowCustomRemoteEvent = createWorkflowCustomRemoteEvent(workFlowDocumentRef);
         // 记录到事件日志表
         WorkFlowEventLogs workFlowEventLogs = createWorkFlowEventLogs(workflowCustomRemoteEvent, workFlowDocumentRef);
         workFlowEventLogsService.createSysWorkflowEventLogs(workFlowEventLogs);
@@ -85,6 +86,8 @@ public class WorkflowApprovalNotificationService {
         workflowMessageCO.setDocumentId(workFlowDocumentRef.getDocumentId());
         workflowMessageCO.setApprovalText(workFlowDocumentRef.getRejectReason());
         workflowMessageCO.setRemark("单据编号:" + workFlowDocumentRef.getDocumentNumber());
+        workflowMessageCO.setDocumentTypeId(workFlowDocumentRef.getDocumentTypeId());
+        workflowMessageCO.setDocumentTypeCode(workFlowDocumentRef.getDocumentTypeCode());
 
         String originalSevice = applicationName + ":**";
         String destinationService = workFlowDocumentRef.getDestinationService();
