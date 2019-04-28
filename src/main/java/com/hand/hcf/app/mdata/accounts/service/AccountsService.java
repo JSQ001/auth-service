@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -227,7 +229,7 @@ public class AccountsService extends ServiceImpl<AccountsMapper,Accounts> {
             list = accountsMapper.findAccountsDTO(accountSetId,accountType,null,null,page);
 
         }else {
-            /*//  按code查询
+           //  按code查询
             List<AccountsDTO> codes = accountsMapper.findAccountsDTO(accountSetId,accountType,info,null,page);
             //  按name查询
             List<AccountsDTO> names = accountsMapper.findAccountsDTO(accountSetId,accountType,null,info,page);
@@ -260,7 +262,7 @@ public class AccountsService extends ServiceImpl<AccountsMapper,Accounts> {
                 });
             }else {
                 list = null;
-            }*/
+            }
             list = accountsMapper.findAccountsDTO(accountSetId,accountType,info,info,page);
         }
         //  判断list是否为空
