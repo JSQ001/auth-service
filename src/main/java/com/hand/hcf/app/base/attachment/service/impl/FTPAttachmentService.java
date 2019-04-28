@@ -180,6 +180,8 @@ public class FTPAttachmentService implements IAttachment {
         return null;
     }
 
+
+    //oss修改
     @Override
     public Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType) {
         Attachment attachment = new Attachment();
@@ -191,6 +193,7 @@ public class FTPAttachmentService implements IAttachment {
             String tempUrl;
             try {
                 tempUrl = upload(path, file.getBytes());
+
             } catch (Exception e) {
                 log.error("upload attachment error:" + e.getMessage());
                 throw new ValidationException(new ValidationError("attachment", "file upload failed"));

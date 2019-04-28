@@ -79,7 +79,7 @@ public class AttachmentController{
 
     @RequestMapping(value = "/upload/static/attachment", method = RequestMethod.POST)
     public ResponseEntity<AttachmentCO> uploadStaticAttachment(@RequestParam MultipartFile file,
-                                                                @RequestParam AttachmentType attachmentType) {
+                                                               @RequestParam AttachmentType attachmentType) {
         if (AttachmentType.EXPENSE_ICON.equals(attachmentType)) {
             Attachment attachment = attachmentService.uploadStatic(file, attachmentType);
 //            expenseTypeIconService.createExpenseTypeIcon(attachment);暂时注释
