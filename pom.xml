@@ -45,12 +45,6 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
-        <!--xxl-job -->
-        <dependency>
-            <groupId>com.hand.hec</groupId>
-            <artifactId>job-core</artifactId>
-            <version>1.0.0</version>
-        </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>

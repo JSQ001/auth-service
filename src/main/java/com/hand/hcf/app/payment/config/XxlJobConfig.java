@@ -2,7 +2,6 @@
 
 package com.hand.hcf.app.payment.config;
 
-import com.xxl.job.core.executor.XxlJobExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = "com.hand.hcf.app.payment.job")
 public class XxlJobConfig {
     private Logger logger = LoggerFactory.getLogger(XxlJobConfig.class);
 
@@ -35,21 +33,4 @@ public class XxlJobConfig {
 
     @Value("${xxl.job.enabled:false}")
     private Boolean enabled;
-
-    @Bean(initMethod = "start", destroyMethod = "destroy")
-    public XxlJobExecutor xxlJobExecutor() {
-        if (enabled) {
-            logger.info(">>>>>>>>>>> xxl-job config init.");
-            XxlJobExecutor xxlJobExecutor = new XxlJobExecutor();
-            xxlJobExecutor.setIp(ip);
-            xxlJobExecutor.setPort(port);
-            xxlJobExecutor.setAppName(appname);
-            xxlJobExecutor.setAdminAddresses(addresses);
-            xxlJobExecutor.setLogPath(logpath);
-            xxlJobExecutor.setAccessToken(accessToken);
-            return xxlJobExecutor;
-        }else{
-            return null;
-        }
-    }
 }
