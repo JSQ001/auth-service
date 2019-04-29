@@ -31,6 +31,7 @@ public class ApplicationHeaderWebDTO extends ApplicationHeader {
     private String companyName;
     private String departmentName;
     private String employeeName;
+    private String employeeCode;
     private String typeName;
     private String createdName;
 

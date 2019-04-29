@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.invoice.persistence.InvoiceExpenseTypeRulesTempMapper">
+
+    <resultMap id="InvoiceExpenseTypeRulesTempResultMap" type="com.hand.hcf.app.expense.invoice.domain.temp.InvoiceExpenseTypeRulesTemp">
+
+    </resultMap>
+
+    <resultMap id="queryInfoMap" type="com.hand.hcf.app.core.web.dto.ImportResultDTO">
+        <result column="successEntities" property="successEntities"/>
+        <result column="failureEntities" property="failureEntities"/>
+        <collection property="errorData" select="queryErrorData"
+                    column="{transactionID=transaction_id}"/>
+    </resultMap>
+
+    <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportResultDTO">
+        <result column="rowNumber" property="index"/>
+        <result column="error" property="error"/>
+    </resultMap>
+
+    <insert id="confirmImport">
+        INSERT INTO invoice_expense_type_rules
+        ( TENANT_ID,
+          SET_OF_BOOKS_ID,
+          ID,
+          GOODS_NAME,
+          EXPENSE_TYPE_ID,
+          ENABLED,
+          START_DATE,
+          END_DATE,
+          DESCRIPTION,
+          CREATED_DATE,
+          CREATED_BY,
+          LAST_UPDATED_DATE,
+          LAST_UPDATED_BY,
+          VERSION_NUMBER
+)
+        SELECT
+        #{TenantId},
+        t.SET_OF_BOOKS_ID,
+		t.id,
+        t.GOODS_NAME,
+        (select p.id from  exp_expense_type p where p.code = t.EXPENSE_TYPE_CODE),
+        t.enabled,
+        t.START_DATE,
+		t.END_DATE,
+		t.DESCRIPTION,
+        #{currentDate},
+        #{userId},
+        #{currentDate},
+        #{userId},
+		1
+        FROM invoice_expense_type_rules_temp t
+        WHERE t.batch_number = #{transactionID}
+        AND t.error_flag = 0
+    </insert>
+
+    <select id="queryInfo" resultMap="queryInfoMap">
+        select (select
+        count(0) as successEntities
+        from invoice_expense_type_rules_temp
+        where batch_number = #{transactionID}
+        and error_flag = 0) as successEntities,
+        (select
+        count(0) as failureEntities
+        from invoice_expense_type_rules_temp
+        where batch_number = #{transactionID}
+        and error_flag = 1) as failureEntities,
+        #{transactionID } as transaction_id
+        from dual
+
+    </select>
+
+    <select id="queryErrorData" resultMap="errorDataMap">
+        select t.row_number AS rowNumber,
+        t.error_msg AS error
+        FROM invoice_expense_type_rules_temp t
+
+        WHERE t.batch_number = #{transactionID}
+        and t.error_flag = 1
+    </select>
+
+
+
+    <!--<update id="updateExists">-->
+         <!--UPDATE sys_res_center_temp t-->
+           <!--SET t.error_flag   = 1,-->
+               <!--t.error_detail = concat(error_detail,-->
+                                       <!--'  一个账套下责任中心代码不可重复！')-->
+         <!--WHERE 1 &lt;-->
+        <!--(-->
+          <!--SELECT COUNT(1)-->
+            <!--FROM (select b.* from sys_res_center_temp b) temp-->
+           <!--WHERE temp.batch_number = #{batchNumber}-->
+             <!--AND temp.responsibility_center_code = t.responsibility_center_code)-->
+             <!--AND t.batch_number = #{batchNumber}-->
+
+    <!--</update>-->
+</mapper>

@@ -4,8 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @description: 源类型与要关联的类型
  * @version: 1.0
@@ -24,4 +22,15 @@ public class SourceTypeTargetTypeDTO {
 
     @ApiModelProperty(value = "关联类型代码")
     private String targetTypeCode;
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj){
+            return false;
+        }
+        SourceTypeTargetTypeDTO obj1 = (SourceTypeTargetTypeDTO) obj;
+        return this.getSetOfBooksCode().equals(obj1.getSetOfBooksCode())
+                && this.getSourceTypeCode().equals(obj1.getSourceTypeCode())
+                && this.getTargetTypeCode().equals(obj1.getTargetTypeCode());
+    }
 }

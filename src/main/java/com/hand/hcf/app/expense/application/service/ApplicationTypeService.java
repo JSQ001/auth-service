@@ -18,7 +18,6 @@ import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.common.utils.StringUtil;
-import com.hand.hcf.app.expense.init.dto.ModuleInitDTO;
 import com.hand.hcf.app.expense.init.dto.SourceTypeTargetTypeDTO;
 import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
@@ -1024,74 +1023,118 @@ public class ApplicationTypeService extends BaseService<ApplicationTypeMapper, A
      * @return
      */
     @Transactional
-    public String expApplicationTypeApplicationType(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS) {
+    public Map<String,String> expApplicationTypeApplicationType(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS) {
+        //申请单数据 用于修改申请类型标志
+        List<ApplicationType> applicationTypeList = new ArrayList<>();
+        //要插入的数据
+        List<ApplicationTypeAssignType> applicationTypeAssignTypeList = new ArrayList<>();
+        //错误信息
+        Map<String,String> resultMap = new HashMap<>();
+        int line = 1;
+        //校验成功标志
+        Boolean successFlag = true;
         for (SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO : sourceTypeTargetTypeDTOS) {
+            String errorMessage = "";
+            //校验重复信息
+            String repeatMessage = checkRepeat(sourceTypeTargetTypeDTOS, sourceTypeTargetTypeDTO);
+            if (!repeatMessage.equals("")){
+                errorMessage += "与第 " + repeatMessage + " 行数据重复,";
+            }
             //账套code
             String setOfBooksCode = sourceTypeTargetTypeDTO.getSetOfBooksCode();
             //申请类型代码
             String ApplicationTypeCode = sourceTypeTargetTypeDTO.getTargetTypeCode();
             //费用申请单类型代码
             String expenseApplicationTypeCode = sourceTypeTargetTypeDTO.getSourceTypeCode();
-            if (StringUtil.isNullOrEmpty(setOfBooksCode)) {
-                throw new BizException("账套code不可为空");
-            }
-            if (StringUtil.isNullOrEmpty(ApplicationTypeCode)) {
-                throw new BizException("申请类型代码不可为空");
-            }
-            if (StringUtil.isNullOrEmpty(expenseApplicationTypeCode)) {
-                throw new BizException("申请单类型代码不可为空");
-            }
-            List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
-            if (setOfBooksList == null || setOfBooksList.size() == 0) {
-                throw new BizException("未找到\'" + setOfBooksCode + "\'账套");
-            }
-            if (setOfBooksList.size() > 1) {
-                throw new BizException("找到多个\'" + setOfBooksCode + "\'账套");
-            }
-            //账套id
-            Long setOfBooksId = setOfBooksList.get(0).getId();
+            if (StringUtil.isNullOrEmpty(setOfBooksCode) || StringUtil.isNullOrEmpty(ApplicationTypeCode)
+                    || StringUtil.isNullOrEmpty(expenseApplicationTypeCode)) {
+                errorMessage += "必输字段为空";
+            }else {
+                Long setOfBooksId = null;
+                List<SetOfBooksInfoCO> setOfBooksList = organizationService.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
+                if (CollectionUtils.isEmpty(setOfBooksList)) {
+                    errorMessage += "未找到账套";
+                }else if (setOfBooksList.size() > 1) {
+                    errorMessage += "找到多个账套";
+                }else {
+                    //账套id
+                    setOfBooksId = setOfBooksList.get(0).getId();
+                    ApplicationType expenseApplicationType = new ApplicationType();
+                    expenseApplicationType.setSetOfBooksId(setOfBooksId);
+                    expenseApplicationType.setTypeCode(expenseApplicationTypeCode);
+                    expenseApplicationType.setBudgetFlag(null);
+                    expenseApplicationType.setAssociateContract(null);
+                    expenseApplicationType.setRequireInput(null);
+                    ApplicationType expenseApplicationTypeResult = baseMapper.selectOne(expenseApplicationType);
+                    if (expenseApplicationTypeResult == null) {
+                        errorMessage += "在当前帐套下,没有找到该申请单类型代码";
+                    }else {
+                        //费用申请单类型id
+                        Long expenseApplicationTypeId = expenseApplicationTypeResult.getId();
 
-            ApplicationType expenseApplicationType = new ApplicationType();
-            expenseApplicationType.setSetOfBooksId(setOfBooksId);
-            expenseApplicationType.setTypeCode(expenseApplicationTypeCode);
-            expenseApplicationType.setBudgetFlag(null);
-            expenseApplicationType.setAssociateContract(null);
-            expenseApplicationType.setRequireInput(null);
-            ApplicationType expenseApplicationTypeResult = baseMapper.selectOne(expenseApplicationType);
-            if (expenseApplicationTypeResult == null) {
-                String errorMessage = new String();
-                errorMessage = "当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + expenseApplicationTypeCode + "\'申请单类型代码！";
-                throw new BizException(errorMessage);
+                        //申请类型id
+                        Long applicationTypeId = expenseTypeService
+                                .queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, ApplicationTypeCode);
+                        if (applicationTypeId == null) {
+                            errorMessage += "在当前帐套下,没有找到该申请类型代码";
+                        }else {
+                            //构造插入数据
+                            ApplicationTypeAssignType applicationTypeAssignType = new ApplicationTypeAssignType();
+                            applicationTypeAssignType.setApplicationTypeId(expenseApplicationTypeId);
+                            applicationTypeAssignType.setExpenseTypeId(applicationTypeId);
+                            //判断是否已存在
+                            if ( assignTypeService.selectList(
+                                    new EntityWrapper<ApplicationTypeAssignType>()
+                                            .eq("application_type_id",applicationTypeAssignType.getApplicationTypeId())
+                                            .eq("expense_type_id",applicationTypeAssignType.getExpenseTypeId())
+                            ).size() > 0 ){
+                                errorMessage += "申请类型已在该申请单类型下";
+                            }else {
+                                //修改报账单关联类型为部分类型
+                                expenseApplicationTypeResult.setAllFlag(false);
+                                applicationTypeList.add(expenseApplicationTypeResult);
+                                applicationTypeAssignTypeList.add(applicationTypeAssignType);
+                            }
+                        }
+                    }
+                }
             }
-            //费用申请单类型id
-            Long expenseApplicationTypeId = expenseApplicationTypeResult.getId();
-
-            //申请类型id
-            Long applicationTypeId = expenseTypeService
-                    .queryApplicationTypeIdByApplicationTypeCode(setOfBooksId, ApplicationTypeCode);
-            if (applicationTypeId == null) {
-                throw new BizException("当前帐套\'" + setOfBooksCode + "\'下,没有找到\'" + ApplicationTypeCode + "\'申请类型代码");
+            if (!errorMessage.equals("")){
+                resultMap.put("第" + line + "行",errorMessage);
+                successFlag = false;
             }
-            //构造插入数据
-            ApplicationTypeAssignType applicationTypeAssignType = new ApplicationTypeAssignType();
-            applicationTypeAssignType.setApplicationTypeId(expenseApplicationTypeId);
-            applicationTypeAssignType.setExpenseTypeId(applicationTypeId);
-
-            //判断是否已存在
-            if ( assignTypeService.selectList(
-                    new EntityWrapper<ApplicationTypeAssignType>()
-                            .eq("application_type_id",applicationTypeAssignType.getApplicationTypeId())
-                            .eq("expense_type_id",applicationTypeAssignType.getExpenseTypeId())
-            ).size() > 0 ){
-                String errorMessage = "\'" + ApplicationTypeCode + "\'申请类型已在\'" + expenseApplicationTypeCode + "\'申请单类型下";
-                throw new BizException(errorMessage);
-            }
-            //修改报账单关联类型为部分类型
-            expenseApplicationTypeResult.setAllFlag(false);
-            baseMapper.updateById(expenseApplicationTypeResult);
-            //插入数据
-            assignTypeService.insert(applicationTypeAssignType);
+            line++;
         }
-        return "SUCCESS";
+        //如果数据没有错误信息
+        if (successFlag) {
+            //更新为部分类型
+            for (ApplicationType applicationType : applicationTypeList) {
+                baseMapper.updateById(applicationType);
+            }
+            //插入数据
+            for (ApplicationTypeAssignType applicationTypeAssignType : applicationTypeAssignTypeList) {
+                assignTypeService.insert(applicationTypeAssignType);
+            }
+            return null;
+        }
+        return resultMap;
+    }
+
+    private String checkRepeat(List<SourceTypeTargetTypeDTO> sourceTypeTargetTypeDTOS,
+                               SourceTypeTargetTypeDTO sourceTypeTargetTypeDTO){
+        String errorMessage = "";
+        int line = 1;
+        for (SourceTypeTargetTypeDTO typeTargetTypeDTO : sourceTypeTargetTypeDTOS) {
+            boolean isRepeat = sourceTypeTargetTypeDTO.equals(typeTargetTypeDTO);
+            if (isRepeat){
+                if (errorMessage.equals("")){
+                    errorMessage += line;
+                }else {
+                    errorMessage += "," + line;
+                }
+            }
+            line++;
+        }
+        return errorMessage;
     }
 }

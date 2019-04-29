@@ -705,11 +705,17 @@ public class OrganizationService {
                                                             Page page) {
         /*return companyClient.pageAssociateDepartmentByCond(companyId, departmentCode, null, null,
                 departmentName, ids, setOfBooksId, status, null, page);*/
-        return companyClient.pageAssociateDepartmentByCond(companyId, departmentCode, null, null,
+		if (ids == null) {
+            ids = new ArrayList<>();
+        }
+		        
+		return companyClient.pageAssociateDepartmentByCond(companyId, departmentCode, null, null,
                 departmentName, ids, setOfBooksId, status, null, page.getCurrent() - 1, page.getSize());
     }
 
     public UserGroupCO getUserGroupByCode(String userGroupCode){
         return userClient.getUserGroupByCode(userGroupCode);
     }
+
+    public CompanyCO getByCompanyCode(String companyCode ){ return companyClient.getByCompanyCode(companyCode);}
 }

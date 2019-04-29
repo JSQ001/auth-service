@@ -1,5 +1,6 @@
 package com.hand.hcf.app.common.enums;
 
+
 import com.hand.hcf.app.core.enums.SysEnum;
 
 /**
@@ -15,7 +16,7 @@ public enum DocumentOperationEnum implements SysEnum {
     , APPROVAL_PASS(1004) // 审批通过
     , APPROVAL_REJECT(1005) // 审批驳回
     , AUDIT_PASS(2004)      //复核通过
-    , AUDIT_REJECT(1005)    //复核拒绝
+    , AUDIT_REJECT(2005)    //复核拒绝
     //对公报销单 2001
     //预付款申请单 3001
     //付款申请单 4001

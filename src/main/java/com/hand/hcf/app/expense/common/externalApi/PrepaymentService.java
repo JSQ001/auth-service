@@ -35,13 +35,14 @@ public class PrepaymentService {
     }
 
     /**
-     * 根据单据头ID提交预付款单
+     * 根据单据头ID校验预付款单是否可以提交
      * @param requisitionHeaderId
-     * @param status
      * @return
      */
-    public Boolean submitCashPaymentRequisition(Long requisitionHeaderId, Integer status){
-        return prepaymentClient.submitCashPaymentRequisition(requisitionHeaderId, status);
+    public Boolean checkCashPaymentRequisitionBeforeSubmit(Long requisitionHeaderId){
+        //return prepaymentClient.checkCashPaymentRequisitionBeforeSubmit(requisitionHeaderId);
+        //jiu.zhao TODO
+        return true;
     }
 
     /**

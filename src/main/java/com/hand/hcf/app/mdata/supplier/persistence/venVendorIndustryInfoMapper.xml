@@ -27,7 +27,7 @@
     <delete id="deleteVenVendorIndustryInfoByVenderId">
         delete from ven_vendor_industry_info t
         <if test="vendorId != null">
-            where t.vendor_id =#{vendorId}
+            where t.vendor_id = #{vendorId}
         </if>
     </delete>
 </mapper>

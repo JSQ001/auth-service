@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -636,7 +637,15 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
         Map<String,List<String>> errorMap = new HashMap<>(16);
         String lineNumber = "第"+line+"行";
         List<String> stringList = new ArrayList<>();
-        if(TypeConversionUtils.isEmpty(dto.getCode()) || TypeConversionUtils.isEmpty(dto.getName())){
+        if(TypeConversionUtils.isEmpty(dto.getSetOfBooksCode()) ||
+                TypeConversionUtils.isEmpty(dto.getIconName()) ||
+                TypeConversionUtils.isEmpty(dto.getSetOfBooksCode()) ||
+                TypeConversionUtils.isEmpty(dto.getCode()) ||
+                TypeConversionUtils.isEmpty(dto.getEnabledStr()) ||
+                TypeConversionUtils.isEmpty(dto.getTypeCategoryName()) ||
+                TypeConversionUtils.isEmpty(dto.getEntryModeStr()) ||
+                TypeConversionUtils.isEmpty(dto.getTypeFlag()) ||
+                TypeConversionUtils.isEmpty(dto.getName())){
             stringList.add("必输字段为空！");
         }else {
             //默认当前租户
@@ -691,15 +700,76 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                 dto.setSourceTypeId(null);
                 dto.setTypeFlag(TypeEnum.APPLICATION_TYPE.getKey());
                 dto.setAttachmentFlag(null);
-            }else{
+            }else if(TypeEnum.COST_TYPE.getKey().compareTo(dto.getTypeFlag()) == 0){
                 dto.setTypeFlag(TypeEnum.COST_TYPE.getKey());
+                if(TypeConversionUtils.isEmpty(dto.getApplicationModel())||
+                        TypeConversionUtils.isEmpty(dto.getAttachmentFlag())){
+                    stringList.add("费用类型关联申请模式和附件模式两字段必输！");
+                }else{
+                    if(dto.getAttachmentFlag().equals(1) ||
+                            dto.getAttachmentFlag().equals(2) ||
+                            dto.getAttachmentFlag().equals(3) ||
+                            dto.getAttachmentFlag().equals(4)
+                            ){
+
+                    }else{
+                        stringList.add("附件模式不在1、2、3、4中！");
+                    }
+                    if(dto.getApplicationModel().equals("EITHER") ||
+                            dto.getApplicationModel().equals("MUST") ||
+                            dto.getApplicationModel().equals("NO_NEED")
+                            ){
+                        if(dto.getApplicationModel().equals("MUST")){
+                            if(TypeConversionUtils.isEmpty(dto.getContrastSign())||
+                                    TypeConversionUtils.isEmpty(dto.getAmount())){
+                                stringList.add("关联申请模式为MUST时，对比符号和金额不允许为空！");
+                            }else{
+                                if(dto.getContrastSign().equals("大于")||
+                                        dto.getContrastSign().equals("大于等于")){
+
+                                }else{
+                                    stringList.add("对比符号有误！");
+                                }
+                                if(dto.getAmount().compareTo(BigDecimal.ZERO) == -1){
+                                    stringList.add("金额必须大于等于0！");
+                                }
+
+                            }
+                        }else{
+                            if(TypeConversionUtils.isEmpty(dto.getContrastSign())&&
+                                    TypeConversionUtils.isEmpty(dto.getAmount())){
+                            }else{
+                                stringList.add("关联申请模式为自主选择/无需关联时（EITHER-自主选择，NO_NEED-无需关联），" +
+                                        "不可输入关联金额条件和关联金额值！");
+                            }
+                        }
+                    }else{
+                        stringList.add("关联申请模式不在EITHER、MUST、NO_NEED中！");
+                    }
+                }
+            } else{
+                stringList.add("数据的类型不在0-申请类型和1-费用类型范围内！");
             }
             // 如果金额录入模式 为总金额
             if (dto.getEntryMode() == null || !dto.getEntryMode()){
-                dto.setPriceUnit(null);
+                if(!TypeConversionUtils.isEmpty(dto.getPriceUnit())){
+                    stringList.add("金额录入模式为总金额，不需要输入单位！");
+                }
             }else{
                 if (dto.getPriceUnit() == null){
                     stringList.add("金额录入模式为单价*数量，请输入单位！");
+                }else{
+                    if(dto.getPriceUnit().equals("day") ||
+                            dto.getPriceUnit().equals("week") ||
+                            dto.getPriceUnit().equals("month") ||
+                            dto.getPriceUnit().equals("person") ||
+                            dto.getPriceUnit().equals("ge") ||
+                            dto.getPriceUnit().equals("time")
+                            ){
+
+                    }else{
+                        stringList.add("单位不在day、week、month、person、ge、time中！");
+                    }
                 }
             }
             if(Integer.valueOf(1).equals(dto.getTypeFlag())){

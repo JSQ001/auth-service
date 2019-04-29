@@ -3,6 +3,7 @@ package com.hand.hcf.app.expense.adjust.web.dto;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.co.AttachmentCO;
+import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -33,6 +34,11 @@ public class ExpenseAdjustLineWebDTO {
     private String expenseTypeName;
     // 单据行类型
     private String adjustLineCategory;
+
+    /**
+     * 维度信息
+     */
+    private List<ExpenseDimension> dimensions;
 
     // 维度1
     @JsonSerialize(using = ToStringSerializer.class)

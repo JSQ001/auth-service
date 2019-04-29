@@ -19,6 +19,11 @@ public class WorkflowMessageCO {
     private PrincipalLite userBean;//必传参数  取 LoginInformationUtil.getUser()
     private Long documentId;  // 单据ID
     private String approvalText;// 审批意见
+    /** 单据类型id */
+    private Long documentTypeId;
+    /** 单据类型代码 */
+    private String documentTypeCode;
+
     @Override
     public String toString() {
         return "WorkflowMessageCO{" +

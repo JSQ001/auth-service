@@ -586,6 +586,13 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                 });
 
             }
+            //获取是否抵扣标识
+            if (invoiceHead.getInvoiceTypeId() != null) {
+                InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
+                if (invoiceType != null) {
+                    invoiceHead.setDeductionFlag(invoiceType.getDeductionFlag());
+                }
+            }
             checkInvoiceHead(invoiceHead);
         }
         //插入发票行

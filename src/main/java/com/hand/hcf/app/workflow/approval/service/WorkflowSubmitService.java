@@ -140,8 +140,7 @@ public class WorkflowSubmitService {
         Assert.notNull(approvalDocumentCO.getDocumentOid(), "approvalDocumentCO.documentOid null");
         Assert.notNull(approvalDocumentCO.getDocumentCategory(), "approvalDocumentCO.documentCategory null");
         Assert.notNull(approvalDocumentCO.getSubmittedBy(), "approvalDocumentCO.submittedBy null");
-        //jiu.zhao 不需要
-        //Assert.notNull(approvalDocumentCO.getDestinationService(), "approvalDocumentCO.destinationService null");
+        Assert.notNull(approvalDocumentCO.getDestinationService(), "approvalDocumentCO.destinationService null");
 
         WorkFlowDocumentRef workFlowDocumentRef = new WorkFlowDocumentRef();
         BeanUtils.copyProperties(approvalDocumentCO, workFlowDocumentRef);

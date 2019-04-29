@@ -94,21 +94,21 @@ public class ModuleInitController {
     }
 
     @PutMapping("/expenseReportTypeExpenseType")
-    @ApiOperation(value = "报账单类型关联费用类型", notes = "报账单类型关联费用类型 开发:20855")
-    public String expExpenseReportTypeExpenseType(@ApiParam(value = "报账单关联费用类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
-        return expenseReportTypeService.expExpenseReportTypeExpenseType(SourceTypeTargetTypeDTOS);
+    @ApiOperation(value = "报账单类型关联费用类型", notes = "报账单类型关联费用类型 开发:赵立国")
+    public ResponseEntity expExpenseReportTypeExpenseType(@ApiParam(value = "报账单关联费用类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return ResponseEntity.ok(expenseReportTypeService.expExpenseReportTypeExpenseType(SourceTypeTargetTypeDTOS));
     }
 
     @ApiOperation(value = "费用申请单关联申请类型", notes = "费用申请单关联申请类型 开发:20855")
     @PutMapping("/expenseApplicationTypeApplicationType")
-    public String expApplicationTypeApplicationType(@ApiParam(value = "费用申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
-        return applicationTypeService.expApplicationTypeApplicationType(SourceTypeTargetTypeDTOS);
+    public ResponseEntity expApplicationTypeApplicationType(@ApiParam(value = "费用申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return ResponseEntity.ok(applicationTypeService.expApplicationTypeApplicationType(SourceTypeTargetTypeDTOS));
     }
 
     @ApiOperation(value = "差旅申请单关联申请类型", notes = "差旅申请单关联申请类型 开发:20855")
     @PutMapping("/travelApplicationTypeApplicationType")
-    public String expTravelApplicationTypeApplicationType(@ApiParam(value = "差旅申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
-        return travelApplicationTypeService.expTravelApplicationTypeApplicationType(SourceTypeTargetTypeDTOS);
+    public ResponseEntity expTravelApplicationTypeApplicationType(@ApiParam(value = "差旅申请单关联申请类型") @RequestBody List<SourceTypeTargetTypeDTO> SourceTypeTargetTypeDTOS) {
+        return ResponseEntity.ok(travelApplicationTypeService.expTravelApplicationTypeApplicationType(SourceTypeTargetTypeDTOS));
     }
 
 

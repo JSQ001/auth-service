@@ -934,7 +934,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         submitData.setRemark(expenseReportHeader.getDescription()); // 备注
         submitData.setSubmittedBy(OrgInformationUtil.getCurrentUserOid()); // 提交人
         submitData.setFormOid(formOid); // 表单oid
-        submitData.setDestinationService(applicationName); // 注册到Eureka中的名称
+        submitData.setDestinationService("expense"); // 注册到Eureka中的名称
 
         //调用工作流的三方接口进行提交
         ApprovalResultCO submitResult = workflowClient.submitWorkflow(submitData);
@@ -992,6 +992,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             saveDataToPayment(header);
             header.setAuditFlag("Y");
             header.setAuditDate(ZonedDateTime.now());
+            //paymentService.updateAuditChangeWriteOffStatus(DocumentTypeEnum.PUBLIC_REPORT.getCategory(), headerId,LoginInformationUtil.getCurrentUserId(),1);
+            //accountingService.updateAccountPosting(DocumentTypeEnum.PUBLIC_REPORT.getCategory(),headerId,null,null,LoginInformationUtil.getCurrentUserId());
             expenseReportLineService.updateExpenseReportLineAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());
             invoiceHeadService.updateInvoiceAccountingFlagByHeaderId(header.getId(),"Y");
             expenseReportDistService.updateExpenseReportDistAduitStatusByHeaderId(header.getId(), "Y", ZonedDateTime.now());

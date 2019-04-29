@@ -3,7 +3,6 @@ package com.hand.hcf.app.expense.adjust.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
-import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
@@ -135,8 +134,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         submitData.setRemark(head.getDescription()); // 备注
         submitData.setSubmittedBy(OrgInformationUtil.getCurrentUserOid()); // 提交人
         submitData.setFormOid(formOid); // 表单oid
-        //jiu.zhao 不需要
-        //submitData.setDestinationService(applicationName); // 注册到Eureka中的名称
+        submitData.setDestinationService("expense"); // 注册到Eureka中的名称
 
         // 调用工作流的三方接口进行提交
         ApprovalResultCO submitResult = workflowInterface.submitWorkflow(submitData);
@@ -255,11 +253,19 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         expenseAdjustHeader.setId(null);
         this.insert(expenseAdjustHeader);
         // 保存单据关联维度信息
-        if (!CollectionUtils.isEmpty(adjustTypeWebDTO.getDimensions())){
+        if (!CollectionUtils.isEmpty(adjustTypeWebDTO.getDimensions())) {
+            List<ExpenseDimension> dtoDimensions = dto.getDimensions();
+            if (adjustTypeWebDTO.getDimensions().size() != dtoDimensions.size()) {
+                throw new BizException(RespCode.EXPENSE_DIMENSIONS_IS_NULL);
+            }
+            Map<Long, ExpenseDimension> valueMap = dtoDimensions
+                    .stream()
+                    .collect(Collectors.toMap(ExpenseDimension::getDimensionId, e -> e));
             adjustTypeWebDTO.getDimensions().forEach(e -> {
                 e.setHeaderId(expenseAdjustHeader.getId());
                 e.setId(null);
                 e.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
+				e.setValue(valueMap.get(e.getDimensionId()).getValue());
             });
             dimensionService.insertBatch(adjustTypeWebDTO.getDimensions());
         }
@@ -399,7 +405,17 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         ExpenseAdjustType expenseAdjustType = expenseAdjustTypeService.selectById(expenseAdjustHeader.getExpAdjustTypeId());
         ExpenseAdjustHeaderWebDTO dto = new ExpenseAdjustHeaderWebDTO();
         BeanUtils.copyProperties(expenseAdjustHeader, dto);
+        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(
+                expAdjustHeaderId, ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), null);
+        dto.setDimensions(dimensions);
         dto.setTypeName(expenseAdjustType.getExpAdjustTypeName());
+        // 编辑时设置保存的值，如果保存的值不存在，则为空，同时设置可以选到的维值
+        commonService.setDimensionValueNameAndOptions(
+                dto.getDimensions(),
+                dto.getCompanyId(),
+                dto.getUnitId(),
+                dto.getEmployeeId()
+        );
         setCompanyAndDepartmentAndEmployee(Arrays.asList(dto), true, true);
         setAttachments(dto);
         return dto;
@@ -534,7 +550,25 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         }else{
             expenseAdjustHeader.setAttachmentOid("");
         }
+        List<ExpenseDimension> dimensions = dimensionService.listDimensionByHeaderIdAndType(
+                dto.getId(), ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey(), true);
+        // 如果维度不为空 将前端的维度值赋值给查询出来的
+        if (!CollectionUtils.isEmpty(dimensions)) {
+            List<ExpenseDimension> dtoDimensions = dto.getDimensions();
+            if (dimensions.size() != dtoDimensions.size()) {
+                throw new BizException(RespCode.EXPENSE_DIMENSIONS_IS_NULL);
+            }
+            Map<Long, ExpenseDimension> valueMap = dtoDimensions
+                    .stream()
+                    .collect(Collectors.toMap(ExpenseDimension::getDimensionId, e -> e));
+            dimensions.forEach(e -> {
+                e.setValue(valueMap.get(e.getDimensionId()).getValue());
+            });
+        }
         this.updateById(expenseAdjustHeader);
+        if (!CollectionUtils.isEmpty(dimensions)) {
+            dimensionService.updateBatchById(dimensions);
+        }
         return expenseAdjustHeader;
     }
 

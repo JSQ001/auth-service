@@ -159,7 +159,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         submitData.setRemark(header.getRemarks()); // 备注
         submitData.setSubmittedBy(OrgInformationUtil.getCurrentUserOid()); // 提交人
         submitData.setFormOid(formOid); // 表单oid
-        submitData.setDestinationService(applicationName); // 注册到Eureka中的名称
+        submitData.setDestinationService("expense"); // 注册到Eureka中的名称
 
         //审批中
         ApprovalResultCO submitResult = workflowClient.submitWorkflow(submitData);
@@ -173,11 +173,11 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 } else {
                     updateDocumentStatus(header.getId(), approvalStatus, "");
                 }
-                //如果有关联预付款单，提交预付款单
+                //如果有关联预付款单，修改状态
                 CashPaymentRequisitionHeaderCO paymentRequisitionHeaderCO = prepaymentService
                         .getCashPaymentRequisitionHeaderByApplicationHeaderId(header.getId());
                 if (paymentRequisitionHeaderCO != null) {
-                    prepaymentService.submitCashPaymentRequisition(paymentRequisitionHeaderCO.getId(), approvalStatus);
+                    prepaymentService.updateCashPaymentRequisitionStatus(paymentRequisitionHeaderCO.getId(), approvalStatus);
                 }
             } else {
                 throw new BizException(submitResult.getError());
@@ -210,6 +210,30 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         //校验状态
         checkDocumentStatus(DocumentOperationEnum.APPROVAL.getId(), header.getStatus());
+
+        //校验申请单金额是否大于关联合同金额
+        //jiu.zhao 合同
+        /*if (header.getContractHeaderId() != null) {
+            List<ContractHeaderCO> contractHeaderCOS = contractClient.listContractHeadersByIds(Arrays.asList(header.getContractHeaderId()));
+            if (!contractHeaderCOS.isEmpty()) {
+                BigDecimal contractAmount = contractHeaderCOS.get(0).getAmount();
+                if (header.getAmount().compareTo(contractAmount) > 0) {
+                    throw new BizException(RespCode.EXPENSE_APPLICATION_AMOUNT_MUST_LESS_THEN_CONTRACT_AMOUNT);
+                }
+            }
+        }*/
+
+        CashPaymentRequisitionHeaderCO paymentRequisitionHeaderCO = prepaymentService
+                .getCashPaymentRequisitionHeaderByApplicationHeaderId(header.getId());
+        if (paymentRequisitionHeaderCO != null) {
+            //校验关联预付款单金额是否大于申请单金额
+            BigDecimal prePaymentAmount = paymentRequisitionHeaderCO.getAdvancePaymentAmount();
+            if (header.getAmount().compareTo(prePaymentAmount) < 0) {
+                throw new BizException(RespCode.EXPENSE_PREPAYMENT_AMOUNT_MUST_LESS_THEN_APPLICATION_AMOUNT);
+            }
+            //根据单据头ID校验预付款单是否可以提交
+            prepaymentService.checkCashPaymentRequisitionBeforeSubmit(paymentRequisitionHeaderCO.getId());
+        }
         // 提交设置申请日期为当前日期
         header.setRequisitionDate(ZonedDateTime.now());
         header.setStatus(DocumentOperationEnum.APPROVAL.getId());
@@ -523,6 +547,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                         if (isSetEmployee) {
                             if (finalUsersMap.containsKey(e.getEmployeeId())) {
                                 e.setEmployeeName(finalUsersMap.get(e.getEmployeeId()).getFullName());
+                                e.setEmployeeCode(finalUsersMap.get(e.getEmployeeId()).getEmployeeCode());
                             }
                             if (finalUsersMap.containsKey(e.getCreatedBy())) {
                                 e.setCreatedName(finalUsersMap.get(e.getCreatedBy()).getFullName());
@@ -1685,6 +1710,9 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
 
             for (ApplicationAssociatePrepaymentDTO dto : result) {
                 dto.setAssociableAmount(dto.getAmount().subtract(dto.getAssociatedAmount()));
+                dto.setDepartmentName(organizationService.getDepartmentById(dto.getDepartmentId()).getName());
+                ContactCO contactCO= organizationService.getUserById(dto.getEmployeeId());
+                dto.setName(contactCO.getFullName());
             }
 
             return result;
