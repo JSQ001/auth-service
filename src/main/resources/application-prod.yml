@@ -114,13 +114,20 @@ async:
   queue-capacity: 8
   core-pool-size: 8
   keep-alive-seconds: 30
-hcf:
-  storage:
-    ftp:
-      port: 22
-      privateKey: /config/id_rsa_hcfftp
-      staticUrl: http://47.101.143.73:9089/
-      url: 47.101.143.73
-      username: hcfftp
-    mode: FTP
+#hcf:
+#  storage:
+#    ftp:
+#      port: 22
+#      privateKey: /config/id_rsa_hcfftp
+#      staticUrl: http://47.101.143.73:9089/
+#      url: 47.101.143.73
+#      username: hcfftp
+#    mode: FTP
 
+hcf:
+   storage:
+      endpoint:    oss-cn-hangzhou.aliyuncs.com
+      accessKeyId:   LTAILXuGflnRebM1
+      accessKeySecret:  La2LjuhgAqtJttgGmwMrRwj7tfsTQE
+      bucketName:      hand-ant-reimburse1
+      filehost:         hand-ant001
