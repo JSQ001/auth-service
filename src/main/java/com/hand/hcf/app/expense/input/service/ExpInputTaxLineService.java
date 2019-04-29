@@ -289,4 +289,22 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                     });
         }
     }
+
+    public String checkSubmitLine(Long headerId){
+        List<ExpInputForReportLineDTO> lineDTOList = baseMapper.checklistExpInputTaxLine(headerId);
+        List<String> stringList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(lineDTOList)){
+            lineDTOList.stream().forEach( lineDTO ->{
+                        if(lineDTO.getBaseAmount().compareTo(lineDTO.getAbleAmount()) == 1){
+                            stringList.add(lineDTO.getDocumentNumber());
+                        }
+                    }
+            );
+        }
+        if(CollectionUtils.isEmpty(stringList)){
+            return "";
+        }else {
+            return stringList.toString();
+        }
+    }
 }

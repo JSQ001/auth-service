@@ -19,6 +19,7 @@ SELECT
 	t.FUNCTION_AMOUNT BASE_FUNCTION_AMOUNT,
 	t.AMOUNT distAmount,
 	t.TAX_DIST_AMOUNT distTaxAmount,
+	t.tax_dist_function_amount distTaxFunctionAmount,
 	t.CURRENCY_CODE,
 	t.EXCHANGE_RATE rate
 FROM
@@ -49,6 +50,8 @@ WHERE
 	where d.id = t.EXP_REPORT_DIST_ID) distAmount,
 	(select d.tax_dist_amount from  exp_report_dist d
 	where d.id = t.EXP_REPORT_DIST_ID) distTaxAmount,
+	(select d.tax_dist_function_amount from  exp_report_dist d
+	where d.id = t.EXP_REPORT_DIST_ID) distTaxFunctionAmount,
 	t.CURRENCY_CODE,
 	t.RATE
 	from EXP_INPUT_TAX_DIST t

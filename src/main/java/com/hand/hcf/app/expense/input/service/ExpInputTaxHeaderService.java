@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.DataAuthorityMetaHandler;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
@@ -18,6 +19,7 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.AccountingService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
+import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
@@ -238,6 +240,10 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                 header.setDocumentOid(docOid.toString());
             } else {
                 docOid = UUID.fromString(header.getDocumentOid());
+            }
+            String result = expInputTaxLineService.checkSubmitLine(id);
+            if(!("").equals(result)){
+                throw new BizException(RespCode.EXPENSE_INPUT_TAX_TRANSFER_AMOUNT_NOT_ENOUGH,new Object[]{result});
             }
             //尝试插入工作流历史
             commonApprovalHistoryCO.setEntityOid(docOid);

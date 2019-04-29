@@ -66,15 +66,13 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
             }else if(typelist.size() > 1){
                 stringList.add("类型代码存在多个！");
             }
-            //todo 这个接口是CompanyCode是模糊查询的需要提供三方接口
-            List<CompanyCO> companyCOList = organizationService.listCompanyBySetOfBooksIdAndCodeAndName(
-                    setOfBooksId,dto.getCompanyCode());
-            if (CollectionUtils.isEmpty(companyCOList)) {
-                stringList.add("公司代码找不到！");
-            }else if(companyCOList.size() == 1) {
-                dto.setCompanyId(companyCOList.get(0).getId());
-            }else if(companyCOList.size() > 1){
-                stringList.add("公司代码存在多个！");
+            if(!TypeConversionUtils.isEmpty(dto.getCompanyCode())) {
+                CompanyCO companyCO = organizationService.getByCompanyCode(dto.getCompanyCode());
+                if (companyCO != null) {
+                    stringList.add("公司代码找不到！");
+                } else {
+                    dto.setCompanyId(companyCO.getId());
+                }
             }
         }
         if(!CollectionUtils.isEmpty(stringList)){

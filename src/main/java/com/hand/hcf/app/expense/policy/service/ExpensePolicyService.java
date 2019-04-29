@@ -742,15 +742,12 @@ public class ExpensePolicyService extends BaseService<ExpensePolicyMapper, Expen
                 stringList.add("类型代码存在多个！");
             }
             //todo 这个接口是CompanyCode是模糊查询的需要提供三方接口
-            if(org.springframework.util.StringUtils.hasText(dto.getCompanyCode())){
-                List<CompanyCO> companyCOList = organizationService.listCompanyBySetOfBooksIdAndCodeAndName(
-                        setOfBooksId,dto.getCompanyCode());
-                if (CollectionUtils.isEmpty(companyCOList)) {
+            if(!TypeConversionUtils.isEmpty(dto.getCompanyCode())) {
+                CompanyCO companyCO = organizationService.getByCompanyCode(dto.getCompanyCode());
+                if (companyCO != null) {
                     stringList.add("公司代码找不到！");
-                }else if(companyCOList.size() == 1) {
-                    dto.setCompanyId(companyCOList.get(0).getId());
-                }else if(companyCOList.size() > 1){
-                    stringList.add("公司代码存在多个！");
+                } else {
+                    dto.setCompanyId(companyCO.getId());
                 }
             }
             //todo CompanyLevelCO没有id，暂时注释

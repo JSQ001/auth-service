@@ -14,6 +14,7 @@
           df.FIELD_ID,
           df.FIELD_TYPE,
           df.VALUE,
+          df.NAME,
           df.DELETED,
           df.VERSION_NUMBER,
           df.CREATED_DATE,

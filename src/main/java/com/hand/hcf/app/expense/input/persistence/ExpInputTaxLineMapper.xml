@@ -117,4 +117,22 @@
            and t.exp_report_line_id = t2.id
            and t2.expense_type_id = t3.id
 	</select>
+    <select id="checklistExpInputTaxLine" resultType="com.hand.hcf.app.expense.input.dto.ExpInputForReportLineDTO">
+        select (select  coalesce(t4.tax_amount,0) - coalesce(sum(BASE_AMOUNT), 0)
+                  from EXP_INPUT_TAX_LINE eitl
+                 where eitl.EXP_REPORT_LINE_ID = t4.id
+                   and exists
+                 (select 1
+                          from EXP_INPUT_TAX_LINE tl, EXP_INPUT_TAX_HEADER th
+                         where tl.input_tax_header_id = th.id
+                           and tl.id = eitl.id
+                           and th.status in (1002, 1004))) ableAmount,
+                  t3.base_amount,
+                 (SELECT erh.REQUISITION_NUMBER
+                            FROM EXP_REPORT_HEADER erh
+                            WHERE erh.id = t4.EXP_REPORT_HEADER_ID) documentNumber
+          from EXP_INPUT_TAX_LINE t3, EXP_REPORT_LINE t4
+         where t3.EXP_REPORT_LINE_ID = t4.id
+                and t3.INPUT_TAX_HEADER_ID = #{headerId}
+    </select>
 </mapper>

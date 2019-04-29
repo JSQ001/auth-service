@@ -293,5 +293,18 @@ public interface RespCode {
      */
     String EXPENSE_REPORT_DIST_NOT_APPROVE = "expense.report.not.approve";
 
+    /**
+     * 进项税提交校验行信息
+     */
+    String EXPENSE_INPUT_TAX_TRANSFER_AMOUNT_NOT_ENOUGH = "EXPENSE_INPUT_TAX_TRANSFER_AMOUNT_NOT_ENOUGH";
+
+    /**
+     * 申请总金额不可大于关联合同总金额，请修改金额！
+     */
+    String EXPENSE_APPLICATION_AMOUNT_MUST_LESS_THEN_CONTRACT_AMOUNT = "EXPENSE_APPLICATION_AMOUNT_MUST_LESS_THEN_CONTRACT_AMOUNT";
+    /**
+     * 预付款金额不可大于申请总金额，请修改金额！
+     */
+    String EXPENSE_PREPAYMENT_AMOUNT_MUST_LESS_THEN_APPLICATION_AMOUNT = "EXPENSE_PREPAYMENT_AMOUNT_MUST_LESS_THEN_APPLICATION_AMOUNT";
 
 }

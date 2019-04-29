@@ -1,8 +1,11 @@
 package com.hand.hcf.app.workflow.approval.service;
 
+import com.hand.hcf.app.common.co.ApprovalNotificationCO;
 import com.hand.hcf.app.common.co.WorkflowMessageCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
+import com.hand.hcf.app.expense.common.workflow.ExpenseWorkflowEventConsumer;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.prepayment.workflow.WorkflowEventConsumer;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.domain.WorkFlowEventLogs;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
@@ -34,6 +37,12 @@ public class WorkflowApprovalNotificationService {
     @Autowired
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
+    @Autowired
+    ExpenseWorkflowEventConsumer expenseWorkflowEventConsumer;
+
+    @Autowired
+    WorkflowEventConsumer prepaymentWorkflowEventConsumer;
+
     /**
      * 发送消息
      * @author mh.z
@@ -53,18 +62,66 @@ public class WorkflowApprovalNotificationService {
             return;
         }
 
-        //jiu.zhao TODO
+        //jiu.zhao 模块合并不需要使用事件通知
         /*WorkflowCustomRemoteEvent workflowCustomRemoteEvent = createWorkflowCustomRemoteEvent(workFlowDocumentRef);
         // 记录到事件日志表
         WorkFlowEventLogs workFlowEventLogs = createWorkFlowEventLogs(workflowCustomRemoteEvent, workFlowDocumentRef);
         workFlowEventLogsService.createSysWorkflowEventLogs(workFlowEventLogs);
 
-        workFlowDocumentRef.setEventId(workflowCustomRemoteEvent.getId());
+        workFlowDocumentRef.setEventId(workflowCustomRemoteEvent.getId());*/
+
+
+        /*logger.info("[发布工作流事件消息]：" + workflowCustomRemoteEvent);
+        applicationEventPublisher.publishEvent(workflowCustomRemoteEvent);*/
+
+
+        publishMessage(workFlowDocumentRef);
+    }
+
+    public void publishMessage(WorkFlowDocumentRef workFlowDocumentRef) {
+
+        Assert.notNull(workFlowDocumentRef, "workFlowDocumentRef null");
+
+        WorkflowMessageCO workflowMessageCO = new WorkflowMessageCO();
+        workflowMessageCO.setUserBean(OrgInformationUtil.getUser());
+        workflowMessageCO.setEntityOid(workFlowDocumentRef.getDocumentOid());
+        workflowMessageCO.setEntityType(workFlowDocumentRef.getDocumentCategory().toString());
+        workflowMessageCO.setStatus(workFlowDocumentRef.getStatus());
+        workflowMessageCO.setUserId(workFlowDocumentRef.getCreatedBy());
+        workflowMessageCO.setDocumentId(workFlowDocumentRef.getDocumentId());
+        workflowMessageCO.setApprovalText(workFlowDocumentRef.getRejectReason());
+        workflowMessageCO.setRemark("单据编号:" + workFlowDocumentRef.getDocumentNumber());
+        workflowMessageCO.setDocumentTypeId(workFlowDocumentRef.getDocumentTypeId());
+        workflowMessageCO.setDocumentTypeCode(workFlowDocumentRef.getDocumentTypeCode());
+
+        // 记录到事件日志表
+        Assert.notNull(workFlowDocumentRef, "workflowCustomRemoteEvent null");
+        Assert.notNull(workFlowDocumentRef, "workFlowDocumentRef null");
+
+        WorkFlowEventLogs workFlowEventLogs = new WorkFlowEventLogs();
+        workFlowEventLogs.setEventId(workFlowDocumentRef.getId().toString());
+        workFlowEventLogs.setDocumentOid(workFlowDocumentRef.getDocumentOid());
+        workFlowEventLogs.setDocumentCategory(workFlowDocumentRef.getDocumentCategory());
+        workFlowEventLogs.setDestinationService(workFlowDocumentRef.getDestinationService());
+        workFlowEventLogs.setEventConfirmStatus(false);
+
         workFlowDocumentRef.setEventConfirmStatus(false);
         workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
 
-        logger.info("[发布工作流事件消息]：" + workflowCustomRemoteEvent);
-        applicationEventPublisher.publishEvent(workflowCustomRemoteEvent);*/
+        //jiu.zhao 直接调用服务更新状态
+        ApprovalNotificationCO approvalNoticeCO = new ApprovalNotificationCO();
+        approvalNoticeCO.setDocumentId(workFlowDocumentRef.getDocumentId());
+        approvalNoticeCO.setDocumentOid(workFlowDocumentRef.getDocumentOid());
+        approvalNoticeCO.setDocumentCategory(workFlowDocumentRef.getDocumentCategory());
+        approvalNoticeCO.setDocumentStatus(workFlowDocumentRef.getStatus());
+
+        String destinationService = workFlowDocumentRef.getDestinationService();
+        if ("expense".equals(destinationService)) {
+            expenseWorkflowEventConsumer.approve(approvalNoticeCO);
+        } else if("prepayment".equals(destinationService)) {
+            prepaymentWorkflowEventConsumer.approve(approvalNoticeCO);
+        }
+
     }
 
     /**

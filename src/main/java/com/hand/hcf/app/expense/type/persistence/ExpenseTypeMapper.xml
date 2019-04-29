@@ -278,6 +278,7 @@
         <result property="amount" column="amount"/>
         <result property="travelTypeCode" column="travel_type_code"/>
         <result property="userGroupFlag" column="user_group_flag"/>
+        <result property="typeCategoryName" column="type_category_name"/>
         <collection property="userGroupIds" ofType="java.lang.Long">
             <result column="user_type_id"/>
         </collection>

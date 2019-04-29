@@ -671,7 +671,7 @@ public class TravelApplicationHeaderService extends BaseService<TravelApplicatio
         submitData.setRemark(header.getDescription()); // 备注
         submitData.setSubmittedBy(OrgInformationUtil.getCurrentUserOid()); // 提交人
         submitData.setFormOid(formOid); // 表单oid
-        submitData.setDestinationService(applicationName); // 注册到Eureka中的名称
+        submitData.setDestinationService("expense"); // 注册到Eureka中的名称
 
         // 调用工作流的三方接口进行提交
         ApprovalResultCO submitResult = workflowClient.submitWorkflow(submitData);

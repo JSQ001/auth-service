@@ -37,4 +37,8 @@ public interface ExpInputTaxLineMapper extends BaseMapper<ExpInputTaxLine>{
      * 获取 报账单的行数据，部分数据需要联表查询
      * */
     List<ExpInputTaxLineDTO> listLineById(@Param("inputTaxHeaderId") Long inputTaxHeaderId);
+    /**
+     * 获取 报账单的行数据对应报账单行的可转出金额
+     * */
+    List<ExpInputForReportLineDTO> checklistExpInputTaxLine(@Param("headerId") Long headerId);
 }
