@@ -3,9 +3,11 @@ package com.hand.hcf.app.base.attachment.web;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
 import com.hand.hcf.app.base.attachment.enums.AttachmentType;
+import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.util.HeaderUtil;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import io.micrometer.core.annotation.Timed;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -34,6 +37,9 @@ public class AttachmentController{
 
     @Autowired
     private AttachmentService attachmentService;
+
+    @Autowired
+    private IAttachment attachmentImpl;
 
     /**
      * DELETE  /attachments/:id -> delete the "id" attachment.
@@ -127,7 +133,7 @@ public class AttachmentController{
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @RequestMapping(value = "/attachments/download/{oid}", method = RequestMethod.GET)
+    //@RequestMapping(value = "/attachments/download/{oid}", method = RequestMethod.GET)
     @Timed
     public void getExpenseReport(@PathVariable String oid,
                                  HttpServletRequest httpServletRequest,
@@ -148,4 +154,16 @@ public class AttachmentController{
         attachmentService.writeFileToResp(httpServletResponse, attachment);
     }
 
+    @RequestMapping(value = "/attachments/download/{oid}", method = RequestMethod.GET)
+    public void downLoadAttachment(@PathVariable String oid,
+                                   HttpServletRequest httpServletRequest,
+                                   HttpServletResponse httpServletResponse) throws IOException{
+            Attachment attachment = attachmentService.findByOId(oid);
+            String objectName = attachment.getName();
+            if(StringUtils.isNotBlank(objectName)) {
+                attachmentImpl.downLoadFile(httpServletRequest,httpServletResponse,objectName);
+            } else{
+                return;
+            }
+    }
 }
