@@ -126,8 +126,12 @@ async:
 
 hcf:
    storage:
-      endpoint:    oss-cn-hangzhou.aliyuncs.com
-      accessKeyId:   LTAILXuGflnRebM1
-      accessKeySecret:  La2LjuhgAqtJttgGmwMrRwj7tfsTQE
-      bucketName:      hand-ant-reimburse1
-      filehost:         hand-ant001
+     oss:
+       endpoint: oss-cn-hangzhou.aliyuncs.com
+       Client:
+         id: LTAILXuGflnRebM1
+         secret: La2LjuhgAqtJttgGmwMrRwj7tfsTQE
+       Bucket:
+         name: hand-ant-reimburse1
+       filehost: gfbrmp
+     mode: OSS

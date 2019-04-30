@@ -32,8 +32,6 @@ public class OssConfiguration {
 
     private static final String STORAGE_MODE = "OSS";
 
-    private final static Logger log = LoggerFactory.getLogger(OssConfiguration.class);
-
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public OSSUtil ossUtil(){
