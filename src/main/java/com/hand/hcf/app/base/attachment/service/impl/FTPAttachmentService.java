@@ -7,6 +7,7 @@ import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.config.FtpConfiguration;
 import com.hand.hcf.app.base.config.HcfBaseProperties;
+import com.hand.hcf.app.base.config.OssConfiguration;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.enums.MediaType;
 import com.hand.hcf.app.core.exception.BizException;
@@ -16,6 +17,7 @@ import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -55,19 +57,24 @@ public class FTPAttachmentService implements IAttachment {
      */
     @Override
     public String upload(String path, byte[] bytes) {
-        FtpConfiguration.SFTPUtil sftpUtil = applicationContext.getBean(FtpConfiguration.SFTPUtil.class);
         String filePath = null;
-        //连接登录sftp
-        sftpUtil.login();
-        try {
-            filePath = sftpUtil.upload(path, bytes);
 
-        } catch (SftpException e) {
-            throw new BizException("file upload failed.","file upload failed. " + e.getMessage());
-        }finally {
-            sftpUtil.logout();
+        if ("FTP".equals(hcfBaseProperties.getStorage().getMode())) {
+            FtpConfiguration.SFTPUtil sftpUtil = applicationContext.getBean(FtpConfiguration.SFTPUtil.class);
+            //连接登录sftp
+            sftpUtil.login();
+            try {
+                filePath = sftpUtil.upload(path, bytes);
+
+            } catch (SftpException e) {
+                throw new BizException("file upload failed.","file upload failed. " + e.getMessage());
+            }finally {
+                sftpUtil.logout();
+            }
+        } else if ("OSS".equals(hcfBaseProperties.getStorage().getMode())) {
+            OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
+            filePath = ossUtil.upload(path, bytes);
         }
-
         return filePath;
     }
 

@@ -3,7 +3,6 @@ package com.hand.hcf.app.base.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-
 @ConfigurationProperties(prefix = "hcf")
 public class HcfBaseProperties {
     private final Storage storage = new Storage();
@@ -13,12 +12,9 @@ public class HcfBaseProperties {
         return sso;
     }
 
-
     public Storage getStorage() {
         return storage;
     }
-
-
 
     public static class Storage {
         private final OSS oss = new OSS();
@@ -86,6 +82,16 @@ public class HcfBaseProperties {
 
             public void setEndpoint(String endpoint) {
                 this.endpoint = endpoint;
+            }
+
+            private String filehost;
+
+            public String getFilehost() {
+                return filehost;
+            }
+
+            public void setFilehost(String filehost) {
+                this.filehost = filehost;
             }
 
             public Client getClient() {
