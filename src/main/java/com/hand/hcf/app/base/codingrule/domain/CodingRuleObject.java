@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.codingrule.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,9 +18,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CodingRuleObject extends DomainI18nEnable {
+public class CodingRuleObject extends DomainLogicEnable {
 	@TableField(value = "tenant_id")
-
 	private Long tenantId;  //租户id
 	@TableField("document_type_code")
 	private String documentTypeCode; //单据类型代码

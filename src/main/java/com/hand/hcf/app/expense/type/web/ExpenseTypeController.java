@@ -990,6 +990,7 @@ public class ExpenseTypeController {
      * @param code
      * @param name
      * @param categoryName
+     * @Param setOfBooksId
      * @param page
      * @param size
      * @return
@@ -999,10 +1000,11 @@ public class ExpenseTypeController {
     public ResponseEntity selectAllExpenseType(@ApiParam(value = "费用类型代码") @RequestParam(value = "code",required = false) String code,
                                                @ApiParam(value = "费用类型名称") @RequestParam(value = "name",required = false) String name,
                                                @ApiParam(value = "大类名称") @RequestParam(value = "categoryName",required = false) String categoryName,
+                                               @ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId",required = false) Long setOfBooksId,
                                                @ApiParam(value = "页码") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                @ApiParam(value = "页数") @RequestParam(value = "size", required = false, defaultValue = "10") int size){
         Page myPage = PageUtil.getPage(page,size);
-        List<ExpenseType> result = service.selectExpenseByCode(code,name,categoryName);
+        List<ExpenseType> result = service.selectExpenseByCode(code, name, categoryName, setOfBooksId, myPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(myPage);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }

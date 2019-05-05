@@ -340,7 +340,7 @@
         </foreach>
     </select>
 
-    <select id="getCompanyByCond" resultType="com.hand.hcf.app.mdata.company.domain.Company">
+    <select id="getCompanyChildrenByCond" resultType="com.hand.hcf.app.mdata.company.domain.Company">
         SELECT
         c.*
         FROM
@@ -385,10 +385,11 @@
             t.parent_company_id
         FROM
             sys_company t
-        where 1 = 1
-            <if test="ew != null">
-                ${ew.sqlSegment}
-            </if>
+       <trim prefix="WHERE" prefixOverrides="AND | OR">
+           <if test="ew != null">
+               ${ew.sqlSegment}
+           </if>
+       </trim>
         order by t.company_code asc
     </select>
     <select id="pageCompanyByCond" resultType="com.hand.hcf.app.common.co.BasicCO">
@@ -490,5 +491,103 @@
     <if test="enabled != null">
       AND  t.enabled = #{enabled}
     </if>
+    </select>
+    <select id="listDTOByPage" resultType="com.hand.hcf.app.mdata.company.dto.CompanyDTO">
+        SELECT
+            c.id,
+            c.version_number,
+            c.last_updated_by,
+            c.last_updated_date,
+            c.deleted,
+            c.company_oid,
+            coalesce(ci.name,
+            c.name) AS NAME,
+            c.logo_id,
+            c.created_by,
+            c.created_date,
+            c.done_register_lead,
+            c.tax_id,
+            c.init_finance,
+            c.enabled,
+            c.group_company_oid,
+            c.tenant_id,
+            c.set_of_books_id,
+            c.legal_entity_id,
+            c.company_code,
+            c.address,
+            c.company_level_id,
+            c.parent_company_id,
+            c.start_date_active,
+            c.end_date_active,
+            c.company_type_code,
+            c.path,
+            c.depth,
+            c.show_custom_logo,
+            ssob.set_of_books_name as setOfBooksName,
+            le.entity_name as legalEntityName,
+            sclt.company_level_name as companyLevelName,
+            (SELECT
+                coalesce(b.name,
+                a.name) AS NAME
+            FROM
+                sys_company a
+            LEFT JOIN
+                sys_company_i18n b
+                    ON a.id = b.id
+                    AND lower(b.language) = #{language}
+            WHERE
+                a.id = c.parent_company_id) AS parent_company_name
+        FROM
+            sys_company c
+        LEFT JOIN
+            sys_company_i18n ci
+                ON c.id = ci.id
+                AND lower(ci.language) = #{language}
+        LEFT JOIN
+            (
+                SELECT
+                    coalesce(sobi.set_of_books_name,
+                    sob.set_of_books_name) AS set_of_books_name,
+                    sob.id
+                FROM
+                    sys_set_of_books sob
+                LEFT JOIN
+                    sys_set_of_books_i18n sobi
+                        ON sobi.id = sob.id
+                        AND lower(sobi.language) = #{language}
+                ) ssob
+                    ON ssob.id = c.set_of_books_id
+            LEFT JOIN
+                (
+                    SELECT
+                        coalesce(slei.entity_name,
+                        sle.entity_name) AS entity_name,
+                        sle.id
+                    FROM
+                        sys_legal_entity sle
+                    LEFT JOIN
+                        sys_legal_entity_i18n slei
+                            ON sle.id = slei.id
+                            AND lower(slei.language) = #{language}
+                    ) le
+                        ON c.legal_entity_id = le.id
+                LEFT JOIN
+                    (
+                        SELECT
+                            coalesce(scli.description,
+                            scl.description) AS company_level_name,
+                            scl.id
+                        FROM
+                            sys_company_levels scl
+                        LEFT JOIN
+                            sys_company_levels_i18n scli
+                                ON scl.id = scli.id
+                                AND lower(scli.language) = #{language}
+                        ) sclt
+                            ON c.company_level_id = sclt.id
+                    where  c.deleted = 0
+                    <if test="ew != null">
+                        ${ew.sqlSegment}
+                    </if>
     </select>
 </mapper>

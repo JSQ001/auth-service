@@ -40,8 +40,6 @@ public class InvoiceCertificationController {
     @Autowired
     private InvoiceCertificationService invoiceCertificationService;
 
-    @Autowired
-    private ExpenseReportHeaderService expenseReportHeaderService;
 
     @GetMapping
     @ApiOperation(value = "分页查询所有未提交认证", notes = "分页查询所有未提交认证信息 开发:郑少锋")
@@ -165,5 +163,13 @@ public class InvoiceCertificationController {
             @RequestParam("status") Integer status,
             @RequestParam(value = "approvalText",required = false) String approvalText) {
         invoiceCertificationService.updateInvoiceCertifiedStatus(headerId,status, approvalText);
+    }
+
+    @ApiOperation(value = "提交发票认证", notes = "提交发票认证 开发:郑少锋")
+    @PostMapping("/submit")
+    public void submitInvoiceCertified(
+            @ApiIgnore @RequestBody List<Long> headerIds,
+            @ApiParam("申请认证税款所属期") @RequestParam("taxDate") String taxDate){
+        invoiceCertificationService.submitInvoiceCertified(headerIds,taxDate);
     }
 }

@@ -42,10 +42,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-;
 
 /**
  * @description:
@@ -403,6 +402,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
 
             @Override
             public ExpInputTaxHeaderDTO toDTO(ExpInputTaxHeaderDTO t) {
+                t.setCreatedDateStr(t.getCreatedDate() == null ? "" : t.getCreatedDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
+                t.setLastUpdatedDateStr(t.getLastUpdatedDate() == null ? "" : t.getLastUpdatedDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
                 return t;
             }
 

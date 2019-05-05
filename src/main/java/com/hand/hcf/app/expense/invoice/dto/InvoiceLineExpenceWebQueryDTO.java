@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
 /**
@@ -85,5 +86,51 @@ public class InvoiceLineExpenceWebQueryDTO {
      * 报账单行备注
      */
     private String remarks;
+
+    /**
+     * 发票袋号码
+     */
+    private String invoiceBagNo;
+
+    /**
+     * 发票袋号码确认标志
+     */
+    private String invoiceBagConfirmFlag;
+    /**
+     * 发票袋号码确认描述
+     */
+    private String invoiceBagConfirmFlagDesc;
+    /**
+     * 发票号码
+     */
+    private String invoiceNo;
+    /**
+     * 发票代码
+     */
+    private String invoiceCode;
+    /**
+     *  开票日期
+     */
+    private ZonedDateTime invoiceDate;
+    /**
+     * 发票金额
+     */
+    private BigDecimal detailAmount;
+    /**
+     * 税率
+     */
+    private String taxRate;
+    /**
+     * 税额
+     */
+    private BigDecimal taxAmount;
+    /**
+     * 发票是否匹配标志
+     */
+    private String invoiceMateFlag;
+    /**
+     * 发票是否匹配描述
+     */
+    private String invoiceMateFlagDesc;
 
 }

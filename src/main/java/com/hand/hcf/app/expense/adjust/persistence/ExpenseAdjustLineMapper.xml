@@ -37,7 +37,8 @@
             eal.amount,
             eal.description,
             eal.attachment_oid,
-            eal.functional_amount
+            eal.functional_amount,
+            eal.version_number
         FROM
             exp_adjust_line eal
 
@@ -140,7 +141,8 @@
             eal.dimension20_id,
             eal.amount,
             eal.description,
-            eal.functional_amount
+            eal.functional_amount,
+            eal.version_number
         FROM
             exp_adjust_line eal
         LEFT JOIN exp_expense_type et ON et.id = eal.expense_type_id

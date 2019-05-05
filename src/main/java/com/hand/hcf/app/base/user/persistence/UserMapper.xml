@@ -114,8 +114,8 @@
         SELECT COUNT(0)
           FROM sys_user t
          WHERE (t.login = #{keyWord}
-            OR t.email = {keyWord}
-            OR t.mobile = {keyWord})
+            OR t.email = #{keyWord}
+            OR t.mobile = #{keyWord})
             <if test="id != null">
                 AND id <![CDATA[ <> ]]> #{id}
             </if>

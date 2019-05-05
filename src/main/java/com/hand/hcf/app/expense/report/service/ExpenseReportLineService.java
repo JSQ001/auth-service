@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.common.co.AttachmentCO;
-import com.hand.hcf.app.common.co.DimensionCO;
-import com.hand.hcf.app.common.co.ResponsibilityCenterCO;
-import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
@@ -260,7 +257,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         // 保存控件field
         saveExpenseDocumentFields(line.getId(),line.getExpReportHeaderId(),dto.getFields(),expenseType.getId(),isNew);
         // 保存分摊行信息
-        saveReportDistMessage(dto,line, expenseType,expenseReportHeader,lineDistRequired);
+        saveReportDistMessage(dto,line, expenseType,expenseReportHeader,lineDistRequired,isNew);
         // 更新头金额
         updateReportHeaderAmount(expenseReportHeader);
         // 创建获取修改默认计划付款行
@@ -282,7 +279,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             BigDecimal reduce = invoiceLines.stream().map(InvoiceLine::getTaxAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
             expenseAmount = expenseAmount.subtract(reduce);
             // 后端计算金额，前端计算不准确时，已后端为主
-            if(! line.getExpenseAmount().equals(expenseAmount)){
+            if(line.getExpenseAmount().compareTo(expenseAmount) != 0){
                 line.setExpenseAmount(expenseAmount);
                 line.setExpenseFunctionAmount(OperationUtil.safeMultiply(expenseAmount,line.getExchangeRate()));
                 line.setTaxAmount(OperationUtil.subtract(line.getAmount(),line.getExpenseAmount()));
@@ -500,12 +497,14 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param expenseType
      * @param expenseReportHeader
      * @param lineDistRequired  分摊行是否必输(针对只能从申请单创建分摊行情况)
+     * @param isNew  费用行是否为新建
      */
     private void saveReportDistMessage(ExpenseReportLineDTO dto,
                                        ExpenseReportLine line,
                                        ExpenseType expenseType,
                                        ExpenseReportHeader expenseReportHeader,
-                                       boolean lineDistRequired){
+                                       boolean lineDistRequired,
+                                       boolean isNew){
         List<ExpenseReportDistDTO> expenseReportDistList = dto.getExpenseReportDistList();
         //税金分摊方式
         String expTaxDist = organizationService.getParameterValue(line.getCompanyId(),
@@ -525,7 +524,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         // 当分摊行为空时，根据费用类型配置，校验是否为必须关联申请，如无需关联，自动生成分摊行
         }else{
             //判断是否已生成过
-            if(line.getVersionNumber() > 1){
+            if(!isNew){
                 throw new BizException(RespCode.EXPENSE_REPORT_DIST_NOT_NULL);
             }
             String applicationModel = expenseType.getApplicationModel();
@@ -901,12 +900,21 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         // 公司
         if(BooleanUtils.isTrue(reportTypeDistSetting.getCompanyDistFlag())){
             if(reportTypeDistSetting.getCompanyDefaultId() == null){
-                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
-                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_COMPANY)});
+                Page<CompanyCO> companyCOPage = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseReportHeader.getDocumentTypeId(),
+                        null,
+                        null,
+                        null,
+                        PageUtil.getPage(0, 10),
+                        Arrays.asList(expenseReportHeader.getCompanyId()));
+                if(CollectionUtils.isNotEmpty(companyCOPage.getRecords())){
+                    expenseReportDist.setCompanyId(companyCOPage.getRecords().get(0).getId());
+                }
+//                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+//                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_COMPANY)});
+            }else{
+                expenseReportDist.setCompanyId(reportTypeDistSetting.getCompanyDefaultId());
             }
-            expenseReportDist.setCompanyId(reportTypeDistSetting.getCompanyDefaultId());
-        }
-        if(expenseReportDist.getCompanyId() == null){
+        }else{
             expenseReportDist.setCompanyId(expenseReportHeader.getCompanyId());
         }
         expenseReportDist.setSetOfBooksId(expenseReportLine.getSetOfBooksId());
@@ -915,8 +923,22 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         // 部门
         if(reportTypeDistSetting.getDepartmentDistFlag()){
             if(reportTypeDistSetting.getDepartmentDefaultId() == null){
-                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
-                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_DEPARTMENT)});
+                try {
+                    Page<DepartmentCO> departmentCOPage = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(expenseReportHeader.getDocumentTypeId(),
+                            expenseReportDist.getCompanyId(),
+                            null,
+                            null,
+                            null,
+                            PageUtil.getPage(0, 10),
+                            Arrays.asList(expenseReportHeader.getDepartmentId()));
+                    if(CollectionUtils.isNotEmpty(departmentCOPage.getRecords())){
+                        expenseReportDist.setDepartmentId(departmentCOPage.getRecords().get(0).getId());
+                    }
+                }catch (Exception e){
+
+                }
+//                throw new BizException(RespCode.EXPENSE_REPORT_DIST_REQUIRED_FIELD_NONE,
+//                        new String[]{messageService.getMessageDetailByCode(RespCode.EXPENSE_REPORT_DIST_DEPARTMENT)});
             }
             expenseReportDist.setDepartmentId(reportTypeDistSetting.getDepartmentDefaultId());
         }

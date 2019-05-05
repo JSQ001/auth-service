@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.userRole.domain.*;
@@ -48,7 +49,7 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
     public List<FunctionPageRelation> createFunctionPageRelationBatch(List<FunctionPageRelation> list){
         Long tenantId = LoginInformationUtil.getCurrentTenantId();
         Tenant tenant = tenantService.getTenantById(tenantId);
-        list.stream().forEach(functionPageRelation -> {
+        list.forEach(functionPageRelation -> {
             //校验数据
             FunctionList functionList = functionListService.selectById(functionPageRelation.getFunctionId());
             if (functionList == null){
@@ -83,16 +84,13 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
             this.insert(functionPageRelation);
             // 如果是系统租户则需要将目录关联功能映射关系分配给所有租户
             if(tenant.getSystemFlag()){
-                Long sourceFunctionId = functionPageRelation.getFunctionId();
-                List<Tenant> tenants = tenantService.findAll()
-                        .stream()
-                        .filter(e -> !e.getId().equals(tenantId)).collect(Collectors.toList());
-                if (tenants.size() > 0) {
-                    List<FunctionPageRelation> functionPageRelations = tenants.stream().map(domain -> {
+                List<FunctionList> functions = functionListService.listOtherTenantFunction(tenantId,
+                        functionPageRelation.getFunctionId());
+                if (CollectionUtils.isNotEmpty(functions)) {
+                    List<FunctionPageRelation> functionPageRelations = functions.stream().map(domain -> {
                         FunctionPageRelation functionPageRelation1 = new FunctionPageRelation();
-                        FunctionList functionList1 = functionListService.getFunctionByTenantIdAndSourceId(domain.getId(),sourceFunctionId);
                         functionPageRelation1.setPageId(pageList.getId());
-                        functionPageRelation1.setFunctionId(functionList1.getId());
+                        functionPageRelation1.setFunctionId(domain.getId());
                         return functionPageRelation1;
                     }).collect(Collectors.toList());
                     this.insertBatch(functionPageRelations);
@@ -137,7 +135,7 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
                                 .eq("source_id", functionList.getId())
                 ).stream().map(FunctionList::getId).collect(Collectors.toList());
                 if(functionIds.size() > 0) {
-                    functionIds.stream().forEach(functionId -> {
+                    functionIds.forEach(functionId -> {
                         List<Long> ids = functionPageRelationMapper.selectList(
                                 new EntityWrapper<FunctionPageRelation>()
                                         .eq("function_id", functionId)
@@ -165,7 +163,7 @@ public class FunctionPageRelationService extends BaseService<FunctionPageRelatio
                         .orderBy("last_updated_date",false)
         );
         if (result.size() > 0){
-            result.stream().forEach(functionPageRelation -> {
+            result.forEach(functionPageRelation -> {
                 functionPageRelation.setFunctionName(functionListService.selectById(functionPageRelation.getFunctionId()).getFunctionName());
                 functionPageRelation.setPageName(pageListService.selectById(functionPageRelation.getPageId()).getPageName());
             });

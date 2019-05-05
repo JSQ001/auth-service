@@ -34,6 +34,10 @@ public class ExpenseAdjustLineWebDTO {
     private String expenseTypeName;
     // 单据行类型
     private String adjustLineCategory;
+    /**
+     * 版本号
+     */
+    private Integer versionNumber;
 
     /**
      * 维度信息

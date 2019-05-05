@@ -977,6 +977,7 @@ public class DimensionItemService extends BaseService<DimensionItemMapper, Dimen
                             temp.setDimensionId(dimensionItem.getDimensionId());
                             DimensionItem exist = baseMapper.selectOne(temp);
                             dto.getDimensionItem().setId(exist.getId());
+                            dto.getDimensionItem().setVersionNumber(exist.getVersionNumber());
                             updateDimensionItem(dto);
                         }
                         if(visibleUserScope.equals(company)) {

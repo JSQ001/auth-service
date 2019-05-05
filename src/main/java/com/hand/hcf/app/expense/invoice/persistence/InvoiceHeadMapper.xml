@@ -46,10 +46,10 @@
         and h.red_invoice_flag = 0
         and h.accounting_flag = 'Y'
         <if test="isSubmit">
-            and certification_status != 0
+            and certification_status != 0 and certification_status != 5
         </if>
         <if test="!isSubmit">
-            and certification_status = 0
+            and (certification_status = 0 or certification_status = 5)
         </if>
         <if test="invoiceTypeId != null">
             and h.invoice_type_id = #{invoiceTypeId}

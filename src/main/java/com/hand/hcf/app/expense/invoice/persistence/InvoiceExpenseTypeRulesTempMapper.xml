@@ -50,7 +50,7 @@
         #{currentDate},
         #{userId},
 		1
-        FROM invoice_expense_type_rules_temp t
+        FROM inv_exp_type_rules_temp t
         WHERE t.batch_number = #{transactionID}
         AND t.error_flag = 0
     </insert>
@@ -58,12 +58,12 @@
     <select id="queryInfo" resultMap="queryInfoMap">
         select (select
         count(0) as successEntities
-        from invoice_expense_type_rules_temp
+        from inv_exp_type_rules_temp
         where batch_number = #{transactionID}
         and error_flag = 0) as successEntities,
         (select
         count(0) as failureEntities
-        from invoice_expense_type_rules_temp
+        from inv_exp_type_rules_temp
         where batch_number = #{transactionID}
         and error_flag = 1) as failureEntities,
         #{transactionID } as transaction_id
@@ -74,7 +74,7 @@
     <select id="queryErrorData" resultMap="errorDataMap">
         select t.row_number AS rowNumber,
         t.error_msg AS error
-        FROM invoice_expense_type_rules_temp t
+        FROM inv_exp_type_rules_temp t
 
         WHERE t.batch_number = #{transactionID}
         and t.error_flag = 1

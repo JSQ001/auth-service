@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.init.web;
 
 import com.hand.hcf.app.expense.application.service.ApplicationTypeService;
 import com.hand.hcf.app.expense.init.dto.*;
+import com.hand.hcf.app.expense.policy.service.ExpensePolicyRelatedCompanyService;
 import com.hand.hcf.app.expense.policy.service.ExpensePolicyService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationTypeService;
@@ -49,6 +50,9 @@ public class ModuleInitController {
 
     @Autowired
     private ExpensePolicyService expensePolicyService;
+
+    @Autowired
+    private ExpensePolicyRelatedCompanyService expensePolicyRelatedCompanyService;
     /**
      * 申请类型/费用类型导入
      * @param expenseTypeInitDTOS
@@ -80,6 +84,17 @@ public class ModuleInitController {
     @ApiOperation(value = "费用政策导入导入", notes = "费用政策导入导入 开发:赵柱")
     public ResponseEntity initExpensePolicy(@RequestBody List<ExpensePolicyInitDTO> expensePolicyInitDTOS) {
         return ResponseEntity.ok(expensePolicyService.initExpensePolicy(expensePolicyInitDTOS));
+    }
+
+    /**
+     * 费用政策导入分配公司
+     * @param policyRelatedCompanyInitDTOS
+     * @return
+     */
+    @PostMapping(value = "/expensePolicyRelatedCompany", produces = "application/json")
+    @ApiOperation(value = "费用政策导入分配公司", notes = "费用政策导入分配公司 开发:赵柱")
+    public ResponseEntity initExpensePolicyRelatedCompany(@RequestBody List<ExpensePolicyRelatedCompanyInitDTO> policyRelatedCompanyInitDTOS) {
+        return ResponseEntity.ok(expensePolicyRelatedCompanyService.initExpensePolicyRelatedCompany(policyRelatedCompanyInitDTOS));
     }
 
     /**

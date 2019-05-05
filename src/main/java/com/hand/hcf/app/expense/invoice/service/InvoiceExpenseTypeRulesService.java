@@ -315,8 +315,16 @@ public class InvoiceExpenseTypeRulesService extends BaseService<InvoiceExpenseTy
                 row = sheet.createRow(startRow++);
                 cell = row.createCell(InvoiceExpenseTypeRulesImportCode.ROW_NUMBER);
                 cell.setCellValue(importDTO.getRowNumber());
-                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.Responsibility_Center_Code);
+                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.RESPONSIBILITY_GOOD_NAME);
+                cell.setCellValue(importDTO.getGoodsName());
+                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.RESPONSIBILITY_EXPENSE_TYPE_CODE);
                 cell.setCellValue(importDTO.getExpenseTypeCode());
+                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.RESPONSIBILITY_DESCRIPTIONS);
+                cell.setCellValue(importDTO.getDescription());
+                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.RESPONSIBILITY_START_DATE);
+                cell.setCellValue( DateUtil.ZonedDateTimeToString(importDTO.getStartDateTime()));
+                cell = row.createCell(InvoiceExpenseTypeRulesImportCode.RESPONSIBILITY_END_DATE);
+                cell.setCellValue(DateUtil.ZonedDateTimeToString(importDTO.getEndDateTime()));
                 cell = row.createCell(InvoiceExpenseTypeRulesImportCode.ENABLED);
                 cell.setCellValue(importDTO.getEnabledStr());
                 cell = row.createCell(InvoiceExpenseTypeRulesImportCode.ERROR_DETAIL);

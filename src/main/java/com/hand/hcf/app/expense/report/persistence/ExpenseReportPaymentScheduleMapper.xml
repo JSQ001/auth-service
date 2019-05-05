@@ -55,7 +55,8 @@
 	</select>
 
 	<select id="getExpPublicReportScheduleByContractHeaderId" resultMap="ExpensePaymentScheduleResult" >
-		SELECT t.requisition_date, v.*, rt.report_type_name,t.requisition_number ,t.status
+		SELECT t.requisition_date, v.*, rt.report_typeull
+		_name,t.requisition_number ,t.status
 		FROM exp_report_header t, exp_report_payment_schedule v, exp_report_type rt
 		WHERE t.id = v.exp_report_header_id
 		and t.document_type_id = rt.id

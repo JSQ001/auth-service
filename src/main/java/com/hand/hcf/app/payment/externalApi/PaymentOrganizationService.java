@@ -18,10 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @description: 调用组织架构三方接口
@@ -96,7 +93,7 @@ public class PaymentOrganizationService {
     }
 
     public List<CompanyCO> listChildrenCompaniesByCondition(Long companyId, Boolean ignoreOwn, String companyCode, String companyCodeFrom, String companyCodeTo, String companyName, String keyWord) {
-      return  companyClient.listChildrenCompaniesByCondition(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord);
+        return  companyClient.listChildrenCompaniesByCondition(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, Arrays.asList());
     }
 
     /**

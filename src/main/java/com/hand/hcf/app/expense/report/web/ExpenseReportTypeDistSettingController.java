@@ -446,7 +446,7 @@ public class ExpenseReportTypeDistSettingController {
             @RequestParam(value = "companyName",required = false) String companyName,
             Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<CompanyCO> result = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseTypeId, companyId, companyCode,companyName,page);
+        Page<CompanyCO> result = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseTypeId, companyId, companyCode,companyName,page,null);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders, HttpStatus.OK);
     }
@@ -495,7 +495,7 @@ public class ExpenseReportTypeDistSettingController {
             Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(
-                expenseTypeId, companyId, departmentId,departmentCode,departmentName,page);
+                expenseTypeId, companyId, departmentId,departmentCode,departmentName,page,null);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
         return new ResponseEntity<>(result.getRecords(),httpHeaders, HttpStatus.OK);
     }

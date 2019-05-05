@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>
@@ -265,6 +262,7 @@ public class CompanyControllerImpl {
                                                             @RequestParam(required = false,value = "companyCodeTo") String companyCodeTo,
                                                             @RequestParam(required = false,value = "companyName") String companyName,
                                                             @RequestParam(value = "keyWord",required = false) String keyWord,
+                                                            @RequestBody(required = false) List<Long> existsIds,
                                                             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                             @RequestParam(value = "size", required = false, defaultValue = "10") int size){
         Page<CompanyCO> mybatisPage = new Page<>(page + 1, size);
@@ -275,6 +273,7 @@ public class CompanyControllerImpl {
                 companyCodeTo,
                 companyName,
                 keyWord,
+                existsIds,
                 mybatisPage);
     }
 
@@ -287,6 +286,7 @@ public class CompanyControllerImpl {
      * @param companyCodeFrom 公司代码从 条件查询
      * @param companyCodeTo 公司代码至 条件查询
      * @param keyWord 关键字
+     * @param existsIds  存在的ID集合
      */
     public List<CompanyCO> listChildrenCompaniesByCondition(@RequestParam("companyId") Long companyId,
                                                             @RequestParam("ignoreOwn") Boolean ignoreOwn,
@@ -294,14 +294,16 @@ public class CompanyControllerImpl {
                                                             @RequestParam(required = false,value = "companyCodeFrom") String companyCodeFrom,
                                                             @RequestParam(required = false,value = "companyCodeTo") String companyCodeTo,
                                                             @RequestParam(required = false,value = "companyName") String companyName,
-                                                            @RequestParam(value = "keyWord",required = false) String keyWord){
+                                                            @RequestParam(value = "keyWord",required = false) String keyWord,
+                                                            @RequestBody(required = false) List<Long> existsIds){
         return companyService.listChildrenCompaniesByCondition(companyId,
                 ignoreOwn,
                 companyCode,
                 companyCodeFrom,
                 companyCodeTo,
                 companyName,
-                keyWord);
+                keyWord,
+                existsIds);
     }
 
     /**
@@ -522,4 +524,15 @@ public class CompanyControllerImpl {
         resultPage.setTotal(mybatisPage.getTotal());
         return resultPage;
     }
+
+    /**
+     * 查询公司部门是否关联
+     * @param params 公司部门参数
+     * @return key 公司Id-部门Id
+     */
+    public Map<String, Boolean> checkCompanyAssociateUnit(@RequestBody List<CompanyAssociateUnitCO> params) {
+        return companyAssociateUnitService.checkCompanyAssociateUnit(params);
+    }
+
+
 }

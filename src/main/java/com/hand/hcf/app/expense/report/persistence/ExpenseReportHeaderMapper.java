@@ -20,4 +20,6 @@ public interface ExpenseReportHeaderMapper extends BaseMapper<ExpenseReportHeade
     List<ExpenseReportHeaderDTO> queryReportHeaderByids(@Param("ew") Wrapper hearderWrapper, RowBounds page);
 
     int getCountByCondition(@Param("ew") Wrapper wrapper);
+
+    List<ExpenseReportHeader> getSignExpenseReports(@Param("ew") Wrapper hearderWrapper, RowBounds page);
 }

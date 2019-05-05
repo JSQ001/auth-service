@@ -22,4 +22,16 @@
 			${ew.sqlSegment}
 		</if>
 	</select>
+
+	<select id="getSignExpenseReports" resultType="com.hand.hcf.app.expense.report.domain.ExpenseReportHeader">
+		select distinct r.*
+		from exp_report_header r
+		inner join invoice_line_expence ile on ile.EXP_EXPENSE_HEAD_ID = r.ID
+		inner join invoice_bag_no_scan ibns on ibns.INVOICE_BAG_NO = ile.INVOICE_BAG_NO
+		where
+		1 = 1
+		<if test="ew!=null">
+			${ew.sqlSegment}
+		</if>
+	</select>
 </mapper>

@@ -39,7 +39,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -252,7 +257,7 @@ public class DataAuthorityRuleService extends BaseService<DataAuthorityRuleMappe
             case "1003": {
                 if (DataAuthorityUtil.COMPANY_COLUMN.equals(dataType)) {
                     Page<CompanyCO> sonAndOwnCompanyByCond = companyService.pageChildrenCompaniesByCondition(OrgInformationUtil.getCurrentCompanyId(),
-                            false,null, null, null, null, keyWord, page);
+                            false,null, null, null, null, keyWord, null, page);
                     return sonAndOwnCompanyByCond.getRecords().stream().map(e -> {
                         return DataAuthRuleDetailValueDTO.builder()
                                 .valueKey(e.getId().toString())

@@ -73,4 +73,15 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201904262011001" author="bin.xie">
+        <comment>修改员工公司为非空约束，用于租户初始化关联</comment>
+        <dropNotNullConstraint tableName="sys_contact" columnName="company_id" columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="201904282202001" author="bin.xie">
+        <renameColumn tableName="sys_res_center_i18n"
+                      oldColumnName="name"
+                      newColumnName="responsibility_center_name"
+                      columnDataType="varchar(255)"/>
+    </changeSet>
 </databaseChangeLog>

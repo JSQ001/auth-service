@@ -37,4 +37,12 @@ public class ExpInputTaxHeaderDTO extends ExpInputTaxHeader {
     private  String applicantName;
     private  String createdName;
 
+    /**
+     * 申请日期（导出进项税业务单时用）
+     */
+    private String createdDateStr;
+    /**
+     * 审核日期（导出进项税业务单时用）
+     */
+    private String lastUpdatedDateStr;
 }

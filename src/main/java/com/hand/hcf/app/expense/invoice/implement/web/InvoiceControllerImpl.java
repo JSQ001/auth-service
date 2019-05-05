@@ -27,4 +27,10 @@ public class InvoiceControllerImpl {
             @RequestParam(value = "certificationReason",required = false) String certificationReason) {
         invoiceCertificationService.updateInvoiceCertifiedStatus(headerId,status,certificationReason);
     }
+
+
+    public void updateInvoiceStatus(@RequestParam("headerId") Long headerId,
+                                    @RequestParam("status") Integer status) {
+        invoiceCertificationService.updateInvoiceStatus(headerId,status);
+    }
 }

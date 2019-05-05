@@ -275,40 +275,38 @@ public class CompanyController {
      */
     @RequestMapping(value = "/company/by/term", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<List<CompanyDTO>> findCompanyByCondition(@RequestParam(name = "companyCode", required = false) String companyCode,
-                                                                   @RequestParam(name = "name", required = false) String name,
-                                                                   @RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId,
-                                                                   @RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
-                                                                   @RequestParam(name = "enabled", required = false) Boolean enabled,
-                                                                   Pageable pageable) throws URISyntaxException {
-        Page<CompanyDTO> page = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode, name, setOfBooksId, legalEntityId, enabled,false, pageable);
-        HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/companyId/by/term");
-        return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
+    public ResponseEntity<List<CompanyDTO>> findCompanyByCondition(
+            @RequestParam(name = "companyCode", required = false) String companyCode,
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId,
+            @RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
+            @RequestParam(name = "enabled", required = false) Boolean enabled,
+            Pageable pageable){
+        Page page = PageUtil.getPage(pageable);
+        List<CompanyDTO> result = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode,
+                name, setOfBooksId, legalEntityId, enabled,false, page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 
 
-    /**
-     *
-     * @api {GET} /company/by/term/enable/dataAuth  根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限）
-     * @apiGroup Company
-     * @apiParam {Long} companyCode 公司code
-     * @apiParam {String} [name] 公司名称
-     * @apiParam {Long} [setOfBooksId] 账套id
-     * @apiParam {Long} [legalEntityId] 法人实体id
-     *
-     */
-    @ApiOperation(value = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限）", notes = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限） 开发 王帅")
+
+    @ApiOperation(value = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限）",
+            notes = "根据条件分页查询公司信息(公司code、公司名称、账套id、法人实体id)（数据权限） 开发 王帅")
     @GetMapping(value = "/company/by/term/enable/dataAuth",  produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<List<CompanyDTO>> findCompanyByConditionEnableDataAuth(@ApiParam("公司code") @RequestParam(name = "companyCode", required = false) String companyCode,
-                                                                                 @ApiParam("公司名称")@RequestParam(name = "name", required = false) String name,
-                                                                                 @ApiParam("账套id")@RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId,
-                                                                                 @ApiParam("法人实体id")@RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
-                                                                                 @ApiParam("是否查询全部包括启用和禁用")@RequestParam(name = "enabled", required = false) Boolean enabled,
-                                                                   Pageable pageable) throws URISyntaxException {
-        Page<CompanyDTO> page = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode, name, setOfBooksId, legalEntityId, enabled,true, pageable);
-        HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/company/by/term/enable/dataAuth");
-        return new ResponseEntity<>(page.getRecords(), httpHeaders, HttpStatus.OK);
+    public ResponseEntity<List<CompanyDTO>> findCompanyByConditionEnableDataAuth(
+            @ApiParam("公司code") @RequestParam(name = "companyCode", required = false) String companyCode,
+            @ApiParam("公司名称")@RequestParam(name = "name", required = false) String name,
+            @ApiParam("账套id")@RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId,
+            @ApiParam("法人实体id")@RequestParam(name = "legalEntityId", required = false) Long legalEntityId,
+            @ApiParam("是否查询全部包括启用和禁用")@RequestParam(name = "enabled", required = false) Boolean enabled,
+            Pageable pageable)  {
+        Page page = PageUtil.getPage(pageable);
+        List<CompanyDTO> result = companyService.findCompanyByTerm(OrgInformationUtil.getCurrentTenantId(), companyCode,
+                name, setOfBooksId, legalEntityId, enabled,true, page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 
 

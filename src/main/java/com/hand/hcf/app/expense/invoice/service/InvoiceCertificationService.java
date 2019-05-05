@@ -2,11 +2,15 @@ package com.hand.hcf.app.expense.invoice.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+import com.hand.hcf.app.common.co.InvoiceAuthenticationReturnCO;
+import com.hand.hcf.app.common.co.InvoiceAuthenticationSendCO;
+import com.hand.hcf.app.common.co.InvoiceAuthenticationSendLineCO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
@@ -26,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -38,12 +44,30 @@ import java.util.List;
 public class InvoiceCertificationService {
 
     private final Logger log = LoggerFactory.getLogger(InvoiceCertificationService.class);
+    /**
+     * 税号
+     * 发票认证需求：暂时写死方正,后续自动生成
+     */
+    private final String BUYER_TAX_NO = "91111122223333444D";
+
+    /**
+     * 认证类型:发票暂时只存在抵扣的情况
+     */
+    private final String APPLYRZLX = "1";
+
+    /**
+     * 认证返回状态码 0000：提交成功
+     */
+    private final String RETURN_CODE = "0000";
 
     @Autowired
     private ExcelExportService excelExportService;
 
     @Autowired
     private InvoiceHeadService invoiceHeadService;
+
+    @Autowired
+    private OrganizationService organizationService;
     /**
      * 分页获取发票信息 （已提交或未提交认证）
      * @param invoiceTypeId 单据类型Id
@@ -156,13 +180,13 @@ public class InvoiceCertificationService {
     /**
      * 更新发票认证状态
      * @param headerIds 发票Id信息
-     * @param status 认证状态
-     * @param approvalText 认证失败原因
+     * @param certificationStatus 认证状态
+     * @param certificationReason 认证失败原因
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateInvoiceCertifiedStatus(List<Long> headerIds,
-                                             Integer status,
-                                             String approvalText) {
+                                             Integer certificationStatus,
+                                             String certificationReason) {
         if(CollectionUtils.isEmpty(headerIds)){
             return;
         }
@@ -171,23 +195,24 @@ public class InvoiceCertificationService {
             if (header == null) {
                 throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
             }
-            checkCertificationStatus(status, header.getCertificationStatus());
+            checkCertificationStatus(certificationStatus, Math.toIntExact(header.getCertificationStatus()));
             //提交待认证
-            if (CertificationEnum.SUCCESS.getId().equals(status)) {
+            if (CertificationEnum.SUCCESS.getId().equals(certificationStatus)) {
                 header.setCertificationDate(ZonedDateTime.now());
-            } else if (CertificationEnum.FAIL.getId().equals(status)) {
-                header.setCertificationReason(approvalText);
+            } else if (CertificationEnum.FAIL.getId().equals(certificationStatus)) {
+                header.setCertificationReason(certificationReason);
             }
-            header.setCertificationStatus(status.longValue());
+            header.setCertificationStatus(certificationStatus.longValue());
             invoiceHeadService.updateById(header);
         });
     }
 
-    private void checkCertificationStatus(Integer status, Long certificationStatus) {
+    private void checkCertificationStatus(Integer status, Integer certificationStatus) {
         switch (status) {
-            //提交
+            //提交 (失败以及未提交)
             case 1:
-                if (!certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId())) {
+                if (!(certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId()) ||
+                        certificationStatus.equals(CertificationEnum.FAIL.getId())) ) {
                     throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
                 }
                 break;
@@ -197,5 +222,59 @@ public class InvoiceCertificationService {
                     throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
                 }
         }
+    }
+
+    /**
+     * 提交发票认证接口
+     * @param headerIds
+     * @param taxDate
+     */
+    public void submitInvoiceCertified(List<Long> headerIds,
+                                       String taxDate) {
+       List<InvoiceAuthenticationSendLineCO> invoices = new ArrayList<>();
+        if(CollectionUtils.isEmpty(headerIds)){
+            return;
+        }
+        headerIds.stream().forEach(id -> {
+           InvoiceHead invoiceHead =  invoiceHeadService.selectById(id);
+           if(invoiceHead == null){
+               throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
+           }
+           invoices.add(InvoiceAuthenticationSendLineCO.builder()
+                   .id(id).invoiceCode(invoiceHead.getInvoiceCode())
+                   .invoiceNo(invoiceHead.getInvoiceNo())
+                   .applyTaxPeriod(taxDate)
+                   .buyerTaxNo(BUYER_TAX_NO)
+                   .applyRzlx(APPLYRZLX)
+                   .build());
+        });
+        InvoiceAuthenticationReturnCO returnCO = organizationService.invoiceAuthentication(
+                InvoiceAuthenticationSendCO.builder()
+                .batchNo(UUID.randomUUID().toString())
+                .contentRows(headerIds.size())
+                .buyerTaxNo(BUYER_TAX_NO)
+                .invoices(invoices)
+                .build());
+        //提交成功
+        if(RETURN_CODE.equals(returnCO.getReturnCode())){
+            this.updateInvoiceCertifiedStatus(headerIds,CertificationEnum.CERTIFICATION.getId(),null);
+        }else {
+            throw  new BizException(returnCO.getReturnMessage());
+        }
+    }
+
+    /**
+     * 认证失败更新单张发票状态
+     * @param headerId
+     * @param invoiceStatus
+     */
+    @Transactional
+    public void updateInvoiceStatus(Long headerId,Integer invoiceStatus){
+        InvoiceHead invoiceHead =  invoiceHeadService.selectById(headerId);
+        if(invoiceHead == null){
+            throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
+        }
+        invoiceHead.setInvoiceStatus(invoiceStatus.longValue());
+        invoiceHeadService.updateById(invoiceHead);
     }
 }

@@ -33,7 +33,7 @@
         and s.parameter_level = 2002
         and s.set_of_books_id = #{setOfBooksId}
         and s.parameter_value_id = v.id
-        and v.parameter_value_code = d.dimension_sequence
+        and v.parameter_value_code = concat(d.dimension_sequence,'')
         and d.ENABLED = 1
         and d.set_of_books_id = #{setOfBooksId}
     </select>

@@ -2311,10 +2311,10 @@ public class DepartmentService extends BaseService<DepartmentMapper, Department>
         top.forEach(category -> {
             List<DepartmentTreeDTO> temp = allMap.get(category.getId());
             if (temp != null && !temp.isEmpty()) {
-                category.setChildrenDepartment(temp);
-                treeCategoryData(category.getChildrenDepartment(), allMap);
+                category.setChildren(temp);
+                treeCategoryData(category.getChildren(), allMap);
             } else {
-                category.setChildrenDepartment(new ArrayList<>());
+                category.setChildren(new ArrayList<>());
             }
         });
         return top;

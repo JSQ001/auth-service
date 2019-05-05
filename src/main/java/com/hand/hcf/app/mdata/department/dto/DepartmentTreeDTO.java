@@ -45,6 +45,12 @@ public class DepartmentTreeDTO {
      * 子部门
      */
     private List<DepartmentTreeDTO> childrenDepartment = new ArrayList<>();
+
+    /**
+     * 子部门 数据权限选择 部门树 - 前端要求使用children作为子部门属性名
+     */
+    private List<DepartmentTreeDTO> children;
+
     /**
      * 路径深度
      */

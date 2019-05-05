@@ -304,6 +304,7 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                         companyCodeTo,
                         companyName,
                         null,
+                        null,
                         page);
             }
             //查询 下属公司
@@ -314,6 +315,7 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                         companyCodeFrom,
                         companyCodeTo,
                         companyName,
+                        null,
                         null,
                         page);
             }
@@ -361,9 +363,10 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
      * @param companyCode
      * @param companyName
      * @param page
+     * @param existsCompanyIds   存在的公司Id集合 条件查询
      * @return
      */
-    public Page<CompanyCO> queryCompanyByExpenseTypeId(Long expenseTypeId, Long companyId, String companyCode, String companyName, Page page){
+    public Page<CompanyCO> queryCompanyByExpenseTypeId(Long expenseTypeId, Long companyId, String companyCode, String companyName, Page page, List<Long> existsCompanyIds){
         Page<CompanyCO> companyCOPage = new Page<>();
         ExpenseReportTypeDistSetting reportTypeDistSetting = selectOne(new EntityWrapper<ExpenseReportTypeDistSetting>().eq("report_type_id", expenseTypeId));
         if(reportTypeDistSetting.getCompanyDistFlag() != null) {
@@ -371,7 +374,8 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                 String companyDistRange = reportTypeDistSetting.getCompanyDistRange();
                 //查询 账套下所有公司
                 if ("ALL_COM_IN_SOB".equals(companyDistRange)) {
-                    return organizationService.pageCompanyByCond(OrgInformationUtil.getCurrentSetOfBookId(), companyCode, companyName, null, null, null, page);
+//                    return organizationService.pageCompanyByCond(OrgInformationUtil.getCurrentSetOfBookId(), companyCode, companyName, null, null, null, page);
+                    return organizationService.pageBySetOfBooksIdConditionByIds(OrgInformationUtil.getCurrentSetOfBookId(), companyCode, null, null,companyName, page,existsCompanyIds);
                     //查询 本公司及下属公司
                 } else if ("CURRENT_COM_&_SUB_COM".equals(companyDistRange)) {
                     return organizationService.pageChildrenCompaniesByCondition(OrgInformationUtil.getCurrentCompanyId(),
@@ -381,6 +385,7 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                             null,
                             companyName,
                             null,
+                            existsCompanyIds,
                             page);
                     //下属公司
                 } else if ("SUB_COM".equals(companyDistRange)) {
@@ -391,12 +396,15 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                             null,
                             companyName,
                             null,
+                            existsCompanyIds,
                             page);
                     // 自定义取值范围
                 } else if ("CUSTOM_RANGE".equals(companyDistRange)) {
                     List<Long> collect = expenseReportTypeDistRangeService.selectList(
                             new EntityWrapper<ExpenseReportTypeDistRange>().eq("report_type_id", expenseTypeId)
-                                    .eq("dist_dimension", "COMPANY")).stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
+                                    .eq("dist_dimension", "COMPANY")
+                                    .in(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(existsCompanyIds),"value_id",existsCompanyIds))
+                            .stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
                     return organizationService.pageBySetOfBooksIdConditionByIds(OrgInformationUtil.getCurrentSetOfBookId(),
                             companyCode,
                             null,
@@ -425,7 +433,13 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
      * @return
      */
     public Page<DepartmentCO> queryDepartmentByExpenseTypeId(
-            Long expenseTypeId,Long companyId,Long departmentId, String departmentCode, String departmentName, Page page){
+            Long expenseTypeId,
+            Long companyId,
+            Long departmentId,
+            String departmentCode,
+            String departmentName,
+            Page page,
+            List<Long> existsDepartmentIds){
         Page<DepartmentCO> result = new Page<>();
         ExpenseReportTypeDistSetting reportTypeDistSetting = selectOne(new EntityWrapper<ExpenseReportTypeDistSetting>().eq("report_type_id", expenseTypeId));
         if(reportTypeDistSetting.getDepartmentDistFlag() != null) {
@@ -433,24 +447,26 @@ public class ExpenseReportTypeDistSettingService extends BaseService<ExpenseRepo
                String departmentDistRange = reportTypeDistSetting.getDepartmentDistRange();
                if ("ALL_DEP_IN_TENANT".equals(departmentDistRange)) {
                    return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
-                           departmentName, null, null,  101, page);
+                           departmentName, existsDepartmentIds, null,  101, page);
                    //查询 账套下所有部门
                } else if ("ALL_DEP_IN_SOB".equals(departmentDistRange)) {
                    return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
-                           departmentName, null, OrgInformationUtil.getCurrentSetOfBookId(),  101, page);
+                           departmentName, existsDepartmentIds, OrgInformationUtil.getCurrentSetOfBookId(),  101, page);
                    //查询 公司下所有部门
                } else if ("ALL_DEP_IN_COM".equals(departmentDistRange)) {
                    if (companyId == null) {
                        return new Page<>();
                    } else {
                        return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
-                               departmentName, null, null, 101, page);
+                               departmentName, existsDepartmentIds, null, 101, page);
                    }
                    // 自定义范围
                } else if ("CUSTOM_RANGE".equals(departmentDistRange)) {
                    List<Long> collect = expenseReportTypeDistRangeService.selectList(
                            new EntityWrapper<ExpenseReportTypeDistRange>().eq("report_type_id", expenseTypeId)
-                                   .eq("dist_dimension", "DEPARTMENT")).stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
+                                   .eq("dist_dimension", "DEPARTMENT")
+                                   .in(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(existsDepartmentIds),"value_id",existsDepartmentIds))
+                           .stream().map(ExpenseReportTypeDistRange::getValueId).collect(Collectors.toList());
                    return organizationService.pageAssociateDepartmentByCond(companyId, departmentCode,
                            departmentName, collect, null, 101, page);
                }

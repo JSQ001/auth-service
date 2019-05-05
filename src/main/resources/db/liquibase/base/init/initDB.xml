@@ -100,29 +100,6 @@
         </createTable>
     </changeSet>
 
-
-    <changeSet id="201901101429361" author="admin">
-        <createTable tableName="sys_tenant_config" remarks="">
-            <column name="id" type="bigint" remarks="">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_tenant_config"/>
-            </column>
-            <column name="tenant_id" type="bigint" remarks="租户id"/>
-            <column name="set_of_books_id" type="bigint" remarks="账套ID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="warn_exchange_rate_tol" type="double" remarks="告警汇率容差"/>
-            <column name="prohibit_exchange_rate_tol" type="double" remarks="禁止汇率容差"/>
-            <column name="enabled" type="bit" defaultValue="1" remarks="是否可用"/>
-            <column name="deleted" type="bit" defaultValue="0" remarks="是否删除"/>
-            <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="bigint" remarks=""/>
-            <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="last_updated_by" type="bigint" remarks="最后更新人"/>
-            <column name="version_number" type="int" defaultValue="1" remarks=""/>
-        </createTable>
-    </changeSet>
-
-
     <changeSet id="201901101429364" author="admin">
         <createTable tableName="sys_attachment" remarks="">
             <column name="id" type="bigint" remarks="">
@@ -2089,7 +2066,7 @@
             <column name="created_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
-
+	
     <changeSet id="20190110141816271" author="admin">
         <addUniqueConstraint tableName="sys_feedback" columnNames="feedback_oid" constraintName="feedback_oid28"/>
     </changeSet>

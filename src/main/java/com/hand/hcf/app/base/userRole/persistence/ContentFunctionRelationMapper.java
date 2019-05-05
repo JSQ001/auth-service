@@ -36,4 +36,15 @@ public interface ContentFunctionRelationMapper extends BaseMapper<ContentFunctio
 
 
     List<ContentFunctionRelation> listRelationByTenant(@Param("tenantId")  Long tenantId);
+
+
+    /**
+     * 根据管理员功能分配的目录查询接口
+     * @param tenantId
+     * @param sourceFunctionId
+     * @return
+     */
+    List<ContentFunctionRelation> listBySystemTenant(@Param("tenantId") Long tenantId,
+                                                     @Param("sourceFunctionId") Long sourceFunctionId,
+                                                     @Param("sourceContentId") Long sourceContentId);
 }

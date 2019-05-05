@@ -133,6 +133,6 @@ public class CompanyDTO implements Serializable {
     /**
      * 子公司列表
      */
-    private List<CompanyDTO> subsidiary;
+    private List<CompanyDTO> children;
 
 }

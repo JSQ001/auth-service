@@ -99,7 +99,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
     @Autowired
     private DepartmentUserService departmentUserService;
 
-
     @Autowired
     private UserImportService userImportService;
     @Autowired
@@ -536,8 +535,6 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
         boolean isCreateMobile = false;//是否创建手机号
         boolean isModifyMobile = false;//是否修改手机号
         boolean isModifyDepartment = false;//是否修改部门
-        boolean isModifyEmail = false;//是否修改邮箱
-        boolean isModifyName = false;//是否修改姓名
 
         if (userDTO.getUserOid() == null) {
             UserCO user = null;
@@ -600,16 +597,11 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
             if(!newDepartment.getId().equals(departmentUser.getDepartmentId())){
                 isModifyDepartment = true;
             }
-            //修改姓名
-            if(!StringUtil.isNullOrEmpty(fullName) && !fullName.equalsIgnoreCase(contact.getFullName())){
-                isModifyName = true;
-            }
             //修改邮箱
             if (!StringUtil.isNullOrEmpty(email) && !email.equalsIgnoreCase(contact.getEmail())) {
                 if(baseMapper.varifyEmailExsits(email) != null){
                     throw new BizException(RespCode.EMPLOYEE_EMAIL_EXISTS);
                 }
-                isModifyEmail = true;
                 contact.setEmail(email);
             }
             //修改手机号
@@ -980,10 +972,12 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
 
             }
         }
+        if(CollectionUtils.isNotEmpty(phones)){
+            phoneService.insertOrUpdateBatch(new ArrayList<>(phones));
+        }
         contact.setStatus(EmployeeStatusEnum.LEAVED.getId());
         contact.setLeavingDate(ZonedDateTime.now());
         hcfOrganizationInterface.updateUserLeaveOffice(contact.getUserId());
-        phoneService.insertOrUpdateBatch(new ArrayList<>(phones));
         contact.setEmail(leavedEmail);
         contact.setEmployeeId(leavedEmployee);
         updateById(contact);
@@ -1780,12 +1774,11 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
 
     public List<Contact> listContactByConditionAndWrapper(List<Long> companyIds,
                                               List<Long> departmentIds,
-                                              List<Long> userGroupIds,
                                               String userCode,
                                               String userName,
                                               Wrapper<Contact> orWrapper,
                                               Page queryPage) {
-        return baseMapper.listContactByConditionAndWrapper(companyIds, departmentIds, userGroupIds, userCode, userName, orWrapper, queryPage);
+        return baseMapper.listContactByConditionAndWrapper(companyIds, departmentIds, userCode, userName, orWrapper, queryPage);
     }
 
     /**

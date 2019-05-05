@@ -254,18 +254,33 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         this.insert(expenseAdjustHeader);
         // 保存单据关联维度信息
         if (!CollectionUtils.isEmpty(adjustTypeWebDTO.getDimensions())) {
-            List<ExpenseDimension> dtoDimensions = dto.getDimensions();
-            if (adjustTypeWebDTO.getDimensions().size() != dtoDimensions.size()) {
-                throw new BizException(RespCode.EXPENSE_DIMENSIONS_IS_NULL);
-            }
-            Map<Long, ExpenseDimension> valueMap = dtoDimensions
+            // 判断是不是单据头的维度
+            List<ExpenseDimension> headerDimensions = adjustTypeWebDTO.getDimensions()
                     .stream()
-                    .collect(Collectors.toMap(ExpenseDimension::getDimensionId, e -> e));
-            adjustTypeWebDTO.getDimensions().forEach(e -> {
+                    .filter(ExpenseDimension::getHeaderFlag)
+                    .collect(Collectors.toList());
+            // 如果是单据头上的维度就将值赋值给对应的维度
+            if (!CollectionUtils.isEmpty(headerDimensions)) {
+                if (CollectionUtils.isEmpty(dto.getDimensions()) && dto.getDimensions().size() != headerDimensions.size()) {
+                    throw new BizException(RespCode.EXPENSE_DIMENSIONS_IS_NULL);
+                }
+                dto.getDimensions().forEach(headerDimension -> {
+                    for (ExpenseDimension dimension : adjustTypeWebDTO.getDimensions()) {
+                        if (headerDimension.getDimensionId().equals(dimension.getDimensionId())) {
+                            dimension.setHeaderFlag(true);
+                            dimension.setValue(headerDimension.getValue());
+                            break;
+                        }
+                    }
+                });
+            }
+        }
+        //插入维度信息
+        if (!CollectionUtils.isEmpty(adjustTypeWebDTO.getDimensions())) {
+            adjustTypeWebDTO.getDimensions().stream().forEach(e -> {
                 e.setHeaderId(expenseAdjustHeader.getId());
                 e.setId(null);
                 e.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
-				e.setValue(valueMap.get(e.getDimensionId()).getValue());
             });
             dimensionService.insertBatch(adjustTypeWebDTO.getDimensions());
         }
@@ -316,7 +331,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
             dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
         Long currentUserId = null;
-        if (!dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
+        if (!dataAuthFlag || !dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
             currentUserId = OrgInformationUtil.getCurrentUserId();
         }
         List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, expAdjustTypeId,

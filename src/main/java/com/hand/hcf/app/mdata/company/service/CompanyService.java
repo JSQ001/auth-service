@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.auth.implement.web.OauthControllerImpl;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
@@ -632,36 +633,44 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @param name：公司名称
      * @param setOfBooksId：账套id
      * @param legalEntityId：法人实体id
-     * @param pageable：分页对象
+     * @param page：分页对象
      * @return
      */
-    public Page<CompanyDTO> findCompanyByTerm(Long tenantId, String companyCode, String name, Long setOfBooksId, Long legalEntityId, Boolean enabled,Boolean dataAuthFlag, Pageable pageable) {
-        Page mybatisPage = PageUtil.getPage(pageable);
+    public List<CompanyDTO> findCompanyByTerm(Long tenantId,
+                                              String companyCode,
+                                              String name,
+                                              Long setOfBooksId,
+                                              Long legalEntityId,
+                                              Boolean enabled,
+                                              Boolean dataAuthFlag,
+                                              Page page) {
         String dataAuthLabel = null;
         if (dataAuthFlag) {
             Map<String, String> map = new HashMap<>();
             map.put(DataAuthorityUtil.TABLE_NAME, "sys_company");
+            map.put(DataAuthorityUtil.TABLE_ALIAS, "c");
             map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
             dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
-        List<Company> companies = baseMapper.selectPage(mybatisPage, new EntityWrapper<Company>()
-                .eq(tenantId != null, "tenant_id", tenantId)
-                .eq(legalEntityId != null, "legal_entity_id", legalEntityId)
-                .eq(setOfBooksId != null, "set_of_books_id", setOfBooksId)
-                .eq(companyCode != null, "company_code", companyCode)
-                .eq(name != null, "name", name)
-                .eq(enabled != null, "enabled", enabled)
-                .and(dataAuthLabel != null, dataAuthLabel)
-                .orderBy(companyCode)
-        );
-        List<CompanyDTO> companyDTOs = new ArrayList<>();
-        CompanyDTO companyDTO = null;
-        for (Company company : companies) {
-            companyDTO = companyToCompanyDTO(company);
-            companyDTOs.add(quoteAttributeAssignment(companyDTO));
+        String language = LanguageEnum.ZH_CN.getKey();
+        if (!StringUtils.hasText(OrgInformationUtil.getCurrentLanguage())) {
+            language = OrgInformationUtil.getCurrentLanguage();
         }
-        mybatisPage.setRecords(companyDTOs);
-        return mybatisPage;
+        List<CompanyDTO> companyDTOs = baseMapper.listDTOByPage(page, new EntityWrapper<Company>()
+                .eq(tenantId != null, "c.tenant_id", tenantId)
+                .eq(legalEntityId != null, "c.legal_entity_id", legalEntityId)
+                .eq(setOfBooksId != null, "c.set_of_books_id", setOfBooksId)
+                .like(companyCode != null, "c.company_code", companyCode)
+                .like(name != null, "c.name", name)
+                .eq(enabled != null, "c.enabled", enabled)
+                .and(dataAuthLabel != null, dataAuthLabel)
+                .orderBy("c.company_code"), language);
+        if (CollectionUtils.isNotEmpty(companyDTOs)) {
+            Map<String, String> sysCodeValueMap = hcfOrganizationInterface.mapAllSysCodeValueByCode(
+                    SystemCustomEnumerationTypeEnum.COMPANY_TYPE.getId().toString());
+            companyDTOs.forEach(e -> e.setCompanyTypeName(sysCodeValueMap.get(e.getCompanyTypeCode())));
+        }
+        return companyDTOs;
     }
 
     /**
@@ -1081,13 +1090,13 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @return
      */
     public Page<CompanyDTO> getCompanyChildrenAndOwnByCondition(Long companyId,
-                                                                                                 String companyCode,
-                                                                                                 String companyName,
-                                                                                                 String companyCodeFrom,
-                                                                                                 String companyCodeTo,
-                                                                                                 String keyWord,
-                                                                                                 Page page) {
-        List<CompanyDTO> companyByCond = getCompanyByCond(companyId, false, companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord, page);
+                                                                String companyCode,
+                                                                String companyName,
+                                                                String companyCodeFrom,
+                                                                String companyCodeTo,
+                                                                String keyWord,
+                                                                Page page) {
+        List<CompanyDTO> companyByCond = getCompanyChildrenByCond(companyId, false, companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord, null, page);
         page.setRecords(companyByCond);
         return page;
     }
@@ -1101,34 +1110,40 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
      * @param companyName
      * @param companyCodeFrom
      * @param companyCodeTo
+     * @param existsIds
      * @param page
      * @return
      */
-    private List<CompanyDTO> getCompanyByCond(Long companyId,
+    private List<CompanyDTO> getCompanyChildrenByCond(Long companyId,
                                               boolean ignoreOwn,
                                               String companyCode,
                                               String companyName,
                                               String companyCodeFrom,
                                               String companyCodeTo,
                                               String keyWord,
+                                              List<Long> existsIds,
                                               Page page) {
         Set<Long> companyChildrenIdByCompanyIds = getCompanyChildrenIdByCompanyId(companyId);
         if (!ignoreOwn) {
             companyChildrenIdByCompanyIds.add(companyId);
         }
+        if (CollectionUtils.isNotEmpty(companyChildrenIdByCompanyIds)) {
+            if(CollectionUtils.isNotEmpty(existsIds)){
+                companyChildrenIdByCompanyIds.retainAll(existsIds);
+            }
+        }
         if (CollectionUtils.isEmpty(companyChildrenIdByCompanyIds)) {
             return new ArrayList<>();
         }
-
         List<CompanyDTO> collect;
         if (page == null) {
             List<Company> companies =
-                    baseMapper.getCompanyByCond(new ArrayList<Long>(companyChildrenIdByCompanyIds), companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord);
+                    baseMapper.getCompanyChildrenByCond(new ArrayList<Long>(companyChildrenIdByCompanyIds), companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord);
             collect = companies.stream().map(company ->
                     companyToCompanyDTO(company)).collect(Collectors.toList());
         } else {
             List<Company> companies =
-                    baseMapper.getCompanyByCond(new ArrayList<Long>(companyChildrenIdByCompanyIds), companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord, page);
+                    baseMapper.getCompanyChildrenByCond(new ArrayList<Long>(companyChildrenIdByCompanyIds), companyCode, companyName, companyCodeFrom, companyCodeTo, keyWord, page);
             collect = companies.stream().map(company ->
                     companyToCompanyDTO(company)).collect(Collectors.toList());
         }
@@ -1572,8 +1587,9 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
                                                             String companyCodeTo,
                                                             String companyName,
                                                             String keyWord,
+                                                            List<Long> existsIds,
                                                             Page<CompanyCO> mybatisPage) {
-        List<CompanyDTO> dtos = getCompanyByCond(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, mybatisPage);
+        List<CompanyDTO> dtos = getCompanyChildrenByCond(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, existsIds, mybatisPage);
         List<CompanyCO> companyCOS = dtos.stream().map(e -> {
             CompanyCO companyCO = CompanyCO.builder()
                     .companyCode(e.getCompanyCode())
@@ -1601,8 +1617,9 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
                                                             String companyCodeFrom,
                                                             String companyCodeTo,
                                                             String companyName,
-                                                            String keyWord) {
-        List<CompanyDTO> dtos = getCompanyByCond(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, null);
+                                                            String keyWord,
+                                                            List<Long> existsIds) {
+        List<CompanyDTO> dtos = getCompanyChildrenByCond(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, existsIds,null);
         List<CompanyCO> companyCOS = dtos.stream().map(e -> {
             CompanyCO companyCO = CompanyCO.builder()
                     .companyCode(e.getCompanyCode())
@@ -1664,7 +1681,7 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
                 if (!subsidiary.isEmpty()) {
                     Wrapper<CompanyCO> wrappers = new EntityWrapper<CompanyCO>().in("id", subsidiary);
                     List<CompanyCO> companys = baseMapper.listCompanyCO(wrappers);
-                    t.setSubsidiary(mapper.mapAsList(companys, CompanyDTO.class));
+                    t.setChildren(mapper.mapAsList(companys, CompanyDTO.class));
                 }
             });
         }
@@ -1689,10 +1706,10 @@ public class CompanyService extends BaseService<CompanyMapper, Company> {
         top.forEach(category -> {
             List<CompanyDTO> temp = allMap.get(category.getId());
             if (temp != null && !temp.isEmpty()) {
-                category.setSubsidiary(temp);
-                treeCategoryData(category.getSubsidiary(), allMap);
+                category.setChildren(temp);
+                treeCategoryData(category.getChildren(), allMap);
             } else {
-                category.setSubsidiary(new ArrayList<>());
+                category.setChildren(new ArrayList<>());
             }
         });
         return top;

@@ -49,10 +49,22 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
                 stringList.add("账套code不存在！");
             }else if(setOfBooksInfoCOList.size() == 1){
                 setOfBooksId = setOfBooksInfoCOList.get(0).getId();
+                dto.setSetOfBooksId(setOfBooksId);
+                if(!TypeConversionUtils.isEmpty(dto.getCompanyCode())) {
+                    CompanyCO companyCO = organizationService.getByCompanyCode(dto.getCompanyCode());
+                    if (companyCO == null) {
+                        stringList.add("公司代码找不到！");
+                    } else {
+                        if(!companyCO.getSetOfBooksId().equals(dto.getSetOfBooksId())){
+                            stringList.add("公司不在"+ dto.getSetOfBooksCode()+"账套中！");
+                        }else {
+                            dto.setCompanyId(companyCO.getId());
+                        }
+                    }
+                }
             }else if(setOfBooksInfoCOList.size() > 1){
                 stringList.add("账套code存在多个！");
             }
-            dto.setSetOfBooksId(setOfBooksId);
             List<ExpenseType> typelist = expenseTypeMapper.selectList(
                     new EntityWrapper<ExpenseType>()
                         .eq("set_of_books_id",setOfBooksId)
@@ -65,14 +77,6 @@ public class ExpenseTypeAssignCompanyService extends BaseService<ExpenseTypeAssi
                 dto.setExpenseTypeId(typelist.get(0).getId());
             }else if(typelist.size() > 1){
                 stringList.add("类型代码存在多个！");
-            }
-            if(!TypeConversionUtils.isEmpty(dto.getCompanyCode())) {
-                CompanyCO companyCO = organizationService.getByCompanyCode(dto.getCompanyCode());
-                if (companyCO != null) {
-                    stringList.add("公司代码找不到！");
-                } else {
-                    dto.setCompanyId(companyCO.getId());
-                }
             }
         }
         if(!CollectionUtils.isEmpty(stringList)){

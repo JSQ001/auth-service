@@ -625,10 +625,12 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
      * @param code
      * @param name
      * @param categoryName
+     * @param setOfBooksId
+     * @param page
      * @return
      */
-    public List<ExpenseType> selectExpenseByCode(String code,String name,String categoryName){
-        List<ExpenseType> expenseType = expenseTypeMapper.selectExpenseByCode(code,name,categoryName);
+    public List<ExpenseType> selectExpenseByCode(String code,String name,String categoryName,Long setOfBooksId ,Page page){
+        List<ExpenseType> expenseType = expenseTypeMapper.selectExpenseByCode(code,name,categoryName,setOfBooksId,page);
         return expenseType;
     }
 
@@ -701,10 +703,29 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                 dto.setTypeFlag(TypeEnum.APPLICATION_TYPE.getKey());
                 dto.setAttachmentFlag(null);
             }else if(TypeEnum.COST_TYPE.getKey().compareTo(dto.getTypeFlag()) == 0){
+                if(!TypeConversionUtils.isEmpty(dto.getSourceTypeCode())){
+                    List<ExpenseType> list = baseMapper.selectList(new EntityWrapper<ExpenseType>()
+                            .eq("code", dto.getSourceTypeCode())
+                            .eq("set_of_books_id",dto.getSetOfBooksId())
+                            .eq("type_flag", Integer.valueOf(0)));
+                    if(list.size() == 0){
+                        stringList.add("费用类型的申请类型代码找不到！");
+                    }else if(list.size() == 1){
+                        dto.setSourceTypeId(list.get(0).getId());
+                        if(dto.getTypeCategoryId() != null){
+                            if(!list.get(0).getTypeCategoryId().equals(dto.getTypeCategoryId())){
+                                stringList.add("该费用大类下无此申请类型！");
+                            }
+                        }
+                    }else if(list.size() > 1){
+                        stringList.add("费用类型的申请类型代码存在多个！");
+                    }
+                }
                 dto.setTypeFlag(TypeEnum.COST_TYPE.getKey());
-                if(TypeConversionUtils.isEmpty(dto.getApplicationModel())||
-                        TypeConversionUtils.isEmpty(dto.getAttachmentFlag())){
-                    stringList.add("费用类型关联申请模式和附件模式两字段必输！");
+                if(TypeConversionUtils.isEmpty(dto.getApplicationModel())){
+                    stringList.add("费用类型关联申请模式字段必输！");
+                }else if(TypeConversionUtils.isEmpty(dto.getAttachmentFlag())){
+                    stringList.add("附件模式字段必输！");
                 }else{
                     if(dto.getAttachmentFlag().equals(1) ||
                             dto.getAttachmentFlag().equals(2) ||
@@ -770,19 +791,6 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     }else{
                         stringList.add("单位不在day、week、month、person、ge、time中！");
                     }
-                }
-            }
-            if(Integer.valueOf(1).equals(dto.getTypeFlag())){
-                List<ExpenseType> list = baseMapper.selectList(new EntityWrapper<ExpenseType>()
-                        .eq("code", dto.getSourceTypeCode())
-                        .eq("set_of_books_id",dto.getSetOfBooksId())
-                        .eq("type_flag", Integer.valueOf(0)));
-                if(list.size() == 0){
-                    stringList.add("费用类型的申请类型代码找不到！");
-                }else if(list.size() == 1){
-                    dto.setSourceTypeId(list.get(0).getId());
-                }else if(list.size() > 1){
-                    stringList.add("费用类型的申请类型代码存在多个！");
                 }
             }
         }

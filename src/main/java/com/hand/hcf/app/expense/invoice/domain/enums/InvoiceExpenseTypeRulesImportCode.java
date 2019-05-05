@@ -22,19 +22,37 @@ public final class InvoiceExpenseTypeRulesImportCode {
     public final static int ROW_NUMBER = 0;
 
     /**
-     * 维值编码
+     * 货物名称
      */
-    public final static int Responsibility_Center_Code = ROW_NUMBER + 1;
+    public final static int RESPONSIBILITY_GOOD_NAME = ROW_NUMBER + 1;
 
     /**
-     * 维值名称
+     * 费用类型代码
      */
-    public final static int Responsibility_Center_Name = Responsibility_Center_Code + 1;
+
+    public final static int RESPONSIBILITY_EXPENSE_TYPE_CODE = RESPONSIBILITY_GOOD_NAME + 1;
+
+    /**
+     * 描述
+     */
+    public final static int RESPONSIBILITY_DESCRIPTIONS = RESPONSIBILITY_EXPENSE_TYPE_CODE + 1;
+
+    /**
+     * 开始时间
+     */
+
+    public final static int  RESPONSIBILITY_START_DATE = RESPONSIBILITY_DESCRIPTIONS + 1;
+
+    /**
+     * 结束时间
+     */
+
+    public final  static int RESPONSIBILITY_END_DATE = RESPONSIBILITY_START_DATE + 1;
 
     /**
      * 是否启用
      */
-    public final static int ENABLED = Responsibility_Center_Name + 1;
+    public final static int ENABLED = RESPONSIBILITY_END_DATE + 1;
 
     /**
      * 错误说明

@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.userRole.domain.*;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
  * @date: 2019/1/29
  */
 @Service
-@Transactional
 public class ContentFunctionRelationService extends BaseService<ContentFunctionRelationMapper,ContentFunctionRelation>{
     @Autowired
     private  ContentFunctionRelationMapper contentFunctionRelationMapper;
@@ -80,21 +80,10 @@ public class ContentFunctionRelationService extends BaseService<ContentFunctionR
 
             // 如果是系统租户则需要将目录关联功能映射关系分配给所有租户
             if(tenant.getSystemFlag()){
-                Long sourceContentId = contentFunctionRelation.getContentId();
-                Long sourceFunctionId = contentFunctionRelation.getFunctionId();
-                List<Tenant> tenants = tenantService.findAll()
-                        .stream()
-                        .filter(e -> !e.getId().equals(tenantId)).collect(Collectors.toList());
-                if (tenants.size() > 0) {
-                    List<ContentFunctionRelation> contentFunctionRelations = tenants.stream().map(domain -> {
-                        ContentFunctionRelation contentFunctionRelation1 = new ContentFunctionRelation();
-                        ContentList contentList1 = contentListService.getContentListByTenantIdAndSourceId(domain.getId(),sourceContentId);
-                        FunctionList functionList1 = functionListService.getFunctionByTenantIdAndSourceId(domain.getId(),sourceFunctionId);
-                        contentFunctionRelation1.setContentId(contentList1.getId());
-                        contentFunctionRelation1.setFunctionId(functionList1.getId());
-                        return contentFunctionRelation1;
-                    }).collect(Collectors.toList());
-                    this.insertBatch(contentFunctionRelations);
+                List<ContentFunctionRelation> relations = baseMapper.listBySystemTenant(tenant.getId(),
+                        contentFunctionRelation.getFunctionId(), contentFunctionRelation.getContentId());
+                if (CollectionUtils.isNotEmpty(relations)) {
+                    this.insertBatch(relations);
                 }
             }
 

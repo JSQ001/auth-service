@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.plugins.Page;
 
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
+import com.hand.hcf.app.common.co.CompanyAssociateUnitCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.CompanyAssociateUnit;
 import com.hand.hcf.app.mdata.company.dto.CompanyAssociateUnitDTO;
 import com.hand.hcf.app.mdata.company.dto.CompanyLovDTO;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -197,5 +200,25 @@ public class CompanyAssociateUnitService extends BaseService<CompanyAssociateUni
      */
     public List<SetOfBooks> listSetOfBooksByDepartmentId(Long departmentId) {
         return baseMapper.listSetOfBooksByDepartmentId(departmentId);
+    }
+
+    public Map<String, Boolean> checkCompanyAssociateUnit(List<CompanyAssociateUnitCO> params) {
+        if (isOpenCompanyAssociate(OrgInformationUtil.getCurrentTenantId())) {
+            Map<String, Boolean> result = new HashMap<>(16);
+            params.forEach(e -> {
+                if (!result.containsKey(e.getCompanyId() + "-" + e.getDepartmentId())) {
+                    Integer count = baseMapper.selectCount(this.getWrapper().eq("company_id", e.getCompanyId())
+                            .eq("department_id", e.getDepartmentId())
+                            .eq("enabled", true));
+                    result.put(e.getCompanyId() + "-" + e.getDepartmentId(), SqlHelper.retBool(count));
+                }
+            });
+            return result;
+        } else {
+            return params
+                    .stream()
+                    .collect(Collectors
+                            .toMap(e -> e.getCompanyId() + "-" + e.getDepartmentId(), e -> true, (k1,k2) -> true));
+        }
     }
 }

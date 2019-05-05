@@ -123,12 +123,12 @@ public class UserController {
         if (userDTO.getId() != null) {
             throw new BizException(RespCode.USER_ID_MUST_NULL);
         }
-        return ResponseEntity.ok(userService.saveUserDto(userDTO,LoginInformationUtil.getCurrentUserId(),LoginInformationUtil.getCurrentTenantId()));
+        return ResponseEntity.ok(userService.saveUserDto(userDTO, LoginInformationUtil.getCurrentTenantId()));
     }
 
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<UserDTO> updateUserForControl(@RequestBody UserDTO userDTO)  {
-        return ResponseEntity.ok(userService.saveUserDto(userDTO,LoginInformationUtil.getCurrentUserId(),LoginInformationUtil.getCurrentTenantId()));
+        return ResponseEntity.ok(userService.saveUserDto(userDTO, LoginInformationUtil.getCurrentTenantId()));
     }
 
     /**

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.mdata.company.domain.Company;
+import com.hand.hcf.app.mdata.company.dto.CompanyDTO;
 import com.hand.hcf.app.mdata.company.dto.CompanyQO;
 import com.hand.hcf.app.mdata.company.dto.CompanySobDTO;
 import org.apache.ibatis.annotations.Param;
@@ -110,7 +111,7 @@ public interface CompanyMapper extends BaseMapper<Company> {
      */
     Set<Long> getCompanyChildrenIdByCompanyIds(@Param(value = "companyIds") Set<Long> companyIds);
 
-    List<Company> getCompanyByCond(@Param("companyIds") List<Long> companyIds,
+    List<Company> getCompanyChildrenByCond(@Param("companyIds") List<Long> companyIds,
                                    @Param("companyCode") String companyCode,
                                    @Param("companyName") String companyName,
                                    @Param("companyCodeFrom") String companyCodeFrom,
@@ -119,7 +120,7 @@ public interface CompanyMapper extends BaseMapper<Company> {
                                    Pagination pagination
     );
 
-    List<Company> getCompanyByCond(@Param("companyIds") List<Long> companyIds,
+    List<Company> getCompanyChildrenByCond(@Param("companyIds") List<Long> companyIds,
                                    @Param("companyCode") String companyCode,
                                    @Param("companyName") String companyName,
                                    @Param("companyCodeFrom") String companyCodeFrom,
@@ -165,4 +166,8 @@ public interface CompanyMapper extends BaseMapper<Company> {
     * */
     List<CompanyCO> listCompanyByTenantId(@Param("tenantId") Long tenantId,
                                           @Param("enabled") Boolean enabled);
+
+    List<CompanyDTO> listDTOByPage(RowBounds rowBounds,
+                                   @Param("ew") Wrapper<Company> wrapper,
+                                   @Param("language") String language);
 }

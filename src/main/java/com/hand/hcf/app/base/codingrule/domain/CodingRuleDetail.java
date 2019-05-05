@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.codingrule.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("sys_coding_rule_detail")
-public class CodingRuleDetail extends DomainI18nEnable {
+public class CodingRuleDetail extends DomainLogicEnable {
 
 
     @TableField("coding_rule_id")
