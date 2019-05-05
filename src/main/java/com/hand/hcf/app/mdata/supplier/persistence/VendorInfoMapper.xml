@@ -59,9 +59,10 @@
         ORDER BY vvi.last_updated_date DESC
     </select>
 
+    <!-- TENANT级别的source默认是1，数据库中存储的是1，故此处搜索source为1-->
     <select id="selectVendorInfosByPage" resultMap="VendorInfoMap">
         SELECT vvi.* FROM ven_vendor_info vvi
-        WHERE vvi.source = 'TENANT'
+        WHERE vvi.source = '1 '
         <if test="venderCode != null">
             AND vvi.vendor_code LIKE concat(concat('%',#{venderCode}),'%')
         </if>
