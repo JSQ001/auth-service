@@ -98,7 +98,7 @@
                 FROM
                     sys_department_user du
                 WHERE
-                    t.id = du.user_id
+                    t.user_id = du.user_id
                     AND du.department_id = #{departmentId}
             )
         <if test="codeName != null and codeName != ''">

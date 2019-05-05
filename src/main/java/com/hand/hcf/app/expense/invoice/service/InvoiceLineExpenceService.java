@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,4 +79,94 @@ public class InvoiceLineExpenceService extends BaseService<InvoiceLineExpenceMap
         return this.selectOne(new EntityWrapper<InvoiceLineExpence>().eq("invoice_dist_id",distId));
     }
 
+    /**
+     * 根据费用头ID获取发票费用关联关系及发票信息
+     * @param reportHeaderId
+     * @return
+     */
+    public List<InvoiceLineExpenceWebQueryDTO> getInvoiceLineExpenseByReportHeaderId(Long reportHeaderId,
+                                                                                      String invoiceMateFlag){
+        Wrapper wrapper = new EntityWrapper<InvoiceLineExpence>()
+                .eq(invoiceMateFlag != null, "ile.invoice_mate_flag", invoiceMateFlag);
+        List<InvoiceLineExpenceWebQueryDTO> nvoiceLineExpenceWebQueryDTOs =
+                invoiceLineExpenceMapper.getInvoiceLineExpenceByReportHeadId(wrapper, reportHeaderId);
+        nvoiceLineExpenceWebQueryDTOs.stream().forEach(invoiceLineExpenceWebQueryDTO -> {
+            if(invoiceLineExpenceWebQueryDTO.getInvoiceMateFlag() == null ||
+                "N".equals(invoiceLineExpenceWebQueryDTO.getInvoiceMateFlag())){
+                invoiceLineExpenceWebQueryDTO.setInvoiceMateFlagDesc("否");
+            }else{
+                invoiceLineExpenceWebQueryDTO.setInvoiceMateFlagDesc("是");
+            }
+            if(invoiceLineExpenceWebQueryDTO.getInvoiceBagConfirmFlag() == null ||
+                    "N".equals(invoiceLineExpenceWebQueryDTO.getInvoiceBagConfirmFlag())){
+                invoiceLineExpenceWebQueryDTO.setInvoiceBagConfirmFlagDesc("未确认");
+            }else{
+                invoiceLineExpenceWebQueryDTO.setInvoiceBagConfirmFlagDesc("已确认");
+            }
+        });
+        return nvoiceLineExpenceWebQueryDTOs;
+    }
+
+    /**
+     * 根据费用头ID及发票袋号码确认标志获取发票费用关联关系
+     * @param reportHeaderId 报账单头ID
+     * @param invoiceBagConfirmFlag 发票袋号码确认标志
+     * @param editor 是否判断发票袋号码不为空
+     * @return
+     */
+    public List<InvoiceLineExpence> getInvoiceLineExpenseByReportHeaderIdAndInvoiceBagConfirmFlag(Long reportHeaderId,
+                                                                                                  String invoiceBagConfirmFlag,
+                                                                                                  Boolean editor){
+        Wrapper wrapper = new EntityWrapper<InvoiceLineExpence>()
+                .eq("exp_expense_head_id",reportHeaderId)
+                .eq("invoice_bag_confirm_flag", invoiceBagConfirmFlag);
+        if(editor){
+            wrapper.isNotNull("invoice_bag_no");
+        }
+        List<InvoiceLineExpence> list = invoiceLineExpenceMapper.selectList(wrapper);
+        if(list.size() > 0){
+            return list;
+        }else{
+            return new ArrayList<InvoiceLineExpence>();
+        }
+    }
+
+    /**
+     * 根据费用头ID及发票行匹配标志获取发票费用关联关系
+     * @param reportHeaderId 报账单头ID
+     * @param invoiceMateFlag 发票关联报账单行匹配标志
+     * @return
+     */
+    public List<InvoiceLineExpence> getInvoiceLineExpenseByReportHeaderIdAndInvoiceMateFlag(Long reportHeaderId,
+                                                                                             String invoiceMateFlag){
+        Wrapper wrapper = new EntityWrapper<InvoiceLineExpence>()
+                .eq("exp_expense_head_id",reportHeaderId)
+                .eq("invoice_mate_flag", invoiceMateFlag);
+        List<InvoiceLineExpence> list = invoiceLineExpenceMapper.selectList(wrapper);
+        if(list.size() > 0){
+            return list;
+        }else{
+            return new ArrayList<InvoiceLineExpence>();
+        }
+    }
+
+    /**
+     * 根据发票袋号码查询报账单头ID
+     * @param invoiceBagNo 发票袋号码
+     * @param invoiceBagConfirmFlag 发票袋号码确认标记
+     * @return
+     */
+    public List<InvoiceLineExpence> getInvoiceLineExpenseByInvoiceBagNoGroupByExpExpenseHeadId(String invoiceBagNo,
+                                                                                                String invoiceBagConfirmFlag){
+        Wrapper wrapper = new EntityWrapper<InvoiceLineExpence>()
+                .eq("invoice_bag_no", invoiceBagNo)
+                .eq("invoice_bag_confirm_flag", invoiceBagConfirmFlag)
+                .groupBy("exp_expense_head_id");
+        List<InvoiceLineExpence> list = invoiceLineExpenceMapper.selectList(wrapper);
+        if(list.size() > 0){
+            return list;
+        }else{
+            return new ArrayList<InvoiceLineExpence>();
+        }
+    }
 }

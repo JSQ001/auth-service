@@ -101,7 +101,6 @@ public interface ContactMapper extends BaseMapper<Contact> {
      */
     List<Contact> listContactByConditionAndWrapper(@Param("companyIds") List<Long> companyIds,
                                                    @Param("departmentIds") List<Long> departmentIds,
-                                                   @Param("userGroupIds") List<Long> userGroupIds,
                                                    @Param("userCode") String userCode,
                                                    @Param("userName") String userName,
                                                    @Param("ew") Wrapper<Contact> orWrapper,

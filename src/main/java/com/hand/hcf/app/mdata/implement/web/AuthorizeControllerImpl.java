@@ -3,6 +3,7 @@ package com.hand.hcf.app.mdata.implement.web;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.AuthorizeQueryCO;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.FormAuthorizeCO;
@@ -13,6 +14,7 @@ import com.hand.hcf.app.mdata.authorize.service.FormCentralizedAuthService;
 import com.hand.hcf.app.mdata.authorize.service.FormPersonalAuthService;
 import com.hand.hcf.app.mdata.contact.domain.Contact;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
+import com.hand.hcf.app.mdata.contact.service.UserGroupService;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +42,8 @@ public class AuthorizeControllerImpl {
     private MapperFacade mapperFacade;
     @Autowired
     private ContactService contactService;
+    @Autowired
+    private UserGroupService userGroupService;
 
     public List<FormAuthorizeCO> listFormAuthorizeByDocumentCategoryAndUserId(@RequestParam String documentCategory,
                                                                               @RequestParam Long userId) {
@@ -81,15 +85,48 @@ public class AuthorizeControllerImpl {
 
         Wrapper<Contact> orWrapper = this.getQueryWrapperByAuthorize(queryCO.getDocumentCategory(), queryCO.getFormTypeId(), queryCO.getCurrentUserId());
 
-        List<Contact> contactList = contactService.listContactByConditionAndWrapper(
-                queryCO.getCompanyIdList(),
-                queryCO.getDepartmentIdList(),
-                queryCO.getUserGroupIdList(),
-                userCode,
-                userName,
-                orWrapper,
-                queryPage
-        );
+        List<Contact> contactList;
+        //根据人员组集合是否为空来判断是否手动分页
+        if (CollectionUtils.isEmpty(queryCO.getUserGroupIdList())) {
+            contactList = contactService.listContactByConditionAndWrapper(
+                    queryCO.getCompanyIdList(),
+                    queryCO.getDepartmentIdList(),
+                    userCode,
+                    userName,
+                    orWrapper,
+                    queryPage
+            );
+            contactCOPage.setTotal(queryPage.getTotal());
+        } else {
+            queryPage.setSearchCount(false);
+            queryPage.setCurrent(1);
+            queryPage.setSize(100000);
+            contactList = contactService.listContactByConditionAndWrapper(
+                    queryCO.getCompanyIdList(),
+                    queryCO.getDepartmentIdList(),
+                    userCode,
+                    userName,
+                    orWrapper,
+                    queryPage
+            );
+            contactList = contactList.stream().filter(contact ->
+                    userGroupService.hasUserGroupPermissionForMuti(queryCO.getUserGroupIdList(), contact.getUserId())
+            ).collect(Collectors.toList());
+
+            //手动分页
+            int startIndex = page * size;
+            int endIndex = (page + 1) * size;
+            int total = contactList.size();
+            if (total < startIndex) {
+                contactList = new ArrayList<>();
+            } else if(total >= startIndex && total < endIndex) {
+                contactList = contactList.subList(startIndex, total);
+            } else if (total >= endIndex) {
+                contactList = contactList.subList(startIndex, endIndex);
+            }
+            contactCOPage.setTotal(total);
+        }
+
 
         List<ContactCO> contactCOList = new ArrayList<>(8);
         contactList.stream().forEach(e -> {
@@ -101,7 +138,6 @@ public class AuthorizeControllerImpl {
             contactCOList.add(contactCO);
         });
 
-        contactCOPage.setTotal(queryPage.getTotal());
         contactCOPage.setRecords(contactCOList);
         return contactCOPage;
     }

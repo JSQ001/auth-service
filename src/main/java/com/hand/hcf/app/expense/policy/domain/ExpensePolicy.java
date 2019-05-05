@@ -86,6 +86,7 @@ public class ExpensePolicy extends DomainLogicEnable {
     /**
      * 有效日期至
      */
+    @TableField(strategy = FieldStrategy.IGNORED)
     private ZonedDateTime endDate;
     /**
      * 全部/部分公司标识

@@ -198,10 +198,10 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         // 按什么金额分摊，就以什么金额为标准
         // 按含税金额分摊
         if(ParameterConstant.TAX_IN.equals(expTaxDist)){
-            amountEqual = line.getAmount().equals(expenseReportDist.getAmount());
+            amountEqual = line.getAmount().compareTo(expenseReportDist.getAmount()) == 0;
             // 按不含税金额分摊
         }else if(ParameterConstant.TAX_OFF.equals(expTaxDist)){
-            amountEqual = line.getExpenseAmount().equals(expenseReportDist.getNoTaxDistAmount());
+            amountEqual = line.getExpenseAmount().compareTo(expenseReportDist.getNoTaxDistAmount()) == 0;
         }
         if(! amountEqual){
             throw new BizException(RespCode.EXPENSE_REPORT_LINE_AMOUNT_UNEQUAL_DIST_AMOUNT);

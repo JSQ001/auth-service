@@ -368,6 +368,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                                                          String remark,
                                                          String requisitionNumber,
                                                          Boolean editor,
+                                                         Boolean passed,
                                                          Page page) {
         Long currentUserId = OrgInformationUtil.getCurrentUserId();
         Wrapper<ExpenseReportHeader> wrapper =new EntityWrapper<ExpenseReportHeader>()
@@ -385,6 +386,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 .orderBy("requisition_number", false);
         if (editor) {
             wrapper = wrapper.in("status", "1001,1003,1005,2001");
+        } else  if (passed) {
+            wrapper = wrapper.in("status", "1004,2002");
         } else {
             wrapper = wrapper.eq(status != null, "status", status);
         }
@@ -1627,6 +1630,239 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             reportHeaderDTOS.stream().forEach(e->{
                 setExpenseReportHeaderDto(e);
             });
+        }
+    }
+
+    /**
+     *  单据邮寄，分页查询已审核且未比对通过的报账单信息
+     *
+     * @param documentTypeId
+     * @param auditDateFrom
+     * @param auditDateTo
+     * @param applicantId
+     * @param status
+     * @param currencyCode
+     * @param amountFrom
+     * @param amountTo
+     * @param remark
+     * @param page
+     * @return
+     */
+    public List<ExpenseReportHeader> getEmailExpenseReports(Long documentTypeId,
+                                                            ZonedDateTime auditDateFrom,
+                                                            ZonedDateTime auditDateTo,
+                                                            Long applicantId,
+                                                            Integer status,
+                                                            String currencyCode,
+                                                            BigDecimal amountFrom,
+                                                            BigDecimal amountTo,
+                                                            String remark,
+                                                            String requisitionNumber,
+                                                            Page page) {
+//        Long currentUserId = OrgInformationUtil.getCurrentUserId();
+        Wrapper<ExpenseReportHeader> wrapper =new EntityWrapper<ExpenseReportHeader>()
+//                .eq("created_by", currentUserId)
+                .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
+                .eq("set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
+                .ne("comparison_flag", "Y")
+                .ne("receipt_documents_flag","Y")
+                .eq(documentTypeId != null, "document_type_id", documentTypeId)
+                .ge(auditDateFrom != null, "audit_date", auditDateFrom)
+                .le(auditDateTo != null, "audit_date", auditDateTo)
+                .eq(applicantId != null, "applicant_id", applicantId)
+                .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "currency_code", currencyCode)
+                .eq("audit_flag","Y")
+                .ge(amountFrom != null, "total_amount", amountFrom)
+                .le(amountTo != null, "total_amount", amountTo)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
+                .orderBy("requisition_number", false);
+        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectPage(page, wrapper);
+        expenseReportHeaders.stream().forEach(expenseReportHeader -> {
+            ContactCO userById = organizationService.getUserById(expenseReportHeader.getApplicantId());
+            expenseReportHeader.setApplicantCode(userById.getEmployeeCode());
+            expenseReportHeader.setApplicantName(userById.getFullName());
+            // 单据类型
+            ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeader.getDocumentTypeId());
+            expenseReportHeader.setDocumentTypeName(expenseReportType.getReportTypeName());
+            expenseReportHeader.setFormId(expenseReportType.getFormId());
+            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
+            expenseReportHeader.setFormOid(approvalFormById.getFormOid());
+            if(expenseReportHeader.getReceiptDocumentsFlag() == null || "N".equals(expenseReportHeader.getReceiptDocumentsFlag())){
+                expenseReportHeader.setReceiptDocumentsFlagDesc("未签收");
+            }else{
+                expenseReportHeader.setReceiptDocumentsFlagDesc("已签收");
+            }
+        });
+        return expenseReportHeaders;
+    }
+
+    /**
+     * 根据报销单头ID保存发票行报销记录中的发票袋号码
+     * @param expenseReportHeaderIdList 报销单头
+     * @param invoiceBagNo 发票袋号码
+     */
+    public void saveInvoiceLineExpenceInvoiceBagNo(List<Long> expenseReportHeaderIdList, String invoiceBagNo){
+        for(Long expenseReportHeaderId : expenseReportHeaderIdList){
+            List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService
+                    .getInvoiceLineExpenseByReportHeaderIdAndInvoiceBagConfirmFlag(expenseReportHeaderId, "N", false);
+            List<InvoiceLineExpence> list = new ArrayList<InvoiceLineExpence>();
+            for(InvoiceLineExpence invoiceLineExpence : invoiceLineExpences){
+                invoiceLineExpence.setInvoiceBagNo(invoiceBagNo);
+                list.add(invoiceLineExpence);
+            }
+            if(list.size() > 0){
+                invoiceLineExpenceService.updateBatchById(list);
+            }
+        }
+    }
+
+    /**
+     * 根据报销单头ID更新报销单确认邮寄
+     * @param expenseReportHeaderIdList 报销单头
+     */
+    public void confirmInvoiceLineExpenceEmail(List<Long> expenseReportHeaderIdList){
+        for(Long expenseReportHeaderId : expenseReportHeaderIdList){
+            List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService
+                    .getInvoiceLineExpenseByReportHeaderIdAndInvoiceBagConfirmFlag(expenseReportHeaderId, "N", true);
+            List<InvoiceLineExpence> list = new ArrayList<InvoiceLineExpence>();
+            for(InvoiceLineExpence invoiceLineExpence : invoiceLineExpences){
+                invoiceLineExpence.setInvoiceBagConfirmFlag("Y");
+                list.add(invoiceLineExpence);
+            }
+            if(list.size() > 0){
+                invoiceLineExpenceService.updateBatchById(list);
+            }
+        }
+    }
+
+    /**
+     *  单据签收，分页查询当前员工已经扫描过发票袋号码的报账单信息
+     *
+     * @param documentTypeId
+     * @param applicantId
+     * @param status
+     * @param currencyCode
+     * @param amountFrom
+     * @param amountTo
+     * @param remark
+     * @param requisitionNumber
+     * @param invoiceBagNo
+     * @param receiptDocumentsFlag
+     * @param sheerMateFlag
+     * @param dealUserId
+     * @param page
+     * @return
+     */
+    public List<ExpenseReportHeader> getSignExpenseReports(Long documentTypeId,
+                                                            Long applicantId,
+                                                            Integer status,
+                                                            String currencyCode,
+                                                            BigDecimal amountFrom,
+                                                            BigDecimal amountTo,
+                                                            String remark,
+                                                            String requisitionNumber,
+                                                            String invoiceBagNo,
+                                                            String receiptDocumentsFlag,
+                                                            String sheerMateFlag,
+                                                            Long dealUserId,
+                                                            Page page) {
+        Long currentUserId = OrgInformationUtil.getCurrentUserId();
+        Wrapper<ExpenseReportHeader> wrapper =new EntityWrapper<ExpenseReportHeader>()
+                .eq("ibns.created_by", currentUserId)
+                .eq("r.tenant_id", OrgInformationUtil.getCurrentTenantId())
+                .eq("r.set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
+                .eq(documentTypeId != null, "r.document_type_id", documentTypeId)
+                .eq(applicantId != null, "r.applicant_id", applicantId)
+                .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "r.currency_code", currencyCode)
+                .eq("r.audit_flag","Y")
+                .ge(amountFrom != null, "r.total_amount", amountFrom)
+                .le(amountTo != null, "r.total_amount", amountTo)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "r.description", remark)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "r.requisition_number", requisitionNumber)
+//                .eq(invoiceBagNo != null,"ibns.invoice_bag_no", invoiceBagNo)
+                .eq(receiptDocumentsFlag != null,"r.receipt_documents_flag", receiptDocumentsFlag)
+                .eq(sheerMateFlag != null,"r.sheer_mate_flag", sheerMateFlag)
+                .eq(dealUserId != null,"r.deal_user_id", dealUserId)
+                .orderBy("r.requisition_number", false);
+        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.getSignExpenseReports(wrapper, page);
+        expenseReportHeaders.stream().forEach(expenseReportHeader -> {
+            ContactCO userById = organizationService.getUserById(expenseReportHeader.getApplicantId());
+            expenseReportHeader.setApplicantCode(userById.getEmployeeCode());
+            expenseReportHeader.setApplicantName(userById.getFullName());
+            if (expenseReportHeader.getDealUserId() != null){
+                ContactCO dealUserById = organizationService.getUserById(expenseReportHeader.getDealUserId());
+                expenseReportHeader.setDealUserIdName(dealUserById.getFullName());
+            }
+            // 单据类型
+            ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeader.getDocumentTypeId());
+            expenseReportHeader.setDocumentTypeName(expenseReportType.getReportTypeName());
+            expenseReportHeader.setFormId(expenseReportType.getFormId());
+            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
+            expenseReportHeader.setFormOid(approvalFormById.getFormOid());
+            if(expenseReportHeader.getReceiptDocumentsFlag() == null || "N".equals(expenseReportHeader.getReceiptDocumentsFlag())){
+                expenseReportHeader.setReceiptDocumentsFlagDesc("未签收");
+            }else{
+                expenseReportHeader.setReceiptDocumentsFlagDesc("已签收");
+            }
+            if(expenseReportHeader.getSheerMateFlag() == null || "N".equals(expenseReportHeader.getSheerMateFlag())){
+                expenseReportHeader.setSheerMateFlagDesc("否");
+            }else{
+                expenseReportHeader.setSheerMateFlagDesc("是");
+            }
+        });
+        return expenseReportHeaders;
+    }
+
+    /**
+     * 报账单单据签收
+     * @param expenseReportHeaderIdList 报销单头
+     */
+    public void expenseReportHeaderSign(List<Long> expenseReportHeaderIdList){
+        Long currentUserId = OrgInformationUtil.getCurrentUserId();
+        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectBatchIds(expenseReportHeaderIdList);
+        if(CollectionUtils.isNotEmpty(expenseReportHeaders)){
+            for(ExpenseReportHeader expenseReportHeader : expenseReportHeaders){
+                List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService
+                        .getInvoiceLineExpenseByReportHeaderIdAndInvoiceBagConfirmFlag(expenseReportHeader.getId(),
+                                "N", false);
+                if(invoiceLineExpences.size() > 0){
+                    throw new BizException("单据编号为："+expenseReportHeader.getRequisitionNumber()+
+                            "的单据，存在未确认的发票袋号码，不允许签收！");
+                }
+                List<InvoiceLineExpence> invoiceLineExpences1 = invoiceLineExpenceService
+                        .getInvoiceLineExpenseByReportHeaderIdAndInvoiceBagConfirmFlag(expenseReportHeader.getId(),
+                                "Y", true);
+                if(invoiceLineExpences1.size() == 0){
+                    throw new BizException("单据编号为："+expenseReportHeader.getRequisitionNumber()+
+                            "的单据，不存在已确认的发票袋号码，不允许签收！");
+                }
+                expenseReportHeader.setDealUserId(currentUserId);
+                expenseReportHeader.setReceiptDocumentsFlag("Y");
+                baseMapper.updateById(expenseReportHeader);
+            }
+        }
+    }
+
+    /**
+     * 报账单单据比对结果更新
+     * @param expenseReportHeaderIdList 报销单头集合
+     */
+    public void updateExpenseReportHeaderComparisonFlag(List<Long> expenseReportHeaderIdList){
+        List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectBatchIds(expenseReportHeaderIdList);
+        if(CollectionUtils.isNotEmpty(expenseReportHeaders)){
+            for(ExpenseReportHeader expenseReportHeader : expenseReportHeaders){
+                List<InvoiceLineExpence> list = invoiceLineExpenceService.getInvoiceLineExpenseByReportHeaderIdAndInvoiceMateFlag(
+                        expenseReportHeader.getId(),
+                        "N"
+                        );
+                if(list.size() > 0){
+                    throw new BizException("单据编号为："+expenseReportHeader.getRequisitionNumber()+
+                            "的单据，存在未匹配的发票行，不允许更新比对结果！");
+                }
+                expenseReportHeader.setComparisonFlag("Y");
+                baseMapper.updateById(expenseReportHeader);
+            }
         }
     }
 }

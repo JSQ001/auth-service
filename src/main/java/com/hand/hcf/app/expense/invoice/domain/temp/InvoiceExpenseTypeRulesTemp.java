@@ -23,7 +23,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@TableName("invoice_expense_type_rules_temp")
+@TableName("inv_exp_type_rules_temp")
 public class InvoiceExpenseTypeRulesTemp extends DomainEnable {
 
     @ApiModelProperty(value = "版本批次号")
@@ -59,6 +59,7 @@ public class InvoiceExpenseTypeRulesTemp extends DomainEnable {
     private ZonedDateTime endDateTime;
 
     @ApiModelProperty(value = "描述")
+    @TableField("description")
     private String description;
 
 

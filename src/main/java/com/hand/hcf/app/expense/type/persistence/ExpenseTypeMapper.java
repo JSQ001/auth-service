@@ -70,11 +70,15 @@ public interface ExpenseTypeMapper extends BaseMapper<ExpenseType> {
      * @param code
      * @param name
      * @param categoryName
+     * @param setOfBooksId
+     * @param rowBounds
      * @return
      */
-    List<ExpenseType>  selectExpenseByCode(@Param("code") String  code,
+    List<ExpenseType>  selectExpenseByCode( @Param("code") String code,
                                            @Param("name") String name,
-                                           @Param("categoryName") String categoryName);
+                                           @Param("categoryName") String categoryName,
+                                           @Param("setOfBooksId") Long setOfBooksId,
+                                            RowBounds rowBounds);
 
     /**
      * 报账单类型定义关联费用类型-根据费用类型代码查询费用类型id

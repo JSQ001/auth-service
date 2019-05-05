@@ -286,13 +286,12 @@ public class UserService extends BaseService<UserMapper, User> {
         return user;
     }
 
-    public UserDTO saveUserDto(UserDTO userDTO, Long currUserId, Long tenantId) {
-        return userToUserDto(createOrUpdate(userDtoToUser(userDTO), currUserId, tenantId));
+    public UserDTO saveUserDto(UserDTO userDTO, Long tenantId) {
+        return userToUserDto(createOrUpdate(userDtoToUser(userDTO), tenantId));
     }
 
     public UserCO saveUserCO(UserCO user) {
         return userToUserCO(createOrUpdate(userCOToUser(user)
-                , LoginInformationUtil.getCurrentUserId()
                 , LoginInformationUtil.getCurrentTenantId()));
     }
 
@@ -432,8 +431,8 @@ public class UserService extends BaseService<UserMapper, User> {
      * @return userDTO
      */
     @Transactional
-   //@SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
-    public User createOrUpdate(User user, Long currentUserId, Long tenantId) {
+    //@SyncLock(lockPrefix = SyncLockPrefix.USER_NEW, waiting = true, timeOut = 3000)
+    public User createOrUpdate(User user, Long tenantId) {
         String email = user.getEmail();
         String mobile = user.getMobile();
         if (user.getId() == null) {
@@ -500,6 +499,7 @@ public class UserService extends BaseService<UserMapper, User> {
             }
             //修改手机号码或者邮箱需要激活
             this.changeLogin(user, email, mobile, true);
+            user.setVersionNumber(oldUser.getVersionNumber());
         }
 
         //保存至User

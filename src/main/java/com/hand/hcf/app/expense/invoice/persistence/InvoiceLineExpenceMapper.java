@@ -28,4 +28,7 @@ public interface InvoiceLineExpenceMapper extends BaseMapper<InvoiceLineExpence>
     List<InvoiceLineExpenceWebQueryDTO> getInvoiceLineExpenceByHeadId(@Param("headId") Long headId,
                                                                       @Param("ew") Wrapper wrapper,
                                                                       Page page);
+
+    List<InvoiceLineExpenceWebQueryDTO> getInvoiceLineExpenceByReportHeadId(@Param("ew") Wrapper hearderWrapper,
+                                                                            @Param("reportHeadId") Long reportHeadId);
 }

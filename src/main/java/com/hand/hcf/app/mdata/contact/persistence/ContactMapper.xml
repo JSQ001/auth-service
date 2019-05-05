@@ -683,17 +683,6 @@
                  #{item}
              </foreach>
          </if>
-         <if test="userGroupIds != null and !userGroupIds.isEmpty()">
-             and exists (
-                 select 1
-                 from sys_user_group_user ugu
-                 where c.user_id = ugu.user_id
-                 and ugu.user_group_id in
-                 <foreach collection="userGroupIds" item="item" index="index" open="(" close=")" separator=",">
-                     #{item}
-                 </foreach>
-             )
-         </if>
          <if test="userCode != null">
              and c.employee_id like concat(concat('%',#{userCode}),'%')
          </if>

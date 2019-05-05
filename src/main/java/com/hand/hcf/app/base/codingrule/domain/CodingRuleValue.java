@@ -3,6 +3,7 @@ package com.hand.hcf.app.base.codingrule.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.Data;
 
 /**
@@ -10,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @TableName("sys_coding_rule_value")
-public class CodingRuleValue extends DomainI18nEnable {
+public class CodingRuleValue extends DomainLogicEnable {
 
     @TableField("coding_rule_id")
     private Long codingRuleId; //编码规则id
@@ -27,6 +28,5 @@ public class CodingRuleValue extends DomainI18nEnable {
     @TableField("period_name")
     private String periodName; //操作日期
     @TableField(value = "tenant_id")
-
     private Long tenantId;  //租户id
 }

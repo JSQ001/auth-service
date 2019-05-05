@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /*import com.hand.hcf.app.client.user.UserCO;*/
@@ -50,6 +50,14 @@ public class HcfOrganizationInterface {
 
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {
         return orgClient.listAllSysCodeValueByCode(code);
+    }
+
+    public Map<String, String> mapAllSysCodeValueByCode(String code){
+        return orgClient.mapAllSysCodeValueByCode(code);
+    }
+
+    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+        return orgClient.listEnabledSysCodeValueByCode(code);
     }
 
     public AttachmentCO getAttachmentByOid(String oid){
@@ -124,10 +132,10 @@ public class HcfOrganizationInterface {
     }
 
     //jiu.zhao 修改三方接口
-    public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
+    /*public List<SysCodeValueCO> listEnabledSysCodeValueByCode(String code) {
         List<SysCodeValueCO> sysCodeValueCOS = orgClient.listSysValueByCodeConditionByEnabled(code, true);
         return (List)(null == sysCodeValueCOS ? new ArrayList() : sysCodeValueCOS);
-    }
+    }*/
     /**
      * 校验数据权限规则是否被使用
      *
@@ -138,8 +146,7 @@ public class HcfOrganizationInterface {
         return userRoleClient.dataAuthHasUsed(id);
     }
 
-    //jiancheng.li TODO
-  /*  public Object getObjectByLovCode(String code,
+    /*public Object getObjectByLovCode(String code,
                                      String id){
        return lovClient.getObjectByLovCode(code,id);
     }*/

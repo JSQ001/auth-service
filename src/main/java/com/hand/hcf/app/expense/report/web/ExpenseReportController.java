@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -401,20 +402,21 @@ public class ExpenseReportController {
         }
     ]
      */
-
+    @ApiOperation(value = "报账单头查询接口-分页查询", notes = "报账单头查询接口-分页查询", tags = {"query"})
     @GetMapping("/header/my")
-    public ResponseEntity<List<ExpenseReportHeader>> getMyExpenseReports(@RequestParam(required = false) Long documentTypeId,
-                                                                   @RequestParam(required = false) String requisitionDateFrom,
-                                                                   @RequestParam(required = false) String requisitionDateTo,
-                                                                   @RequestParam(required = false) Long applicantId,
-                                                                   @RequestParam(required = false) Integer status,
-                                                                   @RequestParam(required = false) String currencyCode,
-                                                                   @RequestParam(required = false) BigDecimal amountFrom,
-                                                                   @RequestParam(required = false) BigDecimal amountTo,
-                                                                   @RequestParam(required = false) String remark,
-                                                                   @RequestParam(required = false) String requisitionNumber,
-                                                                   @RequestParam(required = false,defaultValue = "false") Boolean editor,
-                                                                   Pageable pageable){
+    public ResponseEntity<List<ExpenseReportHeader>> getMyExpenseReports(@ApiParam(value = "单据头类型id") @RequestParam(required = false) Long documentTypeId,
+                                                                         @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                                                                         @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                                                                         @ApiParam(value = "申请人id") @RequestParam(required = false) Long applicantId,
+                                                                         @ApiParam(value = "状态") @RequestParam(required = false) Integer status,
+                                                                         @ApiParam(value = "币种") @RequestParam(required = false) String currencyCode,
+                                                                         @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+                                                                         @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal amountTo,
+                                                                         @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                                         @ApiParam(value = "单据号") @RequestParam(required = false) String requisitionNumber,
+                                                                         @ApiParam(value = "编辑中标识，为true时查询1001，1003，1005,2001的单据") @RequestParam(required = false,defaultValue = "false") Boolean editor,
+                                                                         @ApiParam(value = "通过标识，为true时查询1002和1004的单据")  @RequestParam(required = false,defaultValue = "false") Boolean passed,
+                                                                         @ApiIgnore Pageable pageable){
         Page page =PageUtil.getPage(pageable);
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
         ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
@@ -429,6 +431,7 @@ public class ExpenseReportController {
                 remark,
                 requisitionNumber,
                 editor,
+                passed,
                 page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(myExpenseReports,totalHeader,HttpStatus.OK);
@@ -1632,5 +1635,96 @@ public class ExpenseReportController {
                                                     response,
                                                     request,
                                                     exportConfig);
+    }
+
+    @GetMapping("/header/emailReports")
+    @ApiOperation(value = "分页查询可邮寄报账单", notes = "分页查询审核通过未比对通过的报账单 开发:张卓")
+    public ResponseEntity<List<ExpenseReportHeader>> getEmailExpenseReports(@ApiParam(value = "单据类型ID") @RequestParam(required = false) Long documentTypeId,
+                                                                            @ApiParam(value = "审核日期从") @RequestParam(required = false) String auditDateFrom,
+                                                                            @ApiParam(value = "审核日期到") @RequestParam(required = false) String auditDateTo,
+                                                                            @ApiParam(value = "单据提交人ID") @RequestParam(required = false) Long applicantId,
+                                                                            @ApiParam(value = "单据状态") @RequestParam(required = false) Integer status,
+                                                                            @ApiParam(value = "币种") @RequestParam(required = false) String currencyCode,
+                                                                            @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+                                                                            @ApiParam(value = "金额到") @RequestParam(required = false) BigDecimal amountTo,
+                                                                            @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                                            @ApiParam(value = "单据号") @RequestParam(required = false) String requisitionNumber,
+                                                                            Pageable pageable){
+        Page page =PageUtil.getPage(pageable);
+        ZonedDateTime reqAuditDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(auditDateFrom);
+        ZonedDateTime reqAuditDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(auditDateTo);
+        List<ExpenseReportHeader> myExpenseReports = expenseReportHeaderService.getEmailExpenseReports(documentTypeId,
+                reqAuditDateFrom,
+                reqAuditDateTo,
+                applicantId,
+                status,
+                currencyCode,
+                amountFrom,
+                amountTo,
+                remark,
+                requisitionNumber,
+                page);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(myExpenseReports,totalHeader,HttpStatus.OK);
+    }
+
+    @PostMapping("/header/emailReports/save/invoiceBagNo")
+    @ApiOperation(value = "保存发票费用关联关系的发票袋号码", notes = "保存发票费用关联关系的发票袋号码 开发:张卓")
+    public void saveInvoiceLineExpenceInvoiceBagNo(@ApiParam(value = "报销单信息") @RequestBody List<Long> expenseReportHeaderIdList,
+                                                   @ApiParam(value = "发票袋号码") @RequestParam String invoiceBagNo){
+        expenseReportHeaderService.saveInvoiceLineExpenceInvoiceBagNo(expenseReportHeaderIdList,invoiceBagNo);
+    }
+
+    @PostMapping("/header/emailReports/confirm")
+    @ApiOperation(value = "根据报销单头确认报销单邮寄", notes = "根据报销单头确认报销单邮寄 开发:张卓")
+    public void confirmInvoiceLineExpenceEmail(@ApiParam(value = "报销单信息") @RequestBody List<Long> expenseReportHeaderIdList){
+        expenseReportHeaderService.confirmInvoiceLineExpenceEmail(expenseReportHeaderIdList);
+    }
+
+    @GetMapping("/header/signReports")
+    @ApiOperation(value = "分页查询已扫描过发票袋号码的报账单", notes = "分页查询已扫描过发票袋号码的报账单 开发:张卓")
+    public ResponseEntity<List<ExpenseReportHeader>> getSignExpenseReports(@ApiParam(value = "单据类型ID") @RequestParam(required = false) Long documentTypeId,
+                                                                            @ApiParam(value = "单据提交人ID") @RequestParam(required = false) Long applicantId,
+                                                                            @ApiParam(value = "单据状态") @RequestParam(required = false) Integer status,
+                                                                            @ApiParam(value = "币种") @RequestParam(required = false) String currencyCode,
+                                                                            @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+                                                                            @ApiParam(value = "金额到") @RequestParam(required = false) BigDecimal amountTo,
+                                                                            @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                                            @ApiParam(value = "单据号") @RequestParam(required = false) String requisitionNumber,
+                                                                            @ApiParam(value = "发票袋号码") @RequestParam(required = false) String invoiceBagNo,
+                                                                            @ApiParam(value = "签收状态") @RequestParam(required = false) String receiptDocumentsFlag,
+                                                                            @ApiParam(value = "匹配成功状态") @RequestParam(required = false) String sheerMateFlag,
+                                                                            @ApiParam(value = "签收人ID") @RequestParam(required = false) Long dealUserId,
+                                                                            Pageable pageable){
+        Page page =PageUtil.getPage(pageable);
+//        ZonedDateTime reqAuditDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(auditDateFrom);
+//        ZonedDateTime reqAuditDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(auditDateTo);
+        List<ExpenseReportHeader> myExpenseReports = expenseReportHeaderService.getSignExpenseReports(documentTypeId,
+                applicantId,
+                status,
+                currencyCode,
+                amountFrom,
+                amountTo,
+                remark,
+                requisitionNumber,
+                invoiceBagNo,
+                receiptDocumentsFlag,
+                sheerMateFlag,
+                dealUserId,
+                page);
+        HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(myExpenseReports,totalHeader,HttpStatus.OK);
+    }
+
+    @PostMapping("/header/signReports/confirm")
+    @ApiOperation(value = "报账单单据签收", notes = "报账单单据签收 开发:张卓")
+    public void confirmSignReports(@ApiParam(value = "报销单头id集合") @RequestBody List<Long> expenseReportHeaderIdList){
+        expenseReportHeaderService.expenseReportHeaderSign(expenseReportHeaderIdList);
+    }
+
+    @PostMapping("/header/comparison/confirm")
+    @ApiOperation(value = "更新报账单比对结果", notes = "更新报账单比对结果 开发:张卓")
+    public void confirmSignReportsComparisonFlag(@ApiParam(value = "报销单头id集合") @RequestBody List<Long> expenseReportHeaderIdList){
+        expenseReportHeaderService.updateExpenseReportHeaderComparisonFlag(expenseReportHeaderIdList);
     }
 }

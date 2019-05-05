@@ -126,5 +126,20 @@
         and cfr.CONTENT_ID=cl.source_id
         and cl.tenant_id=${tenantId}
     </select>
+    <select id="listBySystemTenant" resultType="com.hand.hcf.app.base.userRole.domain.ContentFunctionRelation">
+        SELECT
+            fl.id as functionId,
+            cl.id as contentId
+        FROM
+            sys_function_list fl,
+            sys_tenant st,
+            sys_content_list cl
+        WHERE
+            fl.tenant_id = st.id
+            AND st.id <![CDATA[ <> ]]> #{tenantId}
+            AND cl.tenant_id = st.id
+            AND cl.source_id = #{sourceContentId}
+            AND fl.source_id = #{sourceFunctionId}
+    </select>
 
 </mapper>

@@ -270,4 +270,8 @@ public class FunctionListService extends BaseService<FunctionListMapper, Functio
                 .eq("source_id", sourceId)
                 .eq("tenant_id", tenantId));
     }
+
+    public List<FunctionList> listOtherTenantFunction(Long tenantId, Long sourceFunctionId) {
+        return baseMapper.listOtherTenantFunction(tenantId, sourceFunctionId);
+    }
 }

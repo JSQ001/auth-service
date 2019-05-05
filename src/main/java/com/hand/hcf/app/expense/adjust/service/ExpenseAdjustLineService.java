@@ -451,6 +451,12 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
                 e.setErrorFlag(Boolean.TRUE);
                 e.setErrorMsg(e.getErrorMsg() + "部门代码：" + e.getUnitCode() + "不存在！" );
             }
+            // 公司部门关联关系
+            if (!organizationService.checkCompanyAssociateUnit(e.getCompanyId(), e.getUnitId())){
+                e.setErrorFlag(Boolean.TRUE);
+                e.setErrorMsg(e.getErrorMsg() + "公司代码：" + e.getCompanyCode() + "，部门代码：" + e.getUnitCode() + "不存在关联关系！");
+            }
+
             // 维度
             setImportDimensionId(e, dimensions, costItemsMap);
         });
@@ -518,7 +524,9 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
             field.setAccessible(true);
             try {
                 Object o = field.get(temp);
-                return o.toString();
+                if (o != null) {
+                    return o.toString();
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

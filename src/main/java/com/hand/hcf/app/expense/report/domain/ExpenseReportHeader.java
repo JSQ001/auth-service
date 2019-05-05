@@ -174,6 +174,29 @@ public class ExpenseReportHeader extends Domain {
     private ZonedDateTime jeCreationDate;
 
     /**
+     * 纸质单据签收标志
+     */
+    @TableField("receipt_documents_flag")
+    private String receiptDocumentsFlag;
+
+    /**
+     * 是否完全匹配标志
+     */
+    @TableField("sheer_mate_flag")
+    private String sheerMateFlag;
+
+    /**
+     * 处理人ID
+     */
+    @TableField(value = "deal_user_id")
+    private Long dealUserId;
+    /**
+     * 是否比对通过标志
+     */
+    @TableField(value = "comparison_flag")
+    private String comparisonFlag;
+
+    /**
      * 预算校验返回结果描述
      */
     @TableField(exist = false)
@@ -204,4 +227,25 @@ public class ExpenseReportHeader extends Domain {
      */
     @TableField(exist = false)
     private String documentTypeName;
+    /**
+     * 纸质单据签收标志描述
+     */
+    @TableField(exist = false)
+    private String receiptDocumentsFlagDesc;
+    /**
+     * 是否全部匹配描述
+     */
+    @TableField(exist = false)
+    private String sheerMateFlagDesc;
+
+    /**
+     * 处理人名称
+     */
+    @TableField(exist = false)
+    private String dealUserIdName;
+    /**
+     * 是否比对通过标志描述
+     */
+    @TableField(exist = false)
+    private String comparisonFlagDesc;
 }

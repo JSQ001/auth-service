@@ -105,7 +105,7 @@
     </select>
     <select id="listByDocumentLov" resultMap="ExpenseTypeWebMap" parameterType="com.hand.hcf.app.expense.type.bo.ExpenseBO">
         SELECT
-            temp.*
+            temp.*,(select name  from exp_expense_type_category eetc where eetc.id = temp.type_category_id) type_category_name
         FROM
             (SELECT
                 v.*,
@@ -249,14 +249,18 @@
         where  eetc.id=eet.type_category_id
         AND   eet.ENABLED = 1
         <if test="code !=null ">
-            AND eet.code = #{code}
+            AND eet.code like concat(concat('%',#{code}),'%')
         </if>
         <if test="name != null ">
-            AND eet.name = #{name}
+            AND eet.name like concat(concat('%',#{name}),'%')
         </if>
         <if test="categoryName != null ">
-            AND eetc.name = #{categoryName}
+            AND eetc.name like concat(concat('%',#{categoryName}),'%')
         </if>
+        <if test="setOfBooksId != null ">
+            AND eet.set_of_books_id = #{setOfBooksId}
+        </if>
+
     </select>
 
 

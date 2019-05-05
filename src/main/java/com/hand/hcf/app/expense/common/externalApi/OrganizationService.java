@@ -66,7 +66,8 @@ public class OrganizationService {
     @Autowired
     private LocationControllerImpl locationInterface;
 
-
+    /*@Autowired
+    private HangxinInvoiceClient invoiceClient;*/
 
 
     public Map<Long, CompanyCO> getCompanyMapByCompanyIds(List<Long> ids){
@@ -435,6 +436,7 @@ public class OrganizationService {
                                                             String companyCodeTo,
                                                             String companyName,
                                                             String keyWord,
+                                                            List<Long> existsCompanyIds,
                                                             Page page) {
         //jiu.zhao 修改三方接口 20190401
         /*Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId,
@@ -445,7 +447,16 @@ public class OrganizationService {
                 companyName,
                 keyWord,
                 page);*/
-        Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId, ignoreOwn, companyCode, companyCodeFrom, companyCodeTo, companyName, keyWord, page.getCurrent() - 1, page.getSize());
+        Page<CompanyCO> companyCOPage = companyClient.pageChildrenCompaniesByCondition(companyId,
+                ignoreOwn,
+                companyCode,
+                companyCodeFrom,
+                companyCodeTo,
+                companyName,
+                keyWord,
+                existsCompanyIds,
+                page.getCurrent() - 1,
+                page.getSize());
         return companyCOPage;
     }
 
@@ -718,4 +729,34 @@ public class OrganizationService {
     }
 
     public CompanyCO getByCompanyCode(String companyCode ){ return companyClient.getByCompanyCode(companyCode);}
+
+    /**
+     * 提交认证
+     * @param invoiceAuthenticationSendCO
+     * @return
+     */
+    public InvoiceAuthenticationReturnCO invoiceAuthentication(InvoiceAuthenticationSendCO invoiceAuthenticationSendCO) {
+        //return invoiceClient.invoiceAuthentication(invoiceAuthenticationSendCO);
+        return null;
+    }
+
+    /**
+     * 查询公司部门是否关联
+     * @param companyId
+     * @param departmentId
+     * @return boolean
+     */
+    public boolean checkCompanyAssociateUnit(Long companyId, Long departmentId) {
+        //return companyClient.checkCompanyAssociateUnit(companyId, departmentId);
+        //jiu.zhao 修改三方接口
+        if (companyId != null && departmentId != null) {
+            CompanyAssociateUnitCO params = new CompanyAssociateUnitCO(companyId, departmentId);
+            Map<String, Boolean> map = companyClient.checkCompanyAssociateUnit(Collections.singletonList(params));
+            return map.get(companyId + "-" + departmentId) == null ? false : (Boolean)map.get(companyId + "-" + departmentId);
+        } else {
+            return false;
+        }
+
+    }
+
 }

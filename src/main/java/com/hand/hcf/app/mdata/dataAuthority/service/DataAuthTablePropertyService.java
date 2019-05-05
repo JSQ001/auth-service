@@ -12,6 +12,7 @@ import com.hand.hcf.app.core.service.BaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,8 +108,10 @@ public class DataAuthTablePropertyService extends BaseService<DataAuthTablePrope
      * @param page
      * @return
      */
-    public List<DataAuthTableProperty> getDataAuthTablePropertyByCond(String tableName, String dataType, String filterMethod, String columnName, Page page){
-        tableName = tableName.toLowerCase();
+    public List<DataAuthTableProperty> getDataAuthTablePropertyByCond(String tableName, String dataType, String filterMethod, String columnName, Page page) {
+        if (!StringUtils.isEmpty(tableName)) {
+            tableName = tableName.toLowerCase();
+        }
         List<DataAuthTableProperty> list = new ArrayList<>();
         list = dataAuthTablePropertyMapper.selectPage(page,
                     new EntityWrapper<DataAuthTableProperty>()
