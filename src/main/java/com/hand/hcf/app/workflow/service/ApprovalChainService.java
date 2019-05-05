@@ -1,13 +1,16 @@
 package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.brms.service.RuleService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
 import com.hand.hcf.app.workflow.dto.BackNodesDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.persistence.ApprovalChainMapper;
+import com.hand.hcf.app.workflow.util.CheckUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,111 +25,162 @@ import java.util.UUID;
 @Service
 @Transactional
 public class ApprovalChainService extends BaseService<ApprovalChainMapper, ApprovalChain> {
+    @Autowired
+    RuleService ruleService;
 
-   @Autowired
-   RuleService ruleService;
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndFinishFlagAndCountersignType(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, boolean finishFlag, Integer countersignType) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("current_flag", currentFlag)
-                .eq("finish_flag", finishFlag)
-                .eq("countersign_type", countersignType));
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndFinishFlagAndCountersignTypeNotNullAndSequence(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, boolean finishFlag, Integer sequence) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("current_flag", currentFlag)
-                .eq("finish_flag", finishFlag)
-                .eq("sequence_number", sequence));
-
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCountersignTypeAndApproverOidNotAndSequence(Integer entityType, UUID entityOid, Integer status, Integer ruleConutersignAny, UUID approverOid, Integer sequence) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("countersign_type", ruleConutersignAny)
-                .eq("sequence_number", sequence)
-                .ne("approver_oid", approverOid));
+    /**
+     * 根据任务id查找任务
+     *
+     * @param refApprovalChainId 任务id
+     * @return 任务
+     */
+    public ApprovalChainDTO getApprovalChainByRefId(Long refApprovalChainId) {
+        return baseMapper.getApprovalChainByRefId(refApprovalChainId);
     }
 
     /**
-     * 当前的一组加签审批链审批完,查询下一组加签审批链
+     * 根据单据和审批人查询任务
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param approverOid 审批人oid
+     * @return 任务
      */
-    public List<ApprovalChain> listNextSequenceApprovalChain(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, boolean finishFlag) {
-        //先查询下一组未完成的加签审批链的sequence
-        ApprovalChain approvalChain = selectOne(new EntityWrapper<ApprovalChain>()
+    public ApprovalChain getApproverApprovalChain(Integer entityType, UUID entityOid, UUID approverOid) {
+        return selectOne(new EntityWrapper<ApprovalChain>()
                 .eq("entity_type", entityType)
                 .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("current_flag", currentFlag)
-                .eq("finish_flag", finishFlag)
-                .isNotNull("countersign_type")
-                .orderBy("sequence_number", true));
+                .eq("status", ApprovalChainStatusEnum.NORMAL.getId())
+                .eq("approver_oid", approverOid)
+                .eq("current_flag", true)
+        );
+    }
 
-        if (approvalChain != null) {
-            //在查询这组加签审批链
-            return selectList(new EntityWrapper<ApprovalChain>()
-                            .eq("entity_type", entityType)
-                            .eq("entity_oid", entityOid)
-                            .eq("status", status)
-                            .eq("current_flag", currentFlag)
-                            .eq("finish_flag", finishFlag)
-                            .isNotNull("countersign_type")
-                            .eq("sequence_number", approvalChain.getSequence())
-                            .orderBy("sequence_number", true));
+    /**
+     * 查找最近一次审批过的任务（同单据同审批人）
+     * @author mh.z
+     * @date 2019/04/25
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param userOid 审批人oid
+     * @param submitDate 单据实例的提交时间
+     * @return 任务
+     */
+    public ApprovalChain getLastApprovalChain(Integer entityType, UUID entityOid, UUID userOid, ZonedDateTime submitDate) {
+        EntityWrapper<ApprovalChain> entity = new EntityWrapper<ApprovalChain>();
+        entity.eq("finish_flag", true);
+        entity.eq("approver_oid", userOid);
+        entity.eq("entity_oid", entityOid);
+        entity.eq("entity_type", entityType);
+        entity.ge("created_date", submitDate);
+        entity.orderBy("last_updated_date", false);
+
+        List<ApprovalChain> approvalChainList = selectList(entity);
+        ApprovalChain approvalChain = null;
+
+        if (approvalChainList.size() > 0) {
+            approvalChain = approvalChainList.get(0);
         }
-        return null;
+
+        return approvalChain;
     }
 
-    public ApprovalChain getTop1ByEntityTypeAndEntityOidAndStatusOrderBySequenceDesc(Integer entityType, UUID entityOid, Integer status) {
-        return  selectOne(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .orderBy("sequence_number", false));
+    /**
+     * 返回下一个组编号
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/01
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @return 下一个组编号
+     */
+    public Integer getNextGroupNumber(Integer entityType, UUID entityOid) {
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+        wrapper.orderBy("group_number", false);
 
+        Page<ApprovalChain> page = selectPage(new Page(1, 1), wrapper);
+        List<ApprovalChain> approvalChainList = page.getRecords();
+        Integer groupNumber = null;
+
+        if (approvalChainList.size() > 0) {
+            ApprovalChain approvalChain = approvalChainList.get(0);
+            groupNumber = approvalChain.getGroupNumber();
+            groupNumber = groupNumber != null ? groupNumber + 1 : 0;
+        } else {
+            // 组编号从0开始
+            groupNumber = 0;
+        }
+
+        return groupNumber;
     }
 
+    /**
+     * 查询待激活的任务
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/02
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @return 待激活的任务
+     */
+    public List<ApprovalChain> listNextApprovalChain(Integer entityType, UUID entityOid) {
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq("current_flag", false);
+        wrapper.eq("finish_flag", false);
+        wrapper.eq("status", ApprovalChainStatusEnum.NORMAL.getId());
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+        wrapper.orderBy("group_number", false);
+        wrapper.orderBy("approval_order", true);
 
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCountersignTypeNotNullAndSequenceGreaterThan(Integer entityType, UUID entityOid, Integer status, Integer sequence) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .isNotNull("countersign_type")
-                .gt("sequence_number", sequence));
+        Page<ApprovalChain> page = selectPage(new Page(1, 1), wrapper);
+        List<ApprovalChain> approvalChainList = page.getRecords();
+
+        if (approvalChainList.isEmpty()) {
+            return approvalChainList;
+        }
+
+        ApprovalChain approvalChain = approvalChainList.get(0);
+        Integer groupNumber = approvalChain.getGroupNumber();
+        Integer approvalOrder = approvalChain.getApprovalOrder();
+
+        wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq("approval_order", approvalOrder);
+        wrapper.eq("group_number", groupNumber);
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+
+        approvalChainList = selectList(wrapper);
+        return approvalChainList;
     }
 
-    public ApprovalChain getTop1ByEntityTypeAndEntityOidAndCurrentFlagOrderByLastModifiedDateDesc(Integer entityType, UUID entityOid, boolean currentFlag, Integer status) {
-        return  selectOne(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("current_flag", currentFlag)
-                .eq("status", status)
-                .orderBy("last_updated_date", false));
-    }
+    /**
+     * 查询同任务组的任务
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/02
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param groupNumber 任务组编号
+     * @param approvalOrder 审批顺序
+     * @return 同任务组的任务
+     */
+    public List<ApprovalChain> listByGroupNumberAndApprovalOrder(Integer entityType, UUID entityOid,
+                                                                 Integer groupNumber, Integer approvalOrder) {
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq("approval_order", approvalOrder);
+        wrapper.eq("group_number", groupNumber);
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
 
-    public List<ApprovalChain> listByEntityTypeAndEntityOidInAndStatus(Integer entityType, List<UUID> entityOids, Integer status) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .in("entity_oid", entityOids)
-                .eq("status", status)
-        );
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidIn(Integer entityType, List<UUID> entityOids) {
-         return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .in("entity_oid", entityOids)
-        );
+        List<ApprovalChain> approvalChainList = selectList(wrapper);
+        return approvalChainList;
     }
 
     /**
@@ -147,181 +201,24 @@ public class ApprovalChainService extends BaseService<ApprovalChainMapper, Appro
         );
     }
 
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatus(Integer entityType, UUID entityOid, Integer status) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-        );
-    }
-
-    public List<ApprovalChain> saveAll(List<ApprovalChain> approvalChainList) {
-        insertOrUpdateBatch(approvalChainList);
-        return approvalChainList;
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndSourceApprovalChainId(Integer entityType, UUID entityOid, Integer id, Long sourceApprovalChainId) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", id)
-                .eq("source_approval_chain_id",sourceApprovalChainId)
-        );
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndIsAddSignTrue(Integer entityType, UUID entityOid, Integer status) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("add_sign",true)
-        );
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndApproverOidInAndCountersignTypeNotNullAndIsNoticeIsFalse(Integer entityType, UUID entityOid, Integer status, List<UUID> approvalUserOids) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .in("approver_oid",approvalUserOids)
-                .isNotNull("countersign_type")
-                .eq("noticed",false)
-        );
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndApproverOidInAndIsNoticeIsFalse(Integer entityType, UUID entityOid, Integer status, List<UUID> approvalUserOids) {
-           return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .in("approver_oid",approvalUserOids)
-                .eq("noticed",false)
-        );
-
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndApproverOidInAndCountersignTypeIsNullAndIsNoticeIsFalse(Integer entityType, UUID entityOid, Integer status, List<UUID> approvalUserOids) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .in("approver_oid",approvalUserOids)
-                .isNull("countersign_type")
-                .eq("noticed",false)
-        );
-    }
-
-    //查询当前审批的ApprovalChain
-    public ApprovalChain getByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApproverOid(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, UUID approverOid) {
-        return selectOne(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("approver_oid",approverOid)
-                .eq("current_flag",currentFlag)
-        );
-    }
-
-    public List<ApprovalChain> listByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApportionmentFlagFalseAndCountersignRule(Integer entityType, UUID entityOid, Integer status, boolean currentFlag, Integer countersignRule) {
-        return selectList(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("apportionment_flag",false)
-                .eq("current_flag",currentFlag)
-                .eq("countersign_rule",countersignRule)
-        );
-    }
-
-    public ApprovalChain getTop1ByEntityTypeAndEntityOidAndStatusAndCurrentFlagOrderBySequenceDesc(Integer entityType, UUID entityOid, Integer status, boolean currentFlag) {
-        return selectOne(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("current_flag",currentFlag)
-                .orderBy("sequence_number",false)
-        );
-    }
-
-    public ApprovalChain getTop1ByEntityTypeAndEntityOidAndStatusAndFinishFlagIsFalseAndSequenceGreaterThanOrderBySequenceAsc(Integer entityType, UUID entityOid, Integer status, Integer sequence) {
-        return selectOne(new EntityWrapper<ApprovalChain>()
-                .eq("entity_type", entityType)
-                .eq("entity_oid", entityOid)
-                .eq("status", status)
-                .eq("finish_flag",false)
-                .gt("sequence_number",sequence)
-                .orderBy("sequence_number",true)
-        );
-    }
-
+    /**
+     * 保存任务
+     *
+     * @param approvalChain 任务
+     */
     public void save(ApprovalChain approvalChain) {
         insertOrUpdate(approvalChain);
     }
 
-
-
-    public ApprovalChainDTO getApprovalChainByRefId(Long refApprovalChainId) {
-        return baseMapper.getApprovalChainByRefId(refApprovalChainId);
-    }
-
     /**
-     * 通过chainID 获取审批链
+     * 保存任务
      *
-     * @param approvalChainId
-     * @return
+     * @param approvalChainList 任务列表
+     * @return 任务列表
      */
-    public ApprovalChain getApprovalChainById(Long approvalChainId) {
-        return baseMapper.getApprovalChainById(approvalChainId);
-    }
-
-    public void updateAllFinshTrueById(Long id) {
-        baseMapper.updateAllFinshTrueById(id);
-    }
-
-    /**
-     * 查找待激活的任务
-     * @author mh.z
-     * @date 2019/04/22
-     *
-     * @param entityType
-     * @param entityOid
-     * @param sourceApprovalChainId
-     * @param sequenceNumber
-     * @return
-     */
-    public List<ApprovalChain> listWaitActiveApprovalChain(Integer entityType, UUID entityOid,
-                                                           Long sourceApprovalChainId, Integer sequenceNumber) {
-        return baseMapper.listWaitActiveApprovalChain(entityType, entityOid, sourceApprovalChainId, sequenceNumber);
-    }
-
-    /**
-     * 查找最近一次审批过的任务（同单据同审批人）
-     * @author mh.z
-     * @date 2019/04/25
-     *
-     * @param entityType
-     * @param entityOid
-     * @param userOid
-     * @param submitDate
-     * @return
-     */
-    public ApprovalChain getLastApprovalChain(Integer entityType, UUID entityOid, UUID userOid, ZonedDateTime submitDate) {
-        EntityWrapper<ApprovalChain> entity = new EntityWrapper<ApprovalChain>();
-        entity.eq("finish_flag",true);
-        entity.eq("approver_oid", userOid);
-        entity.eq("entity_oid", entityOid);
-        entity.eq("entity_type", entityType);
-        entity.ge("created_date", submitDate);
-        entity.orderBy("last_updated_date", false);
-
-        List<ApprovalChain> approvalChainList = selectList(entity);
-        ApprovalChain approvalChain = null;
-
-        if (approvalChainList.size() > 0) {
-            approvalChain = approvalChainList.get(0);
-        }
-
-        return approvalChain;
+    public List<ApprovalChain> saveAll(List<ApprovalChain> approvalChainList) {
+        insertOrUpdateBatch(approvalChainList);
+        return approvalChainList;
     }
 
     /**
@@ -337,6 +234,78 @@ public class ApprovalChainService extends BaseService<ApprovalChainMapper, Appro
         wrapper.eq("entity_type", entityType);
         wrapper.eq("entity_oid", entityOid);
         delete(wrapper);
+    }
+
+    /**
+     * 统计任务数
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param ruleApprovalNodeOid  节点oid（null则统计整个实例满足条件的任务数）
+     * @param approvalStatus 任务的审批状态
+     * @return 任务数
+     */
+    public int countApprovalChain(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Integer approvalStatus) {
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
+        CheckUtil.notNull(approvalStatus, "approvalStatus null");
+
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+
+        if (WorkflowTask.APPROVAL_STATUS_GENERAL.equals(approvalStatus)) {
+            wrapper.eq("current_flag", false);
+            wrapper.eq("finish_flag", false);
+        } else if (WorkflowTask.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
+            wrapper.eq("current_flag", true);
+        } else if (WorkflowTask.APPROVAL_STATUS_APPROVED.equals(approvalStatus)) {
+            wrapper.eq("finish_flag", true);
+        } else {
+            throw new IllegalArgumentException(String.format("approvalStatus(%s) invalid", approvalStatus));
+        }
+
+        wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);
+        wrapper.eq("status", ApprovalChainStatusEnum.NORMAL.getId());
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+
+        int taskTotal = selectCount(wrapper);
+        return taskTotal;
+    }
+
+    /**
+     * 清除任务
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param ruleApprovalNodeOid 节点oid（null则清除整个实例满足条件的任务数）
+     * @param currentFlag true当前任务，false不是当前任务，null不过滤该条件
+     * @param finishFlag true已完成任务，false未完成任务，null不过滤该条件
+     */
+    public void clearApprovalChain(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid,
+                                   Boolean currentFlag, Boolean finishFlag) {
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
+
+        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
+        wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);
+        wrapper.eq(currentFlag != null, "current_flag", currentFlag);
+        wrapper.eq(finishFlag != null, "finish_flag", finishFlag);
+        wrapper.eq("status", ApprovalChainStatusEnum.NORMAL.getId());
+        wrapper.eq("entity_oid", entityOid);
+        wrapper.eq("entity_type", entityType);
+        List<ApprovalChain> approvalChainList = selectList(wrapper);
+
+        if (approvalChainList.size() > 0) {
+            for (ApprovalChain approvalChain : approvalChainList) {
+                approvalChain.setStatus(ApprovalChainStatusEnum.INVALID.getId());
+            }
+
+            insertOrUpdateBatch(approvalChainList);
+        }
     }
 
 }

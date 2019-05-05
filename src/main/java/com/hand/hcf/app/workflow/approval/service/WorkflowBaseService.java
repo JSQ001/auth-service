@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -65,8 +64,7 @@ public class WorkflowBaseService {
         UUID userOid = CheckUtil.notNull(user.getUserOid(), "user.userOid null");
 
         // 根据实例和用户获取任务
-        ApprovalChain approvalChain = approvalChainService.getByEntityTypeAndEntityOidAndStatusAndCurrentFlagAndApproverOid(
-                entityType, entityOid, ApprovalChainStatusEnum.NORMAL.getId(), true, userOid);
+        ApprovalChain approvalChain = approvalChainService.getApproverApprovalChain(entityType, entityOid, userOid);
         WorkflowTask task = null;
 
         if (approvalChain != null) {
@@ -98,7 +96,7 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        int taskTotal = doCountTasks(entityType, entityOid, nodeOid, approvalStatus);
+        int taskTotal = approvalChainService.countApprovalChain(entityType, entityOid, nodeOid, approvalStatus);
         return taskTotal;
     }
 
@@ -116,8 +114,25 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        int taskTotal = doCountTasks(entityType, entityOid, null, approvalStatus);
+        int taskTotal = approvalChainService.countApprovalChain(entityType, entityOid, null, approvalStatus);
         return taskTotal;
+    }
+
+    /**
+     * 清除跟节点关联的所有当前任务
+     * @author mh.z
+     * @date 2019/04/07
+     *
+     * @param node 节点
+     */
+    public void clearCurrentTasks(WorkflowNode node) {
+        CheckUtil.notNull(node, "node null");
+        UUID nodeOid = CheckUtil.notNull(node.getNodeOid(), "node.nodeOid null");
+        WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "node.instance null");
+        Integer entityType = instance.getEntityType();
+        UUID entityOid = instance.getEntityOid();
+
+        approvalChainService.clearApprovalChain(entityType, entityOid, nodeOid, true, null);
     }
 
     /**
@@ -134,7 +149,7 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        doClearTask(entityType, entityOid, nodeOid, true);
+        approvalChainService.clearApprovalChain(entityType, entityOid, nodeOid, null, false);
     }
 
     /**
@@ -151,7 +166,7 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        doClearTask(entityType, entityOid, nodeOid, null);
+        approvalChainService.clearApprovalChain(entityType, entityOid, nodeOid, null, null);
     }
 
     /**
@@ -166,7 +181,7 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        doClearTask(entityType, entityOid, null, true);
+        approvalChainService.clearApprovalChain(entityType, entityOid, null, null, false);
     }
 
     /**
@@ -181,7 +196,7 @@ public class WorkflowBaseService {
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
 
-        doClearTask(entityType, entityOid, null, null);
+        approvalChainService.clearApprovalChain(entityType, entityOid, null, null, null);
     }
 
     /**
@@ -246,9 +261,10 @@ public class WorkflowBaseService {
      *
      * @param node 节点
      * @param user 审批人
+     * @param group 组编号
      * @return 任务
      */
-    public WorkflowTask createTask(WorkflowNode node, WorkflowUser user) {
+    public WorkflowTask createTask(WorkflowNode node, WorkflowUser user, int group) {
         CheckUtil.notNull(node, "node null");
         CheckUtil.notNull(user, "user null");
         CheckUtil.notNull(node.getInstance(), "node.instance null");
@@ -291,6 +307,8 @@ public class WorkflowBaseService {
             approvalChain.setNoticed(false);
         }
 
+        approvalChain.setGroupNumber(group);
+        approvalChain.setApprovalOrder(0);
         approvalChain.setApportionmentFlag(false);
         approvalChain.setRuleApprovalNodeOid(nodeOid);
         approvalChain.setProxyFlag(false);
@@ -325,11 +343,12 @@ public class WorkflowBaseService {
      * @author mh.z
      * @date 2019/04/07
      *
-     * @param node
-     * @param user
+     * @param node 节点
+     * @param user 用户
+     * @param group 组编号
      */
-    public void saveTask(WorkflowNode node, WorkflowUser user) {
-        WorkflowTask task = createTask(node, user);
+    public void saveTask(WorkflowNode node, WorkflowUser user, int group) {
+        WorkflowTask task = createTask(node, user, group);
         saveTask(task);
     }
 
@@ -388,6 +407,10 @@ public class WorkflowBaseService {
             // 加签
             approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
             approvalHistory.setOperation(ApprovalOperationEnum.ADD_COUNTERSIGN.getId());
+        } else if (ApprovalOperationEnum.APPROVAL_JUMP.getId().toString().equals(operation)){
+            //跳转
+            approvalHistory.setOperationType(ApprovalOperationTypeEnum.APPROVAL.getId());
+            approvalHistory.setOperation(ApprovalOperationEnum.APPROVAL_JUMP.getId());
         } else {
             throw new IllegalArgumentException(String.format("operation(%s) invalid", operation));
         }
@@ -454,6 +477,23 @@ public class WorkflowBaseService {
     }
 
     /**
+     * 返回下一个任务组编号
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/01
+     *
+     * @param instance 实例
+     * @return 下一个任务组编号
+     */
+    public Integer nextGroup(WorkflowInstance instance) {
+        Integer entityType = CheckUtil.notNull(instance.getEntityType(), "instance.entityType null");
+        UUID entityOid = CheckUtil.notNull(instance.getEntityOid(), "instance.entityOid null");
+
+        Integer group = approvalChainService.getNextGroupNumber(entityType, entityOid);
+        return group;
+    }
+
+    /**
      * 加上写锁
      * @author mh.z
      * @date 2019/04/07
@@ -469,75 +509,6 @@ public class WorkflowBaseService {
         wrapper.eq("document_oid", entityOid);
         wrapper.eq("document_category", entityType);
         workFlowDocumentRefService.updateForSet("version_number = version_number", wrapper);
-    }
-
-    /**
-     * 统计任务数
-     * @author mh.z
-     * @date 2019/04/07
-     *
-     * @param entityType 单据大类
-     * @param entityOid 单据oid
-     * @param ruleApprovalNodeOid  节点oid（null则统计整个实例满足条件的任务数）
-     * @param approvalStatus 任务的审批状态
-     * @return 任务数
-     */
-    private int doCountTasks(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Integer approvalStatus) {
-        CheckUtil.notNull(entityType, "entityType null");
-        CheckUtil.notNull(entityOid, "entityOid null");
-        CheckUtil.notNull(approvalStatus, "approvalStatus null");
-
-        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
-
-        if (WorkflowTask.APPROVAL_STATUS_GENERAL.equals(approvalStatus)) {
-            wrapper.eq("current_flag", false);
-            wrapper.eq("finish_flag", false);
-        } else if (WorkflowTask.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
-            wrapper.eq("current_flag", true);
-        } else if (WorkflowTask.APPROVAL_STATUS_APPROVED.equals(approvalStatus)) {
-            wrapper.eq("finish_flag", true);
-        } else {
-            throw new IllegalArgumentException(String.format("approvalStatus(%s) invalid", approvalStatus));
-        }
-
-        wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);
-        wrapper.eq("status", ApprovalChainStatusEnum.NORMAL.getId());
-        wrapper.eq("entity_oid", entityOid);
-        wrapper.eq("entity_type", entityType);
-
-        int taskTotal = approvalChainService.selectCount(wrapper);
-        return taskTotal;
-    }
-
-    /**
-     * 清除任务
-     * @author mh.z
-     * @date 2019/04/07
-     *
-     * @param entityType 单据大类
-     * @param entityOid 单据oid
-     * @param ruleApprovalNodeOid 节点oid（null则清除整个实例满足条件的任务数）
-     * @param currentFlag true当前任务，false不是当前任务，null不过滤该条件
-     */
-    private void doClearTask(Integer entityType, UUID entityOid, UUID ruleApprovalNodeOid, Boolean currentFlag) {
-        CheckUtil.notNull(entityType, "entityType null");
-        CheckUtil.notNull(entityOid, "entityOid null");
-
-        EntityWrapper<ApprovalChain> wrapper = new EntityWrapper<ApprovalChain>();
-        wrapper.eq(ruleApprovalNodeOid != null, "rule_approval_node_oid", ruleApprovalNodeOid);
-        wrapper.eq(currentFlag != null, "current_flag", currentFlag);
-        wrapper.eq("status", ApprovalChainStatusEnum.NORMAL.getId());
-        wrapper.eq("entity_oid", entityOid);
-        wrapper.eq("entity_type", entityType);
-        List<ApprovalChain> approvalChainList = approvalChainService.selectList(wrapper);
-
-        if (approvalChainList.size() > 0) {
-            for (ApprovalChain approvalChain : approvalChainList) {
-                approvalChain.setStatus(ApprovalChainStatusEnum.INVALID.getId());
-            }
-
-            approvalChainService.saveAll(approvalChainList);
-        }
     }
 
 }

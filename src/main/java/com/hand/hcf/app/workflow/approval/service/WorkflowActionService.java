@@ -33,4 +33,7 @@ public class WorkflowActionService {
 
     @Autowired
     private RuleService ruleService;
+
+    @Autowired
+    private WorkflowRepeatApproveService workflowRepeatApproveService;
 }

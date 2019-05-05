@@ -7,23 +7,24 @@ import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.payment.externalApi.OrganizationInterface;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
+import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
+import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
 import com.hand.hcf.app.workflow.constant.FormConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
-import com.hand.hcf.app.workflow.domain.WorkFlowApprovers;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.ApprovalDashboardDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
-import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
-import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
+import com.hand.hcf.app.workflow.dto.*;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
+import com.hand.hcf.app.workflow.util.CheckUtil;
 import com.hand.hcf.app.workflow.util.StringUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,17 +47,22 @@ public class WorkFlowApprovalService {
     private WorkFlowDocumentRefMapper workFlowDocumentRefMapper;
 
     @Autowired
+    private WorkFlowDocumentRefService workFlowDocumentRefService;
+
+    @Autowired
     private ApprovalFormService approvalFormService;
+
     @Autowired
-    private WorkFlowRefApproversService workFlowRefApproversService;
-    @Autowired
-    private CommonControllerImpl organizationInterface;
+    private OrganizationInterface organizationInterface;
 
     @Autowired
     private MapperFacade mapperFacade;
 
     @Autowired
     private ApprovalChainService approvalChainService;
+
+    @Autowired
+    private RuleApprovalNodeService ruleApprovalNodeService;
 
 
     public Map<String, Set<UUID>> getRuleApproverUserOIDs(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
@@ -165,11 +171,12 @@ public class WorkFlowApprovalService {
         Map<String, String> categoryMap = new HashMap<String, String>();
 
         if (approvalDashboardDetailDTOList != null && approvalDashboardDetailDTOList.size() > 0) {
-            List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+            //jiu.zhao TODO
+            /*List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
 
             for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
                 categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
-            }
+            }*/
         }
 
         for (ApprovalDashboardDetailDTO approvalDashboardDetailDTO : approvalDashboardDetailDTOList) {
@@ -210,10 +217,11 @@ public class WorkFlowApprovalService {
 
         Map<String, String> categoryMap = new HashMap<String, String>();
 
-        List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+        //jiu.zhao TODO
+        /*List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
         for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
             categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
-        }
+        }*/
 
         //获取当前登录用户(审批人)
         UUID userOid = OrgInformationUtil.getCurrentUserOid();
@@ -283,10 +291,11 @@ public class WorkFlowApprovalService {
     public List<ApprovalDashboardDetailDTO> getApprovalToPendTotal(Integer documentCategory, Long documentTypeId, String applicantName, ZonedDateTime beginDate, ZonedDateTime endDate, Double amountFrom, Double amountTo, String remark, String documentNumber) {
         Map<String, String> categoryMap = new HashMap<String, String>();
 
-        List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+        //jiu.zhao TODO
+        /*List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
         for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
             categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
-        }
+        }*/
         //获取当前登录用户(审批人)
         UUID userOid = OrgInformationUtil.getCurrentUserOid();
 
@@ -345,10 +354,11 @@ public class WorkFlowApprovalService {
         List<WorkFlowDocumentRef> workFlowDocumentRefList = null;
         Map<String, String> categoryMap = new HashMap<String, String>();
 
-        List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+        //jiu.zhao TODO
+        /*List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
         for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
             categoryMap.put(sysCodeValueCO.getValue(), sysCodeValueCO.getName());
-        }
+        }*/
 
         //审批节点名称模糊查询
         if (StringUtils.isNotEmpty(approvalNodeName)) {
@@ -432,6 +442,70 @@ public class WorkFlowApprovalService {
             }
         }
         return list;
+    }
+
+    /**
+     * 判断是否可以撤回单据
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/29
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param userOid 用户oid
+     * @return true可以撤回false不能撤回
+     */
+    public Boolean getWithdrawFlag(Integer entityType, UUID entityOid, UUID userOid) {
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
+        CheckUtil.notNull(userOid, "userOid null");
+
+        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService
+                .getByDocumentOidAndDocumentCategory(entityOid, entityType);
+
+        Pair<Boolean, String> checkResult = workFlowDocumentRefService.checkWithdrawFlag(workFlowDocumentRef);
+        return checkResult.getKey();
+    }
+
+    /**
+     * 获取当前节点属性
+     * @version 1.0
+     * @author polus
+     * @date 2019/04/29
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @return 当期节点属性
+     */
+    public ApprovalNodeDTO getCurrentApprovalNode(Integer entityType, UUID entityOid) {
+        CheckUtil.notNull(entityType, "entityType null");
+        CheckUtil.notNull(entityOid, "entityOid null");
+
+        ApprovalNodeDTO approvalNodeDTO=new ApprovalNodeDTO();
+        WorkFlowDocumentRef workFlowDocumentRef=
+                workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(entityOid, entityType);
+        RuleApprovalNode ruleApprovalNode = ruleApprovalNodeService.getRuleApprovalNode(
+                UUID.fromString(workFlowDocumentRef.getApprovalNodeOid())
+        );
+
+        Integer approvalStatus = workFlowDocumentRef.getStatus();
+
+        if (!WorkflowInstance.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
+            // 只返回审批中的示例
+            return approvalNodeDTO;
+        }
+
+
+        approvalNodeDTO.setRuleApprovalNodeOid(ruleApprovalNode.getRuleApprovalNodeOid());
+        approvalNodeDTO.setRuleApprovalChainOid(ruleApprovalNode.getRuleApprovalChainOid());
+        approvalNodeDTO.setName(ruleApprovalNode.getName());
+        if (ruleApprovalNode.getReturnFlag()){
+            approvalNodeDTO.setBackable(Boolean.TRUE);
+        }
+        approvalNodeDTO.setAddSignable(ruleApprovalNode.getAddsignFlag());
+        approvalNodeDTO.setTransferable(ruleApprovalNode.getTransferFlag());
+
+        return approvalNodeDTO;
     }
 
 }

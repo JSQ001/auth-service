@@ -28,8 +28,7 @@ public class WorkFlowEventPublishService {
     private ApplicationEventPublisher applicationEventPublisher;
     @Autowired
     private WorkFlowDocumentRefService workFlowDocumentRefService;
-    @Autowired
-    private WorkFlowRefApproversService workflowApproversService;
+
     @Autowired
     private WorkFlowEventLogsService workflowEventLogsService;
     // added by mh.z 20190322 目前没有好的方式判断是不是提交操作
@@ -45,7 +44,7 @@ public class WorkFlowEventPublishService {
      *  status: 需要修改的单据状态  如：1001,  remark:备注说明
      *  destinationService：表示服务注册到Eureka中的名称(如：prepayment:预付款，contract:合同, budget:预算)，这样能保证每次只对具体的服务发布消息
      */
-    public void publishEvent(WorkFlowDocumentRef workFlowDocumentRef) {
+    /*public void publishEvent(WorkFlowDocumentRef workFlowDocumentRef) {
         // added by mh.z 20190322 目前没有好的方式判断是不是提交操作
         if (Boolean.FALSE.equals(publishEnabled.get())) {
             workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
@@ -96,7 +95,7 @@ public class WorkFlowEventPublishService {
             workflowMessage.setApprovalText(workFlowDocumentRef.getRejectReason());//审批意见
             workflowMessage.setRemark("单据编号:" + workFlowDocumentRef.getDocumentNumber());
         }
-        /*WorkflowCustomRemoteEvent event = new WorkflowCustomRemoteEvent(this,applicationName+":**", workFlowDocumentRef.getDestinationService(), workflowMessage);
+        WorkflowCustomRemoteEvent event = new WorkflowCustomRemoteEvent(this,applicationName+":**", workFlowDocumentRef.getDestinationService(), workflowMessage);
         logger.info("[发布工作流事件消息]：" + event);
         workFlowDocumentRef.setEventId(event.getId());
         workFlowDocumentRef.setEventConfirmStatus(false);
@@ -109,12 +108,12 @@ public class WorkFlowEventPublishService {
         eventLogs.setEventConfirmStatus(false);
         workflowEventLogsService.createSysWorkflowEventLogs(eventLogs);
         workFlowDocumentRefService.saveOrUpdate(workFlowDocumentRef);
-        applicationEventPublisher.publishEvent(event);*/
+        applicationEventPublisher.publishEvent(event);
     }
-    /**
+    *//**
      * @param event 监听 对应的消费端是否正常消费了该条消息，并将结果更新到工作流关联的单据表上去
-     */
-    /*@EventListener(AckRemoteApplicationEvent.class)
+     *//*
+    @EventListener(AckRemoteApplicationEvent.class)
     public void ackConsumerConfirm(AckRemoteApplicationEvent event){
         // 相当于回调函数，在消息成功被消费时调用，event里能取得actId: event.getAckId 和 消息的ID：event.getId()
         logger.info("[发布工作流事件消息]消费者端: "+event.getOriginService()+", 服务消费确认 ackId :" + event.getAckId());
@@ -128,9 +127,7 @@ public class WorkFlowEventPublishService {
         if(workFlowDocumentRef != null){
             workFlowDocumentRef.setEventConfirmStatus(true);
             workFlowDocumentRefService.updateById(workFlowDocumentRef);
-            if(workFlowDocumentRef.getStatus().equals(PaymentDocumentOperationEnum.APPROVAL_REJECT.getId()) || workFlowDocumentRef.getStatus().equals(PaymentDocumentOperationEnum.WITHDRAW.getId())){
-                // 拒绝或撤回时，清除当前审批人
-                workflowApproversService.deleteByRefIdAndNodeOid(workFlowDocumentRef.getId(), workFlowDocumentRef.getApprovalNodeOid());
+            if(workFlowDocumentRef.getStatus().equals(DocumentOperationEnum.APPROVAL_REJECT.getId()) || workFlowDocumentRef.getStatus().equals(DocumentOperationEnum.WITHDRAW.getId())){
             }
         }
     }*/

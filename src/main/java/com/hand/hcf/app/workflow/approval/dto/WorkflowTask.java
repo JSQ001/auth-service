@@ -153,4 +153,13 @@ public class WorkflowTask {
         approvalChain.setFinishFlag(finishFlag);
     }
 
+    /**
+     * 返回任务组编号
+     *
+     * @return
+     */
+    public Integer getGroup() {
+        return approvalChain.getGroupNumber();
+    }
+
 }

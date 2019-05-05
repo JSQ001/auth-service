@@ -21,8 +21,6 @@ import com.hand.hcf.app.payment.persistence.PaymentRequisitionHeaderMapper;
 import com.hand.hcf.app.payment.persistence.PaymentRequisitionTypesMapper;
 import com.hand.hcf.app.payment.utils.RespCode;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionHeaderWebDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

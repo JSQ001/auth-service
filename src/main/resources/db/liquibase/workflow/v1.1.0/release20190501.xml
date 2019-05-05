@@ -115,4 +115,47 @@
     <changeSet id="201904171257001" author="maohui.zhuang">
         <dropNotNullConstraint tableName="sys_drools_rule_detail" columnName="rule_condition_approver_oid" columnDataType="varchar(36)"/>
     </changeSet>
+
+    <changeSet id="201905012023001" author="maohui.zhuang">
+        <addColumn tableName="sys_approval_chain">
+            <column name="group_number" type="int" remarks="组编号"/>
+            <column name="approval_order" type="int" remarks="审批顺序"/>
+        </addColumn>
+
+        <dropColumn tableName="sys_rule_approval_node" columnName="return_info"/>
+        <dropColumn tableName="sys_rule_approval_node" columnName="notify_method"/>
+    </changeSet>
+
+    <changeSet id="201905042227001" author="maohui.zhuang">
+        <createTable tableName="sys_wfl_trace" remarks="工作流轨迹">
+            <column name="id" type="bigint" remarks="主键id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_wfl_trace_id"/>
+            </column>
+            <column name="entity_type" type="int" remarks="实体类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_oid" type="varchar(36)" remarks="实体Oid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="varchar(255)" remarks="信息">
+            </column>
+            <column name="detail" type="mediumtext" remarks="详情">
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

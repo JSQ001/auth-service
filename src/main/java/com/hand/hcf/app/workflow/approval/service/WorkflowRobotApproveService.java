@@ -36,8 +36,10 @@ public class WorkflowRobotApproveService {
 
         WorkflowInstance instance = node.getInstance();
         WorkflowUser user = new WorkflowUser(UUID.fromString(RuleConstants.APPROVER_TYPE_ROBOT_OID));
+        // 获取下一个任务组编号
+        int group = workflowBaseService.nextGroup(instance);
         // 创建审批任务
-        WorkflowTask task = workflowBaseService.createTask(node, user);
+        WorkflowTask task = workflowBaseService.createTask(node, user, group);
         // 保存审批任务
         workflowBaseService.saveTask(task);
 

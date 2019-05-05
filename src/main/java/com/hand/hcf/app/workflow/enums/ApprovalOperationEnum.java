@@ -24,6 +24,7 @@ public enum ApprovalOperationEnum implements SysEnum {
     , AUDIT_NOTICE(3006 ,"approval.history.finance.notice") //审核通知
     , AUDIT_SEND(3007 ,"approval.history.finance.send")  //寄出
     ,APPROVAL_TRANSFER(3008 , "approval.history.transfer")//转交
+    ,APPROVAL_JUMP(3009 , "approval.history.jump")//跳转
     , PAYMENT_IN_PROCESS(4000 ,"approval.history.finance.payment.process")//付款中确认
     , FINANCE_LOANED(4001 ,"approval.history.finance.loaned")//财务已付款
     , FINANCE_FAILED(4002 ,"approval.history.finance.loanFailed")//财务付款失败

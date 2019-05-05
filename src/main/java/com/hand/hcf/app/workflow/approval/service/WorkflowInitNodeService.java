@@ -129,9 +129,11 @@ public class WorkflowInitNodeService {
             returnStatus = RESULT_USER_NODE;
 
             List<WorkflowTask> newTaskList = new ArrayList<WorkflowTask>();
+            // 获取下一个任务组编号
+            int group = workflowBaseService.nextGroup(instance);
             // 创建并保存审批任务
             for (WorkflowUser user : userList) {
-                WorkflowTask newTask = workflowBaseService.createTask(node, user);
+                WorkflowTask newTask = workflowBaseService.createTask(node, user, group);
                 workflowBaseService.saveTask(newTask);
                 newTaskList.add(newTask);
             }
@@ -227,14 +229,17 @@ public class WorkflowInitNodeService {
     protected WorkflowResult initNoticeNode(WorkflowNode node, List<WorkflowUser> userList) {
         CheckUtil.notNull(node, "node null");
         CheckUtil.notNull(userList, "userList null");
+        WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "instance null");
 
         // 初始通知节点的逻辑：
         // 1.创建并保存通知任务
         // 下一动作：移到下一节点
 
+        // 获取下一个任务组编号
+        int group = workflowBaseService.nextGroup(instance);
         // 创建并保存通知任务
         for (WorkflowUser user : userList) {
-            workflowBaseService.saveTask(node, user);
+            workflowBaseService.saveTask(node, user, group);
         }
 
         WorkflowNextNodeAction nextAction = new WorkflowNextNodeAction(workflowActionService, node.getInstance(), node);

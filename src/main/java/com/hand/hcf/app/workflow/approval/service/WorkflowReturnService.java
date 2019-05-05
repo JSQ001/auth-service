@@ -137,10 +137,8 @@ public class WorkflowReturnService {
         }
 
         WorkflowMoveNodeAction action = new WorkflowMoveNodeAction(workflowActionService, instance, backNode);
-        workflowMainService.runWorkflow(action);
+        workflowMainService.runWorkflow(instance, action);
 
-        //jiu.zhao 修改三方接口
-        //ContactCO contactCO = contactClient.getByUserOid(instance.getLastApproverOid().toString());
         ContactCO contactCO = contactClient.getByUserOid(instance.getLastApproverOid());
         remark="退回至 "+instance.getLastNodeName()+" "+contactCO.getEmployeeCode()+"-"+contactCO.getFullName()+" "+remark;
 
@@ -218,6 +216,8 @@ public class WorkflowReturnService {
                 returnNodes.forEach(n -> {
                     if (selectNodes.contains(n.getRuleApprovalNodeOid())) {
                         n.setBackable(Boolean.TRUE);
+                    }else {
+                        n.setBackable(Boolean.FALSE);
                     }
                 });
 

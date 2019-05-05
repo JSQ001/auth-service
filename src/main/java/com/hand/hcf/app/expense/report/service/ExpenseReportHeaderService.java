@@ -46,8 +46,6 @@ import com.hand.hcf.app.expense.type.domain.ExpenseDocumentField;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;

@@ -8,6 +8,7 @@ import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
+import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
@@ -39,7 +40,7 @@ public class WorkflowRepeatApproveService {
     private RuleApprovalNodeService ruleApprovalNodeService;
 
     @Autowired
-    private MessageService messageService;
+    private BaseClient baseClient;
 
     /**
      * 返回要重复审批的操作
@@ -53,7 +54,7 @@ public class WorkflowRepeatApproveService {
         CheckUtil.notNull(taskList, "taskList null");
 
         List<WorkflowApproval> approvalList = new ArrayList<WorkflowApproval>();
-        String approvalRemark = getApprovalRemark();
+        String approvalRemark = null;
         Long approvalSequence = null;
         WorkflowApproval newApproval = null;
         WorkflowApproval lastApproval = null;
@@ -66,6 +67,11 @@ public class WorkflowRepeatApproveService {
             if (lastApproval != null) {
                 lastOperation = lastApproval.getOperation();
                 approvalSequence = lastApproval.getApprovalSequence();
+
+                if (approvalRemark == null) {
+                    approvalRemark = getApprovalRemark();
+                }
+
                 newApproval = new WorkflowApproval(task, lastOperation, approvalRemark);
                 newApproval.setApprovalSequence(approvalSequence);
                 approvalList.add(newApproval);
@@ -146,7 +152,8 @@ public class WorkflowRepeatApproveService {
      * @return 审批意见
      */
     protected String getApprovalRemark() {
-        String approvalRemark = messageService.getMessageDetailByCode(MessageConstants.NO_REPEAT_APPROVE_REMARK);
+        String approvalRemark = baseClient.getMessageDetailByCode(
+                MessageConstants.NO_REPEAT_APPROVE_REMARK, true);
         return approvalRemark;
     }
 

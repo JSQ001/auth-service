@@ -1,15 +1,10 @@
 package com.hand.hcf.app.workflow.implement.web;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.common.co.ApprovalFormCO;
-import com.hand.hcf.app.common.co.ApprovalHistoryCO;
-import com.hand.hcf.app.common.co.CommonApprovalHistoryCO;
-import com.hand.hcf.app.common.co.ContactCO;
-import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.workflow.approval.service.WorkflowSubmitService;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
@@ -268,6 +263,12 @@ public class WorkflowControllerImpl /*implements WorkflowInterface*/ {
 
         return documentOidList;
     }
+
+
+    public void updateDocumentStatus(Integer entityType, UUID entityOid, DocumentOperationEnum status) {
+        workFlowDocumentRefService.updateDocumentStatus(entityType, entityOid, status);
+    }
+
 
     public void deleteApprovalDocument(Integer entityType, UUID entityOid) {
         workFlowDocumentRefService.deleteApprovalDocument(entityType, entityOid);

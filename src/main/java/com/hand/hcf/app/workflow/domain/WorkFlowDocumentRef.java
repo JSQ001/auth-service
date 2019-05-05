@@ -130,8 +130,7 @@ public class WorkFlowDocumentRef extends Domain {
 
     @TableField(exist = false)
     private List<UUID> currentApproverOids;//审批人Oid集合
-    @TableField(exist = false)
-    private List<WorkFlowApprovers> currentApproverList;//审批信息集合：审批节点Oid,审批人Oid
+
     @TableField("submitted_by")
     @JsonSerialize(using = ToStringSerializer.class)
     private UUID submittedBy; //提交人Oid

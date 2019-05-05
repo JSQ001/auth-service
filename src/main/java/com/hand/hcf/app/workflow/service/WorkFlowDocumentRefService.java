@@ -4,18 +4,26 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ContactCO;
+import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.RespCode;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
+import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
+import com.hand.hcf.app.workflow.constant.RuleConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
-import com.hand.hcf.app.workflow.domain.WorkFlowApprovers;
+import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
+import com.hand.hcf.app.workflow.util.CheckUtil;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.workflow.util.StringUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +43,6 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
 
     @Autowired
     private WorkFlowDocumentRefMapper workflowDocumentRefMapper;
-    @Autowired
-    private WorkFlowRefApproversService workflowApproversService;
 
     @Autowired
     private ApprovalChainService approvalChainService;
@@ -45,6 +51,9 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
     private ContactControllerImpl contactClient;
 	@Autowired
     private ApprovalHistoryService approvalHistoryService;
+
+    @Autowired
+    private ApprovalFormService approvalFormService;
 
     /**
      * 存在，则更新，不存在，则插入
@@ -68,21 +77,6 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
                 if (approvalUserOids != null && approvalUserOids.size() > 0) {
                     ZonedDateTime now = ZonedDateTime.now();
                     Long userId = OrgInformationUtil.getCurrentUserId();
-                    List<WorkFlowApprovers> approversList = approvalUserOids.stream().map(m -> {
-                        WorkFlowApprovers approvers = new WorkFlowApprovers();
-                        approvers.setApproverOid(m);
-                        approvers.setApproveNodeOid(workFlowDocumentRef.getApprovalNodeOid());
-                        approvers.setCreatedDate(ZonedDateTime.now());
-                        approvers.setWorkFlowDocumentRefId(workFlowDocumentRef.getId());
-                        approvers.setCreatedBy(userId);
-                        approvers.setCreatedDate(now);
-                        approvers.setLastUpdatedDate(now);
-                        approvers.setLastUpdatedBy(userId);
-                        approvers.setVersionNumber(1);
-                        return approvers;
-                    }).collect(Collectors.toList());
-                    workFlowDocumentRef.setCurrentApproverList(approversList);
-                    workflowApproversService.createBatchSysWorkflowApprovers(approversList);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -333,6 +327,51 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
     }
 
     /**
+     * 检查能否撤回单据实例
+     * @author mh.z
+     * @date 2019/04/29
+     *
+     * @param workFlowDocumentRef 单据实例
+     * @return 第一个值是能否撤回（true可以撤回，false不能撤回），第二个值是错误信息
+     */
+    public Pair<Boolean, String> checkWithdrawFlag(WorkFlowDocumentRef workFlowDocumentRef) {
+        CheckUtil.notNull(workFlowDocumentRef, "workFlowDocumentRef null");
+        Integer approvalStatus = workFlowDocumentRef.getStatus();
+
+        if (!WorkflowInstance.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
+            // 只能撤回审批中的实例
+            return Pair.of(false, MessageConstants.INSTANCE_STATUS_CANNOT_WITHDRAW);
+        }
+
+        UUID formOid = workFlowDocumentRef.getFormOid();
+        ApprovalForm approvalForm = approvalFormService.getByOid(formOid);
+        // 获取撤回规则
+        Boolean withdrawFlag = approvalForm.getWithdrawFlag();
+        Integer withdrawRule = approvalForm.getWithdrawRule();
+        withdrawFlag = withdrawFlag == null ? true : withdrawFlag;
+        withdrawRule = withdrawRule == null ? RuleConstants.RULE_WITHDRAW_NONE_APPROVAL_HISTORY : withdrawRule;
+
+        if (!withdrawFlag) {
+            // 审批流未启用撤回
+            return Pair.of(false, MessageConstants.FORM_RULE_CANNOT_WITHDRAW);
+        }
+
+        if (!RuleConstants.RULE_WITHDRAW_BEFORE_APPROVAL_END.equals(withdrawRule)) {
+            // 获取审批过的任务数
+            Integer entityType = workFlowDocumentRef.getDocumentCategory();
+            UUID entityOid = workFlowDocumentRef.getDocumentOid();
+            Integer taskStatus = WorkflowTask.APPROVAL_STATUS_APPROVAL;
+            int approvedTotal = approvalChainService.countApprovalChain(entityType, entityOid, null, taskStatus);
+            if (approvedTotal > 0) {
+                // 审批流设置了只能撤回无审批记录的审批流
+                return Pair.of(false, MessageConstants.ONLY_WITHDRAW_NONE_APPROVAL_HISTORY);
+            }
+        }
+
+        return Pair.of(true, null);
+    }
+
+    /**
      * @author lsq
      * @date 2019/03/29
      * @description 获取指定单据的当前审批人
@@ -379,6 +418,37 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
         deleteByDocumentOidAndDocumentCategory(entityOid.toString(), entityType);
         // 删除历史
         approvalHistoryService.deleteByEntityTypeAndEntityOid(entityType, entityOid);
+    }
+
+    /**
+     * 更新单据实例状态
+     * @author mh.z
+     * @date 2019/04/29
+     *
+     * @param entityType 单据大类
+     * @param entityOid 单据oid
+     * @param status 状态
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDocumentStatus(Integer entityType, UUID entityOid, DocumentOperationEnum status) {
+        WorkFlowDocumentRef workFlowDocumentRef = getByDocumentOidAndDocumentCategory(entityOid, entityType);
+        if (workFlowDocumentRef == null) {
+            throw new BizException(ExceptionCode.NOT_FOUND_THE_DOCUMENT);
+        }
+
+        // 该接口只能复核拒绝单据
+        if (!DocumentOperationEnum.AUDIT_REJECT.equals(status)) {
+            throw new BizException(ExceptionCode.THE_API_ONLY_SUPPORT_AUDIT_REJECT);
+        }
+
+        Integer documentStatus = workFlowDocumentRef.getStatus();
+        // 只能复核拒绝已经审批通过的单据
+        if (!DocumentOperationEnum.APPROVAL_PASS.getId().equals(documentStatus)) {
+            throw new BizException(ExceptionCode.ONLY_AUDIT_REJECT_PASSED_DOCUMENT);
+        }
+
+        workFlowDocumentRef.setStatus(status.getId());
+        updateById(workFlowDocumentRef);
     }
 
 }

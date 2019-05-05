@@ -5,8 +5,8 @@ package com.hand.hcf.app.expense.common.workflow;
  * 用于监听工作流的事件，主要是用于工作流审批后，相应的更新单据的状态
  */
 import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
-//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.ApprovalNotificationCO;
+import com.hand.hcf.app.common.co.ApprovalResultCO;
 import com.hand.hcf.app.common.co.CashPaymentRequisitionHeaderCO;
 import com.hand.hcf.app.expense.adjust.service.ExpenseAdjustHeaderService;
 import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
@@ -14,7 +14,6 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.PrepaymentService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationHeaderService;
-import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;

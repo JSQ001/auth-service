@@ -5,13 +5,16 @@ import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
+import com.hand.hcf.app.workflow.service.WorkflowTraceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.Stack;
+import java.util.UUID;
 
 /**
  * @author mh.z
@@ -21,16 +24,23 @@ import java.util.Stack;
 public class WorkflowMainService {
     public static final Logger logger = LoggerFactory.getLogger(WorkflowMainService.class);
 
+    @Autowired
+    private WorkflowTraceService workflowTraceService;
+
     /**
      * 运行工作流
      * @version 1.0
      * @author mh.z
      * @date 2019/04/07
      *
+     * @param instance
      * @param start
      */
-    public boolean runWorkflow(WorkflowAction start) {
+    public boolean runWorkflow(WorkflowInstance instance, WorkflowAction start) {
+        Assert.notNull(instance, "instance null");
         Assert.notNull(start, "start null");
+        Integer entityType = instance.getEntityType();
+        UUID entityOid = instance.getEntityOid();
 
         StringBuffer buffer = new StringBuffer("workflow trace\n");
         Stack<WorkflowAction> stack = new Stack<WorkflowAction>();
@@ -64,7 +74,7 @@ public class WorkflowMainService {
                 }
 
                 result = action.execute();
-                traceMessage(buffer, action, result);
+                traceAction(buffer, action, result);
                 current = result.getNext();
 
                 if (current == null && stack.size() > 0) {
@@ -72,6 +82,9 @@ public class WorkflowMainService {
                     buffer.append(String.format("@queue -1 -> %s\n", stack.size()));
                 }
             }
+
+            // 保存工作流轨迹
+            workflowTraceService.saveTrace(entityType, entityOid, start.getName(), buffer.toString());
         } finally {
             logger.info(buffer.toString());
         }
@@ -80,8 +93,12 @@ public class WorkflowMainService {
     }
 
     /**
+     * 把动作集添加到stack中
+     * @author mh.z
+     * @date 2019/04/27
+     *
      * @param stack
-     * @param actions
+     * @param actions 动作集
      */
     protected void pushStack(Stack<WorkflowAction> stack, Collection<WorkflowAction> actions) {
         WorkflowAction[] array = actions.toArray(new WorkflowAction[0]);
@@ -92,11 +109,15 @@ public class WorkflowMainService {
     }
 
     /**
+     * 记录动作
+     * @author mh.z
+     * @date 2019/04/27
+     *
      * @param buffer
-     * @param action
-     * @param result
+     * @param action 动作
+     * @param result 动作执行的结果
      */
-    protected void traceMessage(StringBuffer buffer, WorkflowAction action, WorkflowResult result) {
+    protected void traceAction(StringBuffer buffer, WorkflowAction action, WorkflowResult result) {
         buffer.append("action:");
         buffer.append(action.getName());
         buffer.append('[');

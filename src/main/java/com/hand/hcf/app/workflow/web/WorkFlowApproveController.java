@@ -5,23 +5,8 @@ import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.approval.service.WorkflowPassService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowRejectService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowReturnService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowWithdrawService;
-import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalHistoryDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalReqDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalResDTO;
-import com.hand.hcf.app.workflow.dto.BackNodesDTO;
-import com.hand.hcf.app.workflow.dto.CounterSignDTO;
-import com.hand.hcf.app.workflow.dto.NotifyDTO;
-import com.hand.hcf.app.workflow.dto.SendBackDTO;
-import com.hand.hcf.app.workflow.dto.TransferDTO;
-import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
-import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
-import com.hand.hcf.app.workflow.dto.WorkflowDocumentDTO;
+import com.hand.hcf.app.workflow.approval.service.*;
+import com.hand.hcf.app.workflow.dto.*;
 import com.hand.hcf.app.workflow.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -77,6 +62,9 @@ public class WorkFlowApproveController {
     @Inject
     private WorkflowTransferService workflowTransferService;
 
+    @Autowired
+    private WorkflowAddSignService workflowAddSignService;
+
     @ApiOperation(value = "审批通过", notes = "通过待审批单据", tags = {"approval"})
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> passWorkflow(
@@ -107,8 +95,8 @@ public class WorkFlowApproveController {
     public ResponseEntity<ApprovalResDTO> counterSign(
             @ApiParam(value = "单据加签信息") @Valid @RequestBody CounterSignDTO counterSignDTO) {
         UUID userOid = OrgInformationUtil.getCurrentUserOid();
-        // TODO
-        return null;
+        ApprovalResDTO approvalResDTO = workflowAddSignService.addSignWorkflow(userOid, counterSignDTO);
+        return ResponseEntity.ok(approvalResDTO);
     }
 
     @ApiOperation(value = "审批转交", notes = "审批转交", tags = {"approval"})
@@ -151,6 +139,17 @@ public class WorkFlowApproveController {
             @ApiParam(value = "单据oid") @RequestParam UUID entityOid) {
         return ResponseEntity.ok(workflowReturnService.listApprovalNodeByBack(entityType,entityOid));
     }
+
+
+
+    @ApiOperation(value = "查询当前节点属性", notes = "查询当前节点属性", tags = {"query"})
+    @GetMapping(value = "/current/node")
+    public ResponseEntity<ApprovalNodeDTO> getCurrentApprovalNode(
+            @ApiParam(value = "单据类型") @RequestParam Integer entityType,
+            @ApiParam(value = "单据oid") @RequestParam UUID entityOid) {
+        return ResponseEntity.ok(workFlowApprovalService.getCurrentApprovalNode(entityType,entityOid));
+    }
+
 
     /**
      * 【仪表盘】-我的单据
@@ -404,6 +403,19 @@ public class WorkFlowApproveController {
 
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(mybatisPage);
         return new ResponseEntity<>(list, httpHeaders, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "查询能否撤回单据", notes = "查询能否撤回单据 开发：mh.z")
+    @GetMapping("/getWithdrawFlag")
+    public ResponseEntity<WorkflowOperationDTO> getWithdrawFlag(@ApiParam(value = "单据大类") @RequestParam(value = "entityType") Integer entityType,
+                                                                @ApiParam(value = "单据oid") @RequestParam(value = "entityOid") UUID entityOid) {
+        UUID userOid = OrgInformationUtil.getCurrentUserOid();
+        // 获取是否能撤回单据
+        Boolean withdrawFlag = workFlowApprovalService.getWithdrawFlag(entityType, entityOid, userOid);
+
+        WorkflowOperationDTO approvalOperationDTO = new WorkflowOperationDTO();
+        approvalOperationDTO.setWithdrawFlag(withdrawFlag);
+        return ResponseEntity.ok(approvalOperationDTO);
     }
 
 }

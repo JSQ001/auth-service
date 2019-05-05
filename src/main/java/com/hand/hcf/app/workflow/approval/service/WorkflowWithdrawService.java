@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.approval.service;
 
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
@@ -117,7 +116,7 @@ public class WorkflowWithdrawService {
         // 对同个实例的操作不支持并发
         workflowBaseService.lockInstance(instance);
         // 撤回实例
-        workflowMainService.runWorkflow(action);
+        workflowMainService.runWorkflow(instance, action);
 
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());

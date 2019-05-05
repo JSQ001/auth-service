@@ -29,11 +29,24 @@ public class ExceptionCode implements com.hand.hcf.app.core.util.RespCode {
     public static final String WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT="WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT";
     public static final String WORKFLOW_TRANSFER_NOT_EXIST="WORKFLOW_TRANSFER_NOT_EXIST";
     public static final String WORKFLOW_NODE_CANNOT_BE_FORWARDED="WORKFLOW_NODE_CANNOT_BE_FORWARDED";
-    public static final  String WORKFLOW_RULEAPPROVALNODE_NOT_EXIST = "WORKFLOW_RULEAPPROVALNODE_NOT_EXIST";
+    public static final String WORKFLOW_RULEAPPROVALNODE_NOT_EXIST = "WORKFLOW_RULEAPPROVALNODE_NOT_EXIST";
+    public static final String WORKFLOW_RULEAPPROVALNODE_NOT_TYPE_ROBOT = "WORKFLOW_RULEAPPROVALNODE_NOT_TYPE_ROBOT";
     /**
      * 只能转交给当前租户下启用的员工
      */
     public static final String WORKFLOW_TENANT_NOT_OPENING="WORKFLOW_TENANT_NOT_OPENING";
     //快捷回复
     public static final String QUICK_REPLY_REPLY_MORE_THAN_500 = "QUICK_REPLY_REPLY_MORE_THAN_500";//快捷回复信息大于500!
+
+    /** 没有找到单据！ */
+    public static final String NOT_FOUND_THE_DOCUMENT = "WORKFLOW_NOT_FOUND_THE_DOCUMENT";
+
+    /** 只有审批通过的单据才能复核拒绝！ */
+    public static final String ONLY_AUDIT_REJECT_PASSED_DOCUMENT = "WORKFLOW_ONLY_AUDIT_REJECT_PASSED_DOCUMENT";
+
+    /** 该接口只能复核拒绝单据！ */
+    public static final String THE_API_ONLY_SUPPORT_AUDIT_REJECT = "WORKFLOW_THE_API_ONLY_SUPPORT_AUDIT_REJECT";
+
+    /** 没有找到多语言"{0}"！ */
+    public static final String NOT_FIND_THE_MESSAGE = "WORKFLOW_NOT_FIND_THE_MESSAGE";
 }

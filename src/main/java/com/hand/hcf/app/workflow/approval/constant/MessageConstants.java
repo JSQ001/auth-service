@@ -48,12 +48,15 @@ public class MessageConstants {
     /** 只能操作审批中的任务 */
     public static final String TASK_STATUS_CANNOT_OPERATE = "WORKFLOW_TASK_STATUS_CANNOT_OPERATE";
 
-    /** 不需要重复审批 */
+    /** 无需重复审批 */
     public static final String NO_REPEAT_APPROVE_REMARK = "WORKFLOW_NO_REPEAT_APPROVE_REMARK";
 
     /**
      * 加签
      */
+    /** 可能单据已经被通过或驳回！ */
+    public static final String INSTANCE_STATUS_CANNOT_ADDSIGN = "WORKFLOW_INSTANCE_STATUS_CANNOT_ADDSIGN";
+
     /** 该审批节点不允许加签！ */
     public static final String NODE_RULE_CANNOT_ADDSIGN = "WORKFLOW_NODE_RULE_CANNOT_ADDSIGN";
 
@@ -62,4 +65,33 @@ public class MessageConstants {
 
     /** 只能加签给同租户下的用户！ */
     public static final String ADDSIGN_USER_TENANT_DIFFERENT = "WORKFLOW_ADDSIGN_USER_TENANT_DIFFERENT";
+
+    /** 不能加签给自己！ */
+    public static final String CANNOT_ADDSIGN_TO_ME = "WORKFLOW_CANNOT_ADDSIGN_TO_ME";
+
+    /** 按顺序节点前加签至 {0} {1} */
+    public static final String ADDSIGN_ORDER_APPROVE_BEFORE = "WORKFLOW_ADDSIGN_ORDER_APPROVE_BEFORE";
+
+    /** 按顺序节点后加签至 {0} {1} */
+    public static final String ADDSIGN_ORDER_APPROVE_AFTER = "WORKFLOW_ADDSIGN_ORDER_APPROVE_AFTER";
+
+    /** 平行审批节点前加签至 {0} {1} */
+    public static final String ADDSIGN_PARALLEL_APPROVE_BEFORE = "WORKFLOW_ADDSIGN_PARALLEL_APPROVE_BEFORE";
+
+    /** 平行审批节点后加签至 {0} {1} */
+    public static final String ADDSIGN_PARALLEL_APPROVE_AFTER = "WORKFLOW_ADDSIGN_PARALLEL_APPROVE_AFTER";
+
+    /** 平行审批平行于节点至 {0} {1} */
+    public static final String ADDSIGN_PARALLEL_APPROVE_PARALLEL = "WORKFLOW_ADDSIGN_PARALLEL_APPROVE_PARALLEL";
+
+    /**
+     * 转交
+     */
+    /** 历史转交信息 */
+    public static final String DELIVER_REMARK = "WORKFLOW_DELIVER_REMARK";
+
+    /**
+     * 跳转
+     */
+    public static final String JUMP_REMARK = "WORKFLOW_JUMP_REMARK";
 }

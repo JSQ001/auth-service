@@ -42,6 +42,12 @@ public class ApprovalNodeDTO {
     private Integer sequenceNumber;
 
     @ApiModelProperty(value="是否可退回")
-    private Boolean backable=Boolean.TRUE;
+    private Boolean backable=Boolean.FALSE;
+
+    @ApiModelProperty(value="是否可加签")
+    private Boolean addSignable=Boolean.FALSE;
+
+    @ApiModelProperty(value="是否可转交")
+    private Boolean transferable=Boolean.FALSE;
 
 }

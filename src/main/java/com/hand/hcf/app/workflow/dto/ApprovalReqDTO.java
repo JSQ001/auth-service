@@ -26,6 +26,9 @@ public class ApprovalReqDTO {
     @ApiModelProperty(value = "驳回类型")
     private BackTypeEnum backTypeEnum;
 
+    @ApiModelProperty(value = "驳回后再次提交处理")
+    private Integer rejectRule;
+
     @Data
     @ApiModel(description = "单据实体")
     public static class Entity {

@@ -1,12 +1,13 @@
 package com.hand.hcf.app.workflow.approval.service;
 
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.common.co.ApprovalDocumentCO;
+import com.hand.hcf.app.common.co.ApprovalResultCO;
 import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
@@ -16,8 +17,6 @@ import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentCO;
-import com.hand.hcf.app.workflow.dto.ApprovalResultCO;
 import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
@@ -110,7 +109,7 @@ public class WorkflowSubmitService {
         // 对同个实例的操作不支持并发
         workflowBaseService.lockInstance(instance);
         // 提交实例
-        workflowMainService.runWorkflow(action);
+        workflowMainService.runWorkflow(instance, action);
 
         // 获取状态
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());

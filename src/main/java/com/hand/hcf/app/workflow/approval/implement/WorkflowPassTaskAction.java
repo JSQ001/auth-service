@@ -133,6 +133,8 @@ public class WorkflowPassTaskAction implements WorkflowAction {
         }
 
         WorkflowPassNodeAction nextAction = new WorkflowPassNodeAction(service, task.getNode(), user, remark);
+        // 最后操作的任务
+        nextAction.setLastTask(task);
         WorkflowResult result = new WorkflowResult();
         result.setEntity(task);
         result.setStatus(WorkflowPassTaskAction.RESULT_PASS_SUCCESS);

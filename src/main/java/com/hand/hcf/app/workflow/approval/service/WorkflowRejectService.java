@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.approval.service;
 
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.workflow.approval.constant.ErrorConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowRule;
@@ -112,7 +111,7 @@ public class WorkflowRejectService {
         // 对同个实例的操作不支持并发
         workflowBaseService.lockInstance(instance);
         // 驳回任务
-        workflowMainService.runWorkflow(action);
+        workflowMainService.runWorkflow(instance, action);
 
         // 刷新实例
         workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());

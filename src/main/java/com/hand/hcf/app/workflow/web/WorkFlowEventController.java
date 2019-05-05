@@ -28,7 +28,7 @@ public class WorkFlowEventController {
         workFlowDocumentRef.setDestinationService(destinationService);
         workFlowDocumentRef.setDocumentCategory(documentCategory);
         workFlowDocumentRef.setDocumentOid(documentOid);
-        workflowRabbitMQPublish.publishEvent(workFlowDocumentRef);
+        //workflowRabbitMQPublish.publishEvent(workFlowDocumentRef);
 
         return ResponseEntity.ok("WORKFLOW EVENT PUBLISH SUCCESS");
     }

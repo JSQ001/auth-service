@@ -4,6 +4,7 @@ package com.hand.hcf.app.workflow.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -67,4 +68,11 @@ public class ApprovalChain extends Domain {
      */
     private boolean allFinished;
 
+    @ApiModelProperty(value = "任务组编号")
+    @TableField("group_number")
+    private Integer groupNumber;
+
+    @ApiModelProperty(value = "审批顺序")
+    @TableField("approval_order")
+    private Integer approvalOrder;
 }

@@ -1,4 +1,4 @@
-package com.hand.hcf.app.workflow.dto;
+package com.hand.hcf.app.common.co;
 
 import lombok.Data;
 

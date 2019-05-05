@@ -1,12 +1,16 @@
 package com.hand.hcf.app.workflow.externalApi;
 
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 //import com.hand.hcf.app.client.system.ParameterClient;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.mdata.implement.web.CompanyControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.DepartmentControllerImpl;
 import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
+import com.hand.hcf.app.workflow.util.ExceptionCode;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +27,28 @@ public class BaseClient {
     private CompanyControllerImpl companyClient;
     private ContactControllerImpl ContactClient;
     private DepartmentControllerImpl departmentClient;
-    //private ParameterClient parameterClient;
+    private MessageService messageService;
+
+    /**
+     * 根据消息代码获取多语言并返回
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/04
+     *
+     * @param messageCode 消息代码
+     * @param required true必须要有多语言
+     * @param objs 参数
+     * @return 多语言
+     */
+    public String getMessageDetailByCode(String messageCode, boolean required, Object... objs) {
+        String messageDetail = messageService.getMessageDetailByCode(messageCode, objs);
+
+        if (required && StringUtils.isEmpty(messageDetail)) {
+            throw new BizException(ExceptionCode.NOT_FIND_THE_MESSAGE, new Object[] { messageCode });
+        }
+
+        return messageDetail;
+    }
 
     public Boolean getApprovalRuleEnabled(UUID companyOid) {
         return true;
@@ -165,12 +190,6 @@ public class BaseClient {
     public List<DepartmentPositionCO> listDepartmentPosition(Long tenantId) {
         return departmentClient.listDepartmentPosition(null, null, null, tenantId);
     }
-
-
-    public DepartmentRoleCO getDepartmentRole(Long departmentId) {
-        return departmentClient.getDepartmentRoleById(departmentId);
-    }
-
 
     public ContactCO getUserById(Long userId) {
         return ContactClient.getById(userId);

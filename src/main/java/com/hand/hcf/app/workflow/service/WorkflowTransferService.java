@@ -7,11 +7,17 @@ import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
+import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;
+import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowMainService;
+import com.hand.hcf.app.workflow.approval.service.WorkflowRepeatApproveService;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.TransferDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
@@ -29,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,6 +68,17 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
 
     @Autowired
     private ContactControllerImpl contactClient;
+	@Autowired
+    private MessageService messageService;
+
+    @Autowired
+    private WorkflowRepeatApproveService workflowRepeatApproveService;
+
+    @Autowired
+    private WorkflowMainService workflowMainService;
+
+    @Autowired
+    private WorkflowActionService workflowActionService;
     /**
      * 新增转交
      * @param workflowTransfer
@@ -196,7 +214,7 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
 
         WorkflowNode node = task.getNode();
         WorkflowRule rule = node.getRule();
-
+        WorkflowInstance instance = node.getInstance();
         //判断节点是否可以转交
         if (!Boolean.TRUE.equals(rule.getTransferFlag())) {
             throw new BizException(ExceptionCode.WORKFLOW_NODE_CANNOT_BE_FORWARDED);
@@ -211,11 +229,10 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
         String remark = dto.getRemark();
 
         WorkflowUser deliverUser = new WorkflowUser(userOidDeliver);
+        // 保存审批任务
+        WorkflowTask newTask = workflowBaseService.createTask(node,deliverUser, task.getGroup());
+        workflowBaseService.saveTask(newTask);
 
-        workflowBaseService.saveTask(node,deliverUser);
-
-        //ContactCO contactCO = contactClient.getByUserOid(userOidDeliver.toString());
-        //jiu.zhao 修改三方接口
         ContactCO contactCO = contactClient.getByUserOid(userOidDeliver);
         if(!contactCO.getTenantId().equals(tenantId)){
             throw new BizException(ExceptionCode.WORKFLOW_TENANT_NOT_OPENING);
@@ -223,6 +240,23 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
 
         //保存历史
         workflowBaseService.saveHistory(task, ApprovalOperationEnum.APPROVAL_TRANSFER.getId().toString(), deliverRemark(contactCO.getFullName(), contactCO.getEmployeeCode(), remark));
+
+        WorkflowApproval approval = null;
+        // 获取重复的审批
+        if (WorkflowRule.REPEAT_SKIP.equals(rule.getRepeatRule())) {
+            List<WorkflowTask> taskList = new ArrayList<WorkflowTask>();
+            taskList.add(newTask);
+            List<WorkflowApproval> approvalList = workflowRepeatApproveService.getRepeatApprovals(taskList);
+
+            if (approvalList.size() > 0) {
+                approval = approvalList.get(0);
+            }
+        }
+
+        if (approval != null) {
+            WorkflowAutoApproveAction action = new WorkflowAutoApproveAction(workflowActionService, approval);
+            workflowMainService.runWorkflow(instance, action);
+        }
     }
 
     /**
@@ -230,7 +264,8 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
      * @return
      */
     public String deliverRemark(String fullName, String employeeCode, String remark){
-        return "转交至 " + fullName+"-"+employeeCode + "，理由 " + remark;
+        String deliverRemark = messageService.getMessageDetailByCode(MessageConstants.DELIVER_REMARK,fullName, employeeCode, remark);
+        return deliverRemark;
     }
 
 }
