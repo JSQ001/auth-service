@@ -196,12 +196,11 @@ public class FTPAttachmentService implements IAttachment {
         try {
             UUID attachmentOid = UUID.randomUUID();
             String originalFilename = file.getOriginalFilename();
-            //originalFilename = originalFilename.replace(" ", "_");
+            originalFilename = originalFilename.replace(" ", "_");
             String path = generatePath(attachmentOid, attachmentType, originalFilename, null);
             String tempUrl;
             try {
-                //tempUrl = upload(path, file.getBytes());
-                tempUrl = upload(originalFilename, file.getBytes());
+                tempUrl = upload(path, file.getBytes());
             } catch (Exception e) {
                 log.error("upload attachment error:" + e.getMessage());
                 throw new ValidationException(new ValidationError("attachment", "file upload failed"));
@@ -398,7 +397,17 @@ public class FTPAttachmentService implements IAttachment {
     }
 
     public String getTempUrl(Attachment attachment) {
-        return hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
+        String thumbnailPath = null;
+        if ("FTP".equals(hcfBaseProperties.getStorage().getMode())) {
+            thumbnailPath = hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
+        } else if ("OSS".equals(hcfBaseProperties.getStorage().getMode())) {
+            String endpoint = hcfBaseProperties.getStorage().getOss().getEndpoint();
+            String bucketName = hcfBaseProperties.getStorage().getOss().getBucket().getName();
+            String filehost = hcfBaseProperties.getStorage().getOss().getFilehost();
+            String frontUrl = "https://" + bucketName + "." + endpoint + "/" + filehost;
+            thumbnailPath = frontUrl + "/" + attachment.getPath();
+        }
+        return thumbnailPath;
     }
 
     /**
@@ -477,8 +486,8 @@ public class FTPAttachmentService implements IAttachment {
     @Override
     public void downLoadFile(HttpServletRequest httpServletRequest,
                              HttpServletResponse httpServletResponse,
-                             String objectName)throws IOException{
+                             String objectName) throws IOException {
         OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
-        ossUtil.downLoad(httpServletRequest,httpServletResponse,objectName);
+        ossUtil.downLoad(httpServletRequest, httpServletResponse, objectName);
     }
 }

@@ -5,7 +5,6 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.CreateBucketRequest;
-import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
@@ -28,8 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @Configuration
 @Slf4j
@@ -84,6 +81,7 @@ public class OssConfiguration {
 
         public String upload(String path, InputStream inputStream) {
             OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+            String fileUrl = filehost + "/" +  path;
             try {
                 //容器不存在，就创建
                 if (!ossClient.doesBucketExist(bucketName)) {
@@ -92,21 +90,13 @@ public class OssConfiguration {
                     createBucketRequest.setCannedACL(CannedAccessControlList.PublicReadWrite);
                     ossClient.createBucket(createBucketRequest);
                 }
-
-                //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                //String dateStr = format.format(new Date());
-                //创建文件路径
-                //String fileUrl = filehost + "/" + dateStr+ "/" +  path;
-                String fileUrl = filehost + "/" +  path;
-
                 //上传文件
                 PutObjectResult result = ossClient.putObject(new PutObjectRequest(bucketName, fileUrl, inputStream));
-                //ossClient.putObject(bucketName, fileName, new ByteArrayInputStream(bytes));
                 //设置权限 这里是公开读
                 ossClient.setBucketAcl(bucketName, CannedAccessControlList.PublicReadWrite);
                 if (null != result) {
-                    log.info("==========>OSS文件上传成功,OSS地址：" + path);
-                    return path;
+                    log.info("==========>OSS文件上传成功,OSS地址：" + fileUrl);
+                    return fileUrl;
                 }
             } catch (OSSException oe) {
                 log.error(oe.getMessage());
@@ -116,12 +106,13 @@ public class OssConfiguration {
                 //关闭ossClient
                 ossClient.shutdown();
             }
-            return null;
+            return fileUrl;
         }
 
         public String upload(String path, byte[] bytes) {
             String str = upload(path, new ByteArrayInputStream(bytes));
             return str;
+
         }
 
         //附件下载
@@ -130,7 +121,6 @@ public class OssConfiguration {
             OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
             try {
                 String filePath = filehost + "/" +  objectName;
-                //System.out.println("======文件路径"+filePath);
                 // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
                 OSSObject ossObject = ossClient.getObject(bucketName, filePath);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(ossObject.getObjectContent()));
