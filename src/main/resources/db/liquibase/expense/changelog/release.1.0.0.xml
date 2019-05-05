@@ -2289,7 +2289,7 @@
     <changeSet id="201902251705001" author="yuan.liu">
         <dropNotNullConstraint tableName="exp_expense_policy" columnName="company_level_id" columnDataType="bigint"/>
         <dropNotNullConstraint tableName="exp_expense_policy" columnName="duty_type" columnDataType="varchar(100)"/>
-        <dropNotNullConstraint tableName="exp_expense_policy" columnName="staff_level" columnDataType="bigint"/>
+        <dropNotNullConstraint tableName="exp_expense_policy" columnName="staff_level" columnDataType="varchar(100)"/>
         <dropNotNullConstraint tableName="exp_expense_policy" columnName="department_id" columnDataType="bigint"/>
     </changeSet>
     
@@ -2335,7 +2335,7 @@
     </changeSet>
 
     <changeSet id="201903121133001" author="yuan.liu">
-        <dropDefaultValue tableName="exp_expense_policy" columnName="end_date"/>
+        <dropDefaultValue tableName="exp_expense_policy" columnName="end_date" columnDataType="timestamp"/>
     </changeSet>
 
     <changeSet id="201903131006001" author="yuan.liu">

@@ -86,4 +86,72 @@
         </addColumn>
     </changeSet>
 
+
+    <changeSet id="201904261552001" author="bin.xie">
+        <modifyDataType tableName="exp_expense_type" columnName="type_flag" newDataType="int" />
+    </changeSet>
+
+    <changeSet id="201904261030001" author="zhuo.zhang">
+        <addColumn tableName="invoice_line_expence">
+            <column name="invoice_bag_no" type="varchar(100)" remarks="发票袋号码"></column>
+            <column name="invoice_bag_confirm_flag" type="varchar(1)" defaultValue="N" remarks="发票袋号码确认标志"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904261130001" author="zhuo.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="receipt_documents_flag" type="varchar(1)" defaultValue="N" remarks="纸质单据签收标志"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201904281403001" author="shouting.cheng">
+        <addUniqueConstraint tableName="exp_adjust_type_dimension" columnNames="exp_adjust_type_id,dimension_id" constraintName="exp_adjust_type_dimension_u1"/>
+        <addUniqueConstraint tableName="exp_adjust_type_dimension" columnNames="exp_adjust_type_id,header_flag,sequence" constraintName="exp_adjust_type_dimension_u2"/>
+    </changeSet>
+
+    <changeSet id="201904291430001" author="zhuo.zhang">
+        <addColumn tableName="invoice_line_expence">
+            <column name="invoice_mate_flag" type="varchar(1)" defaultValue="N" remarks="发票匹配标志"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904291430002" author="zhuo.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="sheer_mate_flag" type="varchar(1)" defaultValue="N" remarks="是否完全匹配标志"></column>
+        </addColumn>
+        <addColumn tableName="exp_report_header">
+            <column name="deal_user_id" type="bigint" remarks="处理人ID"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201904291430003" author="zhuo.zhang">
+        <createTable tableName="invoice_bag_no_scan" remarks="发票袋号码扫描">
+            <column name="id" type="bigint" >
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_invoice_bag_no_scan"/>
+            </column>
+            <column name="invoice_bag_no" type="varchar(100)" remarks="发票袋号码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="201904301430001" author="zhuo.zhang">
+        <addColumn tableName="exp_report_header">
+            <column name="comparison_flag" type="varchar(1)" defaultValue="N" remarks="是否比对通过标志"></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
