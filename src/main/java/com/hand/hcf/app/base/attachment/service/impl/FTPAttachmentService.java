@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ public class FTPAttachmentService implements IAttachment {
 
     private HcfBaseProperties hcfBaseProperties;
 
-    public FTPAttachmentService(HcfBaseProperties hcfBaseProperties){
+    public FTPAttachmentService(HcfBaseProperties hcfBaseProperties) {
         this.hcfBaseProperties = hcfBaseProperties;
     }
 
@@ -67,8 +68,8 @@ public class FTPAttachmentService implements IAttachment {
                 filePath = sftpUtil.upload(path, bytes);
 
             } catch (SftpException e) {
-                throw new BizException("file upload failed.","file upload failed. " + e.getMessage());
-            }finally {
+                throw new BizException("file upload failed.", "file upload failed. " + e.getMessage());
+            } finally {
                 sftpUtil.logout();
             }
         } else if ("OSS".equals(hcfBaseProperties.getStorage().getMode())) {
@@ -195,12 +196,12 @@ public class FTPAttachmentService implements IAttachment {
         try {
             UUID attachmentOid = UUID.randomUUID();
             String originalFilename = file.getOriginalFilename();
-            originalFilename = originalFilename.replace(" ","_");
+            //originalFilename = originalFilename.replace(" ", "_");
             String path = generatePath(attachmentOid, attachmentType, originalFilename, null);
             String tempUrl;
             try {
-                tempUrl = upload(path, file.getBytes());
-
+                //tempUrl = upload(path, file.getBytes());
+                tempUrl = upload(originalFilename, file.getBytes());
             } catch (Exception e) {
                 log.error("upload attachment error:" + e.getMessage());
                 throw new ValidationException(new ValidationError("attachment", "file upload failed"));
@@ -266,7 +267,7 @@ public class FTPAttachmentService implements IAttachment {
 
     @Override
     public AttachmentCO uploadStaticFile(byte[] content, AttachmentType attachmentType, String filename, Long length) {
-        return adapterAttachmentCO(uploadStatic(content, attachmentType, filename,length));
+        return adapterAttachmentCO(uploadStatic(content, attachmentType, filename, length));
     }
 
     @Override
@@ -311,10 +312,10 @@ public class FTPAttachmentService implements IAttachment {
         String rootPath = hcfBaseProperties.getStorage().getFtp().getDirectoryName();
         switch (attachmentType) {
             case INVOICE_IMAGES:
-                path =  rootPath + "/" + "invoices/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/" + "invoices/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case IMAGE_INVOICE_IMAGES:
-                path = rootPath + "/" + "invoice_images/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/" + "invoice_images/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case FEEDBACK_IMAGES:
                 path = rootPath + "/" + "feedback" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
@@ -323,31 +324,31 @@ public class FTPAttachmentService implements IAttachment {
                 path = rootPath + "/" + "headPortrait" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case CARROUSEL_IMAGES:
-                path = rootPath + "/" + "carrousel/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/" + "carrousel/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case PDF:
-                path = rootPath + "/" + "pdf/"  + date + DigestUtils.md5Hex(filename + UUID.randomUUID().toString().replaceAll("-", "")) + suffix;
+                path = rootPath + "/" + "pdf/" + date + DigestUtils.md5Hex(filename + UUID.randomUUID().toString().replaceAll("-", "")) + suffix;
                 break;
             case REPAYMENT_IMAGES:
-                path = rootPath + "/" + "repayment/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/" + "repayment/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case COMPANY_LOGO:
                 path = rootPath + "/" + Constants.OSS_COMPANY_LOGO_FOLDER + DigestUtils.md5Hex(filename) + suffix;
                 break;
             case EXPENSE_ICON:
-                path = rootPath + "/" + "expenseIcon/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "expenseIcon/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case BUDGET_JOURNAL:
-                path =  rootPath + "/" + "budget/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "budget/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case CONTRACT:
-                path = rootPath + "/" + "contract/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "contract/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case PREPAYMENT:
-                path = rootPath + "/" + "prepayment/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "prepayment/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case EXP_REPORT:
-                path = rootPath + "/" + "report/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "report/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case APPLICATION_ICON:
                 path = rootPath + "/" + "application" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
@@ -356,31 +357,31 @@ public class FTPAttachmentService implements IAttachment {
                 path = rootPath + "/" + "skin" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case EXP_ADJUST:
-                path = rootPath + "/exp_adjust" +date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/exp_adjust" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case PAYMENT:
-                path = rootPath + "/payment" +date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/payment" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case CASH_WRITE_OFF:
-                path = rootPath + "/cash_write_off" +date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/cash_write_off" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case GL_WORK_ORDER:
-                path = rootPath + "/gl_work_order" +date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/gl_work_order" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case EXP_REVERSE:
-                path = rootPath+"/exp_reverse" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                path = rootPath + "/exp_reverse" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case FUND:
-                path = rootPath+"/fund" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                path = rootPath + "/fund" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case TAX:
-                path = rootPath+"/tax" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                path = rootPath + "/tax" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case SUPPLIER:
-                path = rootPath+"/supplier" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename)+suffix;
+                path = rootPath + "/supplier" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case OTHER:
-                path = rootPath + "/" + "other/"  + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/" + "other/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             default:
                 throw new IllegalArgumentException("unrecognised attachment type");
@@ -413,7 +414,7 @@ public class FTPAttachmentService implements IAttachment {
             sftpUtil.remove(key);
         } catch (SftpException e) {
             throw new BizException("file delete failed.", "file delete failed. " + e.getMessage());
-        }finally {
+        } finally {
             sftpUtil.logout();
         }
     }
@@ -424,7 +425,7 @@ public class FTPAttachmentService implements IAttachment {
         //连接登录sftp
         sftpUtil.login();
         try {
-            attachments.stream().forEach( u -> {
+            attachments.stream().forEach(u -> {
                 if (StringUtils.hasText(u.getAbsolutePath())) {
                     try {
                         sftpUtil.remove(u.getAbsolutePath());
@@ -440,6 +441,7 @@ public class FTPAttachmentService implements IAttachment {
         }
 
     }
+
     @Override
     public void writeFileToResp(HttpServletResponse response, Attachment attachment) {
         InputStream inputStream = null;
@@ -455,13 +457,13 @@ public class FTPAttachmentService implements IAttachment {
             }
             outputStream.flush();
         } catch (SftpException e) {
-            throw new BizException("sftp exception","sftp exception " + e.getMessage());
+            throw new BizException("sftp exception", "sftp exception " + e.getMessage());
         } catch (IOException e) {
-            throw new BizException("io exception","io exception " + e.getMessage());
-        }finally {
+            throw new BizException("io exception", "io exception " + e.getMessage());
+        } finally {
             sftpUtil.logout();
             try {
-                if(inputStream!=null) {
+                if (inputStream != null) {
                     inputStream.close();
                 }
             } catch (IOException e) {
@@ -469,5 +471,14 @@ public class FTPAttachmentService implements IAttachment {
             }
         }
 
+    }
+
+    //下载附件的方法
+    @Override
+    public void downLoadFile(HttpServletRequest httpServletRequest,
+                             HttpServletResponse httpServletResponse,
+                             String objectName)throws IOException{
+        OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
+        ossUtil.downLoad(httpServletRequest,httpServletResponse,objectName);
     }
 }

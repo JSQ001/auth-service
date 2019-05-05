@@ -5,11 +5,12 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.aliyun.oss.model.CreateBucketRequest;
+import com.aliyun.oss.model.GetObjectRequest;
+import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
-import com.itextpdf.text.log.Logger;
-import com.itextpdf.text.log.LoggerFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,8 +18,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,7 +43,7 @@ public class OssConfiguration {
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public OSSUtil ossUtil(){
+    public OSSUtil ossUtil() {
         if (STORAGE_MODE.equals(hcfBaseProperties.getStorage().getMode())) {
             OSSUtil ossUtil;
 
@@ -60,13 +69,14 @@ public class OssConfiguration {
 
         private String bucketName;
 
-        private  String filehost;
+        private String filehost;
 
-        public OSSUtil(){}
+        public OSSUtil() {
+        }
 
         public OSSUtil(String endpoint, String accessKeyId, String accessKeySecret, String bucketName, String filehost) {
             this.endpoint = endpoint;
-            this.accessKeyId= accessKeyId;
+            this.accessKeyId = accessKeyId;
             this.accessKeySecret = accessKeySecret;
             this.bucketName = bucketName;
             this.filehost = filehost;
@@ -79,23 +89,24 @@ public class OssConfiguration {
                 if (!ossClient.doesBucketExist(bucketName)) {
                     ossClient.createBucket(bucketName);
                     CreateBucketRequest createBucketRequest = new CreateBucketRequest(bucketName);
-                    createBucketRequest.setCannedACL(CannedAccessControlList.PublicRead);
+                    createBucketRequest.setCannedACL(CannedAccessControlList.PublicReadWrite);
                     ossClient.createBucket(createBucketRequest);
                 }
 
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                String dateStr = format.format(new Date());
+                //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                //String dateStr = format.format(new Date());
                 //创建文件路径
-                String fileUrl = filehost + "/" + dateStr+ "/" +  path;
+                //String fileUrl = filehost + "/" + dateStr+ "/" +  path;
+                String fileUrl = filehost + "/" +  path;
 
                 //上传文件
                 PutObjectResult result = ossClient.putObject(new PutObjectRequest(bucketName, fileUrl, inputStream));
                 //ossClient.putObject(bucketName, fileName, new ByteArrayInputStream(bytes));
                 //设置权限 这里是公开读
-                ossClient.setBucketAcl(bucketName, CannedAccessControlList.PublicRead);
+                ossClient.setBucketAcl(bucketName, CannedAccessControlList.PublicReadWrite);
                 if (null != result) {
-                    log.info("==========>OSS文件上传成功,OSS地址：" + fileUrl);
-                    return fileUrl;
+                    log.info("==========>OSS文件上传成功,OSS地址：" + path);
+                    return path;
                 }
             } catch (OSSException oe) {
                 log.error(oe.getMessage());
@@ -111,6 +122,42 @@ public class OssConfiguration {
         public String upload(String path, byte[] bytes) {
             String str = upload(path, new ByteArrayInputStream(bytes));
             return str;
+        }
+
+        //附件下载
+        public void downLoad(HttpServletRequest request, HttpServletResponse response, String objectName) throws IOException {
+            // 创建OSSClient实例。
+            OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+            try {
+                String filePath = filehost + "/" +  objectName;
+                //System.out.println("======文件路径"+filePath);
+                // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
+                OSSObject ossObject = ossClient.getObject(bucketName, filePath);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ossObject.getObjectContent()));
+                InputStream inputStream = ossObject.getObjectContent();
+                //缓冲文件输出流
+                BufferedOutputStream outputStream = new BufferedOutputStream(response.getOutputStream());
+                //通知浏览器以附件形式下载
+               // response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(objectName, "UTF-8"));
+                // 为防止 文件名出现乱码
+                response.setContentType("application/doc");
+                final String userAgent = request.getHeader("USER-AGENT");
+                if(StringUtils.contains(userAgent, "MSIE")){//IE浏览器
+                    objectName = URLEncoder.encode(objectName,"UTF-8");
+                }else if(StringUtils.contains(userAgent, "Mozilla")){//google,火狐浏览器
+                    objectName = new String(objectName.getBytes(), "ISO8859-1");
+                }else{
+                    objectName = URLEncoder.encode(objectName,"UTF-8");//其他浏览器
+                }
+                response.addHeader("Content-Disposition", "attachment;filename=" +objectName);//这里设置一下让浏览器弹出下载提示框，而不是直接在浏览器中打开
+            } catch (OSSException oe) {
+                log.error(oe.getMessage());
+            } catch (ClientException ce) {
+                log.error(ce.getMessage());
+            } finally {
+                //关闭ossClient
+                ossClient.shutdown();
+            }
         }
     }
 }
