@@ -15,19 +15,19 @@
                 javaType="java.time.ZonedDateTime"/>
     </resultMap>
     <select id="selectVenVendorIndustryInfoByVenderId" resultMap="VendorTypeMap">
-         SELECT * FROM ven_vendor_industry_info t where 1=1
-      <if test="vendorId != null">
-          and t.vendor_id =#{vendorId}
-      </if>
+        SELECT * FROM ven_vendor_industry_info t where 1=1
+        <if test="vendorId != null">
+            and t.vendor_id =#{vendorId}
+        </if>
         <if test="industryId != null">
             and t.industry_id = #{industryId}
         </if>
 
     </select>
     <delete id="deleteVenVendorIndustryInfoByVenderId">
-        delete from ven_vendor_industry_info t
+        delete from ven_vendor_industry_info
         <if test="vendorId != null">
-            where t.vendor_id = #{vendorId}
+            where vendor_id = #{vendorId}
         </if>
     </delete>
 </mapper>

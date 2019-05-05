@@ -140,6 +140,19 @@ public class OssConfiguration {
                     objectName = URLEncoder.encode(objectName,"UTF-8");//其他浏览器
                 }
                 response.addHeader("Content-Disposition", "attachment;filename=" +objectName);//这里设置一下让浏览器弹出下载提示框，而不是直接在浏览器中打开
+
+                byte[] car = new byte[1024];
+                int L;
+                while((L = inputStream.read(car)) != -1){
+                    if (car.length!=0){
+                        outputStream.write(car, 0,L);
+                    }
+                }
+
+                if(outputStream!=null){
+                    outputStream.flush();
+                    outputStream.close();
+                }
             } catch (OSSException oe) {
                 log.error(oe.getMessage());
             } catch (ClientException ce) {
