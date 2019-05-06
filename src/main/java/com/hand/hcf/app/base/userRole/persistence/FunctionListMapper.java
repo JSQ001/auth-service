@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface FunctionListMapper extends BaseMapper<FunctionList>{
     /**
-     * ²éÑ¯ÆäËû×â»§ÏàÍ¬µÄ¹¦ÄÜ
+     * æŸ¥è¯¢å…¶ä»–ç§Ÿæˆ·ç›¸åŒçš„åŠŸèƒ½
      * @param tenantId
      * @param sourceFunctionId
      * @return
