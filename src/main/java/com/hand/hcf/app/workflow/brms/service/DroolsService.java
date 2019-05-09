@@ -94,7 +94,7 @@ public class DroolsService {
     ;
     @Inject
     private DroolsRuleDetailMapper droolsRuleDetailMapper;
-    private String droolsTemplateName = "rule-template.drt";
+    private String droolsTemplateName = "drools/templates/rule-template.drt";
     @Inject
     private RuleManagerImpl ruleManager;
 

@@ -307,4 +307,32 @@ public interface RespCode {
      */
     String EXPENSE_PREPAYMENT_AMOUNT_MUST_LESS_THEN_APPLICATION_AMOUNT = "EXPENSE_PREPAYMENT_AMOUNT_MUST_LESS_THEN_APPLICATION_AMOUNT";
 
+    /**
+     * 请选择相同币种进行报销！
+     */
+    String EXPENSE_REPORT_AUTO_CREATE_CURRENCY_ERROR = "EXPENSE_REPORT_AUTO_CREATE_CURRENCY_ERROR";
+
+    /**
+     * 录入发票（发票代码: {0},发票号码: {1}）与员工{2}录入的发票重复,请检查发票信息重新录入！
+     */
+    String EXPENSE_REPORT_INVOICE_EXISTS = "EXPENSE_REPORT_INVOICE_EXISTS";
+    /**
+     * 录入发票（发票代码: {0},发票号码: {1}）与{2}连号,请确认是否继续使用！
+     */
+    String EXPENSE_REPORT_INVOICE_CONTINUATION = "EXPENSE_REPORT_INVOICE_CONTINUATION";
+    /**
+     * 员工{0}录入的发票（发票代码：{1}，发票号码：{2}）
+     */
+    String EXPENSE_REPORT_INVOICE_CONTINUATION_ASSEMBLY = "EXPENSE_REPORT_INVOICE_CONTINUATION_ASSEMBLY";
+
+    /**
+     * 该账本已被报账单关联，不能删除！
+     */
+    String EXPENSE_REPORT_BOOK_USED = "EXPENSE_REPORT_BOOK_USED";
+
+    /**
+     * 该发票已被报账单关联，不能删除！
+     */
+    String EXPENSE_INVOICE_HEAD_USED ="EXPENSE_INVOICE_HEAD_USED";
+
 }

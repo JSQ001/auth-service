@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +21,7 @@ import java.time.ZonedDateTime;
  * @author: ShilinMao
  * @date: 2019/2/28 14:43
  */
+@ApiModel(description = "进项税业务单头表")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,6 +32,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 租户ID
      */
+    @ApiModelProperty(value = "租户ID")
     @NotNull
     @TableField("tenant_id")
     private Long tenantId;
@@ -36,6 +40,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 账套ID
      */
+    @ApiModelProperty(value = "账套ID")
     @NotNull
     @TableField("set_of_books_id")
     private Long setOfBooksId;
@@ -43,12 +48,14 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 单据编号
      */
+    @ApiModelProperty(value = "单据编号")
     @TableField("document_number")
     private String documentNumber;
 
     /**
      * 员工
      */
+    @ApiModelProperty(value = "员工")
     @NotNull
     @TableField("applicant_id")
     private Long applicantId;
@@ -56,6 +63,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 公司
      */
+    @ApiModelProperty(value = "公司")
     @NotNull
     @TableField("company_id")
 
@@ -64,6 +72,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 部门
      */
+    @ApiModelProperty(value = "部门")
     @NotNull
     @TableField("department_id")
     private Long departmentId;
@@ -71,6 +80,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 业务日期
      */
+    @ApiModelProperty(value = "业务日期")
     @NotNull
     @TableField("transfer_date")
     private ZonedDateTime transferDate;
@@ -78,6 +88,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 业务大类
      */
+    @ApiModelProperty(value = "业务大类")
     @NotNull
     @TableField("transfer_type")
     private String transferType;
@@ -85,6 +96,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 计算比例
      */
+    @ApiModelProperty(value = "计算比例")
     @NotNull
     @TableField("transfer_proportion")
     private BigDecimal transferProportion;
@@ -92,6 +104,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 用途类型
      */
+    @ApiModelProperty(value = "用途类型")
     @NotNull
     @TableField("use_type")
     private String useType;
@@ -99,6 +112,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 币种
      */
+    @ApiModelProperty(value = "币种")
     @NotNull
     @TableField("currency_code")
     private String currencyCode;
@@ -106,6 +120,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 汇率
      */
+    @ApiModelProperty(value = "汇率")
     @NotNull
     @TableField("rate")
     private Long rate;
@@ -113,6 +128,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 基数金额
      */
+    @ApiModelProperty(value = "基数金额")
     @NotNull
     @TableField("base_amount")
 
@@ -121,6 +137,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 基数本币金额
      */
+    @ApiModelProperty(value = "基数本币金额")
     @NotNull
     @TableField("base_function_amount")
 
@@ -129,6 +146,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 金额
      */
+    @ApiModelProperty(value = "金额")
     @NotNull
     @TableField("amount")
 
@@ -137,6 +155,7 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 本币金额
      */
+    @ApiModelProperty(value = "本币金额")
     @NotNull
     @TableField("function_amount")
     private BigDecimal functionAmount;
@@ -145,18 +164,21 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 备注
      */
+    @ApiModelProperty(value = "备注")
     @TableField("description")
     private String description;
 
     /**
      * 状态
      */
+    @ApiModelProperty(value = "状态")
     @TableField("status")
     private String status;
 
     /**
      * 审核状态
      */
+    @ApiModelProperty(value = "审核状态")
     @TableField("audit_status")
     private String auditStatus;
 
@@ -164,36 +186,42 @@ public class ExpInputTaxHeader extends Domain {
     /**
      * 反冲状态
      */
+    @ApiModelProperty(value = "反冲状态")
     @TableField("reverse_flag")
     private String reverseFlag;
 
     /**
      * 关联附件的OID 用 , 分割
      */
+    @ApiModelProperty(value = "关联附件的OID 用 , 分割")
     @TableField(value = "attachment_oid", strategy = FieldStrategy.IGNORED)
     private String attachmentOid;
 
     /**
      * 单据OID
      */
+    @ApiModelProperty(value = "单据OID")
     @TableField("document_oid")
     private String documentOid;
 
     /**
      * 审核日期
      */
+    @ApiModelProperty(value = "审核日期")
     @TableField("audit_date")
     private ZonedDateTime auditDate;
 
     /**
      * 创建凭证标志
      */
+    @ApiModelProperty(value = "创建凭证标志")
     @TableField("je_creation_status")
     private Boolean jeCreationStatus;
 
     /**
      * 创建凭证日期
      */
+    @ApiModelProperty(value = "创建凭证日期")
     @TableField("je_creation_date")
     private ZonedDateTime jeCreationDate;
 

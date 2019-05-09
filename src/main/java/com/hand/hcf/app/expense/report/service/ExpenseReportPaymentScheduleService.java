@@ -254,7 +254,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                     expensePaymentSchedule.setAccountNumber(bankAccountDTOS.getBankAccountNo());
                     expensePaymentSchedule.setAccountName(bankAccountDTOS.getBankAccountName());
                 }
-            }else if("VENDER".equals(expensePaymentSchedule.getPayeeCategory())){
+            }/*else if("VENDER".equals(expensePaymentSchedule.getPayeeCategory())){
                 expensePaymentSchedule.setPayeeId(expenseReportHeader.getPayeeId());
                 List<VendorBankAccountCO> info =  organizationService.listVendorBankAccounts(expenseReportHeader.getPayeeId().toString());
                 if (!CollectionUtils.isEmpty(info)) {
@@ -264,7 +264,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                         expensePaymentSchedule.setAccountName(vender.getVenBankNumberName());
                     });
                 }
-            }
+            }*/
         }
     }
 

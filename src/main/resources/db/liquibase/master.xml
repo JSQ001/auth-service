@@ -44,6 +44,8 @@
     <include file="classpath:db/liquibase/expense/version.1.0.0/release20190118.xml" relativeToChangelogFile="false"/>
 	<!-- 1.1.0 版本-->
     <include file="classpath:db/liquibase/expense/changelog/release.1.1.0.xml" relativeToChangelogFile="false"/>
+    <!-- 1.2.0 版本-->
+    <include file="classpath:db/liquibase/expense/changelog/release.1.2.0.xml" relativeToChangelogFile="false"/>
     <!-- payment模块 -->
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.1.0.xml" relativeToChangelogFile="false"/>

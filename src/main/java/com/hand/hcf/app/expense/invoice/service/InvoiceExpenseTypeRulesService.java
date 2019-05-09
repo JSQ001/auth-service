@@ -36,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -245,6 +247,39 @@ public class InvoiceExpenseTypeRulesService extends BaseService<InvoiceExpenseTy
                     e.setErrorFlag(true);
                     e.setErrorMsg("必输字段不能为空");
                 });
+        //费用类型检验
+        for(InvoiceExpenseTypeRulesTemp data : importData){
+            List<ExpenseType>  list = ExpenseTypeService.selectList(new EntityWrapper<ExpenseType>()
+                    .eq("code" ,data.getExpenseTypeCode())
+                    .eq("enabled" ,true)
+                    .eq("type_flag" ,1));
+         if (list.size() > 0 ){
+             continue;
+         }else{
+             data.setErrorFlag(true);
+             data.setErrorMsg("请输入有效费用代码");
+         }
+        }
+
+        //状态校验
+        for (InvoiceExpenseTypeRulesTemp data : importData){
+            if (!("Y".equals(data.getEnabledStr()) || "N".equals(data.getEnabledStr()))) {
+                 data.setErrorFlag(true);
+                 data.setErrorMsg("请输入有效的状态");
+             }
+
+            if (!checkDateFormat(data.getStartDate())) {
+                data.setErrorFlag(true);
+                data.setErrorMsg("请输入有效的日期");
+            }
+
+        if(!StringUtil.isNullOrEmpty(data.getEndDate())){
+            if (!checkDateFormat(data.getEndDate()) ) {
+                data.setErrorFlag(true);
+                data.setErrorMsg("请输入有效的日期");
+            }
+          }
+        }
     }
 
     /**
@@ -354,4 +389,29 @@ public class InvoiceExpenseTypeRulesService extends BaseService<InvoiceExpenseTy
             }
         }
     }
+
+    /**
+     * 校验日期格式
+     * @author sq.l
+     * @date 2019/04/22
+     *
+     * @param dateStr
+     * @return 日期格式正确返回true否则返回false
+     */
+    private boolean checkDateFormat(String dateStr) {
+        boolean convertSuccess = true;
+        // 指定日期格式为四位年/两位月份/两位日期，注意yyyy-MM-dd区分大小写；
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            // 设置lenient为false. 否则SimpleDateFormat会比较宽松地验证日期，比如2007-02-29会被接受，并转换成2007-03-01
+            format.setLenient(false);
+            format.parse(dateStr);
+        } catch (ParseException e) {
+            // 如果throw java.text.ParseException或者NullPointerException，就说明格式不对
+            convertSuccess = false;
+        }
+        return convertSuccess;
+
+    }
+
 }

@@ -11,6 +11,8 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.OperationUtil;
+import com.hand.hcf.app.expense.application.domain.ApplicationHeader;
+import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.DimensionUtils;
@@ -67,6 +69,9 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private ApplicationHeaderService applicationHeaderService;
 
     /**
      * 根据报账单ID删除分摊行信息
@@ -155,9 +160,9 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         BigDecimal taxAmountSub = OperationUtil.subtract(line.getTaxAmount(), expenseReportDist.getTaxDistAmount());
         BigDecimal fTaxAmountSub = OperationUtil.subtract(line.getTaxFunctionAmount(), expenseReportDist.getTaxDistFunctionAmount());
         // 只要以上6个金额任意一个不为零，都需要处理尾差
-        if(!amountSub.equals(BigDecimal.ZERO) || !fAmountSub.equals(BigDecimal.ZERO)
-                || !expenseAmountSub.equals(BigDecimal.ZERO) || !fExpenseAmountSub.equals(BigDecimal.ZERO)
-                || !taxAmountSub.equals(BigDecimal.ZERO) || !fTaxAmountSub.equals(BigDecimal.ZERO)){
+        if(amountSub.compareTo(BigDecimal.ZERO) != 0 || fAmountSub.compareTo(BigDecimal.ZERO) != 0
+                || expenseAmountSub.compareTo(BigDecimal.ZERO) != 0 || fExpenseAmountSub.compareTo(BigDecimal.ZERO) != 0
+                || taxAmountSub.compareTo(BigDecimal.ZERO) != 0 || fTaxAmountSub.compareTo(BigDecimal.ZERO) != 0){
             ExpenseReportDist expenseReportDistMax = selectOne(new EntityWrapper<ExpenseReportDist>()
                     .eq("exp_report_line_id", line.getId())
                     .eq("amount", expenseReportDist.getMaxAmount()));
@@ -291,7 +296,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
         expenseReportDist.setFunctionAmount(OperationUtil.safeMultiply(expenseReportDist.getAmount(),expenseReportDist.getExchangeRate()));
         //税分摊额计算
         // 费用金额 = 报账金额，则表示不需要分摊税
-        if(line.getAmount().equals(line.getExpenseAmount())){
+        if(line.getAmount().compareTo(line.getExpenseAmount()) == 0){
             expenseReportDist.setTaxDistAmount(BigDecimal.ZERO);
             expenseReportDist.setTaxDistFunctionAmount(BigDecimal.ZERO);
             expenseReportDist.setNoTaxDistAmount(expenseReportDist.getAmount());
@@ -307,6 +312,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                 // 按不含税金额分摊 即分摊金额reportDistAmount = noTaxDistAmount
             }else if(ParameterConstant.TAX_OFF.equals(expTaxDist)){
                 BigDecimal taxAmount = OperationUtil.safeDivide(OperationUtil.safeMultiply(expenseReportDist.getNoTaxDistAmount(), line.getTaxAmount(), 8), line.getExpenseAmount());
+                expenseReportDist.setNoTaxDistFunctionAmount(OperationUtil.safeMultiply(expenseReportDist.getNoTaxDistAmount(),expenseReportDist.getExchangeRate()));
                 expenseReportDist.setTaxDistAmount(taxAmount);
                 expenseReportDist.setTaxDistFunctionAmount(OperationUtil.safeMultiply(taxAmount,line.getExchangeRate()));
                 expenseReportDist.setAmount(OperationUtil.sum(expenseReportDist.getAmount(),taxAmount));
@@ -363,7 +369,7 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
                 taxAmountFunctionSum = taxAmountFunctionSum.add(expenseReportTaxDist.getFunctionAmount());
                 // 金额最大的处理尾差
                 if(i == invoiceDists.size() - 1){
-                    if(! expenseReportDist.getTaxDistAmount().equals(taxAmountSum)){
+                    if(expenseReportDist.getTaxDistAmount().compareTo(taxAmountSum) != 0){
                         BigDecimal taxSub = expenseReportDist.getTaxDistAmount().subtract(taxAmountSum);
                         BigDecimal funTaxSub = expenseReportDist.getTaxDistFunctionAmount().subtract(taxAmountFunctionSum);
                         expenseReportTaxDist.setTaxAmount(expenseReportTaxDist.getTaxAmount().add(taxSub));
@@ -412,6 +418,10 @@ public class ExpenseReportDistService extends BaseService<ExpenseReportDistMappe
             dto.setCompanyName(companyById.getName());
             DepartmentCO departmentById = organizationService.getDepartmentById(dto.getDepartmentId());
             dto.setDepartmentName(departmentById.getName());
+            if("EXP_REQUISITION".equals(dist.getSourceDocumentCategory())){
+                ApplicationHeader applicationHeader = applicationHeaderService.selectById(dist.getSourceDocumentId());
+                dto.setReportDocumentNumber(applicationHeader.getDocumentNumber());
+            }
             if(dto.getResponsibilityCenterId() != null){
                 ResponsibilityCenterCO responsibilityCenterById = organizationService.getResponsibilityCenterById(dto.getResponsibilityCenterId());
                 dto.setResponsibilityCenterName(responsibilityCenterById.getResponsibilityCenterName());

@@ -99,7 +99,7 @@ public class ExpInputTaxDist extends Domain {
      * 维度2
      */
     @NotNull
-    @TableField("dimension2Id")
+    @TableField("dimension2_id")
     private Long dimension2Id;
     /**
      * 维度3
@@ -271,5 +271,11 @@ public class ExpInputTaxDist extends Domain {
      */
     @TableField("reverse_flag")
     private String reverseFlag;
+
+    /**
+     * 费用类型ID
+     */
+    @TableField(exist = false)
+    private  Long expenseTypeId;
 
 }

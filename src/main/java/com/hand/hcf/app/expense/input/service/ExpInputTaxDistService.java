@@ -50,11 +50,11 @@ public class ExpInputTaxDistService extends BaseService<ExpInputTaxDistMapper, E
     }
 
     /**
-     * 根据报账单id获取分摊行
+     * 根据进项税行id获取分摊行
      */
-    public List<ExpInputTaxDist> getExpInputTaxDistByHeaderId(List<Long> lineIds) {
-        if(CollectionUtils.isEmpty(lineIds)) {
-            return baseMapper.selectList(new EntityWrapper<ExpInputTaxDist>()
+    public List<ExpInputTaxDist> getExpInputTaxDistByLineIds(List<Long> lineIds) {
+        if(!CollectionUtils.isEmpty(lineIds)) {
+            return baseMapper.getExpInputTaxDistByLineIds(new EntityWrapper<ExpInputTaxDist>()
                     .in("input_tax_line_id", lineIds));
         }else{
             return new ArrayList<>();

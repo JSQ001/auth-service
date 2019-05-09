@@ -15,6 +15,7 @@ import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +41,7 @@ import java.util.List;
  * @Author: bin.xie
  * @Date: 2018/12/5
  */
+@Api(tags = "费用调整单单据头信息controller")
 @RestController
 @RequestMapping("/api/expense/adjust/headers")
 public class ExpenseAdjustHeaderController {
@@ -49,31 +52,10 @@ public class ExpenseAdjustHeaderController {
     @Autowired
     private ExcelExportService excelService;
 
-    /**
-     * @apiDescription 提交工作流
-     * @api {POST} /api/expense/adjust/headers/submit
-     * @apiGroup ExpenseService
-     *
-     * @apiParam {UUID} applicantOid 申请人OID
-     * @apiParam {UUID} userOid 用户OID
-     * @apiParam {UUID} formOid 表单OID
-     * @apiParam {UUID} documentOid 单据OID
-     * @apiParam {Integer} documentCategory 单据大类 （如801003)
-     * @apiParam {List} countersignApproverOIDs 加签审批人OID
-     * @apiParam {String} documentNumber 单据编号
-     * @apiParam {String} remark 描述说明
-     * @apiParam {Long} companyId 公司ID
-     * @apiParam {UUID} unitOid 部门OID
-     * @apiParam {String} remark 描述说明
-     * @apiParam {Bigdecimal} amount 金额
-     * @apiParam {String} currencyCode 币种
-     * @apiParam {Long} documentTypeId 单据类型ID
-     * @apiSuccessExample {json} 成功返回值:
-     * [true]
-     *
-     */
+
+    @ApiOperation(value = "提交工作流", notes = "提交工作流 开发:bin.xie")
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public ResponseEntity<Boolean> submit(@RequestBody WorkFlowDocumentRefCO workFlowDocumentRef) {
+    public ResponseEntity<Boolean> submit(@ApiParam(value = "提交工作流") @RequestBody WorkFlowDocumentRefCO workFlowDocumentRef) {
         return ResponseEntity.ok(headerService.submit(workFlowDocumentRef));
     }
 
@@ -82,8 +64,9 @@ public class ExpenseAdjustHeaderController {
      * @param dto
      * @return
      */
+    @ApiOperation(value = "创建费用调整单单据头", notes = "创建费用调整单单据头 开发:bin.xie")
     @PostMapping
-    public ResponseEntity<ExpenseAdjustHeader> createHeaders(@RequestBody ExpenseAdjustHeaderWebDTO dto) {
+    public ResponseEntity<ExpenseAdjustHeader> createHeaders(@ApiParam(value = "创建费用调整单单据头") @RequestBody ExpenseAdjustHeaderWebDTO dto) {
         return ResponseEntity.ok( headerService.createHeader(dto) );
     }
 
@@ -92,26 +75,32 @@ public class ExpenseAdjustHeaderController {
      * @param dto
      * @return
      */
+    @ApiOperation(value = "更新费用调整单", notes = "更新费用调整单 开发:bin.xie")
     @PutMapping
-    public ResponseEntity<ExpenseAdjustHeader> updateHeaders(@RequestBody ExpenseAdjustHeaderWebDTO dto) {
+    public ResponseEntity<ExpenseAdjustHeader> updateHeaders(@ApiParam(value = "更新费用调整单") @RequestBody ExpenseAdjustHeaderWebDTO dto) {
 
         return ResponseEntity.ok( headerService.updateHeaders(dto));
     }
+    @ApiOperation(value = "查找费用调整单", notes = "查找费用调整单 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query/dto")
-    public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTO(@RequestParam(required = false) String documentNumber,
-                                                                                       @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
-                                                                                       @RequestParam(required = false,value = "status") String status,
-                                                                                       @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
-                                                                                       @RequestParam(required = false,value = "applyDateTo") String dateTimeTo,
-                                                                                       @RequestParam(required = false,value = "amountFrom") BigDecimal amountMin,
-                                                                                       @RequestParam(required = false,value = "amountTo") BigDecimal amountMax,
-                                                                                       @RequestParam(required = false,value = "applyId") Long employeeId,
-                                                                                       @RequestParam(required = false,value = "description") String description,
-                                                                                       @RequestParam(required = false,value = "adjustTypeCategory") String adjustTypeCategory,
-                                                                                       @RequestParam(required = false,value = "currency") String currencyCode,
-                                                                                       @RequestParam(required = false,value = "unitId") Long unitId,
-                                                                                       @RequestParam(required = false,value = "companyId") Long companyId,
-                                                                                       Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTO(@ApiParam(value = "费用调整单编号") @RequestParam(required = false) String documentNumber,
+                                                                                      @ApiParam(value = "费用调整类型ID") @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
+                                                                                      @ApiParam(value = "状态") @RequestParam(required = false,value = "status") String status,
+                                                                                      @ApiParam(value = "日期时间从") @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
+                                                                                      @ApiParam(value = "日期时间到") @RequestParam(required = false,value = "applyDateTo") String dateTimeTo,
+                                                                                      @ApiParam(value = "最小金额") @RequestParam(required = false,value = "amountFrom") BigDecimal amountMin,
+                                                                                      @ApiParam(value = "最大金额") @RequestParam(required = false,value = "amountTo") BigDecimal amountMax,
+                                                                                      @ApiParam(value = "申请人id") @RequestParam(required = false,value = "applyId") Long employeeId,
+                                                                                      @ApiParam(value = "描述") @RequestParam(required = false,value = "description") String description,
+                                                                                      @ApiParam(value = "调整类型") @RequestParam(required = false,value = "adjustTypeCategory") String adjustTypeCategory,
+                                                                                      @ApiParam(value = "币种") @RequestParam(required = false,value = "currency") String currencyCode,
+                                                                                      @ApiParam(value = "部门ID") @RequestParam(required = false,value = "unitId") Long unitId,
+                                                                                      @ApiParam(value = "公司ID") @RequestParam(required = false,value = "companyId") Long companyId,
+                                                                                      @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateTimeFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTimeTo);
@@ -127,21 +116,26 @@ public class ExpenseAdjustHeaderController {
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "查找费用调整单", notes = "查找费用调整单 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query/dto/enable/dataAuth")
-    public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTOEnableDataAuth(@RequestParam(required = false) String documentNumber,
-                                                                                      @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
-                                                                                      @RequestParam(required = false,value = "status") String status,
-                                                                                      @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
-                                                                                      @RequestParam(required = false,value = "applyDateTo") String dateTimeTo,
-                                                                                      @RequestParam(required = false,value = "amountFrom") BigDecimal amountMin,
-                                                                                      @RequestParam(required = false,value = "amountTo") BigDecimal amountMax,
-                                                                                      @RequestParam(required = false,value = "applyId") Long employeeId,
-                                                                                      @RequestParam(required = false,value = "description") String description,
-                                                                                      @RequestParam(required = false,value = "adjustTypeCategory") String adjustTypeCategory,
-                                                                                      @RequestParam(required = false,value = "currency") String currencyCode,
-                                                                                      @RequestParam(required = false,value = "unitId") Long unitId,
-                                                                                      @RequestParam(required = false,value = "companyId") Long companyId,
-                                                                                      Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTOEnableDataAuth(@ApiParam(value = "费用调整单编号") @RequestParam(required = false) String documentNumber,
+                                                                                      @ApiParam(value = "费用调整类型ID") @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
+                                                                                      @ApiParam(value = "状态") @RequestParam(required = false,value = "status") String status,
+                                                                                      @ApiParam(value = "日期时间从") @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
+                                                                                      @ApiParam(value = "日期时间到") @RequestParam(required = false,value = "applyDateTo") String dateTimeTo,
+                                                                                      @ApiParam(value = "最小金额") @RequestParam(required = false,value = "amountFrom") BigDecimal amountMin,
+                                                                                      @ApiParam(value = "最大金额") @RequestParam(required = false,value = "amountTo") BigDecimal amountMax,
+                                                                                      @ApiParam(value = "申请人id") @RequestParam(required = false,value = "applyId") Long employeeId,
+                                                                                      @ApiParam(value = "描述") @RequestParam(required = false,value = "description") String description,
+                                                                                      @ApiParam(value = "调整类型") @RequestParam(required = false,value = "adjustTypeCategory") String adjustTypeCategory,
+                                                                                      @ApiParam(value = "币种") @RequestParam(required = false,value = "currency") String currencyCode,
+                                                                                      @ApiParam(value = "部门ID") @RequestParam(required = false,value = "unitId") Long unitId,
+                                                                                      @ApiParam(value = "公司ID") @RequestParam(required = false,value = "companyId") Long companyId,
+                                                                                                    @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateTimeFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTimeTo);
@@ -158,17 +152,20 @@ public class ExpenseAdjustHeaderController {
     }
 
     @GetMapping("/query/id")
-    public ResponseEntity queryHeaderById(@RequestParam("expAdjustHeaderId") Long expAdjustHeaderId){
+    @ApiOperation(value = "根据ID查询费用调整单头", notes = "根据ID查询费用调整单头 开发:bin.xie")
+    public ResponseEntity queryHeaderById(@ApiParam(value = "费用调整单头ID") @RequestParam("expAdjustHeaderId") Long expAdjustHeaderId){
 
         return ResponseEntity.ok(headerService.getHeaderDTOById(expAdjustHeaderId));
     }
 
     @GetMapping("/query/dimension/dto")
-    public ResponseEntity queryDimensionDTOByTypeId(@RequestParam("headerId") Long headerId){
+    @ApiOperation(value = "根据类型ID查询维度", notes = "根据类型ID查询维度 开发:bin.xie")
+    public ResponseEntity queryDimensionDTOByTypeId(@ApiParam(value = "头ID") @RequestParam("headerId") Long headerId){
         return ResponseEntity.ok(headerService.queryDimensionDTOByTypeId(headerId));
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "根据ID删除费用调整单头", notes = "根据类型ID查询维度 开发:bin.xie")
     public ResponseEntity<Boolean> deleteHeaderById(@PathVariable("id") Long id){
 
         return ResponseEntity.ok(headerService.deleteHeaderById(id));
@@ -178,6 +175,7 @@ public class ExpenseAdjustHeaderController {
      * @api {GET} /api/expense/adjust/headers/query/created 查询已创建调整单的申请人
      */
     @GetMapping("/query/created")
+    @ApiOperation(value = "查询已创建调整单的申请人", notes = "查询已创建调整单的申请人 开发:bin.xie")
     public List<ContactCO> listUsersByCreatedAdjustHeaders(){
 
         return headerService.listUsersByCreatedAdjustHeaders();
@@ -199,19 +197,24 @@ public class ExpenseAdjustHeaderController {
      * @return
      */
     @GetMapping("/approvals/filters")
-    public ResponseEntity listExpenseAdjustApprovals(@RequestParam(value = "finished", required = false) boolean finished,
-                                                     @RequestParam(required = false) String documentNumber,
-                                                     @RequestParam(required = false) Long expAdjustTypeId,
-                                                     @RequestParam(required = false) String adjustTypeCategory,
-                                                     @RequestParam(required = false) String fullName,
-                                                     @RequestParam(required = false) Long employeeId,
-                                                     @RequestParam(required = false) String beginDate,
-                                                     @RequestParam(required = false) String endDate,
-                                                     @RequestParam(required = false) String currencyCode,
-                                                     @RequestParam(required = false) BigDecimal amountMin,
-                                                     @RequestParam(required = false) BigDecimal amountMax,
-                                                     @RequestParam(required = false) String description,
-                                                     Pageable pageable){
+    @ApiOperation(value = "费用调整单许可列表", notes = "费用调整单许可列表 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity listExpenseAdjustApprovals(@ApiParam(value = "完成状态") @RequestParam(value = "finished", required = false) boolean finished,
+                                                    @ApiParam(value = "费用调整单编号") @RequestParam(required = false) String documentNumber,
+                                                    @ApiParam(value = "费用调整类型ID") @RequestParam(required = false) Long expAdjustTypeId,
+                                                    @ApiParam(value = "调整类型") @RequestParam(required = false) String adjustTypeCategory,
+                                                    @ApiParam(value = "全称") @RequestParam(required = false) String fullName,
+                                                    @ApiParam(value = "申请人id") @RequestParam(required = false) Long employeeId,
+                                                    @ApiParam(value = "开始日期") @RequestParam(required = false) String beginDate,
+                                                    @ApiParam(value = "结束日期") @RequestParam(required = false) String endDate,
+                                                    @ApiParam(value = "币种") @RequestParam(required = false) String currencyCode,
+                                                    @ApiParam(value = "最小数量") @RequestParam(required = false) BigDecimal amountMin,
+                                                    @ApiParam(value = "最大数量") @RequestParam(required = false) BigDecimal amountMax,
+                                                    @ApiParam(value = "描述") @RequestParam(required = false) String description,
+                                                    @ApiIgnore Pageable pageable){
         Page mybatisPage = PageUtil.getPage(pageable);
 
         beginDate = StringUtils.isEmpty(beginDate) ? null : beginDate;
@@ -225,23 +228,28 @@ public class ExpenseAdjustHeaderController {
   * 导出费用调整单
   * ***************/
     @RequestMapping(value = "export/query/dto")
+    @ApiOperation(value = "导出费用调整单", notes = "导出费用调整单 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public void exportExpenseAdjustHeader(HttpServletRequest request,
                                           HttpServletResponse response,
-                                          @RequestParam(value = "documentNumber",required = false) String documentNumber,
-                                          @RequestParam(value = "expAdjustTypeId",required = false) Long expAdjustTypeId,
-                                          @RequestParam(value = "status",required = false) String status,
-                                          @RequestParam(value = "applyDateFrom",required = false) String dateTimeFrom,
-                                          @RequestParam(value = "applyDateTo",required = false) String dateTimeTo,
-                                          @RequestParam(value = "amountFrom",required = false) BigDecimal amountMin,
-                                          @RequestParam(value = "amountTo",required = false) BigDecimal amountMax,
-                                          @RequestParam(value = "applyId",required = false) Long employeeId,
-                                          @RequestParam(value = "description",required = false) String description,
-                                          @RequestParam(value = "adjustTypeCategory",required = false) String adjustTypeCategory,
-                                          @RequestParam(value = "currencyCode",required = false) String currencyCode,
-                                          @RequestParam(value = "unitId",required = false) Long unitId,
-                                          @RequestParam(value = "companyId",required = false) Long companyId,
-                                          @RequestBody ExportConfig exportConfig,
-                                           Pageable pageable) throws IOException {
+                                          @ApiParam(value = "费用调整单编号") @RequestParam(value = "documentNumber",required = false) String documentNumber,
+                                          @ApiParam(value = "费用调整类型ID") @RequestParam(value = "expAdjustTypeId",required = false) Long expAdjustTypeId,
+                                          @ApiParam(value = "状态") @RequestParam(value = "status",required = false) String status,
+                                          @ApiParam(value = "日期时间从") @RequestParam(value = "applyDateFrom",required = false) String dateTimeFrom,
+                                          @ApiParam(value = "日期时间到") @RequestParam(value = "applyDateTo",required = false) String dateTimeTo,
+                                          @ApiParam(value = "最小金额") @RequestParam(value = "amountFrom",required = false) BigDecimal amountMin,
+                                          @ApiParam(value = "最大金额") @RequestParam(value = "amountTo",required = false) BigDecimal amountMax,
+                                          @ApiParam(value = "申请人id") @RequestParam(value = "applyId",required = false) Long employeeId,
+                                          @ApiParam(value = "描述") @RequestParam(value = "description",required = false) String description,
+                                          @ApiParam(value = "调整类型") @RequestParam(value = "adjustTypeCategory",required = false) String adjustTypeCategory,
+                                          @ApiParam(value = "币种") @RequestParam(value = "currencyCode",required = false) String currencyCode,
+                                          @ApiParam(value = "部门ID") @RequestParam(value = "unitId",required = false) Long unitId,
+                                          @ApiParam(value = "公司ID") @RequestParam(value = "companyId",required = false) Long companyId,
+                                          @ApiParam(value = "导出配置") @RequestBody ExportConfig exportConfig,
+                                          @ApiIgnore Pageable pageable) throws IOException {
         Page page = PageUtil.getPage(pageable);
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateTimeFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTimeTo);

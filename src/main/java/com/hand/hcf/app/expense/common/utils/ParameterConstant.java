@@ -52,4 +52,34 @@ public class ParameterConstant {
      * 按不含税金额分摊
      */
     public static final String TAX_OFF = "TAX_OFF";
+
+    /**
+     * 进项税转出占用预算
+     */
+    public static final String INPUT_TAX_TRANSFER_BUDGET = "INPUT_TAX_TRANSFER_BUDGET";
+
+    /**
+     * 占用预算并校验
+     */
+    public static final String OCCUPY_CHECK = "OCCUPY_CHECK";
+
+    /**
+     * 占用预算并校验
+     */
+    public static final String CCCUPY_NO_CHECK = "CCCUPY_NO_CHECK";
+
+    /**
+     * 全额转出
+     */
+    public static final String ALL_TRANSFER = "ALL_TRANSFER";
+
+    /**
+     * 部分转出
+     */
+    public static final String PART_TRANSFER = "PART_TRANSFER";
+
+    /**
+     * 部分转出
+     */
+    public static final String FOR_SALE = "FOR_SALE";
 }

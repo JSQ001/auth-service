@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="now" value="now()" dbms="mysql,h2"/>
+    <property name="now" value="sysdate" dbms="oracle"/>
+    <property name="autoIncrement" value="true" dbms="mysql,h2,postgresql,oracle"/>
+    <property name="amount" value="decimal(20,2)"/>
+
+
+    <changeSet id="201905081757001" author="xue.han">
+        <dropNotNullConstraint tableName="exp_report_type" columnName="payment_method" columnDataType="varchar(50)"/>
+    </changeSet>
+    <changeSet id="201905081758001" author="xue.han">
+        <addColumn tableName="exp_report_type">
+            <column name="payment_type" type="varchar(200)" remarks="付款方式"></column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

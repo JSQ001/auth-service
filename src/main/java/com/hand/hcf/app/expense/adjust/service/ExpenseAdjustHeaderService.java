@@ -600,6 +600,10 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         dimension.setHeaderId(id);
         dimension.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
         dimensionService.delete(new EntityWrapper<>(dimension));
+        //删除审批流实例
+        Integer entityType = ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey();
+        UUID entityOid = UUID.fromString(expenseAdjustHeader.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
         return true;
     }
 

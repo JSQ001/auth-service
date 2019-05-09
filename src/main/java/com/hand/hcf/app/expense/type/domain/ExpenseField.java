@@ -52,7 +52,7 @@ public class ExpenseField extends DomainI18nEnable {
     private Integer fieldTypeId;
 
     /**
-     * 字段数据类型 data LONG TEXT
+     * 字段数据类型 DATA LONG TEXT
      */
     @TableField(value = "field_data_type")
     private String fieldDataType;
@@ -67,6 +67,16 @@ public class ExpenseField extends DomainI18nEnable {
     private Boolean required;
     //列表展示
     private Boolean showOnList;
+    //是否包含国家
+    private Boolean containCountry;
+    //是否包含省/州
+    private Boolean containProvince;
+    //是否包含直辖市
+    private Boolean containMunicipality;
+    //是否包含市/区
+    private Boolean containCity;
+    //是否包含县
+    private Boolean containRegion;
 
     @TableField(value = "field_oid")
     private UUID fieldOid;

@@ -9,8 +9,10 @@ import com.hand.hcf.app.common.co.CurrencyRateCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.core.web.dto.MessageDTO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.*;
@@ -25,7 +27,9 @@ import com.hand.hcf.app.expense.report.service.ExpenseReportLineService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,28 +47,41 @@ import java.util.stream.Collectors;
  * @date: 2019/1/16
  */
 @Service
-@AllArgsConstructor
 @Transactional
 public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHead> {
-    private final InvoiceHeadMapper invoiceHeadMapper;
 
-    private final InvoiceLineService invoiceLineService;
+    @Autowired
+    private InvoiceHeadMapper invoiceHeadMapper;
 
-    private final InvoiceLineDistService invoiceLineDistService;
+    @Autowired
+    private InvoiceLineService invoiceLineService;
 
-    private final InvoiceLineExpenceService invoiceLineExpenceService;
-    
-    private final InvoiceTypeService invoiceTypeService;
+    @Autowired
+    private InvoiceLineDistService invoiceLineDistService;
 
-    private final OrganizationService organizationService;
+    @Autowired
+    private InvoiceLineExpenceService invoiceLineExpenceService;
 
-    private final MapperFacade mapper;
+    @Autowired
+    private InvoiceTypeService invoiceTypeService;
 
-    private final ExpenseReportHeaderService reportHeaderService;
+    @Autowired
+    private OrganizationService organizationService;
 
-    private final ExpenseReportLineService reportLineService;
+    @Autowired
+    private MapperFacade mapper;
 
-    private final InvoiceLineDistMapper invoiceLineDistMapper;
+    @Autowired
+    private ExpenseReportHeaderService reportHeaderService;
+
+    @Autowired
+    private ExpenseReportLineService reportLineService;
+
+    @Autowired
+    private InvoiceLineDistMapper invoiceLineDistMapper;
+
+    @Autowired
+    private MessageService messageService;
 
     /**
      * 新建 发票头、行
@@ -341,7 +359,9 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                                 ).size() > 0){
                                     InvoiceHead head = invoiceHeadMapper.selectById(headId);
                                     list.add(head);
-                                }else {
+                                    throw new BizException(RespCode.EXPENSE_INVOICE_HEAD_USED);
+
+                                }else{
                                     invoiceLineDistService.deleteById(distId);
                                     invoiceLineService.deleteById(lineId);
                                     invoiceHeadMapper.deleteById(headId);
@@ -655,16 +675,16 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
      * @return
      */
     public List<InvoiceCertificationDTO> pageInvoiceCertifiedByCond(Long invoiceTypeId,
-                                                                    String invoiceNo,
-                                                                    String invoiceCode,
-                                                                    ZonedDateTime invoiceDateFrom,
-                                                                    ZonedDateTime invoiceDateTo,
-                                                                    BigDecimal invoiceAmountFrom,
-                                                                    BigDecimal invoiceAmountTo,
-                                                                    String createdMethod,
-                                                                    Long certificationStatus,
-                                                                    Boolean isSubmit,
-                                                                    Page page) {
+                                                                String invoiceNo,
+                                                                String invoiceCode,
+                                                                ZonedDateTime invoiceDateFrom,
+                                                                ZonedDateTime invoiceDateTo,
+                                                                BigDecimal invoiceAmountFrom,
+                                                                BigDecimal invoiceAmountTo,
+                                                                String createdMethod,
+                                                                Long certificationStatus,
+                                                                Boolean isSubmit,
+                                                                Page page) {
         List<InvoiceCertificationDTO> invoiceCertificationDTOList = baseMapper.pageInvoiceCertifiedByCond(
                 invoiceTypeId,
                 invoiceNo,
@@ -729,5 +749,55 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                         invoiceHeadMapper.updateById(invoiceHead);
                     }
         });
+    }
+
+    /**
+     * 校验录入的发票代码和号码是否重复或者连号
+     * @param invoiceCode
+     * @param invoiceNo
+     * @param ignoreContinuation 忽略连号校验
+     * @return
+     */
+    public Boolean checkInvoiceCodeInvoiceNoExistsOrContinuation(String invoiceCode,String invoiceNo, Boolean ignoreContinuation){
+        if(StringUtils.isEmpty(invoiceCode) || StringUtils.isEmpty(invoiceNo)){
+            return false;
+        }
+        // 验重
+        List<InvoiceHead> invoiceHeadList = invoiceHeadMapper.selectList(
+                new EntityWrapper<InvoiceHead>()
+                        .eq("invoice_code", invoiceCode)
+                        .eq("invoice_no", invoiceNo)
+        );
+        if (invoiceHeadList.size() > 0){
+            InvoiceHead invoiceHead = invoiceHeadList.get(0);
+            ContactCO userById = organizationService.getUserById(invoiceHead.getCreatedBy());
+            throw new BizException(RespCode.EXPENSE_REPORT_INVOICE_EXISTS,
+                    new String[]{invoiceCode,invoiceNo,userById.getEmployeeCode() + "-" + userById.getFullName()});
+        }
+        //连号校验
+        if(BooleanUtils.isNotTrue(ignoreContinuation)){
+            Long invoiceNoLong = Long.valueOf(invoiceNo);
+            invoiceHeadList = invoiceHeadMapper.selectList(
+                    new EntityWrapper<InvoiceHead>()
+                            .eq("invoice_code", invoiceCode)
+                            .in("invoice_no",new Long[]{invoiceNoLong + 1L,invoiceNoLong - 1L})
+            );
+            if(invoiceHeadList.size() > 0){
+                StringBuffer error = new StringBuffer();
+                Map<Long, List<InvoiceHead>> collect = invoiceHeadList.stream().collect(Collectors.groupingBy(InvoiceHead::getCreatedBy));
+                collect.entrySet().stream().forEach(entry -> {
+                    ContactCO userById = organizationService.getUserById(entry.getKey());
+                    String invoiceNumber = entry.getValue().stream().map(InvoiceHead::getInvoiceNo).collect(Collectors.joining("、"));
+                    MessageDTO message = messageService.getMessage(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION_ASSEMBLY,
+                            new String[]{userById.getEmployeeCode() + "-" + userById.getFullName(), invoiceCode, invoiceNumber});
+                    if(StringUtils.isNotEmpty(error)){
+                        error.append("、");
+                    }
+                    error.append(message.getKeyDescription());
+                });
+                throw new BizException(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION,new String[]{invoiceCode, invoiceNo,error.toString()});
+            }
+        }
+        return true;
     }
 }

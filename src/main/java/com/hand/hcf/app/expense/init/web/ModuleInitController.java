@@ -60,7 +60,7 @@ public class ModuleInitController {
      */
     @PostMapping(value = "/expenseType", produces = "application/json")
     @ApiOperation(value = "申请类型/费用类型导入", notes = "申请类型/费用类型导入 开发:赵柱")
-    public ResponseEntity initExpenseType(@RequestBody List<ExpenseTypeInitDTO> expenseTypeInitDTOS) {
+    public ResponseEntity initExpenseType(@ApiParam(value = "申请类型/费用类型初始化DTO") @RequestBody List<ExpenseTypeInitDTO> expenseTypeInitDTOS) {
         return ResponseEntity.ok(expenseTypeService.initExpenseType(expenseTypeInitDTOS));
     }
 
@@ -71,7 +71,7 @@ public class ModuleInitController {
      */
     @PostMapping(value = "/expenseTypeAssignCompany", produces = "application/json")
     @ApiOperation(value = "申请类型/费用类型分配公司导入", notes = "申请类型/费用类型分配公司导入 开发:赵柱")
-    public ResponseEntity initExpenseTypeAssignCompany(@RequestBody List<ExpenseTypeAssignCompanyInitDTO> expenseTypeAssignCompanyInitDTOS) {
+    public ResponseEntity initExpenseTypeAssignCompany(@ApiParam(value = "申请类型/费用类型分配公司初始化DTO") @RequestBody List<ExpenseTypeAssignCompanyInitDTO> expenseTypeAssignCompanyInitDTOS) {
         return ResponseEntity.ok(expenseTypeAssignCompanyService.initExpenseTypeAssignCompany(expenseTypeAssignCompanyInitDTOS));
     }
 
@@ -82,7 +82,7 @@ public class ModuleInitController {
      */
     @PostMapping(value = "/expensePolicy", produces = "application/json")
     @ApiOperation(value = "费用政策导入导入", notes = "费用政策导入导入 开发:赵柱")
-    public ResponseEntity initExpensePolicy(@RequestBody List<ExpensePolicyInitDTO> expensePolicyInitDTOS) {
+    public ResponseEntity initExpensePolicy(@ApiParam(value = "费用政策初始化DTO") @RequestBody List<ExpensePolicyInitDTO> expensePolicyInitDTOS) {
         return ResponseEntity.ok(expensePolicyService.initExpensePolicy(expensePolicyInitDTOS));
     }
 
@@ -93,7 +93,7 @@ public class ModuleInitController {
      */
     @PostMapping(value = "/expensePolicyRelatedCompany", produces = "application/json")
     @ApiOperation(value = "费用政策导入分配公司", notes = "费用政策导入分配公司 开发:赵柱")
-    public ResponseEntity initExpensePolicyRelatedCompany(@RequestBody List<ExpensePolicyRelatedCompanyInitDTO> policyRelatedCompanyInitDTOS) {
+    public ResponseEntity initExpensePolicyRelatedCompany(@ApiParam(value = "申请政策分配公司初始化DTO") @RequestBody List<ExpensePolicyRelatedCompanyInitDTO> policyRelatedCompanyInitDTOS) {
         return ResponseEntity.ok(expensePolicyRelatedCompanyService.initExpensePolicyRelatedCompany(policyRelatedCompanyInitDTOS));
     }
 
@@ -104,7 +104,7 @@ public class ModuleInitController {
      */
     @PostMapping(value = "/expenseTypeAssignUser", produces = "application/json")
     @ApiOperation(value = "申请类型/费用类型适用人员导入", notes = "申请类型/费用类型适用人员导入 开发:赵柱")
-    public ResponseEntity initExpenseTypeAssignUser(@RequestBody List<ExpenseTypeAssignUserInitDTO> expenseTypeAssignUserInitDTOS) {
+    public ResponseEntity initExpenseTypeAssignUser(@ApiParam(value = "申请类型/费用类型适用初始化DTO") @RequestBody List<ExpenseTypeAssignUserInitDTO> expenseTypeAssignUserInitDTOS) {
         return ResponseEntity.ok(expenseTypeAssignUserService.initExpenseTypeAssignUser(expenseTypeAssignUserInitDTOS));
     }
 

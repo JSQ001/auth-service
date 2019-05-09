@@ -9,7 +9,9 @@ import com.hand.hcf.app.common.co.DepartmentCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.util.OperationUtil;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
+import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
+import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
 import com.hand.hcf.app.expense.input.dto.*;
 import com.hand.hcf.app.expense.input.persistence.ExpInputTaxLineMapper;
@@ -145,20 +147,22 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                     expInputTaxDist.setReverseFlag(header.getReverseFlag());
                     expInputTaxDist.setUseType(header.getUseType());
                     expInputTaxDist.setTransferProportion(header.getTransferProportion());
-                    //金额计算
-                    expInputTaxDist.setBaseAmount(dist.getDistTaxAmount());
-                    if(dist.getBaseFunctionAmount() != null) {
-                        expInputTaxDist.setBaseFunctionAmount(dist.getBaseFunctionAmount());
-                    }else{
-                        expInputTaxDist.setBaseFunctionAmount(dist.getDistTaxAmount());
-                    }
                     BigDecimal tp = OperationUtil.safeDivide(header.getTransferProportion(),BigDecimal.valueOf(100),4);
-                    expInputTaxDist.setAmount(OperationUtil.safeMultiply(dist.getDistTaxAmount(),tp));
-                    if(dist.getBaseFunctionAmount() != null) {
-                        expInputTaxDist.setFunctionAmount(OperationUtil.safeMultiply(dist.getBaseFunctionAmount(),tp));
-                    }else{
-                        expInputTaxDist.setFunctionAmount(OperationUtil.safeMultiply(dist.getDistTaxAmount(),tp));
+                    //进项转出取税额，视同销售取不含税金额
+                    if (ParameterConstant.PART_TRANSFER.equals(header.getTransferType()) ||
+                            ParameterConstant.ALL_TRANSFER.equals(header.getTransferType())) {
+                        expInputTaxDist.setBaseAmount(dist.getDistTaxAmount());
+                        expInputTaxDist.setBaseFunctionAmount(dist.getDistTaxFunctionAmount() != null ?
+                                dist.getDistTaxFunctionAmount() : dist.getDistTaxAmount());
+                    } else if(ParameterConstant.FOR_SALE.equals(header.getTransferType())) {
+                        expInputTaxDist.setBaseAmount(OperationUtil.subtract(dist.getDistAmount(),dist.getDistTaxAmount()));
+                        expInputTaxDist.setBaseFunctionAmount(
+                                OperationUtil.subtract(dist.getDistFunctionAmount(),dist.getDistTaxFunctionAmount()) != null ?
+                                OperationUtil.subtract(dist.getDistFunctionAmount(),dist.getDistTaxFunctionAmount()) :
+                                OperationUtil.subtract(dist.getDistAmount(),dist.getDistTaxAmount()));
                     }
+                    expInputTaxDist.setAmount(OperationUtil.safeMultiply(expInputTaxDist.getBaseAmount(),tp));
+                    expInputTaxDist.setFunctionAmount(OperationUtil.safeMultiply(expInputTaxDist.getBaseFunctionAmount(),tp));
                     //日志信息
                     expInputTaxDist.setLastUpdatedBy(OrgInformationUtil.getUser().getId());
                     expInputTaxDist.setLastUpdatedDate(ZonedDateTime.now());
@@ -220,28 +224,40 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
                 .ge(transferDateFrom != null, "transferDate", TypeConversionUtils.getStartTimeForDayYYMMDD(transferDateFrom))
                 .le(transferDateTo != null, "transferDate", TypeConversionUtils.getEndTimeForDayYYMMDD(transferDateTo));
 
-        List<ExpInputForReportLineDTO> expInputForReportLineDTOS = expInputTaxLineMapper.listExpInputTaxLine(wrapper, OrgInformationUtil.getCurrentSetOfBookId(), headerId, page);
-        setDesc(expInputForReportLineDTOS);
-        for (ExpInputForReportLineDTO line : expInputForReportLineDTOS) {
-            List<ExpInputForReportDistDTO> expInputForReportDistDTOS = expInputTaxDistService.listDistByLineId(line.getExpReportLineId(), line.getId());
-            int x = 0;
-            for (ExpInputForReportDistDTO dist : expInputForReportDistDTOS) {
-                CompanyCO companyCO = organizationService.getCompanyById(dist.getCompanyId());
-                dist.setCompanyName(companyCO == null ? null : companyCO.getName());
-                DepartmentCO departmentCO = organizationService.getDepartmentById(dist.getDepartmentId());
-                dist.setDepartmentName(departmentCO == null ? null : departmentCO.getName());
-                if (dist.getSelectFlag().equals("Y")) {
-                    x++;
-                }
-                if (x == expInputForReportDistDTOS.size()) {
-                    line.setSelectFlag("Y");
-                } else if (x == 0) {
-                    line.setSelectFlag("N");
-                } else {
-                    line.setSelectFlag("P");
-                }
+        List<ExpInputForReportLineDTO> expInputForReportLineDTOS = new ArrayList<>();
+
+        //获取进项税业务单头信息
+        ExpInputTaxHeader expInputTaxHeader = expInputTaxHeaderService.selectById(headerId);
+        if (expInputTaxHeader != null) {
+            if ("PART_TRANSFER".equals(expInputTaxHeader.getTransferType()) || "ALL_TRANSFER".equals(expInputTaxHeader.getTransferType())){
+                expInputForReportLineDTOS = expInputTaxLineMapper.listExpInputTaxLine(wrapper, OrgInformationUtil.getCurrentSetOfBookId(), headerId, page);
+            }else{
+                expInputForReportLineDTOS = expInputTaxLineMapper.listExpInputTaxLineV2(wrapper, OrgInformationUtil.getCurrentSetOfBookId(), headerId, page);
             }
-            line.setExpInputForReportDistDTOS(expInputForReportDistDTOS);
+
+//            expInputForReportLineDTOS = expInputTaxLineMapper.listExpInputTaxLine(wrapper, OrgInformationUtil.getCurrentSetOfBookId(), headerId, page);
+            setDesc(expInputForReportLineDTOS);
+            for (ExpInputForReportLineDTO line : expInputForReportLineDTOS) {
+                List<ExpInputForReportDistDTO> expInputForReportDistDTOS = expInputTaxDistService.listDistByLineId(line.getExpReportLineId(), line.getId());
+                int x = 0;
+                for (ExpInputForReportDistDTO dist : expInputForReportDistDTOS) {
+                    CompanyCO companyCO = organizationService.getCompanyById(dist.getCompanyId());
+                    dist.setCompanyName(companyCO == null ? null : companyCO.getName());
+                    DepartmentCO departmentCO = organizationService.getDepartmentById(dist.getDepartmentId());
+                    dist.setDepartmentName(departmentCO == null ? null : departmentCO.getName());
+                    if (dist.getSelectFlag().equals("Y")) {
+                        x++;
+                    }
+                    if (x == expInputForReportDistDTOS.size()) {
+                        line.setSelectFlag("Y");
+                    } else if (x == 0) {
+                        line.setSelectFlag("N");
+                    } else {
+                        line.setSelectFlag("P");
+                    }
+                }
+                line.setExpInputForReportDistDTOS(expInputForReportDistDTOS);
+            }
         }
         page.setRecords(expInputForReportLineDTOS);
         return page;
@@ -290,8 +306,13 @@ public class ExpInputTaxLineService extends BaseService<ExpInputTaxLineMapper, E
         }
     }
 
-    public String checkSubmitLine(Long headerId){
-        List<ExpInputForReportLineDTO> lineDTOList = baseMapper.checklistExpInputTaxLine(headerId);
+    public String checkSubmitLine(ExpInputTaxHeader header){
+        List<ExpInputForReportLineDTO> lineDTOList = new ArrayList<>();
+        if (ParameterConstant.PART_TRANSFER.equals(header.getTransferType()) || ParameterConstant.ALL_TRANSFER.equals(header.getTransferType())) {
+            lineDTOList = baseMapper.checklistExpInputTaxLine(header.getId());
+        }else if(ParameterConstant.FOR_SALE.equals(header.getTransferType())){
+            lineDTOList = baseMapper.checklistExpInputTaxLineV2(header.getId());
+        }
         List<String> stringList = new ArrayList<>();
         if(!CollectionUtils.isEmpty(lineDTOList)){
             lineDTOList.stream().forEach( lineDTO ->{
