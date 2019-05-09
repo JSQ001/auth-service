@@ -311,49 +311,49 @@ public class FTPAttachmentService implements IAttachment {
         String rootPath = hcfBaseProperties.getStorage().getFtp().getDirectoryName();
         switch (attachmentType) {
             case INVOICE_IMAGES:
-                path = rootPath + "/" + "invoices/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/invoices" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case IMAGE_INVOICE_IMAGES:
-                path = rootPath + "/" + "invoice_images/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/invoice_images" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case FEEDBACK_IMAGES:
-                path = rootPath + "/" + "feedback" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/feedback" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case HEAD_PORTRAIT:
-                path = rootPath + "/" + "headPortrait" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/headPortrait" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case CARROUSEL_IMAGES:
-                path = rootPath + "/" + "carrousel/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/carrousel" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case PDF:
-                path = rootPath + "/" + "pdf/" + date + DigestUtils.md5Hex(filename + UUID.randomUUID().toString().replaceAll("-", "")) + suffix;
+                path = rootPath + "/pdf" + date + DigestUtils.md5Hex(filename + UUID.randomUUID().toString().replaceAll("-", "")) + suffix;
                 break;
             case REPAYMENT_IMAGES:
-                path = rootPath + "/" + "repayment/" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
+                path = rootPath + "/repayment" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
                 break;
             case COMPANY_LOGO:
                 path = rootPath + "/" + Constants.OSS_COMPANY_LOGO_FOLDER + DigestUtils.md5Hex(filename) + suffix;
                 break;
             case EXPENSE_ICON:
-                path = rootPath + "/" + "expenseIcon/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/expenseIcon" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case BUDGET_JOURNAL:
-                path = rootPath + "/" + "budget/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/budget" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case CONTRACT:
-                path = rootPath + "/" + "contract/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/contract" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case PREPAYMENT:
-                path = rootPath + "/" + "prepayment/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/prepayment" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case EXP_REPORT:
-                path = rootPath + "/" + "report/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/report" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case APPLICATION_ICON:
-                path = rootPath + "/" + "application" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/application" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case SKIN_PACKAGE:
-                path = rootPath + "/" + "skin" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/skin" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case EXP_ADJUST:
                 path = rootPath + "/exp_adjust" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
@@ -380,7 +380,7 @@ public class FTPAttachmentService implements IAttachment {
                 path = rootPath + "/supplier" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             case OTHER:
-                path = rootPath + "/" + "other/" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
+                path = rootPath + "/other" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
                 break;
             default:
                 throw new IllegalArgumentException("unrecognised attachment type");
