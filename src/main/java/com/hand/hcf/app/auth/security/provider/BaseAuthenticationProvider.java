@@ -40,9 +40,6 @@ public class BaseAuthenticationProvider extends AbstractUserDetailsAuthenticatio
     @Autowired
     private AppDetailService appDetailService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
     // ~ Methods
     // ========================================================================================================
     @Override
@@ -77,13 +74,6 @@ public class BaseAuthenticationProvider extends AbstractUserDetailsAuthenticatio
             String password = (String) authentication.getCredentials();
             Map details = (Map) authentication.getDetails();
             logger.info("details:{}" + JSONObject.toJSONString(details));
-
-            //sso登录时根据重定向获取的用户返回登录信息
-            if ((details.get("loginType") != null && details.get("loginType").toString().equals("sso"))) {
-                if (StringUtils.hasText(username)) {
-                    return userDetailsService.loadUserByUsername(username);
-                }
-            }
 
             if ((details.get("wxLogin") != null && details.get("wxLogin").toString().equals("Y")) || (details.get("loginType") != null && details.get("loginType").toString().equals("wx"))) {//微信端调用接口
                 if (details.get("suiteId") == null) {
