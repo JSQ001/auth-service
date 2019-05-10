@@ -170,7 +170,7 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
             Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
             // 如果是系统管理员, 得看这个代码是不是存在所以的租户
             selectOne = this.selectOne(this.getWrapper().eq("code", sysCode.getCode()));
-            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag()) && tenant.getSystemFlag()){
+            if (tenant != null && SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag()) && tenant.getSystemFlag()){
                 sysCode.setTenantId(-1L);
             }else{
                 isInit = true;

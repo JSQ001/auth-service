@@ -16,9 +16,12 @@ import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
+import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.externalApi.AccountingService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
+import com.hand.hcf.app.expense.common.utils.DimensionUtils;
+import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxDist;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
@@ -31,9 +34,11 @@ import com.hand.hcf.app.expense.type.domain.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import ma.glasnost.orika.MapperFacade;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -108,7 +113,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                 .like(documentNumber != null, "document_number", documentNumber)
                 .eq(companyId != null, "company_id", companyId)
                 .eq(departmentId != null, "department_id", departmentId)
-                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel);
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
+                .orderBy("document_number",false);
         if (!dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
             wrapper = wrapper.eq(applicantId == null, "applicant_id", OrgInformationUtil.getCurrentUserId());
         }
@@ -217,6 +223,119 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         }
     }
 
+    /**
+     * expInputTaxDistList转换为BudgetReserveCO
+     *
+     * @param expInputTaxDistList
+     * @return
+     */
+    private List<BudgetReserveCO> expenseInputTaxDistToBudgetReserveCO(ExpInputTaxHeader header,
+                                                                       List<ExpInputTaxDist> expInputTaxDistList) {
+        List<BudgetReserveCO> budgetReserveCOList = new ArrayList<>();
+        for (ExpInputTaxDist expenseInputTaxDist : expInputTaxDistList) {
+            BudgetReserveCO budgetReserveCO = new BudgetReserveCO();
+            budgetReserveCO.setCompanyId(expenseInputTaxDist.getCompanyId());
+            budgetReserveCO.setCompanyCode(organizationService.getCompanyById(expenseInputTaxDist.getCompanyId()).getCompanyCode());
+            budgetReserveCO.setBusinessType(ExpenseDocumentTypeEnum.EXP_INPUT_TAX.getCategory());
+            budgetReserveCO.setReserveFlag("U");
+            budgetReserveCO.setStatus("N");
+            budgetReserveCO.setManualFlag("N");
+            budgetReserveCO.setDocumentId(header.getId());
+            budgetReserveCO.setDocumentLineId(expenseInputTaxDist.getId());
+            budgetReserveCO.setCurrency(expenseInputTaxDist.getCurrencyCode());
+            budgetReserveCO.setExchangeRate(expenseInputTaxDist.getRate().doubleValue());
+            budgetReserveCO.setAmount(expenseInputTaxDist.getAmount());
+            budgetReserveCO.setFunctionalAmount(expenseInputTaxDist.getFunctionAmount());
+            budgetReserveCO.setQuantity(1);
+            budgetReserveCO.setUnitId(expenseInputTaxDist.getDepartmentId());
+            budgetReserveCO.setUnitCode(organizationService.getDepartmentById(expenseInputTaxDist.getDepartmentId()).getDepartmentCode());
+            budgetReserveCO.setEmployeeId(header.getApplicantId());
+            budgetReserveCO.setEmployeeCode(organizationService.getUserById(header.getApplicantId()).getEmployeeCode());
+            if (expenseInputTaxDist.getResponsibilityCenterId() != null) {
+                budgetReserveCO.setResponsibilityCenterId(expenseInputTaxDist.getResponsibilityCenterId());
+                budgetReserveCO.setResponsibilityCenterCode(
+                        organizationService.getResponsibilityCenterById(expenseInputTaxDist.getResponsibilityCenterId()).getResponsibilityCenterCode());
+            }
+            budgetReserveCO.setCreatedBy(expenseInputTaxDist.getCreatedBy());
+            DimensionUtils.setDimensionMessage(expenseInputTaxDist, budgetReserveCO, organizationService, true, true, false);
+            budgetReserveCO.setDocumentItemSourceType(ExpenseDocumentTypeEnum.EXP_INPUT_TAX.getCategory());
+            budgetReserveCO.setDocumentItemSourceId(expenseInputTaxDist.getExpenseTypeId());
+            // 期间信息
+            ZonedDateTime periodDate = ZonedDateTime.now();
+            String parameterValue = organizationService.getParameterValue(expenseInputTaxDist.getCompanyId(),
+                    expenseInputTaxDist.getSetOfBooksId(), ParameterConstant.BGT_OCCUPY_DATE);
+            if (ParameterConstant.EXPENSE_DATE.equals(parameterValue)) {
+                periodDate = header.getTransferDate();
+            }
+            PeriodCO period = organizationService.getPeriodsByIDAndTime(expenseInputTaxDist.getSetOfBooksId(), DateUtil.ZonedDateTimeToString(periodDate));
+            //会计期间名称
+            budgetReserveCO.setPeriodName(period.getPeriodName());
+            budgetReserveCO.setPeriodNumber(period.getPeriodNum());
+            budgetReserveCO.setPeriodQuarter(period.getQuarterNum());
+            budgetReserveCO.setPeriodYear(period.getPeriodYear());
+            budgetReserveCOList.add(budgetReserveCO);
+        }
+        return budgetReserveCOList;
+    }
+
+    private void rollBackBudget(Long id) {
+        List<ExpInputTaxLineDTO> lineDTOS = expInputTaxLineMapper.listLineById(id);
+        List<Long> lineIds = lineDTOS.stream().map(ExpInputTaxLine::getId).collect(Collectors.toList());
+        //分摊行
+        List<ExpInputTaxDist> distList = expInputTaxDistService.getExpInputTaxDistByLineIds(lineIds);
+        List<BudgetReverseRollbackCO> rollbackDTOList = distList.stream().map(e -> {
+            BudgetReverseRollbackCO rollbackDTO = new BudgetReverseRollbackCO();
+            rollbackDTO.setBusinessType(ExpenseDocumentTypeEnum.EXP_INPUT_TAX.getCategory());
+            rollbackDTO.setDocumentId(id);
+            rollbackDTO.setDocumentLineId(e.getId());
+            return rollbackDTO;
+        }).collect(Collectors.toList());
+        commonService.rollbackBudget(rollbackDTOList);
+    }
+
+    /**
+     * 调用预算模块预算校验接口
+     *
+     * @param header 进项税头信息
+     * @return
+     */
+    public BudgetCheckResultDTO checkBudget(ExpInputTaxHeader header,
+                                            Boolean ignoreWarningFlag) {
+
+        BudgetCheckMessageCO param = new BudgetCheckMessageCO();
+        List<BudgetReserveCO> budgetReserveDtoList;
+        List<ExpInputTaxLineDTO> lineDTOS = expInputTaxLineMapper.listLineById(header.getId());
+        List<Long> lineIds = lineDTOS.stream().map(ExpInputTaxLine::getId).collect(Collectors.toList());
+        //分摊行
+        List<ExpInputTaxDist> expInputTaxDistList = expInputTaxDistService.getExpInputTaxDistByLineIds(lineIds);
+        budgetReserveDtoList = expenseInputTaxDistToBudgetReserveCO(header, expInputTaxDistList);
+        param.setTenantId(header.getTenantId());
+        param.setSetOfBooksId(header.getSetOfBooksId());
+        param.setBudgetReserveDtoList(budgetReserveDtoList);
+        param.setIgnoreWarningFlag(BooleanUtils.isTrue(ignoreWarningFlag) ? "Y" : "N");
+        param.setIncludeReleaseFlag("Y");
+        return commonService.checkBudget(param);
+    }
+
+    public BudgetCheckResultDTO checkInputTaxBudget(ExpInputTaxHeader header){
+        //进项税转出占用预算
+        String budgetFlag = organizationService.getParameterValue(header.getCompanyId(),
+                header.getSetOfBooksId(), ParameterConstant.INPUT_TAX_TRANSFER_BUDGET);
+        BudgetCheckResultDTO budgetCheckResultDTO = null;
+        if (ParameterConstant.OCCUPY_CHECK.equals(budgetFlag)) {
+            //占用预算并校验
+            budgetCheckResultDTO = checkBudget(
+                    header, Boolean.TRUE);
+        } else if (ParameterConstant.CCCUPY_NO_CHECK.equals(budgetFlag)){
+            //todo 占用预算不校验,暂时没有这样的方法
+            budgetCheckResultDTO = checkBudget(
+                    header, Boolean.TRUE);
+        }else{
+            budgetCheckResultDTO = BudgetCheckResultDTO.ok();
+        }
+        return budgetCheckResultDTO;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateStatus(Long id, int status, String desc) {
         ExpInputTaxHeader header = expInputTaxHeaderMapper.selectById(id);
@@ -240,13 +359,23 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             } else {
                 docOid = UUID.fromString(header.getDocumentOid());
             }
-            String result = expInputTaxLineService.checkSubmitLine(id);
+            //校验可转出金额/可视同销售金额
+            String result = expInputTaxLineService.checkSubmitLine(header);
             if(!("").equals(result)){
                 throw new BizException(RespCode.EXPENSE_INPUT_TAX_TRANSFER_AMOUNT_NOT_ENOUGH,new Object[]{result});
             }
-            //尝试插入工作流历史
-            commonApprovalHistoryCO.setEntityOid(docOid);
-            commonApprovalHistoryCO.setOperationDetail("单据提交" + (desc != null ? ":" + desc : ""));
+            //校验预算
+            BudgetCheckResultDTO budgetCheckResultDTO = checkInputTaxBudget(header);
+            if (budgetCheckResultDTO.getPassFlag()) {
+                //尝试插入工作流历史
+                commonApprovalHistoryCO.setEntityOid(docOid);
+                commonApprovalHistoryCO.setOperationDetail("单据提交" + (desc != null ? ":" + desc : ""));
+            }else{
+                //校验失败，回滚
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return false;
+            }
+
         } else if (DocumentOperationEnum.APPROVAL_PASS.getId() == status) {
             header.setAuditDate(ZonedDateTime.now());
             if (!header.getStatus().equals(DocumentOperationEnum.APPROVAL.getId().toString())) {
@@ -259,6 +388,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             if (!header.getStatus().equals(DocumentOperationEnum.APPROVAL.getId().toString())) {
                 return false;
             }
+            //单据拒绝  如果有预算需要释放，
+            rollBackBudget(id);
             commonApprovalHistoryCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
             commonApprovalHistoryCO.setOperationDetail("单据拒绝" + (desc != null ? ":" + desc : ""));
         }
@@ -473,12 +604,12 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         List<ExpInputTaxLineDTO> lineDTOS = expInputTaxLineMapper.listLineById(inputTaxHeaderId);
         List<Long> lineIds = lineDTOS.stream().map(ExpInputTaxLine::getId).collect(Collectors.toList());
         //分摊行
-        List<ExpInputTaxDist> expenseReportDists = expInputTaxDistService.getExpInputTaxDistByHeaderId(lineIds);
+        List<ExpInputTaxDist> expenseInputTaxDists = expInputTaxDistService.getExpInputTaxDistByLineIds(lineIds);
 
         //转换
         ExpenseInputTaxHeaderCO expenseInputTaxHeader = inputTaxHeaderToInputTaxHeaderCO(inputTaxHeader, accountingDate);
         List<ExpenseInputTaxLineCO> expenseInputTaxLineCOS = inputTaxLineToInputTaxLineCO(lineDTOS, inputTaxHeader);
-        List<ExpenseInputTaxDistCO> expenseInputTaxDistCOS = inputTaxDistToInputTaxDistCO(expenseReportDists, inputTaxHeader);
+        List<ExpenseInputTaxDistCO> expenseInputTaxDistCOS = inputTaxDistToInputTaxDistCO(expenseInputTaxDists, inputTaxHeader);
 
         inputTaxCO.setExpenseInputTaxHeader(expenseInputTaxHeader);
         inputTaxCO.setExpenseReportLines(expenseInputTaxLineCOS);
@@ -548,9 +679,9 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
     }
 
     private List<ExpenseInputTaxDistCO> inputTaxDistToInputTaxDistCO(List<ExpInputTaxDist> inputTaxDists, ExpInputTaxHeader expInputTaxHeader) {
-        List<ExpenseInputTaxDistCO> expenseReportDists = new ArrayList<>();
+        List<ExpenseInputTaxDistCO> expenseInputTaxDists = new ArrayList<>();
         inputTaxDists.forEach(inputTaxDist -> {
-            ExpenseInputTaxDistCO expenseReportDist = ExpenseInputTaxDistCO.builder().companyId(inputTaxDist.getCompanyId())
+            ExpenseInputTaxDistCO expenseInputTaxDist = ExpenseInputTaxDistCO.builder().companyId(inputTaxDist.getCompanyId())
                     .currencyCode(inputTaxDist.getCurrencyCode())
                     .dimension1Id(inputTaxDist.getDimension1Id())
                     .dimension2Id(inputTaxDist.getDimension2Id())
@@ -586,8 +717,8 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                     .baseAmount(inputTaxDist.getBaseAmount())
                     .baseFunctionAmount(inputTaxDist.getBaseFunctionAmount())
                     .departmentId(inputTaxDist.getDepartmentId()).build();
-            expenseReportDists.add(expenseReportDist);
+            expenseInputTaxDists.add(expenseInputTaxDist);
         });
-        return expenseReportDists;
+        return expenseInputTaxDists;
     }
 }

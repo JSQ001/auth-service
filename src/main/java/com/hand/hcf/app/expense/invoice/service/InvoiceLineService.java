@@ -3,6 +3,7 @@ package com.hand.hcf.app.expense.invoice.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.OperationUtil;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
@@ -118,7 +119,7 @@ public class InvoiceLineService extends BaseService<InvoiceLineMapper,InvoiceLin
         BigDecimal taxRate = new BigDecimal(taxRateTemp);
         BigDecimal temp = new BigDecimal("100");
         BigDecimal rate = taxRate.divide(temp);
-        if (invoiceLine.getTaxAmount().compareTo(invoiceLine.getDetailAmount().multiply(rate)) == 1){
+        if (invoiceLine.getTaxAmount().compareTo(OperationUtil.safeMultiply(invoiceLine.getDetailAmount(),rate)) > 0){
             throw new BizException(RespCode.INVOICE_LINE_TAX_AMOUNT_NO_MORE_THAN_DETAIL_AMOUNT_MULTIPLIED_BY_TAX_RATE);
         }
     }

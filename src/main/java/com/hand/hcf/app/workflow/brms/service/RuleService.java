@@ -8,31 +8,25 @@ import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.brms.constant.MessageConstants;
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.brms.domain.*;
 import com.hand.hcf.app.workflow.brms.dto.*;
-import com.hand.hcf.app.workflow.brms.enums.FieldType;
-import com.hand.hcf.app.workflow.brms.enums.OperationEntityTypeEnum;
-import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
-import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
+import com.hand.hcf.app.workflow.brms.enums.*;
 import com.hand.hcf.app.workflow.brms.persistence.ApprovalFormApprovalModeMapper;
-import com.hand.hcf.app.workflow.brms.util.cache.CacheNames;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.dto.ApprovalFormDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalFormQO;
-import com.hand.hcf.app.workflow.dto.FormFieldDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalFormEnum;
-import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.dto.form.ApprovalFormDTO;
+import com.hand.hcf.app.workflow.dto.form.ApprovalFormQO;
+import com.hand.hcf.app.workflow.dto.form.FormFieldDTO;
+import com.hand.hcf.app.workflow.enums.form.ApprovalFormEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalFormPropertyService;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -1189,9 +1183,9 @@ public class RuleService {
                     || droolsRuleApprovalNodeDTO.getApplicantOid() == null
             ) {
                 //throw new ValidationException(new ValidationError("getNextApprovalNode", "CustFormValues is null"));
-                log.error("invoke getNextApprovalNode param error , code : {} ", ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR);
+                log.error("invoke getNextApprovalNode param error , code : {} ", MessageConstants.SYS_APPROVAL_CHAIN_GET_ERROR);
                 return RuleNextApproverResult.builder()
-                        .returnCode(ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR)
+                        .returnCode(MessageConstants.SYS_APPROVAL_CHAIN_GET_ERROR)
                         .returnMsg("param is null ")
                         .build();
             }
@@ -1219,9 +1213,9 @@ public class RuleService {
                 return result;
             }
         } catch (Exception e) {
-            log.error("invoke getNextApprovalNode error , code : {} , msg : {}, {} ", ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR, e.getMessage(), e);
+            log.error("invoke getNextApprovalNode error , code : {} , msg : {}, {} ", MessageConstants.SYS_APPROVAL_CHAIN_GET_ERROR, e.getMessage(), e);
             return RuleNextApproverResult.builder()
-                    .returnCode(ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR)
+                    .returnCode(MessageConstants.SYS_APPROVAL_CHAIN_GET_ERROR)
                     .returnMsg(e.getMessage())
                     .build();
         }

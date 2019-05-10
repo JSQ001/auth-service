@@ -169,4 +169,20 @@ public class InvoiceLineExpenceService extends BaseService<InvoiceLineExpenceMap
             return new ArrayList<InvoiceLineExpence>();
         }
     }
+
+    /**
+     * 根据费用头ID获取发票费用关联关系
+     * @param reportHeaderId 报账单头ID
+     * @return
+     */
+    public List<InvoiceLineExpence> getInvoiceLineExpenseByReportHeaderId(Long reportHeaderId){
+        Wrapper wrapper = new EntityWrapper<InvoiceLineExpence>()
+                .eq("exp_expense_head_id",reportHeaderId);
+        List<InvoiceLineExpence> list = invoiceLineExpenceMapper.selectList(wrapper);
+        if(list.size() > 0){
+            return list;
+        }else{
+            return new ArrayList<InvoiceLineExpence>();
+        }
+    }
 }

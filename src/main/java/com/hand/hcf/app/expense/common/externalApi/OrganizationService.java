@@ -316,6 +316,9 @@ public class OrganizationService {
         return organizationClient.listEnabledSysCodeValueByCodeOid(codeOid);
     }
 
+    public Map<String, String> mapSysCodeValueByCode(String sysCode){
+        return organizationClient.mapAllSysCodeValueByCode(sysCode);
+    }
     /**
      * 根据用户id查询其组织架构Id信息
      * @param userId

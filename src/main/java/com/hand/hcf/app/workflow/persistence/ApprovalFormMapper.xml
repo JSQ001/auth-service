@@ -3,7 +3,7 @@
 <mapper namespace="com.hand.hcf.app.workflow.persistence.ApprovalFormMapper" >
 
 
-    <select id="listDTOByQO" parameterType="com.hand.hcf.app.workflow.dto.ApprovalFormQO" resultType="com.hand.hcf.app.workflow.dto.ApprovalFormDTO">
+    <select id="listDTOByQO" parameterType="com.hand.hcf.app.workflow.dto.form.ApprovalFormQO" resultType="com.hand.hcf.app.workflow.dto.form.ApprovalFormDTO">
         SELECT
         a.*
         FROM

@@ -9,6 +9,7 @@ import com.hand.hcf.app.common.co.SetOfBooksInfoCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.OperationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.book.domain.ExpenseBook;
@@ -25,6 +26,7 @@ import com.hand.hcf.app.expense.invoice.service.InvoiceHeadService;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineDistService;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineExpenceService;
 import com.hand.hcf.app.expense.invoice.service.InvoiceLineService;
+import com.hand.hcf.app.expense.report.service.ExpenseReportLineService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.expense.type.domain.ExpenseDocumentField;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;
@@ -36,12 +38,14 @@ import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,6 +86,9 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
 
     @Autowired
     private ExpenseReportTypeService expenseReportTypeService;
+
+    @Autowired
+    private ExpenseReportLineService expenseReportLineService;
 
     /**
      *  新建费用（我的账本）
@@ -481,4 +488,69 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
         return expenseBook;
     }
 
+    /**
+     * 根据发票获取账本信息，并持久化相关信息
+     * @param invoiceDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public List<ExpenseBook> getExpenseBookByInvoice(InvoiceDTO invoiceDTO){
+        InvoiceHead invoiceHead = new InvoiceHead();
+        BeanUtils.copyProperties(invoiceDTO.getInvoiceHead(),invoiceHead);
+        return invoiceDTO.getInvoiceLineList().stream().map(invoiceLine -> {
+            ExpenseBook expenseBook = new ExpenseBook();
+            expenseBook.setExpenseTypeId(invoiceLine.getExpenseTypeId());
+            expenseBook.setTenantId(invoiceDTO.getInvoiceHead().getTenantId());
+            expenseBook.setSetOfBooksId(invoiceDTO.getInvoiceHead().getSetOfBooksId());
+            expenseBook.setExpenseDate(ZonedDateTime.now());
+            expenseBook.setCurrencyCode(invoiceLine.getCurrencyCode());
+            expenseBook.setExchangeRate(invoiceLine.getExchangeRate());
+            expenseBook.setAmount(invoiceLine.getDetailAmount());
+            expenseBook.setFunctionalAmount(OperationUtil.safeMultiply(invoiceLine.getDetailAmount(),invoiceLine.getExchangeRate()));
+            expenseBook.setQuantity(invoiceLine.getNum() == null ? null : Integer.valueOf(invoiceLine.getNum().toString()));
+            expenseBook.setPrice(invoiceLine.getUnitPrice());
+            expenseBook.setPriceUnit(invoiceLine.getUnit());
+            List<ExpenseFieldDTO> expenseFieldDTOS = expenseTypeService.queryFields(invoiceLine.getExpenseTypeId());
+            expenseBook.setFields(expenseFieldDTOS);
+            ArrayList<InvoiceLine> invoiceLines = new ArrayList<>();
+            invoiceLines.add(invoiceLine);
+            invoiceHead.setInvoiceLineList(invoiceLines);
+            ArrayList<InvoiceHead> invoiceHeads = new ArrayList<>();
+            invoiceHeads.add(invoiceHead);
+            expenseBook.setInvoiceHead(invoiceHeads);
+            insertExpenseBook(expenseBook);
+            return expenseBook;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 删除账本信息
+     * @param expenseBookId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteExpenseBook(Long expenseBookId) {
+        if(expenseReportLineService.checkExpenseBookCreatedExpense(expenseBookId)){
+            throw new BizException(RespCode.EXPENSE_REPORT_BOOK_USED);
+        }
+        List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService.selectList(new EntityWrapper<InvoiceLineExpence>()
+                .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
+                .eq("expense_book_id", expenseBookId));
+        List<InvoiceLineExpence> collect = invoiceLineExpences.stream().filter(invoiceLineExpence -> {
+            return "BY_HAND".equals(invoiceLineExpence.getExpenseBookInvoiceMethod());
+        }).collect(Collectors.toList());
+        // 删除手工创建的发票
+        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(collect)){
+            collect.stream().forEach(invoiceLineExpence -> {
+                invoiceLineService.deleteInvoiceLineByInvoiceDistId(invoiceLineExpence.getInvoiceDistId());
+            });
+        }
+        // 解除与账本关联
+        invoiceLineExpenceService.delete(
+                new EntityWrapper<InvoiceLineExpence>()
+                        .eq("tenant_id", LoginInformationUtil.getCurrentTenantId())
+                        .eq("expense_book_id", expenseBookId));
+        deleteById(expenseBookId);
+        return true;
+    }
 }

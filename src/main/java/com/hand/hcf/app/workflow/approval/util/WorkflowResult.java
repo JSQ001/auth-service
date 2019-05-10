@@ -17,4 +17,7 @@ public class WorkflowResult {
 
     /** 下一个动作/动作集合 */
     private Object next;
+
+    /** 执行返回的信息 */
+    private String message;
 }

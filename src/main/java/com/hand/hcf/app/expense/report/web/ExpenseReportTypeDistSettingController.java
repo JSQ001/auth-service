@@ -9,11 +9,13 @@ import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDistSetting;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDistSettingRequestDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeDistSettingService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.List;
  * @author: xue.han@hand-china.com
  * @date: 2019/3/3
  */
+@Api(tags = "报账单类型分摊设置")
 @RestController
 @RequestMapping("/api/expense/report/type/dist/setting")
 public class ExpenseReportTypeDistSettingController {
@@ -119,7 +122,8 @@ public class ExpenseReportTypeDistSettingController {
     }
      */
     @PostMapping
-    public ResponseEntity<ExpenseReportTypeDistSetting> createExpenseReportTypeDistSetting(@RequestBody ExpenseReportTypeDistSettingRequestDTO expenseReportTypeDistSettingRequestDTO){
+    @ApiOperation(value = "报账单类型分摊设置单个新增", notes = "报账单类型分摊设置单个新增 开发：xue.han")
+    public ResponseEntity<ExpenseReportTypeDistSetting> createExpenseReportTypeDistSetting(@ApiParam(value = "报账单类型分摊设置") @RequestBody ExpenseReportTypeDistSettingRequestDTO expenseReportTypeDistSettingRequestDTO){
         return ResponseEntity.ok(expenseReportTypeDistSettingService.createExpenseReportTypeDistSetting(expenseReportTypeDistSettingRequestDTO));
     }
 
@@ -215,7 +219,8 @@ public class ExpenseReportTypeDistSettingController {
     }
      */
     @PutMapping
-    public ResponseEntity<ExpenseReportTypeDistSetting> updateExpenseReportTypeDistSetting(@RequestBody ExpenseReportTypeDistSettingRequestDTO expenseReportTypeDistSettingRequestDTO){
+    @ApiOperation(value = "报账单类型分摊设置单个修改", notes = "报账单类型分摊设置单个修改 开发：xue.han")
+    public ResponseEntity<ExpenseReportTypeDistSetting> updateExpenseReportTypeDistSetting(@ApiParam(value = "报账单类型分摊设置") @RequestBody ExpenseReportTypeDistSettingRequestDTO expenseReportTypeDistSettingRequestDTO){
         return ResponseEntity.ok(expenseReportTypeDistSettingService.updateExpenseReportTypeDistSetting(expenseReportTypeDistSettingRequestDTO));
     }
 
@@ -275,6 +280,7 @@ public class ExpenseReportTypeDistSettingController {
     }
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "根据报账单类型id查询单个 报账单类型分摊设置", notes = "根据报账单类型id查询单个 报账单类型分摊设置 开发：xue.han")
     public ResponseEntity<ExpenseReportTypeDistSettingRequestDTO> getExpenseReportTypeDistSettingById(@PathVariable Long id){
         return ResponseEntity.ok(expenseReportTypeDistSettingService.getExpenseReportTypeDistSettingById(id));
     }
@@ -328,6 +334,11 @@ public class ExpenseReportTypeDistSettingController {
     ]
      */
     @GetMapping("/query/company/by/company/dist/range")
+    @ApiOperation(value = "根据 “公司分摊范围” 分页查询公司 （自定义范围弹框和选择公司默认值时通用）", notes = "根据 “公司分摊范围” 分页查询公司 （自定义范围弹框和选择公司默认值时通用） 开发：xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CompanyCO>> queryCompanyByCompanyDistRange (
             @RequestParam(value = "companyDistRange") String companyDistRange,
             @RequestParam(value = "companyCode",required = false) String companyCode,
@@ -380,13 +391,18 @@ public class ExpenseReportTypeDistSettingController {
     ]
      */
     @GetMapping("/query/department/by/department/dist/range")
+    @ApiOperation(value = "根据 “部门分摊范围” 分页查询部门 （自定义范围弹框和选择部门默认值时通用）", notes = "根据 “部门分摊范围” 分页查询部门 （自定义范围弹框和选择部门默认值时通用） 开发：xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<DepartmentCO>> queryDepartmentByDepartmentDistRange (
-            @RequestParam(value = "departmentDistRange") String departmentDistRange,
-            @RequestParam(value = "departmentCode",required = false) String departmentCode,
-            @RequestParam(value = "departmentName",required = false) String departmentName,
-            @RequestParam(value = "departmentCodeFrom",required = false) String departmentCodeFrom,
-            @RequestParam(value = "departmentCodeTo",required = false) String departmentCodeTo,
-            Pageable pageable) throws URISyntaxException{
+            @ApiParam(value = "部门分摊范围") @RequestParam(value = "departmentDistRange") String departmentDistRange,
+            @ApiParam(value = "部门编码") @RequestParam(value = "departmentCode",required = false) String departmentCode,
+            @ApiParam(value = "部门名称") @RequestParam(value = "departmentName",required = false) String departmentName,
+            @ApiParam(value = "部门编码从") @RequestParam(value = "departmentCodeFrom",required = false) String departmentCodeFrom,
+            @ApiParam(value = "部门编码到") @RequestParam(value = "departmentCodeTo",required = false) String departmentCodeTo,
+            @ApiIgnore Pageable pageable) throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
         Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByDepartmentDistRange(departmentDistRange,departmentCode,departmentName,departmentCodeFrom,departmentCodeTo,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
@@ -439,12 +455,17 @@ public class ExpenseReportTypeDistSettingController {
     ]
      */
     @GetMapping("/query/company/by/expenseTypeId")
+    @ApiOperation(value = "根据单据类型获取公司范围", notes = "根据单据类型获取公司范围 开发：xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CompanyCO>> queryCompanyByExpenseTypeId (
-            @RequestParam(value = "expenseTypeId") Long expenseTypeId,
-            @RequestParam(value = "companyId",required = false) Long companyId,
-            @RequestParam(value = "companyCode",required = false) String companyCode,
-            @RequestParam(value = "companyName",required = false) String companyName,
-            Pageable pageable){
+            @ApiParam(value = "费用类型单ID")  @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @ApiParam(value = "公司ID")  @RequestParam(value = "companyId",required = false) Long companyId,
+            @ApiParam(value = "公司编码") @RequestParam(value = "companyCode",required = false) String companyCode,
+            @ApiParam(value = "公司名称") @RequestParam(value = "companyName",required = false) String companyName,
+            @ApiIgnore Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<CompanyCO> result = expenseReportTypeDistSettingService.queryCompanyByExpenseTypeId(expenseTypeId, companyId, companyCode,companyName,page,null);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(result);
@@ -486,13 +507,18 @@ public class ExpenseReportTypeDistSettingController {
     ]
      */
     @GetMapping("/query/department/by/expenseTypeId")
+    @ApiOperation(value = "根据单据类型查询分摊行部门范围", notes = "根据单据类型查询分摊行部门范围 开发：xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<DepartmentCO>> queryDepartmentByDepartmentDistRange (
-            @RequestParam(value = "expenseTypeId") Long expenseTypeId,
-            @RequestParam(value = "companyId",required = false) Long companyId,
-            @RequestParam(value = "departmentId",required = false) Long departmentId,
-            @RequestParam(value = "departmentCode",required = false) String departmentCode,
-            @RequestParam(value = "departmentName",required = false) String departmentName,
-            Pageable pageable){
+            @ApiParam(value = "费用类型单ID") @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @ApiParam(value = "公司ID") @RequestParam(value = "companyId",required = false) Long companyId,
+            @ApiParam(value = "部门ID") @RequestParam(value = "departmentId",required = false) Long departmentId,
+            @ApiParam(value = "部门编码") @RequestParam(value = "departmentCode",required = false) String departmentCode,
+            @ApiParam(value = "部门名称") @RequestParam(value = "departmentName",required = false) String departmentName,
+            @ApiIgnore Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<DepartmentCO> result = expenseReportTypeDistSettingService.queryDepartmentByExpenseTypeId(
                 expenseTypeId, companyId, departmentId,departmentCode,departmentName,page,null);
@@ -536,13 +562,18 @@ public class ExpenseReportTypeDistSettingController {
     ]
      */
     @GetMapping("/query/respCenter/by/expenseTypeId")
+    @ApiOperation(value = "根据单据类型获取责任中心", notes = "根据单据类型获取责任中心 开发：xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<ResponsibilityCenterCO>> queryResponsibilityCenterByExpenseTypeId (
-            @RequestParam(value = "expenseTypeId") Long expenseTypeId,
-            @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
-            @RequestParam(value = "responsibilityCenterCodeName",required = false) String responsibilityCenterCodeName,
-            @RequestParam(value = "companyId",required = false) Long companyId,
-            @RequestParam(value = "departmentId",required = false) Long departmentId,
-            Pageable pageable){
+            @ApiParam(value = "费用类型单ID") @RequestParam(value = "expenseTypeId") Long expenseTypeId,
+            @ApiParam(value = "责任中心编码") @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
+            @ApiParam(value = "责任中心名称") @RequestParam(value = "responsibilityCenterCodeName",required = false) String responsibilityCenterCodeName,
+            @ApiParam(value = "公司ID") @RequestParam(value = "companyId",required = false) Long companyId,
+            @ApiParam(value = "部门ID") @RequestParam(value = "departmentId",required = false) Long departmentId,
+            @ApiIgnore Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         Page<ResponsibilityCenterCO> result = expenseReportTypeDistSettingService.queryResponsibilityCenterByExpenseTypeId(expenseTypeId,
                 companyId,

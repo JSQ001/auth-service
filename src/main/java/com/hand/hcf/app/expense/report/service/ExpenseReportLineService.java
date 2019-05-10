@@ -31,6 +31,7 @@ import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -806,6 +807,21 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
     }
 
     /**
+     * 根据账本信息自动生成费用行
+     * @param expenseReportHeader
+     * @param expenseBooks
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveExpenseReportLineFromBook(ExpenseReportHeader expenseReportHeader, List<ExpenseBook> expenseBooks){
+        List<ExpenseReportLineDTO> collect = expenseBooks.stream().map(expenseBook -> {
+            return getExpenseReportLineFromBook(expenseBook, expenseReportHeader);
+        }).collect(Collectors.toList());
+        collect.stream().forEach(e -> {
+            saveExpenseReportLine(e,false);
+        });
+    }
+
+    /**
      * 根据账本信息生成
      * @param expenseBook
      * @param expenseReportHeader
@@ -980,5 +996,17 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             }
         });
         return expenseReportDist;
+    }
+
+    /**
+     * 校验账本是否使用
+     * @param expenseBooksId
+     * @return
+     */
+    public Boolean checkExpenseBookCreatedExpense(Long expenseBooksId){
+        int i = selectCount(new EntityWrapper<ExpenseReportLine>()
+                .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
+                .eq("expense_book_id", expenseBooksId));
+        return i > 0;
     }
 }

@@ -1,8 +1,10 @@
 package com.hand.hcf.app.workflow.approval.service;
 
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
@@ -41,6 +43,48 @@ public class WorkflowRepeatApproveService {
 
     @Autowired
     private BaseClient baseClient;
+
+    @Autowired
+    private WorkflowActionService workflowActionService;
+
+    /**
+     * 根据规则获取自动审批动作并返回
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/05
+     *
+     * @param rule 规则
+     * @param taskList 任务列表
+     * @return 审批动作列表
+     */
+    public List<WorkflowAutoApproveAction> getAutoActionsByRule(WorkflowRule rule, List<WorkflowTask> taskList) {
+        CheckUtil.notNull(rule, "rule null");
+        CheckUtil.notNull(taskList, "taskList null");
+
+        // 获取当前审批中的任务
+        List<WorkflowTask> currentTaskList = new ArrayList<WorkflowTask>();
+        for (WorkflowTask task : taskList) {
+            if (WorkflowTask.APPROVAL_STATUS_APPROVAL.equals(task.getApprovalStatus())) {
+                currentTaskList.add(task);
+            }
+        }
+
+        List<WorkflowApproval> approvalList = null;
+        // 获取重复上次操作的审批
+        if (WorkflowRule.REPEAT_SKIP.equals(rule.getRepeatRule())) {
+            approvalList = getRepeatApprovals(currentTaskList);
+        }
+
+        if (CollectionUtils.isEmpty(approvalList)) {
+            return new ArrayList<WorkflowAutoApproveAction>();
+        }
+
+        // 创建自动审批动作
+        List<WorkflowAutoApproveAction> actionList = WorkflowAutoApproveAction
+                .createActions(workflowActionService, approvalList);
+
+        return actionList;
+    }
 
     /**
      * 返回要重复审批的操作

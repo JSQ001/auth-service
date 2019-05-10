@@ -16,7 +16,7 @@ SELECT
 	t.DEPARTMENT_ID,
 	t.RESPONSIBILITY_CENTER_ID,
 	t.AMOUNT BASE_AMOUNT,
-	t.FUNCTION_AMOUNT BASE_FUNCTION_AMOUNT,
+	t.FUNCTION_AMOUNT distFunctionAmount,
 	t.AMOUNT distAmount,
 	t.TAX_DIST_AMOUNT distTaxAmount,
 	t.tax_dist_function_amount distTaxFunctionAmount,
@@ -64,5 +64,16 @@ WHERE
 	coalesce(SUM(t.AMOUNT),0) amount,
 	coalesce(SUM(t.FUNCTION_AMOUNT),0) functionAmount
 	 from EXP_INPUT_TAX_DIST t where t.input_tax_line_id= #{inputTaxLineId}
+	</select>
+
+	<select id="getExpInputTaxDistByLineIds" resultType="com.hand.hcf.app.expense.input.domain.ExpInputTaxDist">
+		select
+		t.*,d.expense_type_id expenseTypeId
+		from EXP_INPUT_TAX_DIST t,exp_report_dist d
+		where
+		t.exp_report_dist_id = d.id
+		<if test="ew!=null">
+			${ew.sqlSegment}
+		</if>
 	</select>
 </mapper>

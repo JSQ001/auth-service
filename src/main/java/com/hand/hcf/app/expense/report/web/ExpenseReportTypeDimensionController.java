@@ -6,11 +6,13 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeDimension;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeDimensionService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
  * @author: xue.han@hand-china.com
  * @date: 2019/3/1
  */
+@Api(tags = "报账单类型关联维度")
 @RestController
 @RequestMapping("/api/expense/report/type/dimension")
 public class ExpenseReportTypeDimensionController {
@@ -82,7 +85,8 @@ public class ExpenseReportTypeDimensionController {
     }
      */
     @PostMapping
-    public ResponseEntity<ExpenseReportTypeDimension> createExpenseReportTypeDimension(@RequestBody ExpenseReportTypeDimension expenseReportTypeDimension){
+    @ApiOperation(value = "报账单类型单个新增维度", notes = "报账单类型单个新增维度 开发:xue.han")
+    public ResponseEntity<ExpenseReportTypeDimension> createExpenseReportTypeDimension(@ApiParam(value = "报账单类型关联维度") @RequestBody ExpenseReportTypeDimension expenseReportTypeDimension){
         return ResponseEntity.ok(expenseReportTypeDimensionService.createExpenseReportTypeDimension(expenseReportTypeDimension));
     }
 
@@ -143,7 +147,8 @@ public class ExpenseReportTypeDimensionController {
     }
      */
     @PutMapping
-    public ResponseEntity<ExpenseReportTypeDimension> updateExpenseReportTypeDimension(@RequestBody ExpenseReportTypeDimension expenseReportTypeDimension){
+    @ApiOperation(value = "报账单类型单个修改维度", notes = "报账单类型单个修改维度 开发:xue.han")
+    public ResponseEntity<ExpenseReportTypeDimension> updateExpenseReportTypeDimension(@ApiParam(value = "报账单类型关联维度") @RequestBody ExpenseReportTypeDimension expenseReportTypeDimension){
         return ResponseEntity.ok(expenseReportTypeDimensionService.updateExpenseReportTypeDimension(expenseReportTypeDimension));
     }
 
@@ -160,6 +165,7 @@ public class ExpenseReportTypeDimensionController {
         /api/expense/report/type/dimension/1102404301313626113
      */
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "报账单类型单个删除维度", notes = "报账单类型单个删除维度 开发:xue.han")
     public ResponseEntity deleteExpenseReportTypeDimension(@PathVariable Long id){
         expenseReportTypeDimensionService.deleteExpenseReportTypeDimension(id);
         return ResponseEntity.ok().build();
@@ -211,9 +217,14 @@ public class ExpenseReportTypeDimensionController {
     ]
      */
     @GetMapping("/query/by/cond")
+    @ApiOperation(value = "分页查询 某个报账单类型下分配的维度", notes = "分页查询 某个报账单类型下分配的维度 开发:xue.han")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<ExpenseReportTypeDimension>> getExpenseReportTypeDimensionByCond(
-            @RequestParam(value = "reportTypeId") Long reportTypeId,
-            Pageable pageable)throws URISyntaxException{
+            @ApiParam(value = "报账单类型ID") @RequestParam(value = "reportTypeId") Long reportTypeId,
+            @ApiIgnore Pageable pageable)throws URISyntaxException{
         Page page = PageUtil.getPage(pageable);
         Page<ExpenseReportTypeDimension> result = expenseReportTypeDimensionService.getExpenseReportTypeDimensionByCond(reportTypeId,page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
@@ -258,8 +269,9 @@ public class ExpenseReportTypeDimensionController {
     ]
      */
     @GetMapping("/query/not/assign/dimension")
+    @ApiOperation(value = "根据报账单类型ID->reportTypeId 查询出其尚未分配的维度", notes = "根据报账单类型ID->reportTypeId 查询出其尚未分配的维度 开发:xue.han")
     public ResponseEntity<List<DimensionCO>> getNotAssignDimensionForExpenseReportType(
-            @RequestParam("reportTypeId") Long reportTypeId
+            @ApiParam(value = "报账单类型ID") @RequestParam("reportTypeId") Long reportTypeId
     ) throws URISyntaxException {
         List<DimensionCO> result = expenseReportTypeDimensionService.getNotAssignDimensionForExpenseReportType(reportTypeId);
         return ResponseEntity.ok(result);

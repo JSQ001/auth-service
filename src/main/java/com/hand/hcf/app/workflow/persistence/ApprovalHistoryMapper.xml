@@ -4,7 +4,7 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.workflow.persistence.ApprovalHistoryMapper">
 
-    <select id="checkAuditNotice" resultType="com.hand.hcf.app.workflow.dto.CheckAuditNoticeDTO">
+    <select id="checkAuditNotice" resultType="com.hand.hcf.app.workflow.dto.history.CheckAuditNoticeDTO">
         SELECT entity_oid,MAX(id) as id from sys_approval_history WHERE entity_oid IN
         <foreach collection="entityOids" item="item" open="(" separator="," close=")">
             #{item}

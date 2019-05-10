@@ -6,23 +6,23 @@ import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApproverDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleNextApproverResult;
+import com.hand.hcf.app.workflow.brms.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.constant.WorkflowConstants;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
+import com.hand.hcf.app.workflow.constant.ValueConstants;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.AssembleBrmsParamsRespDTO;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
+import com.hand.hcf.app.workflow.dto.form.FormValueDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalPathModeEnum;
-import com.hand.hcf.app.workflow.enums.BusinessColumnMessageKey;
+import com.hand.hcf.app.workflow.enums.form.BusinessColumnMessageKey;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.workflow.util.StringUtil;
 import com.hand.hcf.app.core.exception.BizException;
 import org.apache.commons.collections.CollectionUtils;
@@ -79,7 +79,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
         } else if (approvalMode == ApprovalMode.USER_PICK.getId()) {//选人审批
             if (StringUtils.isNotBlank(approvalOids)) {
-                List<String> userPick = new ArrayList<>(Arrays.asList(approvalOids.split(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT)));
+                List<String> userPick = new ArrayList<>(Arrays.asList(approvalOids.split(ValueConstants.WORKFLOW_APPROVAL_SPLIT)));
                 result = userPick;
             }
         }
@@ -92,7 +92,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
 
         if (CollectionUtils.isEmpty(result)) {
             log.info("====userOid:" + userOid + "  " + " entityOid:" + entityOid + "=======workflowRulesSettingRoleList.empty");
-            throw new BizException(ExceptionCode.SYS_APPROVAL_CHAIN_IS_NULL);
+            throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHAIN_IS_NULL);
         } else {
 
             /**
@@ -125,7 +125,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                         UUID managerOid = baseClient.getLastDepartmentManagerByApplicantOid(userOid);
                         if (managerOid == null) {
                             log.info("SELFAPPROVAL ,replace approver error ,applicatOid : {} ", applicantOidStirng);
-                            throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                            throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                         }
                         result.set(result.indexOf(applicantOidStirng), managerOid.toString());
                         break;
@@ -180,14 +180,14 @@ public class DefaultWorkflowIntegrationServiceImpl {
         droolsRuleApprovalNodeDTO.setRuleApprovalNodeDTO(ruleApprovalNodeDTO);
 
         Map<String, Set<UUID>> ruleApproverMap = getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(), droolsRuleApprovalNodeDTO.getFormValues(), droolsRuleApprovalNodeDTO.getApplicantOid(),  droolsRuleApprovalNodeDTO);
-        Set<UUID> countersignApprover = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(WorkflowConstants.COUNTERSIGN_APPROVER))));
-        Set<UUID> approver = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(WorkflowConstants.APPROVER))));
+        Set<UUID> countersignApprover = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(ValueConstants.COUNTERSIGN_APPROVER))));
+        Set<UUID> approver = new HashSet<>(buildApproverByRule(ruleApprovalNodeDTO, ruleApproverMap, droolsRuleApprovalNodeDTO.getApplicantOid(), new ArrayList<>(ruleApproverMap.get(ValueConstants.APPROVER))));
         //没有找到审批人逻辑处理
         if (RuleConstants.RULE_NULLABLE_THROW.equals(ruleApprovalNodeDTO.getNullableRule()) ) {
-            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER);
+            throw new BizException(LocaleMessageConstants.SYS_APPROVAL_NO_APPROVER);
         }
-        ruleApproverMap.put(WorkflowConstants.COUNTERSIGN_APPROVER, countersignApprover);
-        ruleApproverMap.put(WorkflowConstants.APPROVER, approver);
+        ruleApproverMap.put(ValueConstants.COUNTERSIGN_APPROVER, countersignApprover);
+        ruleApproverMap.put(ValueConstants.APPROVER, approver);
         log.info("DefaultWorkflowIntegrationServiceImpl->getRuleApproverUserOids->ruleApproverMap:" + JSONObject.toJSONString(ruleApproverMap));
         ruleApprovalNodeDTO.setRuleApproverMap(ruleApproverMap);
     }
@@ -211,7 +211,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     UUID managerOid = baseClient.getLastDepartmentManagerByApplicantOid(applicantOid, Boolean.FALSE);
                     if (managerOid == null) {
                         log.info("SELFAPPROVAL ,replace approver error ,applicantOid : {} ", applicantOid);
-                        throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                        throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                     }
                     approvers.set(approvers.indexOf(applicantOid), managerOid);
                     log.info("SELFAPPROVAL ,replace approver from {} to {} ", applicantOid, managerOid);
@@ -220,7 +220,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     UUID peerManagerOid = baseClient.getLastDepartmentManagerByApplicantOid(applicantOid, Boolean.TRUE);
                     if (peerManagerOid == null) {
                         log.info("SELFAPPROVAL ,replace approver error ,applicantOid : {} ", applicantOid);
-                        throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                        throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
                     }
                     approvers.set(approvers.indexOf(applicantOid), peerManagerOid);
                     log.info("SELFAPPROVAL ,replace approver from {} to {} ", applicantOid, peerManagerOid);
@@ -229,7 +229,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                     //TODO
                     break;
                 default:
-                    throw new BizException(ExceptionCode.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
+                    throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHANGE_APPLICANT_ERROR);
             }
         }
         if (approvers != null) {
@@ -251,7 +251,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
         List<DepartmentPositionCO> departmentPositions = baseClient.getDepartmentPositionByUserAndDepartment(departmentId, applicantOid);
         if (CollectionUtils.isNotEmpty(departmentPositions)) {
             for (DepartmentPositionCO departmentPosition : departmentPositions) {
-                departmentRoleString.append(departmentPosition.getPositionCode()).append(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT);
+                departmentRoleString.append(departmentPosition.getPositionCode()).append(ValueConstants.WORKFLOW_APPROVAL_SPLIT);
             }
         }
         return departmentRoleString.length() > 0 ? departmentRoleString.substring(0, departmentRoleString.length() - 1) : "";
@@ -303,7 +303,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
         //获取实体对应的分摊的部门 及成本中心
         List<UUID> apportionmentDepartmentOids = null;
         if (entityData != null) {
-            apportionmentDepartmentOids = (List<UUID>) entityData.get(WorkflowConstants.APPORTIONMENT_DEPARTMENTS);
+            apportionmentDepartmentOids = (List<UUID>) entityData.get(ValueConstants.APPORTIONMENT_DEPARTMENTS);
         }
         // 结束
         if (ruleApproverDTOs != null && ruleApproverDTOs.size() > 0) {
@@ -395,8 +395,8 @@ public class DefaultWorkflowIntegrationServiceImpl {
         if (CollectionUtils.isNotEmpty(apportionApprovalUserOids)) {
             apportionApprovalUserOids.remove(null);
         }
-        map.get(WorkflowConstants.COUNTERSIGN_APPROVER).addAll(approverUserOids);  //会签审批人
-        map.get(WorkflowConstants.APPROVER).addAll(apportionApprovalUserOids); //不受会签规则影响
+        map.get(ValueConstants.COUNTERSIGN_APPROVER).addAll(approverUserOids);  //会签审批人
+        map.get(ValueConstants.APPROVER).addAll(apportionApprovalUserOids); //不受会签规则影响
     }
 
 
@@ -526,7 +526,7 @@ public class DefaultWorkflowIntegrationServiceImpl {
                 .build();
 
         if (ruleNextApproverResult != null && ruleNextApproverResult.getDroolsApprovalNode() != null && RuleConstants.RULE_NULLABLE_THROW.equals(ruleNextApproverResult.getDroolsApprovalNode().getNullableRule()) && CollectionUtils.isEmpty(ruleNextApproverResult.getDroolsApprovalNode().getRuleApprovers())) {
-            throw new BizException(ExceptionCode.SYS_APPROVAL_NO_APPROVER);
+            throw new BizException(LocaleMessageConstants.SYS_APPROVAL_NO_APPROVER);
         }
         if (ruleNextApproverResult != null && ruleNextApproverResult.getDroolsApprovalNode() != null && CollectionUtils.isNotEmpty(ruleNextApproverResult.getDroolsApprovalNode().getRuleApprovers())) {
             getRuleApproverUserOids(ruleNextApproverResult.getDroolsApprovalNode(), droolsRuleApprovalNodeDTO);

@@ -248,6 +248,7 @@
         select  eet.id,eet.code,eet.name,eetc.name categoryName from  exp_expense_type_category eetc , exp_expense_type eet
         where  eetc.id=eet.type_category_id
         AND   eet.ENABLED = 1
+        AND   eet.TYPE_FLAG = 1
         <if test="code !=null ">
             AND eet.code like concat(concat('%',#{code}),'%')
         </if>

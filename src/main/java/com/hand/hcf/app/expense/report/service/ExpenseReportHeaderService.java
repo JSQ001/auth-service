@@ -17,34 +17,39 @@ import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.core.web.dto.MessageDTO;
 import com.hand.hcf.app.expense.application.domain.ApplicationLineDist;
 import com.hand.hcf.app.expense.application.domain.ExpenseRequisitionRelease;
 import com.hand.hcf.app.expense.application.service.ApplicationLineDistService;
 import com.hand.hcf.app.expense.application.service.ExpenseRequisitionReleaseService;
+import com.hand.hcf.app.expense.book.domain.ExpenseBook;
+import com.hand.hcf.app.expense.book.service.ExpenseBookService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.externalApi.*;
 import com.hand.hcf.app.expense.common.service.CommonService;
-import com.hand.hcf.app.expense.common.utils.DimensionUtils;
-import com.hand.hcf.app.expense.common.utils.ParameterConstant;
-import com.hand.hcf.app.expense.common.utils.RespCode;
-import com.hand.hcf.app.expense.common.utils.SyncLockPrefix;
-import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
-import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
-import com.hand.hcf.app.expense.invoice.domain.InvoiceLineDist;
-import com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence;
-import com.hand.hcf.app.expense.invoice.service.InvoiceHeadService;
-import com.hand.hcf.app.expense.invoice.service.InvoiceLineDistService;
-import com.hand.hcf.app.expense.invoice.service.InvoiceLineExpenceService;
-import com.hand.hcf.app.expense.invoice.service.InvoiceLineService;
+import com.hand.hcf.app.expense.common.utils.*;
+import com.hand.hcf.app.expense.invoice.domain.*;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
+import com.hand.hcf.app.expense.invoice.service.*;
+import com.hand.hcf.app.expense.policy.dto.DynamicFieldDTO;
+import com.hand.hcf.app.expense.policy.dto.ExpensePolicyMatchDimensionDTO;
+import com.hand.hcf.app.expense.policy.dto.PolicyCheckResultDTO;
+import com.hand.hcf.app.expense.policy.service.ExpensePolicyService;
 import com.hand.hcf.app.expense.report.domain.*;
+import com.hand.hcf.app.expense.report.dto.ExpenseReportAutoCreateDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportHeaderDTO;
+import com.hand.hcf.app.expense.report.dto.ExpenseReportInvoiceMatchResultDTO;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportTypeDTO;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportHeaderMapper;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import com.hand.hcf.app.expense.type.domain.ExpenseDocumentField;
+import com.hand.hcf.app.expense.type.domain.ExpenseField;
+import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.service.ExpenseDimensionService;
 import com.hand.hcf.app.expense.type.service.ExpenseDocumentFieldService;
+import com.hand.hcf.app.expense.type.service.ExpenseFieldService;
+import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +61,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -146,24 +152,45 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     @Autowired
     private ExcelExportService excelExportService;
 
+    @Autowired
+    private InvoiceExpenseTypeRulesService invoiceExpenseTypeRulesService;
+
+    @Autowired
+    private ExpenseTypeService expenseTypeService;
+
+    @Autowired
+    private ExpenseBookService expenseBookService;
+
+    @Autowired
+    private ExpenseFieldService expenseFieldService;
+
+    @Autowired
+    private ExpensePolicyService expensePolicyService;
+
     /**
      * 保存费用类型
      *
      * @param expenseReportHeaderDTO
+     * @param expenseReportType
+     * @param autoCreate  是否为系统自动生成
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ExpenseReportHeader saveExpenseReportHeader(ExpenseReportHeaderDTO expenseReportHeaderDTO) {
-        ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
-        if (!expenseReportType.getMultiPayee()) {
-            if (expenseReportHeaderDTO.getAccountNumber() == null || expenseReportHeaderDTO.getAccountName() == null
-                    || expenseReportHeaderDTO.getPayeeId() == null || expenseReportHeaderDTO.getPayeeCategory() == null) {
-                throw new BizException(RespCode.EXPENSE_REPORT_ACCOUNT_INFO_IS_NOT_COMPLETE);
-            }
+    public ExpenseReportHeader saveExpenseReportHeader(ExpenseReportHeaderDTO expenseReportHeaderDTO, ExpenseReportType expenseReportType, Boolean autoCreate) {
+        if(expenseReportType == null){
+            expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
         }
-        if (BooleanUtils.isTrue(expenseReportType.getAssociateContract()) && BooleanUtils.isTrue(expenseReportType.getContractRequired())) {
-            if (expenseReportHeaderDTO.getContractHeaderId() == null) {
-                throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_IS_NULL);
+        if(BooleanUtils.isNotTrue(autoCreate)){
+            if (!expenseReportType.getMultiPayee()) {
+                if (expenseReportHeaderDTO.getAccountNumber() == null || expenseReportHeaderDTO.getAccountName() == null
+                        || expenseReportHeaderDTO.getPayeeId() == null || expenseReportHeaderDTO.getPayeeCategory() == null) {
+                    throw new BizException(RespCode.EXPENSE_REPORT_ACCOUNT_INFO_IS_NOT_COMPLETE);
+                }
+            }
+            if (BooleanUtils.isTrue(expenseReportType.getAssociateContract()) && BooleanUtils.isTrue(expenseReportType.getContractRequired())) {
+                if (expenseReportHeaderDTO.getContractHeaderId() == null) {
+                    throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_IS_NULL);
+                }
             }
         }
         ExpenseReportHeader expenseReportHeader = new ExpenseReportHeader();
@@ -283,6 +310,10 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             expenseReportTaxDistService.deleteExpenseReportTaxDistByHeaderId(headerId);
             // 删除计划付款行信息
             expenseReportPaymentScheduleService.deleteExpenseReportPaymentScheduleByHeaderId(headerId);
+            //删除审批流实例
+            Integer entityType = ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey();
+            UUID entityOid = UUID.fromString(expenseReportHeader.getDocumentOid());
+            workflowClient.deleteApprovalDocument(entityType, entityOid);
         }
     }
 
@@ -539,8 +570,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         businessDataCO.setAmount(expenseReportHeader.getTotalAmount());
         businessDataCO.setFunctionalAmount(expenseReportHeader.getFunctionalAmount());
         businessDataCO.setDocumentTypeId(expenseReportHeader.getDocumentTypeId());
-        businessDataCO.setDocumentCategory(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory());
-        //jiu.zhao 工作台
+        businessDataCO.setDocumentCategory(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey().toString());
+        businessDataCO.setDocumentOid(expenseReportHeader.getDocumentOid());
         //workBenchService.pushReportDataToWorkBranch(businessDataCO);
     }
 
@@ -676,6 +707,78 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         }
     }
 
+
+    /**
+     * 根据报账单单据头ID校验费用政策
+     *
+     * @param id
+     * @return
+     */
+    public PolicyCheckResultDTO checkPolicy(Long id) {
+
+        ExpenseReportHeader header = this.selectById(id);
+        if (header == null) {
+            throw new BizException(RespCode.SYS_OBJECT_IS_EMPTY);
+        }
+        List<ExpenseReportLine> lines = expenseReportLineService.getExpenseReportLinesByHeaderId(id);
+
+        PolicyCheckResultDTO waringPolicyResult = null;
+
+        for (ExpenseReportLine line : lines) {
+            List<ExpenseDocumentField> fieldList = documentFieldService.selectList(new EntityWrapper<ExpenseDocumentField>()
+                    .eq("header_id", header.getId())
+                    .eq("line_id", line.getId())
+                    .eq("document_type", 801001)
+            );
+            List<DynamicFieldDTO> dynamicFields = new ArrayList<>();
+            fieldList.forEach(f -> {
+                        ExpenseField expenseField = expenseFieldService.selectOne(
+                                new EntityWrapper<ExpenseField>().eq("field_oid", f.getFieldOid())
+                        );
+                        dynamicFields.add(
+                                DynamicFieldDTO
+                                        .builder()
+                                        .fieldId(expenseField.getId())
+                                        .fieldName(f.getName())
+                                        .fieldDataType(f.getFieldDataType())
+                                        .fieldValue(f.getValue())
+                                        .fieldTypeId(f.getFieldTypeId())
+                                        .build()
+                        );
+                    }
+            );
+            ExpensePolicyMatchDimensionDTO matchDimensionDTO = ExpensePolicyMatchDimensionDTO
+                    .builder()
+                    .expenseTypeFlag(0)
+                    .companyId(header.getCompanyId())
+                    .applicationId(header.getApplicantId())
+                    .currencyCode(line.getCurrencyCode())
+                    .expenseTypeId(line.getExpenseTypeId())
+                    .amount(line.getAmount())
+                    .quantity(line.getQuantity())
+                    .price(line.getPrice())
+                    .dynamicFields(dynamicFields)
+                    .build();
+            PolicyCheckResultDTO result = expensePolicyService.checkExpensePolicy(matchDimensionDTO);
+            //禁止
+            if (PolicyCheckConstant.CONTROL_STRATEGY_CODE_FORBIDDEN.equals(result.getCode())) {
+                return result;
+            }
+            if (waringPolicyResult == null && PolicyCheckConstant.CONTROL_STRATEGY_CODE_WARNING.equals(result.getCode())) {
+                waringPolicyResult = result;
+            }
+        }
+
+        if (waringPolicyResult != null) {
+            //警告
+            return waringPolicyResult;
+        } else {
+            //通过
+            return PolicyCheckResultDTO.ok();
+        }
+    }
+
+
     /**
      * 报账单提交
      *
@@ -700,6 +803,11 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         checkDocumentStatus(DocumentOperationEnum.APPROVAL.getId(), expenseReportHeader.getStatus());
         expenseReportHeader.setStatus(DocumentOperationEnum.APPROVAL.getId());
         ExpenseReportTypeDTO expenseReportType = expenseReportTypeService.getExpenseReportType(expenseReportHeader.getDocumentTypeId(), expenseReportHeader.getId());
+        if (BooleanUtils.isTrue(expenseReportType.getAssociateContract()) && BooleanUtils.isTrue(expenseReportType.getContractRequired())) {
+            if (expenseReportHeader.getContractHeaderId() == null) {
+                throw new BizException(RespCode.EXPENSE_REPORT_CONTRACT_IS_NULL);
+            }
+        }
         //计划付款行校验
         List<ExpenseReportPaymentSchedule> expenseReportPaymentSchedules = checkPaymentSchedule(expenseReportHeader);
         //校验费用行及分摊行
@@ -1024,6 +1132,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 header.setJeCreationDate(null);
             }
             header.setStatus(DocumentOperationEnum.APPROVAL_REJECT.getId());
+            // 删除工作流实列
+            workflowClient.updateDocumentStatus(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(),
+                    UUID.fromString(header.getDocumentOid()), DocumentOperationEnum.AUDIT_REJECT);
         }
         // 保存
         this.updateAllColumnById(header);
@@ -1862,5 +1973,243 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 baseMapper.updateById(expenseReportHeader);
             }
         }
+    }
+
+    /**
+     * 自动生成报账单
+     * @param expenseReportAutoCreateDTO
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Long autoCreateExpenseReport(ExpenseReportAutoCreateDTO expenseReportAutoCreateDTO){
+        // 生成报账单头
+        ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportAutoCreateDTO.getExpenseReportTypeId());
+        ExpenseReportHeaderDTO expenseReportHeaderDTO = new ExpenseReportHeaderDTO();
+        List<ExpenseDimension> expenseTypeDimensions = expenseReportTypeService.getExpenseTypeDimension(expenseReportAutoCreateDTO.getExpenseReportTypeId(), null);
+        expenseReportHeaderDTO.setExpenseDimensions(expenseTypeDimensions);
+        expenseReportHeaderDTO.setCompanyId(OrgInformationUtil.getCurrentCompanyId());
+        expenseReportHeaderDTO.setDepartmentId(OrgInformationUtil.getCurrentDepartmentId());
+        expenseReportHeaderDTO.setApplicantId(OrgInformationUtil.getCurrentUserId());
+        expenseReportHeaderDTO.setDocumentTypeId(expenseReportAutoCreateDTO.getExpenseReportTypeId());
+        expenseReportHeaderDTO.setRequisitionDate(ZonedDateTime.now());
+        // 单收款方设置收款方信息
+        if(BooleanUtils.isNotTrue(expenseReportType.getMultiPayee())){
+            if("EMPLOYEE".equals(expenseReportType.getPayeeType())){
+                expenseReportHeaderDTO.setPayeeCategory(expenseReportType.getPayeeType());
+                expenseReportHeaderDTO.setPayeeId(expenseReportHeaderDTO.getApplicantId());
+                UserBankAccountCO bankAccountDTOS = organizationService.getContactPrimaryBankAccountByUserId(expenseReportHeaderDTO.getPayeeId());
+                if (!ObjectUtils.isEmpty(bankAccountDTOS)) {
+                    expenseReportHeaderDTO.setAccountNumber(bankAccountDTOS.getBankAccountNo());
+                    expenseReportHeaderDTO.setAccountName(bankAccountDTOS.getBankAccountName());
+                }
+            }else if("VENDER".equals(expenseReportType.getPayeeType())){
+                expenseReportHeaderDTO.setPayeeCategory(expenseReportType.getPayeeType());
+            }
+        }
+        List<ExpenseDimension> expenseTypeDimension = expenseReportTypeService.getExpenseTypeDimension(expenseReportAutoCreateDTO.getExpenseReportTypeId(), null);
+        expenseReportHeaderDTO.setExpenseDimensions(expenseTypeDimension);
+        if(CollectionUtils.isNotEmpty(expenseReportAutoCreateDTO.getExpenseBookIds())){
+            ExpenseBook expenseBook = expenseBookService.selectById(expenseReportAutoCreateDTO.getExpenseBookIds().get(0));
+            expenseReportHeaderDTO.setCurrencyCode(expenseBook.getCurrencyCode());
+            expenseReportHeaderDTO.setExchangeRate(expenseBook.getExchangeRate());
+        }
+        if(CollectionUtils.isNotEmpty(expenseReportAutoCreateDTO.getInvoiceDTOS())){
+            InvoiceLine invoiceLine = expenseReportAutoCreateDTO.getInvoiceDTOS().get(0).getInvoiceLineList().get(0);
+            expenseReportHeaderDTO.setCurrencyCode(invoiceLine.getCurrencyCode());
+            expenseReportHeaderDTO.setExchangeRate(invoiceLine.getExchangeRate());
+        }
+        ExpenseReportHeader expenseReportHeader = saveExpenseReportHeader(expenseReportHeaderDTO,expenseReportType,true);
+        // 生成费用行
+        if(CollectionUtils.isNotEmpty(expenseReportAutoCreateDTO.getExpenseBookIds())){
+            expenseReportLineService.saveExpenseReportLineFromBook(expenseReportHeader.getId(),expenseReportAutoCreateDTO.getExpenseBookIds());
+        }
+        if(CollectionUtils.isNotEmpty(expenseReportAutoCreateDTO.getInvoiceDTOS())){
+            ExpenseReportInvoiceMatchResultDTO expenseBookByInvoice = createExpenseBookByInvoice(expenseReportAutoCreateDTO.getInvoiceDTOS(),true);
+            expenseReportLineService.saveExpenseReportLineFromBook(expenseReportHeader, expenseBookByInvoice.getExpenseBooks());
+        }
+        return expenseReportHeader.getId();
+    }
+
+
+    /**
+     * 根据发票信息创建账本
+     * @param invoiceDTOS
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    //@Lock(name = SyncLockPrefix.PUBLIC_REPORT_PIPELINE,lockType = LockType.TRY_LOCK_LIST, listKey = "#expenseReportAutoCreateDTO.![invoiceDTOS].![invoiceHead].![invoiceNo + '-' + invoiceCode]")
+    public ExpenseReportInvoiceMatchResultDTO createExpenseBookByInvoice(List<InvoiceDTO> invoiceDTOS, Boolean throwsException){
+        ExpenseReportInvoiceMatchResultDTO dto = new ExpenseReportInvoiceMatchResultDTO(null,1001,null,invoiceDTOS,new ArrayList<>());
+        for (InvoiceDTO invoiceDTO : invoiceDTOS) {
+            //验重及连号校验
+            try{
+                invoiceHeadService.checkInvoiceCodeInvoiceNoExistsOrContinuation(invoiceDTO.getInvoiceHead().getInvoiceCode(),
+                        invoiceDTO.getInvoiceHead().getInvoiceNo(),
+                        true);
+            } catch (BizException e){
+                if(throwsException){
+                    throw e;
+                }
+                // 发票重复
+                MessageDTO message = messageService.getMessage(e.getCode(), e.getArgs());
+                dto.setResultMessage(message.getKeyDescription());
+                if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_EXISTS)){
+                    dto.setStatus(1002);
+                    return dto;
+                }
+                if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION)){
+                    dto.setStatus(1003);
+                }
+            }
+        }
+        // 如果校验通过
+        if(1001 == dto.getStatus()){
+            invoiceDTOS.stream().forEach(invoiceDTO -> {
+                invoiceDTO.getInvoiceHead().setFromBook(false);
+                if(StringUtils.isEmpty(invoiceDTO.getInvoiceHead().getCreatedMethod())){
+                    invoiceDTO.getInvoiceHead().setCreatedMethod("BY_HAND");
+                }
+                //  保存发票信息
+                invoiceHeadService.insertInvoice(invoiceDTO);
+                // 保存账本信息
+                List<ExpenseBook> expenseBookByInvoice = expenseBookService.getExpenseBookByInvoice(invoiceDTO);
+                dto.getExpenseBooks().addAll(expenseBookByInvoice);
+            });
+        }
+        return dto;
+    }
+
+    /**
+     * 发票自动匹配费用类型
+     * @param invoiceDTOS
+     * @return
+     */
+    //@Lock(name = SyncLockPrefix.INVOICE_CHECK,lockType = LockType.TRY_LOCK_LIST, listKey = "#invoiceDTOS.![invoiceHead].![invoiceNo + '-' + invoiceCode]")
+    public ExpenseReportInvoiceMatchResultDTO invoiceAutoMatchExpense(List<InvoiceDTO> invoiceDTOS){
+        ExpenseReportInvoiceMatchResultDTO dto = new ExpenseReportInvoiceMatchResultDTO(null,1001,null,invoiceDTOS,null);
+        if(CollectionUtils.isNotEmpty(invoiceDTOS)){
+            for (InvoiceDTO invoiceDTO : invoiceDTOS) {
+                //验重及连号校验
+                try{
+                    invoiceHeadService.checkInvoiceCodeInvoiceNoExistsOrContinuation(invoiceDTO.getInvoiceHead().getInvoiceCode(), invoiceDTO.getInvoiceHead().getInvoiceNo(),false);
+                } catch (BizException e){
+                    // 发票重复
+                    MessageDTO message = messageService.getMessage(e.getCode(), e.getArgs());
+                    dto.setResultMessage(message.getKeyDescription());
+                    if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_EXISTS)){
+                        dto.setStatus(1002);
+                        return dto;
+                    }
+                    if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION)){
+                        dto.setStatus(1003);
+                    }
+                }
+                List<InvoiceLine> invoiceLineList = invoiceDTO.getInvoiceLineList();
+                invoiceLineList.stream().forEach(invoiceLine -> {
+                    List<InvoiceExpenseTypeRules> invoiceExpenseTypeRules = invoiceExpenseTypeRulesService.selectList(new EntityWrapper<InvoiceExpenseTypeRules>()
+                            .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
+                            .eq("set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
+                            .eq("enabled", true)
+                            .eq("goods_name", invoiceLine.getGoodsName())
+                            .and("(start_date is null or start_date <= {0}) and (end_date is null or end_date >= {1})", new ZonedDateTime[]{
+                                    TypeConversionUtils.getEndTimeForDayYYMMDD(TypeConversionUtils.timeToString(ZonedDateTime.now())),
+                                    TypeConversionUtils.getStartTimeForDayYYMMDD(TypeConversionUtils.timeToString(ZonedDateTime.now()))}));
+                    if(invoiceExpenseTypeRules.size() == 1){
+                        InvoiceExpenseTypeRules invoiceExpenseTypeRule = invoiceExpenseTypeRules.get(0);
+                        ExpenseType expenseType = expenseTypeService.selectById(invoiceExpenseTypeRule.getExpenseTypeId());
+                        invoiceLine.setExpenseTypeId(expenseType.getId());
+                        invoiceLine.setExpenseTypeName(expenseType.getName());
+                        invoiceLine.setExpenseTypeIcon(expenseType.getIconUrl());
+                        invoiceLine.setMatchExpenseTypeIds(Arrays.asList());
+                    }else{
+                        invoiceLine.setMatchExpenseTypeIds(invoiceExpenseTypeRules.stream().map(InvoiceExpenseTypeRules::getExpenseTypeId).collect(Collectors.toList()));
+                    }
+                });
+            }
+        }
+        return dto;
+    }
+
+    /**
+     * 根据账本取当前用户有权限创建，且有相应费用类型的报账单类型
+     * @param expenseBookIds
+     * @return
+     */
+    public List<ExpenseReportType> getExpenseReportTypeByExpenseBooks(List<Long> expenseBookIds){
+        List<ExpenseBook> expenseBooks = expenseBookService.selectBatchIds(expenseBookIds);
+        if(CollectionUtils.isNotEmpty(expenseBooks)){
+            ExpenseBook expenseBook = expenseBooks.get(0);
+            Set<Long> collect = expenseBooks.stream().map(e -> {
+                if (!e.getCurrencyCode().equals(expenseBook.getCurrencyCode())) {
+                    throw new BizException(RespCode.EXPENSE_REPORT_AUTO_CREATE_CURRENCY_ERROR);
+                }
+                return e.getExpenseTypeId();
+            }).collect(Collectors.toSet());
+            List<ExpenseReportType> expenseReportTypeByExpenseTypeIds = expenseReportTypeService.getExpenseReportTypeByExpenseTypeIds(collect);
+            return expenseReportTypeByExpenseTypeIds;
+        }
+        return Arrays.asList();
+    }
+
+    /**
+     * 根据发票对应的费用类型，获取相应的报账单类型
+     * @param invoiceDTOS
+     * @return
+     */
+    public List<ExpenseReportType> getExpenseReportTypeByInvoices(List<InvoiceDTO> invoiceDTOS){
+        List<Long> expenseTypeIds = new ArrayList<>();
+        invoiceDTOS.stream().forEach(invoiceDTO -> {
+            List<InvoiceLine> invoiceLineList = invoiceDTO.getInvoiceLineList();
+            invoiceLineList.stream().forEach(invoiceLine -> {
+                expenseTypeIds.add(invoiceLine.getExpenseTypeId());
+            });
+        });
+        if(CollectionUtils.isNotEmpty(expenseTypeIds)){
+            return expenseReportTypeService.getExpenseReportTypeByExpenseTypeIds(expenseTypeIds);
+        }
+        return Arrays.asList();
+    }
+
+    /**
+     * 单据签收-单据退回
+     * @param rejectType
+     * @param rejectReason
+     * @param expenseReportHeaderIdList
+     */
+    public void rejectSignReports(String rejectType, String rejectReason, List<Long> expenseReportHeaderIdList) {
+
+        if (rejectType.equals("全部退回")) {
+            //TODO 清空影像比对匹配表 单据签收中比对功能未完成 暂时无法开发
+
+            for(Long expenseReportHeaderId : expenseReportHeaderIdList){
+                //更新发票行报销记录表 发票袋号码,发票袋号码确认标志
+                List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService
+                        .getInvoiceLineExpenseByReportHeaderId(expenseReportHeaderId);
+                List<InvoiceLineExpence> list = new ArrayList<InvoiceLineExpence>();
+                for(InvoiceLineExpence invoiceLineExpence : invoiceLineExpences){
+                    invoiceLineExpence.setInvoiceBagNo(null);
+                    invoiceLineExpence.setInvoiceBagConfirmFlag("N");
+                    list.add(invoiceLineExpence);
+                }
+                if(list.size() > 0){
+                    invoiceLineExpenceService.updateBatchById(list);
+                }
+
+                //报账单审核驳回
+                rejectReason = rejectType + "-" + rejectReason;
+                updateDocumentStatus(expenseReportHeaderId,DocumentOperationEnum.AUDIT_REJECT.getId(),rejectReason);
+
+                //更新报账单 是否通过比对标志
+                ExpenseReportHeader expenseReportHeader = this.selectById(expenseReportHeaderId);
+                if (expenseReportHeader == null) {
+                    throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);
+                }
+                expenseReportHeader.setComparisonFlag("N");
+                this.updateById(expenseReportHeader);
+            }
+        }else {
+            //TODO 补寄逻辑 单据签收中比对功能未完成 暂时无法开发
+        }
+
     }
 }

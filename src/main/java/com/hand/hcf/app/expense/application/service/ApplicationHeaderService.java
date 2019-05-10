@@ -828,6 +828,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         // 删除头信息
         this.deleteById(id);
+        //删除审批流实例
+        Integer entityType = applicationHeader.getDocumentType();
+        UUID entityOid = UUID.fromString(applicationHeader.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
         return true;
     }
 

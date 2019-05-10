@@ -11,20 +11,21 @@ import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
+import com.hand.hcf.app.workflow.brms.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.BrmsService;
 import com.hand.hcf.app.workflow.constant.ApprovalFormPropertyConstants;
-import com.hand.hcf.app.workflow.constant.FormConstants;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
+import com.hand.hcf.app.workflow.constant.ValueConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.dto.*;
-import com.hand.hcf.app.workflow.enums.ApprovalFormEnum;
-import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.dto.form.*;
+import com.hand.hcf.app.workflow.enums.form.ApprovalFormEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.ApprovalFormMapper;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.workflow.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
@@ -258,7 +259,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
     public ApprovalFormDTO createCustomForm(ApprovalFormDTO approvalFormDTO, UUID userOid, Long tenantId) {
 
         if (StringUtils.isEmpty(approvalFormDTO.getFormName())) {
-            throw new BizException(ExceptionCode.SYS_PARAM_CANT_BE_NULL, new Object[]{"formName"});
+            throw new BizException(LocaleMessageConstants.SYS_PARAM_CANT_BE_NULL, new Object[]{"formName"});
         }
 
         ApprovalForm approvalForm = approvalFormDTOToForm(approvalFormDTO);
@@ -289,7 +290,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         try {
             insert(approvalForm);//保存customForm和formI18n
         } catch (DuplicateKeyException e) {
-            throw new BizException(ExceptionCode.CUSTOM_FORM_NAME_EXIST);
+            throw new BizException(LocaleMessageConstants.CUSTOM_FORM_NAME_EXIST);
         }
 
 
@@ -377,7 +378,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         if (CollectionUtils.isNotEmpty(list)) {
             //获取审批类型
             Map<String,String> categoryMap = new HashMap<>();
-            List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(FormConstants.SYS_CODE_FORM_TYPE, true);
+            List<SysCodeValueCO> sysCodeValueCOList = organizationInterface.listSysValueByCodeConditionByEnabled(ValueConstants.SYS_CODE_FORM_TYPE, true);
             for (SysCodeValueCO sysCodeValueCO : sysCodeValueCOList) {
                 categoryMap.put(sysCodeValueCO.getValue(),sysCodeValueCO.getName());
             }
@@ -639,7 +640,7 @@ public class ApprovalFormService extends BaseService<ApprovalFormMapper, Approva
         try {
             updateById(persistent);
         } catch (DuplicateKeyException e) {
-            throw new BizException(ExceptionCode.CUSTOM_FORM_NAME_EXIST);
+            throw new BizException(LocaleMessageConstants.CUSTOM_FORM_NAME_EXIST);
         }
 
 

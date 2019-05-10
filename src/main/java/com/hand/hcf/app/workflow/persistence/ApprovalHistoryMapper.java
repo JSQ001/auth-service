@@ -2,7 +2,7 @@ package com.hand.hcf.app.workflow.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
-import com.hand.hcf.app.workflow.dto.CheckAuditNoticeDTO;
+import com.hand.hcf.app.workflow.dto.history.CheckAuditNoticeDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

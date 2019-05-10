@@ -2,6 +2,7 @@ package com.hand.hcf.app.workflow.approval.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.enums.RejectTypeEnum;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowPassTaskAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowRejectTaskAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowSubmitInstanceAction;
@@ -15,7 +16,6 @@ import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationTypeEnum;
-import com.hand.hcf.app.workflow.enums.RejectTypeEnum;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.service.ApprovalHistoryService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -321,6 +322,21 @@ public class WorkflowBaseService {
 
         WorkflowTask task = new WorkflowTask(approvalChain, instance, node, user);
         return task;
+    }
+
+    /**
+     * 保存任务
+     * @author mh.z
+     * @date 2019/05/05
+     *
+     * @param taskList 任务列表
+     */
+    public void saveTasks(List<WorkflowTask> taskList) {
+        CheckUtil.notNull(taskList, "taskList null");
+
+        for (WorkflowTask task : taskList) {
+            saveTask(task);
+        }
     }
 
     /**

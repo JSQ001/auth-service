@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper">
 
-    <select id="getApprovalListDashboard" resultType="com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO">
+    <select id="getApprovalListDashboard" resultType="com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDetailDTO">
         SELECT dr.document_category type, count(1) count
         FROM sys_wfl_document_ref dr
         WHERE EXISTS (
@@ -191,7 +191,7 @@
     </select>
 
     <!-- 待办事项-待审批单据-分类信息 -->
-    <select id="getApprovalToPendTotal" resultType="com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO">
+    <select id="getApprovalToPendTotal" resultType="com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDetailDTO">
         SELECT DISTINCT dr.document_category type, count(dr.ID) count
         FROM sys_wfl_document_ref dr
         WHERE EXISTS (
