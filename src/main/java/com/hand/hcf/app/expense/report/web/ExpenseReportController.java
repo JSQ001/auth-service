@@ -122,6 +122,9 @@ public class ExpenseReportController {
      * @apiParam (请求参数){String} [applicantCode] 申请人代码
      * @apiParam (请求参数){Long} applicantId 申请人ID
      * @apiParam (请求参数){String} [applicantName] 申请人名称
+     * @apiParam (请求参数){String} [demanderCode] 需求方代码
+     * @apiParam (请求参数){Long} demanderId 需求方ID
+     * @apiParam (请求参数){String} [demanderName] 需求方名称
      * @apiParam (请求参数){ZonedDateTime} [auditDate] 审核日期
      * @apiParam (请求参数){String} [auditFlag] 审核标志
      * @apiParam (请求参数){String} [budgetCheckResult] 预算校验返回标志
@@ -136,10 +139,15 @@ public class ExpenseReportController {
      * @apiParam (请求参数){ZonedDateTime} [createdDate] 创建日期
      * @apiParam (请求参数){String} [createdName] 创建人名称
      * @apiParam (请求参数){String} currencyCode 币种
-     * @apiParam (请求参数){String} [departmentCode] 部门代码
-     * @apiParam (请求参数){Long} departmentId 部门ID
-     * @apiParam (请求参数){String} [departmentName] 部门名称
+     * @apiParam (请求参数){String} areaCode 区域
+     * @apiParam (请求参数){String} [budgetDepCode] 预算部门代码
+     * @apiParam (请求参数){Long} budgetDepId 预算部门ID
+     * @apiParam (请求参数){String} [budgetDepName] 预算部门名称
+     * @apiParam (请求参数){String} [departmentCode] 受益部门代码
+     * @apiParam (请求参数){Long} departmentId 受益部门ID
+     * @apiParam (请求参数){String} [departmentName] 受益部门名称
      * @apiParam (请求参数){String} [description] 备注
+     * @apiParam (请求参数){String} [attachmentOid] 附件OID
      * @apiParam (请求参数){String} [documentOid] 单据OID
      * @apiParam (请求参数){Long} documentTypeId 报账单类型ID
      * @apiParam (请求参数){String} [documentTypeName] 报账单类型名称
@@ -170,6 +178,9 @@ public class ExpenseReportController {
      * @apiSuccess (返回参数){String} [applicantCode] 申请人代码
      * @apiSuccess (返回参数){Long} applicantId 申请人ID
      * @apiSuccess (返回参数){String} [applicantName] 申请人名称
+     * @apiSuccess (返回参数){String} [demanderCode] 需求方代码
+     * @apiSuccess (返回参数){Long} demanderId 需求方ID
+     * @apiSuccess (返回参数){String} [demanderName] 需求方名称
      * @apiSuccess (返回参数){ZonedDateTime} [auditDate] 审核日期
      * @apiSuccess (返回参数){String} [auditFlag] 审核标志
      * @apiSuccess (返回参数){String} [budgetCheckResult] 预算校验返回标志
@@ -180,8 +191,11 @@ public class ExpenseReportController {
      * @apiSuccess (返回参数){ZonedDateTime} [createdDate] 创建日期
      * @apiSuccess (返回参数){String} [createdName] 创建人名称
      * @apiSuccess (返回参数){String} currencyCode 币种
-     * @apiSuccess (返回参数){Long} departmentId 部门ID
+     * @apiSuccess (返回参数){String} areaCode 区域
+     * @apiSuccess (返回参数){Long} budgetDepartmentId 预算部门ID
+     * @apiSuccess (返回参数){Long} departmentId 受益部门ID
      * @apiSuccess (返回参数){String} [description] 备注
+     * @apiSuccess (返回参数){String} [attachmentOid] 附件OID
      * @apiSuccess (返回参数){String} [documentOid] 单据OID
      * @apiSuccess (返回参数){Long} documentTypeId 报账单类型ID
      * @apiSuccess (返回参数){BigDecimal} exchangeRate 汇率

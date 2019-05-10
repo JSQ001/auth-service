@@ -34,6 +34,14 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      */
     private String companyCode;
     /**
+     * 預算部门名称
+     */
+    private String budgetDepName;
+    /**
+     * 預算部门代码
+     */
+    private String budgetDepCode;
+    /**
      * 部门名称
      */
     private String departmentName;
@@ -58,6 +66,14 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      */
     private String applicantCode;
     /**
+     * 需求方名称
+     */
+    private String demanderName;
+    /**
+     * 需求方编码
+     */
+    private String demanderCode;
+    /**
      * 合同编号
      */
     private String contractNumber;
@@ -73,6 +89,10 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      * 币种名称
      */
     private String currencyName;
+    /**
+     * 区域名称
+     */
+    private String areaName;
     /**
      * 税金分摊方式
      */

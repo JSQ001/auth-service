@@ -44,8 +44,16 @@ public class ExpenseReportHeader extends Domain {
     private Long companyId;
 
     /**
+     * 預算部门
+     */
+    @NotNull
+    @TableField(value = "budget_dep_id")
+    private Long budgetDepId;
+
+    /**
      * 部门
      */
+    @NotNull
     @TableField(value = "department_id")
     private Long departmentId;
 
@@ -57,11 +65,24 @@ public class ExpenseReportHeader extends Domain {
     private Long applicantId;
 
     /**
+     * 需求方
+     */
+    @NotNull
+    @TableField(value = "demander_id")
+    private Long demanderId;
+
+    /**
      * 币种
      */
     @NotNull
     @TableField(value = "currency_code")
     private String currencyCode;
+
+    /**
+     * 区域
+     */
+    @TableField(value = "area_code")
+    private String areaCode;
 
     /**
      * 汇率
@@ -87,6 +108,12 @@ public class ExpenseReportHeader extends Domain {
      */
     @TableField(value = "description")
     private String description;
+
+    /**
+     * 附件oid
+     */
+    @TableField(value = "attachment_oid")
+    private Long attachmentOid;
 
     /**
      * 单据类型id
