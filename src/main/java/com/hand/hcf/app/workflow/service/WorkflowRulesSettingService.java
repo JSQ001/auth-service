@@ -10,18 +10,18 @@ import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.constant.WorkflowConstants;
+import com.hand.hcf.app.workflow.brms.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
+import com.hand.hcf.app.workflow.constant.ValueConstants;
 import com.hand.hcf.app.workflow.domain.WorkflowRole;
 import com.hand.hcf.app.workflow.domain.WorkflowRulesSetting;
 import com.hand.hcf.app.workflow.dto.WorkflowRoleDTO;
 import com.hand.hcf.app.workflow.dto.WorkflowRulesSettingDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.enums.WorkflowRoleType;
 import com.hand.hcf.app.workflow.enums.WorkflowSettingType;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkFlowRoleMapper;
 import com.hand.hcf.app.workflow.persistence.WorkFlowRuleSettingMapper;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -219,7 +219,7 @@ public class WorkflowRulesSettingService extends BaseService<WorkFlowRuleSetting
 
             List<String> userPick = null;
             if (StringUtils.isNotBlank(approvalOIDs)) {
-                userPick = new ArrayList<>(Arrays.asList(approvalOIDs.split(WorkflowConstants.WORKFLOW_APPROVAL_SPLIT)));
+                userPick = new ArrayList<>(Arrays.asList(approvalOIDs.split(ValueConstants.WORKFLOW_APPROVAL_SPLIT)));
             }
             LinkedList<String> list = new LinkedList<>();
 
@@ -254,7 +254,7 @@ public class WorkflowRulesSettingService extends BaseService<WorkFlowRuleSetting
             return list;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BizException(ExceptionCode.SYS_APPROVAL_CHAIN_IS_NULL);
+            throw new BizException(LocaleMessageConstants.SYS_APPROVAL_CHAIN_IS_NULL);
         }
 
     }

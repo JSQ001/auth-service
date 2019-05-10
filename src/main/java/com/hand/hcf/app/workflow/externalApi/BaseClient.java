@@ -2,15 +2,15 @@ package com.hand.hcf.app.workflow.externalApi;
 
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
-//import com.hand.hcf.app.client.system.ParameterClient;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.mdata.implement.web.CompanyControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.DepartmentControllerImpl;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
+import com.hand.hcf.app.workflow.util.CheckUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
 public class BaseClient {
     private CommonControllerImpl organizationClient;
     private CompanyControllerImpl companyClient;
-    private ContactControllerImpl ContactClient;
+    private ContactControllerImpl contactClient;
     private DepartmentControllerImpl departmentClient;
     private MessageService messageService;
 
@@ -44,10 +45,29 @@ public class BaseClient {
         String messageDetail = messageService.getMessageDetailByCode(messageCode, objs);
 
         if (required && StringUtils.isEmpty(messageDetail)) {
-            throw new BizException(ExceptionCode.NOT_FIND_THE_MESSAGE, new Object[] { messageCode });
+            throw new BizException(LocaleMessageConstants.NOT_FIND_THE_MESSAGE, new Object[] { messageCode });
         }
 
         return messageDetail;
+    }
+
+    /**
+     * 根据用户oid查询员工
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/04/28
+     *
+     * @param userOidList 用户oid
+     * @return
+     */
+    public List<ContactCO> listContactCOs(List<UUID> userOidList) {
+        CheckUtil.notNull(userOidList, "userOidList null");
+
+        Stream<String> stream = userOidList.stream().map(userOid -> userOid.toString());
+        List<String> userOidStrList = stream.collect(Collectors.toList());
+        List<ContactCO> userList = contactClient.listByUserOids(userOidStrList);
+
+        return userList;
     }
 
     public Boolean getApprovalRuleEnabled(UUID companyOid) {
@@ -82,7 +102,7 @@ public class BaseClient {
 
     public List<UserApprovalDTO> listUserByUserGroupOid(UUID userGroupOid) {
         //Page page = new Page(0, 100000); jiu.zhao 三方接口修改 20190327
-        return ContactClient.pageByUserGroupOid(userGroupOid, 0, 100000).getRecords().stream()
+        return contactClient.pageByUserGroupOid(userGroupOid, 0, 100000).getRecords().stream()
                 .map(u -> userCOToUserApprovalDTO(u)
                 ).collect(Collectors.toList());
     }
@@ -93,7 +113,7 @@ public class BaseClient {
             level = 1;
         }
 
-        return ContactClient.getDirectManager(userOid, level);
+        return contactClient.getDirectManager(userOid, level);
     }
 
 
@@ -102,11 +122,11 @@ public class BaseClient {
             return null;
         }
 
-        return userCOToUserApprovalDTO(ContactClient.getByUserOid(userOid));
+        return userCOToUserApprovalDTO(contactClient.getByUserOid(userOid));
     }
 
     public List<UserApprovalDTO> listByUserOids(List<UUID> userOids) {
-        return ContactClient.listByUserOids(userOids.stream().map(u -> u.toString()).collect(Collectors.toList()))
+        return contactClient.listByUserOids(userOids.stream().map(u -> u.toString()).collect(Collectors.toList()))
                 .stream().map(u -> userCOToUserApprovalDTO(u)).collect(Collectors.toList());
     }
 
@@ -192,7 +212,7 @@ public class BaseClient {
     }
 
     public ContactCO getUserById(Long userId) {
-        return ContactClient.getById(userId);
+        return contactClient.getById(userId);
     }
 
     public SysCodeValueCO getSysCodeValueByCodeAndValue(String code, String value) {

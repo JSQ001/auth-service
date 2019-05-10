@@ -16,7 +16,7 @@ import com.hand.hcf.app.workflow.brms.persistence.DroolsRuleDetailResultMapper;
 import com.hand.hcf.app.workflow.brms.util.event.Event;
 import com.hand.hcf.app.workflow.brms.util.event.RuleApproverEvent;
 import com.hand.hcf.app.workflow.brms.util.rule.RuleGenerator;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.form.FormValueDTO;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.drools.compiler.compiler.DrlParser;

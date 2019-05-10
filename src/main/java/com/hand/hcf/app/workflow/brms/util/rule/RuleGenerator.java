@@ -1,12 +1,12 @@
 package com.hand.hcf.app.workflow.brms.util.rule;
 
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.brms.domain.RuleCondition;
 import com.hand.hcf.app.workflow.brms.dto.RuleConditionDTO;
 import com.hand.hcf.app.workflow.brms.dto.SimpleValueDetailDTO;
 import com.hand.hcf.app.workflow.brms.dto.SimpleValueSymbolDTO;
 import com.hand.hcf.app.workflow.brms.enums.FieldType;
 import com.hand.hcf.app.workflow.brms.enums.SymbolEnum;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -102,8 +102,8 @@ public class RuleGenerator {
 
 //            statementBuilder.append(getValueType(ruleConditionDTO.getFieldTypeId())).append(getOperateor(ruleCondition.getSymbol())).append(" ");
 
-                if (ruleConditionDTO.getSymbol().equals(SymbolEnum.NULL.getId())
-                    && ruleConditionDTO.getSymbol().equals(SymbolEnum.NOT_NULL.getId())) {
+                if (!ruleConditionDTO.getSymbol().equals(SymbolEnum.NULL.getId())
+                    && !ruleConditionDTO.getSymbol().equals(SymbolEnum.NOT_NULL.getId())) {
                     statementBuilder.append(getValueType(ruleConditionDTO.getFieldTypeId())).append(getOperateor(ruleCondition.getSymbol())).append(" ");
                     if (ruleCondition.getFieldTypeId().equals(FieldType.TEXT.getId())
                         || ruleCondition.getFieldTypeId().equals(FieldType.DATE.getId())
@@ -137,7 +137,7 @@ public class RuleGenerator {
         if (null != simpleValueDetailDTO.getFieldType()) {
             int fieldTypeId = Integer.valueOf(simpleValueDetailDTO.getFieldType());
             if (symbol.equals(String.valueOf(SymbolEnum.IN.getId()))) {
-                String opearor = getOperateor(Integer.valueOf(simpleValueDetailDTO.getFieldType()));
+                //String opearor = getOperateor(Integer.valueOf(simpleValueDetailDTO.getFieldType()));
                 for (String value : simpleValueDetailDTO.getValue()) {
                     stringBuilder.append(getValueType(fieldTypeId) + "==" + " ");
                     stringBuilder.append("\"");

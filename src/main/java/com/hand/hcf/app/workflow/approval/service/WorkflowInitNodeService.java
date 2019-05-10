@@ -146,7 +146,8 @@ public class WorkflowInitNodeService {
 
             if (CollectionUtils.isNotEmpty(approvalList)) {
                 // 下一个动作是自动审批
-                nextAction = createWorkflowAutoApproveActions(workflowActionService, approvalList);
+                nextAction = WorkflowAutoApproveAction.createActions(
+                        workflowActionService, approvalList);
             } else {
                 // 没有下一个动作
                 nextAction = null;
@@ -249,31 +250,6 @@ public class WorkflowInitNodeService {
         // 下一个动作是移到下一节点
         result.setNext(nextAction);
         return result;
-    }
-
-    /**
-     * 创建自动审批动作并返回
-     * @verson 1.0
-     * @author mh.z
-     * @date 2019/04/27
-     *
-     * @param workflowActionService
-     * @param approvalList 审批操作
-     * @return 自动审批动作
-     */
-    protected List<WorkflowAutoApproveAction> createWorkflowAutoApproveActions(WorkflowActionService workflowActionService, List<WorkflowApproval> approvalList) {
-        CheckUtil.notNull(workflowActionService, "workflowActionService null");
-        CheckUtil.notNull(approvalList, "approvalList null");
-
-        List<WorkflowAutoApproveAction> actionList = new ArrayList<WorkflowAutoApproveAction>();
-        WorkflowAutoApproveAction action = null;
-
-        for (WorkflowApproval approval : approvalList) {
-            action = new WorkflowAutoApproveAction(workflowActionService, approval);
-            actionList.add(action);
-        }
-
-        return actionList;
     }
 
 }

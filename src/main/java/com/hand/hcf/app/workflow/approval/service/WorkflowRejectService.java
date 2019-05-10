@@ -35,13 +35,7 @@ public class WorkflowRejectService {
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
-    private WorkflowBaseService workflowBaseService;
-
-    @Autowired
     private WorkflowMainService workflowMainService;
-
-    @Autowired
-    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
     @Autowired
     private WorkflowActionService workflowActionService;
@@ -71,12 +65,13 @@ public class WorkflowRejectService {
         Integer entityType = null;
         UUID entityOid = null;
         String approvalText = approvalReqDTO.getApprovalTxt();
+        Integer rejectRule = approvalReqDTO.getRejectRule();
 
         for (ApprovalReqDTO.Entity entity : entityList) {
             entityType = entity.getEntityType();
             entityOid = UUID.fromString(entity.getEntityOid());
             // 驳回审批
-            doRejectWorkflow(entityType, entityOid, userOid, approvalText);
+            doRejectWorkflow(entityType, entityOid, userOid, approvalText, rejectRule);
             // 累加成功数
             approvalResDTO.setSuccessNum(approvalResDTO.getSuccessNum() + 1);
         }
@@ -94,8 +89,9 @@ public class WorkflowRejectService {
      * @param entityOid 单据oid
      * @param userOid 审批人oid
      * @param approvalText 审批意见
+     * @param rejectRule 驳回驳回
      */
-    protected void doRejectWorkflow(Integer entityType, UUID entityOid, UUID userOid, String approvalText) {
+    protected void doRejectWorkflow(Integer entityType, UUID entityOid, UUID userOid, String approvalText, Integer rejectRule) {
         Assert.notNull(entityType, "entityType null");
         Assert.notNull(entityOid, "entityOid null");
         Assert.notNull(userOid, "userOid null");
@@ -107,16 +103,10 @@ public class WorkflowRejectService {
         WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowRejectTaskAction action = new WorkflowRejectTaskAction(workflowActionService, instance, user, approvalText);
+        action.setRejectRule(rejectRule);
 
-        // 对同个实例的操作不支持并发
-        workflowBaseService.lockInstance(instance);
         // 驳回任务
-        workflowMainService.runWorkflow(instance, action);
-
-        // 刷新实例
-        workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 通知审批结果
-        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
+        workflowMainService.runWorkflowAndSendMessage(instance, action);
     }
 
 }

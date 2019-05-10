@@ -20,6 +20,6 @@ public class SortBySequenceDTO implements Serializable {
     @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "id")
     private Long id;
-    @ApiModelProperty(value = "–Ú¡–")
+    @ApiModelProperty(value = "Â∫èÂàó")
     private Integer sequence;
 }

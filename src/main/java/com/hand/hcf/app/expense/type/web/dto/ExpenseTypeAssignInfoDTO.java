@@ -15,15 +15,15 @@ import java.util.List;
  * @Author: bin.xie
  * @Date: 2018/11/12
  */
-@ApiModel(description = "·ÑÓÃÀàĞÍ·ÖÅäĞÅÏ¢")
+@ApiModel(description = "è´¹ç”¨ç±»å‹åˆ†é…ä¿¡æ¯")
 @Data
 public class ExpenseTypeAssignInfoDTO implements Serializable {
-    @ApiModelProperty(value = "·ÖÅäÓÃ»§")
+    @ApiModelProperty(value = "åˆ†é…ç”¨æˆ·")
     private List<ExpenseTypeAssignUser> assignUsers;
-    @ApiModelProperty(value = "·ÖÅä¹«Ë¾")
+    @ApiModelProperty(value = "åˆ†é…å…¬å¸")
     private List<ExpenseTypeAssignCompany> assignCompanies;
-    @ApiModelProperty(value = "È«¹«Ë¾±êÖ¾")
+    @ApiModelProperty(value = "å…¨å…¬å¸æ ‡å¿—")
     private Boolean allCompanyFlag;
-    @ApiModelProperty(value = "ÉêÇëÀàĞÍ")
+    @ApiModelProperty(value = "ç”³è¯·ç±»å‹")
     private Integer applyType;
 }

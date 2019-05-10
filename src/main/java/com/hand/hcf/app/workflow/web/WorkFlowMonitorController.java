@@ -5,6 +5,9 @@ import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.workflow.brms.dto.ReturnNode;
 import com.hand.hcf.app.workflow.dto.*;
+import com.hand.hcf.app.workflow.dto.monitor.MonitorReturnNodeDTO;
+import com.hand.hcf.app.workflow.dto.monitor.WorkFlowMonitorDTO;
+import com.hand.hcf.app.workflow.dto.monitor.WorkflowJumpDTO;
 import com.hand.hcf.app.workflow.service.WorkFLowMonitorService;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
@@ -29,16 +32,16 @@ public class WorkFlowMonitorController {
 
     @GetMapping(value = "/query")
         public ResponseEntity<List<WorkFlowMonitorDTO>> pageWorkflowMonitorByCond(@ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId",required = false) Long booksID,
-                                                              @ApiParam(value = "单据大类") @RequestParam(value = "documentCategory",required = false) Integer documentCategory,
-                                                              @ApiParam(value = "创建人") @RequestParam(value = "createdBy",required = false) Long createdBy,
-                                                              @ApiParam(value = "状态") @RequestParam(value = "currentStatus",required = false) Integer status,
-                                                              @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber",required = false) String documentNumber,
-                                                              @ApiParam(value = "申请日期至") @RequestParam(value = "startDate",required = false) String startDate,
-                                                              @ApiParam(value = "申请日期到") @RequestParam(value = "endDate",required = false) String endDate,
-                                                              @ApiParam(value = "当前审批人") @RequestParam(value = "lastApproverOid",required = false) UUID lastApproverOid,
-                                                              @ApiParam(value = "工作流名称") @RequestParam(value = "formName",required = false) String formName,
-                                                              @ApiParam(value = "页码") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                              @ApiParam(value = "每页条数") @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+                                                                                  @ApiParam(value = "单据大类") @RequestParam(value = "documentCategory",required = false) Integer documentCategory,
+                                                                                  @ApiParam(value = "创建人") @RequestParam(value = "createdBy",required = false) Long createdBy,
+                                                                                  @ApiParam(value = "状态") @RequestParam(value = "currentStatus",required = false) Integer status,
+                                                                                  @ApiParam(value = "单据编号") @RequestParam(value = "documentNumber",required = false) String documentNumber,
+                                                                                  @ApiParam(value = "申请日期至") @RequestParam(value = "startDate",required = false) String startDate,
+                                                                                  @ApiParam(value = "申请日期到") @RequestParam(value = "endDate",required = false) String endDate,
+                                                                                  @ApiParam(value = "当前审批人") @RequestParam(value = "lastApproverOid",required = false) UUID lastApproverOid,
+                                                                                  @ApiParam(value = "工作流名称") @RequestParam(value = "formName",required = false) String formName,
+                                                                                  @ApiParam(value = "页码") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                  @ApiParam(value = "每页条数") @RequestParam(value = "size", required = false, defaultValue = "10") int size){
 
         //日期格式转换
         ZonedDateTime startTimeForDay = null;
@@ -57,7 +60,7 @@ public class WorkFlowMonitorController {
     }
 
     @PostMapping("/jump")
-    public ResponseEntity<ApprovalResDTO> workFlowJump(@RequestBody  WorkflowJumpDTO dto){
+    public ResponseEntity<ApprovalResDTO> workFlowJump(@RequestBody WorkflowJumpDTO dto){
         ApprovalResDTO approvalResDTO = workFLowMonitorService.workFlowJump(dto.getRuleApprovalNodeOid(), dto.getEntityOid(), dto.getEntityType());
         return ResponseEntity.ok(approvalResDTO);
     }

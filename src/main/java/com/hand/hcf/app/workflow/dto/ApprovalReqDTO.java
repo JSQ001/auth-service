@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.dto;
 
-import com.hand.hcf.app.workflow.enums.BackTypeEnum;
+import com.hand.hcf.app.workflow.approval.enums.BackTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

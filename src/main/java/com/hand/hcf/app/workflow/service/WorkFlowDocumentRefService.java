@@ -13,15 +13,15 @@ import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.ApprovalDocumentDTO;
+import com.hand.hcf.app.workflow.dto.document.ApprovalDocumentDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalChainStatusEnum;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
 import com.hand.hcf.app.workflow.util.CheckUtil;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import com.hand.hcf.app.workflow.util.StringUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -433,18 +433,18 @@ public class WorkFlowDocumentRefService extends BaseService<WorkFlowDocumentRefM
     public void updateDocumentStatus(Integer entityType, UUID entityOid, DocumentOperationEnum status) {
         WorkFlowDocumentRef workFlowDocumentRef = getByDocumentOidAndDocumentCategory(entityOid, entityType);
         if (workFlowDocumentRef == null) {
-            throw new BizException(ExceptionCode.NOT_FOUND_THE_DOCUMENT);
+            throw new BizException(LocaleMessageConstants.NOT_FOUND_THE_DOCUMENT);
         }
 
         // 该接口只能复核拒绝单据
         if (!DocumentOperationEnum.AUDIT_REJECT.equals(status)) {
-            throw new BizException(ExceptionCode.THE_API_ONLY_SUPPORT_AUDIT_REJECT);
+            throw new BizException(LocaleMessageConstants.THE_API_ONLY_SUPPORT_AUDIT_REJECT);
         }
 
         Integer documentStatus = workFlowDocumentRef.getStatus();
         // 只能复核拒绝已经审批通过的单据
         if (!DocumentOperationEnum.APPROVAL_PASS.getId().equals(documentStatus)) {
-            throw new BizException(ExceptionCode.ONLY_AUDIT_REJECT_PASSED_DOCUMENT);
+            throw new BizException(LocaleMessageConstants.ONLY_AUDIT_REJECT_PASSED_DOCUMENT);
         }
 
         workFlowDocumentRef.setStatus(status.getId());

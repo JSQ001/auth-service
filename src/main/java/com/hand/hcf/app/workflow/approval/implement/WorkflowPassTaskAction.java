@@ -86,7 +86,7 @@ public class WorkflowPassTaskAction implements WorkflowAction {
         // 2.更新任务的审批状态成已审批
         // 3.保存通过操作的历史
         // 4.更新实例最后审批人
-        // 下一节点
+        // 下一动作：
         //   a.如果是机器人则下一个动作是通过实例
         //   b.如果不是机器人则下一个动作是通过节点
 

@@ -11,6 +11,7 @@ import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
+import com.hand.hcf.app.workflow.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,7 @@ public class WorkflowPassNodeAction implements WorkflowAction {
         WorkflowInstance instance = CheckUtil.notNull(node.getInstance(), "node.instance null");
         WorkflowRule rule = CheckUtil.notNull(node.getRule(), "node.rule null");
         Integer countersignFlag = CheckUtil.notNull(rule.getCountersignRule(), "node.rule.countersignRule null");
+        String returnMessage = null;
 
         // 通过节点的逻辑：
         // 根据会签规则可以通过节点
@@ -130,6 +132,8 @@ public class WorkflowPassNodeAction implements WorkflowAction {
                 // 下一个动作是移到下个节点
                 nextAction = new WorkflowNextNodeAction(service, instance, node);
             }
+
+            returnMessage = StringUtil.concat("unfinished task total is ", unfinishedTaskList.size());
         } else {
             returnStatus = WorkflowPassNodeAction.RESULT_PASS_PEND;
             // 没有下一个动作
@@ -140,6 +144,7 @@ public class WorkflowPassNodeAction implements WorkflowAction {
         result.setEntity(node);
         result.setStatus(returnStatus);
         result.setNext(nextAction);
+        result.setMessage(returnMessage);
         return result;
     }
 
@@ -174,13 +179,8 @@ public class WorkflowPassNodeAction implements WorkflowAction {
             return null;
         }
 
-        List<WorkflowAutoApproveAction> actionList = new ArrayList<WorkflowAutoApproveAction>();
-        WorkflowAutoApproveAction action = null;
-        for (WorkflowApproval approval : approvalList) {
-            action = new WorkflowAutoApproveAction(service, approval);
-            actionList.add(action);
-        }
-
+        List<WorkflowAutoApproveAction> actionList = WorkflowAutoApproveAction
+                .createActions(service, approvalList);
         return actionList;
     }
 

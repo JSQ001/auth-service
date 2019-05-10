@@ -33,16 +33,10 @@ import java.util.UUID;
 @Service
 public class WorkflowPassService {
     @Autowired
-    private WorkflowBaseService workflowBaseService;
-
-    @Autowired
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
     private WorkflowMainService workflowMainService;
-
-    @Autowired
-    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
 
     @Autowired
     private WorkflowActionService workflowActionService;
@@ -108,15 +102,8 @@ public class WorkflowPassService {
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowPassTaskAction action = new WorkflowPassTaskAction(workflowActionService, instance, user, approvalText);
 
-        // 对同个实例的操作不支持并发
-        workflowBaseService.lockInstance(instance);
         // 通过任务
-        workflowMainService.runWorkflow(instance, action);
-
-        // 刷新实例
-        workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 通知审批结果
-        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
+        workflowMainService.runWorkflowAndSendMessage(instance, action);
     }
 
 }

@@ -1,8 +1,8 @@
 package com.hand.hcf.app.workflow.approval.dto;
 
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
 
 /**
  * 工作流规则
@@ -15,6 +15,9 @@ public class WorkflowRule {
      */
 
     private RuleApprovalNode ruleApprovalNode;
+
+    /** 驳回规则（不为null的时候会覆盖节点设置的驳回规则） */
+    private Integer rejectRule;
 
     /** 会签规则-所有审批人（所有审批人审批通过则单据审批通过，任一审批人审批驳回则单据被驳回） */
     public static final Integer COUNTERSIGN_ALL_PASS_OR_ANY_REJECT = RuleApprovalEnum.RULE_CONUTERSIGN_ALL.getId();
@@ -73,7 +76,20 @@ public class WorkflowRule {
      * @return
      */
     public Integer getRejectRule() {
+        if (rejectRule != null) {
+            return rejectRule;
+        }
+
         return ruleApprovalNode.getRejectRule();
+    }
+
+    /**
+     * 驳回规则
+     *
+     * @param rejectRule
+     */
+    public void setRejectRule(Integer rejectRule) {
+        this.rejectRule = rejectRule;
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.hand.hcf.app.workflow.web;
 
-import com.hand.hcf.app.workflow.dto.ApprovalFormPropertyRuleDTO;
+import com.hand.hcf.app.workflow.dto.form.ApprovalFormPropertyRuleDTO;
 import com.hand.hcf.app.workflow.service.ApprovalFormPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

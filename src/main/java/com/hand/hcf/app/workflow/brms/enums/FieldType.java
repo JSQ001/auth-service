@@ -1,7 +1,6 @@
 package com.hand.hcf.app.workflow.brms.enums;
 
 import com.hand.hcf.app.core.enums.SysEnum;
-import com.hand.hcf.app.workflow.enums.FieldDataTypeEnum;
 import lombok.AllArgsConstructor;
 
 /**

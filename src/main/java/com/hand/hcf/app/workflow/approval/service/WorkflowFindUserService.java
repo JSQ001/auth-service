@@ -9,10 +9,10 @@ import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApproverDTO;
 import com.hand.hcf.app.workflow.brms.service.DroolsService;
 import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
-import com.hand.hcf.app.workflow.constant.WorkflowConstants;
+import com.hand.hcf.app.workflow.constant.ValueConstants;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.AssembleBrmsParamsRespDTO;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
+import com.hand.hcf.app.workflow.dto.form.FormValueDTO;
 import com.hand.hcf.app.workflow.service.DefaultWorkflowIntegrationServiceImpl;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
@@ -106,7 +106,7 @@ public class WorkflowFindUserService {
         Map<String, Set<UUID>> userOidSetMap = defaultWorkflowIntegrationService.getApproverUserOids(
                 ruleApproverDTOList, formValueDTOList, applicantOid, droolsRuleApprovalNodeDTO);
         //
-        Set<UUID> userOidSet = userOidSetMap.get(WorkflowConstants.COUNTERSIGN_APPROVER);
+        Set<UUID> userOidSet = userOidSetMap.get(ValueConstants.COUNTERSIGN_APPROVER);
         //
         List<UUID> userOidList = defaultWorkflowIntegrationService.buildApproverByRule(
                 ruleApprovalNodeDTO, userOidSetMap, applicantOid, new ArrayList<UUID>(userOidSet));

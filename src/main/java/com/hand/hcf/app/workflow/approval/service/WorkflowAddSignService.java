@@ -3,16 +3,15 @@ package com.hand.hcf.app.workflow.approval.service;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
+import com.hand.hcf.app.workflow.approval.enums.ApprovalOrderEnum;
+import com.hand.hcf.app.workflow.approval.enums.CounterSignOrderEnum;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowAddSignAction;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.ApprovalResDTO;
-import com.hand.hcf.app.workflow.dto.CounterSignDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalOrderEnum;
-import com.hand.hcf.app.workflow.enums.CounterSignOrderEnum;
+import com.hand.hcf.app.workflow.dto.countersign.CounterSignDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
@@ -41,13 +40,6 @@ public class WorkflowAddSignService {
 
     @Autowired
     private WorkflowMainService workflowMainService;
-
-    @Autowired
-    private WorkflowBaseService workflowBaseService;
-
-
-    @Autowired
-    private ContactControllerImpl contactClient;
 
     @Autowired
     private BaseClient baseClient;
@@ -102,36 +94,34 @@ public class WorkflowAddSignService {
         CheckUtil.notNull(countersignOrder, "countersignOrder null");
         CheckUtil.notNull(approvalOrder, "approvalOrder null");
 
+        // 根据单据大类和单据oid查找单据
         WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService
                 .getByDocumentOidAndDocumentCategory(entityOid, entityType);
         if (workFlowDocumentRef == null) {
             throw new BizException(MessageConstants.NOT_FIND_THE_INSTANCE);
         }
 
+        // 获取当前用户的租户
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
-        List<ContactCO> signerCOList = getUsers(signerOidList);
-        // 只能加签同租户下的用户
-        checkTenant(tenantId, signerCOList);
-
-        List<WorkflowUser> signerList = new ArrayList<WorkflowUser>();
-        for (UUID signerOid : signerOidList) {
-            signerList.add(new WorkflowUser(signerOid));
-        }
+        // 根据oid获取加签人
+        List<ContactCO> signerCOList = baseClient.listContactCOs(signerOidList);
+        // 检查加签人的租户（只能加签同租户下的用户）
+        checkSignersTenant(tenantId, signerCOList);
 
         WorkflowInstance instance = new WorkflowInstance(workFlowDocumentRef);
         WorkflowUser user = new WorkflowUser(userOid);
-        String remark = getOperationRemark(signerCOList, countersignOrder, approvalOrder, approvalText);
+        List<WorkflowUser> signerList = WorkflowUser.createUsers(signerOidList);
+        String remark = getOperationDetail(signerCOList, countersignOrder, approvalOrder, approvalText);
+        // 创建加签动作
         WorkflowAddSignAction action = new WorkflowAddSignAction(workflowActionService, instance, user,
                 signerList, countersignOrder, approvalOrder, remark);
 
-        // 对同个实例的操作不支持并发
-        workflowBaseService.lockInstance(instance);
-        // 加签
-        workflowMainService.runWorkflow(instance, action);
+        // 执行加签的工作流逻辑
+        workflowMainService.runWorkflowAndSendMessage(instance, action);
     }
 
     /**
-     * 只能加签同租户下的用户
+     * 检查加签人的租户（只能加签同租户下的用户）
      * @version 1.0
      * @author mh.z
      * @date 2019/04/28
@@ -139,7 +129,7 @@ public class WorkflowAddSignService {
      * @param tenantId 租户id
      * @param signerList 加签人
      */
-    protected void checkTenant(Long tenantId, List<ContactCO> signerList) {
+    protected void checkSignersTenant(Long tenantId, List<ContactCO> signerList) {
         CheckUtil.notNull(tenantId, "tenantId null");
         CheckUtil.notNull(signerList, "signerList null");
 
@@ -152,26 +142,7 @@ public class WorkflowAddSignService {
     }
 
     /**
-     * 根据用户oid获取用户
-     * @version 1.0
-     * @author mh.z
-     * @date 2019/04/28
-     *
-     * @param userOidList 用户oid
-     * @return
-     */
-    protected List<ContactCO> getUsers(List<UUID> userOidList) {
-        CheckUtil.notNull(userOidList, "userOidList null");
-
-        Stream<String> stream = userOidList.stream().map(userOid -> userOid.toString());
-        List<String> userOidStrList = stream.collect(Collectors.toList());
-        List<ContactCO> userList = contactClient.listByUserOids(userOidStrList);
-
-        return userList;
-    }
-
-    /**
-     * 返回操作的描述
+     * 返回操作的详情
      * @version 1.0
      * @author mh.z
      * @date 2019/04/28
@@ -182,7 +153,7 @@ public class WorkflowAddSignService {
      * @param approvalText 加签理由
      * @return
      */
-    protected String getOperationRemark(List<ContactCO> signerList, Integer countersignOrder,
+    protected String getOperationDetail(List<ContactCO> signerList, Integer countersignOrder,
                                         Integer approvalOrder, String approvalText) {
         CheckUtil.notNull(signerList, "signerList null");
         CheckUtil.notNull(countersignOrder, "countersignOrder null");
@@ -209,9 +180,9 @@ public class WorkflowAddSignService {
         // 根据加签顺序和审批顺序获取多语言信息代码
         String messageCode = getMessageCode(countersignOrder, approvalOrder);
         // 调用第三方接口获取多语言信息
-        String operationRemark = baseClient.getMessageDetailByCode(
+        String operationDetail = baseClient.getMessageDetailByCode(
                 messageCode, true, signersBuffer, approvalText);
-        return operationRemark;
+        return operationDetail;
     }
 
     /**
