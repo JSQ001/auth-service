@@ -263,6 +263,8 @@ public class ApplicationDocumentController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity listClosedByCondition(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                                @ApiParam(value = "账套ID")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                                                @ApiParam(value = "部门ID")@RequestParam(value = "unitId", required = false) Long unitId,
                                                 @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
                                                 @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
                                                 @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
@@ -282,7 +284,7 @@ public class ApplicationDocumentController {
         }
         Page page = PageUtil.getPage(pageable);
         // 获取查询条件SQL
-        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber,setOfBooksId,unitId, typeId, requisitionDateFrom,
                 requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, false);
         //查询
         List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
@@ -314,6 +316,8 @@ public class ApplicationDocumentController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity listClosedByConditionEnableDataAuth(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                                @ApiParam(value = "账套ID")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                                                @ApiParam(value = "部门ID")@RequestParam(value = "unitId", required = false) Long unitId,
                                                 @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
                                                 @ApiParam(value = "日期从")  @RequestParam(value = "dateFrom", required = false) String dateFrom,
                                                 @ApiParam(value = "日期到")  @RequestParam(value = "dateTo", required = false) String dateTo,
@@ -333,7 +337,7 @@ public class ApplicationDocumentController {
         }
         Page page = PageUtil.getPage(pageable);
         // 获取查询条件SQL
-        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId,setOfBooksId,unitId, requisitionDateFrom,
                 requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, true);
         //查询
         List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
@@ -363,6 +367,7 @@ public class ApplicationDocumentController {
     @PostMapping("/header/closed/export")
     @ApiOperation(value = "导出", notes = "导出 开发:bin.xie")
     public void export(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                       @ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
                        @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
                        @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
                        @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
@@ -381,7 +386,7 @@ public class ApplicationDocumentController {
         if (requisitionDateTo != null) {
             requisitionDateTo = requisitionDateTo.plusDays(1);
         }
-        service.exportClosedExcel(documentNumber, typeId, requisitionDateFrom, requisitionDateTo, amountFrom, amountTo,
+        service.exportClosedExcel(documentNumber, setOfBooksId,typeId, requisitionDateFrom, requisitionDateTo, amountFrom, amountTo,
                 closedFlag, currencyCode, remarks, employeeId, companyId, response, request, exportConfig);
 
     }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 //import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -639,6 +640,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             co.setCshFlowItemId(paymentSchedule.getCashFlowItemId());
             co.setContractHeaderId(expenseReportHeader.getContractHeaderId());
             co.setPaymentMethodCategory(paymentSchedule.getPaymentMethod());
+            //jiu.zhao TODO
+            /*co.setPaymentType(paymentSchedule.getPaymentType());
+            co.setPropFlag(paymentSchedule.getPropFlag());*/
             co.setRemark(paymentSchedule.getDescription());
             co.setFrozenFlag("Y".equals(paymentSchedule.getFrozenFlag()) ? true : false);
             //单据OID
@@ -749,7 +753,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             );
             ExpensePolicyMatchDimensionDTO matchDimensionDTO = ExpensePolicyMatchDimensionDTO
                     .builder()
-                    .expenseTypeFlag(0)
+                    //0为申请政策，1为报销政策
+                    .expenseTypeFlag(1)
                     .companyId(header.getCompanyId())
                     .applicationId(header.getApplicantId())
                     .currencyCode(line.getCurrencyCode())
@@ -947,7 +952,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         //默认创建的分摊数据不完整
         for (ExpenseReportPaymentSchedule expensePaymentSchedule : paymentScheduleList) {
             if (expensePaymentSchedule.getAccountName() == null || expensePaymentSchedule.getAccountNumber() == null
-                    /*|| expensePaymentSchedule.getCshTransactionClassId() == null*/) { //jiu.zhao 无支付模块所以不需要付款方式
+                    || expensePaymentSchedule.getCshTransactionClassId() == null) {
                 throw new BizException(RespCode.EXPENSE_REPORT_PAYMENT_INFO_ERROR);
             }
         }
@@ -1067,10 +1072,17 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param status   状态
      */
     @Transactional(rollbackFor = Exception.class)
-    //@LcnTransaction
-   //@SyncLock(lockPrefix = SyncLockPrefix.PUBLIC_REPORT)
     public void updateDocumentStatus(Long headerId, Integer status, String approvalText) {
         ExpenseReportHeader header = this.selectById(headerId);
+        updateDocumentStatus(header,status,approvalText);
+    }
+
+    /**
+     * @param header 申请单头
+     * @param status   状态
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDocumentStatus(ExpenseReportHeader header, Integer status, String approvalText) {
         if (header == null) {
             throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);
         }
@@ -1078,9 +1090,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             checkDocumentStatus(status,header.getStatus());
             header.setStatus(status);
             //审批拒绝  撤回 如果有预算需要释放，
-            rollBackBudget(headerId);
+            rollBackBudget(header.getId());
             //删除费用申请释放信息
-            expenseRequisitionReleaseService.deleteExpenseRequisitionReleaseMsg(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), headerId, null, null);
+            expenseRequisitionReleaseService.deleteExpenseRequisitionReleaseMsg(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), header.getId(), null, null);
             //核销回滚
             //jiu.zhao 支付
             //paymentService.updateWriteOffRollback(ExpenseDocumentTypeEnum.PUBLIC_REPORT.name(),header.getId(),Arrays.asList(),LoginInformationUtil.getCurrentUserId());
@@ -1116,9 +1128,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 throw new BizException(RespCode.EXPENSE_REPORT_STATUS_ERROR);
             }
             //审批拒绝  撤回 如果有预算需要释放，
-            rollBackBudget(headerId);
+            rollBackBudget(header.getId());
             //删除费用申请释放信息
-            expenseRequisitionReleaseService.deleteExpenseRequisitionReleaseMsg(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), headerId, null, null);
+            expenseRequisitionReleaseService.deleteExpenseRequisitionReleaseMsg(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), header.getId(), null, null);
             //释放合同关联信息
             deleteContractDocumentRelations(header);
             //核销回滚
@@ -1508,6 +1520,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     }
 
     public List<ExpenseReportHeaderDTO> queryExpenseReportsFinance(Long companyId,
+                                                                   Long setOfBooksId,
                                                                    Long documentTypeId,
                                                                    ZonedDateTime reqDateFrom,
                                                                    ZonedDateTime reqDateTo,
@@ -1560,6 +1573,14 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                                          , applicantId, status, currencyCode, amountFrom, amountTo,
                                          remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId).and(dataAuthLabel !=  null,dataAuthLabel),
                                          page);
+                        for (ExpenseReportHeaderDTO expenseReportHeaderDTO : reportHeaderDTOS) {
+                            // 返回账套code、账套name
+                            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expenseReportHeaderDTO.getSetOfBooksId(), false);
+                            if (setOfBooksInfoCOById != null) {
+                                expenseReportHeaderDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                                expenseReportHeaderDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+                            }
+                        }
                     }
                          //为空则 返回前台空数据。
             }else{
@@ -1567,6 +1588,14 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                         , applicantId, status, currencyCode, amountFrom, amountTo,
                         remark, requisitionNumber, unitId, cDateFrom, cDateTo,tenantId).and(dataAuthLabel !=  null,dataAuthLabel),
                         page);
+                for (ExpenseReportHeaderDTO expenseReportHeaderDTO : reportHeaderDTOS) {
+                    // 返回账套code、账套name
+                    SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expenseReportHeaderDTO.getSetOfBooksId(), false);
+                    if (setOfBooksInfoCOById != null) {
+                        expenseReportHeaderDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                        expenseReportHeaderDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+                    }
+                }
             }
 
               //拼接数据
@@ -2195,17 +2224,47 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                     invoiceLineExpenceService.updateBatchById(list);
                 }
 
-                //报账单审核驳回
+                //拒绝原因
                 rejectReason = rejectType + "-" + rejectReason;
-                updateDocumentStatus(expenseReportHeaderId,DocumentOperationEnum.AUDIT_REJECT.getId(),rejectReason);
 
-                //更新报账单 是否通过比对标志
-                ExpenseReportHeader expenseReportHeader = this.selectById(expenseReportHeaderId);
-                if (expenseReportHeader == null) {
+                ExpenseReportHeader header = this.selectById(expenseReportHeaderId);
+                if (header == null) {
                     throw new BizException(RespCode.EXPENSE_REPORT_HEADER_IS_NUTT);
                 }
-                expenseReportHeader.setComparisonFlag("N");
-                this.updateById(expenseReportHeader);
+
+                //TODO 单据退回目前与工作台退回至申请人完全相同 如需状态变更 需与工作流沟通
+                //单据退回 如果有预算需要释放，
+                rollBackBudget(expenseReportHeaderId);
+                //删除费用申请释放信息
+                expenseRequisitionReleaseService.deleteExpenseRequisitionReleaseMsg(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), expenseReportHeaderId, null, null);
+                //释放合同关联信息
+                deleteContractDocumentRelations(header);
+                //核销回滚
+                paymentService.updateAuditChangeWriteOffStatus(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), expenseReportHeaderId,LoginInformationUtil.getCurrentUserId(),-1);
+                //删除凭证
+                if (BooleanUtils.isTrue(header.getJeCreationStatus())) {
+                    //accountingService.deleteExpReportGeneralLedgerJournalDataByHeaderId(header.getId());
+                    header.setJeCreationStatus(false);
+                    header.setJeCreationDate(null);
+                }
+                header.setStatus(DocumentOperationEnum.APPROVAL_REJECT.getId());
+                // 删除工作流实列
+                workflowClient.updateDocumentStatus(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey(),
+                        UUID.fromString(header.getDocumentOid()), DocumentOperationEnum.AUDIT_REJECT);
+                //计入工作流日志
+                CommonApprovalHistoryCO approvalHistoryCO = new CommonApprovalHistoryCO();
+                approvalHistoryCO.setEntityOid(UUID.fromString(header.getDocumentOid()));
+                approvalHistoryCO.setEntityType(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getKey());
+                approvalHistoryCO.setOperatorOid(OrgInformationUtil.getCurrentUserOid());
+                approvalHistoryCO.setOperationDetail(rejectReason);
+                approvalHistoryCO.setOperationType(1009);
+                approvalHistoryCO.setOperation(1004);
+                workflowClient.saveHistory(approvalHistoryCO);
+                //更新报账单 是否通过比对标志
+                header.setComparisonFlag("N");
+                //更新报账单 审核通过标志
+                header.setAuditFlag("N");
+                this.updateById(header);
             }
         }else {
             //TODO 补寄逻辑 单据签收中比对功能未完成 暂时无法开发

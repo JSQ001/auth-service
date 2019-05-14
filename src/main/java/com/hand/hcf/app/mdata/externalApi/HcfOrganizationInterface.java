@@ -30,7 +30,7 @@ public class HcfOrganizationInterface {
     private UserControllerImpl userClient;
 
     @Autowired
-    private AttchmentControllerImpl attachmentClient;
+    private AttachmentControllerImpl attachmentClient;
     @Autowired
     private CompanyControllerImpl companyClient;
     @Autowired
@@ -76,7 +76,7 @@ public class HcfOrganizationInterface {
     }
 
     public AttachmentCO uploadStatic(MultipartFile file, AttachmentType attachmentType){
-        return attachmentClient.uploadStatic(file,attachmentType.name());
+        return attachmentClient.uploadStatic(file,attachmentType.name(), (String)null);
     }
 
     //删除附件

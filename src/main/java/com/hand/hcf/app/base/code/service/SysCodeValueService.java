@@ -9,6 +9,7 @@ import com.hand.hcf.app.base.code.persistence.SysCodeMapper;
 import com.hand.hcf.app.base.code.persistence.SysCodeValeMapper;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.persistence.TenantMapper;
+import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
@@ -82,7 +83,7 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
     }
     private void initOtherTenantBatch(SysCode sysCode, List<SysCodeValue> sysCodeValues) {
         Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
-        if (tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
+        if (tenant != null && tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
             List<SysCode> codes = sysCodeMapper.selectList(new EntityWrapper<SysCode>()
                     .eq("code", sysCode.getCode()));
             if (!org.springframework.util.CollectionUtils.isEmpty(codes)) {
@@ -123,5 +124,28 @@ public class SysCodeValueService extends BaseService<SysCodeValeMapper, SysCodeV
             }
         });
         return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void insertOrUpdateSysCodeValue(SysCode sysCode, SysCodeValueCO sysCodeValueCO) {
+        SysCodeValue sysCodeValue = this.selectOne(getWrapper()
+                .eq("code_id", sysCode.getId())
+                .eq("value", sysCodeValueCO.getValue()));
+        if (null == sysCodeValue) {
+            sysCodeValue = SysCodeValue.builder()
+                    .value(sysCodeValueCO.getValue())
+                    .name(sysCodeValueCO.getName())
+                    .remark(sysCodeValueCO.getRemark())
+                    .codeId(sysCode.getId())
+                    .build();
+            sysCodeValue.setEnabled(sysCodeValueCO.getEnabled() == null ? true : sysCodeValueCO.getEnabled());
+            this.insert(sysCodeValue);
+        } else {
+            sysCodeValue.setName(sysCodeValueCO.getName());
+            sysCodeValue.setRemark(sysCodeValueCO.getRemark());
+            sysCodeValue.setEnabled(sysCodeValueCO.getEnabled() == null
+                    ? sysCodeValue.getEnabled() : sysCodeValueCO.getEnabled());
+            this.updateById(sysCodeValue);
+        }
     }
 }

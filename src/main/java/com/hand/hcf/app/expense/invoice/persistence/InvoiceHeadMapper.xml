@@ -80,4 +80,17 @@
         </if>
 
     </select>
+
+    <select id="getInvoiceHeadIdByReportLineId" resultType="long">
+        SELECT ih.id
+          FROM invoice_line_expence ile
+         INNER JOIN invoice_line_dist ild
+            ON ild.id = ile.invoice_dist_id
+         INNER JOIN invoice_line il
+            ON il.id = ild.invoice_line_id
+         INNER JOIN invoice_head ih
+            ON ih.id = il.invoice_head_id
+         WHERE ile.exp_expense_line_id = #{reportLineId}
+         group by ih.id
+    </select>
 </mapper>

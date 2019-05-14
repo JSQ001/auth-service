@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.system.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.base.system.domain.Application;
 import com.hand.hcf.app.base.system.domain.FrontLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.persistence.FrontLocaleMapper;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -34,6 +36,8 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
     private  FrontLocaleMapper frontLocaleMapper;
     @Autowired
     private  TenantService tenantService;
+    @Autowired
+    private ApplicationService applicationService;
     /**
      * 单个新增 前端多语言
      * @param frontLocale
@@ -264,4 +268,34 @@ public class FrontLocaleService extends BaseService<FrontLocaleMapper,FrontLocal
         }
     }
 
+    /**
+     * 新增前端多语言给所有的租户，存在就删除
+     * @param list
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchInsertAllTenant(List<FrontLocale> list) {
+        List<Tenant> all = tenantService.findAll();
+        List<Application> applications = applicationService.listAll(null, null);
+        Map<String, Application> appMap = applications.stream().collect(Collectors.toMap(Application::getAppCode, e -> e));
+        List<FrontLocale> result;
+        for (FrontLocale frontLocale : list) {
+            this.delete(getWrapper()
+                    .eq("key_code", frontLocale.getKeyCode())
+                    .eq("language", frontLocale.getLanguage()));
+            if (appMap.containsKey(frontLocale.getApplicationCode())) {
+                result = all.stream().map(e -> {
+                    FrontLocale v = FrontLocale.builder()
+                            .applicationCode(frontLocale.getApplicationCode())
+                            .applicationId(appMap.get(frontLocale.getApplicationCode()).getId())
+                            .keyCode(frontLocale.getKeyCode())
+                            .keyDescription(frontLocale.getKeyDescription())
+                            .language(frontLocale.getLanguage())
+                            .tenantId(e.getId()).build();
+                    v.setDeleted(false);
+                    return v;
+                }).collect(Collectors.toList());
+                this.insertBatch(result);
+            }
+        }
+    }
 }

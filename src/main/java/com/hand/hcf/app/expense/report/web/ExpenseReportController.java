@@ -32,7 +32,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
 
 /**
  * @apiDefine ExpenseReport 报账单
@@ -380,6 +380,7 @@ public class ExpenseReportController {
     })
     public ResponseEntity<List<ExpenseReportHeaderDTO>> MyExpenseReportsFinanceQuery(
                                                                                     @ApiParam(value = "公司ID") @RequestParam(required = false)Long companyId,
+                                                                                    @ApiParam(value = "账套ID")@RequestParam(required = false)Long setOfBooksId,
                                                                                     @ApiParam(value = "报账单类型ID") @RequestParam(required = false) Long documentTypeId,
                                                                                     @ApiParam(value = "申请人ID") @RequestParam(required = false,value = "applyId") Long applicantId,
                                                                                     @ApiParam(value = "状态") @RequestParam(required = false) Integer status,
@@ -407,6 +408,7 @@ public class ExpenseReportController {
         //首先在费用模块根据条件全部查询出来， 然后再将符合条件的单据编号单据id输出至支付模块， 再信息返回回来。然后在进行比对筛选
         List<ExpenseReportHeaderDTO> list =expenseReportHeaderService.queryExpenseReportsFinance(
                 companyId,
+                null,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -438,6 +440,7 @@ public class ExpenseReportController {
     })
     public ResponseEntity<List<ExpenseReportHeaderDTO>> MyExpenseReportsFinanceQueryDataAuth(
             @ApiParam(value = "公司ID") @RequestParam(required = false)Long companyId,
+            @ApiParam(value = "账套ID")@RequestParam(required = false)Long setOfBooksId,
             @ApiParam(value = "报账单类型ID")@RequestParam(required = false) Long documentTypeId,
             @ApiParam(value = "申请人ID") @RequestParam(required = false,value = "applyId") Long applicantId,
             @ApiParam(value = "状态") @RequestParam(required = false) Integer status,
@@ -465,6 +468,7 @@ public class ExpenseReportController {
         //首先在费用模块根据条件全部查询出来， 然后再将符合条件的单据编号单据id输出至支付模块， 再信息返回回来。然后在进行比对筛选
         List<ExpenseReportHeaderDTO> list =expenseReportHeaderService.queryExpenseReportsFinance(
                 companyId,
+                setOfBooksId,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -611,7 +615,7 @@ public class ExpenseReportController {
      * @return
      */
     @PostMapping("/header/auto/create")
-    @ApiOperation(value = "自动报账", notes = "根据费用类型以及账本信息或者发票信息，自动生成报账单 开发:kai.zhang")
+    @ApiOperation(value = "自动生成报账单", notes = "根据费用类型以及账本信息或者发票信息，自动生成报账单 开发:kai.zhang")
     public ResponseEntity<Long> autoCreateExpenseReport(@ApiParam(value = "自动生成报账单所需信息") @RequestBody @Valid ExpenseReportAutoCreateDTO expenseReportAutoCreateDTO){
         return ResponseEntity.ok(expenseReportHeaderService.autoCreateExpenseReport(expenseReportAutoCreateDTO));
     }
@@ -622,7 +626,7 @@ public class ExpenseReportController {
      * @return
      */
     @PostMapping("/books/auto/create")
-    @ApiOperation(value = "自动报账", notes = "根据发票信息，自动生成账本 开发:kai.zhang")
+    @ApiOperation(value = "自动生成报账本", notes = "根据发票信息，自动生成账本 开发:kai.zhang")
     public ResponseEntity<ExpenseReportInvoiceMatchResultDTO> createExpenseBookByInvoice(@ApiParam(value = "自动生成账本所需信息") @RequestBody List<InvoiceDTO> invoiceDTOS){
         return ResponseEntity.ok(expenseReportHeaderService.createExpenseBookByInvoice(invoiceDTOS,false));
     }

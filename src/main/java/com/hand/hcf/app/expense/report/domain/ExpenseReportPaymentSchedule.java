@@ -3,6 +3,8 @@ package com.hand.hcf.app.expense.report.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import java.time.ZonedDateTime;
  * @create 2019/3/5 14:10
  * @remark
  */
+@ApiModel(description = "报账单计划付款行表实体类")
 @Data
 @TableName("exp_report_payment_schedule")
 public class ExpenseReportPaymentSchedule extends Domain {
@@ -95,9 +98,24 @@ public class ExpenseReportPaymentSchedule extends Domain {
     /**
      * 付款方式类型（线上：ONLINE_PAYMENT；线下：OFFLINE_PAYMENT；落地文件：EBANK_PAYMENT)
      */
-    @NotNull
     @TableField(value = "payment_method")
     private String paymentMethod;
+
+    /**
+     * 付款方式 (付款方式值列表：ZJ_PAYMENT_TYPE)
+     */
+    @ApiModelProperty(value = "付款方式")
+    @TableField("payment_type")
+    @NotNull
+    private String paymentType;
+
+    /**
+     * 账户属性 (“对私”（PRIVATE）和“对公”（BUSINESS）)
+     */
+    @ApiModelProperty(value = "账户属性")
+    @TableField("prop_flag")
+    @NotNull
+    private String propFlag;
 
     /**
      * 付款用途ID

@@ -25,49 +25,19 @@ public interface IAttachment {
 
     String upload(String path, byte[] bytes);
 
-    Attachment upload(MultipartFile file, AttachmentType attachmentType);
+    Attachment upload(MultipartFile file, String attachmentType, String pkValue);
 
-    AttachmentCO uploadFile(MultipartFile file, AttachmentType attachmentType);
+    AttachmentCO uploadFile(MultipartFile file, String attachmentType, String pkValue);
 
-    AttachmentCO uploadFileAsync(MultipartFile file, AttachmentType attachmentType);
 
-    /**
-     * 上传附件
-     *
-     * @param content
-     * @param fileName
-     * @param attachmentType
-     * @return
-     */
-    AttachmentCO uploadFile(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid);
-    String uploadStaticFile(String path, byte[] bytes);
-    Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType);
+    Attachment uploadStatic(MultipartFile file, String attachmentType, String pkValue);
 
-    Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType, String fileName);
 
-    Attachment uploadStatic(byte[] content, AttachmentType attachmentType, String filename, Long length);
-
-    AttachmentCO uploadStaticFile(MultipartFile file, AttachmentType attachmentType);
-
-    AttachmentCO uploadStaticFile(MultipartFile file, AttachmentType attachmentType, String fileName);
-
-    AttachmentCO uploadStaticFile(byte[] content, AttachmentType attachmentType, String filename, Long length);
-
-    AttachmentCO uploadTempFile(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid);
-
-    Attachment uploadTempStatic(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid);
+    AttachmentCO uploadStaticFile(MultipartFile file, String attachmentType, String pkValue);
 
 
     void removeFile(boolean isPublic, String path);
 
-    /**
-     * 轮播图
-     *
-     * @param attachmentType
-     * @param file
-     * @return
-     */
-    String uploadPublicStaticAttachment( AttachmentType attachmentType, MultipartFile file);
 
     AttachmentCO adapterAttachmentCO(Attachment attachment);
 

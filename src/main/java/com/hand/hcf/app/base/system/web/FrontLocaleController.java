@@ -120,4 +120,11 @@ public class FrontLocaleController {
         frontLocaleService.initFrontLocale(tenantId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/batch/insert/all/tenant")
+    @ApiOperation(value = "新增多语言给全部租户", notes = "新增多语言给全部租户 开发:谢宾")
+    public ResponseEntity batchInsertAllTenant(@RequestBody List<FrontLocale> list){
+        frontLocaleService.batchInsertAllTenant(list);
+        return ResponseEntity.ok().build();
+    }
 }

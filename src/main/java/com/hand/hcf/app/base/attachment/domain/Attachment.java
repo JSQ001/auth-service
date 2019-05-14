@@ -52,5 +52,13 @@ public class Attachment extends Domain implements Serializable {
      * ftp 上绝对路径 上传方式不是FTP 请设置为空
      */
     private String absolutePath;
+    /**
+     * 业务类型主键
+     */
+    private String pkValue;
+    /**
+     * 业务类型名称
+     */
+    private String pkName;
 
 }

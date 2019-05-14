@@ -1,7 +1,9 @@
 package com.hand.hcf.app.expense.input.dto;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,4 +47,18 @@ public class ExpInputTaxHeaderDTO extends ExpInputTaxHeader {
      * 审核日期（导出进项税业务单时用）
      */
     private String lastUpdatedDateStr;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

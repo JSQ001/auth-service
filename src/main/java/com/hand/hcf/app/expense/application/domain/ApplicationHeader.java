@@ -10,6 +10,7 @@ import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.expense.application.enums.ClosedTypeEnum;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.common.utils.SqlConditionExpanse;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -165,4 +166,18 @@ public class ApplicationHeader extends Domain {
      * 已关闭金额(本位币)
      */
     private BigDecimal closedFunctionalAmount;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

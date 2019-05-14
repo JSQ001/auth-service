@@ -2,7 +2,7 @@ package com.hand.hcf.app.mdata.announcement.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
+import com.hand.hcf.app.base.implement.web.AttachmentControllerImpl;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.announcement.domain.Carousel;
@@ -15,7 +15,6 @@ import com.hand.hcf.app.mdata.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,7 +41,7 @@ public class CarouselService extends BaseService<CarouselMapper, Carousel> {
     private CarouselMapper carouselMapper;
 
     @Autowired
-    private AttchmentControllerImpl attachmentClient;
+    private AttachmentControllerImpl attachmentClient;
 
     @Autowired
     private CompanyService companyService;

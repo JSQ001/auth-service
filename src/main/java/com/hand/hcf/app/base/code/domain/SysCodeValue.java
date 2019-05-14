@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.annotation.I18nField;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
@@ -13,6 +16,9 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 @TableName("sys_code_value")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SysCodeValue extends DomainI18nEnable {
 
 

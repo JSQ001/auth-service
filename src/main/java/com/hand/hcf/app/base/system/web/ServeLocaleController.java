@@ -121,4 +121,12 @@ public class ServeLocaleController {
         serveLocaleService.initServeLocale(tenantId);
         return ResponseEntity.ok().build();
     }
+
+
+    @PostMapping("/batch/insert/all/tenant")
+    @ApiOperation(value = "新增多语言给全部租户", notes = "新增多语言给全部租户 开发:谢宾")
+    public ResponseEntity batchInsertAllTenant(@RequestBody List<ServeLocale> list){
+        serveLocaleService.batchInsertAllTenant(list);
+        return ResponseEntity.ok().build();
+    }
 }

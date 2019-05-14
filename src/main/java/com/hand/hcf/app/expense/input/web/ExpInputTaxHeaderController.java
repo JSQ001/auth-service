@@ -47,6 +47,7 @@ public class ExpInputTaxHeaderController {
     })
     public ResponseEntity getHeaders(
             @ApiParam(value = "申请人ID") @RequestParam(value = "applicantId", required = false) Long applicantId,
+            @ApiParam(value = "账套id")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
             @ApiParam(value = "业务大类") @RequestParam(value = "transferType", required = false) String transferType,
             @ApiParam(value = "用户类型") @RequestParam(value = "useType", required = false) String useType,
             @ApiParam(value = "业务日期从") @RequestParam(value = "transferDateFrom", required = false) String transferDateFrom,
@@ -60,7 +61,7 @@ public class ExpInputTaxHeaderController {
             @ApiParam(value = "部门ID") @RequestParam(value = "departmentId", required = false)Long departmentId,
             @ApiIgnore Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        Page result = expInputTaxHeaderService.queryHeader(applicantId, transferType, useType, transferDateFrom,
+        Page result = expInputTaxHeaderService.queryHeader(applicantId, setOfBooksId,transferType, useType, transferDateFrom,
                 transferDateTo, status, amountFrom, amountTo, description,documentNumber,companyId,departmentId, false, page);
         HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
@@ -74,6 +75,7 @@ public class ExpInputTaxHeaderController {
     })
     public ResponseEntity getHeadersEnableDataAuth(
             @ApiParam(value = "申请人ID") @RequestParam(value = "applicantId", required = false) Long applicantId,
+            @ApiParam(value = "账套id")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
             @ApiParam(value = "业务大类") @RequestParam(value = "transferType", required = false) String transferType,
             @ApiParam(value = "用户类型") @RequestParam(value = "useType", required = false) String useType,
             @ApiParam(value = "业务日期从")@RequestParam(value = "transferDateFrom", required = false) String transferDateFrom,
@@ -87,7 +89,7 @@ public class ExpInputTaxHeaderController {
             @ApiParam(value = "部门ID") @RequestParam(value = "departmentId", required = false)Long departmentId,
             @ApiIgnore Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        Page result = expInputTaxHeaderService.queryHeader(applicantId, transferType, useType, transferDateFrom,
+        Page result = expInputTaxHeaderService.queryHeader(applicantId, setOfBooksId,transferType, useType, transferDateFrom,
                 transferDateTo, status, amountFrom, amountTo, description,documentNumber,companyId,departmentId, true, page);
         HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
@@ -149,6 +151,7 @@ public class ExpInputTaxHeaderController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity queryExpInputFinance(@ApiParam(value = "公司id") @RequestParam(value = "companyId",required = false)Long companyId,
+                                              @ApiParam(value = "账套id")@RequestParam(value = "setOfBooksId",required = false)Long setOfBooksId,
                                               @ApiParam(value = "部门id") @RequestParam(value = "unitId",required = false)Long unitId,
                                               @ApiParam(value = "申请人id") @RequestParam(value = "applyId",required = false)Long applyId,
                                               @ApiParam(value = "状态") @RequestParam(value = "status",required = false)Long status,
@@ -178,7 +181,7 @@ public class ExpInputTaxHeaderController {
             auditDateTo = auditDateTo.plusDays(1);
         }
         Page page = PageUtil.getPage(pageable);
-        List<ExpInputTaxHeaderDTO> result =expInputTaxHeaderService.queryExpInputFinance(page,companyId,unitId,applyId,status,
+        List<ExpInputTaxHeaderDTO> result =expInputTaxHeaderService.queryExpInputFinance(page,companyId,setOfBooksId,unitId,applyId,status,
                     transferType,useType,currencyCode,amountFrom,amountTo,
                         reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber, false);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
@@ -211,6 +214,7 @@ public class ExpInputTaxHeaderController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity queryExpInputFinanceEnableDataAuth(@ApiParam(value = "公司id") @RequestParam(value = "companyId",required = false)Long companyId,
+                                               @ApiParam(value = "账套id")@RequestParam(value = "setOfBooksId",required = false)Long setOfBooksId,
                                                @ApiParam(value = "部门id") @RequestParam(value = "unitId",required = false)Long unitId,
                                                @ApiParam(value = "申请人id") @RequestParam(value = "applyId",required = false)Long applyId,
                                                @ApiParam(value = "状态") @RequestParam(value = "status",required = false)Long status,
@@ -240,7 +244,7 @@ public class ExpInputTaxHeaderController {
             auditDateTo = auditDateTo.plusDays(1);
         }
         Page page = PageUtil.getPage(pageable);
-        List<ExpInputTaxHeaderDTO> result =expInputTaxHeaderService.queryExpInputFinance(page,companyId,unitId,applyId,status,
+        List<ExpInputTaxHeaderDTO> result =expInputTaxHeaderService.queryExpInputFinance(page,companyId,setOfBooksId,unitId,applyId,status,
                 transferType,useType,currencyCode,amountFrom,amountTo,
                 reverseFlag,remark,creatDateFrom,creatDateTo,auditDateFrom,auditDateTo,tenantId,documentNumber, true);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);

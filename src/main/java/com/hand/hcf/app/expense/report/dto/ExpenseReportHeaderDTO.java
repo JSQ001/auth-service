@@ -1,5 +1,6 @@
 package com.hand.hcf.app.expense.report.dto;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import io.swagger.annotations.ApiModel;
@@ -118,4 +119,18 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      */
     @ApiModelProperty(value = "付款总金额")
     private  BigDecimal paymentTotalAmount;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

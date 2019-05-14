@@ -304,9 +304,14 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             expenseReportType.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
         }
         //返回付款方式类型name
-        SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+        /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
         if (sysCodeValueByCodeAndValue != null) {
             expenseReportType.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+        }*/
+        //返回付款方式name
+        SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+        if (sysCodeValue != null) {
+            expenseReportType.setPaymentTypeName(sysCodeValue.getName());
         }
         //返回关联表单名称formName
         ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
@@ -413,7 +418,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         list = baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(list, ExpenseReportType.class);
         SetOfBooksInfoCO setOfBooks = organizationService.getSetOfBooksInfoCOById(setOfBooksId, false);
         Map<String, String> sysCodeValueMap = organizationService.mapSysCodeValueByCode(
-                SystemCustomEnumerationType.CSH_PAYMENT_TYPE);
+                "ZJ_PAYMENT_TYPE");
         Map<Long, String> formNameMap = new HashMap<>(16);
         for (ExpenseReportType expenseReportType : list){
             //返回账套code、账套name
@@ -423,7 +428,9 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
 
             //返回付款方式类型name
-            expenseReportType.setPaymentMethodName(sysCodeValueMap.get(expenseReportType.getPaymentMethod()));
+//            expenseReportType.setPaymentMethodName(sysCodeValueMap.get(expenseReportType.getPaymentMethod()));
+            //返回付款方式name
+            expenseReportType.setPaymentTypeName(sysCodeValueMap.get(expenseReportType.getPaymentType()));
 
             //返回关联表单名称formName
             if (!formNameMap.containsKey(expenseReportType.getFormId())) {
@@ -647,9 +654,14 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             reportTypeDistSetting.setResName(responsibilityCenterById.getResponsibilityCenterName());
         }
         //返回付款方式类型name
-        SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+        /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
         if (sysCodeValueByCodeAndValue != null) {
             expenseReportTypeDTO.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+        }*/
+        //返回付款方式name
+        SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+        if (sysCodeValue != null) {
+            expenseReportType.setPaymentTypeName(sysCodeValue.getName());
         }
         expenseReportTypeDTO.setExpenseReportTypeDistSetting(reportTypeDistSetting);
         return expenseReportTypeDTO;
@@ -856,9 +868,15 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
 
             //返回付款方式类型name
-            SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+            /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
             if (sysCodeValueByCodeAndValue != null) {
                 expenseReportType.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+            }*/
+
+            //返回付款方式name
+            SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+            if (sysCodeValue != null) {
+                expenseReportType.setPaymentTypeName(sysCodeValue.getName());
             }
 
             //返回关联表单名称formName

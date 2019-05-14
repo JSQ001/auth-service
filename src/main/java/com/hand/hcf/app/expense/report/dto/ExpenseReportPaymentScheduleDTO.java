@@ -44,8 +44,13 @@ public class ExpenseReportPaymentScheduleDTO extends ExpenseReportPaymentSchedul
     /**
      * 付款方式名称
      */
-    @ApiModelProperty(value = "付款方式名称")
+    @ApiModelProperty(value = "付款方式类型名称")
     private String paymentMethodName;
+    /**
+     * 付款方式名称
+     */
+    @ApiModelProperty(value = "付款方式名称")
+    private String paymentTypeName;
     /**
      * 现金事务分类名称
      */

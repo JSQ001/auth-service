@@ -25,6 +25,8 @@
 		<result property="functionAmount" column="function_amount" />
 		<result property="description" column="description" />
 		<result property="paymentMethod" column="payment_method" />
+		<result property="paymentType" column="payment_type" />
+		<result property="propFlag" column="prop_flag" />
 		<result property="cshTransactionClassId" column="csh_transaction_class_id" />
 		<result property="cashFlowItemId" column="cash_flow_item_id" />
 		<result property="paymentScheduleDate" column="payment_schedule_date" />

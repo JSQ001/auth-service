@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.service.SysCodeService;
+import com.hand.hcf.app.base.system.domain.Application;
 import com.hand.hcf.app.base.system.domain.ServeLocale;
 import com.hand.hcf.app.base.system.dto.LocaleDTO;
 import com.hand.hcf.app.base.system.persistence.ServeLocaleMapper;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -39,6 +41,8 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
     private  SysCodeService sysCodeService;
     @Autowired
     private  TenantService tenantService;
+    @Autowired
+    private ApplicationService applicationService;
     /**
      * 单个新增 服务端多语言
      * @param serveLocale
@@ -318,5 +322,33 @@ public class ServeLocaleService extends BaseService<ServeLocaleMapper,ServeLocal
             serveLocale.setTenantId(tenantId);
         });
         this.insertBatch(serveLocaleList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void batchInsertAllTenant(List<ServeLocale> list) {
+        List<Tenant> all = tenantService.findAll();
+        List<Application> applications = applicationService.listAll(null, null);
+        Map<String, Application> appMap = applications.stream().collect(Collectors.toMap(Application::getAppCode, e -> e));
+        List<ServeLocale> result;
+        for (ServeLocale serveLocale : list) {
+            this.delete(getWrapper()
+                    .eq("key_code", serveLocale.getKeyCode())
+                    .eq("language", serveLocale.getLanguage()));
+            if (appMap.containsKey(serveLocale.getApplicationCode())) {
+                result = all.stream().map(e -> {
+                    ServeLocale v = ServeLocale.builder()
+                            .applicationCode(serveLocale.getApplicationCode())
+                            .applicationId(appMap.get(serveLocale.getApplicationCode()).getId())
+                            .keyCode(serveLocale.getKeyCode())
+                            .keyDescription(serveLocale.getKeyDescription())
+                            .language(serveLocale.getLanguage())
+                            .category(serveLocale.getCategory())
+                            .tenantId(e.getId()).build();
+                    v.setDeleted(false);
+                    return v;
+                }).collect(Collectors.toList());
+                this.insertBatch(result);
+            }
+        }
     }
 }

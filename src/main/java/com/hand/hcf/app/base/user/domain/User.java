@@ -45,7 +45,7 @@ public class User extends DomainLogic implements Serializable {
     @TableField(exist = false)
     private String password;
 
-    protected Boolean activated = false;
+    protected Boolean activated;
 
     protected String language;
 

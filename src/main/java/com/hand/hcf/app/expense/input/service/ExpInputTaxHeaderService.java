@@ -85,7 +85,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
     private DataAuthMetaRealization dataAuthorityMetaHandler;
 
 
-    public Page<ExpInputTaxHeaderDTO> queryHeader(Long applicantId, String transferType, String useType,
+    public Page<ExpInputTaxHeaderDTO> queryHeader(Long applicantId,Long setOfBooksId, String transferType, String useType,
                                                   String transferDateFrom, String transferDateTo,
                                                   String status, BigDecimal amountFrom, BigDecimal amountTo,
                                                   String description, String documentNumber, Long companyId, Long departmentId,
@@ -103,6 +103,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         Wrapper wrapper = new EntityWrapper<ExpInputTaxHeader>()
                 .eq(applicantId != null,"applicant_id", applicantId)
                 .eq(transferType != null, "transfer_type", transferType)
+                .eq(setOfBooksId !=null,"set_of_books_id",setOfBooksId)
                 .eq(useType != null, "use_type", useType)
                 .eq(status != null, "status", status)
                 .like(description != null, "description", description)
@@ -120,6 +121,14 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         }
         List<ExpInputTaxHeader> expInputTaxHeaders = expInputTaxHeaderMapper.selectPage(page, wrapper);
         List<ExpInputTaxHeaderDTO> headers = mapperFacade.mapAsList(expInputTaxHeaders, ExpInputTaxHeaderDTO.class);
+        for (ExpInputTaxHeaderDTO expInputTaxHeaderDTO : headers) {
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expInputTaxHeaderDTO.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                expInputTaxHeaderDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                expInputTaxHeaderDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
         //设置 名称（公司，部门，员工）
         setDesc(headers);
         //设置 值列表的 name
@@ -424,7 +433,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
     }
 
     public List<ExpInputTaxHeaderDTO> queryExpInputFinance(
-            Page page, Long companyId, Long unitId, Long applyId, Long status,
+            Page page, Long companyId, Long setOfBooksId,Long unitId,Long applyId, Long status,
             String transferType, String useType, String currencyCode,
             BigDecimal amountFrom, BigDecimal amountTo, String reverseFlag, String remark,
             ZonedDateTime creatDateFrom, ZonedDateTime creatDateTo, ZonedDateTime auditDateFrom,
@@ -441,9 +450,17 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
             map.put(DataAuthorityUtil.EMPLOYEE_COLUMN, "applicant_id");
             dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
-        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId,setOfBooksId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
                 reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber, dataAuthLabel);
         List<ExpInputTaxHeaderDTO> expInputFinances = baseMapper.queryExpInputFinance(page, wrapper);
+        for (ExpInputTaxHeaderDTO expInputTaxHeaderDTO : expInputFinances) {
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expInputTaxHeaderDTO.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                expInputTaxHeaderDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                expInputTaxHeaderDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
         setDesc(expInputFinances);
         setSysCodeValue(expInputFinances);
         /*for (ExpInputTaxHeaderDTO header : expInputFinances) {
@@ -515,7 +532,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
                                 HttpServletRequest request,
                                 ExportConfig exportConfig) throws IOException {
         //获取查询的Sql
-        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
+        Wrapper<ExpInputTaxHeader> wrapper = getQueryExpInputFinance(companyId, unitId,null, applyId, status, transferType, useType, currencyCode, amountFrom, amountTo,
                 reverseFlag, remark, creatDateFrom, creatDateTo, auditDateFrom, auditDateTo, tenantId, documentNumber, null);
         //获取 查询的总数
         int total = baseMapper.getCountByCondition(wrapper);
@@ -555,6 +572,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
 
     public Wrapper<ExpInputTaxHeader> getQueryExpInputFinance(Long companyId,
                                                               Long unitId,
+                                                              Long setOfBooksId,
                                                               Long applyId,
                                                               Long status,
                                                               String transferType,
@@ -574,6 +592,7 @@ public class ExpInputTaxHeaderService extends BaseService<ExpInputTaxHeaderMappe
         Wrapper<ExpInputTaxHeader> wrapper = new EntityWrapper<ExpInputTaxHeader>()
                 .eq(companyId != null, "t.company_id", companyId)
                 .eq(unitId != null, "t.department_id", unitId)
+                .eq(setOfBooksId !=null,"t.set_of_books_id",setOfBooksId)
                 .eq(applyId != null, "t.applicant_id", applyId)
                 .eq(status != null, "t.status", status)
                 .eq(StringUtils.hasText(transferType), "t.transfer_type", transferType)

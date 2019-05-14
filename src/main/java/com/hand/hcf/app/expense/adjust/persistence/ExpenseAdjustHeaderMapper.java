@@ -20,6 +20,7 @@ import java.util.List;
  */
 public interface ExpenseAdjustHeaderMapper extends BaseMapper<ExpenseAdjustHeader> {
     List<ExpenseAdjustHeaderWebDTO> listHeaderWebDTOByCondition(@Param("expAdjustHeaderNumber") String expAdjustHeaderNumber,
+                                                                @Param("setOfBooksId") Long setOfBooksId,
                                                                 @Param("expAdjustTypeId") Long expAdjustTypeId,
                                                                 @Param("status") String status,
                                                                 @Param("requisitionDateFrom") ZonedDateTime requisitionDateFrom,

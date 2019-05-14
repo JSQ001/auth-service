@@ -76,22 +76,22 @@ public class ExpenseFieldDTO implements Serializable{
     /**
      * 是否包含国家
      */
+    @ApiModelProperty(value = "是否包含国家")
     private Boolean containCountry;
     /**
-     * 是否包含省/州
+     * 是否包含省/直辖市/州
      */
-    private Boolean containProvince;
+    @ApiModelProperty(value = "是否包含省/直辖市/州")
+    private Boolean containState;
     /**
-     * 是否包含直辖市
+     * 是否包含市
      */
-    private Boolean containMunicipality;
-    /**
-     * 是否包含市/区
-     */
+    @ApiModelProperty(value = "是否包含市")
     private Boolean containCity;
     /**
-     * 是否包含县
+     * 是否包含区/县
      */
+    @ApiModelProperty(value = "是否包含区/县")
     private Boolean containRegion;
     /**
      * 费用字段oid

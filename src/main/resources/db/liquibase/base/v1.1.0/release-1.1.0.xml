@@ -71,4 +71,101 @@
         <dropUniqueConstraint tableName="sys_content_list" constraintName="sys_content_list_u1"/>
         <addUniqueConstraint tableName="sys_content_list" columnNames="content_name,tenant_id"  constraintName="sys_content_list_u1"/>
     </changeSet>
+
+    <changeSet id="201905041420001" author="bin.xie">
+        <comment>修改历史数据</comment>
+        <sql>update sys_serve_locale set tenant_id = 0 where tenant_id is null</sql>
+        <sql>update sys_front_locale set tenant_id = 0 where tenant_id is null</sql>
+        <sql>update sys_function_list set tenant_id = 0 where tenant_id is null</sql>
+        <sql>update sys_content_list set tenant_id = 0 where tenant_id is null</sql>
+    </changeSet>
+
+    <changeSet id="201905041430001" author="bin.xie">
+        <comment>初始化值列表数据</comment>
+        <sql>truncate table sys_code</sql>
+        <sql>truncate table sys_code_i18n</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_code.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438001" author="bin.xie">
+        <comment>初始化值列表的值数据</comment>
+        <sql>truncate table sys_code_value</sql>
+        <sql>truncate table sys_code_value_i18n</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_code_value.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438002" author="bin.xie">
+        <comment>初始化应用数据</comment>
+        <sql>truncate table sys_application</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_application.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438003" author="bin.xie">
+        <comment>初始化目录数据</comment>
+        <sql>delete from sys_content_list where tenant_id = 0</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_content_list.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438004" author="bin.xie">
+        <comment>初始化功能数据</comment>
+        <sql>delete from  sys_function_list where tenant_id = 0</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_function_list.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438005" author="bin.xie">
+        <comment>初始化目录关联功能数据</comment>
+        <sql>
+            delete from sys_content_function_rel where exists (select 1 from sys_content_list a where a.id = sys_content_function_rel.content_id and a.tenant_id = 0)
+        </sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_content_function_rel.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438006" author="bin.xie">
+        <comment>初始化页面数据</comment>
+        <sql>truncate table sys_page_list</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_page_list.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438007" author="bin.xie">
+        <comment>初始化功能关联页面数据</comment>
+        <sql>
+            delete from sys_function_page_relation where exists (select 1 from sys_function_list a where a.id = sys_function_page_relation.function_id and a.tenant_id = 0)
+        </sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_function_page_relation.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438008" author="bin.xie">
+        <comment>初始化应用多语言数据</comment>
+        <sql>delete from sys_front_locale where tenant_id = 0</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_front_locale.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041438009" author="bin.xie">
+        <comment>初始化服务端多语言数据</comment>
+        <sql>delete from  sys_serve_locale where tenant_id = 0</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_serve_locale.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041447001" author="bin.xie">
+        <comment>初始化接口管理数据</comment>
+        <sql>truncate table sys_interface</sql>
+        <sql>truncate table sys_interface_request</sql>
+        <sql>truncate table sys_interface_response</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_interface.sql" encoding="UTF-8"/>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_interface_request.sql" encoding="UTF-8"/>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_interface_response.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041447002" author="bin.xie">
+        <comment>初始化角色关联功能数据</comment>
+        <sql>delete from sys_role_function where role_id in (0,1)</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_role_function.sql" encoding="UTF-8"/>
+    </changeSet>
+
+    <changeSet id="201905041447003" author="bin.xie">
+        <comment>初始化lov数据</comment>
+        <sql>truncate table sys_lov</sql>
+        <sqlFile path="classpath:db/liquibase/base/v1.1.0/init/sys_lov.sql" encoding="UTF-8"/>
+    </changeSet>
+
 </databaseChangeLog>

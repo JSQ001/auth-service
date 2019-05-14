@@ -14,6 +14,7 @@ import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.report.dto.ExpenseReportInvoiceMatchResultDTO;
 import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -511,8 +512,36 @@ public class InvoiceHeadController {
 
 
     @PostMapping("/check/invoice")
-    @ApiOperation(value = "分页查询地点级别", notes = "分页查询地点级别信息 开发:xue.han")
+    @ApiOperation(value = "校验发票头、行", notes = "校验发票头、行 开发:xue.han")
     public ResponseEntity<InvoiceDTO> checkInvoice(@ApiParam(value = "发票信息") @RequestBody InvoiceDTO invoiceDTO){
         return ResponseEntity.ok(invoiceHeadService.checkInvoice(invoiceDTO));
+    }
+
+    @ApiOperation(value = "发票验真", notes = "发票验真 开发:xue.han")
+    @PostMapping("/check/verification")
+    public ResponseEntity<ExpenseReportInvoiceMatchResultDTO> invoiceVerification(@ApiParam(value = "发票信息") @RequestBody InvoiceDTO invoiceDTO){
+        return ResponseEntity.ok(invoiceHeadService.invoiceVerificationAndCheckCodeAndNumber(invoiceDTO));
+    }
+
+    /**
+     * invoiceCheck : 发票查验（发票验真+发票保存+返回发票详细信息）
+     *
+     * @param invoiceDTO 发票信息
+     */
+    @ApiOperation(value = "发票查验（发票验真+发票保存+返回发票详细信息）", notes = "发票查验（发票验真+发票保存+返回发票详细信息） 开发:xudong.zhao")
+    @PostMapping("/invoicecheck/returndetail")
+    public ResponseEntity<InvoiceDTO> invoiceCheckReturnDetail(@ApiParam(value = "发票信息") @RequestBody InvoiceDTO invoiceDTO){
+        return ResponseEntity.ok(invoiceHeadService.invoiceCheckReturnDetail(invoiceDTO));
+    }
+
+    /**
+     * 根据报账单行id 查询发票头行信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/query/by/reportLineId/{id}")
+    @ApiOperation(value = " 根据报账单行id 查询发票头行信息", notes = " 根据报账单行id 查询发票头行信息 开发:张卓")
+    public ResponseEntity<List<InvoiceDTO>> getInvoicesByReportLineId(@ApiParam(value = "报账单行id") @PathVariable Long id){
+        return ResponseEntity.ok(invoiceHeadService.getInvoicesByReportLineId(id));
     }
 }

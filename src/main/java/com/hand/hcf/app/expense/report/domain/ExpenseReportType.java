@@ -198,6 +198,12 @@ public class ExpenseReportType extends DomainI18nEnable {
     @ApiModelProperty(value = "付款方式类型名称",dataType = "String")
     private String paymentMethodName;
     /**
+     * 付款方式名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "付款方式名称",dataType = "String")
+    private String paymentTypeName;
+    /**
      * 关联表单名称
      */
     @TableField(exist = false)

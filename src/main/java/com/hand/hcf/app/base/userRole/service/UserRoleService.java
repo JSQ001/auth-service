@@ -283,15 +283,14 @@ public class UserRoleService extends BaseService<UserRoleMapper, UserRole> {
                                                                          Page page) {
         List<UserAssignRoleDataAuthority>  list =  userRoleMapper.listSelectedUserRolesByCond(userId, roleCode, roleName, dataAuthorityName, validDateFrom, validDateTo, page);
         list.parallelStream().forEach(t->{
-            //从主数据模块查询数据权限信息
-            /*Map<String,String > m = (Map<String, String>) lovService.getObjectByLovCode("mdata_user_all", String.valueOf(t.getDataAuthorityId()));
-            t.setDataAuthorityName(m.get("dataAuthorityName"));
-            t.setDataAuthorityCode(m.get("dataAuthorityCode"));*/
-            //jiu.zhao 修改LOV动态获取的实现方式
-            Long id = t.getDataAuthorityId();
-            UserAssignRoleDataAuthority data = userRoleMapper.getDataAuthName(id);
-            t.setDataAuthorityName(data.getDataAuthorityName());
-            t.setDataAuthorityCode(data.getDataAuthorityCode());
+            if (t.getDataAuthorityId() != null) {
+                //从主数据模块查询数据权限信息
+                //jiu.zhao TODO
+                /*Map<String, String> m = (Map<String, String>) lovService.getObjectByLovCode(
+                        "mdata_user_all", String.valueOf(t.getDataAuthorityId()));
+                t.setDataAuthorityName(m.get("dataAuthorityName"));
+                t.setDataAuthorityCode(m.get("dataAuthorityCode"));*/
+            }
         });
         return list;
     }

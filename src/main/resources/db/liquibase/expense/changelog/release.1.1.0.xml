@@ -184,4 +184,31 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201905091559001" author="xiaoji.li">
+        <dropColumn tableName="exp_expense_field" columnName="contain_province"></dropColumn>
+        <dropColumn tableName="exp_expense_field" columnName="contain_municipality"></dropColumn>
+        <addColumn tableName="exp_expense_field">
+            <column name="contain_state" type="int" defaultValue="0" remarks="是否包含省/州/直辖市">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="201905092040001" author="xiaoji.li">
+        <dropColumn tableName="exp_expense_field" columnName="contain_country"></dropColumn>
+        <dropColumn tableName="exp_expense_field" columnName="contain_city"></dropColumn>
+        <dropColumn tableName="exp_expense_field" columnName="contain_region"></dropColumn>
+        <addColumn tableName="exp_expense_field">
+            <column name="contain_country" type="int" defaultValue="0" remarks="是否包含国家">
+                <constraints nullable="true"/>
+            </column>
+            <column name="contain_city" type="int" defaultValue="0" remarks="是否包含市">
+                <constraints nullable="true"/>
+            </column>
+            <column name="contain_region" type="int" defaultValue="0" remarks="是否包含区/县">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

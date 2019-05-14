@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.common.co.ContactCO;
-import com.hand.hcf.app.common.co.CurrencyRateCO;
-import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
@@ -22,13 +20,16 @@ import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceHeadMapper;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceLineDistMapper;
+import com.hand.hcf.app.expense.report.dto.ExpenseReportInvoiceMatchResultDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportLineService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
+@Slf4j
 public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHead> {
 
     @Autowired
@@ -799,5 +802,106 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
             }
         }
         return true;
+    }
+
+    /**
+     * 获取发票信息，并校验号码代码
+     * @param invoiceDTO
+     * @return
+     */
+    public ExpenseReportInvoiceMatchResultDTO invoiceVerificationAndCheckCodeAndNumber(InvoiceDTO invoiceDTO){
+        ExpenseReportInvoiceMatchResultDTO dto = new ExpenseReportInvoiceMatchResultDTO(null,1001,null,null,null);
+        try{
+            checkInvoiceCodeInvoiceNoExistsOrContinuation(invoiceDTO.getInvoiceHead().getInvoiceCode(),
+                    invoiceDTO.getInvoiceHead().getInvoiceNo(),
+                    false);
+        } catch (BizException e){
+            // 发票重复
+            MessageDTO message = messageService.getMessage(e.getCode(), e.getArgs());
+            dto.setResultMessage(message.getKeyDescription());
+            if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_EXISTS)){
+                dto.setStatus(1002);
+            }
+            if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION)){
+                dto.setStatus(1003);
+            }
+            return dto;
+        }
+        invoiceDTO = invoiceVerification(invoiceDTO);
+        dto.setInvoiceDTOS(Arrays.asList(invoiceDTO));
+        return dto;
+    }
+
+    /**
+     * 获取发票平台发票明细信息
+     * @param invoiceDTO
+     * @return
+     */
+    public InvoiceDTO invoiceVerification(InvoiceDTO invoiceDTO){
+        InvoiceHead invoiceHead = invoiceDTO.getInvoiceHead();
+        InvoiceCheckCO invoiceCheckCO = new InvoiceCheckCO();
+        BeanUtils.copyProperties(invoiceHead,invoiceCheckCO);
+//        InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
+
+        //InvoiceHead实体中无invoiceType字段，无法映射到InvoiceCheckCO中，先临时手动设置
+        invoiceCheckCO.setInvoiceType("04");
+
+        /*InvoiceHeadCO invoiceHeadCO = peripheralService.invoiceCheck(invoiceCheckCO);
+        invoiceCheckCO.setSetOfBooksId(OrgInformationUtil.getCurrentSetOfBookId());
+        return invoiceHeadCOToDTO(invoiceHeadCO);*/
+        return null;
+    }
+
+
+    /**
+     * invoiceCheckReturnDetail : 发票查验（发票验真+发票保存+返回发票详细信息）
+     * @param invoiceDTO  发票信息
+     */
+    public InvoiceDTO invoiceCheckReturnDetail(InvoiceDTO invoiceDTO){
+        // 发票验真
+        InvoiceDTO invoiceResult = invoiceVerification(invoiceDTO);
+
+        //保存发票信息
+        invoiceResult.getInvoiceHead().setCheckResult(true);
+        invoiceResult.getInvoiceHead().setCreatedMethod(invoiceDTO.getInvoiceHead().getCreatedMethod());
+        invoiceResult = insertInvoice(invoiceResult);
+
+        return invoiceResult;
+    }
+
+    private InvoiceDTO invoiceHeadCOToDTO(InvoiceHeadCO invoiceHeadCO){
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        InvoiceHead invoiceHead = new InvoiceHead();
+        BeanUtils.copyProperties(invoiceHeadCO,invoiceHead);
+        invoiceDTO.setInvoiceHead(invoiceHead);
+        List<InvoiceLineCO> invoiceLineCOList = invoiceHeadCO.getInvoiceLineCOList();
+        if(CollectionUtils.isNotEmpty(invoiceLineCOList)){
+            List<InvoiceLine> collect = invoiceLineCOList.stream().map(invoiceLineCO -> {
+                InvoiceLine invoiceLine = new InvoiceLine();
+                BeanUtils.copyProperties(invoiceLineCO, invoiceLine);
+                return invoiceLine;
+            }).collect(Collectors.toList());
+            invoiceDTO.setInvoiceLineList(collect);
+        }else{
+            invoiceDTO.setInvoiceLineList(Arrays.asList());
+        }
+        return invoiceDTO;
+    }
+
+    /**
+     * 根据报销单行id查询发票信息
+     * @param id
+     * @return
+     */
+    public List<InvoiceDTO> getInvoicesByReportLineId(Long id){
+        List<Long> invoiceHeadIdList = invoiceHeadMapper.getInvoiceHeadIdByReportLineId(id);
+        List<InvoiceDTO> list = new ArrayList<InvoiceDTO>();
+        if (invoiceHeadIdList.size() > 0){
+            invoiceHeadIdList.stream().forEach(invoiceHeadId -> {
+                InvoiceDTO invoiceDTO = getInvoiceByHeadId(invoiceHeadId);
+                list.add(invoiceDTO);
+            });
+        }
+        return list;
     }
 }

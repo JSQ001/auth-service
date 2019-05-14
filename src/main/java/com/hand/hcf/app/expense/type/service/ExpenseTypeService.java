@@ -207,8 +207,7 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     expenseField.setShowOnList(dto.getShowOnList());
                 }
                 expenseField.setContainCountry(null!=dto.getContainCountry()?dto.getContainCountry():false);
-                expenseField.setContainProvince(null!=dto.getContainProvince()?dto.getContainProvince():false);
-                expenseField.setContainMunicipality(null!=dto.getContainMunicipality()?dto.getContainMunicipality():false);
+                expenseField.setContainState(null!=dto.getContainState()?dto.getContainState():false);
                 expenseField.setContainCity(null!=dto.getContainCity()?dto.getContainCity():false);
                 expenseField.setContainRegion(null!=dto.getContainRegion()?dto.getContainRegion():false);
                 expenseField.setEditable(null!=dto.getEditable()?dto.getEditable():true);
@@ -433,8 +432,7 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     .reportKey(e.getReportKey())
                     .required(e.getRequired())
                     .containCountry(e.getContainCountry())
-                    .containProvince(e.getContainProvince())
-                    .containMunicipality(e.getContainMunicipality())
+                    .containState(e.getContainState())
                     .containCity(e.getContainCity())
                     .containRegion(e.getContainRegion())
                     .sequence(e.getSequence())

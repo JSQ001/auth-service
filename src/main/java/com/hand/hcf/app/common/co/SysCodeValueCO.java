@@ -14,9 +14,11 @@ import java.io.Serializable;
  */
 @Data
 public class SysCodeValueCO implements Serializable {
-    String value;
-    String name;
-    Long codeId;
-    Long id;
-    Boolean enabled;
+    private String value;
+    private String name;
+    private Long codeId;
+    private Long id;
+    private Boolean enabled;
+    private String remark;
+
 }

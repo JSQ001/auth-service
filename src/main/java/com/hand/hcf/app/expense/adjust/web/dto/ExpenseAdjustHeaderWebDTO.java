@@ -1,5 +1,6 @@
 package com.hand.hcf.app.expense.adjust.web.dto;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.expense.adjust.domain.ExpenseAdjustHeader;
 import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
@@ -50,4 +51,17 @@ public class ExpenseAdjustHeaderWebDTO extends ExpenseAdjustHeader {
      */
     @ApiModelProperty(value = "维度信息")
     private List<ExpenseDimension> dimensions;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

@@ -31,6 +31,8 @@ public class AttachmentCO implements Serializable {
 
     private Long size;
 
+    private String pkName;
 
+    private String pkValue;
 
 }

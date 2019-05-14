@@ -70,9 +70,7 @@ public class ExpenseField extends DomainI18nEnable {
     //是否包含国家
     private Boolean containCountry;
     //是否包含省/州
-    private Boolean containProvince;
-    //是否包含直辖市
-    private Boolean containMunicipality;
+    private Boolean containState;
     //是否包含市/区
     private Boolean containCity;
     //是否包含县

@@ -69,6 +69,7 @@ public class ApplicationFinancialFormController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity getApplicationFDList(@ApiParam(value = "公司ID") @RequestParam(value = "companyId", required =  false)Long companyId,
+                                     @ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId", required = false)Long setOfBooksId,
                                      @ApiParam(value = "类型ID") @RequestParam(value = "typeId",required = false)Long typeId,
                                      @ApiParam(value = "申请ID") @RequestParam(value = "applyId",required = false)Long applyId,
                                      @ApiParam(value = "状态") @RequestParam(value = "status",required = false)Long status,
@@ -96,6 +97,7 @@ public class ApplicationFinancialFormController {
         //用对象接受前端传过来的 查询条件，
         List<ApplicationFinancRequsetDTO> result = applicationHeaderService.listHeaderDTOsByfincancies(page,
                 documentNumber,
+                setOfBooksId,
                 companyId,
                 typeId,
                 requisitionDateFrom,
@@ -147,6 +149,7 @@ public class ApplicationFinancialFormController {
             @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
     })
     public ResponseEntity getApplicationFDListDataAuth(@ApiParam(value = "公司ID") @RequestParam(value = "companyId", required =  false)Long companyId,
+                                                       @ApiParam(value = "账套ID")@RequestParam(value = "setOfBooksId", required = false)Long setOfBooksId,
                                                        @ApiParam(value = "类型ID") @RequestParam(value = "typeId",required = false)Long typeId,
                                                        @ApiParam(value = "申请ID")  @RequestParam(value = "applyId",required = false)Long applyId,
                                                        @ApiParam(value = "状态")  @RequestParam(value = "status",required = false)Long status,
@@ -174,6 +177,7 @@ public class ApplicationFinancialFormController {
         //用对象接受前端传过来的 查询条件，
         List<ApplicationFinancRequsetDTO> result = applicationHeaderService.listHeaderDTOsByfincancies(page,
                 documentNumber,
+                setOfBooksId,
                 companyId,
                 typeId,
                 requisitionDateFrom,

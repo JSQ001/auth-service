@@ -19,4 +19,16 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201905100932001" author="xue.han">
+        <dropNotNullConstraint tableName="exp_report_payment_schedule" columnName="payment_method" columnDataType="varchar(30)"/>
+    </changeSet>
+    <changeSet id="201905101025001" author="xue.han">
+        <addColumn tableName="exp_report_payment_schedule">
+            <column name="payment_type" type="varchar(200)" remarks="付款方式"></column>
+        </addColumn>
+        <addColumn tableName="exp_report_payment_schedule">
+            <column name="prop_flag" type="varchar(200)" remarks="账户属性"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -2,6 +2,7 @@ package com.hand.hcf.app.base.tenant.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
@@ -11,6 +12,7 @@ import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.system.service.FrontLocaleService;
 import com.hand.hcf.app.base.system.service.ServeLocaleService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.domain.TenantApplication;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
 import com.hand.hcf.app.base.tenant.dto.TenantRegisterDTO;
 import com.hand.hcf.app.base.tenant.persistence.TenantMapper;
@@ -25,6 +27,7 @@ import com.hand.hcf.app.base.userRole.service.RoleFunctionService;
 import com.hand.hcf.app.base.userRole.service.RoleService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.base.util.RespCode;
+import com.hand.hcf.app.common.co.ApplicationCO;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.CarryMessageCO;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
@@ -90,6 +93,9 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     private ContentListService contentListService;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private TenantApplicationService tenantApplicationService;
     /**
      * save tenant
      *
@@ -256,23 +262,6 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     }
 
 
-    public Tenant uploadTenantLogo(UUID companyOid, Long tenantId, MultipartFile file) {
-        Tenant tenant = findTenantById(tenantId);
-        if (tenant == null) {
-            throw new BizException(RespCode.TENANT_NOT_EXIST);
-        }
-        Attachment attachment;
-        if (tenant.getLogoId() != null) {
-            AttachmentCO AttachmentCO = attachmentService.getAttachmentById(tenant.getLogoId());
-            attachmentService.removeFile(true, AttachmentCO.getFileUrl());
-        }
-        attachment = attachmentService.uploadStatic(file, AttachmentType.COMPANY_LOGO);
-        tenant.setLogoId(attachment.getId());
-        updateById(tenant);
-        tenant.setLogoURL(attachment.getThumbnailPath());
-        return tenant;
-    }
-
 
 
     public Tenant tenantDTOToTenant(TenantDTO tenantDTO) {
@@ -395,5 +384,23 @@ public class TenantService extends BaseService<TenantMapper, Tenant> {
     public List<TenantDTO> listTenantDTOsByCondition(String tenantName, String tenantCode, String userName, String mobile, String email, String login, String remark,Page page){
         List<TenantDTO> result = baseMapper.listTenantDTOsByCondition(tenantName,tenantCode,userName,mobile,email,login,remark,page);
         return result;
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public boolean assignApplication(List<Long> applicationIds, Long id) {
+        tenantApplicationService.delete(new EntityWrapper<TenantApplication>().eq("tenant_id", id));
+        if (CollectionUtils.isEmpty(applicationIds)) {
+            return true;
+        }
+        List<TenantApplication> collect = applicationIds.stream().map(e -> {
+            TenantApplication temp = new TenantApplication();
+            temp.setApplicationId(e);
+            temp.setTenantId(id);
+            return temp;
+        }).collect(Collectors.toList());
+        return tenantApplicationService.insertBatch(collect);
+    }
+
+    public List<ApplicationCO> listApplications(Long currentTenantId) {
+        return baseMapper.listApplications(currentTenantId);
     }
 }

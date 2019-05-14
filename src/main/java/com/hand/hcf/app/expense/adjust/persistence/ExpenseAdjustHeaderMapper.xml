@@ -17,6 +17,9 @@
         <if test="expAdjustTypeId != null">
             AND t.exp_adjust_type_id = #{expAdjustTypeId}
         </if>
+        <if test="setOfBooksId != null">
+            AND t.set_of_books_id = #{setOfBooksId}
+        </if>
         <if test="status != null">
             AND t.status = #{status}
         </if>

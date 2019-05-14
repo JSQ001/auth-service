@@ -200,6 +200,8 @@ public class ExpenseBookService extends BaseService<ExpenseBookMapper,ExpenseBoo
                     .taxRate(invoiceLine.getTaxRate())
                     .taxAmount(invoiceLine.getTaxAmount())
                     .status("N")
+                    .invoiceBagConfirmFlag("N")
+                    .invoiceMateFlag("N")
                     .build();
             List<InvoiceLineExpence> invoiceLineExpences = invoiceLineExpenceService.selectList(new EntityWrapper<InvoiceLineExpence>()
                     .eq(invoiceLineDistId != null, "invoice_dist_id", invoiceLineDistId));

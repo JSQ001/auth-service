@@ -1,5 +1,6 @@
 package com.hand.hcf.app.base.attachment.service.impl;
 
+import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.constant.Constants;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
@@ -81,11 +82,12 @@ public class FTPAttachmentService implements IAttachment {
 
 
     @Override
-    public Attachment upload(MultipartFile file, AttachmentType attachmentType) {
+    public Attachment upload(MultipartFile file, String attachmentType, String pkValue) {
         Attachment attachment = new Attachment();
         try {
             UUID attachmentOid = UUID.randomUUID();
-            String path = generatePath(attachmentOid, attachmentType, file.getOriginalFilename(), null);
+            String path = generatePath(attachmentOid, attachmentType, file.getOriginalFilename() == null
+                    ? UUID.randomUUID().toString() : file.getOriginalFilename(), null);
             String filePath;
             try {
                 filePath = upload(path, file.getBytes());
@@ -101,6 +103,8 @@ public class FTPAttachmentService implements IAttachment {
             attachment.setSizes(file.getSize());
             attachment.setCreatedDate(ZonedDateTime.now());
             attachment.setCreatedBy(LoginInformationUtil.getCurrentUserId());
+            attachment.setPkName(attachmentType);
+            attachment.setPkValue(pkValue);
             attachmentService.insertOrUpdate(attachment);
             return attachment;
         } catch (Exception e) {
@@ -113,23 +117,26 @@ public class FTPAttachmentService implements IAttachment {
         if (attachment == null) {
             return null;
         }
-        AttachmentCO AttachmentCO = new AttachmentCO();
-        AttachmentCO.setFileUrl(attachment.getPath());
-        AttachmentCO.setId(attachment.getId());
-        AttachmentCO.setThumbnailUrl(attachment.getThumbnailPath());
-        AttachmentCO.setSize(attachment.getSizes());
-        AttachmentCO.setAttachmentOid(attachment.getAttachmentOid());
-        AttachmentCO.setFileName(attachment.getName());
-        AttachmentCO.setFileType(MediaType.parse(attachment.getMediaTypeID()));
-        return AttachmentCO;
+        AttachmentCO attachmentCO = new AttachmentCO();
+        attachmentCO.setFileUrl(attachment.getPath());
+        attachmentCO.setId(attachment.getId());
+        attachmentCO.setThumbnailUrl(attachment.getThumbnailPath());
+        attachmentCO.setSize(attachment.getSizes());
+        attachmentCO.setAttachmentOid(attachment.getAttachmentOid());
+        attachmentCO.setFileName(attachment.getName());
+        attachmentCO.setFileType(MediaType.parse(attachment.getMediaTypeID()));
+        attachmentCO.setPkName(attachment.getPkName());
+        attachmentCO.setPkValue(attachment.getPkValue());
+        return attachmentCO;
     }
 
     @Override
-    public AttachmentCO uploadFile(MultipartFile file, AttachmentType attachmentType) {
+    public AttachmentCO uploadFile(MultipartFile file, String attachmentType, String pkValue) {
         Attachment attachment = new Attachment();
         try {
             UUID attachmentOid = UUID.randomUUID();
-            String path = generatePath(attachmentOid, attachmentType, file.getOriginalFilename(), null);
+            String path = generatePath(attachmentOid, attachmentType, file.getOriginalFilename() == null
+                    ? attachmentOid.toString() : file.getOriginalFilename(), null);
             String filePath;
             try {
                 filePath = upload(path, file.getBytes());
@@ -144,6 +151,8 @@ public class FTPAttachmentService implements IAttachment {
             attachment.setThumbnailPath(getTempUrl(attachment));
             attachment.setAbsolutePath(filePath);
             attachment.setSizes(file.getSize());
+            attachment.setPkName(attachmentType);
+            attachment.setPkValue(pkValue);
             attachmentService.insertOrUpdate(attachment);
             return this.adapterAttachmentCO(attachment);
         } catch (Exception e) {
@@ -151,52 +160,20 @@ public class FTPAttachmentService implements IAttachment {
         }
     }
 
-    @Override
-    public AttachmentCO uploadFileAsync(MultipartFile file, AttachmentType attachmentType) {
-        return null;
-    }
-
-    @Override
-    public AttachmentCO uploadFile(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid) {
-        Attachment attachment = new Attachment();
-        try {
-            UUID attachmentOid = UUID.randomUUID();
-            String path = generatePath(attachmentOid, attachmentType, fileName, null);
-            String filePath;
-            try {
-                filePath = upload(path, content);
-            } catch (Exception e) {
-                log.error("upload attachment error:" + e.getMessage());
-                throw new ValidationException(new ValidationError("attachment", "file upload failed"));
-            }
-            attachment.setAttachmentOid(attachmentOid);
-            attachment.setName(fileName);
-            attachment.setMediaTypeID(MediaType.getMediaTypeByFileName(fileName).getId());
-            attachment.setPath(path);
-            attachment.setThumbnailPath(getTempUrl(attachment));
-            attachment.setAbsolutePath(filePath);
-            attachment.setSizes(0L);
-            attachmentService.insertOrUpdate(attachment);
-            return adapterAttachmentCO(attachment);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public String uploadStaticFile(String path, byte[] bytes) {
-        return null;
-    }
 
 
-    //oss修改
+
     @Override
-    public Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType) {
+    public Attachment uploadStatic(MultipartFile file, String attachmentType, String pkValue) {
         Attachment attachment = new Attachment();
         try {
             UUID attachmentOid = UUID.randomUUID();
             String originalFilename = file.getOriginalFilename();
-            originalFilename = originalFilename.replace(" ", "_");
+            if (StringUtils.hasText(originalFilename)) {
+                originalFilename = originalFilename.replace(" ", "_");
+            } else {
+                originalFilename = UUID.randomUUID().toString();
+            }
             String path = generatePath(attachmentOid, attachmentType, originalFilename, null);
             String tempUrl;
             try {
@@ -213,6 +190,8 @@ public class FTPAttachmentService implements IAttachment {
             attachment.setAbsolutePath(tempUrl);
             attachment.setSizes(file.getSize());
             attachment.setPublicFlag(true);
+            attachment.setPkValue(pkValue);
+            attachment.setPkName(attachmentType);
             attachmentService.insertOrUpdate(attachment);
             return attachment;
         } catch (Exception e) {
@@ -220,82 +199,18 @@ public class FTPAttachmentService implements IAttachment {
         }
     }
 
-    @Override
-    public Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType, String fileName) {
-        return null;
-    }
-
 
     @Override
-    public Attachment uploadStatic(byte[] content, AttachmentType attachmentType, String filename, Long length) {
-        Attachment attachment = new Attachment();
-        try {
-            UUID attachmentOid = UUID.randomUUID();
-            String path = generatePath(attachmentOid, attachmentType, filename, null);
-            String tempUrl;
-            try {
-                tempUrl = upload(path, content);
-            } catch (Exception e) {
-                log.error("upload attachment error:" + e.getMessage());
-                throw new ValidationException(new ValidationError("attachment", "file upload failed"));
-            }
-            attachment.setAttachmentOid(attachmentOid);
-            attachment.setName(filename);
-            attachment.setMediaTypeID(MediaType.getMediaTypeByFileName(filename).getId());
-            attachment.setPath(path);
-            attachment.setThumbnailPath(getTempUrl(attachment));
-            attachment.setAbsolutePath(tempUrl);
-            attachment.setSizes(length);// yuvia todo head
-            attachment.setPublicFlag(true);
-            attachmentService.insertOrUpdate(attachment);
-            return attachment;
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public AttachmentCO uploadStaticFile(MultipartFile file, AttachmentType attachmentType) {
-        return adapterAttachmentCO(uploadStatic(file, attachmentType));
-    }
-
-    @Override
-    public AttachmentCO uploadStaticFile(MultipartFile file, AttachmentType attachmentType, String fileName) {
-        return null;
-    }
-
-    @Override
-    public AttachmentCO uploadStaticFile(byte[] content, AttachmentType attachmentType, String filename, Long length) {
-        return adapterAttachmentCO(uploadStatic(content, attachmentType, filename, length));
-    }
-
-    @Override
-    public AttachmentCO uploadTempFile(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid) {
-        return null;
-    }
-
-    @Override
-    public Attachment uploadTempStatic(byte[] content, String fileName, AttachmentType attachmentType, UUID userOid) {
-        return null;
-    }
-
-    @Override
-    public String uploadPublicStaticAttachment(AttachmentType attachmentType, MultipartFile file) {
-        String path = generatePath(UUID.randomUUID(), attachmentType, file.getOriginalFilename(), null);
-        String tempUrl;
-        try {
-            tempUrl = uploadStaticFile(path, file.getBytes());
-        } catch (Exception e) {
-            log.error("upload attachment error:" + e.getMessage());
-            throw new RuntimeException("upload public file upload failed");
-        }
-        return tempUrl;
+    public AttachmentCO uploadStaticFile(MultipartFile file, String attachmentType, String pkValue) {
+        return adapterAttachmentCO(uploadStatic(file, attachmentType, pkValue));
     }
 
 
     @Override
     public void removeFile(List<Attachment> attachments) {
-        delete(attachments);
+        if (!CollectionUtils.isEmpty(attachments)) {
+            delete(attachments);
+        }
     }
 
     @Override
@@ -303,88 +218,14 @@ public class FTPAttachmentService implements IAttachment {
         delete(isPublic, path);
     }
 
-    private String generatePath(UUID attachmentOid, AttachmentType attachmentType, String filename, String thumb) {
+    private String generatePath(UUID attachmentOid, String attachmentType, String filename, String thumb) {
         String path;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         String suffix = "." + filename.substring(filename.lastIndexOf(".") + 1);
         String date = "/" + sdf.format(new Date()) + "/";
         String rootPath = hcfBaseProperties.getStorage().getFtp().getDirectoryName();
-        switch (attachmentType) {
-            case INVOICE_IMAGES:
-                path = rootPath + "/invoices" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case IMAGE_INVOICE_IMAGES:
-                path = rootPath + "/invoice_images" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case FEEDBACK_IMAGES:
-                path = rootPath + "/feedback" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case HEAD_PORTRAIT:
-                path = rootPath + "/headPortrait" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case CARROUSEL_IMAGES:
-                path = rootPath + "/carrousel" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case PDF:
-                path = rootPath + "/pdf" + date + DigestUtils.md5Hex(filename + UUID.randomUUID().toString().replaceAll("-", "")) + suffix;
-                break;
-            case REPAYMENT_IMAGES:
-                path = rootPath + "/repayment" + date + DigestUtils.md5Hex(attachmentOid.toString() + (thumb != null ? thumb : "-") + filename) + suffix;
-                break;
-            case COMPANY_LOGO:
-                path = rootPath + "/" + Constants.OSS_COMPANY_LOGO_FOLDER + DigestUtils.md5Hex(filename) + suffix;
-                break;
-            case EXPENSE_ICON:
-                path = rootPath + "/expenseIcon" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case BUDGET_JOURNAL:
-                path = rootPath + "/budget" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case CONTRACT:
-                path = rootPath + "/contract" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case PREPAYMENT:
-                path = rootPath + "/prepayment" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case EXP_REPORT:
-                path = rootPath + "/report" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case APPLICATION_ICON:
-                path = rootPath + "/application" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case SKIN_PACKAGE:
-                path = rootPath + "/skin" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case EXP_ADJUST:
-                path = rootPath + "/exp_adjust" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case PAYMENT:
-                path = rootPath + "/payment" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case CASH_WRITE_OFF:
-                path = rootPath + "/cash_write_off" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case GL_WORK_ORDER:
-                path = rootPath + "/gl_work_order" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case EXP_REVERSE:
-                path = rootPath + "/exp_reverse" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case FUND:
-                path = rootPath + "/fund" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case TAX:
-                path = rootPath + "/tax" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case SUPPLIER:
-                path = rootPath + "/supplier" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            case OTHER:
-                path = rootPath + "/other" + date + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
-                break;
-            default:
-                throw new IllegalArgumentException("unrecognised attachment type");
-        }
+        path = rootPath + "/" + attachmentType.toLowerCase()   + date
+                + DigestUtils.md5Hex(attachmentOid.toString() + "-" + filename) + suffix;
         return path;
     }
 
@@ -397,17 +238,7 @@ public class FTPAttachmentService implements IAttachment {
     }
 
     public String getTempUrl(Attachment attachment) {
-        String thumbnailPath = null;
-        if ("FTP".equals(hcfBaseProperties.getStorage().getMode())) {
-            thumbnailPath = hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
-        } else if ("OSS".equals(hcfBaseProperties.getStorage().getMode())) {
-            String endpoint = hcfBaseProperties.getStorage().getOss().getEndpoint();
-            String bucketName = hcfBaseProperties.getStorage().getOss().getBucket().getName();
-            String filehost = hcfBaseProperties.getStorage().getOss().getFilehost();
-            String frontUrl = "https://" + bucketName + "." + endpoint + "/" + filehost;
-            thumbnailPath = frontUrl + "/" + attachment.getPath();
-        }
-        return thumbnailPath;
+        return hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
     }
 
     /**
@@ -434,7 +265,7 @@ public class FTPAttachmentService implements IAttachment {
         //连接登录sftp
         sftpUtil.login();
         try {
-            attachments.stream().forEach(u -> {
+            attachments.forEach( u -> {
                 if (StringUtils.hasText(u.getAbsolutePath())) {
                     try {
                         sftpUtil.remove(u.getAbsolutePath());

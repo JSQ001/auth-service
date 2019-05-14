@@ -88,6 +88,7 @@ public class ExpenseAdjustHeaderController {
     })
     @GetMapping("/query/dto")
     public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTO(@ApiParam(value = "费用调整单编号") @RequestParam(required = false) String documentNumber,
+                                                                                      @ApiParam(value = "账套ID")@RequestParam(required = false,value = "setOfBooksId") Long setOfBooksId,
                                                                                       @ApiParam(value = "费用调整类型ID") @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
                                                                                       @ApiParam(value = "状态") @RequestParam(required = false,value = "status") String status,
                                                                                       @ApiParam(value = "日期时间从") @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
@@ -108,7 +109,7 @@ public class ExpenseAdjustHeaderController {
             requisitionDateTo = requisitionDateTo.plusDays(1);
         }
         List<ExpenseAdjustHeaderWebDTO> result = headerService.listHeaderWebDTOByCondition(
-                documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
+                documentNumber,setOfBooksId, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
                 employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,false, page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + page.getTotal());
@@ -123,6 +124,7 @@ public class ExpenseAdjustHeaderController {
     })
     @GetMapping("/query/dto/enable/dataAuth")
     public ResponseEntity<List<ExpenseAdjustHeaderWebDTO>> findExpenseAdjustHeaderDTOEnableDataAuth(@ApiParam(value = "费用调整单编号") @RequestParam(required = false) String documentNumber,
+                                                                                      @ApiParam(value = "账套ID")@RequestParam(required = false,value = "setOfBooksId") Long setOfBooksId,
                                                                                       @ApiParam(value = "费用调整类型ID") @RequestParam(required = false,value = "expAdjustTypeId") Long expAdjustTypeId,
                                                                                       @ApiParam(value = "状态") @RequestParam(required = false,value = "status") String status,
                                                                                       @ApiParam(value = "日期时间从") @RequestParam(required = false,value ="applyDateFrom" ) String dateTimeFrom,
@@ -143,7 +145,7 @@ public class ExpenseAdjustHeaderController {
             requisitionDateTo = requisitionDateTo.plusDays(1);
         }
         List<ExpenseAdjustHeaderWebDTO> result = headerService.listHeaderWebDTOByCondition(
-                documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
+                documentNumber ,expAdjustTypeId,setOfBooksId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
                 employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,true, page);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + page.getTotal());
@@ -236,6 +238,7 @@ public class ExpenseAdjustHeaderController {
     public void exportExpenseAdjustHeader(HttpServletRequest request,
                                           HttpServletResponse response,
                                           @ApiParam(value = "费用调整单编号") @RequestParam(value = "documentNumber",required = false) String documentNumber,
+                                          @ApiParam(value = "账套ID")@RequestParam(required = false,value = "setOfBooksId") Long setOfBooksId,
                                           @ApiParam(value = "费用调整类型ID") @RequestParam(value = "expAdjustTypeId",required = false) Long expAdjustTypeId,
                                           @ApiParam(value = "状态") @RequestParam(value = "status",required = false) String status,
                                           @ApiParam(value = "日期时间从") @RequestParam(value = "applyDateFrom",required = false) String dateTimeFrom,
@@ -254,7 +257,7 @@ public class ExpenseAdjustHeaderController {
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateTimeFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTimeTo);
         Page<ExpenseAdjustHeaderWebDTO> ExpenseAdjustHeaderWebDTOPage = headerService.getExpenseAdjustHeaderWebDTOByCond(
-                documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
+                documentNumber,setOfBooksId, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
                 employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,page);
         Integer total = TypeConversionUtils.parseInt(page.getTotal());
         int thredNumber = total > 100000 ? 8 : 2;
@@ -268,7 +271,7 @@ public class ExpenseAdjustHeaderController {
             public List<ExpenseAdjustHeaderWebDTO> queryDataByPage(Page page) {
 
                 Page<ExpenseAdjustHeaderWebDTO> ExpenseAdjustHeaderWebDTOPage = headerService.getExpenseAdjustHeaderWebDTOByCond(
-                        documentNumber, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
+                        documentNumber,setOfBooksId, expAdjustTypeId, status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax,
                         employeeId, description, adjustTypeCategory, currencyCode,unitId,companyId,page);
                 return ExpenseAdjustHeaderWebDTOPage.getRecords();
             }

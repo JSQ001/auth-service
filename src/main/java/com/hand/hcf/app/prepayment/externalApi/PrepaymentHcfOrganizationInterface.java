@@ -2,7 +2,7 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
+import com.hand.hcf.app.base.implement.web.AttachmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -51,7 +51,7 @@ public class PrepaymentHcfOrganizationInterface {
 
     // 附件接口
     @Autowired
-    private AttchmentControllerImpl attachmentClient;
+    private AttachmentControllerImpl attachmentClient;
 
     @Autowired
     private CommonControllerImpl orgClient;
@@ -164,7 +164,7 @@ public class PrepaymentHcfOrganizationInterface {
         //jiu.zhao 修改三方接口 20190328
         //return orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now);
         String language = LoginInformationUtil.getCurrentLanguage();
-        OrderNumberCO orderNumberCO = (OrderNumberCO) this.orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now).getBody();
+        OrderNumberCO orderNumberCO = (OrderNumberCO) this.orgClient.getOrderNumber("PREPAYMENT_REQUISITION", companyCode, now);
         if (StringUtils.isEmpty(orderNumberCO.getOrderNumber())) {
             throw new BizException(orderNumberCO.getCode(), (String) orderNumberCO.getMessage().stream().filter((u) -> {
                 return u.getLanguage().equalsIgnoreCase(language);

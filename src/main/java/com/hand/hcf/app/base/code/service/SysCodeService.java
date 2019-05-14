@@ -170,7 +170,7 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
             Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
             // 如果是系统管理员, 得看这个代码是不是存在所以的租户
             selectOne = this.selectOne(this.getWrapper().eq("code", sysCode.getCode()));
-            if (tenant != null && SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag()) && tenant.getSystemFlag()){
+            if (SysCodeEnum.SYSTEM.equals(sysCode.getTypeFlag()) && tenant.getSystemFlag()){
                 sysCode.setTenantId(-1L);
             }else{
                 isInit = true;
@@ -250,7 +250,7 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
 
     private void initOtherTenant(SysCode sysCode, SysCodeValue sysCodeValue) {
         Tenant tenant = tenantMapper.selectById(sysCode.getTenantId());
-        if (tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
+        if (tenant != null && tenant.getSystemFlag() && sysCode.getTypeFlag() == SysCodeEnum.INIT) {
             if (SqlHelper.retBool(baseMapper.checkValueExists(sysCode.getCode(), sysCodeValue.getValue()))) {
                 throw new BizException(RespCode.SYS_CODE_VALE_CODE_IS_EXISTS);
             }
@@ -446,16 +446,16 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         if (CollectionUtils.isEmpty(sysCodeValues)){
             return new ArrayList<>();
         }
-        List<SysCodeValueCO> result = sysCodeValues.stream().map(sysCodeValue -> {
+        return sysCodeValues.stream().map(sysCodeValue -> {
             SysCodeValueCO sysCodeValueCO = new SysCodeValueCO();
             sysCodeValueCO.setCodeId(sysCodeValue.getCodeId());
             sysCodeValueCO.setEnabled(sysCodeValue.getEnabled());
             sysCodeValueCO.setId(sysCodeValue.getId());
             sysCodeValueCO.setName(sysCodeValue.getName());
             sysCodeValueCO.setValue(sysCodeValue.getValue());
+            sysCodeValueCO.setRemark(sysCodeValue.getRemark());
             return sysCodeValueCO;
         }).collect(Collectors.toList());
-        return result;
     }
 
     public List<SysCodeValueCO> listSysValueByCodeOidConditionByEnabled(String codeOid, Boolean enabled) {
@@ -470,16 +470,16 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
         if (CollectionUtils.isEmpty(sysCodeValues)){
             return new ArrayList<>();
         }
-        List<SysCodeValueCO> result = sysCodeValues.stream().map(sysCodeValue -> {
+        return sysCodeValues.stream().map(sysCodeValue -> {
             SysCodeValueCO sysCodeValueCO = new SysCodeValueCO();
             sysCodeValueCO.setCodeId(sysCodeValue.getCodeId());
             sysCodeValueCO.setEnabled(sysCodeValue.getEnabled());
             sysCodeValueCO.setId(sysCodeValue.getId());
             sysCodeValueCO.setName(sysCodeValue.getName());
             sysCodeValueCO.setValue(sysCodeValue.getValue());
+            sysCodeValueCO.setRemark(sysCodeValue.getRemark());
             return sysCodeValueCO;
         }).collect(Collectors.toList());
-        return result;
     }
 
     public SysCodeValue getSysCodeValueByCodeOidAndValue(String codeOid, String value) {
@@ -493,21 +493,23 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
     @Transactional(rollbackFor = Exception.class)
     public boolean init() {
         List<Long> tenantIds = baseMapper.getNotExistsTenantId();
-        List<Long> ids = this.selectList(new EntityWrapper<SysCode>().eq("tenant_id", 0L))
+        List<Long> ids = this.selectList(new EntityWrapper<SysCode>()
+                .eq("tenant_id", 0L)
+                .eq("type_flag", SysCodeEnum.INIT))
                 .stream()
                 .map(SysCode::getId)
                 .collect(Collectors.toList());
         List<SysCode> sysCodes1 = baseI18nService.selectListTranslatedTableInfoWithI18n(ids, SysCode.class);
-        tenantIds.forEach(tenantId ->{
-            sysCodes1.forEach(e -> {
-                Long codeId = e.getId();
-                e.setTenantId(tenantId);
-                e.setId(null);
-                e.setCodeOid(UUID.randomUUID().toString());
-                this.insert(e);
-                itemService.initTenantBySysCode(e, codeId);
+        for (SysCode sysCode : sysCodes1) {
+            Long codeId = sysCode.getId();
+            tenantIds.forEach(e -> {
+                sysCode.setId(null);
+                sysCode.setCodeOid(UUID.randomUUID().toString());
+                sysCode.setTenantId(e);
+                this.insert(sysCode);
+                itemService.initTenantBySysCode(sysCode, codeId);
             });
-        });
+        }
         return true;
     }
 
@@ -525,6 +527,22 @@ public class SysCodeService extends BaseService<SysCodeMapper, SysCode> {
             }
             itemService.updateItemStatusByIds(sysCodeValues, enabled);
         }
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean insertOrUpdateSysCodeValue(String code, List<SysCodeValueCO> codeValues) {
+        if (CollectionUtils.isEmpty(codeValues)) {
+            return false;
+        }
+        SysCode sysCode = this.selectOne(getWrapper().eq("code", code));
+        if (null == sysCode) {
+            throw new BizException(RespCode.SYS_CODE_NOT_EXISTS);
+        }
+        codeValues
+                .stream()
+                .filter(e -> StringUtils.hasText(e.getValue()) && StringUtils.hasText(e.getValue()))
+                .forEach(v -> itemService.insertOrUpdateSysCodeValue(sysCode, v));
         return true;
     }
 }
