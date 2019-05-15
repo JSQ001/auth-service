@@ -640,9 +640,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             co.setCshFlowItemId(paymentSchedule.getCashFlowItemId());
             co.setContractHeaderId(expenseReportHeader.getContractHeaderId());
             co.setPaymentMethodCategory(paymentSchedule.getPaymentMethod());
-            //jiu.zhao TODO
-            /*co.setPaymentType(paymentSchedule.getPaymentType());
-            co.setPropFlag(paymentSchedule.getPropFlag());*/
+            co.setPaymentType(paymentSchedule.getPaymentType());
+            co.setPropFlag(paymentSchedule.getPropFlag());
             co.setRemark(paymentSchedule.getDescription());
             co.setFrozenFlag("Y".equals(paymentSchedule.getFrozenFlag()) ? true : false);
             //单据OID
@@ -1060,7 +1059,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 //提交成功，更新单据的状态
                 updateById(expenseReportHeader);
             } else {
-                updateDocumentStatus(expenseReportHeader.getId(), approvalStatus, "");
+                updateDocumentStatus(expenseReportHeader, approvalStatus, "");
             }
         } else {
             throw new BizException(submitResult.getError());
@@ -2139,7 +2138,7 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                             .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
                             .eq("set_of_books_id", OrgInformationUtil.getCurrentSetOfBookId())
                             .eq("enabled", true)
-                            .eq("goods_name", invoiceLine.getGoodsName())
+                            .and("{0} like concat('%',concat(goods_name,'%'))",new String[]{invoiceLine.getGoodsName()})
                             .and("(start_date is null or start_date <= {0}) and (end_date is null or end_date >= {1})", new ZonedDateTime[]{
                                     TypeConversionUtils.getEndTimeForDayYYMMDD(TypeConversionUtils.timeToString(ZonedDateTime.now())),
                                     TypeConversionUtils.getStartTimeForDayYYMMDD(TypeConversionUtils.timeToString(ZonedDateTime.now()))}));

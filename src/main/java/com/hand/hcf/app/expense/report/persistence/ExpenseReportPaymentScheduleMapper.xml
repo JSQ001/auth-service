@@ -14,7 +14,7 @@
 	<resultMap id="ExpensePaymentScheduleResult" type="com.hand.hcf.app.common.co.ExpensePaymentScheduleCO">
 		<id property="id" column="id" />
 		<result property="expReportHeaderId" column="exp_report_header_id" />
-		<result property="tenantId" column="telnant_id" />
+		<result property="tenantId" column="tenant_id" />
 		<result property="setOfBooksId" column="set_of_books_id" />
 		<result property="companyId" column="company_id" />
 		<result property="departmentId" column="department_id" />
