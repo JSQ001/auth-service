@@ -13,6 +13,7 @@ import com.hand.hcf.app.core.handler.ExcelImportHandler;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.service.ExcelImportService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -124,9 +125,10 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
      * @param setOfBooksId 账套Id
      * @param responsibilityCenterCode 责任中心代码
      * @param responsibilityCenterName 责任中心名称
-     * @param enabled 启用禁用
-     * @param page 分页
-     * @return
+     * @param enabled         启用禁用
+     * @param page            分页
+     * @param dataAuthFlag    是否启用数据权限
+     * @return                责任中心
      */
     public Page<ResponsibilityCenter> pageResponsibilityCenterBySetOfBooksId(String keyword,
                                                                              String codeFrom,
@@ -135,7 +137,16 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                                                                              String responsibilityCenterCode,
                                                                              String responsibilityCenterName,
                                                                              Boolean enabled,
-                                                                             Page page) {
+                                                                             Page page,
+                                                                             boolean dataAuthFlag ) {
+
+        String dataAuthLabel = null;
+        if (dataAuthFlag){
+            Map<String, String> map = new HashMap<>(2);
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_res_center");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         //根据套账查询
         List<ResponsibilityCenter> list = responsibilityCenterMapper
                 .pageResponsibilityCenterBySetOfBooksId(keyword,
@@ -145,6 +156,7 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
                         responsibilityCenterCode,
                         responsibilityCenterName,
                         enabled,
+                        dataAuthLabel,
                         page);
         if (CollectionUtils.isNotEmpty(list)){
         page.setRecords(list);
@@ -745,5 +757,17 @@ public class ResponsibilityCenterService extends BaseService<ResponsibilityCente
         });
 
         return result;
+    }
+
+    /**
+     * 根据公司或者账套查询已启用的责任中心
+     * @param setOfBooksId
+     * @param companyId
+     * @return
+     */
+    public List<ResponsibilityCenter> listEnabledBySobIdAndCompanyId(Long setOfBooksId,
+                                                                     Long companyId,
+                                                                     List<Long> centerIds) {
+        return baseMapper.listEnabledBySobIdAndCompanyId(setOfBooksId, companyId, centerIds);
     }
 }

@@ -50,6 +50,7 @@ public interface ResponsibilityCenterMapper extends BaseMapper<ResponsibilityCen
                                                                       @Param("responsibilityCenterCode") String responsibilityCenterCode,
                                                                       @Param("responsibilityCenterName") String responsibilityCenterName,
                                                                       @Param("enabled") Boolean enabled,
+                                                                      @Param("dataAuthLabel") String dataAuthLabel,
                                                                       Page page);
 
     /**
@@ -81,4 +82,15 @@ public interface ResponsibilityCenterMapper extends BaseMapper<ResponsibilityCen
      */
     List<ResponsibilityDefaultDTO> listCompanyDepartmentDefaultCenter(@Param("companyId") Long companyId,
                                                                       @Param("departmentIds") List<Long> departmentIds);
+
+    /**
+     * 查询账套下已启用或者分配给指定公司的责任中心
+     * @param setOfBooksId
+     * @param companyId
+     * @param centerIds
+     * @return
+     */
+    List<ResponsibilityCenter> listEnabledBySobIdAndCompanyId(@Param("setOfBooksId") Long setOfBooksId,
+                                                              @Param("companyId") Long companyId,
+                                                              @Param("centerIds") List<Long> centerIds);
 }

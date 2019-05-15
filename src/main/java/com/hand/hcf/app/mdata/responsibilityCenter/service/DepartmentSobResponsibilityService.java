@@ -165,7 +165,7 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
                         .orderBy("set_of_books_id")
                         .orderBy("company_id"));
         List<DepartmentSobResponsibilityDTO> result = mapperFacade.mapAsList(departmentSobResponsibilityList,DepartmentSobResponsibilityDTO.class);
-        result.stream().forEach(e-> toDTO(e));
+        result.forEach(e-> toDTO(e));
         page.setRecords(result);
         return page;
     }
@@ -192,13 +192,11 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
                 departmentSobRes.setSetOfBooksName(setOfBooks.getSetOfBooksName());
             }
             //全部
-            if(departmentSobRes.getAllResponsibilityCenter().equals("Y")){
+            if("Y".equals(departmentSobRes.getAllResponsibilityCenter())) {
                 //获取当前所选账套下所有启用的责任中心
-                responsibilityCenterList = responsibilityCenterService.selectList(
-                        new EntityWrapper<ResponsibilityCenter>()
-                                .eq("set_of_books_id",setOfBooksId)
-                                .eq("enabled",true));
-            }else {
+                responsibilityCenterList = responsibilityCenterService.listEnabledBySobIdAndCompanyId(setOfBooksId,
+                        departmentSobRes.getCompanyId(), null);
+            } else {
                 //选择部分 获取当前部门所选的责任中心
                 List<Long> responsibilityCenterIdList = departmentResCenterService.selectList(
                         new EntityWrapper<DepartmentResponsibilityCenter>()
@@ -208,13 +206,15 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
                         .stream()
                         .map(DepartmentResponsibilityCenter::getResponsibilityCenterId)
                         .collect(Collectors.toList());
-                responsibilityCenterList= responsibilityCenterService.listByResponsibilityCenterConditionByIds(setOfBooksId,responsibilityCenterIdList,true);
+
+                responsibilityCenterList = responsibilityCenterService.listEnabledBySobIdAndCompanyId(
+                        setOfBooksId, departmentSobRes.getCompanyId(), responsibilityCenterIdList);
                 //可用责任中心 全部或者已选个数
-                departmentSobRes.setAllResponsibilityCenterCount(Long.valueOf(responsibilityCenterList.size()));
+                departmentSobRes.setAllResponsibilityCenterCount(TypeConversionUtils.parseLong(responsibilityCenterList.size()));
             }
             departmentSobRes.setResponsibilityCentersList(responsibilityCenterList);
         }
-        if(departmentSobRes.getDefaultResponsibilityCenter() != null){
+        if(departmentSobRes.getDefaultResponsibilityCenter() != null) {
             ResponsibilityCenter center = responsibilityCenterService.selectById(departmentSobRes.getDefaultResponsibilityCenter());
             if(center != null){
                 departmentSobRes.setDefaultResponsibilityCenterName(center.getResponsibilityCenterName());
@@ -303,9 +303,9 @@ public class DepartmentSobResponsibilityService extends BaseService<DepartmentSo
         DepartmentSobResponsibilityDTO departmentSobResDTO = null;
         DepartmentSobResponsibility departmentSobResponsibility = baseMapper.selectById(id);
         if(departmentSobResponsibility == null){
-            throw  new BizException(messageService.getMessageDetailByCode("RESPONSIBILITY_CENTER_DEPARTMENTSOB_NOT_EXIST"));
+            throw new BizException(RespCode.RESPONSIBILITY_CENTER_DEPARTMENTSOB_NOT_EXIST);
         }
-        departmentSobResDTO = mapperFacade.map(departmentSobResponsibility,DepartmentSobResponsibilityDTO.class);
+        departmentSobResDTO = mapperFacade.map(departmentSobResponsibility, DepartmentSobResponsibilityDTO.class);
         toDTO(departmentSobResDTO);
         return departmentSobResDTO;
 

@@ -7,6 +7,7 @@ import com.hand.hcf.app.common.co.ResponsibilityCenterGroupCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.GroupCenterRelationship;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,18 +102,28 @@ public class ResponsibilityCenterGroupService extends BaseService<Responsibility
      * @param groupName 责任中心组名称
      * @param enabled 启用禁用
      * @param page 分页
-     * @return
+     * @param dataAuthFlag 是否启用数据权限
+     * @return 责任中心组
      */
     public Page<ResponsibilityCenterGroup> pageResponsibilityCenterGroupBySetOfBooksId(Long setOfBooksId,
                                                                                        String groupCode,
                                                                                        String groupName,
                                                                                        Boolean enabled,
-                                                                                       Page page) {
+                                                                                       Page page,
+                                                                                       boolean dataAuthFlag) {
+        String dataAuthLabel = null;
+        if (dataAuthFlag){
+            Map<String, String> map = new HashMap<>(2);
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_res_center_group");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         Wrapper<ResponsibilityCenterGroup> wrapper = new EntityWrapper<ResponsibilityCenterGroup>()
                 .eq("set_of_books_id", setOfBooksId)
                 .like(groupCode != null, "group_code", groupCode)
                 .like(groupName != null, "group_name", groupName)
                 .eq(enabled != null,"enabled", enabled)
+                .and(dataAuthLabel != null, dataAuthLabel)
                 .orderBy("enabled",false)
                 .orderBy("group_code");
         List<ResponsibilityCenterGroup> centerGroupList = resCenterGroupMapper.selectPage(page,wrapper);
