@@ -130,6 +130,22 @@
         </if>
     </select>
 
+    <select id = "findLegalEntityBySetOfBooksIdDataAuth" resultMap="legalEntityMap">
+        SELECT *
+        FROM sys_legal_entity
+        <where>
+        <if test="setOfBooksId != null">
+           AND set_of_books_id = #{setOfBooksId}
+        </if>
+        <if test="isEnabled != null">
+            AND enabled = #{isEnabled}
+        </if>
+        <if test="dataAuthLabel != null">
+            AND #{dataAuthLabel}
+        </if>
+        </where>
+    </select>
+
     <select id="pageLegalEntityByInfoResultBasic" resultType="com.hand.hcf.app.common.co.BasicCO">
         SELECT
         l.id id,

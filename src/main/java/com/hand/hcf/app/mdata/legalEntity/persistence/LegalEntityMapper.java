@@ -124,6 +124,11 @@ public interface LegalEntityMapper extends BaseMapper<LegalEntity> {
      */
     List<LegalEntity> findLegalEntityBySetOfBooksId(@Param("setOfBooksId") Long setOfBooksId, @Param("isEnabled") Boolean isEnabled, Pagination page);
 
+
+    List<LegalEntity> findLegalEntityBySetOfBooksIdDataAuth(@Param("setOfBooksId") Long setOfBooksId,
+                                                            @Param("isEnabled") Boolean isEnabled ,
+                                                            @Param("dataAuthLabel") String dataAuthLabel);
+
     List<BasicCO> pageLegalEntityByInfoResultBasic(@Param("tenantId") Long tenantId,
                                                    @Param("code") String code,
                                                    @Param("name") String name,

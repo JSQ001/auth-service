@@ -10,6 +10,7 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
@@ -848,5 +849,27 @@ public class LegalEntityService extends BaseService<LegalEntityMapper,LegalEntit
 
         }
         return "导入成功,共导入" + list.size() + "条";
+    }
+
+    /**
+     *  通过账套id 查询法人信息
+     * @param setOfBooksId 账套id
+     * @return 法人信息
+     */
+    public List<LegalEntityDTO> findLegalEntityBySetOfBooksIdDataAuth(Long setOfBooksId) {
+        String dataAuthLabel;
+        Map<String, String> map = new HashMap<>();
+        map.put(DataAuthorityUtil.TABLE_NAME, "sys_legal_entity");
+        map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+        dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        List<LegalEntity> legalEntities = legalEntityMapper.findLegalEntityBySetOfBooksIdDataAuth(setOfBooksId, true,dataAuthLabel);
+        legalEntities = baseI18nService.convertListByLocale(legalEntities);
+        List<LegalEntityDTO> legalEntityDTOs = new ArrayList<>();
+        LegalEntityDTO legalEntityDTO;
+        for (LegalEntity legalEntity : legalEntities) {
+            legalEntityDTO = LegalEntityConver.legalEntityTolegalEntityDTO(legalEntity);
+            legalEntityDTOs.add(quoteAttributeAssignment(legalEntityDTO));
+        }
+        return legalEntityDTOs;
     }
 }
