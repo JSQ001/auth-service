@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -106,10 +109,18 @@ public class DimensionService extends BaseService<DimensionMapper, Dimension> {
                                                                String dimensionCode,
                                                                String dimensionName,
                                                                Boolean enabled,
-                                                               Page page) {
+                                                               Page page,
+                                                               boolean dataAuthFlag) {
         //如果未传入账套id，获取当前账套下的维度
         if (setOfBooksId == null) {
             setOfBooksId = OrgInformationUtil.getCurrentSetOfBookId();
+        }
+        String dataAuthLabel = null;
+        if (dataAuthFlag){
+            Map<String, String> map = new HashMap<>(2);
+            map.put(DataAuthorityUtil.TABLE_NAME, "sys_dimension");
+            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
         List<Dimension> result = dimensionMapper.selectPage(
                 page,
@@ -118,6 +129,7 @@ public class DimensionService extends BaseService<DimensionMapper, Dimension> {
                         .like(TypeConversionUtils.isNotEmpty(dimensionCode), "dimension_code",dimensionCode)
                         .like(TypeConversionUtils.isNotEmpty(dimensionName), "dimension_name", dimensionName)
                         .eq(TypeConversionUtils.isNotEmpty(enabled), "enabled", enabled)
+                        .and(dataAuthLabel != null, dataAuthLabel)
                         .orderBy("enabled",false)
                         .orderBy("dimension_sequence")
         );

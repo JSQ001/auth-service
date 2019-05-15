@@ -5,6 +5,8 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.service.DimensionService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,7 +248,37 @@ public class DimensionController {
                                                                                @RequestParam(value = "page",defaultValue = "0") int page,
                                                                                @RequestParam(value = "size",defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
-        List<Dimension> result = dimensionService.pageDimensionsBySetOfBooksIdAndCond(setOfBooksId, dimensionCode, dimensionName, enabled, queryPage);
+        List<Dimension> result = dimensionService.pageDimensionsBySetOfBooksIdAndCond(setOfBooksId, dimensionCode, dimensionName, enabled, queryPage,false);
+        HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(queryPage, "/api/dimension/page/by/cond");
+        return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 维度定义查询 数据权限控制
+     * @param setOfBooksId  账套ID
+     * @param dimensionCode 维度代码
+     * @param dimensionName 维度名称
+     * @param enabled       是否启用
+     * @param page          分页page
+     * @param size          分页size
+     * @return              维度信息
+     */
+    @ApiOperation(value = "【维度】维度定义查询 数据权限控制", notes = "维度定义查询 数据权限控制 开发：王帅")
+    @GetMapping("/page/by/cond/enable/dataAuth")
+    public ResponseEntity<List<Dimension>> pageDimensionsBySetOfBooksIdAndCondEnableDataAuth(@ApiParam(value = "账套ID")
+                                                                                             @RequestParam(value = "setOfBooksId",required = false) Long setOfBooksId,
+                                                                                             @ApiParam(value = "维度代码")
+                                                                                             @RequestParam(value = "dimensionCode",required = false) String dimensionCode,
+                                                                                             @ApiParam(value = "维度名称")
+                                                                                             @RequestParam(value = "dimensionName",required = false) String dimensionName,
+                                                                                             @ApiParam(value = "是否启用")
+                                                                                             @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                             @ApiParam(value = "分页page")
+                                                                                             @RequestParam(value = "page",defaultValue = "0") int page,
+                                                                                             @ApiParam(value = "分页size")
+                                                                                             @RequestParam(value = "size",defaultValue = "10") int size){
+        Page queryPage = PageUtil.getPage(page, size);
+        List<Dimension> result = dimensionService.pageDimensionsBySetOfBooksIdAndCond(setOfBooksId, dimensionCode, dimensionName, enabled, queryPage,true);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(queryPage, "/api/dimension/page/by/cond");
         return  new ResponseEntity(result,httpHeaders, HttpStatus.OK);
     }
