@@ -18,41 +18,30 @@ import com.hand.hcf.app.workflow.approval.implement.WorkflowMoveNodeAction;
 import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowMainService;
-import com.hand.hcf.app.workflow.brms.domain.RuleApprovalChain;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
-import com.hand.hcf.app.workflow.brms.domain.RuleCondition;
-import com.hand.hcf.app.workflow.brms.domain.RuleConditionRelation;
-import com.hand.hcf.app.workflow.brms.dto.ReturnNode;
-import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
-import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
 import com.hand.hcf.app.workflow.brms.service.RuleConditionService;
 import com.hand.hcf.app.workflow.brms.service.RuleService;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import com.hand.hcf.app.workflow.dto.*;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
+import com.hand.hcf.app.workflow.dto.monitor.MonitorNode;
+import com.hand.hcf.app.workflow.dto.monitor.MonitorReturnNodeDTO;
+import com.hand.hcf.app.workflow.dto.monitor.WorkFlowMonitorDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class WorkFLowMonitorService extends BaseService<WorkFlowDocumentRefMapper, WorkFlowDocumentRef> {
@@ -225,7 +214,7 @@ public class WorkFLowMonitorService extends BaseService<WorkFlowDocumentRefMappe
         UUID lastNodeOid = instance.getLastNodeOid();
         if(lastNodeOid.equals(ruleApprovalNodeOid)){
             //节点重复
-            throw new BizException(ExceptionCode.WORKFLOW_RULEAPPROVALNODE_NOT_EXIST);
+            throw new BizException(LocaleMessageConstants.WORKFLOW_RULEAPPROVALNODE_NOT_EXIST);
         }
 
         //跳转的节点
@@ -236,7 +225,7 @@ public class WorkFLowMonitorService extends BaseService<WorkFlowDocumentRefMappe
         Integer nodeType = workflowNode.getType();
         //不可跳转机器人节点
         if(WorkflowNode.TYPE_ROBOT.equals(nodeType)){
-            throw new BizException(ExceptionCode.WORKFLOW_RULEAPPROVALNODE_NOT_TYPE_ROBOT);
+            throw new BizException(LocaleMessageConstants.WORKFLOW_RULEAPPROVALNODE_NOT_TYPE_ROBOT);
         }
 
         WorkflowMoveNodeAction action = new WorkflowMoveNodeAction(workflowActionService, instance, workflowNode);

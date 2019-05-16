@@ -2,8 +2,8 @@ package com.hand.hcf.app.workflow.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.ApprovalDashboardDetailDTO;
-import com.hand.hcf.app.workflow.dto.WorkFlowDocumentRefDTO;
+import com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDetailDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkFlowDocumentRefDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
@@ -136,8 +136,8 @@ public interface WorkFlowDocumentRefMapper extends BaseMapper<WorkFlowDocumentRe
      * @param rowBounds 分页
      * @return
      */
-    List<WorkFlowDocumentRef> getRejectORUnFinishedList(@Param("workFlowDocumentRefDTO") 
-    	WorkFlowDocumentRefDTO workFlowDocumentRefDTO,
+    List<WorkFlowDocumentRef> getRejectORUnFinishedList(@Param("workFlowDocumentRefDTO")
+                                                                WorkFlowDocumentRefDTO workFlowDocumentRefDTO,
                                                         @Param("beginDate") ZonedDateTime beginDate,
                                                         @Param("endDate") ZonedDateTime endDate,
                                                         @Param("amountFrom") Double amountFrom,

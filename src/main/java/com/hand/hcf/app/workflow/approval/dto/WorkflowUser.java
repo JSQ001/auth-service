@@ -1,5 +1,7 @@
 package com.hand.hcf.app.workflow.approval.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -26,6 +28,22 @@ public class WorkflowUser {
      */
     public UUID getUserOid() {
         return userOid;
+    }
+
+    /**
+     * 创建用户对象
+     *
+     * @param userOidList
+     * @return
+     */
+    public static List<WorkflowUser> createUsers(List<UUID> userOidList) {
+        List<WorkflowUser> userList = new ArrayList<WorkflowUser>();
+
+        for (UUID userOid : userOidList) {
+            userList.add(new WorkflowUser(userOid));
+        }
+
+        return userList;
     }
 
 }

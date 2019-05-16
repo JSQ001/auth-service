@@ -38,9 +38,6 @@ public class WorkflowWithdrawService {
     private WorkFlowDocumentRefService workFlowDocumentRefService;
 
     @Autowired
-    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
-
-    @Autowired
     private WorkflowActionService workflowActionService;
 
     /**
@@ -113,15 +110,8 @@ public class WorkflowWithdrawService {
         WorkflowUser user = new WorkflowUser(userOid);
         WorkflowWithdrawInstanceAction action = new WorkflowWithdrawInstanceAction(workflowActionService, instance, user, approvalText);
 
-        // 对同个实例的操作不支持并发
-        workflowBaseService.lockInstance(instance);
         // 撤回实例
-        workflowMainService.runWorkflow(instance, action);
-
-        // 刷新实例
-        workFlowDocumentRef = workFlowDocumentRefService.selectById(workFlowDocumentRef.getId());
-        // 通知审批结果
-        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
+        workflowMainService.runWorkflowAndSendMessage(instance, action);
     }
 
 }

@@ -3,12 +3,15 @@ package com.hand.hcf.app.base.implement.web;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.base.system.service.OrderNumberService;
+import com.hand.hcf.app.base.tenant.domain.Tenant;
+import com.hand.hcf.app.base.tenant.service.TenantService;
+import com.hand.hcf.app.common.co.ApplicationCO;
 import com.hand.hcf.app.common.co.OrderNumberCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
+import com.hand.hcf.app.common.co.TenantCO;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +28,9 @@ public class CommonControllerImpl {
     @Autowired
     private OrderNumberService orderNumberService;
 
+    @Autowired
+    private TenantService tenantService;
+
 
     /**
      * 根据编码规则生成编号
@@ -34,7 +40,8 @@ public class CommonControllerImpl {
      * @param operationDate
      * @return
      */
-    public ResponseEntity<OrderNumberCO> getOrderNumber(@RequestParam("documentTypeCode") String documentTypeCode,
+
+    public OrderNumberCO getOrderNumber(@RequestParam("documentTypeCode") String documentTypeCode,
                                                         @RequestParam("companyCode") String companyCode,
                                                         @RequestParam(value = "operationDate", required = false) String operationDate) {
         Long tenantId = LoginInformationUtil.getCurrentTenantId();
@@ -42,7 +49,7 @@ public class CommonControllerImpl {
         orderNumberDTO.setCode("0000");
         String orderNumber = orderNumberService.getOderNumber(documentTypeCode, companyCode, operationDate, tenantId);
         orderNumberDTO.setOrderNumber(orderNumber);
-        return ResponseEntity.ok(orderNumberDTO);
+        return orderNumberDTO;
     }
 
 
@@ -75,8 +82,33 @@ public class CommonControllerImpl {
         sysCodeValueCO.setEnabled(sysCodeValue.getEnabled());
         sysCodeValueCO.setId(sysCodeValue.getId());
         sysCodeValueCO.setName(sysCodeValue.getName());
+        sysCodeValueCO.setRemark(sysCodeValue.getRemark());
         sysCodeValueCO.setValue(sysCodeValue.getValue());
         return sysCodeValueCO;
+    }
+
+    public List<ApplicationCO> listApplications() {
+        return tenantService.listApplications(LoginInformationUtil.getCurrentTenantId());
+    }
+
+    public Boolean insertOrUpdateSysCodeValue(String code, List<SysCodeValueCO> codeValues) {
+        return sysCodeService.insertOrUpdateSysCodeValue(code, codeValues);
+    }
+
+    public List<TenantCO> listAllTenant() {
+        List<Tenant> all = tenantService.findAll();
+        return all.stream().map(e -> {
+            TenantCO temp = new TenantCO();
+            temp.setCountryCode(e.getCountryCode());
+            temp.setStatus(e.getStatus());
+            temp.setSystemFlag(e.getSystemFlag());
+            temp.setTenantCode(e.getTenantCode());
+            temp.setTenantName(e.getTenantName());
+            temp.setTenantShortName(e.getTenantShortName());
+            temp.setId(e.getId());
+            temp.setEnabled(e.getEnabled());
+            return temp;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -107,6 +139,7 @@ public class CommonControllerImpl {
         sysCodeValueCO.setId(sysCodeValue.getId());
         sysCodeValueCO.setName(sysCodeValue.getName());
         sysCodeValueCO.setValue(sysCodeValue.getValue());
+        sysCodeValueCO.setRemark(sysCodeValue.getRemark());
         return sysCodeValueCO;
     }
 
@@ -118,7 +151,7 @@ public class CommonControllerImpl {
 
     public OrderNumberCO getOrderNumberCO(String documentTypeCode, String companyCode, String operationDate) {
         String language = LoginInformationUtil.getCurrentLanguage();
-        return (OrderNumberCO)getOrderNumber(documentTypeCode, companyCode, operationDate).getBody();
+        return (OrderNumberCO)getOrderNumber(documentTypeCode, companyCode, operationDate);
     }
 
     public List<SysCodeValueCO> listAllSysCodeValueByCode(String code) {

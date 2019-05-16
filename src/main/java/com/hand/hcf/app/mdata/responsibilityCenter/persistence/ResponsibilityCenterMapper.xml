@@ -207,4 +207,35 @@
             and a.default_responsibility_center = rc.id
     </select>
 
+    <select id="listEnabledBySobIdAndCompanyId"
+            resultType="com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter">
+        select
+                a.*
+            from
+                sys_res_center a
+            where
+                a.set_of_books_id = #{setOfBooksId}
+                and a.enabled = 1
+                and a.deleted = 0
+            <if test="companyId != null">
+                and exists (
+                    select
+                        1
+                    from
+                        sys_res_center_company_assign b
+                    where
+                        a.id = b.responsibility_center_id
+                        and b.enabled = 1
+                        and b.deleted = 0
+                        and b.company_id = #{companyId}
+                )
+            </if>
+            <if test="centerIds != null and centerIds.size > 0">
+                and a.id in
+                <foreach collection="centerIds" item="id" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+    </select>
+
 </mapper>

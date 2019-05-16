@@ -304,6 +304,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
      */
     public List<ExpenseAdjustHeaderWebDTO> listHeaderWebDTOByCondition(String expAdjustHeaderNumber,
                                                                        Long expAdjustTypeId,
+                                                                       Long setOfBooksId,
                                                                        String status,
                                                                        ZonedDateTime requisitionDateFrom,
                                                                        ZonedDateTime requisitionDateTo,
@@ -331,15 +332,24 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         if (!dataAuthFlag || !dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
             currentUserId = OrgInformationUtil.getCurrentUserId();
         }
-        List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, expAdjustTypeId,
+        List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, setOfBooksId,expAdjustTypeId,
                 status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax, employeeId, description, adjustTypeCategory,
                 currencyCode, currentUserId ,unitId,companyId, dataAuthLabel, page);
         //isSetEmployee 暂时设置为 false
         setCompanyAndDepartmentAndEmployee(result, true, true);
 
+        for (ExpenseAdjustHeaderWebDTO expenseAdjustHeaderWebDTO : result) {
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expenseAdjustHeaderWebDTO.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                expenseAdjustHeaderWebDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                expenseAdjustHeaderWebDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
         return result;
     }
     public Page<ExpenseAdjustHeaderWebDTO> getExpenseAdjustHeaderWebDTOByCond(String expAdjustHeaderNumber,
+                                                                              Long setOfBooksId,
                                                                               Long expAdjustTypeId,
                                                                               String status,
                                                                               ZonedDateTime requisitionDateFrom,
@@ -353,7 +363,7 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
                                                                               Long companyId,
                                                                               Page page ){
         Page<ExpenseAdjustHeaderWebDTO> pageResult = new Page<>();
-        List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, expAdjustTypeId,
+        List<ExpenseAdjustHeaderWebDTO> result = baseMapper.listHeaderWebDTOByCondition(expAdjustHeaderNumber, setOfBooksId,expAdjustTypeId,
                 status, requisitionDateFrom, requisitionDateTo, amountMin, amountMax, employeeId, description, adjustTypeCategory,
                 currencyCode, OrgInformationUtil.getCurrentUserId(),unitId,companyId, null, page);
         //isSetEmployee 暂时设置为 false
@@ -600,6 +610,10 @@ public class ExpenseAdjustHeaderService extends BaseService<ExpenseAdjustHeaderM
         dimension.setHeaderId(id);
         dimension.setDocumentType(ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey());
         dimensionService.delete(new EntityWrapper<>(dimension));
+        //删除审批流实例
+        Integer entityType = ExpenseDocumentTypeEnum.EXPENSE_ADJUST.getKey();
+        UUID entityOid = UUID.fromString(expenseAdjustHeader.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
         return true;
     }
 

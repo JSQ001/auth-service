@@ -5,6 +5,8 @@ import com.hand.hcf.app.workflow.approval.dto.WorkflowNode;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
+import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
+import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
 import com.hand.hcf.app.workflow.service.WorkflowTraceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,37 @@ public class WorkflowMainService {
     @Autowired
     private WorkflowTraceService workflowTraceService;
 
+    @Autowired
+    private WorkFlowDocumentRefService workFlowDocumentRefService;
+
+    @Autowired
+    private WorkflowApprovalNotificationService workflowApprovalNotificationService;
+
+    @Autowired
+    private WorkflowBaseService workflowBaseService;
+
+    /**
+     * 运行工作流
+     * @version 1.0
+     * @author mh.z
+     * @date 2019/05/05
+     *
+     * @param instance
+     * @param start
+     */
+    public boolean runWorkflowAndSendMessage(WorkflowInstance instance, WorkflowAction start) {
+        // 运行工作流
+        boolean result = runWorkflow(instance, start);
+
+        Long instanceId = instance.getId();
+        // 刷新实例
+        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.selectById(instanceId);
+        // 通知审批结果
+        workflowApprovalNotificationService.sendMessage(workFlowDocumentRef);
+
+        return result;
+    }
+
     /**
      * 运行工作流
      * @version 1.0
@@ -41,6 +74,9 @@ public class WorkflowMainService {
         Assert.notNull(start, "start null");
         Integer entityType = instance.getEntityType();
         UUID entityOid = instance.getEntityOid();
+
+        // 对同个实例的操作不支持并发
+        workflowBaseService.lockInstance(instance);
 
         StringBuffer buffer = new StringBuffer("workflow trace\n");
         Stack<WorkflowAction> stack = new Stack<WorkflowAction>();
@@ -65,10 +101,13 @@ public class WorkflowMainService {
 
                 if (current instanceof Collection) {
                     Collection<WorkflowAction> actionList = (Collection<WorkflowAction>) current;
+                    // 添加动作到等待队列中
                     pushStack(stack, actionList);
-                    buffer.append(String.format("@queue +%s -> %s\n", actionList.size(), stack.size()));
                     action = stack.pop();
-                    buffer.append(String.format("@queue -1 -> %s\n", stack.size()));
+
+                    if (actionList.size() > 1) {
+                        buffer.append(String.format("#wait actions +%d -> %d\n", actionList.size() - 1, stack.size()));
+                    }
                 } else {
                     action = (WorkflowAction) current;
                 }
@@ -78,8 +117,9 @@ public class WorkflowMainService {
                 current = result.getNext();
 
                 if (current == null && stack.size() > 0) {
+                    // 从等待队列里取下一个动作
                     current = stack.pop();
-                    buffer.append(String.format("@queue -1 -> %s\n", stack.size()));
+                    buffer.append(String.format("#wait actions -1 -> %d\n", stack.size()));
                 }
             }
 
@@ -141,7 +181,13 @@ public class WorkflowMainService {
         } else if (next instanceof WorkflowAction) {
             buffer.append(((WorkflowAction) next).getName());
         } else {
-            buffer.append("action batch");
+            buffer.append("actions");
+        }
+
+        String message = result.getMessage();
+        if (message != null) {
+            buffer.append(", message:");
+            buffer.append(message);
         }
 
         buffer.append('\n');

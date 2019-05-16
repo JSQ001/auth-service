@@ -44,14 +44,21 @@ public interface InvoiceHeadMapper extends BaseMapper<InvoiceHead>{
      * @return
      */
     List<InvoiceCertificationDTO> pageInvoiceCertifiedByCond(@Param("invoiceTypeId") Long invoiceTypeId,
-                                                             @Param("invoiceNo") String invoiceNo,
-                                                             @Param("invoiceCode") String invoiceCode,
-                                                             @Param("invoiceDateFrom") ZonedDateTime invoiceDateFrom,
-                                                             @Param("invoiceDateTo") ZonedDateTime invoiceDateTo,
-                                                             @Param("invoiceAmountFrom") BigDecimal invoiceAmountFrom,
-                                                             @Param("invoiceAmountTo") BigDecimal invoiceAmountTo,
-                                                             @Param("createdMethod") String createdMethod,
-                                                             @Param("certificationStatus") Long certificationStatus,
-                                                             @Param("isSubmit") Boolean isSubmit,
-                                                             Page page);
+                                                         @Param("invoiceNo") String invoiceNo,
+                                                         @Param("invoiceCode") String invoiceCode,
+                                                         @Param("invoiceDateFrom") ZonedDateTime invoiceDateFrom,
+                                                         @Param("invoiceDateTo") ZonedDateTime invoiceDateTo,
+                                                         @Param("invoiceAmountFrom") BigDecimal invoiceAmountFrom,
+                                                         @Param("invoiceAmountTo") BigDecimal invoiceAmountTo,
+                                                         @Param("createdMethod") String createdMethod,
+                                                         @Param("certificationStatus") Long certificationStatus,
+                                                         @Param("isSubmit") Boolean isSubmit,
+                                                         Page page);
+
+    /**
+     *  根据报账单行id查询关联发票头id
+     * @param reportLineId 报账单行id
+     * @return
+     */
+    List<Long> getInvoiceHeadIdByReportLineId(@Param("reportLineId") Long reportLineId);
 }

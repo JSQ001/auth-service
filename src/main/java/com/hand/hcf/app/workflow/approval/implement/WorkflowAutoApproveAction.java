@@ -8,6 +8,9 @@ import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 自动审批动作
  * @author mh.z
@@ -107,6 +110,31 @@ public class WorkflowAutoApproveAction implements WorkflowAction {
         // 设置下一动作
         result.setNext(nextAction);
         return result;
+    }
+
+    /**
+     * 创建自动审批动作并返回
+     * @verson 1.0
+     * @author mh.z
+     * @date 2019/04/27
+     *
+     * @param workflowActionService
+     * @param approvalList 审批操作
+     * @return 自动审批动作
+     */
+    public static List<WorkflowAutoApproveAction> createActions(WorkflowActionService workflowActionService, List<WorkflowApproval> approvalList) {
+        CheckUtil.notNull(workflowActionService, "workflowActionService null");
+        CheckUtil.notNull(approvalList, "approvalList null");
+
+        List<WorkflowAutoApproveAction> actionList = new ArrayList<WorkflowAutoApproveAction>();
+        WorkflowAutoApproveAction action = null;
+
+        for (WorkflowApproval approval : approvalList) {
+            action = new WorkflowAutoApproveAction(workflowActionService, approval);
+            actionList.add(action);
+        }
+
+        return actionList;
     }
 
 }

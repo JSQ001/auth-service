@@ -17,9 +17,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.itextpdf.text.io.StreamUtil;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +42,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/responsibilityCenter")
+@Api(tags = "责任中心")
 public class ResponsibilityCenterResource {
     @Autowired
     private ResponsibilityCenterService responsibilityCenterService;
@@ -162,7 +161,49 @@ public class ResponsibilityCenterResource {
                                                                                               @RequestParam(value = "enabled",required = false) Boolean enabled,
                                                                                               Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<ResponsibilityCenter> result = responsibilityCenterService.pageResponsibilityCenterBySetOfBooksId(keyword,codeFrom,codeTo,setOfBooksId,responsibilityCenterCode,responsibilityCenterName,enabled,page);
+        Page<ResponsibilityCenter> result = responsibilityCenterService.pageResponsibilityCenterBySetOfBooksId(keyword,codeFrom,codeTo,setOfBooksId,responsibilityCenterCode,responsibilityCenterName,enabled,page,false);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + result.getTotal());
+        headers.add("Link", "/api/responsibilityCenter/query");
+        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+    }
+
+    /**
+     *
+     * @param keyword  责任中心名称或者代码
+     * @param codeFrom 责任中心代码从
+     * @param codeTo   责任中心代码至
+     * @param setOfBooksId 账套id
+     * @param responsibilityCenterCode 责任中心代码
+     * @param responsibilityCenterName 责任中心名称
+     * @param enabled  启用 禁用
+     * @param pageable 分页
+     * @return   责任中心
+     */
+    @ApiOperation(value = "【责任中心-查询】根据账套", notes = "责任中心查询 数据权限控制 开发：王帅")
+    @GetMapping(value = "/query/enable/dataAuth",  produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity<List<ResponsibilityCenter>> pageResponsibilityCenterBySetOfBooksIdDataAuth(
+                                                                                             @ApiParam(value = "责任中心名称或者代码")
+                                                                                             @RequestParam(value = "keyword",required = false) String keyword,
+                                                                                             @ApiParam(value = "责任中心代码从")
+                                                                                             @RequestParam(value="codeFrom",required = false) String codeFrom,
+                                                                                             @ApiParam(value = "责任中心代码至")
+                                                                                             @RequestParam(value = "codeTo",required = false) String codeTo,
+                                                                                             @ApiParam(value = "账套id")
+                                                                                             @RequestParam(value="setOfBooksId") Long setOfBooksId,
+                                                                                             @ApiParam(value = "责任中心代码")
+                                                                                             @RequestParam(value = "responsibilityCenterCode",required = false) String responsibilityCenterCode,
+                                                                                             @ApiParam(value = "责任中心名称")
+                                                                                             @RequestParam(value = "responsibilityCenterName",required = false) String responsibilityCenterName,
+                                                                                             @ApiParam(value = "启用 禁用")
+                                                                                             @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                             @ApiIgnore  Pageable pageable){
+        Page page = PageUtil.getPage(pageable);
+        Page<ResponsibilityCenter> result = responsibilityCenterService.pageResponsibilityCenterBySetOfBooksId(keyword,codeFrom,codeTo,setOfBooksId,responsibilityCenterCode,responsibilityCenterName,enabled,page,true);
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", "" + result.getTotal());
         headers.add("Link", "/api/responsibilityCenter/query");

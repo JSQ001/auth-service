@@ -11,13 +11,11 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
-import com.hand.hcf.app.workflow.approval.implement.WorkflowNextNodeAction;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowSubmitInstanceAction;
-import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
 import com.hand.hcf.app.workflow.service.WorkFlowDocumentRefService;
@@ -48,9 +46,6 @@ public class WorkflowSubmitService {
     private WorkflowMainService workflowMainService;
 
     @Autowired
-    private WorkflowBaseService workflowBaseService;
-
-    @Autowired
     private ApprovalFormService approvalFormService;
 
     @Autowired
@@ -73,10 +68,18 @@ public class WorkflowSubmitService {
         UUID entityOid = workFlowDocumentRef.getDocumentOid();
         UUID submitterOid = workFlowDocumentRef.getSubmittedBy();
 
+        //不能通过禁用的审批链
+        ApprovalForm approvalForm = approvalFormService.getByOid(workFlowDocumentRef.getFormOid());
+        Boolean valid = approvalForm.getValid();
+        if (!Boolean.TRUE.equals(valid)) {
+            throw new BizException(MessageConstants.FORM_RULE_PROHIBIT);
+        }
+
         WorkFlowDocumentRef workFlowDocumentRefPO = workFlowDocumentRefService
                 .getByDocumentOidAndDocumentCategory(entityOid, entityType);
-        // 不能提交审批中和已通过的实例
+
         if (workFlowDocumentRefPO != null) {
+            // 不能提交审批中和已通过的实例
             Integer status = workFlowDocumentRefPO.getStatus();
             if (DocumentOperationEnum.APPROVAL.getId().equals(status)
                     || DocumentOperationEnum.APPROVAL_PASS.getId().equals(status)) {
@@ -106,8 +109,6 @@ public class WorkflowSubmitService {
         // WorkflowSubmitInstanceAction
         WorkflowSubmitInstanceAction action = new WorkflowSubmitInstanceAction(workflowActionService, instance, user, null);
 
-        // 对同个实例的操作不支持并发
-        workflowBaseService.lockInstance(instance);
         // 提交实例
         workflowMainService.runWorkflow(instance, action);
 

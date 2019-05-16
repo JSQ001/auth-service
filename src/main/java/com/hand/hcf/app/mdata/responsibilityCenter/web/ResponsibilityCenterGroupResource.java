@@ -6,12 +6,17 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterGroupService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -96,7 +101,36 @@ public class ResponsibilityCenterGroupResource {
                                                                                                         @RequestParam(value = "enabled",required = false) Boolean enabled,
                                                                                                         Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        Page<ResponsibilityCenterGroup> result = centerGroupService.pageResponsibilityCenterGroupBySetOfBooksId(setOfBooksId,groupCode,groupName,enabled,page);
+        Page<ResponsibilityCenterGroup> result = centerGroupService.pageResponsibilityCenterGroupBySetOfBooksId(setOfBooksId,groupCode,groupName,enabled,page,false);
+        return new ResponseEntity<>(result.getRecords(), PageUtil.getTotalHeader(page), HttpStatus.OK);
+    }
+
+    /**
+     *  责任中心组-查询
+     * @param setOfBooksId 账套id
+     * @param groupCode    责任中心组code
+     * @param groupName    责任中心组名称
+     * @param enabled      是否启用
+     * @param pageable     分页
+     * @return             责任中心组
+     */
+    @ApiOperation(value = "【责任中心组-查询】根据账套", notes = "责任中心组查询 数据权限控制 开发：王帅")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    @GetMapping(value = "/query/enable/dataAuth",  produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ResponsibilityCenterGroup>> pageResponsibilityCenterGroupBySetOfBooksIdDataAuth(@ApiParam(value = "账套ID")
+                                                                                                                   @RequestParam(value="setOfBooksId") Long setOfBooksId,
+                                                                                                               @ApiParam(value = "责任中心组code")
+                                                                                                               @RequestParam(value = "groupCode",required = false) String groupCode,
+                                                                                                               @ApiParam(value = "责任中心组名称")
+                                                                                                               @RequestParam(value="groupName",required = false) String groupName,
+                                                                                                               @ApiParam(value = "是否启用")
+                                                                                                               @RequestParam(value = "enabled",required = false) Boolean enabled,
+                                                                                                               @ApiIgnore Pageable pageable){
+        Page page = PageUtil.getPage(pageable);
+        Page<ResponsibilityCenterGroup> result = centerGroupService.pageResponsibilityCenterGroupBySetOfBooksId(setOfBooksId,groupCode,groupName,enabled,page,true);
         return new ResponseEntity<>(result.getRecords(), PageUtil.getTotalHeader(page), HttpStatus.OK);
     }
 

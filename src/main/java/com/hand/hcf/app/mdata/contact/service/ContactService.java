@@ -562,7 +562,9 @@ public class ContactService extends BaseService<ContactMapper, Contact> {
                 isCreateMobile = true;
             }
             //保存至User
-            user.setLogin(mobile);
+            //jiu.zhao 修改登录名为工号
+            //user.setLogin(mobile);
+            user.setLogin(employeeId);
             user.setLanguage(OrgInformationUtil.getCurrentLanguage());
             user.setTenantId(tenantId);
             user.setPhoneNumber(mobile);

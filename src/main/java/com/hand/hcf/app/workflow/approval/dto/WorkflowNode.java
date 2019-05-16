@@ -2,7 +2,6 @@ package com.hand.hcf.app.workflow.approval.dto;
 
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
 
 import java.util.UUID;
 

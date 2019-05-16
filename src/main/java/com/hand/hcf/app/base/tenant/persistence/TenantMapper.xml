@@ -37,4 +37,36 @@
         </if>
         order by t.tenant_code
     </select>
+
+    <resultMap id="TenantDTOMap" type="com.hand.hcf.app.base.tenant.dto.TenantDTO">
+        <id column="id" property="id"/>
+        <result column="tenant_code" property="tenantCode"/>
+        <result column="tenant_name" property="tenantName"/>
+        <result column="remark" property="remark"/>
+        <result column="userName" property="userName"/>
+        <result column="mobile" property="mobile"/>
+        <result column="login" property="login"/>
+        <result column="email" property="email"/>
+        <collection property="applicationIds" column="id"
+                    select="listApplicationId"/>
+    </resultMap>
+    <select id="listApplicationId" resultType="java.lang.Long">
+        select a.application_id from sys_tenant_application a where a.tenant_id = #{id}
+    </select>
+    <select id="listApplications" resultType="com.hand.hcf.app.common.co.ApplicationCO">
+        select
+            t.id, t.app_code, t.app_name
+        from
+            sys_application t
+        where
+            exists(
+                select
+                    1
+                from
+                    sys_tenant_application a
+                where
+                    a.tenant_id = #{tenantId}
+                    and a.application_id = t.id
+            )
+    </select>
 </mapper>

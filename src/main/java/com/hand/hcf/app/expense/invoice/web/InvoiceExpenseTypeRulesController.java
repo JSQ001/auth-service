@@ -59,13 +59,13 @@ public class InvoiceExpenseTypeRulesController {
     private InvoiceExpenseTypeRulesTempService invoiceExpenseTypeRulesTempService;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "新建发票费用映射规则表", notes = "新建发票费用映射规则表 开发:19658")
+    @ApiOperation(value = "新建发票费用映射规则表", notes = "新建发票费用映射规则表 开发:罗书强")
     public ResponseEntity<InvoiceExpenseTypeRules> insertInvoiceExpenseRules(@ApiParam(value = "新建数据") @RequestBody InvoiceExpenseTypeRules invoiceexpensetyperules) {
         return ResponseEntity.ok(invoiceExpenseTypeRulesService.insertInvoiceExpenseRules(invoiceexpensetyperules));
     }
 
     @GetMapping("/select/by/id")
-    @ApiOperation(value = "发票费用类型映射规则-修改", notes = "发票费用类型映射规则-修改 开发:19658")
+    @ApiOperation(value = "发票费用类型映射规则-修改", notes = "发票费用类型映射规则-修改 开发:罗书强")
     public ResponseEntity selectInvoiceExpenseRules(
             //@ApiParam(value = "租户id") @RequestParam(value = "tenant_id", required = false) String tenantId,
             @ApiParam(value = "账套id") @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
@@ -87,14 +87,14 @@ public class InvoiceExpenseTypeRulesController {
     }
 
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "发票费用类型映射规则-修改", notes = "发票费用类型映射规则-修改 开发:19658")
+    @ApiOperation(value = "发票费用类型映射规则-修改", notes = "发票费用类型映射规则-修改 开发:罗书强")
     public InvoiceExpenseTypeRules updateInvoiceExpenseById(@ApiParam(value = "修改数据") @RequestBody InvoiceExpenseTypeRules invoiceExpenseTypeRules) {
         return invoiceExpenseTypeRulesService.updateInvoiceExpebseById(invoiceExpenseTypeRules);
     }
 
 
     @PostMapping("/select/export")
-    @ApiOperation(value = "发票费用类型映射规则-导出", notes = "发票费用类型映射规则-导出 开发:19658")
+    @ApiOperation(value = "发票费用类型映射规则-导出", notes = "发票费用类型映射规则-导出 开发:罗书强")
     public void exportInvoiceExpenseRules(HttpServletRequest request,
                                           @ApiParam(value = "导出配置") @RequestBody ExportConfig exportConfig,
                                           HttpServletResponse response,
@@ -135,7 +135,7 @@ public class InvoiceExpenseTypeRulesController {
     }
 
     @GetMapping(value = "/template")
-    @ApiOperation(value = "发票费用类型-导入模板下载", notes = "发票费用类型-导入模板下载 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入模板下载", notes = "发票费用类型-导入模板下载 开发:罗书强")
     public byte[] exportResponsibilityCenterTemplate() {
         InputStream inputStream = null;
         ByteArrayOutputStream bos = null;
@@ -167,13 +167,13 @@ public class InvoiceExpenseTypeRulesController {
 
 
     @GetMapping("/import/error/export/{transactionId}")
-    @ApiOperation(value = "发票费用类型-导入", notes = "发票费用类型-导入 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入", notes = "发票费用类型-导入 开发:罗书强")
     public ResponseEntity errorExport(@PathVariable("transactionId") String transactionId) throws IOException {
         return ResponseEntity.ok(invoiceExpenseTypeRulesService.exportFailedData(transactionId));
     }
 
     @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "发票费用类型-导入确定发票费用类型", notes = "发票费用类型-导入确定发票费用类型 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入确定发票费用类型", notes = "发票费用类型-导入确定发票费用类型 开发:罗书强")
     public ResponseEntity<Map<String, UUID>> importresponsibilityCenters(@RequestParam("file") MultipartFile file)
             throws Exception {
         // 获取账套id
@@ -190,20 +190,20 @@ public class InvoiceExpenseTypeRulesController {
     }
 
     @GetMapping(value = "/import/query/result/{transactionOid}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "发票费用类型-导入查询导入结果", notes = "发票费用类型-导入查询导入结果 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入查询导入结果", notes = "发票费用类型-导入查询导入结果 开发:罗书强")
     public ResponseEntity queryResultInfo(@PathVariable("transactionOid") String transactionOid) throws IOException {
         ImportResultDTO importResultDTO = invoiceExpenseTypeRulesTempService.queryResultInfo(transactionOid);
         return ResponseEntity.ok(importResultDTO);
     }
 
     @PostMapping(value = "/import/confirm/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "发票费用类型-导入 确定导入", notes = "发票费用类型-导入 确定导入果 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入 确定导入", notes = "发票费用类型-导入 确定导入果 开发:罗书强")
     public ResponseEntity confirmImport(@PathVariable("transactionId") String transactionId) {
         return ResponseEntity.ok(invoiceExpenseTypeRulesTempService.confirmImport(transactionId));
     }
 
     @DeleteMapping(value = "/import/delete/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "发票费用类型-导入 取消导入", notes = "发票费用类型-导入 取消导入 开发:19658")
+    @ApiOperation(value = "发票费用类型-导入 取消导入", notes = "发票费用类型-导入 取消导入 开发:罗书强")
     public ResponseEntity deleteImportData(@PathVariable("transactionId") String transactionId) {
         return ResponseEntity.ok(invoiceExpenseTypeRulesService.deleteImportData(transactionId));
     }

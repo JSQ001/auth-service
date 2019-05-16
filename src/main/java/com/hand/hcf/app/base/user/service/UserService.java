@@ -51,7 +51,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional
-@CacheConfig(cacheNames = {CacheConstants.USER})
 public class UserService extends BaseService<UserMapper, User> {
 
     @Autowired
@@ -373,16 +372,6 @@ public class UserService extends BaseService<UserMapper, User> {
         }
     }
 
-    private boolean checkUserInactiveStatus(UUID userOID) {
-        List<UserLoginBind> userLoginBindList = getUserLoginBindInfo(userOID);
-        //有部分项目是没有绑定记录的，那么这种是不能设置为未激活的
-        List<UserLoginBind> userLoginBindListWithAllStatus = getUserLoginBindByUserOID(userOID, true);
-        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(userLoginBindListWithAllStatus) && org.apache.commons.collections.CollectionUtils.isEmpty(userLoginBindList)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     private List<UserLoginBind> getUserLoginBindByUserOID(UUID userOID, boolean withAllStatus) {
         Map<String, Object> param = new HashMap<>();
@@ -396,13 +385,12 @@ public class UserService extends BaseService<UserMapper, User> {
         return userLoginBindList;
     }
 
-    public User changeLogin(User user, String email, String mobile, boolean clearOldMobile) {
-
+    private User changeLogin(User user, String email, String mobile) {
         String oldEmail = user.getEmail();
+        String oldMobile = user.getMobile();
         if (!StringUtils.isEmpty(email)) {
             log.info("email:{},oldemail:{}", email, oldEmail);
             if (!email.equalsIgnoreCase(oldEmail)) {
-
                 UserLoginBind userLoginBind = getUserLoginBindByLogin(oldEmail, user.getUserOid());
                 if (userLoginBind != null) {
                     // Modified qingsheng.chen 2018/03/14
@@ -413,10 +401,19 @@ public class UserService extends BaseService<UserMapper, User> {
                     log.info("update useroid:{}", userLoginBind.getUserOid());
                     // End modified
                 }
-
-                if (this.checkUserInactiveStatus(user.getUserOid())) {
-                    log.info("将用户修改成未激活，原email:{},新email{}", oldEmail, email);
-                    user.setActivated(false);
+            }
+        }
+        if (!StringUtils.isEmpty(mobile)) {
+            if (!mobile.equalsIgnoreCase(oldMobile)) {
+                UserLoginBind userLoginBind = getUserLoginBindByLogin(oldMobile, user.getUserOid());
+                if (userLoginBind != null) {
+                    // Modified qingsheng.chen 2018/03/14
+                    userLoginBind.setDeleted(true);
+                    userLoginBind.setEnabled(false);
+                    userLoginBind.setLastUpdatedDate(ZonedDateTime.now());
+                    userLoginBindMapper.updateById(userLoginBind);
+                    log.info("update useroid:{}", userLoginBind.getUserOid());
+                    // End modified
                 }
             }
         }
@@ -498,8 +495,11 @@ public class UserService extends BaseService<UserMapper, User> {
                 }
             }
             //修改手机号码或者邮箱需要激活
-            this.changeLogin(user, email, mobile, true);
+            this.changeLogin(user, email, mobile);
             user.setVersionNumber(oldUser.getVersionNumber());
+            user.setLogin(org.springframework.util.StringUtils.hasText(user.getLogin())
+                    ? user.getLogin() : user.getMobile());
+            user.setActivated(user.getActivated() != null ? user.getActivated() : oldUser.getActivated());
         }
 
         //保存至User

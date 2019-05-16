@@ -228,4 +228,9 @@ public class ExpenseReportLine extends Domain{
      */
     @TableField(exist = false)
     private String iconUrl;
+    /**
+     * 行信息是否存在发票标志
+     */
+    @TableField(exist = false)
+    private Boolean invoiceExistsFlag;
 }

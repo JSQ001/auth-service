@@ -14,10 +14,7 @@ import com.hand.hcf.app.expense.application.service.ApplicationHeaderService;
 import com.hand.hcf.app.expense.application.web.dto.*;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.dto.DocumentLineDTO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
@@ -28,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,85 +51,17 @@ public class ApplicationDocumentController {
     @Autowired
     private ApplicationHeaderService service;
 
-    /**
-     * @apiDescription 提交工作流
-     * @api {POST} /api/expense/application/submit
-     * @apiGroup ExpenseService
-     * @apiParam {UUID} applicantOid 申请人OID
-     * @apiParam {UUID} userOid 用户OID
-     * @apiParam {UUID} formOid 表单OID
-     * @apiParam {UUID} documentOid 单据OID
-     * @apiParam {Integer} documentCategory 单据大类 （如801003)
-     * @apiParam {List} countersignApproverOIDs 加签审批人OID
-     * @apiParam {String} documentNumber 单据编号
-     * @apiParam {String} remark 描述说明
-     * @apiParam {Long} companyId 公司ID
-     * @apiParam {UUID} unitOid 部门OID
-     * @apiParam {String} remark 描述说明
-     * @apiParam {Bigdecimal} amount 金额
-     * @apiParam {String} currencyCode 币种
-     * @apiParam {Long} documentTypeId 单据类型ID
-     * @apiSuccessExample {json} 成功返回值:
-     * [true]
-     */
+
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public ResponseEntity<BudgetCheckResultDTO> submit(@RequestBody WorkFlowDocumentRefCO workFlowDocumentRef,
-                                                       @RequestParam(value = "ignoreWarningFlag", required = false) Boolean ignoreWarningFlag) {
+    @ApiOperation(value = "提交工作流", notes = "提交工作流 开发:bin.xie")
+    public ResponseEntity<BudgetCheckResultDTO> submit(@ApiParam(value = "工作流文档参数") @RequestBody WorkFlowDocumentRefCO workFlowDocumentRef,
+                                                       @ApiParam(value = "忽略警告标志") @RequestParam(value = "ignoreWarningFlag", required = false) Boolean ignoreWarningFlag) {
         return ResponseEntity.ok(service.submit(workFlowDocumentRef, ignoreWarningFlag));
     }
 
-    /**
-     * @api {POST} /api/expense/application/type 【申请单】创建
-     * @apiDescription 创建一个申请单头信息
-     * @apiGroup ExpenseService
-     * @apiParam (请求对象) {Long} typeId  申请单类型Id
-     * @apiParam (请求对象) {Long} employeeId  员工Id
-     * @apiParam (请求对象) {String} currencyCode  币种
-     * @apiParam (请求对象) {String} remarks  描述
-     * @apiParam (请求对象) {Long} companyId  公司Id
-     * @apiParam (请求对象) {Long} departmentId  部门Id
-     * @apiParam (请求对象) {Long} [contractHeaderId]  关联的合同头Id,合同必填时必填
-     * @apiParam (请求对象) {String} [attachmentOid]  附件Oid，多个附件用,拼接
-     * @apiParam (请求对象) {Dimensions} [dimensions]  分配的维度对象
-     * @apiParam (Dimensions) {Long} value  所选的值
-     * @apiParam (Dimensions) {Boolean} name  维度名称
-     * @apiParam (Dimensions) {String} dimensionId  维度Id
-     * @apiParam (Dimensions) {String} dimensionFiled  字段代码
-     * @apiParamExample {json} 请求报文:
-     * {
-     * "typeId": 1060457723043524609,
-     * "employeeId": 1005,
-     * "currencyCode": "CNY",
-     * "remarks": "天知道",
-     * "companyId": 1005,
-     * "departmentId": 1005,
-     * "contractHeaderId": null,
-     * "attachmentOid": null,
-     * "dimensions": [
-     * {
-     * "value": "35525",
-     * "name": "区域",
-     * "dimensionId": "1032",
-     * "dimensionFiled": "dimension1Id",
-     * "headerFlag": true,
-     * "sequence": 10
-     * },
-     * {
-     * "value": "4444",
-     * "name": "项目",
-     * "dimensionId": "1033",
-     * "dimensionFiled": "dimension2Id",
-     * "headerFlag": true,
-     * "sequence": 20
-     * }]
-     * }
-     * @apiSuccess (返回对象) {Long} id 申请单Id
-     * @apiSuccess (返回对象) {String} documentNumber 单据编号
-     * @apiSuccessExample {json} 返回报文:
-     * true
-     */
     @PostMapping("/header")
-    public ResponseEntity createHeader(@RequestBody @Validated ApplicationHeaderWebDTO dto) {
+    @ApiOperation(value = "创建一个申请单头信息", notes = "创建一个申请单头信息 开发:bin.xie")
+    public ResponseEntity createHeader(@ApiParam(value = "申请单头信息") @RequestBody @Validated ApplicationHeaderWebDTO dto) {
 
         return ResponseEntity.ok(service.createHeader(dto));
     }
@@ -143,7 +73,8 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/header/query")
-    public ResponseEntity<ApplicationHeaderWebDTO> getHeaderInfoById(@RequestParam("id") Long id) {
+    @ApiOperation(value = "根据ID查询申请单头信息，编辑时用", notes = "根据ID查询申请单头信息，编辑时用 开发:bin.xie")
+    public ResponseEntity<ApplicationHeaderWebDTO> getHeaderInfoById(@ApiParam(value = "id") @RequestParam("id") Long id) {
 
         return ResponseEntity.ok(service.getHeaderInfoById(id));
     }
@@ -152,19 +83,24 @@ public class ApplicationDocumentController {
      * 我的申请单条件查询
      */
     @GetMapping("/header/query/condition")
-    public ResponseEntity listByCondition(@RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                          @RequestParam(value = "typeId", required = false) Long typeId,
-                                          @RequestParam(value = "dateFrom", required = false) String dateFrom,
-                                          @RequestParam(value = "dateTo", required = false) String dateTo,
-                                          @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                                          @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                                          @RequestParam(value = "status", required = false) Integer status,
-                                          @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                                          @RequestParam(value = "remarks", required = false) String remarks,
-                                          @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
-                                          @RequestParam(value = "employeeId", required = false) Long employeeId,
-                                          @RequestParam(required = false,defaultValue = "false") Boolean editor,
-                                          Pageable pageable){
+    @ApiOperation(value = "我的申请单条件查询", notes = "我的申请单条件查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity listByCondition(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                          @ApiParam(value = "申请单类型Id") @RequestParam(value = "typeId", required = false) Long typeId,
+                                          @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                                          @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
+                                          @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                          @ApiParam(value = "金额到") @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                          @ApiParam(value = "状态") @RequestParam(value = "status", required = false) Integer status,
+                                          @ApiParam(value = "币种") @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                                          @ApiParam(value = "描述") @RequestParam(value = "remarks", required = false) String remarks,
+                                          @ApiParam(value = "关闭标志") @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                                          @ApiParam(value = "员工Id") @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                          @ApiParam(value = "编者") @RequestParam(required = false,defaultValue = "false") Boolean editor,
+                                          @ApiIgnore Pageable pageable){
 
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTo);
@@ -191,20 +127,23 @@ public class ApplicationDocumentController {
     }
 
     @PutMapping("/header")
-    public ResponseEntity updateHeader(@RequestBody ApplicationHeaderWebDTO dto) {
+    @ApiOperation(value = "更新头信息", notes = "更新头信息 开发:bin.xie")
+    public ResponseEntity updateHeader(@ApiParam(value = "申请单头表") @RequestBody ApplicationHeaderWebDTO dto) {
 
         return ResponseEntity.ok(service.updateHeader(dto));
     }
 
     @DeleteMapping("/header/{id}")
+    @ApiOperation(value = "删除头信息", notes = "删除头信息 开发:bin.xie")
     public ResponseEntity deleteHeader(@PathVariable("id") Long id) {
         return ResponseEntity.ok(service.deleteHeader(id));
     }
 
     @GetMapping("/line/query/info")
-    public ResponseEntity queryOtherInfo(@RequestParam("headerId") Long headerId,
-                                         @RequestParam(value = "lineId", required = false) Long id,
-                                         @RequestParam(value = "isNew", defaultValue = "true") Boolean isNew) {
+    @ApiOperation(value = "查询其他信息", notes = "查询其他信息 开发:bin.xie")
+    public ResponseEntity queryOtherInfo(@ApiParam(value = "头ID") @RequestParam("headerId") Long headerId,
+                                         @ApiParam(value = "行ID") @RequestParam(value = "lineId", required = false) Long id,
+                                         @ApiParam(value = "是否新建") @RequestParam(value = "isNew", defaultValue = "true") Boolean isNew) {
         return ResponseEntity.ok(service.queryLineInfo(headerId, id, isNew));
     }
 
@@ -215,7 +154,8 @@ public class ApplicationDocumentController {
      * @return
      */
     @PostMapping("/line")
-    public ResponseEntity createLine(@RequestBody ApplicationLineWebDTO dto) {
+    @ApiOperation(value = "创建行", notes = "创建行 开发:bin.xie")
+    public ResponseEntity createLine(@ApiParam(value = "申请单行表") @RequestBody ApplicationLineWebDTO dto) {
 
         return ResponseEntity.ok(service.createLine(dto));
     }
@@ -225,7 +165,7 @@ public class ApplicationDocumentController {
             @ApiImplicitParam(name = "lineId", value = "复制的行id", dataType = "Long")
     })
     @GetMapping("/copyLineByLineId")
-    public ResponseEntity copyLineByLineId(@RequestParam("lineId") Long lineId) {
+    public ResponseEntity copyLineByLineId(@ApiParam(value = "行ID") @RequestParam("lineId") Long lineId) {
         return  ResponseEntity.ok(service.copyLine(lineId));
     }
     /**
@@ -235,7 +175,8 @@ public class ApplicationDocumentController {
      * @return
      */
     @PutMapping("/line")
-    public ResponseEntity updateLine(@RequestBody ApplicationLineWebDTO dto) {
+    @ApiOperation(value = "更新行", notes = "更新行 开发:bin.xie")
+    public ResponseEntity updateLine(@ApiParam(value = "申请单行表") @RequestBody ApplicationLineWebDTO dto) {
 
         return ResponseEntity.ok(service.updateLine(dto));
     }
@@ -247,6 +188,7 @@ public class ApplicationDocumentController {
      * @return
      */
     @DeleteMapping("/line/{id}")
+    @ApiOperation(value = "删除行", notes = "删除行 开发:bin.xie")
     public ResponseEntity deleteLine(@PathVariable("id") Long id) {
 
         return ResponseEntity.ok(service.deleteLineByLineId(id));
@@ -259,6 +201,7 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/line/column/{id}")
+    @ApiOperation(value = "查询动态维度列信息", notes = "查询动态维度列信息 开发:bin.xie")
     public ResponseEntity queryDimensionColumn(@PathVariable("id") Long id) {
         return ResponseEntity.ok(service.queryDimensionColumn(id));
     }
@@ -270,14 +213,20 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/header/{id}")
+    @ApiOperation(value = "点击详情查询单据头信息", notes = "点击详情查询单据头信息 开发:bin.xie")
     public ResponseEntity getHeaderDetail(@PathVariable("id") Long id) {
 
         return ResponseEntity.ok(service.getHeaderDetailInfo(id));
     }
 
     @GetMapping("/line/query/{id}")
+    @ApiOperation(value = "根据头ID获取行信息", notes = "根据头ID获取行信息 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<DocumentLineDTO<ApplicationLineWebDTO>> getLinesByHeaderId(@PathVariable("id") Long id,
-                                                                                     Pageable pageable) {
+                                                                                     @ApiIgnore Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
         DocumentLineDTO<ApplicationLineWebDTO> result = service.getLinesByHeaderId(id, page, false);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
@@ -308,18 +257,25 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/header/query/closed/condition")
-    public ResponseEntity listClosedByCondition(@RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                @RequestParam(value = "typeId", required = false) Long typeId,
-                                                @RequestParam(value = "dateFrom", required = false) String dateFrom,
-                                                @RequestParam(value = "dateTo", required = false) String dateTo,
-                                                @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                                                @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                                                @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
-                                                @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                                                @RequestParam(value = "remarks", required = false) String remarks,
-                                                @RequestParam(value = "companyId", required = false) List<Long> companyId,
-                                                @RequestParam(value = "employeeId", required = false) Long employeeId,
-                                                Pageable pageable) {
+    @ApiOperation(value = "申请单关闭查询", notes = "申请单关闭查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity listClosedByCondition(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                                @ApiParam(value = "账套ID")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                                                @ApiParam(value = "部门ID")@RequestParam(value = "unitId", required = false) Long unitId,
+                                                @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
+                                                @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                                                @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
+                                                @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                                @ApiParam(value = "金额到") @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                                @ApiParam(value = "关闭标识") @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                                                @ApiParam(value = "币种") @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                                                @ApiParam(value = "备注") @RequestParam(value = "remarks", required = false) String remarks,
+                                                @ApiParam(value = "公司ID") @RequestParam(value = "companyId", required = false) List<Long> companyId,
+                                                @ApiParam(value = "员工ID") @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                                @ApiIgnore Pageable pageable) {
 
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTo);
@@ -328,7 +284,7 @@ public class ApplicationDocumentController {
         }
         Page page = PageUtil.getPage(pageable);
         // 获取查询条件SQL
-        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber,setOfBooksId,unitId, typeId, requisitionDateFrom,
                 requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, false);
         //查询
         List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
@@ -354,18 +310,25 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/header/query/closed/condition/enable/dataAuth")
-    public ResponseEntity listClosedByConditionEnableDataAuth(@RequestParam(value = "documentNumber", required = false) String documentNumber,
-                                                @RequestParam(value = "typeId", required = false) Long typeId,
-                                                @RequestParam(value = "dateFrom", required = false) String dateFrom,
-                                                @RequestParam(value = "dateTo", required = false) String dateTo,
-                                                @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                                                @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                                                @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
-                                                @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                                                @RequestParam(value = "remarks", required = false) String remarks,
-                                                @RequestParam(value = "companyId", required = false) List<Long> companyId,
-                                                @RequestParam(value = "employeeId", required = false) Long employeeId,
-                                                Pageable pageable) {
+    @ApiOperation(value = "申请单关闭查询", notes = "申请单关闭查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity listClosedByConditionEnableDataAuth(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                                                @ApiParam(value = "账套ID")@RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                                                @ApiParam(value = "部门ID")@RequestParam(value = "unitId", required = false) Long unitId,
+                                                @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
+                                                @ApiParam(value = "日期从")  @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                                                @ApiParam(value = "日期到")  @RequestParam(value = "dateTo", required = false) String dateTo,
+                                                @ApiParam(value = "金额从")  @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                                @ApiParam(value = "金额到")  @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                                @ApiParam(value = "关闭标识") @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                                                @ApiParam(value = "币种")  @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                                                @ApiParam(value = "备注")  @RequestParam(value = "remarks", required = false) String remarks,
+                                                @ApiParam(value = "公司ID") @RequestParam(value = "companyId", required = false) List<Long> companyId,
+                                                @ApiParam(value = "员工ID") @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                                              @ApiIgnore Pageable pageable) {
 
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
         ZonedDateTime requisitionDateTo = DateUtil.stringToZonedDateTime(dateTo);
@@ -374,7 +337,7 @@ public class ApplicationDocumentController {
         }
         Page page = PageUtil.getPage(pageable);
         // 获取查询条件SQL
-        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+        Wrapper<ApplicationHeader> wrapper = service.getClosedQueryWrapper(documentNumber, typeId,setOfBooksId,unitId, requisitionDateFrom,
                 requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, true);
         //查询
         List<ApplicationHeaderWebDTO> result = service.listClosedByCondition(page, wrapper);
@@ -402,18 +365,20 @@ public class ApplicationDocumentController {
      * @throws IOException
      */
     @PostMapping("/header/closed/export")
-    public void export(@RequestParam(value = "documentNumber", required = false) String documentNumber,
-                       @RequestParam(value = "typeId", required = false) Long typeId,
-                       @RequestParam(value = "dateFrom", required = false) String dateFrom,
-                       @RequestParam(value = "dateTo", required = false) String dateTo,
-                       @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                       @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                       @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
-                       @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                       @RequestParam(value = "remarks", required = false) String remarks,
-                       @RequestParam(value = "companyId", required = false) List<Long> companyId,
-                       @RequestParam(value = "employeeId", required = false) Long employeeId,
-                       @RequestBody ExportConfig exportConfig,
+    @ApiOperation(value = "导出", notes = "导出 开发:bin.xie")
+    public void export(@ApiParam(value = "文档编号") @RequestParam(value = "documentNumber", required = false) String documentNumber,
+                       @ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId", required = false) Long setOfBooksId,
+                       @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
+                       @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                       @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
+                       @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                       @ApiParam(value = "金额到") @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                       @ApiParam(value = "关闭标识") @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                       @ApiParam(value = "币种") @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                       @ApiParam(value = "备注") @RequestParam(value = "remarks", required = false) String remarks,
+                       @ApiParam(value = "公司ID") @RequestParam(value = "companyId", required = false) List<Long> companyId,
+                       @ApiParam(value = "员工ID") @RequestParam(value = "employeeId", required = false) Long employeeId,
+                       @ApiParam(value = "导出配置") @RequestBody ExportConfig exportConfig,
                        HttpServletResponse response,
                        HttpServletRequest request) throws IOException {
         ZonedDateTime requisitionDateFrom = DateUtil.stringToZonedDateTime(dateFrom);
@@ -421,7 +386,7 @@ public class ApplicationDocumentController {
         if (requisitionDateTo != null) {
             requisitionDateTo = requisitionDateTo.plusDays(1);
         }
-        service.exportClosedExcel(documentNumber, typeId, requisitionDateFrom, requisitionDateTo, amountFrom, amountTo,
+        service.exportClosedExcel(documentNumber, setOfBooksId,typeId, requisitionDateFrom, requisitionDateTo, amountFrom, amountTo,
                 closedFlag, currencyCode, remarks, employeeId, companyId, response, request, exportConfig);
 
     }
@@ -433,8 +398,13 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/line/close/query/{id}")
+    @ApiOperation(value = "申请单关闭行查询", notes = "申请单关闭行查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<DocumentLineDTO<ApplicationLineWebDTO>> getCloseLinesByHeaderId(@PathVariable("id") Long id,
-                                                                                     Pageable pageable) {
+                                                                                          @ApiIgnore Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
         DocumentLineDTO<ApplicationLineWebDTO> result = service.getLinesByHeaderId(id, page, true);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
@@ -447,14 +417,16 @@ public class ApplicationDocumentController {
      * @return
      */
     @PostMapping("/header/closed")
-    public ResponseEntity closedHeader(@RequestBody ClosedDTO closedDTO) {
+    @ApiOperation(value = "关闭申请单", notes = "关闭申请单 开发:bin.xie")
+    public ResponseEntity closedHeader(@ApiParam(value = "关闭DTO") @RequestBody ClosedDTO closedDTO) {
         return ResponseEntity.ok(service.closedHeader(closedDTO));
     }
 
     @PostMapping("/line/closed/{id}")
-    public ResponseEntity closedLine(@RequestParam String message,
+    @ApiOperation(value = "关闭申请单", notes = "关闭申请单 开发:bin.xie")
+    public ResponseEntity closedLine(@ApiParam(value = "信息") @RequestParam String message,
                                      @PathVariable("id") Long id,
-                                     @RequestParam("headerId") Long headerId) {
+                                     @ApiParam(value = "头id") @RequestParam("headerId") Long headerId) {
         return ResponseEntity.ok(service.closedLine(id, message, headerId));
     }
 
@@ -463,7 +435,8 @@ public class ApplicationDocumentController {
      * @apiParam (请求参数) {Long} id 申请单头Id
      */
     @GetMapping("/header/submit/check/policy")
-    public ResponseEntity checkPolicy(@RequestParam("id") Long id) {
+    @ApiOperation(value = "校验费用政策", notes = "校验费用政策 开发:bin.xie")
+    public ResponseEntity checkPolicy(@ApiParam(value = "申请单头Id") @RequestParam("id") Long id) {
 
         return ResponseEntity.ok(service.checkPolicy(id));
     }
@@ -473,6 +446,7 @@ public class ApplicationDocumentController {
      * @api {GET} /api/expense/application/header/query/created 查询已创建申请单的申请人
      */
     @GetMapping("/header/query/created")
+    @ApiOperation(value = "查询已创建申请单的申请人", notes = "查询已创建申请单的申请人 开发:bin.xie")
     public List<ContactCO> listUsersByCreatedApplications() {
 
         return service.listUsersByCreatedApplications();
@@ -482,23 +456,28 @@ public class ApplicationDocumentController {
      * @Api {get} 费用申请单财务查询
      */
     @GetMapping("/header/query/financial")
-    public ResponseEntity listByFinancial(@RequestParam(value = "companyId", required = false) Long companyId,
-                                          @RequestParam(value = "typeId", required = false) Long typeId,
-                                          @RequestParam(value = "employeeId", required = false) Long employeeId,
-                                          @RequestParam(value = "status", required = false) Integer status,
-                                          @RequestParam(value = "departmentId", required = false) Long departmentId,
-                                          @RequestParam(value = "dateFrom", required = false) String dateFrom,
-                                          @RequestParam(value = "dateTo", required = false) String dateTo,
-                                          @RequestParam(value = "currencyCode", required = false) String currencyCode,
-                                          @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                                          @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                                          @RequestParam(value = "reportAmountFrom", required = false) BigDecimal reportAmountFrom,
-                                          @RequestParam(value = "reportAmountTo", required = false) BigDecimal reportAmountTo,
-                                          @RequestParam(value = "reportAbleAmountFrom", required = false) BigDecimal reportAbleAmountFrom,
-                                          @RequestParam(value = "reportAbleAmountTo", required = false) BigDecimal reportAbleAmountTo,
-                                          @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
-                                          @RequestParam(value = "remarks", required = false) String remarks,
-                                          Pageable pageable) {
+    @ApiOperation(value = "费用申请单财务查询", notes = "费用申请单财务查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity listByFinancial(@ApiParam(value = "公司ID") @RequestParam(value = "companyId", required = false) Long companyId,
+                                          @ApiParam(value = "类型ID") @RequestParam(value = "typeId", required = false) Long typeId,
+                                          @ApiParam(value = "员工ID") @RequestParam(value = "employeeId", required = false) Long employeeId,
+                                          @ApiParam(value = "状态") @RequestParam(value = "status", required = false) Integer status,
+                                          @ApiParam(value = "部门ID") @RequestParam(value = "departmentId", required = false) Long departmentId,
+                                          @ApiParam(value = "日期从") @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                                          @ApiParam(value = "日期到") @RequestParam(value = "dateTo", required = false) String dateTo,
+                                          @ApiParam(value = "币种") @RequestParam(value = "currencyCode", required = false) String currencyCode,
+                                          @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                          @ApiParam(value = "金额到") @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                          @ApiParam(value = "报告数量从") @RequestParam(value = "reportAmountFrom", required = false) BigDecimal reportAmountFrom,
+                                          @ApiParam(value = "报告数量到") @RequestParam(value = "reportAmountTo", required = false) BigDecimal reportAmountTo,
+                                          @ApiParam(value = "报告可用数量从") @RequestParam(value = "reportAbleAmountFrom", required = false) BigDecimal reportAbleAmountFrom,
+                                          @ApiParam(value = "报告可用数量到") @RequestParam(value = "reportAbleAmountTo", required = false) BigDecimal reportAbleAmountTo,
+                                          @ApiParam(value = "关闭标识") @RequestParam(value = "closedFlag", required = false) ClosedTypeEnum closedFlag,
+                                          @ApiParam(value = "备注") @RequestParam(value = "remarks", required = false) String remarks,
+                                          @ApiIgnore Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
         Page result = service.listByFinancial(companyId,
                 typeId,
@@ -538,16 +517,17 @@ public class ApplicationDocumentController {
      * @throws URISyntaxException
      */
     @GetMapping("/associated/by/prepayment")
+    @ApiOperation(value = "预付款关联申请单", notes = "预付款关联申请单 开发:bin.xie")
     public ResponseEntity listInfoByCondition(
-            @RequestParam Long prepaymentTypeId,
-            @RequestParam Long companyId,
-            @RequestParam Long unitId,
-            @RequestParam Long applicantId,
-            @RequestParam String currencyCode,
-            @RequestParam(required = false) String applicationNumber,
-            @RequestParam(required = false) String applicationType,
-            @RequestParam(value = "page",defaultValue = "0") int page,
-            @RequestParam(value = "size",defaultValue = "10") int size
+            @ApiParam(value = "预付款类型ID") @RequestParam Long prepaymentTypeId,
+            @ApiParam(value = "公司ID") @RequestParam Long companyId,
+            @ApiParam(value = "部门ID") @RequestParam Long unitId,
+            @ApiParam(value = "申请人ID") @RequestParam Long applicantId,
+            @ApiParam(value = "币种") @RequestParam String currencyCode,
+            @ApiParam(value = "申请编号") @RequestParam(required = false) String applicationNumber,
+            @ApiParam(value = "申请类型") @RequestParam(required = false) String applicationType,
+            @ApiParam(value = "页数") @RequestParam(value = "page",defaultValue = "0") int page,
+            @ApiParam(value = "每页大小") @RequestParam(value = "size",defaultValue = "10") int size
     ) throws URISyntaxException {
 
         Page queryPage = PageUtil.getPage(page, size);
@@ -572,36 +552,28 @@ public class ApplicationDocumentController {
      * @return
      */
     @GetMapping("/contract")
-    public ResponseEntity getContractById(@RequestParam(value = "contractHeaderId") Long contractHeaderId,
-                                                                         @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size){
+    @ApiOperation(value = "关联合同", notes = "关联合同 开发:bin.xie")
+    public ResponseEntity getContractById(@ApiParam(value = "合同头ID") @RequestParam(value = "contractHeaderId") Long contractHeaderId,
+                                          @ApiParam(value = "页数") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                          @ApiParam(value = "每页大小") @RequestParam(value = "size", required = false, defaultValue = "10") int size){
         Page myPage = PageUtil.getPage(page,size);
         List<ApplicationHeaderWebDTO> result = service.getContractById(contractHeaderId, myPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(myPage);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 
-    /**
-     * @api {GET} /api/expense/application/release 【报账单】关联申请单
-     * @apiDescription 关联申请单
-     * @apiGroup ExpenseReport
-     *
-     * @apiParam (请求参数){Long} expenseTypeId 费用类型ID
-     * @apiParam (请求参数){String} currencyCode 币种
-     * @apiParam (请求参数){Long} expReportHeaderId 报账单头ID
-     * @apiParam (请求参数){String} [documentNumber] 申请单编号
-     * @apiParam (请求参数){Integer} [page] 页数
-     * @apiParam (请求参数){Integer} [size] 每页大小
 
-     * @apiParamExample {json} 请求参数:
-    /api/expense/application/release?expenseTypeId=1084663637303009282&currencyCode=CNY&expReportHeaderId=1106225896027717633
-     */
     @GetMapping("/release")
-    public ResponseEntity<List<ApplicationHeaderAbbreviateDTO>> selectApplicationAndApportionment(@RequestParam Long expenseTypeId,
-                                                                                                  @RequestParam String currencyCode,
-                                                                                                  @RequestParam Long expReportHeaderId,
-                                                                                                  @RequestParam(required = false) String documentNumber,
-                                                                                                  Pageable pageable){
+    @ApiOperation(value = "【报账单】关联申请单", notes = "【报账单】关联申请单 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity<List<ApplicationHeaderAbbreviateDTO>> selectApplicationAndApportionment(@ApiParam(value = "费用类型ID") @RequestParam Long expenseTypeId,
+                                                                                                  @ApiParam(value = "币种") @RequestParam String currencyCode,
+                                                                                                  @ApiParam(value = "报账单头ID") @RequestParam Long expReportHeaderId,
+                                                                                                  @ApiParam(value = "申请单编号") @RequestParam(required = false) String documentNumber,
+                                                                                                  @ApiIgnore Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         List<ApplicationHeaderAbbreviateDTO> applicationHeaderAbbreviateDTOS =
                 service.selectApplicationAndApportionment(expenseTypeId, currencyCode, expReportHeaderId, documentNumber, page);
@@ -610,11 +582,16 @@ public class ApplicationDocumentController {
     }
 
     @RequestMapping("get/release/by/reportId")
-    public ResponseEntity<List<ApplicationHeaderWebDTO>>  queryReleaseByReport(@RequestParam(value = "businessCode") String reportNumber,
-                                                                               @RequestParam (required = false)String formName,
-                                                                                @RequestParam(required = false)String releaseCode,
-                                                                                @RequestParam(required = false)String expenseTypeName,
-                                                                                Pageable pageable){
+    @ApiOperation(value = "根据报告查询发布", notes = "根据报告查询发布 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity<List<ApplicationHeaderWebDTO>>  queryReleaseByReport(@ApiParam(value = "报告编号") @RequestParam(value = "businessCode") String reportNumber,
+                                                                               @ApiParam(value = "表格名称") @RequestParam (required = false)String formName,
+                                                                               @ApiParam(value = "发布编码") @RequestParam(required = false)String releaseCode,
+                                                                               @ApiParam(value = "费用类型名称") @RequestParam(required = false)String expenseTypeName,
+                                                                               @ApiIgnore Pageable pageable){
 
         Page page = PageUtil.getPage(pageable);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);

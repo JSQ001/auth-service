@@ -67,6 +67,14 @@ public class BudgetReserveCO extends DomainObjectDTO {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long employeeId;         //员工ID
     private String employeeCode;         //员工代码
+
+    //责任中心ID
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long responsibilityCenterId;
+
+    //责任中心代码
+    private String responsibilityCenterCode;
+
     @JsonSerialize(using = ToStringSerializer.class)
     private Long dimension1Id;         //维度1
     private String dimension1Code;         //维度1代码

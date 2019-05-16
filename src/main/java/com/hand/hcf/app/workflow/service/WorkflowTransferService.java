@@ -7,37 +7,21 @@ import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
-import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
-import com.hand.hcf.app.workflow.approval.dto.*;
-import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;
-import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowMainService;
-import com.hand.hcf.app.workflow.approval.service.WorkflowRepeatApproveService;
-import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.TransferDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
+import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
+import com.hand.hcf.app.workflow.dto.transfer.WorkflowTransferDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkflowTransfer;
-import com.hand.hcf.app.workflow.dto.WorkflowTransferDTO;
 import com.hand.hcf.app.workflow.persistence.WorkflowTransferMapper;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author shaofeng.zheng@hand-china.com
@@ -46,7 +30,7 @@ import java.util.UUID;
  * @version: 1.0.0
  */
 @Service
-public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,WorkflowTransfer> {
+public class WorkflowTransferService extends BaseService<WorkflowTransferMapper, WorkflowTransfer> {
 
     @Autowired
     private BaseClient baseClient;
@@ -57,28 +41,6 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
     @Autowired
     private MapperFacade mapper;
 
-    @Inject
-    private ApprovalChainService approvalChainService;
-
-    @Inject
-    private WorkFlowDocumentRefService workFlowDocumentRefService;
-
-    @Autowired
-    private WorkflowBaseService workflowBaseService;
-
-    @Autowired
-    private ContactControllerImpl contactClient;
-	@Autowired
-    private MessageService messageService;
-
-    @Autowired
-    private WorkflowRepeatApproveService workflowRepeatApproveService;
-
-    @Autowired
-    private WorkflowMainService workflowMainService;
-
-    @Autowired
-    private WorkflowActionService workflowActionService;
     /**
      * 新增转交
      * @param workflowTransfer
@@ -88,13 +50,14 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
     public WorkflowTransfer insertWorkflowTransfer(WorkflowTransfer workflowTransfer) {
         //点击保存时做校验，若将同一条审批流授权给不同用户且授权时间有重叠，则保存失败，
         // 系统提示“当前审批流已被授权，不允许重复授权”
-        if(baseMapper.selectList(
+        if (baseMapper.selectList(
                 new EntityWrapper<WorkflowTransfer>()
-                        .eq("workflow_id",workflowTransfer.getWorkflowId())
-                        .eq("start_date",workflowTransfer.getStartDate()))
-                .size() > 0){
-            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT);
-        };
+                        .eq("workflow_id", workflowTransfer.getWorkflowId())
+                        .eq("start_date", workflowTransfer.getStartDate()))
+                .size() > 0) {
+            throw new BizException(LocaleMessageConstants.WORKFLOW_TRANSFER_AUTHORIZATION_REPEAT);
+        }
+        ;
         workflowTransfer.setAuthorizerId(OrgInformationUtil.getCurrentUserId());
         workflowTransfer.setTenantId(OrgInformationUtil.getCurrentTenantId());
         baseMapper.insert(workflowTransfer);
@@ -123,23 +86,23 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
                                                                 String tab,
                                                                 Page mybaitsPage) {
         Long userId = OrgInformationUtil.getCurrentUserId();
-        Wrapper wrapper =  new EntityWrapper<WorkflowTransfer>()
-                .eq(StringUtils.isNotEmpty(documentCategory),"document_category",documentCategory)
-                .eq(workflowId != null, "workflow_id",workflowId)
-                .ge(StringUtils.isNotEmpty(startDate),"start_date", TypeConversionUtils.getStartTimeForDayYYMMDD(startDate))
-                .le(StringUtils.isNotEmpty(endDate),"end_date",TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
-                .like(StringUtils.isNotEmpty(authorizationNotes),"authorization_notes",authorizationNotes)
+        Wrapper wrapper = new EntityWrapper<WorkflowTransfer>()
+                .eq(StringUtils.isNotEmpty(documentCategory), "document_category", documentCategory)
+                .eq(workflowId != null, "workflow_id", workflowId)
+                .ge(StringUtils.isNotEmpty(startDate), "start_date", TypeConversionUtils.getStartTimeForDayYYMMDD(startDate))
+                .le(StringUtils.isNotEmpty(endDate), "end_date", TypeConversionUtils.getEndTimeForDayYYMMDD(endDate))
+                .like(StringUtils.isNotEmpty(authorizationNotes), "authorization_notes", authorizationNotes)
                 .orderBy("start_date");
-        if(tab.equals("agent")){
+        if (tab.equals("agent")) {
             //当前代理人为当前用户
-             wrapper.eq("agent_id",userId)
-                    .eq(authorizerId != null,"authorizer_id",authorizerId);
-        }else {
+            wrapper.eq("agent_id", userId)
+                    .eq(authorizerId != null, "authorizer_id", authorizerId);
+        } else {
             //当前授权人
-             wrapper.eq("authorizer_id",userId)
-                    .eq(agentId != null,"agent_id",agentId);
+            wrapper.eq("authorizer_id", userId)
+                    .eq(agentId != null, "agent_id", agentId);
         }
-        return toDTO(baseMapper.selectPage(mybaitsPage,wrapper));
+        return toDTO(baseMapper.selectPage(mybaitsPage, wrapper));
 
     }
 
@@ -149,12 +112,12 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
      * @return
      */
     public List<WorkflowTransferDTO> toDTO(List<WorkflowTransfer> workflowTransferList) {
-        List<WorkflowTransferDTO> workflowTransferDTOS = mapper.mapAsList(workflowTransferList,WorkflowTransferDTO.class);
-        workflowTransferDTOS.stream().forEach(workflowTransfer ->{
+        List<WorkflowTransferDTO> workflowTransferDTOS = mapper.mapAsList(workflowTransferList, WorkflowTransferDTO.class);
+        workflowTransferDTOS.stream().forEach(workflowTransfer -> {
             String documentCategory = workflowTransfer.getDocumentCategory();
             Long workflowId = workflowTransfer.getWorkflowId();
             //代理人
-            ContactCO  agent= baseClient.getUserById(workflowTransfer.getAgentId());
+            ContactCO agent = baseClient.getUserById(workflowTransfer.getAgentId());
             //授权人
             ContactCO authorizer = baseClient.getUserById(workflowTransfer.getAuthorizerId());
             workflowTransfer.setAuthorizerName(authorizer.getFullName());
@@ -162,17 +125,17 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
             workflowTransfer.setAgentName(agent.getFullName());
             workflowTransfer.setAgentCode(agent.getEmployeeCode());
             //设置审批流名称
-            if(workflowId != null){
+            if (workflowId != null) {
                 ApprovalForm approvalForm = approvalFormService.selectById(workflowId);
-                if(approvalForm != null){
+                if (approvalForm != null) {
                     workflowTransfer.setWorkflowName(approvalForm.getFormName());
                 }
             }
-            if(documentCategory != null ){
-               SysCodeValueCO sysCodeValueCO = baseClient.getSysCodeValueByCodeAndValue("SYS_APPROVAL_FORM_TYPE",documentCategory);
-               if(sysCodeValueCO != null){
-                   workflowTransfer.setDocumentCategoryName(sysCodeValueCO.getName());
-               }
+            if (documentCategory != null) {
+                SysCodeValueCO sysCodeValueCO = baseClient.getSysCodeValueByCodeAndValue("SYS_APPROVAL_FORM_TYPE", documentCategory);
+                if (sysCodeValueCO != null) {
+                    workflowTransfer.setDocumentCategoryName(sysCodeValueCO.getName());
+                }
             }
         });
         return workflowTransferDTOS;
@@ -184,88 +147,11 @@ public class WorkflowTransferService extends BaseService<WorkflowTransferMapper,
      * @return
      */
     public WorkflowTransfer updateWorkflowTransfer(WorkflowTransfer workflowTransfer) {
-        if(baseMapper.selectById(workflowTransfer.getId()) == null){
-            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_NOT_EXIST);
+        if (baseMapper.selectById(workflowTransfer.getId()) == null) {
+            throw new BizException(LocaleMessageConstants.WORKFLOW_TRANSFER_NOT_EXIST);
         }
         baseMapper.updateAllColumnById(workflowTransfer);
         return workflowTransfer;
-    }
-
-    /**
-     * 转交单据
-     * @param tenantId
-     * @param userOid
-     * @param dto
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public void transferDeliver(Long tenantId, UUID userOid, TransferDTO dto){
-        Assert.notNull(dto.getEntityOid(), "dto.entityOid null");
-        Assert.notNull(dto.getEntityType(), "dto.entityType null");
-        Assert.notNull(dto.getUserOid(), "dto.userOid null");
-
-        //加载审批任务
-        WorkflowUser user = new WorkflowUser(userOid);
-        WorkFlowDocumentRef workFlowDocumentRef = workFlowDocumentRefService.getByDocumentOidAndDocumentCategory(dto.getEntityOid(), dto.getEntityType());
-
-        WorkflowTask task = workflowBaseService.findTask(new WorkflowInstance(workFlowDocumentRef), user);
-        if(task == null){
-            throw new BizException(ExceptionCode.WORKFLOW_TRANSFER_NOT_EXIST);
-        }
-
-        WorkflowNode node = task.getNode();
-        WorkflowRule rule = node.getRule();
-        WorkflowInstance instance = node.getInstance();
-        //判断节点是否可以转交
-        if (!Boolean.TRUE.equals(rule.getTransferFlag())) {
-            throw new BizException(ExceptionCode.WORKFLOW_NODE_CANNOT_BE_FORWARDED);
-        }
-
-        //设置当前审批任务为无效
-        task.setStatus(WorkflowTask.STATUS_INVALID);
-        workflowBaseService.updateTask(task);
-
-       //创建新的审批任务
-        UUID userOidDeliver = dto.getUserOid();
-        String remark = dto.getRemark();
-
-        WorkflowUser deliverUser = new WorkflowUser(userOidDeliver);
-        // 保存审批任务
-        WorkflowTask newTask = workflowBaseService.createTask(node,deliverUser, task.getGroup());
-        workflowBaseService.saveTask(newTask);
-
-        ContactCO contactCO = contactClient.getByUserOid(userOidDeliver);
-        if(!contactCO.getTenantId().equals(tenantId)){
-            throw new BizException(ExceptionCode.WORKFLOW_TENANT_NOT_OPENING);
-        }
-
-        //保存历史
-        workflowBaseService.saveHistory(task, ApprovalOperationEnum.APPROVAL_TRANSFER.getId().toString(), deliverRemark(contactCO.getFullName(), contactCO.getEmployeeCode(), remark));
-
-        WorkflowApproval approval = null;
-        // 获取重复的审批
-        if (WorkflowRule.REPEAT_SKIP.equals(rule.getRepeatRule())) {
-            List<WorkflowTask> taskList = new ArrayList<WorkflowTask>();
-            taskList.add(newTask);
-            List<WorkflowApproval> approvalList = workflowRepeatApproveService.getRepeatApprovals(taskList);
-
-            if (approvalList.size() > 0) {
-                approval = approvalList.get(0);
-            }
-        }
-
-        if (approval != null) {
-            WorkflowAutoApproveAction action = new WorkflowAutoApproveAction(workflowActionService, approval);
-            workflowMainService.runWorkflow(instance, action);
-        }
-    }
-
-    /**
-     * 返回转交历史记录
-     * @return
-     */
-    public String deliverRemark(String fullName, String employeeCode, String remark){
-        String deliverRemark = messageService.getMessageDetailByCode(MessageConstants.DELIVER_REMARK,fullName, employeeCode, remark);
-        return deliverRemark;
     }
 
 }

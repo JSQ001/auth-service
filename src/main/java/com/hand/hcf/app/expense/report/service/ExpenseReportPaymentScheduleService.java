@@ -201,6 +201,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
             ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeader.getDocumentTypeId());
             ExpenseReportPaymentSchedule expensePaymentSchedule = new ExpenseReportPaymentSchedule();
             String paymentMethod = expenseReportType.getPaymentMethod();
+            String paymentType = expenseReportType.getPaymentType();
+
             expensePaymentSchedule.setExpReportHeaderId(expenseReportHeader.getId());
             expensePaymentSchedule.setTenantId(expenseReportHeader.getTenantId());
             expensePaymentSchedule.setSetOfBooksId(expenseReportHeader.getSetOfBooksId());
@@ -214,6 +216,8 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
             expensePaymentSchedule.setFunctionAmount(OperationUtil.safeMultiply(expensePaymentSchedule.getAmount(),expensePaymentSchedule.getExchangeRate()));
             expensePaymentSchedule.setPaymentScheduleDate(ZonedDateTime.now());
             expensePaymentSchedule.setPaymentMethod(paymentMethod);
+            expensePaymentSchedule.setPaymentType(paymentType);
+
             setDefaultAccountInfo(expensePaymentSchedule,expenseReportHeader,expenseReportType);
             expensePaymentSchedule.setConPaymentScheduleLineId(null);
             expensePaymentSchedule.setFrozenFlag("N");
@@ -254,7 +258,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                     expensePaymentSchedule.setAccountNumber(bankAccountDTOS.getBankAccountNo());
                     expensePaymentSchedule.setAccountName(bankAccountDTOS.getBankAccountName());
                 }
-            }else if("VENDER".equals(expensePaymentSchedule.getPayeeCategory())){
+            }/*else if("VENDER".equals(expensePaymentSchedule.getPayeeCategory())){
                 expensePaymentSchedule.setPayeeId(expenseReportHeader.getPayeeId());
                 List<VendorBankAccountCO> info =  organizationService.listVendorBankAccounts(expenseReportHeader.getPayeeId().toString());
                 if (!CollectionUtils.isEmpty(info)) {
@@ -264,7 +268,7 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
                         expensePaymentSchedule.setAccountName(vender.getVenBankNumberName());
                     });
                 }
-            }
+            }*/
         }
     }
 
@@ -412,10 +416,15 @@ public class ExpenseReportPaymentScheduleService extends BaseService<ExpenseRepo
         ExpenseReportPaymentScheduleDTO paymentScheduleDTO = new ExpenseReportPaymentScheduleDTO();
         BeanUtils.copyProperties(expensePaymentSchedule, paymentScheduleDTO);
 
-        //付款方式
+        //付款方式类型
         if(StringUtils.isNotEmpty(expensePaymentSchedule.getPaymentMethod())){
             SysCodeValueCO paymentMethodSysCode = organizationService.getSysCodeValueByCodeAndValue("2105",expensePaymentSchedule.getPaymentMethod());
             paymentScheduleDTO.setPaymentMethodName(paymentMethodSysCode == null ? null : paymentMethodSysCode.getName());
+        }
+        //付款方式
+        if(StringUtils.isNotEmpty(expensePaymentSchedule.getPaymentType())){
+            SysCodeValueCO paymentMethodSysCode = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE",expensePaymentSchedule.getPaymentType());
+            paymentScheduleDTO.setPaymentTypeName(paymentMethodSysCode == null ? null : paymentMethodSysCode.getName());
         }
 
         //现金事物分类、默认现金事物流量项

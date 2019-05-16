@@ -13,6 +13,8 @@ import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,6 +201,15 @@ public class LegalEntityResource {
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/legalentitys/by/setofbooks/or/user");
         return new ResponseEntity<>(page.getRecords(), headers, HttpStatus.OK);
     }
+
+    @ApiOperation(value = "通过账套id 查询法人 数据权限", notes = "通过账套id 查询法人 如果不传账套id则会查询该账号数据权限下的所有法人 开发：王帅")
+    @GetMapping(value = "/legalentitys/by/setofbooks/enable/dataAuth")
+    @Timed
+    public ResponseEntity<List<LegalEntityDTO>> findLegalEntityBySetOfBooksIdDataAuth(@ApiParam(value = "账套id")
+                                                                                          @RequestParam(name = "setOfBooksId", required = false) Long setOfBooksId) {
+        return  ResponseEntity.ok(legalEntityService.findLegalEntityBySetOfBooksIdDataAuth(setOfBooksId));
+    }
+
 
     /**
      * @api {get} /api/listDTOByQO/parent/legalentitys 查询上级法人实体列表

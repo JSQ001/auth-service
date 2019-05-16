@@ -1,14 +1,14 @@
 package com.hand.hcf.app.base.attachment;
 
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
-import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.persistence.AttachmentMapper;
 import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -27,10 +33,8 @@ import java.util.stream.Collectors;
  */
 @Service
 @CacheConfig(cacheNames = {CacheConstants.ATTACHMENT})
-public class AttachmentService extends BaseService<AttachmentMapper,Attachment> {
+public class AttachmentService extends BaseService<AttachmentMapper, Attachment> {
 
-    public static final String THUMBNAIL = "-thumbnail-";
-    public static final String ICON = "-icon-";
     private final Logger log = LoggerFactory.getLogger(AttachmentService.class);
     @Autowired
     private AttachmentMapper attachmentMapper;
@@ -42,21 +46,33 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
      * delete the  attachment by oids.
      * delete the  attachment by oid.
      */
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String oid) {
-        log.debug("Request to delete Attachment : {}", oid);
         Attachment attachment =  attachmentMapper.findByAttachmentOid(oid);
         attachmentImpl.removeFile(Arrays.asList(attachment));
         attachmentMapper.deleteById(attachment.getId());
     }
+    // OSS 删除 根据传入的附件的Oid
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOssFile(String oid) {
+        Attachment attachment =  attachmentMapper.findByAttachmentOid(oid);
+        String objectName = attachment.getPath();
+        //先删除服务器文件
+        if(StringUtils.isNotBlank(objectName)) {
+            attachmentImpl.deleteOssFile(objectName);
+        }
+        //再删除表中数据
+        attachmentMapper.deleteById(attachment.getId());
+
+    }
     /**
      * delete the  attachment by oids.
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteByOids(List<UUID> oids) {
-        log.debug("Request to delete Attachment : {}", oids);
-        List<Attachment> attachments = new ArrayList<>();
         Collection<Attachment> attachmentsParam = attachmentMapper.findByAttachmentOidIn(oids);
-        attachments.addAll(attachmentsParam);
-        List<Long> attachmentIds = attachments.stream().map(u -> u.getId()).collect(Collectors.toList());
+        List<Attachment> attachments = new ArrayList<>(attachmentsParam);
+        List<Long> attachmentIds = attachments.stream().map(Attachment::getId).collect(Collectors.toList());
         if(CollectionUtils.isNotEmpty(attachmentIds)) {
             //先删除表
             attachmentMapper.deleteBatchIds(attachmentIds);
@@ -69,39 +85,33 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
         attachmentImpl.removeFile(isPublic,path);
     }
 
-    public Attachment uploadStatic(MultipartFile file, AttachmentType attachmentType){
-        return attachmentImpl.uploadStatic(file,attachmentType);
+    @Transactional(rollbackFor = Exception.class)
+    public Attachment uploadStatic(MultipartFile file, String attachmentType, String pkValue){
+        return attachmentImpl.uploadStatic(file,attachmentType, pkValue);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public AttachmentCO uploadStaticFile(MultipartFile file, String attachmentType, String pkValue){
+        return  attachmentImpl.uploadStaticFile(file, attachmentType, pkValue);
     }
 
-    public AttachmentCO uploadStaticFile(MultipartFile file, AttachmentType attachmentType){
-        return  attachmentImpl.uploadStaticFile(file,attachmentType);
-    }
 
-
-    public AttachmentCO uploadStaticFile(byte[] content, AttachmentType attachmentType,String fileName,Long length){
-        return  attachmentImpl.uploadStaticFile(content,attachmentType,fileName,length);
-    }
 
     /**
      * get one attachment by Oid.
      *
      * @return the entity
      */
-    @Transactional(readOnly = true)
     public AttachmentCO findByAttachmentOid(UUID attachmentOid) {
         log.debug("Request to get Attachment : {}", attachmentOid);
         Attachment attachment = attachmentMapper.findByAttachmentOid(attachmentOid.toString());
         if (attachment == null) {
             return null;
         }
-        AttachmentCO AttachmentCO = attachmentImpl.adapterAttachmentCO(attachment);
-        return AttachmentCO;
+        return attachmentImpl.adapterAttachmentCO(attachment);
     }
 
-    @Transactional(readOnly = true)
     public Attachment findByOId(String id){
-        Attachment attachment = attachmentMapper.findByAttachmentOid(id);
-        return attachment;
+        return attachmentMapper.findByAttachmentOid(id);
     }
 
 
@@ -110,71 +120,90 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
      *
      * @return the entity
      */
-    @Transactional(readOnly = true)
     public List<AttachmentCO> findByAttachmentOids(List<UUID> attachmentOids) {
         if (attachmentOids == null || attachmentOids.size() == 0) {
-            return new ArrayList<AttachmentCO>();
+            return new ArrayList<>();
         }
         log.debug("Request to get Attachments : {}", attachmentOids);
         Collection<Attachment> attachments = attachmentMapper.findByAttachmentOidIn(attachmentOids);
-        List<Attachment> attachmentsParam = new ArrayList<>();
-        attachmentsParam.addAll(attachments);
+        List<Attachment> attachmentsParam = new ArrayList<>(attachments);
         return attachmentsParam.stream().map(a->attachmentImpl.adapterAttachmentCO(a)).collect(Collectors.toList());
     }
-
 
 
     public Attachment findOneByAttachmentOid(UUID attachmentOid) {
         return attachmentMapper.findByAttachmentOid(attachmentOid.toString());
     }
 
-
-
-
     /**
      * 根据附件id获取附件信息
      * @param id：附件id
      * @return
      */
-    @Transactional
     public AttachmentCO getAttachmentById(Long id){
         return attachmentImpl.adapterAttachmentCO(attachmentMapper.selectById(id));
     }
 
-    public static Attachment AttachmentCOToAttachment(AttachmentCO AttachmentCO){
-        if(null == AttachmentCO){
-            return null;
-        }
-        Attachment attachment = new Attachment();
-        attachment.setId(AttachmentCO.getId());
-        attachment.setAttachmentOid(AttachmentCO.getAttachmentOid());
-        attachment.setName(AttachmentCO.getFileName());
-        attachment.setMediaTypeID(AttachmentCO.getFileType().getId());
-        attachment.setPath(AttachmentCO.getFileUrl());
-        attachment.setThumbnailPath(AttachmentCO.getThumbnailUrl());
-        attachment.setIconPath(AttachmentCO.getIconUrl());
-        attachment.setSizes(AttachmentCO.getSize());
-        attachment.setCreatedBy(LoginInformationUtil.getCurrentUserId());
-        return attachment;
+
+    @Transactional(rollbackFor = Exception.class)
+    public AttachmentCO uploadFile(MultipartFile file, String attachmentType, String pkValue){
+        return attachmentImpl.uploadFile(file, attachmentType, pkValue);
     }
 
-    public AttachmentCO uploadFile(MultipartFile file, AttachmentType attachmentType){
-        return attachmentImpl.uploadFile(file,attachmentType);
-    }
-
-    public AttachmentCO uploadFileAsync(MultipartFile file, AttachmentType attachmentType){
-        return attachmentImpl.uploadFileAsync(file,attachmentType);
-    }
-
-    public String uploadPublicStaticAttachment( AttachmentType attachmentType, MultipartFile file){
-        return attachmentImpl.uploadPublicStaticAttachment(attachmentType,file);
-    }
 
     public void writeFileToResp(HttpServletResponse response, Attachment attachment){
         attachmentImpl.writeFileToResp(response,attachment);
     }
 
-    public AttachmentCO AttachmentToAttachmentCO(Attachment attachment){
+    public AttachmentCO attachmentToAttachmentCO(Attachment attachment){
         return attachmentImpl.adapterAttachmentCO(attachment);
+    }
+
+    public void savePkVale(List<String> attachmentOids, String pkValue, String attachmentType) {
+        List<Attachment> attachments = attachmentMapper.selectList(
+                getWrapper()
+                        .eq("pk_name", attachmentType)
+                        .in("attachment_oid", attachmentOids));
+        if (CollectionUtils.isNotEmpty(attachments)) {
+            attachments.forEach(e -> e.setPkValue(pkValue));
+            this.updateBatchById(attachments);
+        }
+    }
+
+
+    public List<AttachmentCO> listByPkValue(String pkValue, String attachmentType) {
+        List<Attachment> attachments = attachmentMapper.selectList(
+                getWrapper()
+                        .eq("pk_value", pkValue)
+                        .eq("pk_name", attachmentType));
+        return attachments.stream().map(e -> attachmentImpl.adapterAttachmentCO(e)).collect(Collectors.toList());
+    }
+
+    public Map<String, List<AttachmentCO>> listByPkValues(String attachmentType, List<String> pkValues) {
+        Map<String, List<AttachmentCO>> result = new HashMap<>(16);
+        pkValues.forEach(v -> result.put(v, listByPkValue(v, attachmentType)));
+        return result;
+    }
+
+    public void deleteByPkValue(String pkValue, String attachmentType) {
+        Wrapper<Attachment> wrapper = getWrapper()
+                .eq("pk_value", pkValue)
+                .eq("pk_name", attachmentType);
+        deleteFileByWrapper(wrapper);
+    }
+
+    public void deleteByPkValues(String attachmentType, List<String> pkValues) {
+        Wrapper<Attachment> wrapper = getWrapper()
+                .in("pk_value", pkValues)
+                .eq("pk_name", attachmentType);
+        deleteFileByWrapper(wrapper);
+    }
+
+    private void deleteFileByWrapper (Wrapper<Attachment> wrapper) {
+        List<Attachment> attachments = attachmentMapper.selectList(wrapper);
+        // 删除表
+        this.delete(wrapper);
+        // 删文件
+        attachmentImpl.removeFile(attachments);
     }
 }

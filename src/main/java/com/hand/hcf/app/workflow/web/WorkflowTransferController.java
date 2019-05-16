@@ -1,10 +1,9 @@
 package com.hand.hcf.app.workflow.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.workflow.domain.WorkflowTransfer;
-import com.hand.hcf.app.workflow.dto.WorkflowTransferDTO;
+import com.hand.hcf.app.workflow.dto.transfer.WorkflowTransferDTO;
 import com.hand.hcf.app.workflow.service.WorkflowTransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

@@ -2,9 +2,7 @@ package com.hand.hcf.app.workflow.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.DepartmentCO;
-import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.payment.externalApi.OrganizationInterface;
@@ -12,11 +10,15 @@ import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
 import com.hand.hcf.app.workflow.brms.domain.RuleApprovalNode;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.service.RuleApprovalNodeService;
-import com.hand.hcf.app.workflow.constant.FormConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
 import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.dto.*;
+import com.hand.hcf.app.workflow.dto.chain.ApprovalNodeDTO;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
+import com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDTO;
+import com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDetailDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkFlowDocumentRefDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkflowDocumentDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.WorkFlowDocumentRefMapper;
 import com.hand.hcf.app.workflow.util.CheckUtil;
@@ -67,9 +69,9 @@ public class WorkFlowApprovalService {
 
     public Map<String, Set<UUID>> getRuleApproverUserOIDs(DroolsRuleApprovalNodeDTO droolsRuleApprovalNodeDTO) {
         return defaultWorkflowIntegrationService.getApproverUserOids(droolsRuleApprovalNodeDTO.getRuleApproverDTOs(),
-                droolsRuleApprovalNodeDTO.getFormValues(),
-                droolsRuleApprovalNodeDTO.getApplicantOid(),
-                droolsRuleApprovalNodeDTO);
+                        droolsRuleApprovalNodeDTO.getFormValues(),
+                        droolsRuleApprovalNodeDTO.getApplicantOid(),
+                        droolsRuleApprovalNodeDTO);
     }
 
 
@@ -88,7 +90,7 @@ public class WorkFlowApprovalService {
             statusList.add(2001);//2001审核驳回
         }else if(tabNumber == 2){
             statusList.add(DocumentOperationEnum.APPROVAL.getId());//1002审批中
-            //statusList.add(PaymentDocumentOperationEnum.APPROVAL_PASS.getId());//1004审批通过
+            //statusList.add(DocumentOperationEnum.APPROVAL_PASS.getId());//1004审批通过
         }
         List<WorkFlowDocumentRef> workFlowDocumentRefList = workFlowDocumentRefMapper.selectList(
                 new EntityWrapper<WorkFlowDocumentRef>()
@@ -499,12 +501,12 @@ public class WorkFlowApprovalService {
         approvalNodeDTO.setRuleApprovalNodeOid(ruleApprovalNode.getRuleApprovalNodeOid());
         approvalNodeDTO.setRuleApprovalChainOid(ruleApprovalNode.getRuleApprovalChainOid());
         approvalNodeDTO.setName(ruleApprovalNode.getName());
+        approvalNodeDTO.setRejectRule(ruleApprovalNode.getRejectRule());
         if (ruleApprovalNode.getReturnFlag()){
             approvalNodeDTO.setBackable(Boolean.TRUE);
         }
         approvalNodeDTO.setAddSignable(ruleApprovalNode.getAddsignFlag());
         approvalNodeDTO.setTransferable(ruleApprovalNode.getTransferFlag());
-
         return approvalNodeDTO;
     }
 

@@ -828,6 +828,10 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
         // 删除头信息
         this.deleteById(id);
+        //删除审批流实例
+        Integer entityType = applicationHeader.getDocumentType();
+        UUID entityOid = UUID.fromString(applicationHeader.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
         return true;
     }
 
@@ -1062,6 +1066,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      */
     public Wrapper<ApplicationHeader> getClosedQueryWrapper(String documentNumber,
                                                             Long typeId,
+                                                            Long setOfBooksId,
+                                                            Long unitId,
                                                             ZonedDateTime requisitionDateFrom,
                                                             ZonedDateTime requisitionDateTo,
                                                             BigDecimal amountFrom,
@@ -1086,6 +1092,8 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         Wrapper<ApplicationHeader> wrapper = new EntityWrapper<ApplicationHeader>()
                 .eq("t.status", DocumentOperationEnum.APPROVAL_PASS.getId())
                 .ne("t.closed_flag", ClosedTypeEnum.CLOSED)
+                .eq(setOfBooksId !=null,"t.set_of_books_id",setOfBooksId)
+                .eq(unitId != null ,"t.department_id",unitId)
                 .eq(typeId != null, "t.type_id", typeId)
                 .eq(closedFlag != null, "t.closed_flag", closedFlag)
                 .eq(employeeId != null, "t.employee_id", employeeId)
@@ -1108,6 +1116,14 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                                                                Wrapper<ApplicationHeader> wrapper) {
         List<ApplicationHeaderWebDTO> headers = baseMapper.listCloseByCondition(page, wrapper);
         setCompanyAndDepartmentAndEmployee(headers, true);
+        for (ApplicationHeader applicationHeader : headers) {
+            //返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(applicationHeader.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                applicationHeader.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                applicationHeader.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
         return headers;
     }
 
@@ -1116,20 +1132,21 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
      */
     public void exportClosedExcel(String documentNumber,
                                   Long typeId,
-                                  ZonedDateTime requisitionDateFrom,
-                                  ZonedDateTime requisitionDateTo,
-                                  BigDecimal amountFrom,
-                                  BigDecimal amountTo,
-                                  ClosedTypeEnum closedFlag,
-                                  String currencyCode,
-                                  String remarks,
-                                  Long employeeId,
-                                  List<Long> companyId,
-                                  HttpServletResponse response,
-                                  HttpServletRequest request,
-                                  ExportConfig exportConfig) throws IOException {
-        // 获取查询条件SQL
-        Wrapper<ApplicationHeader> wrapper = getClosedQueryWrapper(documentNumber, typeId, requisitionDateFrom,
+                                  Long setOfBooksId,
+                ZonedDateTime requisitionDateFrom,
+                ZonedDateTime requisitionDateTo,
+                BigDecimal amountFrom,
+                BigDecimal amountTo,
+                ClosedTypeEnum closedFlag,
+                String currencyCode,
+                String remarks,
+                Long employeeId,
+                List<Long> companyId,
+                HttpServletResponse response,
+                HttpServletRequest request,
+                ExportConfig exportConfig) throws IOException {
+            // 获取查询条件SQL
+            Wrapper<ApplicationHeader> wrapper = getClosedQueryWrapper(documentNumber, typeId,setOfBooksId,null, requisitionDateFrom,
                 requisitionDateTo, amountFrom, amountTo, closedFlag, currencyCode, remarks, employeeId, companyId, null);
         int total = baseMapper.getCountByCondition(wrapper);
         int availProcessors = Runtime.getRuntime().availableProcessors() / 2;
@@ -1358,26 +1375,27 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
         }
     }
 
-    public List<ApplicationFinancRequsetDTO> listHeaderDTOsByfincancies(Page page,
-                                                                        String documentNumber,
-                                                                        Long companyId,
-                                                                        Long typeId,
-                                                                        ZonedDateTime requisitionDateFrom,
-                                                                        ZonedDateTime requisitionDateTo,
-                                                                        BigDecimal amountFrom,
-                                                                        BigDecimal amountTo,
-                                                                        Long status,
-                                                                        String currencyCode,
-                                                                        String remarks,
-                                                                        Long employeeId,
-                                                                        Long unitId,
-                                                                        Long closedFlag,
-                                                                        BigDecimal associatedAmountFrom,
-                                                                        BigDecimal associatedAmountTo,
-                                                                        BigDecimal relevanceAmountFrom,
-                                                                        BigDecimal relevanceAmountTo,
-                                                                        Long tenantId,
-                                                                        boolean dataAuthFlag) {
+    public  List<ApplicationFinancRequsetDTO> listHeaderDTOsByfincancies(Page page,
+                                                                         String documentNumber,
+                                                                         Long setOfBooksId,
+                                                                         Long companyId,
+                                                                         Long typeId,
+                                                                         ZonedDateTime requisitionDateFrom,
+                                                                         ZonedDateTime requisitionDateTo,
+                                                                         BigDecimal amountFrom,
+                                                                         BigDecimal amountTo,
+                                                                         Long status,
+                                                                         String currencyCode,
+                                                                         String remarks,
+                                                                         Long employeeId,
+                                                                         Long unitId,
+                                                                         Long closedFlag,
+                                                                         BigDecimal associatedAmountFrom,
+                                                                         BigDecimal associatedAmountTo,
+                                                                         BigDecimal relevanceAmountFrom,
+                                                                         BigDecimal relevanceAmountTo,
+                                                                         Long tenantId,
+                                                                         boolean dataAuthFlag){
 
         String dataAuthLabel = null;
         if(dataAuthFlag){
@@ -1396,6 +1414,7 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 .like(StringUtils.hasText(documentNumber), "t.document_number", documentNumber)
                 .eq(typeId != null, "t.type_id", typeId)
                 .eq(unitId != null, "t.department_id", unitId)
+                .eq(setOfBooksId !=null,"t.set_of_books_id",setOfBooksId)
                 .eq(companyId != null, "t.company_id", companyId)
                 .eq(status != null, "t.status", status)
                 .eq(closedFlag != null, "t.closed_flag", closedFlag)
@@ -1420,6 +1439,14 @@ public class ApplicationHeaderService extends BaseService<ApplicationHeaderMappe
                 applicationFinancRequsetDTO.setDepartmentName(department.getName());
             }
         });
+        for (ApplicationFinancRequsetDTO applicationFinancRequsetDTO : headers) {
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(applicationFinancRequsetDTO.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                applicationFinancRequsetDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                applicationFinancRequsetDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
         setCompanyAndDepartmentAndEmployee1(headers);
 
 

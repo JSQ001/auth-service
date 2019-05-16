@@ -10,6 +10,7 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/user")
+@Api(tags = "用户定义")
 public class UserController {
 
 
@@ -61,63 +63,11 @@ public class UserController {
     private UserService userService;
 
     /**
-     * POST  /users -> Creates a new user.
-     * <p>
-     * Creates a new user if the login and email are not already used, and sends an
-     * mail with an activation link.
-     * The user needs to be activated on creation.
-     * </p>
+     * 新增用户
+     * @param userDTO
+     * @return
      */
-    /**
-     *
-     * @api {post} /api/refactor/users/v2 创建用户V2
-     * @apiGroup User
-     * @apiVersion 0.1.0
-     * @apiParamExample {json} 请求参数
-    {
-    "departmentPath" : null,
-    "mobile" : "13645454545",
-    "fullName" : "测试人员",
-    "employeeID" : "A113",
-    "email" : "13645454545@163.com",
-    "title" : "技术员",
-    "corporation" : null,
-    "leavingDate" : null,
-    "status" : 1001,
-    "companyOID" : "2ec774f5-7aba-486c-bd48-cf2ae74c9d9f",
-    "departmentOID" : "2cbd0780-ca07-4a34-9827-d8da0132aea6",
-    "departmentName" : "市场部",
-    "userOID" : null,
-    "employeeType" : null,
-    "duty" : null,
-    "birthday" : "1995-11-11",
-    "rank" : null,
-    "customFormValues" : [],
-    "corporationOID" : "3479fd3f-103e-4282-a39d-2e6052a17522",
-    "entryTime" : "2017-11-11"
-    }
-     * @apiSuccessExample {json} 响应结果
-    {
-    "customFormValues" : [],
-    "departmentPath" : "市场部",
-    "mobile" : "13645454545",
-    "fullName" : "测试人员",
-    "employeeID" : "A113",
-    "email" : "13645454545@163.com",
-    "title" : "技术员",
-    "corporation" : "上海xx有限公司",
-    "status" : 1001,
-    "departmentName" : "市场部",
-    "entryTime" : "2017-11-10T16:00:00Z",
-    "birthday" : "1995-11-10T16:00:00Z",
-    "userOID" : "c54c78d1-580b-48fa-ad59-3e332f4f66ee",
-    "departmentOID" : "2cbd0780-ca07-4a34-9827-d8da0132aea6",
-    "corporationOID" : "3479fd3f-103e-4282-a39d-2e6052a17522",
-    "companyOID" : "2ec774f5-7aba-486c-bd48-cf2ae74c9d9f",
-    "manager" : false
-    }
-     *
-     */
+    @ApiOperation(value = "新增用户", notes = "新增用户")
     @RequestMapping( method = RequestMethod.POST)
     public ResponseEntity<UserDTO> createUserForControl(@RequestBody UserDTO userDTO)  {
         if (userDTO.getId() != null) {
@@ -125,7 +75,7 @@ public class UserController {
         }
         return ResponseEntity.ok(userService.saveUserDto(userDTO, LoginInformationUtil.getCurrentTenantId()));
     }
-
+    @ApiOperation(value = "修改用户", notes = "修改用户")
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<UserDTO> updateUserForControl(@RequestBody UserDTO userDTO)  {
         return ResponseEntity.ok(userService.saveUserDto(userDTO, LoginInformationUtil.getCurrentTenantId()));

@@ -165,7 +165,7 @@ public class ExpenseAdjustLineService extends BaseService<ExpenseAdjustLineMappe
         // 当类型为费用补录时，费用行保存时，需要校验金额不能为0
         // 1001 为分摊，1002 为补录
         if("1002".equals(header.getAdjustTypeCategory())){
-            if(linesBean.getAmount() == null || linesBean.getAmount().equals(BigDecimal.ZERO)){
+            if(linesBean.getAmount() == null || linesBean.getAmount().compareTo(BigDecimal.ZERO) == 0){
                 throw new BizException(RespCode.EXPENSE_ADJUST_LINE_AMOUNT_IS_ZERO);
             }
         }

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -64,5 +65,5 @@ public class TenantDTO {
     private String taxId;       //税务证件号
     private Boolean systemFlag;
 
-
+    private List<Long> applicationIds;
 }

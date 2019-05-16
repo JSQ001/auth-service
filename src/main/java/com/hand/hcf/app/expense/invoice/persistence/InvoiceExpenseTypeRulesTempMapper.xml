@@ -13,7 +13,7 @@
                     column="{transactionID=transaction_id}"/>
     </resultMap>
 
-    <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportResultDTO">
+    <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
         <result column="rowNumber" property="index"/>
         <result column="error" property="error"/>
     </resultMap>
@@ -40,7 +40,7 @@
         t.SET_OF_BOOKS_ID,
 		t.id,
         t.GOODS_NAME,
-        (select p.id from  exp_expense_type p where p.code = t.EXPENSE_TYPE_CODE),
+        p.id,
         t.enabled,
         t.START_DATE,
 		t.END_DATE,
@@ -50,8 +50,9 @@
         #{currentDate},
         #{userId},
 		1
-        FROM inv_exp_type_rules_temp t
-        WHERE t.batch_number = #{transactionID}
+        FROM inv_exp_type_rules_temp t ,exp_expense_type p
+        WHERE p.code = t.EXPENSE_TYPE_CODE
+        and t.batch_number = #{transactionID}
         AND t.error_flag = 0
     </insert>
 

@@ -1,13 +1,12 @@
 package com.hand.hcf.app.expense.common.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.implement.web.AttchmentControllerImpl;
+import com.hand.hcf.app.base.implement.web.AttachmentControllerImpl;
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.dto.LocationDTO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.mdata.implement.web.*;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class OrganizationService {
     @Autowired
     private CurrencyControllerImpl currencyClient;
     @Autowired
-    private AttchmentControllerImpl attachmentClient;
+    private AttachmentControllerImpl attachmentClient;
     @Autowired
     private PeriodControllerImpl periodClient;
     @Autowired
@@ -227,7 +226,7 @@ public class OrganizationService {
         //jiu.zhao 修改三方接口 20190329
         //return organizationClient.getOrderNumber(documentType, companyCode, now);
         String language = LoginInformationUtil.getCurrentLanguage();
-        OrderNumberCO orderNumberCO = (OrderNumberCO)this.organizationClient.getOrderNumber(documentType, companyCode, now).getBody();
+        OrderNumberCO orderNumberCO = (OrderNumberCO)this.organizationClient.getOrderNumber(documentType, companyCode, now);
         if (StringUtils.isEmpty(orderNumberCO.getOrderNumber())) {
             throw new BizException(orderNumberCO.getCode(), (String)orderNumberCO.getMessage().stream().filter((u) -> {
                 return u.getLanguage().equalsIgnoreCase(language);
@@ -316,6 +315,9 @@ public class OrganizationService {
         return organizationClient.listEnabledSysCodeValueByCodeOid(codeOid);
     }
 
+    public Map<String, String> mapSysCodeValueByCode(String sysCode){
+        return organizationClient.mapAllSysCodeValueByCode(sysCode);
+    }
     /**
      * 根据用户id查询其组织架构Id信息
      * @param userId

@@ -2,17 +2,17 @@ package com.hand.hcf.app.workflow.brms.service;
 
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.workflow.brms.constant.MessageConstants;
 import com.hand.hcf.app.workflow.brms.dto.DroolsRuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleApprovalNodeDTO;
 import com.hand.hcf.app.workflow.brms.dto.RuleNextApproverResult;
+import com.hand.hcf.app.workflow.brms.enums.ApprovalMode;
 import com.hand.hcf.app.workflow.brms.enums.FieldType;
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
-import com.hand.hcf.app.workflow.dto.FormValueDTO;
-import com.hand.hcf.app.workflow.enums.ApprovalMode;
+import com.hand.hcf.app.workflow.dto.form.FormValueDTO;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.service.ApprovalFormService;
-import com.hand.hcf.app.workflow.util.ExceptionCode;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,7 @@ public class BrmsService {
             return nextApprovalNode;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BizException(ExceptionCode.SYS_APPROVAL_CHAIN_GET_ERROR, "invoke brms service error");
+            throw new BizException(MessageConstants.SYS_APPROVAL_CHAIN_GET_ERROR, "invoke brms service error");
         }
     }
 

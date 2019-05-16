@@ -1,6 +1,8 @@
 package com.hand.hcf.app.expense.application.web.dto;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.hand.hcf.app.expense.application.domain.ApplicationHeader;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -26,4 +28,17 @@ public class ApplicationFinancRequsetDTO extends ApplicationHeader {
     private String employeeName;
     private String typeName;
     private String createdName;
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

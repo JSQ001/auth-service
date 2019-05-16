@@ -101,6 +101,9 @@ public class BusinessDataCO implements Serializable {
     @NotBlank
     private String documentCategory;
 
+    @NotBlank
+    private String documentOid;
+
     private Map<String, List<Map<String, Object>>> otherLines;
 
 }

@@ -155,6 +155,8 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                 expenseType.setApplicationModelName(sysCodeValueCO.getName());
             }
         }
+        List<ExpenseFieldDTO> fields = queryFields(id);
+        expenseType.setFields(fields);
         return expenseType;
     }
 
@@ -204,6 +206,10 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                 if(dto.getShowOnList() != null){
                     expenseField.setShowOnList(dto.getShowOnList());
                 }
+                expenseField.setContainCountry(null!=dto.getContainCountry()?dto.getContainCountry():false);
+                expenseField.setContainState(null!=dto.getContainState()?dto.getContainState():false);
+                expenseField.setContainCity(null!=dto.getContainCity()?dto.getContainCity():false);
+                expenseField.setContainRegion(null!=dto.getContainRegion()?dto.getContainRegion():false);
                 expenseField.setEditable(null!=dto.getEditable()?dto.getEditable():true);
                 expenseField.setCustomEnumerationOid(dto.getCustomEnumerationOid());
                 if(!StringUtils.isEmpty(dto.getDefaultValueMode())){
@@ -425,6 +431,10 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
                     .printHide(e.getPrintHide())
                     .reportKey(e.getReportKey())
                     .required(e.getRequired())
+                    .containCountry(e.getContainCountry())
+                    .containState(e.getContainState())
+                    .containCity(e.getContainCity())
+                    .containRegion(e.getContainRegion())
                     .sequence(e.getSequence())
                     .value(null)
                     .editable(e.getEditable())
@@ -863,5 +873,34 @@ public class ExpenseTypeService extends BaseService<ExpenseTypeMapper, ExpenseTy
      */
     public Long queryApplicationTypeIdByApplicationTypeCode(Long setOfBooksId,String applicationTypeCode) {
         return baseMapper.queryApplicationTypeIdByApplicationTypeCode(setOfBooksId,applicationTypeCode);
+    }
+
+    /**
+     * 根据登录人信息获取有权限使用的费用类型
+     * @param categoryId
+     * @param expenseTypeName
+     * @param existsExpenseTypeIds
+     * @param page
+     * @return
+     */
+    public List<ExpenseTypeWebDTO> getExpenseTypeByLoginUser(Long categoryId,
+                                                                   String expenseTypeName,
+                                                                   List<Long> existsExpenseTypeIds,
+                                                                   Page page){
+        ExpenseBO expenseBO = new ExpenseBO();
+        expenseBO.setTypeFlag(1);
+        expenseBO.setSetOfBooksId(OrgInformationUtil.getCurrentSetOfBookId());
+        expenseBO.setCompanyId(OrgInformationUtil.getCurrentCompanyId());
+        expenseBO.setDepartmentId(OrgInformationUtil.getCurrentDepartmentId());
+        expenseBO.setEmployeeId(OrgInformationUtil.getCurrentUserId());
+        expenseBO.setCategoryId(categoryId);
+        expenseBO.setExpenseTypeName(expenseTypeName);
+        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(existsExpenseTypeIds)){
+            expenseBO.setAllFlag(false);
+            expenseBO.setAssignTypeIds(existsExpenseTypeIds);
+        }else{
+            expenseBO.setAllFlag(true);
+        }
+        return lovExpenseType(expenseBO,page);
     }
 }

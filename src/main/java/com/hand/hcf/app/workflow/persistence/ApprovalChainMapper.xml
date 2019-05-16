@@ -4,7 +4,7 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.workflow.persistence.ApprovalChainMapper">
 
-    <select id="getApprovalChainByRefId" parameterType="long"  resultType="com.hand.hcf.app.workflow.dto.ApprovalChainDTO">
+    <select id="getApprovalChainByRefId" parameterType="long"  resultType="com.hand.hcf.app.workflow.dto.chain.ApprovalChainDTO">
         SELECT
         ac.*
         FROM sys_approval_chain ac

@@ -7,6 +7,18 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.approval.service.*;
 import com.hand.hcf.app.workflow.dto.*;
+import com.hand.hcf.app.workflow.dto.backnode.BackNodesDTO;
+import com.hand.hcf.app.workflow.dto.backnode.SendBackDTO;
+import com.hand.hcf.app.workflow.dto.chain.ApprovalNodeDTO;
+import com.hand.hcf.app.workflow.dto.countersign.CounterSignDTO;
+import com.hand.hcf.app.workflow.dto.dashboard.ApprovalDashboardDetailDTO;
+import com.hand.hcf.app.workflow.dto.document.ApprovalDocumentDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkFlowDocumentRefDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkflowDocumentDTO;
+import com.hand.hcf.app.workflow.dto.document.WorkflowOperationDTO;
+import com.hand.hcf.app.workflow.dto.history.ApprovalHistoryDTO;
+import com.hand.hcf.app.workflow.dto.history.WebApprovalHistoryDTO;
+import com.hand.hcf.app.workflow.dto.transfer.TransferDTO;
 import com.hand.hcf.app.workflow.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -65,6 +77,9 @@ public class WorkFlowApproveController {
     @Autowired
     private WorkflowAddSignService workflowAddSignService;
 
+    @Autowired
+    private WorkflowApprovalTransferService workflowApprovalTransferService;
+
     @ApiOperation(value = "审批通过", notes = "通过待审批单据", tags = {"approval"})
     @RequestMapping(value = "/pass", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> passWorkflow(
@@ -103,10 +118,8 @@ public class WorkFlowApproveController {
     @RequestMapping(value = "/deliver", method = RequestMethod.POST)
     public ResponseEntity<ApprovalResDTO> deliver(
             @ApiParam(value = "单据转交信息") @Valid @RequestBody TransferDTO transferDTO) {
-        ApprovalResDTO approvalResDTO = new ApprovalResDTO();
-        approvalResDTO.setSuccessNum(0);
-        workflowTransferService.transferDeliver(OrgInformationUtil.getCurrentTenantId(), OrgInformationUtil.getCurrentUserOid(),transferDTO);
-        //todo
+        UUID userOid = OrgInformationUtil.getCurrentUserOid();
+        ApprovalResDTO approvalResDTO = workflowApprovalTransferService.transferWorkflow(userOid,transferDTO);
         return ResponseEntity.ok(approvalResDTO);
     }
 

@@ -2,15 +2,14 @@ package com.hand.hcf.app.workflow.approval.implement;
 
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
-import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
+import com.hand.hcf.app.workflow.approval.dto.*;
 import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowRejectService;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;
 import com.hand.hcf.app.workflow.util.CheckUtil;
+import com.hand.hcf.app.workflow.util.StringUtil;
 
 /**
  * 驳回任务动作
@@ -28,6 +27,8 @@ public class WorkflowRejectTaskAction implements WorkflowAction {
     private String remark;
     /** 操作的任务（如果该值是null，则驳回任务的逻辑里根据实例和用户获取任务） */
     private WorkflowTask task;
+    /** 驳回规则 */
+    private Integer rejectRule;
 
     /** 动作名称 */
     public static final String ACTION_NAME = "reject task";
@@ -49,6 +50,14 @@ public class WorkflowRejectTaskAction implements WorkflowAction {
 
     public void setTask(WorkflowTask task) {
         this.task = task;
+    }
+
+    public Integer getRejectRule() {
+        return rejectRule;
+    }
+
+    public void setRejectRule(Integer rejectRule) {
+        this.rejectRule = rejectRule;
     }
 
     @Override
@@ -79,6 +88,7 @@ public class WorkflowRejectTaskAction implements WorkflowAction {
         CheckUtil.notNull(action, "action null");
         CheckUtil.notNull(instance, "instance null");
         CheckUtil.notNull(user, "user null");
+        String returnMessage = null;
 
         // 驳回任务的逻辑：
         // 1.查找要驳回的任务
@@ -116,12 +126,21 @@ public class WorkflowRejectTaskAction implements WorkflowAction {
         instance.setLastApproverOid(user.getUserOid());
         workflowBaseService.updateInstance(instance);
 
-        WorkflowRejectNodeAction nextAction = new WorkflowRejectNodeAction(service, task.getNode(), user, remark);
+        WorkflowNode node = task.getNode();
+        WorkflowRule rule = node.getRule();
+        // 如果驳回人自主决定则覆盖规则里的驳回规则
+        if (WorkflowRule.REJECT_USER_DECIDE.equals(rule.getRejectRule())) {
+            rule.setRejectRule(action.getRejectRule());
+            returnMessage = StringUtil.concat("user-selected rejection rule is ", action.getRejectRule());
+        }
+
+        WorkflowRejectNodeAction nextAction = new WorkflowRejectNodeAction(service, node, user, remark);
         WorkflowResult result = new WorkflowResult();
         result.setEntity(task);
         result.setStatus(WorkflowRejectTaskAction.RESULT_REJECT_SUCCESS);
         // 下一个动作是驳回节点
         result.setNext(nextAction);
+        result.setMessage(returnMessage);
         return result;
     }
 

@@ -2,6 +2,7 @@ package com.hand.hcf.app.expense.report.service;
 
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
@@ -303,9 +304,14 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             expenseReportType.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
         }
         //返回付款方式类型name
-        SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+        /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
         if (sysCodeValueByCodeAndValue != null) {
             expenseReportType.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+        }*/
+        //返回付款方式name
+        SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+        if (sysCodeValue != null) {
+            expenseReportType.setPaymentTypeName(sysCodeValue.getName());
         }
         //返回关联表单名称formName
         ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
@@ -409,26 +415,31 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
                         .orderBy("enabled",false)
                         .orderBy("report_type_code")
         );
-        list = baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(list,ExpenseReportType.class);
+        list = baseI18nService.selectListTranslatedTableInfoWithI18nByEntity(list, ExpenseReportType.class);
+        SetOfBooksInfoCO setOfBooks = organizationService.getSetOfBooksInfoCOById(setOfBooksId, false);
+        Map<String, String> sysCodeValueMap = organizationService.mapSysCodeValueByCode(
+                "ZJ_PAYMENT_TYPE");
+        Map<Long, String> formNameMap = new HashMap<>(16);
         for (ExpenseReportType expenseReportType : list){
             //返回账套code、账套name
-            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(expenseReportType.getSetOfBooksId(), false);
-            if (setOfBooksInfoCOById != null) {
-                expenseReportType.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
-                expenseReportType.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            if (setOfBooks != null) {
+                expenseReportType.setSetOfBooksCode(setOfBooks.getSetOfBooksCode());
+                expenseReportType.setSetOfBooksName(setOfBooks.getSetOfBooksName());
             }
 
             //返回付款方式类型name
-            SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
-            if (sysCodeValueByCodeAndValue != null) {
-                expenseReportType.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
-            }
+//            expenseReportType.setPaymentMethodName(sysCodeValueMap.get(expenseReportType.getPaymentMethod()));
+            //返回付款方式name
+            expenseReportType.setPaymentTypeName(sysCodeValueMap.get(expenseReportType.getPaymentType()));
 
             //返回关联表单名称formName
-            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
-            if (approvalFormById != null){
-                expenseReportType.setFormName(approvalFormById.getFormName());
+            if (!formNameMap.containsKey(expenseReportType.getFormId())) {
+                ApprovalFormCO formCO = organizationService.getApprovalFormById(expenseReportType.getFormId());
+                if (formCO != null){
+                    formNameMap.put(expenseReportType.getFormId(), formCO.getFormName());
+                }
             }
+            expenseReportType.setFormName(formNameMap.get(expenseReportType.getFormId()));
         }
         return list;
     }
@@ -611,7 +622,12 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
         return expenseReportTypeList;
     }
 
-
+    /**
+     * 根据报账类型获取明细配置
+     * @param typeId
+     * @param headerId
+     * @return
+     */
     public ExpenseReportTypeDTO getExpenseReportType(Long typeId, Long headerId){
         ExpenseReportType expenseReportType = selectById(typeId);
         if (expenseReportType == null){
@@ -638,9 +654,14 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             reportTypeDistSetting.setResName(responsibilityCenterById.getResponsibilityCenterName());
         }
         //返回付款方式类型name
-        SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+        /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
         if (sysCodeValueByCodeAndValue != null) {
             expenseReportTypeDTO.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+        }*/
+        //返回付款方式name
+        SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+        if (sysCodeValue != null) {
+            expenseReportType.setPaymentTypeName(sysCodeValue.getName());
         }
         expenseReportTypeDTO.setExpenseReportTypeDistSetting(reportTypeDistSetting);
         return expenseReportTypeDTO;
@@ -743,7 +764,7 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
      * @param headerId
      * @return
      */
-    private List<ExpenseDimension> getExpenseTypeDimension(Long typeId, Long headerId){
+    public List<ExpenseDimension> getExpenseTypeDimension(Long typeId, Long headerId){
         List<ExpenseDimension> expenseDimensions = Arrays.asList();
         // 当单据ID为空时，表示为创建单据
         if(headerId == null){
@@ -847,9 +868,15 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             }
 
             //返回付款方式类型name
-            SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
+            /*SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE, expenseReportType.getPaymentMethod());
             if (sysCodeValueByCodeAndValue != null) {
                 expenseReportType.setPaymentMethodName(sysCodeValueByCodeAndValue.getName());
+            }*/
+
+            //返回付款方式name
+            SysCodeValueCO sysCodeValue = organizationService.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE", expenseReportType.getPaymentType());
+            if (sysCodeValue != null) {
+                expenseReportType.setPaymentTypeName(sysCodeValue.getName());
             }
 
             //返回关联表单名称formName
@@ -1048,6 +1075,32 @@ public class ExpenseReportTypeService extends BaseService<ExpenseReportTypeMappe
             line++;
         }
         return errorMessage;
+    }
+
+    /**
+     * 根据费用类型获取当前用户有权限创建，且有相应费用类型的报账单类型
+     * @param expenseTypeIds
+     * @return
+     */
+    public List<ExpenseReportType> getExpenseReportTypeByExpenseTypeIds(Collection<Long> expenseTypeIds){
+        //当前用户有权限创建的单据类型
+        List<ExpenseReportType> currentUserExpenseReportTypes = getCurrentUserExpenseReportType(false);
+        if(com.baomidou.mybatisplus.toolkit.CollectionUtils.isNotEmpty(currentUserExpenseReportTypes)){
+            Wrapper<ExpenseReportTypeExpenseType> wrapper = new EntityWrapper<ExpenseReportTypeExpenseType>();
+            currentUserExpenseReportTypes.stream().forEach(expenseReportType -> {
+                wrapper.orNew();
+                expenseTypeIds.stream().forEach(expenseTypeId -> {
+                    String sql = "select 1 from dual where report_type_id = " + expenseReportType.getId() + " and expense_type_id = " + expenseTypeId;
+                    wrapper.exists(sql);
+                });
+
+            });
+            List<ExpenseReportTypeExpenseType> list = expenseReportTypeExpenseTypeService.selectList(wrapper);
+            return currentUserExpenseReportTypes.stream().filter(e -> {
+                return list.stream().anyMatch(m -> e.getId().equals(m.getReportTypeId()));
+            }).collect(toList());
+        }
+        return Arrays.asList();
     }
 
 }

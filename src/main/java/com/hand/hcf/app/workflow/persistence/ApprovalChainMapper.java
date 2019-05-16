@@ -2,8 +2,7 @@ package com.hand.hcf.app.workflow.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.workflow.domain.ApprovalChain;
-import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalNodeDTO;
+import com.hand.hcf.app.workflow.dto.chain.ApprovalChainDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

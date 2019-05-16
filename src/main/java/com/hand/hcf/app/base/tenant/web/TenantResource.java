@@ -12,6 +12,9 @@ import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +31,7 @@ import java.util.Map;
 
 @RequestMapping("/api/tenant")
 @RestController
+@Api("租户控制器")
 public class TenantResource {
 
     @Autowired
@@ -40,11 +44,6 @@ public class TenantResource {
     UserService userService;
 
 
-
-    @RequestMapping(value = "/upload/logo/{tenantId}", method = RequestMethod.POST)
-    public ResponseEntity<Tenant> uploadTenantLogo(@PathVariable("tenantId") Long tenantId, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok().body(tenantService.uploadTenantLogo(null, tenantId, file));
-    }
 
     @RequestMapping(value = "/update/tenantLogo", method = RequestMethod.POST)
     public ResponseEntity<Tenant> updateTenantLogo(@RequestBody TenantDTO tenantDTO) {
@@ -168,7 +167,7 @@ public class TenantResource {
                                                            Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<TenantDTO> result = tenantService.listTenantDTOsByCondition(tenantName, tenantCode, userName, mobile, email, login,remark,page);
-        HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/tenant/query/condition");
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(result, httpHeaders, HttpStatus.OK);
     }
 
@@ -179,6 +178,11 @@ public class TenantResource {
         return ResponseEntity.ok().build();
     }
 
-
+    @ApiOperation(value = "租户分配应用", notes = "租户分配应用 开发：谢宾")
+    @PostMapping("/assign/application/{id}")
+    public ResponseEntity<Boolean> assignApplication(@ApiParam("应用id集合")@RequestBody List<Long> applicationIds,
+                                                     @ApiParam("租户id") @PathVariable("id") Long id) {
+        return ResponseEntity.ok(tenantService.assignApplication(applicationIds, id));
+    }
 
 }

@@ -3,6 +3,9 @@ package com.hand.hcf.app.workflow.approval.implement;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.enums.ApprovalOrderEnum;
+import com.hand.hcf.app.workflow.approval.enums.CounterSignOrderEnum;
+import com.hand.hcf.app.workflow.approval.enums.IsAddSignEnum;
 import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowBaseService;
 import com.hand.hcf.app.workflow.approval.service.WorkflowRepeatApproveService;
@@ -12,6 +15,7 @@ import com.hand.hcf.app.workflow.domain.ApprovalChain;
 import com.hand.hcf.app.workflow.enums.*;
 import com.hand.hcf.app.workflow.service.ApprovalChainService;
 import com.hand.hcf.app.workflow.util.CheckUtil;
+import com.hand.hcf.app.workflow.util.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
@@ -95,18 +99,19 @@ public class WorkflowAddSignAction implements WorkflowAction {
         CheckUtil.notNull(signers, "signers null");
         CheckUtil.notNull(countersignOrder, "countersignOrder null");
         CheckUtil.notNull(approvalOrder, "approvalOrder null");
+        String returnMessage = null;
 
         // 节点前加签：
-        // 获取跟当前任务同任务组同审批顺序的任务
-        // 克隆审批中和已审批过的任务（新的任务组编号，审批状态是待激活）
-        // 把原来任务（未完成的任务）的状态修改成无效
-        // 创建加签的任务（新的任务组）
+        // 1.获取跟当前任务同任务组同审批顺序的任务
+        // 2.克隆步骤1中审批状态是审批中和已审批过的任务（新的任务组编号，审批状态是待激活）
+        // 3.把步骤1中状态是未完成的任务修改成无效
+        // 4.创建加签的任务（新的任务组）
         //
         // 平行节点加签：
-        // 创建加签的任务（跟当前任务同任务组）
+        // 1.创建加签的任务（跟当前任务同任务组）
         //
         // 节点后加签：
-        // 创建加签的任务（新的任务组）
+        // 1.创建加签的任务（新的任务组）
 
         // 根据实例和用户获取任务
         WorkflowTask task = workflowBaseService.findTask(instance, user);
@@ -115,41 +120,27 @@ public class WorkflowAddSignAction implements WorkflowAction {
         }
 
         // 检查加签
-        checkSign(task, signers, countersignOrder, approvalOrder);
-
-        // 更改当前的任务
+        checkAddSign(task, signers, countersignOrder, approvalOrder);
+        // 更改当前任务
         updateCurrentTasks(task, countersignOrder, approvalOrder);
-
         // 创建加签任务
         List<WorkflowTask> newTaskList = createNewTasks(task, signers, countersignOrder, approvalOrder);
-        for (WorkflowTask newTask : newTaskList) {
-            workflowBaseService.saveTask(newTask);
-        }
-
+        workflowBaseService.saveTasks(newTaskList);
         // 保存加签操作的历史
         String operation = ApprovalOperationEnum.ADD_COUNTERSIGN.getId().toString();
         workflowBaseService.saveHistory(task, operation, remark);
 
         WorkflowNode node = task.getNode();
         WorkflowRule rule = node.getRule();
-        List<WorkflowApproval> approvalList = null;
-        // 获取要重复审批的操作
-        if (WorkflowRule.REPEAT_SKIP.equals(rule.getRepeatRule())) {
-            approvalList = getRepeatApprovals(newTaskList);
-        }
+        // 获取自动审批动作（根据是否无需重复审批规则）
+        List<WorkflowAutoApproveAction> actionList = workflowRepeatApproveService.getAutoActionsByRule(rule, newTaskList);
+        // 设置要返回的信息
+        returnMessage = StringUtil.concat("repeat approval total is ", actionList.size());
 
         Object nextAction = null;
         String returnStatus = null;
 
-        if (CollectionUtils.isNotEmpty(approvalList)) {
-            List<WorkflowAutoApproveAction> actionList = new ArrayList<WorkflowAutoApproveAction>();
-            WorkflowAutoApproveAction newAction = null;
-
-            for (WorkflowApproval approval : approvalList) {
-                newAction = new WorkflowAutoApproveAction(service, approval);
-                actionList.add(newAction);
-            }
-
+        if (CollectionUtils.isNotEmpty(actionList)) {
             returnStatus = RESULT_ADD_SUCCESS;
             // 下一个动作是自动审批
             nextAction = actionList;
@@ -163,31 +154,34 @@ public class WorkflowAddSignAction implements WorkflowAction {
         result.setEntity(task);
         result.setStatus(returnStatus);
         result.setNext(nextAction);
+        result.setMessage(returnMessage);
         return result;
     }
-    
+
     /**
      * 检查加签
      * @version 1.0
      * @author mh.z
      * @date 2019/04/29
      *
-     * @param task
-     * @param signers
-     * @param countersignOrder
-     * @param approvalOrder
+     * @param task 当前任务
+     * @param signers 加签人
+     * @param countersignOrder 加签顺序
+     * @param approvalOrder 审批顺序
      */
-    protected void checkSign(WorkflowTask task, Collection<WorkflowUser> signers,
-                             Integer countersignOrder, Integer approvalOrder) {
+    protected void checkAddSign(WorkflowTask task, Collection<WorkflowUser> signers,
+                                Integer countersignOrder, Integer approvalOrder) {
         CheckUtil.notNull(task, "task null");
         CheckUtil.notNull(signers, "signers null");
         CheckUtil.notNull(countersignOrder, "countersignOrder null");
         CheckUtil.notNull(approvalOrder, "approvalOrder null");
+
         WorkflowInstance instance = CheckUtil.notNull(task.getInstance(), "task.instance null");
+        Integer approvalStatus = CheckUtil.notNull(instance.getApprovalStatus(), "task.instance.approvalStatus null");
+        WorkflowNode node = CheckUtil.notNull(task.getNode(), "task.node null");
+        WorkflowRule rule = CheckUtil.notNull(node.getRule(), "task.node.rule null");
         WorkflowUser user = CheckUtil.notNull(task.getUser(), "task.user null");
-        UUID userOid = user.getUserOid();
-        Integer approvalStatus = CheckUtil.notNull(
-                instance.getApprovalStatus(), "task.instance.approvalStatus null");
+        UUID userOid = CheckUtil.notNull(user.getUserOid(), "task.user.userOid null");
 
         // 只能对审批中的单据操作
         if (!WorkflowInstance.APPROVAL_STATUS_APPROVAL.equals(approvalStatus)) {
@@ -199,8 +193,6 @@ public class WorkflowAddSignAction implements WorkflowAction {
             throw new BizException(MessageConstants.ADDSIGN_USER_IS_EMPTY);
         }
 
-        WorkflowNode node = task.getNode();
-        WorkflowRule rule = node.getRule();
         // 只有节点设置允许加签才能加签
         if (!Boolean.TRUE.equals(rule.getAddSignFlag())) {
             throw new BizException(MessageConstants.NODE_RULE_CANNOT_ADDSIGN);
@@ -215,12 +207,12 @@ public class WorkflowAddSignAction implements WorkflowAction {
     }
 
     /**
-     * 更改当前的任务
+     * 更改当前任务
      * @version 1.0
      * @author mh.z
      * @date 2019/05/03
      *
-     * @param task 任务
+     * @param task 当前任务
      * @param countersignOrder 加签顺序
      * @param approvalOrder 审批顺序
      */
@@ -242,8 +234,8 @@ public class WorkflowAddSignAction implements WorkflowAction {
         Integer groupNumber = approvalChain.getGroupNumber();
         Integer approvalNumber = approvalChain.getApprovalOrder();
         // 获取跟当前任务同任务组同审批顺序的任务
-        List<ApprovalChain> approvalChainList = approvalChainService.listByGroupNumberAndApprovalOrder(
-                entityType, entityOid, groupNumber, approvalNumber);
+        List<ApprovalChain> approvalChainList = approvalChainService
+                .listByGroupNumberAndApprovalOrder(entityType, entityOid, groupNumber, approvalNumber);
         // 获取下一个任务组编号
         Integer newGroupNumber = workflowBaseService.nextGroup(instance);
 
@@ -260,7 +252,7 @@ public class WorkflowAddSignAction implements WorkflowAction {
                 workflowBaseService.saveTask(newTask);
             }
 
-            // 把原来任务（未完成的任务）的状态修改成无效
+            // 把原来未完成任务的状态修改成无效
             if (ApprovalChainStatusEnum.NORMAL.getId().equals(sourceApprovalChain.getStatus())
                     && Boolean.FALSE.equals(sourceApprovalChain.getFinishFlag())) {
                 sourceApprovalChain.setStatus(ApprovalChainStatusEnum.INVALID.getId());
@@ -275,36 +267,41 @@ public class WorkflowAddSignAction implements WorkflowAction {
      * @author mh.z
      * @date 2019/05/02
      *
-     * @param task 源任务
+     * @param sourceTask 源任务
      * @param signers 加签人
      * @param countersignOrder 加签顺序
      * @param approvalOrder 审批顺序
      * @return 创建的加签任务
      */
-    protected List<WorkflowTask> createNewTasks(WorkflowTask task, Collection<WorkflowUser> signers,
+    protected List<WorkflowTask> createNewTasks(WorkflowTask sourceTask, Collection<WorkflowUser> signers,
                                                 Integer countersignOrder, Integer approvalOrder) {
-        CheckUtil.notNull(task, "task null");
+        CheckUtil.notNull(sourceTask, "sourceTask null");
         CheckUtil.notNull(signers, "signers null");
         CheckUtil.notNull(countersignOrder, "countersignOrder null");
         CheckUtil.notNull(approvalOrder, "approvalOrder null");
-        WorkflowInstance instance = CheckUtil.notNull(task.getInstance(), "task.instance null");
-        WorkflowNode node = CheckUtil.notNull(task.getNode(), "task.node null");
-        ApprovalChain sourceApprovalChain = task.getApprovalChain();
+        WorkflowInstance instance = CheckUtil.notNull(sourceTask.getInstance(), "task.instance null");
+        WorkflowNode node = CheckUtil.notNull(sourceTask.getNode(), "task.node null");
+        ApprovalChain sourceApprovalChain = sourceTask.getApprovalChain();
         Long sourceApprovalChainId = sourceApprovalChain.getId();
 
         Integer group = null;
+        List<WorkflowTask> newTaskList = new ArrayList<WorkflowTask>();
+
         if (CounterSignOrderEnum.PARALLEL.getValue().equals(countersignOrder)) {
             // 平行加签的新任务跟源任务同个任务组
-            group = task.getGroup();
+            group = sourceTask.getGroup();
         } else {
+            // 不是平行加签的新任务用新的任务组
             group = workflowBaseService.nextGroup(instance);
         }
 
-        List<WorkflowTask> newTaskList = new ArrayList<WorkflowTask>();
         for (WorkflowUser signer : signers) {
+            // 创建加签任务
             WorkflowTask newTask = workflowBaseService.createTask(node, signer, group);
             ApprovalChain newApprovalChain = newTask.getApprovalChain();
+            // 记录来源任务
             newApprovalChain.setSourceApprovalChainId(sourceApprovalChainId);
+            // 标记为加签任务
             newApprovalChain.setAddSign(IsAddSignEnum.SIGN_YES.getId());
 
             boolean currentFlag = true;
@@ -330,30 +327,6 @@ public class WorkflowAddSignAction implements WorkflowAction {
         }
 
         return newTaskList;
-    }
-
-    /**
-     * 返回要重复审批的操作
-     * @version 1.0
-     * @author mh.z
-     * @date 2019/05/04
-     *
-     * @param taskList 任务列表
-     * @return 要重复审批的操作
-     */
-    protected List<WorkflowApproval> getRepeatApprovals(List<WorkflowTask> taskList) {
-        CheckUtil.notNull(taskList, "taskList null");
-
-        List<WorkflowTask> currentTaskList = new ArrayList<WorkflowTask>();
-        for (WorkflowTask task : taskList) {
-            if (WorkflowTask.APPROVAL_STATUS_APPROVAL.equals(task.getApprovalStatus())) {
-                currentTaskList.add(task);
-            }
-        }
-
-        // 只需要获取当前任务要重复审批的操作
-        List<WorkflowApproval> approvalList = workflowRepeatApproveService.getRepeatApprovals(currentTaskList);
-        return approvalList;
     }
 
 }

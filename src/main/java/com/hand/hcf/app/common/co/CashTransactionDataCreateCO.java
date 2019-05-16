@@ -93,6 +93,10 @@ public class CashTransactionDataCreateCO {
 
     @NotNull
     private String paymentMethodCategory; // 付款方式类型
+    @NotNull
+    private String paymentType; // 付款方式
+    @NotNull
+    private String propFlag; // 账户属性
 
     private ZonedDateTime requisitionPaymentDate; // 计划付款日期
 

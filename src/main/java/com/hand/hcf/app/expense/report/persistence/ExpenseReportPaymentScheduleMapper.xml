@@ -14,7 +14,7 @@
 	<resultMap id="ExpensePaymentScheduleResult" type="com.hand.hcf.app.common.co.ExpensePaymentScheduleCO">
 		<id property="id" column="id" />
 		<result property="expReportHeaderId" column="exp_report_header_id" />
-		<result property="tenantId" column="telnant_id" />
+		<result property="tenantId" column="tenant_id" />
 		<result property="setOfBooksId" column="set_of_books_id" />
 		<result property="companyId" column="company_id" />
 		<result property="departmentId" column="department_id" />
@@ -25,6 +25,8 @@
 		<result property="functionAmount" column="function_amount" />
 		<result property="description" column="description" />
 		<result property="paymentMethod" column="payment_method" />
+		<result property="paymentType" column="payment_type" />
+		<result property="propFlag" column="prop_flag" />
 		<result property="cshTransactionClassId" column="csh_transaction_class_id" />
 		<result property="cashFlowItemId" column="cash_flow_item_id" />
 		<result property="paymentScheduleDate" column="payment_schedule_date" />
@@ -55,8 +57,7 @@
 	</select>
 
 	<select id="getExpPublicReportScheduleByContractHeaderId" resultMap="ExpensePaymentScheduleResult" >
-		SELECT t.requisition_date, v.*, rt.report_typeull
-		_name,t.requisition_number ,t.status
+		SELECT t.requisition_date, v.*, rt.report_type_name,t.requisition_number ,t.status
 		FROM exp_report_header t, exp_report_payment_schedule v, exp_report_type rt
 		WHERE t.id = v.exp_report_header_id
 		and t.document_type_id = rt.id

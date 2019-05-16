@@ -5,17 +5,17 @@ import com.hand.hcf.app.base.system.constant.Constants;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.constant.RuleConstants;
-import com.hand.hcf.app.workflow.dto.ApprovalChainDTO;
-import com.hand.hcf.app.workflow.dto.ApprovalHistoryDTO;
-import com.hand.hcf.app.workflow.dto.CheckAuditNoticeDTO;
-import com.hand.hcf.app.workflow.dto.PDFApprovalHistory;
-import com.hand.hcf.app.workflow.dto.UserApprovalDTO;
-import com.hand.hcf.app.workflow.dto.WebApprovalHistoryDTO;
+import com.hand.hcf.app.workflow.brms.constant.RuleConstants;
 import com.hand.hcf.app.workflow.domain.ApprovalHistory;
+import com.hand.hcf.app.workflow.dto.chain.ApprovalChainDTO;
+import com.hand.hcf.app.workflow.dto.chain.UserApprovalDTO;
+import com.hand.hcf.app.workflow.dto.history.ApprovalHistoryDTO;
+import com.hand.hcf.app.workflow.dto.history.CheckAuditNoticeDTO;
+import com.hand.hcf.app.workflow.dto.history.PDFApprovalHistory;
+import com.hand.hcf.app.workflow.dto.history.WebApprovalHistoryDTO;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationEnum;
 import com.hand.hcf.app.workflow.enums.ApprovalOperationTypeEnum;
-import com.hand.hcf.app.workflow.enums.CounterSignTypeEnum;
+import com.hand.hcf.app.workflow.enums.form.CounterSignTypeEnum;
 import com.hand.hcf.app.workflow.externalApi.BaseClient;
 import com.hand.hcf.app.workflow.persistence.ApprovalHistoryMapper;
 import ma.glasnost.orika.MapperFacade;
@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hand.hcf.app.workflow.constant.RuleConstants.APPROVER_TYPE_ROBOT_NAME;
+import static com.hand.hcf.app.workflow.brms.constant.RuleConstants.APPROVER_TYPE_ROBOT_NAME;
 
 @Service
 @Transactional
