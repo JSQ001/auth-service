@@ -2,14 +2,13 @@ package com.hand.hcf.app.base.attachment;
 
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
-import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.persistence.AttachmentMapper;
 import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +33,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @CacheConfig(cacheNames = {CacheConstants.ATTACHMENT})
-public class AttachmentService extends BaseService<AttachmentMapper,Attachment> {
+public class AttachmentService extends BaseService<AttachmentMapper, Attachment> {
 
     private final Logger log = LoggerFactory.getLogger(AttachmentService.class);
     @Autowired
@@ -46,6 +51,19 @@ public class AttachmentService extends BaseService<AttachmentMapper,Attachment> 
         Attachment attachment =  attachmentMapper.findByAttachmentOid(oid);
         attachmentImpl.removeFile(Arrays.asList(attachment));
         attachmentMapper.deleteById(attachment.getId());
+    }
+    // OSS 删除 根据传入的附件的Oid
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteOssFile(String oid) {
+        Attachment attachment =  attachmentMapper.findByAttachmentOid(oid);
+        String objectName = attachment.getPath();
+        //先删除服务器文件
+        if(StringUtils.isNotBlank(objectName)) {
+            attachmentImpl.deleteOssFile(objectName);
+        }
+        //再删除表中数据
+        attachmentMapper.deleteById(attachment.getId());
+
     }
     /**
      * delete the  attachment by oids.

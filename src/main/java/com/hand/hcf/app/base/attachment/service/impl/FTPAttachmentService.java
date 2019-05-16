@@ -2,9 +2,7 @@ package com.hand.hcf.app.base.attachment.service.impl;
 
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.base.attachment.AttachmentService;
-import com.hand.hcf.app.base.attachment.constant.Constants;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
-import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.config.FtpConfiguration;
 import com.hand.hcf.app.base.config.HcfBaseProperties;
@@ -18,7 +16,6 @@ import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -238,7 +235,17 @@ public class FTPAttachmentService implements IAttachment {
     }
 
     public String getTempUrl(Attachment attachment) {
-        return hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
+        String thumbnailPath = null;
+        if ("FTP".equals(hcfBaseProperties.getStorage().getMode())) {
+            thumbnailPath = hcfBaseProperties.getStorage().getFtp().getStaticUrl() + attachment.getPath();
+        } else if ("OSS".equals(hcfBaseProperties.getStorage().getMode())) {
+            String endpoint = hcfBaseProperties.getStorage().getOss().getEndpoint();
+            String bucketName = hcfBaseProperties.getStorage().getOss().getBucket().getName();
+            String filehost = hcfBaseProperties.getStorage().getOss().getFilehost();
+            String frontUrl = "https://" + bucketName + "." + endpoint + "/" + filehost;
+            thumbnailPath = frontUrl + "/" + attachment.getPath();
+        }
+        return thumbnailPath;
     }
 
     /**
@@ -247,16 +254,16 @@ public class FTPAttachmentService implements IAttachment {
      * @param: getPublicFlag
      */
     protected void delete(boolean isPublic, String key) {
-        FtpConfiguration.SFTPUtil sftpUtil = applicationContext.getBean(FtpConfiguration.SFTPUtil.class);
-        //连接登录sftp
-        sftpUtil.login();
-        try {
-            sftpUtil.remove(key);
-        } catch (SftpException e) {
-            throw new BizException("file delete failed.", "file delete failed. " + e.getMessage());
-        } finally {
-            sftpUtil.logout();
-        }
+            FtpConfiguration.SFTPUtil sftpUtil = applicationContext.getBean(FtpConfiguration.SFTPUtil.class);
+            //连接登录sftp
+            sftpUtil.login();
+            try {
+                sftpUtil.remove(key);
+            } catch (SftpException e) {
+                throw new BizException("file delete failed.", "file delete failed. " + e.getMessage());
+            } finally {
+                sftpUtil.logout();
+            }
     }
 
 
@@ -321,4 +328,12 @@ public class FTPAttachmentService implements IAttachment {
         OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
         ossUtil.downLoad(httpServletRequest, httpServletResponse, objectName);
     }
+
+    //删除Oss文件的方法
+    @Override
+    public void deleteOssFile(String path) {
+        OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
+        ossUtil.deleteOssFile(path);
+    }
+
 }

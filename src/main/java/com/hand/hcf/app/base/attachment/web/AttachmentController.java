@@ -2,7 +2,6 @@ package com.hand.hcf.app.base.attachment.web;
 
 import com.hand.hcf.app.base.attachment.AttachmentService;
 import com.hand.hcf.app.base.attachment.domain.Attachment;
-import com.hand.hcf.app.base.attachment.enums.AttachmentType;
 import com.hand.hcf.app.base.attachment.service.IAttachment;
 import com.hand.hcf.app.base.util.HeaderUtil;
 import com.hand.hcf.app.common.co.AttachmentCO;
@@ -12,18 +11,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @Auther: chenzhipeng
@@ -31,12 +39,15 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api")
-public class AttachmentController{
+public class AttachmentController {
 
     private final Logger log = LoggerFactory.getLogger(AttachmentController.class);
 
     @Autowired
     private AttachmentService attachmentService;
+
+    @Autowired
+    private IAttachment attachmentImpl;
 
     /**
      * DELETE  /attachments/:id -> delete the "id" attachment.
@@ -44,7 +55,8 @@ public class AttachmentController{
     @DeleteMapping("/attachments/{oid}")
     public ResponseEntity<Void> deleteAttachment(@PathVariable String oid) {
         log.debug("REST request to delete Attachment : {}", oid);
-        attachmentService.delete(oid);
+        //删除文件 antfin cx
+        attachmentService.deleteOssFile(oid);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("attachment", oid)).build();
     }
 
@@ -70,6 +82,7 @@ public class AttachmentController{
         return ResponseEntity.ok(batch);
     }
 
+    //上传文件
     @RequestMapping(value = "/upload/static/attachment", method = RequestMethod.POST)
     public ResponseEntity<AttachmentCO> uploadStaticAttachment(
             @RequestParam MultipartFile file,
@@ -110,7 +123,7 @@ public class AttachmentController{
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/attachments/download/{oid}")
+    //@GetMapping("/attachments/download/{oid}")
     public void downLoad(@PathVariable String oid,
                          HttpServletRequest httpServletRequest,
                          HttpServletResponse httpServletResponse) throws Exception {
@@ -130,4 +143,17 @@ public class AttachmentController{
         attachmentService.writeFileToResp(httpServletResponse, attachment);
     }
 
+    //下载文件
+    @RequestMapping(value = "/attachments/download/{oid}", method = RequestMethod.GET)
+    public void downLoadAttachment(@PathVariable String oid,
+                                   HttpServletRequest httpServletRequest,
+                                   HttpServletResponse httpServletResponse) throws IOException{
+            Attachment attachment = attachmentService.findByOId(oid);
+            String objectName = attachment.getPath();
+            if(StringUtils.isNotBlank(objectName)) {
+                attachmentImpl.downLoadFile(httpServletRequest,httpServletResponse,objectName);
+            } else{
+                return;
+            }
+    }
 }

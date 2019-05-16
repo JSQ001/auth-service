@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -95,7 +94,7 @@ public class OssConfiguration {
                 //设置权限 这里是公开读
                 ossClient.setBucketAcl(bucketName, CannedAccessControlList.PublicReadWrite);
                 if (null != result) {
-                    log.info("==========>OSS文件上传成功,OSS地址：" + fileUrl);
+                    log.info("==========>file upload successfully：" + fileUrl);
                     return fileUrl;
                 }
             } catch (OSSException oe) {
@@ -161,6 +160,21 @@ public class OssConfiguration {
                 //关闭ossClient
                 ossClient.shutdown();
             }
+        }
+
+        //附件删除
+        public void deleteOssFile(String objectName){
+            // 创建OSSClient实例。
+            OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+            //判断文件是否存在
+            String filePath = filehost + "/" +  objectName;
+            boolean found = ossClient.doesObjectExist(bucketName, filePath);
+            if(true) {
+                // 删除文件 objectName不只是文件名称，还要指定相对路径
+                ossClient.deleteObject(bucketName, filePath);
+            }
+            // 关闭OSSClient。
+            ossClient.shutdown();
         }
     }
 }
