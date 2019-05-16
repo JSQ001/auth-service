@@ -7,10 +7,13 @@ import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.currency.cover.CurrencyRateCover;
 import com.hand.hcf.app.mdata.currency.domain.CurrencyRate;
+import com.hand.hcf.app.mdata.currency.domain.TenantConfig;
 import com.hand.hcf.app.mdata.currency.dto.CompanyStandardCurrencyDTO;
 import com.hand.hcf.app.mdata.currency.dto.CurrencyRateDTO;
+import com.hand.hcf.app.mdata.currency.dto.TenantConfigDTO;
 import com.hand.hcf.app.mdata.currency.service.CurrencyI18nService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
+import com.hand.hcf.app.mdata.currency.service.TenantConfigService;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.setOfBooks.service.SetOfBooksService;
 import com.hand.hcf.app.mdata.system.enums.CurrencyRateSourceEnum;
@@ -18,6 +21,7 @@ import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.util.DateUtil;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +37,7 @@ import java.util.UUID;
 /**
  * Created by fanfuqiang 2018/11/28
  */
+@Api(tags = "币种汇率")
 @RestController
 @RequestMapping("/api/currency/rate")
 public class CurrencyRateResource {
@@ -51,6 +56,9 @@ public class CurrencyRateResource {
 
     @Autowired
     private SetOfBooksService setOfBooksService;
+
+    @Autowired
+    private TenantConfigService tenantConfigService;
 
     /**
      *
@@ -460,5 +468,35 @@ public class CurrencyRateResource {
         CurrencyRateDTO currencyRateDTO = CurrencyRateCover.parse(currencyRate);
         currencyI18nService.i18nTranslateCurrencyRateDTOs(Arrays.asList(currencyRateDTO), OrgInformationUtil.getCurrentLanguage());
         return ResponseEntity.ok(CurrencyRateCover.toCompanyStandardCurrencyDTO(currencyRateDTO));
+    }
+
+    /**
+     * 新增或更新租户及账套下的汇率容差
+     *
+     * @param tenantConfig 汇率容差
+     * @return 更新后的汇率容差
+     */
+    @PostMapping(value = "/tenant/config/input")
+    @ApiOperation(value = "新增或更新租户及账套下的汇率容差", notes = "需传入账套id 告警汇率容差 禁止汇率容差 开发：王帅")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "body", dataType = "TenantConfig", name = "tenantConfig", value = "汇率容差", required = true) })
+    public ResponseEntity<TenantConfigDTO> updateTenantConfig(@ApiParam(value = "汇率容差信息") @RequestBody TenantConfig tenantConfig) {
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        tenantConfig.setTenantId(tenantId);
+        return ResponseEntity.ok(tenantConfigService.updateTenantConfig(tenantConfig));
+    }
+
+    /**
+     * 根据账套id查询汇率容差
+     * @param setOfBooksId 账套id
+     * @return 汇率容差
+     */
+    @GetMapping(value = "/tenant/config/get")
+    @ApiOperation(value = "查询汇率容差", notes = "根据账套id查询汇率容差 开发：王帅")
+    public ResponseEntity<TenantConfigDTO> getTenantConfig(@ApiParam(value = "账套id")@RequestParam(name = "setOfBooksId") long setOfBooksId) {
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        TenantConfigDTO tenantConfig = new TenantConfigDTO();
+        tenantConfig.setTenantId(tenantId);
+        tenantConfig.setSetOfBooksId(setOfBooksId);
+        return ResponseEntity.ok(tenantConfigService.getTenantConfig(tenantConfig));
     }
 }
