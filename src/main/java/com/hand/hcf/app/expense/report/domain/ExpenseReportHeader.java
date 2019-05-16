@@ -2,12 +2,14 @@ package com.hand.hcf.app.expense.report.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -113,7 +115,17 @@ public class ExpenseReportHeader extends Domain {
      * 附件oid
      */
     @TableField(value = "attachment_oid")
-    private Long attachmentOid;
+    private String attachmentOid;
+    /**
+     * 附件OID集合
+     */
+    @TableField(exist = false)
+    private List<String> attachmentOidList;
+    /**
+     * 附件信息
+     */
+    @TableField(exist = false)
+    private List<AttachmentCO> attachments;
 
     /**
      * 单据类型id
@@ -121,6 +133,13 @@ public class ExpenseReportHeader extends Domain {
     @NotNull
     @TableField(value = "document_type_id")
     private Long documentTypeId;
+
+    /**
+     * 是否有票
+     */
+    @NotNull
+    @TableField(value = "is_invoice")
+    private String isInvoice;
 
     /**
      * 申请日期

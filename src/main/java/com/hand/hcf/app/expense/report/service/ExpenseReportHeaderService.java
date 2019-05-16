@@ -4,7 +4,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
+import com.hand.hcf.app.base.code.domain.SysCodeValue;
+import com.hand.hcf.app.base.code.service.SysCodeService;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -25,10 +26,8 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
 import com.hand.hcf.app.expense.common.externalApi.*;
 import com.hand.hcf.app.expense.common.service.CommonService;
-import com.hand.hcf.app.expense.common.utils.DimensionUtils;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
-import com.hand.hcf.app.expense.common.utils.SyncLockPrefix;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLine;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineDist;
@@ -52,7 +51,6 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -65,6 +63,8 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -145,6 +145,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
     private AccountingService accountingService;
     @Autowired
     private ExcelExportService excelExportService;
+    @Autowired
+    private SysCodeService sysCodeService;
 
     /**
      * 保存费用类型
@@ -1467,20 +1469,41 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             CompanyCO companyById = organizationService.getCompanyById(expenseReportHeaderDTO.getCompanyId());
             expenseReportHeaderDTO.setCompanyCode(companyById.getCompanyCode());
             expenseReportHeaderDTO.setCompanyName(companyById.getName());
-            // 部门信息
+            // 受益部门信息
             DepartmentCO departmentById = organizationService.getDepartmentById(expenseReportHeaderDTO.getDepartmentId());
             expenseReportHeaderDTO.setDepartmentCode(departmentById.getDepartmentCode());
             expenseReportHeaderDTO.setDepartmentName(departmentById.getName());
+            // 预算部门信息
+            DepartmentCO budgetDepById = organizationService.getDepartmentById(expenseReportHeaderDTO.getBudgetDepId());
+            expenseReportHeaderDTO.setBudgetDepCode(budgetDepById.getDepartmentCode());
+            expenseReportHeaderDTO.setBudgetDepName(budgetDepById.getName());
             // 申请人信息
             ContactCO userById = organizationService.getUserById(expenseReportHeaderDTO.getApplicantId());
             expenseReportHeaderDTO.setApplicantCode(userById.getEmployeeCode());
             expenseReportHeaderDTO.setApplicantName(userById.getFullName());
+            // 需求方信息
+            ContactCO demanderUserById = organizationService.getUserById(expenseReportHeaderDTO.getDemanderId());
+            expenseReportHeaderDTO.setDemanderCode(demanderUserById.getEmployeeCode());
+            expenseReportHeaderDTO.setDemanderName(demanderUserById.getFullName());
             // 单据类型
             ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeaderDTO.getDocumentTypeId());
             expenseReportHeaderDTO.setDocumentTypeName(expenseReportType.getReportTypeName());
             expenseReportHeaderDTO.setFormId(expenseReportType.getFormId());
             ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
             expenseReportHeaderDTO.setFormOid(approvalFormById.getFormOid());
+            //区域
+            SysCodeValue sysCodeValueByCode = sysCodeService.getValueBySysCodeAndValue("PERSON_AREA", expenseReportHeaderDTO.getAreaCode());
+            expenseReportHeaderDTO.setAreaName(sysCodeValueByCode.getName());
+            //附件
+            if(com.baomidou.mybatisplus.toolkit.StringUtils.isNotEmpty(expenseReportHeaderDTO.getAttachmentOid())){
+                List<String> strings = Arrays.asList(expenseReportHeaderDTO.getAttachmentOid().split(","));
+                expenseReportHeaderDTO.setAttachmentOidList(strings);
+                List<AttachmentCO> attachmentCOS = organizationService.listAttachmentsByOids(strings);
+                expenseReportHeaderDTO.setAttachments(attachmentCOS);
+            }else{
+                expenseReportHeaderDTO.setAttachmentOidList(Arrays.asList());
+                expenseReportHeaderDTO.setAttachments(Arrays.asList());
+            }
             // 创建人信息
             if (expenseReportHeaderDTO.getApplicantId().equals(expenseReportHeaderDTO.getCreatedBy())) {
                 expenseReportHeaderDTO.setCreatedCode(userById.getEmployeeCode());
