@@ -1,4 +1,4 @@
-package com.hand.hcf.app.expense.report.domain;
+﻿package com.hand.hcf.app.expense.report.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
