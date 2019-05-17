@@ -115,7 +115,7 @@ public class OssConfiguration {
         }
 
         //附件下载
-        public void downLoad(HttpServletRequest request, HttpServletResponse response, String objectName) throws IOException {
+        public void downLoad(HttpServletRequest request, HttpServletResponse response, String objectName,String originName) throws IOException {
             // 创建OSSClient实例。
             OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
             try {
@@ -138,7 +138,7 @@ public class OssConfiguration {
                 }else{
                     objectName = URLEncoder.encode(objectName,"UTF-8");//其他浏览器
                 }
-                response.addHeader("Content-Disposition", "attachment;filename=" +objectName);//这里设置一下让浏览器弹出下载提示框，而不是直接在浏览器中打开
+                response.addHeader("Content-Disposition", "attachment;filename=" +originName);//这里设置一下让浏览器弹出下载提示框，而不是直接在浏览器中打开
 
                 byte[] car = new byte[1024];
                 int L;

@@ -324,9 +324,10 @@ public class FTPAttachmentService implements IAttachment {
     @Override
     public void downLoadFile(HttpServletRequest httpServletRequest,
                              HttpServletResponse httpServletResponse,
-                             String objectName) throws IOException {
+                             String objectName,
+                             String originName) throws IOException {
         OssConfiguration.OSSUtil ossUtil = applicationContext.getBean(OssConfiguration.OSSUtil.class);
-        ossUtil.downLoad(httpServletRequest, httpServletResponse, objectName);
+        ossUtil.downLoad(httpServletRequest, httpServletResponse, objectName,originName);
     }
 
     //删除Oss文件的方法
