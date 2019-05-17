@@ -5,11 +5,13 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.payment.domain.CashTransactionLog;
 import com.hand.hcf.app.payment.service.CashTransactionLogService;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/9/30.
  */
+@Api(tags = "通用支付平台日志API")
 @RestController
 @RequestMapping("/api/cash/transaction/logs")
 public class CashTransactionLogController {
@@ -32,8 +35,10 @@ public class CashTransactionLogController {
      * @param cashTransactionLog
      * @return
      */
+
+    @ApiOperation(value = "新增通用支付平台日志表", notes = "新增通用支付平台日志表 开发:")
     @PostMapping()
-    public ResponseEntity<CashTransactionLog> createCashTransactionLog(@RequestBody CashTransactionLog cashTransactionLog){
+    public ResponseEntity<CashTransactionLog> createCashTransactionLog(@ApiParam(value = "通用支付平台日志") @RequestBody CashTransactionLog cashTransactionLog){
         return ResponseEntity.ok(cashTransactionLogService.createCashTransactionLog(cashTransactionLog));
     }
 
@@ -64,9 +69,15 @@ public class CashTransactionLogController {
      * @apiSuccess (CashTransactionLog的属性) {String} operationTypeName 操作类型名称
      * @apiSuccess (CashTransactionLog的属性) {byte[]} bankMessage 银行报文
      */
+
+    @ApiOperation(value = "通用支付平台日志分页查询", notes = "通用支付平台日志分页查询 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashTransactionLog>> getCashTransactionLogByCond(
-            @RequestParam(value = "paymentDetailId") Long paymentDetailId, Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "支付明细表ID") @RequestParam(value = "paymentDetailId") Long paymentDetailId,@ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashTransactionLog> list = cashTransactionLogService.getCashTransactionLogByCond(paymentDetailId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/transaction/logs/query");
@@ -95,9 +106,11 @@ public class CashTransactionLogController {
      * @apiSuccess (CashTransactionLog的属性) {String} operationTypeName 操作类型名称
      * @apiSuccess (CashTransactionLog的属性) {byte[]} bankMessage 银行报文
      */
+
+    @ApiOperation(value = "通用支付平台日志不分页查询", notes = "通用支付平台日志不分页查询 开发:")
     @GetMapping("/queryAll")
     public ResponseEntity<List<CashTransactionLog>> getCashTransactionLogAllByCond(
-            @RequestParam(value = "paymentDetailId") Long paymentDetailId){
+            @ApiParam(value = "支付明细表ID") @RequestParam(value = "paymentDetailId") Long paymentDetailId){
         List<CashTransactionLog> list = cashTransactionLogService.getCashTransactionLogAllByCond(paymentDetailId);
         return ResponseEntity.ok(list);
     }
@@ -129,9 +142,15 @@ public class CashTransactionLogController {
      * @apiSuccess (CashTransactionLog的属性) {String} operationTypeName 操作类型名称
      * @apiSuccess (CashTransactionLog的属性) {byte[]} bankMessage 银行报文
      */
+
+    @ApiOperation(value = "根据支付表id分页查询对应的支付明细id日志", notes = "根据支付表id分页查询对应的支付明细id日志 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/queryByDataId")
     public ResponseEntity<List<CashTransactionLog>> getCashTransactionLogByDataId(
-            @RequestParam Long dateId, Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "支付表id") @RequestParam Long dateId,@ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashTransactionLog> list = cashTransactionLogService.getCashTransactionLogByDataId(dateId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/transaction/logs/queryByDataId");

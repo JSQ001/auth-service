@@ -2,6 +2,9 @@ package com.hand.hcf.app.prepayment.web;
 
 import com.hand.hcf.app.prepayment.service.PrepaymentLogService;
 import com.hand.hcf.app.prepayment.web.dto.PrePaymentLogDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,12 +16,12 @@ import java.util.List;
 /**
  * Created by 刘亮 on 2018/1/26.
  */
+@Api(tags = "预付款日志")
 @RestController
 @RequestMapping("/api/prepayment/log")
 public class CashPrepaymentLogController {
 
     private final PrepaymentLogService prepaymentLogService;
-
     public CashPrepaymentLogController(PrepaymentLogService prepaymentLogService) {
         this.prepaymentLogService = prepaymentLogService;
     }
@@ -47,7 +50,8 @@ public class CashPrepaymentLogController {
     }
      */
     @GetMapping("/get/all/by/id")
-    public ResponseEntity<List<PrePaymentLogDTO>> getAllById(@RequestParam Long id){
+    @ApiOperation(value = "查询日志", notes = "查询日志 开发:刘亮")
+    public ResponseEntity<List<PrePaymentLogDTO>> getAllById(@ApiParam(value = "日志表ID") @RequestParam Long id){
         return ResponseEntity.ok(prepaymentLogService.getAll(id));
     }
 }

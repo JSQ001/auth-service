@@ -185,6 +185,16 @@ public class PrepaymentHcfOrganizationInterface {
         return currencyClient.getForeignCurrencyByCode(baseCurrencyCode, currency, OrgInformationUtil.getCurrentSetOfBookId());
     }
 
+    /**
+     * 通过币种code获取币种信息
+     *
+     * @param currency
+     * @return
+     */
+    public CurrencyRateCO getForeignCurrencyByCode(String baseCurrencyCode, String currency,Long setOfBookId) {
+        return currencyClient.getForeignCurrencyByCode(baseCurrencyCode, currency, setOfBookId);
+    }
+
 //    /*根据公司id和用户name，查询用户银行信息*/
 //    public static Page<ReceivablesDTO> getContactBankAccountDTO(Long tenantId, String userName, Integer page, Integer size){
 //        Page<ReceivablesDTO> dtoPage = new Page<>();
@@ -301,6 +311,16 @@ public class PrepaymentHcfOrganizationInterface {
             map.put(operationType, sysCodeValueCO.getName());
             return map;
         }
+    }
+
+    /**
+     * 根据系统代码的code,以及值的code获取具体的系统代码
+     * @param code
+     * @param value
+     * @return
+     */
+    public SysCodeValueCO getSysCodeValueByCodeAndValue(String code, String value){
+        return orgClient.getSysCodeValueByCodeAndValue(code, value);
     }
 
     public ContactCO getUserById(Long userId) {
@@ -439,5 +459,23 @@ public class PrepaymentHcfOrganizationInterface {
                 ignoreIds == null ? new ArrayList<>() : ignoreIds,
                 page.getCurrent() - 1,
                 page.getSize());
+    }
+
+    /**
+     *
+     * 根据账套id获取账套信息，如果不存在则根据参数决定是否创建一个对象
+     * @param id
+     * @return
+     */
+    public SetOfBooksInfoCO getSetOfBooksInfoCOById(Long id, boolean isNullNew){
+        SetOfBooksInfoCO setOfBooksInfoCO = sobClient.getSetOfBooksById(id);
+        if (isNullNew) {
+            if (setOfBooksInfoCO == null) {
+                SetOfBooksInfoCO result = new SetOfBooksInfoCO();
+                result.setId(id);
+                return result;
+            }
+        }
+        return setOfBooksInfoCO;
     }
 }

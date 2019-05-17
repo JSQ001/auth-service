@@ -13,6 +13,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Created by 韩雪 on 2017/10/24.
@@ -35,6 +39,15 @@ public class CashPayRequisitionType extends DomainLogicEnable {
 
     @TableField(value = "payment_method_category")
     private String paymentMethodCategory;//付款方式类型(线上、线下、落地文件)
+
+
+    /**
+     * 付款方式(付款方式值列表：ZJ_PAYMENT_TYPE)
+     */
+    @NotNull
+    @TableField("payment_type")
+    @ApiModelProperty(value = "付款方式",dataType = "String",required = true)
+    private String paymentType;
 
     //关联表单类型oid
     @TableField(value = "form_oid", strategy = FieldStrategy.IGNORED)
@@ -63,6 +76,8 @@ public class CashPayRequisitionType extends DomainLogicEnable {
 
     @TableField(exist = false)
     private String paymentMethodCategoryName;//付款方式类型name
+    @TableField(exist = false)
+    private String paymentTypeName;//付款方式name
 
 
 

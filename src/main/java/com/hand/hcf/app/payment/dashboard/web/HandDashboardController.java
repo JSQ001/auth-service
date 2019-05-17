@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 @RestController
-@RequestMapping("/api/payment/dashboard")
+@RequestMapping("/api/dashboard")
 public class HandDashboardController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class HandDashboardController {
      * @param startDate
      * @param endDate
      * @return
-     */
+     *//*
     @RequestMapping(value = "/my/report/payment/situation", method = RequestMethod.GET)
     public ResponseEntity<PaymentSituationDTO> getPaymentSituation(@RequestParam(value = "entityType", required = false) Integer entityType,
                                                                    @RequestParam(value = "startDate", required = false) String startDate,
@@ -44,7 +44,7 @@ public class HandDashboardController {
         }
         PaymentSituationDTO paymentSituationDTO = dashboardService.SearchPaymentSituation(entityType,currentUserID,dateFrom,dateTo);
         return ResponseEntity.ok(paymentSituationDTO);
-    }
+    }*/
 
 
 }

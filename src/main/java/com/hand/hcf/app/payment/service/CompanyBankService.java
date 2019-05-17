@@ -203,8 +203,7 @@ public class CompanyBankService extends ServiceImpl<CompanyBankMapper, CompanyBa
         wrapper.eq("deleted", false);
         wrapper.eq("tenant_id", OrgInformationUtil.getCurrentTenantId());
         wrapper.eq(StringUtils.isNotEmpty(currency), "currency_code", currency);
-        //jiu.zhao TODO
-        //wrapper.and(dataAuthLabel);
+        wrapper.and(StringUtils.isNotEmpty(dataAuthLabel),dataAuthLabel);
         wrapper.orderBy("set_of_books_code");
         wrapper.orderBy("company_code");
         wrapper.orderBy("bank_account_number");
@@ -222,7 +221,8 @@ public class CompanyBankService extends ServiceImpl<CompanyBankMapper, CompanyBa
                     companyBankDTO.setSetOfBooksName(setOfBooksInfoCO.getSetOfBooksName());
                     companyBankDTO.setCompanyCode(companyDTO.getCompanyCode() == null ? "" : companyDTO.getCompanyCode());
                     companyBankDTO.setCompanyName(companyDTO.getName());
-                    companyBankDTO.setCurrencyName(organizationService.getForeignCurrencyByCode("CNY", companyBankDTO.getCurrencyCode(), OrgInformationUtil.getCurrentSetOfBookId()).getCurrencyName());
+                    companyBankDTO.setCurrencyName(organizationService.getForeignCurrencyByCode(setOfBooksInfoCO.getFunctionalCurrencyCode(),
+                            companyBankDTO.getCurrencyCode(), OrgInformationUtil.getCurrentSetOfBookId()).getCurrencyName());
                     companyBankDTOS.add(companyBankDTO);
                 }
         );

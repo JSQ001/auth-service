@@ -27,6 +27,7 @@ import com.hand.hcf.app.payment.web.dto.PartnerBankInfo;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -46,13 +47,16 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CashTransactionDataService extends BaseService<CashTransactionDataMapper, CashTransactionData> {
     private static final Logger log = LoggerFactory.getLogger(CashTransactionDataService.class);
-    private final CashTransactionClassMapper cashTransactionClassMapper;
-    private final CashFlowItemMapper cashFlowItemMapper;
-
-    private final PaymentOrganizationService organizationService;
-    private final SupplierService supplierService;
-
-    private final PaymentCompanyConfigService paymentCompanyConfigService;
+    @Autowired
+    private CashTransactionClassMapper cashTransactionClassMapper;
+    @Autowired
+    private CashFlowItemMapper cashFlowItemMapper;
+    @Autowired
+    private PaymentOrganizationService organizationService;
+    @Autowired
+    private SupplierService supplierService;
+    @Autowired
+    private PaymentCompanyConfigService paymentCompanyConfigService;
 
     /**
      * 根据条件查询待付提交数据
@@ -75,6 +79,7 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                                                                     String requisitionDateFrom,
                                                                     String requisitionDateTo,
                                                                     String paymentMethodCategory,
+                                                                    String paymentType,
                                                                     String partnerCategory,
                                                                     Long partnerId,
                                                                     BigDecimal amountFrom,
@@ -98,6 +103,7 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                             .ge(requisitionZonedDateFrom != null, "requisition_date", requisitionZonedDateFrom)
                             .lt(requisitionZonedDateTo != null, "requisition_date", requisitionZonedDateTo)
                             .eq(paymentMethodCategory != null, "payment_method_category", paymentMethodCategory)
+                            .eq(paymentType != null,"payment_type",paymentType)
                             .eq(partnerCategory != null, "partner_category", partnerCategory)
                             .eq(partnerId != null, "partner_id", partnerId)
                             .ge(amountFrom != null, "amount", amountFrom)
@@ -130,6 +136,12 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
             }
             if (u.getPaymentMethodCategory() != null && !u.getPaymentMethodCategory().isEmpty()) {
                 cashTransactionData.setPaymentMethodCategory(u.getPaymentMethodCategory());
+            }
+            if (u.getPaymentType() != null && !u.getPaymentType().isEmpty()){
+                cashTransactionData.setPaymentType(u.getPaymentType());
+            }
+            if (u.getPropFlag() != null && !u.getPropFlag().isEmpty()){
+                cashTransactionData.setPropFlag(u.getPropFlag());
             }
             cashTransactionData.setVersionNumber(u.getVersionNumber());
             return cashTransactionData;
@@ -337,6 +349,7 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                                                                          ZonedDateTime requisitionDateFrom,
                                                                          ZonedDateTime requisitionDateTo,
                                                                          String paymentMethodCategory,
+                                                                         String paymentType,
                                                                          String partnerCategory,
                                                                          Long partnerId,
                                                                          BigDecimal amountFrom,
@@ -352,6 +365,7 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                             .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                             .lt(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                             .eq(paymentMethodCategory != null, "payment_method_category", paymentMethodCategory)
+                            .eq(paymentType != null,"payment_type",paymentType)
                             .eq(partnerCategory != null, "partner_category", partnerCategory)
                             .eq(partnerId != null, "partner_id", partnerId)
                             .ge(amountFrom != null, "amount", amountFrom)
@@ -383,7 +397,9 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
     private  List<CashTransactionDataWebDTO> toDto(List<CashTransactionData> list){
         List<CashTransactionDataWebDTO> dtoList = new ArrayList<>();
         Map<String, String> documentTypeMap = new HashMap<>(16);
-        Map<String, String> paymentTypeMap = new HashMap<>(16);
+//        Map<String, String> paymentTypeMap = new HashMap<>(16);
+        Map<String, String> paymentTypeSysCodeMap = new HashMap<>(16);
+
         Map<String, String> partnerTypeMap = new HashMap<>(16);
         Map<String, String> paymentStatusMap = new HashMap<>(16);
         Map<Long, String> empMap = new HashMap<>(16);
@@ -396,11 +412,17 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
             documentTypeMap.put(e.getValue(), e.getName());
         });
 
-        // 支付方式
-        List<SysCodeValueCO> paymentType = organizationService.listAllSysCodeValueByCode(
-                PaymentSystemCustomEnumerationType.CSH_PAYMENT_TYPE);
+        // 付款方式类型
+        /*List<SysCodeValueCO> paymentType = organizationService.listAllSysCodeValueByCode(
+                SystemCustomEnumerationType.CSH_PAYMENT_TYPE);
         paymentType.forEach( e ->{
             paymentTypeMap.put(e.getValue(), e.getName());
+        });*/
+
+        // 付款方式值列表
+        List<SysCodeValueCO> paymentTypeSysCode = organizationService.listAllSysCodeValueByCode("ZJ_PAYMENT_TYPE");
+        paymentTypeSysCode.forEach( e ->{
+            paymentTypeSysCodeMap.put(e.getValue(), e.getName());
         });
 
         // 员工或供应商
@@ -468,6 +490,8 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                     .payableAmount(payableAmount)
                     .currentPayAmount(payableAmount)
                     .paymentMethodCategory(t.getPaymentMethodCategory())
+                    .paymentType(t.getPaymentType())
+                    .propFlag(t.getPropFlag())
                     .partnerCategory(t.getPartnerCategory())
                     // 员工或供应商名字
                     .partnerName(partnerName)
@@ -477,7 +501,8 @@ public class CashTransactionDataService extends BaseService<CashTransactionDataM
                     .currency(t.getCurrency())
                     .paymentStatus(t.getPaymentStatus())
                     .documentCategoryName(documentTypeMap.get(t.getDocumentCategory()))
-                    .paymentMethodCategoryName(paymentTypeMap.get(t.getPaymentMethodCategory()))
+//                    .paymentMethodCategoryName(paymentTypeMap.get(t.getPaymentMethodCategory()))
+                    .paymentTypeName(paymentTypeSysCodeMap.get(t.getPaymentType()))
                     .partnerCategoryName(partnerTypeMap.get(t.getPartnerCategory()))
                     .paymentStatusName(paymentStatusMap.get(t.getPaymentStatus()))
                     .documentTypeName(documentTypeMap.get(t.getDocumentCategory()))

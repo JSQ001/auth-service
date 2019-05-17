@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.net.URISyntaxException;
@@ -19,6 +21,8 @@ import java.util.List;
 /**
  * @author dong.liu on 2017-11-07
  */
+
+@Api(tags = "银行API")
 @RestController
 @RequestMapping("/api/cash/bank/user/defineds")
 public class CashBankUserDefinedController {
@@ -141,8 +145,9 @@ public class CashBankUserDefinedController {
      *  }
      * }
      */
+    @ApiOperation(value = "新增单个自定义银行", notes = "新增单个自定义银行 开发:")
     @PostMapping
-    public ResponseEntity<CashBankUserDefined> createCshBank(@RequestBody @Valid CashBankUserDefined cashBankUserDefined) {
+    public ResponseEntity<CashBankUserDefined> createCshBank(@ApiParam(value = "银行自定义类") @RequestBody @Valid CashBankUserDefined cashBankUserDefined) {
         return ResponseEntity.ok(cashBankUserDefinedService.createCshBank(cashBankUserDefined));
     }
 
@@ -222,8 +227,10 @@ public class CashBankUserDefinedController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量新增自定义银行", notes = "批量新增自定义银行 开发:")
     @PostMapping("/batch")
-    public ResponseEntity<List<CashBankUserDefined>> createCshBankBatch(@RequestBody List<CashBankUserDefined> cashBankUserDefineds) {
+    public ResponseEntity<List<CashBankUserDefined>> createCshBankBatch(@ApiParam(value = "银行自定义类") @RequestBody List<CashBankUserDefined> cashBankUserDefineds) {
         return ResponseEntity.ok(cashBankUserDefinedService.createCshBankBatch(cashBankUserDefineds));
     }
 
@@ -341,8 +348,10 @@ public class CashBankUserDefinedController {
      * }
      * }
      */
+
+    @ApiOperation(value = "修改单个自定义银行", notes = "修改单个自定义银行 开发:")
     @PutMapping
-    public ResponseEntity<CashBankUserDefined> updateCshBank(@RequestBody @Valid CashBankUserDefined cashBankUserDefined) {
+    public ResponseEntity<CashBankUserDefined> updateCshBank(@ApiParam(value = "银行自定义类") @RequestBody @Valid CashBankUserDefined cashBankUserDefined) {
         return ResponseEntity.ok(cashBankUserDefinedService.updateCshBank(cashBankUserDefined));
     }
 
@@ -423,8 +432,10 @@ public class CashBankUserDefinedController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量修改自定义银行", notes = "批量修改自定义银行 开发:")
     @PutMapping("/batch")
-    public ResponseEntity<List<CashBankUserDefined>> updateCshBankBatch(@RequestBody List<CashBankUserDefined> cashBankUserDefineds) {
+    public ResponseEntity<List<CashBankUserDefined>> updateCshBankBatch(@ApiParam(value = "银行自定义类") @RequestBody List<CashBankUserDefined> cashBankUserDefineds) {
         return ResponseEntity.ok(cashBankUserDefinedService.updateCshBankBatch(cashBankUserDefineds));
     }
 
@@ -449,6 +460,8 @@ public class CashBankUserDefinedController {
      * @apiUse myID
      * @apiUse MyError
      */
+
+    @ApiOperation(value = "根据id删除单个自定义银行", notes = "根据id删除单个自定义银行 开发:")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCshBankById(@PathVariable Long id) {
         cashBankUserDefinedService.deleteCshBankById(id);
@@ -502,6 +515,8 @@ public class CashBankUserDefinedController {
      *  }
      * }
      */
+
+    @ApiOperation(value = "根据id查询单个自定义银行", notes = "根据id查询单个自定义银行 开发:")
     @GetMapping("/{id}")
     public ResponseEntity<CashBankUserDefined> getCshBankById(@PathVariable Long id) {
         return ResponseEntity.ok(cashBankUserDefinedService.selectById(id));
@@ -570,16 +585,22 @@ public class CashBankUserDefinedController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询自定义银行", notes = "根据条件分页查询自定义银行 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashBankUserDefined>> getCshBankByCond(
-            @RequestParam(required = false) String bankCode,
-            @RequestParam(required = false) String bankName,
-            @RequestParam(required = false) String countryCode,
-            @RequestParam(required = false) String provinceCode,
-            @RequestParam(required = false) String cityCode,
-            @RequestParam(required = false) String districtCode,
-            @RequestParam(required = false, value = "enabled") Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "银行代码") @RequestParam(required = false) String bankCode,
+            @ApiParam(value = "银行名称") @RequestParam(required = false) String bankName,
+            @ApiParam(value = "所在国家代码") @RequestParam(required = false) String countryCode,
+            @ApiParam(value = "所在省份代码") @RequestParam(required = false) String provinceCode,
+            @ApiParam(value = "所在城市代码") @RequestParam(required = false) String cityCode,
+            @ApiParam(value = "区/县代码") @RequestParam(required = false) String districtCode,
+            @ApiParam(value = "是否启用") @RequestParam(required = false, value = "enabled") Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashBankUserDefined> list = cashBankUserDefinedService.getCshBankDataByCond(bankCode, bankName, countryCode, provinceCode, cityCode, districtCode, isEnabled, page);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/banks/query");

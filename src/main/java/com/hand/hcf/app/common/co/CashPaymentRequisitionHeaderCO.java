@@ -161,9 +161,13 @@ public class CashPaymentRequisitionHeaderCO {
     @NotNull
     private Boolean ifWorkflow;
 
-    //预付款单类型付款方式
+    //预付款单类型付款方式类型
     private String paymentMethod;
     private String paymentMethodCode;
+
+    //预付款单类型付款方式
+    private String paymentType;
+    private String paymentTypeCode;
 
     //预付款单是否关联申请单
     private Boolean ifApplication;
@@ -174,10 +178,22 @@ public class CashPaymentRequisitionHeaderCO {
     //字符串提交日期
     private String StringSubmitDate;
 
+
+    //是否从申请单创建(是：true，不是：false)
+    private Boolean reqIn;
+
+
     @JsonSerialize(using = ToStringSerializer.class)
     private Long checkBy;
 
     private Boolean currentFlag;
 
     private Page page;
+
+
+
+    /**
+     * 关联申请id（申请单主动关联预付款单）
+     */
+    private Long refDocumentId;
 }

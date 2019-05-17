@@ -97,6 +97,11 @@ public class PaymentRequisitionLineWebDTO extends DomainObjectDTO {
 
     private String paymentMethodCategoryName;//付款方式类型名称
 
+    private String paymentType;//付款方式
+    private String paymentTypeName;//付款方式名称
+    private String propFlag;//账户属性
+    private String propFlagName;//账户属性名称
+
     @JsonSerialize(using = ToStringSerializer.class)
     private Long contractHeaderId;//关联合同ID
 

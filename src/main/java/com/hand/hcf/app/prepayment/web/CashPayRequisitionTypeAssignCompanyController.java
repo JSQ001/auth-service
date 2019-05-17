@@ -5,13 +5,14 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignCompany;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignCompanyService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -22,11 +23,11 @@ import java.util.Map;
 /**
  * Created by 韩雪 on 2017/10/25.
  */
+@Api(tags = "预付款单类型关联的公司")
 @RestController
 @RequestMapping("/api/cash/pay/requisition/type/assign/companies")
 public class CashPayRequisitionTypeAssignCompanyController {
     private final CashPayRequisitionTypeAssignCompanyService cashSobPayReqTypeAssignCompanyService;
-
     public CashPayRequisitionTypeAssignCompanyController(CashPayRequisitionTypeAssignCompanyService cashSobPayReqTypeAssignCompanyService){
         this.cashSobPayReqTypeAssignCompanyService = cashSobPayReqTypeAssignCompanyService;
     }
@@ -135,7 +136,8 @@ public class CashPayRequisitionTypeAssignCompanyController {
     }
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignCompany>> createCashPayRequisitionTypeAssignCompanyBatch(@RequestBody List<CashPayRequisitionTypeAssignCompany> list){
+    @ApiOperation(value = "批量新增 预付款单类型关联的公司表", notes = "批量新增 预付款单类型关联的公司表 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignCompany>> createCashPayRequisitionTypeAssignCompanyBatch(@ApiParam(value = "预付款单类型关联的公司表") @RequestBody List<CashPayRequisitionTypeAssignCompany> list){
         return ResponseEntity.ok(cashSobPayReqTypeAssignCompanyService.createCashPayRequisitionTypeAssignCompanyBatch(list));
     }
 
@@ -213,7 +215,8 @@ public class CashPayRequisitionTypeAssignCompanyController {
     }
      */
     @PutMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignCompany>> updateCashPayRequisitionTypeAssignCompanyBatch(@RequestBody List<CashPayRequisitionTypeAssignCompany> list){
+    @ApiOperation(value = "批量修改 预付款单类型关联的公司表", notes = "批量修改 预付款单类型关联的公司表 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignCompany>> updateCashPayRequisitionTypeAssignCompanyBatch(@ApiParam(value = "预付款单类型关联的公司表") @RequestBody List<CashPayRequisitionTypeAssignCompany> list){
         return ResponseEntity.ok(cashSobPayReqTypeAssignCompanyService.updateCashPayRequisitionTypeAssignCompanyBatch(list));
     }
 
@@ -265,9 +268,14 @@ public class CashPayRequisitionTypeAssignCompanyController {
 
      */
     @GetMapping("/query")
+    @ApiOperation(value = "根据预付款单类型ID->sobPayReqTypeId 查询出与之对应的公司表中的数据，前台显示公司代码以及公司名称(分页)", notes = "根据预付款单类型ID->sobPayReqTypeId 查询出与之对应的公司表中的数据，前台显示公司代码以及公司名称(分页) 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CashPayRequisitionTypeAssignCompany>> getCashPayRequisitionTypeAssignCompanyByCond(
-            @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashPayRequisitionTypeAssignCompany> list = cashSobPayReqTypeAssignCompanyService.getCashPayRequisitionTypeAssignCompanyByCond(sobPayReqTypeId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/companies/query");
@@ -351,12 +359,17 @@ public class CashPayRequisitionTypeAssignCompanyController {
     ]
      */
     @GetMapping("/filter")
-    public ResponseEntity assignCompanyQuery(@RequestParam Long sobPayReqTypeId,
-                                             @RequestParam(required = false) String companyCode,
-                                             @RequestParam(required = false) String companyName,
-                                             @RequestParam(required = false) String companyCodeFrom,
-                                             @RequestParam(required = false) String companyCodeTo,
-                                             Pageable pageable) throws URISyntaxException {
+    @ApiOperation(value = "分配页面的公司筛选查询", notes = "分配页面的公司筛选查询 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity assignCompanyQuery(@ApiParam(value = "预付款单类型ID") @RequestParam Long sobPayReqTypeId,
+                                             @ApiParam(value = "公司代码") @RequestParam(required = false) String companyCode,
+                                             @ApiParam(value = "公司名称") @RequestParam(required = false) String companyName,
+                                             @ApiParam(value = "公司代码从") @RequestParam(required = false) String companyCodeFrom,
+                                             @ApiParam(value = "公司代码到") @RequestParam(required = false) String companyCodeTo,
+                                             @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<CompanyCO> result = cashSobPayReqTypeAssignCompanyService.assignCompanyQuery(sobPayReqTypeId, companyCode, companyName, companyCodeFrom, companyCodeTo, page);
 

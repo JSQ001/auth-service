@@ -40,9 +40,7 @@ public class PrepaymentService {
      * @return
      */
     public Boolean checkCashPaymentRequisitionBeforeSubmit(Long requisitionHeaderId){
-        //return prepaymentClient.checkCashPaymentRequisitionBeforeSubmit(requisitionHeaderId);
-        //jiu.zhao TODO
-        return true;
+        return prepaymentClient.checkCashPaymentRequisitionBeforeSubmit(requisitionHeaderId);
     }
 
     /**

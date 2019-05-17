@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Created by 刘亮 on 2017/9/6.
  */
+@Api(tags = "付款方式API")
 @RestController
 @RequestMapping("/api/cash/payment/method")
 public class CashPaymentMethodController {
@@ -82,8 +84,10 @@ public class CashPaymentMethodController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "新增或修改单个付款方式", notes = "新增或修改单个付款方式 开发:")
     @PostMapping()
-    public ResponseEntity<CashPaymentMethod> insertOrUpdateCashPaymentMethod(@RequestBody CashPaymentMethod cashPaymentMethod){
+    public ResponseEntity<CashPaymentMethod> insertOrUpdateCashPaymentMethod(@ApiParam(value = "付款方式") @RequestBody CashPaymentMethod cashPaymentMethod){
         return ResponseEntity.ok(cashPaymentMethodService.insertOrUpdateCashPaymentMethod(cashPaymentMethod));
     }
 
@@ -108,6 +112,8 @@ public class CashPaymentMethodController {
      * @apiUse myID
      * @apiUse MyError
      */
+
+    @ApiOperation(value = "单个删除付款方式", notes = "单个删除付款方式 开发:")
     @DeleteMapping("/deleteById/{id}")
     public ResponseEntity<Boolean> deleteCashPaymentMethodById(@PathVariable Long id){
         boolean flag = cashPaymentMethodService.deleteById(id);
@@ -123,12 +129,14 @@ public class CashPaymentMethodController {
      * @return
      * @throws URISyntaxException
      */
+
+    @ApiOperation(value = "条件查询", notes = "条件查询 开发:")
     @GetMapping("/query")
     public ResponseEntity<List<CashPaymentMethod>> selectByInput(
-            @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
-            @RequestParam(value = "description", required = false ) String description,
-            @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int current,
-            @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size
+            @ApiParam(value = "付款方式code") @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
+            @ApiParam(value = "付款方式名称") @RequestParam(value = "description", required = false ) String description,
+            @ApiParam(value = "目前") @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int current,
+            @ApiParam(value = "尺寸") @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size
             ) throws URISyntaxException {
         Page page = new Page(current,size);
         List<CashPaymentMethod> list =  cashPaymentMethodService.selectByInput(paymentMethodCode, description, page);
@@ -174,12 +182,14 @@ public class CashPaymentMethodController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询付款方式", notes = "根据条件分页查询付款方式 开发:")
     @GetMapping("/query/lov")
     public ResponseEntity<List<CashPaymentMethod>> selectByInputLOV(
-            @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
-            @RequestParam(value = "description", required = false ) String description,
-            @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
-            @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size
+            @ApiParam(value = "付款方式code") @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
+            @ApiParam(value = "付款方式名称") @RequestParam(value = "description", required = false ) String description,
+            @ApiParam(value = "页面") @RequestParam(defaultValue = PageUtil.DEFAULT_PAGE) int page,
+            @ApiParam(value = "尺寸") @RequestParam(defaultValue = PageUtil.DEFAULT_SIZE) int size
     ) throws URISyntaxException {
         Page pages = new Page(page + 1,size);
         List<CashPaymentMethod> list =  cashPaymentMethodService.selectByInputLOV(paymentMethodCode, description, pages);
@@ -220,10 +230,12 @@ public class CashPaymentMethodController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件不分页查询付款方式", notes = "根据条件不分页查询付款方式 开发:")
     @GetMapping("/query/all")
     public ResponseEntity<List<CashPaymentMethod>> selectAll(
-            @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
-            @RequestParam(value = "description", required = false ) String description){
+            @ApiParam(value = "付款方式code") @RequestParam(value = "paymentMethodCode", required = false ) String paymentMethodCode,
+            @ApiParam(value = "付款方式名称") @RequestParam(value = "description", required = false ) String description){
 
         List<CashPaymentMethod> list =  cashPaymentMethodService.selectAll(paymentMethodCode, description);
         return ResponseEntity.ok(list);
@@ -238,8 +250,10 @@ public class CashPaymentMethodController {
      * @apiDescription 批量删除付款方式
      * @apiGroup PaymentService
      */
+
+    @ApiOperation(value = "批量删除付款方式", notes = "批量删除付款方式 开发:")
     @DeleteMapping("/delete/batch")
-    public ResponseEntity deleteCashPaymentMethodBatch(@RequestBody List<CashPaymentMethod> list){
+    public ResponseEntity deleteCashPaymentMethodBatch(@ApiParam(value = "付款方式列表") @RequestBody List<CashPaymentMethod> list){
         cashPaymentMethodService.deleteCashPaymentMethodBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -282,8 +296,10 @@ public class CashPaymentMethodController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "批量新增或修改付款方式", notes = "批量新增或修改付款方式 开发:")
     @PostMapping("/insertOrUpdate/batch")
-    public ResponseEntity<List<CashPaymentMethod>> insertOrUpdateCashPaymentMethodBatch(@RequestBody List<CashPaymentMethod> list){
+    public ResponseEntity<List<CashPaymentMethod>> insertOrUpdateCashPaymentMethodBatch(@ApiParam(value = "付款方式列表") @RequestBody List<CashPaymentMethod> list){
         List<CashPaymentMethod> list1 = cashPaymentMethodService.insertOrUpdateCashPaymentMethodBatch(list);
         return ResponseEntity.ok(list1);
     }
@@ -300,8 +316,10 @@ public class CashPaymentMethodController {
      * @apiGroup PaymentService
      * @apiParam (请求参数) {String} paymentType 付款方式类型
      */
+
+    @ApiOperation(value = "根据当前付款方式类型查看付款方式--通用支付平台", notes = "根据当前付款方式类型查看付款方式--通用支付平台 开发:")
     @GetMapping("/selectByPaymentType")
-    public ResponseEntity<List<CashPaymentMethod>> selectByPaymentType(@RequestParam String paymentType){
+    public ResponseEntity<List<CashPaymentMethod>> selectByPaymentType(@ApiParam(value = "付款方式") @RequestParam String paymentType){
         return ResponseEntity.ok(cashPaymentMethodService.selectByPaymentType(paymentType));
     }
 
@@ -318,6 +336,8 @@ public class CashPaymentMethodController {
      * @apiDescription 不分页查询当前租户下所有付款方式(公司银行账户详情下页签使用)
      * @apiGroup PaymentService
      */
+
+    @ApiOperation(value = "不分页查询当前租户下所有付款方式", notes = "不分页查询当前租户下所有付款方式 开发:")
     @GetMapping("/selectByTenantId")
     public ResponseEntity<List<CashPaymentMethod>> selectByTenantId(){
         return ResponseEntity.ok(cashPaymentMethodService.selectPaymentMethodByTenantId(OrgInformationUtil.getCurrentTenantId()));
@@ -349,8 +369,10 @@ public class CashPaymentMethodController {
      *   "description": "线上支付"
      * }
      */
+
+    @ApiOperation(value = "根据付款方式id查看付款方式详情", notes = "根据付款方式id查看付款方式详情 开发:")
     @GetMapping("/selectById/{id}")
-    public ResponseEntity<CashPaymentMethod> selectById(@PathVariable Long id, @RequestParam(value = "paymentMethod",required = false) String paymentMethod){
+    public ResponseEntity<CashPaymentMethod> selectById(@PathVariable Long id,@ApiParam(value = "付款方式") @RequestParam(value = "paymentMethod",required = false) String paymentMethod){
 
         return  ResponseEntity.ok(cashPaymentMethodService.selectPaymentMethodById(id,paymentMethod));
     }
@@ -369,12 +391,14 @@ public class CashPaymentMethodController {
      * @apiParam (请求参数) {Long} [companyPaymentId] 付款公司ID
      * @apiParam (请求参数) {Long} [paymentMethodId] 付款方式ID
      */
+
+    @ApiOperation(value = "新增时过滤已选的小类付款方式", notes = "新增时过滤已选的小类付款方式 开发:")
     @GetMapping("/get/payment/by/bankId/and/code")
     public ResponseEntity<List<CashPaymentMethod>> selectByInput(
-            @RequestParam Long companyBankId,
-            @RequestParam String type,
-            @RequestParam(value = "companyPaymentId",required = false) Long companyPaymentId,
-            @RequestParam(value = "paymentMethodId",required = false) Long paymentMethodId
+            @ApiParam(value = "公司银行账户ID") @RequestParam Long companyBankId,
+            @ApiParam(value = "付款方式类型") @RequestParam String type,
+            @ApiParam(value = "付款公司ID") @RequestParam(value = "companyPaymentId",required = false) Long companyPaymentId,
+            @ApiParam(value = "付款方式ID") @RequestParam(value = "paymentMethodId",required = false) Long paymentMethodId
             ){
         return ResponseEntity.ok(cashPaymentMethodService.selectByTypeAndCompanyBankId(type,companyBankId,companyPaymentId,paymentMethodId));
     }

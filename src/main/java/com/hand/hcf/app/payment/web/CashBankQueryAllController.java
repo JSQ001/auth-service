@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.List;
 /**
  * Created by liudong on 2017/12/22.
  */
+
+@Api(tags = "业务规则")
 @RestController
 @RequestMapping("/api/cash/bank/query/all")
 public class CashBankQueryAllController {
@@ -71,11 +75,17 @@ public class CashBankQueryAllController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询银行返回自定义DTO类", notes = "根据条件分页查询银行返回自定义DTO类 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping
     public ResponseEntity<List<BankQueryAllDTO>> queryAllBankDTO(
-            @RequestParam(required = false) String bankCode,
-            @RequestParam(required = false) String bankName,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "银行代码") @RequestParam(required = false) String bankCode,
+            @ApiParam(value = "银行名称") @RequestParam(required = false) String bankName,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<BankQueryAllDTO> pages =  cashBankQueryAllService.queryAllBankDTO(bankCode,bankName,page);
         HttpHeaders headers = PageUtil.generateHttpHeaders(pages, "api/cash/bank/query/all");

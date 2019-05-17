@@ -84,12 +84,18 @@ public class CashPaymentRequisitionLineAdapter {
             e.printStackTrace();
             throw new BizException(RespCode.SYS_COMPANY_INFO_NOT_EXISTS);
         }
-        try{
-            dto.setPaymentMethodName(prepaymentHcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
-                    line.getPaymentMethodCategory(), RespCode.SYS_CODE_TYPE_NOT_EXIT).get(line.getPaymentMethodCategory()));
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new BizException(RespCode.PREPAY_SYSTEM_VALUE_PAYMENT_METHOD_ERROR);
+        if (line.getPaymentMethodCategory() != null && !line.getPaymentMethodCategory().equals("") ) {
+            try {
+                dto.setPaymentMethodName(prepaymentHcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
+                        line.getPaymentMethodCategory(), RespCode.SYS_CODE_TYPE_NOT_EXIT).get(line.getPaymentMethodCategory()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new BizException(RespCode.PREPAY_SYSTEM_VALUE_PAYMENT_METHOD_ERROR);
+            }
+        }
+        if (line.getPaymentType() != null && !line.getPaymentType().equals("") ) {
+            dto.setPaymentTypeName(prepaymentHcfOrganizationInterface.getSysCodeValue("ZJ_PAYMENT_TYPE",
+                    line.getPaymentType(), RespCode.SYS_CODE_TYPE_NOT_EXIT).get(line.getPaymentType()));
         }
 
         if(dto.getContractId()!=null){
@@ -111,7 +117,7 @@ public class CashPaymentRequisitionLineAdapter {
             CashPaymentRequisitionHead head = cashPaymentRequisitionHeadService.selectById(line.getPaymentRequisitionHeaderId());
             //查询申请单信息
             if(line.getRefDocumentId()!=null){
-//                ApplicationDTO applicationDTO = hcfOrganizationInterface.getApplicapayCurrency = nulltionById(line.getRefDocumentId());
+//                ApplicationDTO applicationDTO = prepaymentHcfOrganizationInterface.getApplicapayCurrency = nulltionById(line.getRefDocumentId());
 //                dto.setRefDocumentTotalAmount(BigDecimal.valueOf(applicationDTO.getTotalAmount()));
             }
         }
@@ -140,7 +146,7 @@ public class CashPaymentRequisitionLineAdapter {
         //关联申请
         if(line.getRefDocumentId()!=null){
             try{
-//                ApplicationDTO applicationDTO = hcfOrganizationInterface.getApplicationById(line.getRefDocumentId());
+//                ApplicationDTO applicationDTO = prepaymentHcfOrganizationInterface.getApplicationById(line.getRefDocumentId());
 //                dto.setRefDocumentOid(applicationDTO.getApplicantOID().toString());
 //                dto.setRefDocumentCode(applicationDTO.getBusinessCode());
 //                dto.setRefDocumentRemark(applicationDTO.getTitle());

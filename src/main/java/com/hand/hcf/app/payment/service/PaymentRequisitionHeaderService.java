@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.DataAuthorityUtil;
@@ -20,6 +21,7 @@ import com.hand.hcf.app.payment.externalApi.PaymentOrganizationService;
 import com.hand.hcf.app.payment.persistence.PaymentRequisitionHeaderMapper;
 import com.hand.hcf.app.payment.persistence.PaymentRequisitionTypesMapper;
 import com.hand.hcf.app.payment.utils.RespCode;
+import com.hand.hcf.app.payment.utils.SpecificationUtil;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionHeaderWebDTO;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.slf4j.Logger;
@@ -51,6 +53,7 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
     private static final String ACP_CODE = "ACP_REQUISITION";
     private final CashDataRelationAcpService cashDataRelationAcpService;
     private final CashTransactionDataService cashTransactionDataService;
+	private final CashTransactionDetailService cashTransactionDetailService;
     private final PaymentOrganizationService organizationService;
     private final WorkflowControllerImpl workflowClient;// 工作流服务
     private final WorkflowControllerImpl workflowInterface;
@@ -63,6 +66,7 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
                                            PaymentRequisitionLineService paymentRequisitionLineService,
                                            CashDataRelationAcpService cashDataRelationAcpService,
                                            CashTransactionDataService cashTransactionDataService,
+										   CashTransactionDetailService cashTransactionDetailService,
                                            PaymentOrganizationService organizationService,
                                            WorkflowControllerImpl workflowClient,
                                            WorkflowControllerImpl workflowInterface,
@@ -71,6 +75,7 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
         this.paymentRequisitionLineService = paymentRequisitionLineService;
         this.cashDataRelationAcpService = cashDataRelationAcpService;
         this.cashTransactionDataService = cashTransactionDataService;
+        this.cashTransactionDetailService = cashTransactionDetailService;
         this.organizationService = organizationService;
         this.workflowClient = workflowClient;
         this.workflowInterface = workflowInterface;
@@ -146,11 +151,16 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
      */
     @Transactional(rollbackFor = Exception.class)
     public void deleteHeaderById(Long id){
+        PaymentRequisitionHeader paymentRequisitionHeader = this.selectById(id);
         operateCheck(id,-1);
         this.deleteById(id);
         PaymentRequisitionLine line = new PaymentRequisitionLine();
         line.setHeaderId(id);
         paymentRequisitionLineService.delete(new EntityWrapper<>(line));
+        //删除审批流实例
+        Integer entityType = PaymentConstants.ACP_REQUISITION_ENTITY_TYPE;
+        UUID entityOid = UUID.fromString(paymentRequisitionHeader.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
     }
 
     /**
@@ -601,6 +611,12 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
         cashTransactionData.setRequisitionPaymentDate(u.getSchedulePaymentDate());
         // 付款方式类型
         cashTransactionData.setPaymentMethodCategory(u.getPaymentMethodCategory());
+
+        //付款方式
+        cashTransactionData.setPaymentType(u.getPaymentType());
+        //账户属性
+        cashTransactionData.setPropFlag(u.getPropFlag());
+
         // 租户ID
         cashTransactionData.setTenantId(queryData.getTenantId());
         cashTransactionData.setPartnerId(u.getPartnerId());
@@ -1062,7 +1078,8 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
      * 付款申请单财务查询
      */
     @Transactional(readOnly = true)
-    public List<PaymentRequisitionHeaderWebDTO> getHeaderByCond(String requisitionNumber,
+    public Page<PaymentRequisitionHeaderWebDTO> getHeaderByCond(String requisitionNumber,
+                                                                Long setOfBooksId,
                                                                 Long companyId,
                                                                 Long acpReqTypeId,
                                                                 Long employeeId,
@@ -1077,6 +1094,9 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
                                                                 String description,
                                                                 boolean dataAuthFlag,
                                                                 Page mybatisPage){
+        List<PaymentRequisitionHeaderWebDTO> paymentRequisitionHeaderWebDTOS = new ArrayList<>();
+
+
         ZonedDateTime requisitionZonedDateFrom = DateUtil.stringToZonedDateTime(requisitionDateFrom);
         ZonedDateTime requisitionZonedDateTo = DateUtil.stringToZonedDateTime(requisitionDateTo);
         if (requisitionZonedDateTo != null){
@@ -1086,29 +1106,158 @@ public class PaymentRequisitionHeaderService extends BaseService<PaymentRequisit
         if(dataAuthFlag){
             Map<String,String> map = new HashMap<>();
             map.put(DataAuthorityUtil.TABLE_NAME,"csh_acp_requisition_hds");
-            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.TABLE_ALIAS,"a");
+            String customSql = "select 1 from csh_req_types t where a.acp_req_type_id = t.id and {t}";
+            String value = DataAuthorityUtil.getColumnDataAuthTypeLabelValue(
+                    "set_of_books_id",
+                    DataAuthFilterMethodEnum.CUSTOM_SQL,
+                    customSql);
+            map.put(DataAuthorityUtil.SOB_COLUMN,value);
             map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
             map.put(DataAuthorityUtil.UNIT_COLUMN,"unit_id");
             map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"employee_id");
             dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
         }
-        List<PaymentRequisitionHeader> lists = baseMapper.queryHeaders(mybatisPage,new EntityWrapper<PaymentRequisitionHeader>()
-                .like(requisitionNumber != null, "t.requisition_number",requisitionNumber)
-                .eq(companyId != null,"t.company_id",companyId)
-                .eq(acpReqTypeId != null,"t.acp_req_type_id",acpReqTypeId)
-                .eq(employeeId != null,"t.employee_id",employeeId)
-                .eq(status != null,"t.status",status)
-                .eq(unitId !=null,"t.unit_id",unitId)
-                .ge(requisitionZonedDateFrom != null,"t.requisition_date",requisitionZonedDateFrom)
-                .lt(requisitionZonedDateTo != null,"t.requisition_date",requisitionZonedDateTo)
-                .ge(functionAmountFrom != null,"t.payAmount",payAmountFrom)
-                .le(functionAmountTo != null,"t.payAmount",payAmountTo)
-                .ge(functionAmountFrom != null,"t.function_amount",functionAmountFrom)
-                .le(functionAmountTo != null,"t.function_amount",functionAmountTo)
-                .like(description != null,"t.description",description)
-                .and(TypeConversionUtils.isNotEmpty(dataAuthLabel),dataAuthLabel)
-                .orderBy("t.id",false));
-        return toDTO(lists,false, false);
+        List<PaymentRequisitionHeader> lists = baseMapper.queryPaymentRequisitionHeaders(
+                                                                                            requisitionNumber,
+                                                                                            setOfBooksId,
+                                                                                            companyId,
+                                                                                            acpReqTypeId,
+                                                                                            employeeId,
+                                                                                            status,
+                                                                                            unitId,
+                                                                                            requisitionZonedDateFrom,
+                                                                                            requisitionZonedDateTo,
+                                                                                            functionAmountFrom,
+                                                                                            functionAmountTo,
+                                                                                            description,
+                                                                                            dataAuthLabel
+
+        );
+//        List<PaymentRequisitionHeader> lists = baseMapper.queryHeaders(new EntityWrapper<PaymentRequisitionHeader>()
+//                .like(requisitionNumber != null, "a.requisition_number",requisitionNumber)
+//                .eq(setOfBooksId !=null,"set_of_books_id",setOfBooksId)
+//                .eq(companyId != null,"a.company_id",companyId)
+//                .eq(acpReqTypeId != null,"a.acp_req_type_id",acpReqTypeId)
+//                .eq(employeeId != null,"a.employee_id",employeeId)
+//                .eq(status != null,"a.status",status)
+//                .eq(unitId !=null,"a.unit_id",unitId)
+//                .ge(requisitionZonedDateFrom != null,"a.requisition_date",requisitionZonedDateFrom)
+//                .lt(requisitionZonedDateTo != null,"a.requisition_date",requisitionZonedDateTo)
+//                .ge(functionAmountFrom != null,"a.function_amount",functionAmountFrom)
+//                .le(functionAmountTo != null,"a.function_amount",functionAmountTo)
+//                .like(description != null,"a.description",description)
+//                .and(TypeConversionUtils.isNotEmpty(dataAuthLabel),dataAuthLabel)
+//                .orderBy("a.id",false));
+
+        paymentRequisitionHeaderWebDTOS = toDTO(lists, false, false);
+
+        for (PaymentRequisitionHeaderWebDTO paymentRequisitionHeaderWebDTO : paymentRequisitionHeaderWebDTOS) {
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = organizationService.getSetOfBooksInfoCOById(paymentRequisitionHeaderWebDTO.getSetOfBooksId(),false);
+            if (setOfBooksInfoCOById != null) {
+                paymentRequisitionHeaderWebDTO.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                paymentRequisitionHeaderWebDTO.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
+        }
+
+        for (PaymentRequisitionHeaderWebDTO paymentRequisition : paymentRequisitionHeaderWebDTOS) {
+            // 给付款申请单类型名称赋值
+            PaymentRequisitionTypes aymentRequisitionTypes = paymentRequisitionTypesMapper.selectById(paymentRequisition.getAcpReqTypeId());
+            if (paymentRequisition != null) {
+                paymentRequisition.setAcpReqTypeName(aymentRequisitionTypes.getDescription());
+            }
+        }
+
+        //获取“已付金额”（已付金额=付款金额-退款金额-反冲金额）
+        if ( CollectionUtils.isNotEmpty(paymentRequisitionHeaderWebDTOS) ){
+            paymentRequisitionHeaderWebDTOS.stream().forEach(paymentRequisitionHeaderWebDTO -> {
+                if ( 1004 == paymentRequisitionHeaderWebDTO.getStatus() ){
+                    //获取“付款金额”
+                    BigDecimal paymentAmount = cashTransactionDetailService.selectList(
+                            new EntityWrapper<CashTransactionDetail>()
+                                    .eq("document_id",paymentRequisitionHeaderWebDTO.getId())
+                                    .eq("payment_status", SpecificationUtil.PAYSUCCESS)
+                                    .eq("document_category","ACP_REQUISITION")
+                                    .eq("operation_type",SpecificationUtil.PAYMENT)
+                    ).stream().map(CashTransactionDetail::getAmount).reduce(BigDecimal.ZERO,(a,b)->a.add(b));
+                    //获取“退款金额”
+                    BigDecimal refundAmount = cashTransactionDetailService.selectList(
+                            new EntityWrapper<CashTransactionDetail>()
+                                    .eq("document_id",paymentRequisitionHeaderWebDTO.getId())
+                                    .eq("payment_status", SpecificationUtil.PAYSUCCESS)
+                                    .eq("document_category","ACP_REQUISITION")
+                                    .eq("operation_type",SpecificationUtil.RETURN)
+                    ).stream().map(CashTransactionDetail::getAmount).reduce(BigDecimal.ZERO,(a,b)->a.add(b));
+                    //获取“反冲金额”
+                    BigDecimal recoilAmount = cashTransactionDetailService.selectList(
+                            new EntityWrapper<CashTransactionDetail>()
+                                    .eq("document_id",paymentRequisitionHeaderWebDTO.getId())
+                                    .eq("payment_status", SpecificationUtil.PAYSUCCESS)
+                                    .eq("document_category","ACP_REQUISITION")
+                                    .eq("operation_type",SpecificationUtil.RETURN)
+                    ).stream().map(CashTransactionDetail::getAmount).reduce(BigDecimal.ZERO,(a,b)->a.add(b));
+                    BigDecimal payAmount = paymentAmount.subtract(refundAmount).subtract(recoilAmount);
+                    paymentRequisitionHeaderWebDTO.setPayAmount(payAmount);
+                }
+            });
+        }
+        //“已付金额从”、“已付金额至”筛选
+        if (payAmountFrom != null || payAmountTo != null){
+            List<PaymentRequisitionHeaderWebDTO> result = new ArrayList<>();
+            if (payAmountFrom != null && payAmountTo != null){
+                paymentRequisitionHeaderWebDTOS.stream().forEach(dto -> {
+                    if (dto.getPayAmount() != null){
+                        if (dto.getPayAmount().compareTo(payAmountFrom) > -1 && dto.getPayAmount().compareTo(payAmountTo) < 1){
+                            result.add(dto);
+                        }
+                    }
+                });
+            }else if (payAmountFrom != null && payAmountTo == null){
+                paymentRequisitionHeaderWebDTOS.stream().forEach(dto -> {
+                    if (dto.getPayAmount() != null){
+                        if (dto.getPayAmount().compareTo(payAmountFrom) > -1){
+                            result.add(dto);
+                        }
+                    }
+                });
+            }else if (payAmountFrom == null && payAmountTo != null){
+                paymentRequisitionHeaderWebDTOS.stream().forEach(dto -> {
+                    if (dto.getPayAmount() != null){
+                        if (dto.getPayAmount().compareTo(payAmountTo) < 1){
+                            result.add(dto);
+                        }
+                    }
+                });
+            }
+            List<PaymentRequisitionHeaderWebDTO> webDTOs = new ArrayList<>();
+            if (result.size() < mybatisPage.getSize() * mybatisPage.getCurrent()){
+                for (int i = (mybatisPage.getCurrent()-1)*mybatisPage.getSize();i < result.size();i++){
+                    webDTOs.add(result.get(i));
+                }
+            }else {
+                for (int i = (mybatisPage.getCurrent() - 1) * mybatisPage.getSize(); i < mybatisPage.getCurrent() * mybatisPage.getSize(); i++) {
+                    webDTOs.add(result.get(i));
+                }
+            }
+            mybatisPage.setTotal(result.size());
+            mybatisPage.setRecords(webDTOs);
+            return mybatisPage;
+        }
+
+        List<PaymentRequisitionHeaderWebDTO> dtos = new ArrayList<>();
+        if (paymentRequisitionHeaderWebDTOS.size() < mybatisPage.getSize() * mybatisPage.getCurrent()){
+            for (int i = (mybatisPage.getCurrent()-1)*mybatisPage.getSize();i < paymentRequisitionHeaderWebDTOS.size();i++){
+                dtos.add(paymentRequisitionHeaderWebDTOS.get(i));
+            }
+        }else {
+            for (int i = (mybatisPage.getCurrent() - 1) * mybatisPage.getSize(); i < mybatisPage.getCurrent() * mybatisPage.getSize(); i++) {
+                dtos.add(paymentRequisitionHeaderWebDTOS.get(i));
+            }
+        }
+        mybatisPage.setTotal(lists.size());
+        mybatisPage.setRecords(dtos);
+        return mybatisPage;
     }
 }
 

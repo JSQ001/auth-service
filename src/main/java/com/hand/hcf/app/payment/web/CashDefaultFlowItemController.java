@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/9/7.
  */
+
+@Api(tags = "现金事务分类关联现金流量表API")
 @RestController
 @RequestMapping("/api/cash/default/flowitems")
 public class CashDefaultFlowItemController {
@@ -72,8 +76,10 @@ public class CashDefaultFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "新增单个现金事务分类分配现金流量项", notes = "新增单个现金事务分类分配现金流量项 开发:")
     @PostMapping
-    public ResponseEntity<CashDefaultFlowItem> createCashDefaultFlowItem(@RequestBody CashDefaultFlowItem cashDefaultFlowItem){
+    public ResponseEntity<CashDefaultFlowItem> createCashDefaultFlowItem(@ApiParam(value = "现金事务分类关联现金流量") @RequestBody CashDefaultFlowItem cashDefaultFlowItem){
         return ResponseEntity.ok(cashDefaultFlowItemService.createCashDefaultFlowItem(cashDefaultFlowItem));
     }
 
@@ -122,8 +128,10 @@ public class CashDefaultFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "修改单个现金事务分类分配现金流量项", notes = "修改单个现金事务分类分配现金流量项 开发:")
     @PutMapping
-    public ResponseEntity<CashDefaultFlowItem> updateCashDefaultFlowItem(@RequestBody CashDefaultFlowItem cashDefaultFlowItem){
+    public ResponseEntity<CashDefaultFlowItem> updateCashDefaultFlowItem(@ApiParam(value = "现金事务分类关联现金流量") @RequestBody CashDefaultFlowItem cashDefaultFlowItem){
         return ResponseEntity.ok(cashDefaultFlowItemService.updateCashDefaultFlowItem(cashDefaultFlowItem));
     }
 
@@ -148,6 +156,8 @@ public class CashDefaultFlowItemController {
      * @apiUse myID
      * @apiUse MyError
      */
+
+    @ApiOperation(value = "根据id删除单个现金事务分类分配现金流量项", notes = "根据id删除单个现金事务分类分配现金流量项 开发:")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCashDefaultFlowItem(@PathVariable Long id){
         cashDefaultFlowItemService.deleteCashDefaultFlowItem(id);
@@ -181,6 +191,8 @@ public class CashDefaultFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "根据id查询单个现金事务分类分配现金流量项", notes = "根据id查询单个现金事务分类分配现金流量项 开发:")
     @GetMapping("/{id}")
     public ResponseEntity<CashDefaultFlowItem> getCashDefaultFlowItem(@PathVariable Long id){
         return ResponseEntity.ok(cashDefaultFlowItemService.getCashDefaultFlowItem(id));
@@ -242,12 +254,18 @@ public class CashDefaultFlowItemController {
      * }
      *]
      */
+
+    @ApiOperation(value = "根据条件分页查询现金事务分类分配现金流量项", notes = "根据条件分页查询现金事务分类分配现金流量项 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashDefaultFlowItem>> getCashDefaultFlowItemByCond(
-            @RequestParam(value = "transactionClassId", required = false) Long transactionClassId,
-            @RequestParam(value = "defaultFlag", required = false) Boolean defaultFlag,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "现金事务分类ID") @RequestParam(value = "transactionClassId", required = false) Long transactionClassId,
+            @ApiParam(value = "是否为默认现金流量项") @RequestParam(value = "defaultFlag", required = false) Boolean defaultFlag,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashDefaultFlowItem> list = cashDefaultFlowItemService.getCashDefaultFlowItemByCond(transactionClassId,defaultFlag,isEnabled,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/default/flowitems/query");
@@ -305,11 +323,13 @@ public class CashDefaultFlowItemController {
      * }
      *]
      */
+
+    @ApiOperation(value = "根据条件不分页查询现金事务分类分配现金流量项", notes = "根据条件不分页查询现金事务分类分配现金流量项 开发:")
     @GetMapping("/queryAll")
     public ResponseEntity<List<CashDefaultFlowItem>> getCashDefaultFlowItemAllByCond(
-            @RequestParam(value = "transactionClassId", required = false) Long transactionClassId,
-            @RequestParam(value = "defaultFlag", required = false) Boolean defaultFlag,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled){
+            @ApiParam(value = "现金事务分类ID") @RequestParam(value = "transactionClassId", required = false) Long transactionClassId,
+            @ApiParam(value = "是否为默认现金流量项") @RequestParam(value = "defaultFlag", required = false) Boolean defaultFlag,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled){
         List<CashDefaultFlowItem> list = cashDefaultFlowItemService.getCashDefaultFlowItemAllByCond(transactionClassId,defaultFlag,isEnabled);
         return ResponseEntity.ok(list);
     }
@@ -367,13 +387,19 @@ public class CashDefaultFlowItemController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件查询现金事务分类尚未分配的现金流量项", notes = "根据条件查询现金事务分类尚未分配的现金流量项 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/queryNotSaveFlowItem")
     public ResponseEntity<List<CashFlowItem>> getNotSaveFlowItem(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "transactionClassId") Long transactionClassId,
-            @RequestParam(value = "flowCode", required = false) String flowCode,
-            @RequestParam(value = "description", required = false) String description,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金事务分类ID") @RequestParam(value = "transactionClassId") Long transactionClassId,
+            @ApiParam(value = "现金流量项代码") @RequestParam(value = "flowCode", required = false) String flowCode,
+            @ApiParam(value = "现金流量项名称") @RequestParam(value = "description", required = false) String description,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashFlowItem> list = cashDefaultFlowItemService.getNotSaveFlowItem(setOfBookId,transactionClassId,flowCode,description,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/default/flowitems//queryNotSaveFlowItem");
@@ -433,8 +459,10 @@ public class CashDefaultFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量新增现金事务分类分配现金流量项", notes = "批量新增现金事务分类分配现金流量项 开发:")
     @PostMapping("/batch")
-    public ResponseEntity<List<CashDefaultFlowItem>> createCashDefaultFlowItemBatch(@RequestBody List<CashDefaultFlowItem> list){
+    public ResponseEntity<List<CashDefaultFlowItem>> createCashDefaultFlowItemBatch(@ApiParam(value = "现金事务分类关联现金流量列表") @RequestBody List<CashDefaultFlowItem> list){
         return ResponseEntity.ok(cashDefaultFlowItemService.createCashDefaultFlowItemBatch(list));
     }
 
@@ -473,8 +501,10 @@ public class CashDefaultFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量修改现金事务分类分配现金流量项", notes = "批量修改现金事务分类分配现金流量项 开发:")
     @PutMapping("/batch")
-    public ResponseEntity<List<CashDefaultFlowItem>> updateCashDefaultFlowItemBatch(@RequestBody List<CashDefaultFlowItem> list){
+    public ResponseEntity<List<CashDefaultFlowItem>> updateCashDefaultFlowItemBatch(@ApiParam(value = "现金事务分类关联现金流量列表") @RequestBody List<CashDefaultFlowItem> list){
         return ResponseEntity.ok(cashDefaultFlowItemService.updateCashDefaultFlowItemBatch(list));
     }
 
@@ -498,8 +528,10 @@ public class CashDefaultFlowItemController {
      *
      * }
      */
+
+    @ApiOperation(value = "批量删除现金事务分类分配现金流量项", notes = "批量删除现金事务分类分配现金流量项 开发:")
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashDefaultFlowItemBatch(@RequestBody List<Long> list){
+    public ResponseEntity deleteCashDefaultFlowItemBatch(@ApiParam(value = "现金事务分类关联现金流量列表") @RequestBody List<Long> list){
         cashDefaultFlowItemService.deleteCashDefaultFlowItemBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -512,6 +544,8 @@ public class CashDefaultFlowItemController {
      * @param transactionClassId
      * @return
      */
+
+    @ApiOperation(value = "根据现金事务分类ID返回现金流量项信息", notes = "根据现金事务分类ID返回现金流量项信息 开发:")
     @GetMapping("/queryByTransactionClassId/{transactionClassId}")
     public ResponseEntity<CashDefaultFlowItem> getCashDefaultFlowItemByTransactionClassId(@PathVariable Long transactionClassId){
         return ResponseEntity.ok(cashDefaultFlowItemService.getCashDefaultFlowItemByTransactionClassId(transactionClassId));

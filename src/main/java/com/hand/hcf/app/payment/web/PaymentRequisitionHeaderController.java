@@ -17,9 +17,7 @@ import com.hand.hcf.app.payment.utils.StringUtil;
 import com.hand.hcf.app.payment.web.dto.AcpPaymentApprovalDTO;
 import com.hand.hcf.app.payment.web.dto.ApprovalEntityDTO;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionHeaderWebDTO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -150,14 +149,16 @@ public class PaymentRequisitionHeaderController {
     }
 
      */
+    @ApiOperation(value = "创建新的付款申请单头信息", notes = "创建新的付款申请单头信息 开发：")
     @PostMapping
-    public ResponseEntity createHeader(@RequestBody PaymentRequisitionHeader header){
+    public ResponseEntity createHeader(@ApiParam(value = "付款申请单头信息") @RequestBody PaymentRequisitionHeader header){
 
         return ResponseEntity.ok(headerService.createHeader(header));
     }
 
+    @ApiOperation(value = "修改付款申请单头信息", notes = "修改付款申请单头信息 开发：")
     @PutMapping
-    public ResponseEntity updateHeader(@RequestBody PaymentRequisitionHeader header){
+    public ResponseEntity updateHeader(@ApiParam(value = "付款申请单头信息") @RequestBody PaymentRequisitionHeader header){
 
         return ResponseEntity.ok(headerService.updateHeader(header));
     }
@@ -168,6 +169,7 @@ public class PaymentRequisitionHeaderController {
      * @apiDescription 根据ID删除付款申请单
      * @apiParam (请求参数) {Long} id 付款申请单头ID
      */
+    @ApiOperation(value = "根据ID删除付款申请单", notes = "根据ID删除付款申请单 开发：")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity deleteHeader(@PathVariable Long id){
         headerService.deleteHeaderById(id);
@@ -262,17 +264,22 @@ public class PaymentRequisitionHeaderController {
             }
         ]
      */
+    @ApiOperation(value = "分页查询付款申请单信息", notes = "分页查询付款申请单信息 开发：")
     @GetMapping(value = "/query")
-    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeaders(@RequestParam(required = false) String requisitionNumber,
-                                                                           @RequestParam(required = false) Long employeeId,
-                                                                           @RequestParam(required = false) Long acpReqTypeId,
-                                                                           @RequestParam(required = false) String status,
-                                                                           @RequestParam(required = false) String requisitionDateFrom,
-                                                                           @RequestParam(required = false) String requisitionDateTo,
-                                                                           @RequestParam(required = false) BigDecimal functionAmountFrom,
-                                                                           @RequestParam(required = false) BigDecimal functionAmountTo,
-                                                                           @RequestParam(required = false) String description,
-                                                                           Pageable pageable) throws URISyntaxException {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeaders(@ApiParam(value = "付款申请单编号") @RequestParam(required = false) String requisitionNumber,
+                                                                           @ApiParam(value = "员工ID") @RequestParam(required = false) Long employeeId,
+                                                                           @ApiParam(value = "付款申请单类型ID") @RequestParam(required = false) Long acpReqTypeId,
+                                                                           @ApiParam(value = "状态") @RequestParam(required = false) String status,
+                                                                           @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                                                                           @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                                                                           @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal functionAmountFrom,
+                                                                           @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal functionAmountTo,
+                                                                           @ApiParam(value = "说明") @RequestParam(required = false) String description,
+                                                                           @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionHeaderWebDTO> lists = headerService.getHeaderByCondition(requisitionNumber,employeeId,
                 acpReqTypeId,status,requisitionDateFrom,requisitionDateTo,functionAmountFrom,functionAmountTo,page,description);
@@ -290,8 +297,10 @@ public class PaymentRequisitionHeaderController {
      * @Date: Created in 2018/1/24 14:55
      * @Modified by
      */
+    @ApiOperation(value = "操作付款申请单", notes = "操作付款申请单 开发：")
     @PutMapping(value = "/{operateType}/{id}")
-    public ResponseEntity<PaymentRequisitionHeader> operateHeader(@PathVariable Integer operateType, @PathVariable Long id){
+    public ResponseEntity<PaymentRequisitionHeader> operateHeader(@PathVariable Integer operateType,
+                                                                  @PathVariable Long id){
         return ResponseEntity.ok(headerService.operateHeader(id,operateType));
     }
 
@@ -371,6 +380,7 @@ public class PaymentRequisitionHeaderController {
     "attachments":null
     }
      */
+    @ApiOperation(value = "根据ID查询付款申请单头信息", notes = "根据ID查询付款申请单头信息 开发：")
     @GetMapping(value = "/query/{id}")
     public ResponseEntity<PaymentRequisitionHeaderWebDTO> getHeaderById(@PathVariable Long id){
         return ResponseEntity.ok(headerService.getHeaderById(id,false));
@@ -476,6 +486,7 @@ public class PaymentRequisitionHeaderController {
     "attachments":null
     }
      */
+    @ApiOperation(value = "根据ID查看付款申请单详细信息", notes = "根据ID查看付款申请单详细信息 开发：")
     @GetMapping(value = "/query/detail/{id}")
     public ResponseEntity<PaymentRequisitionHeaderWebDTO> getDocumentDetailById(@PathVariable Long id){
         return ResponseEntity.ok(headerService.getHeaderById(id,true));
@@ -489,8 +500,9 @@ public class PaymentRequisitionHeaderController {
      * @Date: Created in 2018/7/9 22:20
      * @Modified by
      */
+    @ApiOperation(value = "付款申请单头行保存", notes = "付款申请单头行保存 开发：")
     @PostMapping("/save")
-    public ResponseEntity<PaymentRequisitionHeaderWebDTO> saveDocumentDetail(@RequestBody @Valid PaymentRequisitionHeaderWebDTO dto){
+    public ResponseEntity<PaymentRequisitionHeaderWebDTO> saveDocumentDetail(@ApiParam(value = "付款申请单头DTO") @RequestBody @Valid PaymentRequisitionHeaderWebDTO dto){
 
         return ResponseEntity.ok(headerService.saveDocumentDetail(dto));
     }
@@ -511,6 +523,7 @@ public class PaymentRequisitionHeaderController {
      * @apiParam (paymentRequisitionLineDTO) {Long} id  付款申请单行ID
      *
      */
+    @ApiOperation(value = "根据付款申请单行ID删除行信息", notes = "根据付款申请单行ID删除行信息 开发：")
     @DeleteMapping("/line/{id}")
     public ResponseEntity deleteLineByLineId(@PathVariable Long id){
         headerService.deleteLineByLineId(id);
@@ -533,12 +546,14 @@ public class PaymentRequisitionHeaderController {
      * @apiParam (paymentRequisitionLineDTO) {List} ids  付款申请单行ID
      *
      */
+    @ApiOperation(value = "根据付款申请单行ID删除行信息", notes = "根据付款申请单行ID删除行信息 开发：bin.xie")
     @PostMapping("/deleteByIds")
-    public ResponseEntity deleteHeaderByIds(@RequestBody List<Long> ids){
+    public ResponseEntity deleteHeaderByIds(@ApiParam(value = "付款申请单行ID") @RequestBody List<Long> ids){
         ids.stream().forEach(u -> headerService.deleteHeaderById(u));
         return ResponseEntity.ok().build();
     }
 
+    @ApiOperation(value = "提交付款申请单行信息", notes = "提交付款申请单行信息 开发：bin.xie")
     @RequestMapping(value = "/acpRequisition/submit",method = RequestMethod.POST)
     public ResponseEntity<Boolean> submit(@RequestBody WorkFlowDocumentRefCO workFlowDocumentRe){
         return ResponseEntity.ok(headerService.submit(workFlowDocumentRe));
@@ -563,17 +578,22 @@ public class PaymentRequisitionHeaderController {
      * @date 2019/02/25
      * @description 获取未审批/已审批的付款申请单
      */
+    @ApiOperation(value = "获取未审批/已审批的付款申请单", notes = "获取未审批/已审批的付款申请单 开发：mh.z")
     @RequestMapping(value = "/approvals/filters", method = RequestMethod.GET)
-    public ResponseEntity<List<ApprovalEntityDTO>> getMyAcpPaymentApprovalList(@RequestParam(value = "userOid", required = false) String userOid,
-                                                                               @RequestParam(value = "businessCode", required = false) String businessCode,
-                                                                               @RequestParam(value = "beginDate", required = false) String beginDate,
-                                                                               @RequestParam(value = "finished", required = false) boolean finished,
-                                                                               @RequestParam(value = "typeId", required = false) Long typeId,
-                                                                               @RequestParam(value = "endDate", required = false) String endDate,
-                                                                               @RequestParam(value = "amountFrom", required = false) Double amountFrom,
-                                                                               @RequestParam(value = "amountTo", required = false) Double amountTo,
-                                                                               @RequestParam(value = "description", required = false) String description,
-                                                                               Pageable pageable) throws URISyntaxException, ParseException {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
+    public ResponseEntity<List<ApprovalEntityDTO>> getMyAcpPaymentApprovalList(@ApiParam(value = "用户oid") @RequestParam(value = "userOid", required = false) String userOid,
+                                                                               @ApiParam(value = "业务编码") @RequestParam(value = "businessCode", required = false) String businessCode,
+                                                                               @ApiParam(value = "开始日期") @RequestParam(value = "beginDate", required = false) String beginDate,
+                                                                               @ApiParam(value = "完成情况") @RequestParam(value = "finished", required = false) boolean finished,
+                                                                               @ApiParam(value = "类型id") @RequestParam(value = "typeId", required = false) Long typeId,
+                                                                               @ApiParam(value = "结束日期") @RequestParam(value = "endDate", required = false) String endDate,
+                                                                               @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) Double amountFrom,
+                                                                               @ApiParam(value = "金额至") @RequestParam(value = "amountTo", required = false) Double amountTo,
+                                                                               @ApiParam(value = "描述") @RequestParam(value = "description", required = false) String description,
+                                                                               @ApiIgnore Pageable pageable) throws URISyntaxException, ParseException {
         // 若参数是空字符串则转换成null
         userOid = StringUtils.isEmpty(userOid) ? null : userOid;
         businessCode = StringUtils.isEmpty(businessCode) ? null : businessCode;
@@ -663,6 +683,7 @@ public class PaymentRequisitionHeaderController {
      * @api {GET} /api/acp/requisition/header/query/created 查询已创建调整单的申请人
      * @apiGroup PaymentService
      */
+    @ApiOperation(value = "获取未审批/已审批的付款申请单", notes = "获取未审批/已审批的付款申请单 开发：")
     @GetMapping("/query/created")
     public List<ContactCO> listUsersByCreatedPaymentRequisitionHeaders(){
 
@@ -675,7 +696,7 @@ public class PaymentRequisitionHeaderController {
 
     @GetMapping(value = "/query/reportlineids/{id}")
     @ApiOperation(value = "根据付款申请单头表ID查询对应行表关联的报账单行表ID集合", notes = "根据付款申请单头表ID查询对应行表关联的报账单行表ID集合 开发:赵旭东")
-    public ResponseEntity<List<Long>> getReortLineIds(@ApiParam(value = "付款申请单头表ID") @PathVariable Long id){
+    public ResponseEntity<List<Long>> getReortLineIds(@PathVariable Long id){
         return new ResponseEntity(headerService.getReportLineIds(id), HttpStatus.OK);
     }
 
@@ -684,25 +705,28 @@ public class PaymentRequisitionHeaderController {
      * @api {GET} /api/acp/requisition/header/query/dto
      * @apiGroup PaymentService
      */
+    @ApiOperation(value = "付款申请单财务查询", notes = "付款申请单财务查询 开发：")
     @GetMapping(value = "/query/dto")
-    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeadersByCond(@RequestParam(required = false) String requisitionNumber,
-                                                                                 @RequestParam(required = false) Long companyId,
-                                                                                 @RequestParam(required = false) Long acpReqTypeId,
-                                                                                 @RequestParam(required = false) Long employeeId,
-                                                                                 @RequestParam(required = false) String status,
-                                                                                 @RequestParam(required = false) Long unitId,
-                                                                                 @RequestParam(required = false) String requisitionDateFrom,
-                                                                                 @RequestParam(required = false) String requisitionDateTo,
-                                                                                 @RequestParam(required = false) BigDecimal payAmountFrom,
-                                                                                 @RequestParam(required = false) BigDecimal payAmountTo,
-                                                                                 @RequestParam(required = false) BigDecimal functionAmountFrom,
-                                                                                 @RequestParam(required = false) BigDecimal functionAmountTo,
-                                                                                 @RequestParam(required = false) String description,
-                                                                                 @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) throws URISyntaxException {
+    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeadersByCond(@ApiParam(value = "申请单编号") @RequestParam(required = false) String requisitionNumber,
+                                                                                 @ApiParam(value = "账套id") @RequestParam(required = false) Long setOfBooksId,
+                                                                                 @ApiParam(value = "公司id") @RequestParam(required = false) Long companyId,
+                                                                                 @ApiParam(value = "付款申请单类型id") @RequestParam(required = false) Long acpReqTypeId,
+                                                                                 @ApiParam(value = "员工id") @RequestParam(required = false) Long employeeId,
+                                                                                 @ApiParam(value = "状态") @RequestParam(required = false) String status,
+                                                                                 @ApiParam(value = "部门id") @RequestParam(required = false) Long unitId,
+                                                                                 @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                                                                                 @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                                                                                 @ApiParam(value = "付款金额从") @RequestParam(required = false) BigDecimal payAmountFrom,
+                                                                                 @ApiParam(value = "付款金额至") @RequestParam(required = false) BigDecimal payAmountTo,
+                                                                                 @ApiParam(value = "功能金额从") @RequestParam(required = false) BigDecimal functionAmountFrom,
+                                                                                 @ApiParam(value = "功能金额至") @RequestParam(required = false) BigDecimal functionAmountTo,
+                                                                                 @ApiParam(value = "描述") @RequestParam(required = false) String description,
+                                                                                 @ApiParam(value = "当前页") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                 @ApiParam(value = "每页多少条") @RequestParam(value = "size", required = false, defaultValue = "10") int size) throws URISyntaxException {
         Page mybatisPage = PageUtil.getPage(page, size);
-        List<PaymentRequisitionHeaderWebDTO> lists = headerService.getHeaderByCond(
+        Page<PaymentRequisitionHeaderWebDTO> lists = headerService.getHeaderByCond(
                 requisitionNumber,
+                setOfBooksId,
                 companyId,
                 acpReqTypeId,
                 employeeId,
@@ -719,7 +743,7 @@ public class PaymentRequisitionHeaderController {
                 mybatisPage
         );
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(mybatisPage);
-        return new ResponseEntity(lists,httpHeaders, HttpStatus.OK);
+        return new ResponseEntity(lists.getRecords(),httpHeaders, HttpStatus.OK);
     }
 
     /**
@@ -727,25 +751,28 @@ public class PaymentRequisitionHeaderController {
      * @api {GET} /api/acp/requisition/header/query/dto/enable/dataAuth
      * @apiGroup PaymentService
      */
+    @ApiOperation(value = "付款申请单财务查询(数据权限控制)", notes = "付款申请单财务查询(数据权限控制) 开发：")
     @GetMapping(value = "/query/dto/enable/dataAuth")
-    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeadersByCondDataAuth(@RequestParam(required = false) String requisitionNumber,
-                                                                                         @RequestParam(required = false) Long companyId,
-                                                                                         @RequestParam(required = false) Long acpReqTypeId,
-                                                                                         @RequestParam(required = false) Long employeeId,
-                                                                                         @RequestParam(required = false) String status,
-                                                                                         @RequestParam(required = false) Long unitId,
-                                                                                         @RequestParam(required = false) String requisitionDateFrom,
-                                                                                         @RequestParam(required = false) String requisitionDateTo,
-                                                                                         @RequestParam(required = false) BigDecimal payAmountFrom,
-                                                                                         @RequestParam(required = false) BigDecimal payAmountTo,
-                                                                                         @RequestParam(required = false) BigDecimal functionAmountFrom,
-                                                                                         @RequestParam(required = false) BigDecimal functionAmountTo,
-                                                                                         @RequestParam(required = false) String description,
-                                                                                         @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) throws URISyntaxException {
+    public ResponseEntity<List<PaymentRequisitionHeaderWebDTO>> getHeadersByCondDataAuth(@ApiParam(value = "申请单编号") @RequestParam(required = false) String requisitionNumber,
+                                                                                         @ApiParam(value = "账套id") @RequestParam(required = false) Long setOfBooksId,
+                                                                                         @ApiParam(value = "公司id") @RequestParam(required = false) Long companyId,
+                                                                                         @ApiParam(value = "付款申请单类型") @RequestParam(required = false) Long acpReqTypeId,
+                                                                                         @ApiParam(value = "员工id") @RequestParam(required = false) Long employeeId,
+                                                                                         @ApiParam(value = "状态") @RequestParam(required = false) String status,
+                                                                                         @ApiParam(value = "部门id") @RequestParam(required = false) Long unitId,
+                                                                                         @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                                                                                         @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                                                                                         @ApiParam(value = "付款金额从") @RequestParam(required = false) BigDecimal payAmountFrom,
+                                                                                         @ApiParam(value = "付款金额至") @RequestParam(required = false) BigDecimal payAmountTo,
+                                                                                         @ApiParam(value = "功能金额从") @RequestParam(required = false) BigDecimal functionAmountFrom,
+                                                                                         @ApiParam(value = "功能金额至") @RequestParam(required = false) BigDecimal functionAmountTo,
+                                                                                         @ApiParam(value = "描述") @RequestParam(required = false) String description,
+                                                                                         @ApiParam(value = "当前页") @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                         @ApiParam(value = "每页多少条") @RequestParam(value = "size", required = false, defaultValue = "10") int size) throws URISyntaxException {
         Page mybatisPage = PageUtil.getPage(page, size);
-        List<PaymentRequisitionHeaderWebDTO> lists = headerService.getHeaderByCond(
+        Page<PaymentRequisitionHeaderWebDTO> lists = headerService.getHeaderByCond(
                 requisitionNumber,
+                setOfBooksId,
                 companyId,
                 acpReqTypeId,
                 employeeId,
@@ -762,32 +789,34 @@ public class PaymentRequisitionHeaderController {
                 mybatisPage
         );
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(mybatisPage);
-        return new ResponseEntity(lists,httpHeaders, HttpStatus.OK);
+        return new ResponseEntity(lists.getRecords(),httpHeaders, HttpStatus.OK);
     }
 
     /**
      * 付款申请单财务查询打印
      */
+    @ApiOperation(value = "付款申请单财务查询打印", notes = "付款申请单财务查询打印 开发：")
     @PostMapping("export/header")
-    public void exportHeader(@RequestParam(required = false) String requisitionNumber,
-                             @RequestParam(required = false) Long companyId,
-                             @RequestParam(required = false) Long acpReqTypeId,
-                             @RequestParam(required = false) Long employeeId,
-                             @RequestParam(required = false) String status,
-                             @RequestParam(required = false) Long unitId,
-                             @RequestParam(required = false) String requisitionDateFrom,
-                             @RequestParam(required = false) String requisitionDateTo,
-                             @RequestParam(required = false) BigDecimal payAmountFrom,
-                             @RequestParam(required = false) BigDecimal payAmountTo,
-                             @RequestParam(required = false) BigDecimal functionAmountFrom,
-                             @RequestParam(required = false) BigDecimal functionAmountTo,
-                             @RequestParam(required = false) String description,
-                             @RequestBody ExportConfig exportConfig,
+    public void exportHeader(@ApiParam(value = "申请单编号") @RequestParam(required = false) String requisitionNumber,
+                             @ApiParam(value = "公司id") @RequestParam(required = false) Long companyId,
+                             @ApiParam(value = "付款申请单类型id") @RequestParam(required = false) Long acpReqTypeId,
+                             @ApiParam(value = "员工id") @RequestParam(required = false) Long employeeId,
+                             @ApiParam(value = "状态") @RequestParam(required = false) String status,
+                             @ApiParam(value = "部门id") @RequestParam(required = false) Long unitId,
+                             @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                             @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                             @ApiParam(value = "付款金额从") @RequestParam(required = false) BigDecimal payAmountFrom,
+                             @ApiParam(value = "付款金额至") @RequestParam(required = false) BigDecimal payAmountTo,
+                             @ApiParam(value = "功能金额从") @RequestParam(required = false) BigDecimal functionAmountFrom,
+                             @ApiParam(value = "功能金额至") @RequestParam(required = false) BigDecimal functionAmountTo,
+                             @ApiParam(value = "描述") @RequestParam(required = false) String description,
+                             @ApiParam(value = "导出配置") @RequestBody ExportConfig exportConfig,
                              HttpServletRequest request,
                              HttpServletResponse response) throws IOException {
         Page mybatisPage = PageUtil.getPage(1, 0);
         headerService.getHeaderByCond(
                 requisitionNumber,
+                null,
                 companyId,
                 acpReqTypeId,
                 employeeId,
@@ -813,8 +842,9 @@ public class PaymentRequisitionHeaderController {
 
 
             public List<PaymentRequisitionHeaderWebDTO> queryDataByPage(Page mybatisPage) {
-                List<PaymentRequisitionHeaderWebDTO> result = headerService.getHeaderByCond(
+                Page<PaymentRequisitionHeaderWebDTO> result = headerService.getHeaderByCond(
                         requisitionNumber,
+                        null,
                         companyId,
                         acpReqTypeId,
                         employeeId,
@@ -831,7 +861,7 @@ public class PaymentRequisitionHeaderController {
                         mybatisPage
                 );
 
-                return result;
+                return result.getRecords();
             }
 
 

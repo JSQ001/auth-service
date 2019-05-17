@@ -6,13 +6,14 @@ import com.hand.hcf.app.common.co.CashTransactionClassForOtherCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignTransactionClass;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignTransactionClassService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.net.URISyntaxException;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/10/25.
  */
+@Api(tags = "预付款单类型关联的现金事务分类表")
 @RestController
 @RequestMapping("/api/cash/pay/requisition/type/assign/transaction/classes")
 public class CashPayRequisitionTypeAssignTransactionClassController {
@@ -75,7 +77,8 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     }
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> createCashPayRequisitionTypeAssignTransactionClassBatch(@RequestBody List<CashPayRequisitionTypeAssignTransactionClass> list){
+    @ApiOperation(value = "批量新增 预付款单类型关联的现金事务分类表", notes = "批量新增 预付款单类型关联的现金事务分类表 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> createCashPayRequisitionTypeAssignTransactionClassBatch(@ApiParam(value = "预付款单类型关联的现金事务分类表") @RequestBody List<CashPayRequisitionTypeAssignTransactionClass> list){
         return ResponseEntity.ok(cashSobPayReqTypeAssignTransactionClassService.createCashPayRequisitionTypeAssignTransactionClassBatch(list));
     }
 
@@ -124,7 +127,8 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     }
      */
     @PutMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> updateCashPayRequisitionTypeAssignTransactionClassBatch(@RequestBody List<CashPayRequisitionTypeAssignTransactionClass> list){
+    @ApiOperation(value = "批量修改 预付款单类型关联的现金事务分类表", notes = "批量修改 预付款单类型关联的现金事务分类表 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> updateCashPayRequisitionTypeAssignTransactionClassBatch(@ApiParam(value = "预付款单类型关联的现金事务分类表") @RequestBody List<CashPayRequisitionTypeAssignTransactionClass> list){
         return ResponseEntity.ok(cashSobPayReqTypeAssignTransactionClassService.updateCashPayRequisitionTypeAssignTransactionClassBatch(list));
     }
 
@@ -145,7 +149,8 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     }
      */
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashPayRequisitionTypeAssignTransactionClassBatch(@RequestBody List<Long> list){
+    @ApiOperation(value = "批量删除 预付款单类型关联的现金事务分类表(物理删除)", notes = "批量删除 预付款单类型关联的现金事务分类表(物理删除) 开发:韩雪")
+    public ResponseEntity deleteCashPayRequisitionTypeAssignTransactionClassBatch(@ApiParam(value = "主键id") @RequestBody List<Long> list){
         cashSobPayReqTypeAssignTransactionClassService.deleteCashPayRequisitionTypeAssignTransactionClassBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -189,9 +194,14 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     ]
      */
     @GetMapping("/query")
+    @ApiOperation(value = "根据预付款单类型ID查询现金事务分类表，分页", notes = "根据预付款单类型ID查询现金事务分类表，分页 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> getCashPayRequisitionTypeAssignTransactionClassByCond(
-            @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashPayRequisitionTypeAssignTransactionClass> list = cashSobPayReqTypeAssignTransactionClassService.getCashPayRequisitionTypeAssignTransactionClassByCond(sobPayReqTypeId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/transaction/classes/query");
@@ -233,8 +243,9 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     ]
      */
     @GetMapping("/queryAll")
+    @ApiOperation(value = "根据预付款单类型ID查询现金事务分类表，不分页", notes = "根据预付款单类型ID查询现金事务分类表，不分页 开发:韩雪")
     public ResponseEntity<List<CashPayRequisitionTypeAssignTransactionClass>> getCashPayRequisitionTypeAssignTransactionClassAllByCond(
-            @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId){
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "sobPayReqTypeId") Long sobPayReqTypeId){
         List<CashPayRequisitionTypeAssignTransactionClass> list = cashSobPayReqTypeAssignTransactionClassService.getCashPayRequisitionTypeAssignTransactionClassAllByCond(sobPayReqTypeId);
         return ResponseEntity.ok(list);
     }
@@ -287,6 +298,7 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     ]
      */
     @GetMapping("/queryCashTransactionClass/{setOfBookId}")
+    @ApiOperation(value = "获取当前账套下，启用的、现金事务类型为PREPAYMENT(预付款) 的 现金事务分类", notes = "获取当前账套下，启用的、现金事务类型为PREPAYMENT(预付款) 的 现金事务分类 开发:韩雪")
     public ResponseEntity<List<CashTransactionClassCO>> getCashTransactionClassBySetOfBookId(@PathVariable long setOfBookId){
         return ResponseEntity.ok(cashSobPayReqTypeAssignTransactionClassService.getCashTransactionClassBySetOfBookId(setOfBookId));
     }
@@ -346,9 +358,14 @@ public class CashPayRequisitionTypeAssignTransactionClassController {
     }
      */
     @PostMapping(value = "/queryByRange")
+    @ApiOperation(value = "获取当前账套下，启用的、现金事务类型为PREPAYMENT(预付款) 的 现金事务分类", notes = "获取当前账套下，启用的、现金事务类型为PREPAYMENT(预付款) 的 现金事务分类 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CashTransactionClassCO>> getCashPayRequisitionTypeAssignTransactionClassByCond (
-            @RequestBody @Valid CashTransactionClassForOtherCO forOtherDTO,
-            Pageable pageable) throws Exception {
+            @ApiParam(value = "其他DTO") @RequestBody @Valid CashTransactionClassForOtherCO forOtherDTO,
+            @ApiIgnore Pageable pageable) throws Exception {
         Page page = PageUtil.getPage(pageable);
         Page<CashTransactionClassCO> list = cashSobPayReqTypeAssignTransactionClassService.getCashPayRequisitionTypeAssignTransactionClassByCond(forOtherDTO, page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/transaction/classes/queryByRange");

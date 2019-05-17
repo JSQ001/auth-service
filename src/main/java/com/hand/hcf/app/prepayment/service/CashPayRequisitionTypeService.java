@@ -3,11 +3,13 @@ package com.hand.hcf.app.prepayment.service;
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeEmployeeEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeTypeEnum;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
+import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
@@ -333,9 +335,14 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
             cashPayRequisitionType.setSetOfBookName(standardDto.getSetOfBooksName());
         }
         //返回付款方式类型name
-        if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
-            cashPayRequisitionType.setPaymentMethodCategoryName(prepaymentHcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
+        /*if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
+            cashPayRequisitionType.setPaymentMethodCategoryName(hcfOrganizationInterface.getSysCodeValue(SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
                     cashPayRequisitionType.getPaymentMethodCategory(), RespCode.SYS_CODE_TYPE_NOT_EXIT).get(cashPayRequisitionType.getPaymentMethodCategory()));
+        }*/
+        //返回付款方式name
+        SysCodeValueCO sysCodeValue = prepaymentHcfOrganizationInterface.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE",cashPayRequisitionType.getPaymentType());
+        if (sysCodeValue != null) {
+            cashPayRequisitionType.setPaymentTypeName(sysCodeValue.getName());
         }
         CashPayRequisitionType dtoCashPayRequisitionType = new CashPayRequisitionType();
         BeanUtils.copyProperties(cashPayRequisitionType,dtoCashPayRequisitionType);
@@ -417,12 +424,21 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
      * @param page
      * @return
      */
-    public List<CashPayRequisitionType> getCashPayRequisitionTypeByCond(Long setOfBookId, String typeCode, String typeName,String paymentMethodCategory,Boolean isEnabled, Page page){
+    public List<CashPayRequisitionType> getCashPayRequisitionTypeByCond(Long setOfBookId, String typeCode, String typeName,String paymentMethodCategory,String paymentType,Boolean isEnabled, Page page,boolean dataAuthFlag){
         List<CashPayRequisitionType> list = new ArrayList<>();
 
         if (setOfBookId == null){
             return list;
         }
+
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"csh_sob_pay_req_type");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_book_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
+
 
         list = baseMapper.selectPage(page,
                 new EntityWrapper<CashPayRequisitionType>()
@@ -431,7 +447,9 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
                 .like(typeCode != null, "type_code",typeCode, SqlLike.DEFAULT)
                 .like(typeName != null, "type_name",typeName, SqlLike.DEFAULT)
                 .eq(paymentMethodCategory != null,"payment_method_category",paymentMethodCategory)
+                .eq(paymentType != null,"payment_type",paymentType)
                 .eq(isEnabled != null, "enabled",isEnabled)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .orderBy("enabled",false)
                 .orderBy("type_code")
         );
@@ -444,10 +462,15 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
             }
 
             //返回付款方式类型name
-            if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
-                cashPayRequisitionType.setPaymentMethodCategoryName(prepaymentHcfOrganizationInterface.getSysCodeValue(
+            /*if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
+                cashPayRequisitionType.setPaymentMethodCategoryName(hcfOrganizationInterface.getSysCodeValue(
                         SystemCustomEnumerationType.CSH_PAYMENT_TYPE, cashPayRequisitionType.getPaymentMethodCategory(),
                         RespCode.SYS_CODE_TYPE_NOT_EXIT).get(cashPayRequisitionType.getPaymentMethodCategory()));
+            }*/
+            //返回付款方式name
+            SysCodeValueCO sysCodeValue = prepaymentHcfOrganizationInterface.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE",cashPayRequisitionType.getPaymentType());
+            if (sysCodeValue != null) {
+                cashPayRequisitionType.setPaymentTypeName(sysCodeValue.getName());
             }
         }
         return list;
@@ -513,11 +536,16 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
             }
 
             //返回付款方式类型name
-            if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
-                cashPayRequisitionType.setPaymentMethodCategoryName(prepaymentHcfOrganizationInterface.getSysCodeValue(
+            /*if (cashPayRequisitionType.getPaymentMethodCategory() != null) {
+                cashPayRequisitionType.setPaymentMethodCategoryName(hcfOrganizationInterface.getSysCodeValue(
                         SystemCustomEnumerationType.CSH_PAYMENT_TYPE,cashPayRequisitionType.getPaymentMethodCategory(),
                         RespCode.SYS_CODE_TYPE_NOT_EXIT
                 ).get(cashPayRequisitionType.getPaymentMethodCategory()));
+            }*/
+            //返回付款方式name
+            SysCodeValueCO sysCodeValue = prepaymentHcfOrganizationInterface.getSysCodeValueByCodeAndValue("ZJ_PAYMENT_TYPE",cashPayRequisitionType.getPaymentType());
+            if (sysCodeValue != null) {
+                cashPayRequisitionType.setPaymentTypeName(sysCodeValue.getName());
             }
         }
         return list;
@@ -562,7 +590,7 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
      * @param isEnabled
      * @return
      */
-    public List<CashPayRequisitionType> getCashPayRequisitionTypeByEmployeeId(Long userId, Long setOfBookId, String typeCode, String typeName, Boolean isEnabled){
+    public List<CashPayRequisitionType> getCashPayRequisitionTypeByEmployeeId(Long userId,Long setOfBookId,String typeCode,String typeName,Boolean isEnabled, Boolean isAuth){
         List<CashPayRequisitionType> list = baseMapper.selectList(
                 new EntityWrapper<CashPayRequisitionType>()
                         .eq("deleted",false)
@@ -640,6 +668,14 @@ public class CashPayRequisitionTypeService extends BaseService<CashPayRequisitio
         list3 = list2.stream().collect(
                 collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(CashPayRequisitionType::getId))), ArrayList::new)
         );
+
+        if (isAuth != null && isAuth) {
+            list3.addAll(getCashPayRequisitionTypeByAuthorize());
+            //根据ID去重
+            list3 = list3.stream().collect(
+                    collectingAndThen(toCollection(() -> new TreeSet<>(comparingLong(CashPayRequisitionType::getId))), ArrayList::new)
+            );
+        }
 
         return list3;
     }

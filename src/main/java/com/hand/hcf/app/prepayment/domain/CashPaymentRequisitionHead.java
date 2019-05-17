@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.annotation.ExcelDomainField;
 import com.hand.hcf.app.core.domain.Domain;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -215,4 +216,25 @@ public class CashPaymentRequisitionHead extends Domain {
      */
     @TableField(value = "ref_document_id")
     private Long refDocumentId;
+
+    /**
+     * 账套ID
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long setOfBooksId;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
+
 }

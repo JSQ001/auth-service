@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 /**
  * Created by cbc on 2018/4/3.
  */
+@Api(tags = "反冲数据API")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/cash/backlash")
@@ -104,21 +107,27 @@ public class BacklashController {
      *   "versionNumber": 1
      * }]
      */
+
+    @ApiOperation(value = "获取反冲数据", notes = "获取反冲数据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping
-    public ResponseEntity getBacklash(@RequestParam(required = false) String billcode,
-                                      @RequestParam(required = false) String documentNumber,
-                                      @RequestParam(required = false) String documentTypeId,
-                                      @RequestParam(required = false) Long partnerId,
-                                      @RequestParam(required = false) String partnerCategory,
-                                      @RequestParam(required = false) BigDecimal amountFrom,
-                                      @RequestParam(required = false) BigDecimal amountTo,
-                                      @RequestParam(required = false) String payDateFrom,
-                                      @RequestParam(required = false) String payDateTo,
-                                      @RequestParam(required = false) Long applicant,
-                                      @RequestParam(required = false) String partnerName,
-                                      @RequestParam(required = false) String sign,
-                                      @RequestParam(required = false) Long tenantId,
-                                      Pageable pageable
+    public  ResponseEntity getBacklash(@ApiParam(value = "流水号") @RequestParam(required = false) String billcode,
+                                       @ApiParam(value = "单据编号") @RequestParam(required = false) String documentNumber,
+                                       @ApiParam(value = "单据类型") @RequestParam(required = false) String documentTypeId,
+                                       @ApiParam(value = "收款方") @RequestParam(required = false) Long partnerId,
+                                       @ApiParam(value = "收款方类型") @RequestParam(required = false) String partnerCategory,
+                                       @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+                                       @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal amountTo,
+                                       @ApiParam(value = "付款日期从") @RequestParam(required = false) String payDateFrom,
+                                       @ApiParam(value = "付款日期至") @RequestParam(required = false) String payDateTo,
+                                       @ApiParam(value = "申请人") @RequestParam(required = false) Long applicant,
+                                       @ApiParam(value = "收款方名称") @RequestParam(required = false) String partnerName,
+                                       @ApiParam(value = "供应商类型") @RequestParam(required = false) String sign,
+                                       @ApiParam(value = "租户id") @RequestParam(required = false) Long tenantId,
+                                       @ApiIgnore Pageable pageable
     ) throws URISyntaxException, ParseException {
         Page page = PageUtil.getPage(pageable);
 
@@ -135,8 +144,9 @@ public class BacklashController {
 
 
     //发起反冲操作
+    @ApiOperation(value = "发起反冲操作", notes = "发起反冲操作 开发:")
     @GetMapping("/to/backlash")
-    public ResponseEntity<BacklashDTO> toBacklash(@RequestParam Long detailId){
+    public ResponseEntity<BacklashDTO> toBacklash(@ApiParam(value = "详情id") @RequestParam  Long detailId){
         //根据明细id查询明细信息
         BacklashDTO backlashDTO = backlashService.toBacklash(detailId);
         return ResponseEntity.ok(backlashDTO);
@@ -145,15 +155,16 @@ public class BacklashController {
 
     //反冲更新
     @PostMapping("/update/backlash")
-    public ResponseEntity<BacklashDTO> saveBacklash(@RequestBody BacklashUpdateDTO backlashUpdateDTO){
+    public ResponseEntity<BacklashDTO> saveBacklash(@ApiParam(value = "反冲更新") @RequestBody BacklashUpdateDTO backlashUpdateDTO){
         BacklashDTO dto = backlashService.updateBacklash(backlashUpdateDTO);
         return ResponseEntity.ok(dto);
     }
 
     //删除反冲
+    @ApiOperation(value = "删除反冲", notes = "删除反冲 开发:")
     @DeleteMapping("/delete/backlash")
     @Transactional
-    public ResponseEntity<Boolean> deleteById(@RequestParam Long id){
+    public ResponseEntity<Boolean> deleteById(@ApiParam(value = "id") @RequestParam Long id){
 
         CashTransactionDetail detail = detailService.selectById(id);
         boolean deleteFlag = detailService.deleteById(id);
@@ -179,8 +190,9 @@ public class BacklashController {
 
 
     //反冲提交
+    @ApiOperation(value = "反冲提交", notes = "反冲提交 开发:")
     @PostMapping("/submit/backlash")
-    public ResponseEntity<Boolean> submitBacklash(@RequestParam Long id){
+    public ResponseEntity<Boolean> submitBacklash(@ApiParam(value = "id") @RequestParam Long id){
         try {
             CashTransactionDetail detail = detailService.selectById(id);
             backlashService.submitBacklash(detail);
@@ -194,25 +206,31 @@ public class BacklashController {
 
 
     //根据反冲数据id查询单据信息，原支付明细信息，反冲单据信息
+    @ApiOperation(value = "根据反冲数据id查询信息", notes = "根据反冲数据id查询信息 开发:")
     @GetMapping("/get/by/backlash/id")
-    public ResponseEntity<BacklashDTO> getBacklashDTOByBacklashId(@RequestParam Long id){
+    public ResponseEntity<BacklashDTO> getBacklashDTOByBacklashId(@ApiParam(value = "id") @RequestParam Long id){
         BacklashDTO backlashDTO = backlashService.backInfo(detailService.selectById(id));
         return ResponseEntity.ok(backlashDTO);
     }
 
 
     //查询我发起的反冲单据
+    @ApiOperation(value = "查询我发起的反冲单据", notes = "查询我发起的反冲单据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/get/backlash/by/user")
     public ResponseEntity<List<CashTransactionDetail>> getBacklashByUserId(
-            @RequestParam(value = "userId",required = false) Long userId,
-            @RequestParam(value = "backlashCode",required = false) String backlashCode,
-            @RequestParam(value = "billCode",required = false) String billCode,
-            @RequestParam(value = "backFlashDateFrom",required = false)  String backFlashDateFrom,
-            @RequestParam(value = "backFlashDateTo",required = false) String backFlashDateTo,
-            @RequestParam(value = "backlashAmountFrom",required = false) BigDecimal backlashAmountFrom,
-            @RequestParam(value = "backlashAmountTo",required = false) BigDecimal backlashAmountTo,
-            @RequestParam(value = "backlashStatus",required = false) String backlashStatus,
-            Pageable pageable
+            @ApiParam(value = "用户id") @RequestParam(value = "userId",required = false) Long userId,
+            @ApiParam(value = "反冲代码") @RequestParam(value = "backlashCode",required = false) String backlashCode,
+            @ApiParam(value = "流水号") @RequestParam(value = "billCode",required = false) String billCode,
+            @ApiParam(value = "反冲日期从") @RequestParam(value = "backFlashDateFrom",required = false)  String backFlashDateFrom,
+            @ApiParam(value = "反冲日期至") @RequestParam(value = "backFlashDateTo",required = false) String backFlashDateTo,
+            @ApiParam(value = "反冲金额从") @RequestParam(value = "backlashAmountFrom",required = false) BigDecimal backlashAmountFrom,
+            @ApiParam(value = "反冲金额至") @RequestParam(value = "backlashAmountTo",required = false) BigDecimal backlashAmountTo,
+            @ApiParam(value = "反冲状态") @RequestParam(value = "backlashStatus",required = false) String backlashStatus,
+            @ApiIgnore Pageable pageable
     ) throws URISyntaxException, ParseException {
         Calendar c = Calendar.getInstance();
         if(backFlashDateTo!=null){
@@ -238,12 +256,14 @@ public class BacklashController {
      * @param status
      * @return
      */
+
+    @ApiOperation(value = "反冲复核通过", notes = "反冲复核通过 开发:")
     @PostMapping("/update/status")
     public ResponseEntity<Boolean> updateStatusById(
-            @RequestParam(value = "detailId") Long detailId,
-            @RequestParam(value = "remark",required = false) String remark,
-            @RequestParam(value = "status") String status,
-            @RequestParam(value = "backlashRemark",required = false) String backlashRemark
+            @ApiParam(value = "详情id") @RequestParam(value = "detailId") Long detailId,
+            @ApiParam(value = "备注") @RequestParam(value = "remark",required = false) String remark,
+            @ApiParam(value = "反冲状态") @RequestParam(value = "status") String status,
+            @ApiParam(value = "反冲说明") @RequestParam(value = "backlashRemark",required = false) String backlashRemark
     ){
         if ("undefined".equals(backlashRemark)){
             backlashRemark = "";
@@ -256,17 +276,21 @@ public class BacklashController {
     }
 
 
-
+    @ApiOperation(value = "反冲复核驳回", notes = "反冲复核驳回 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/get/recheck/by/input")
     public ResponseEntity<List<CashTransactionDetail>> getRecheckByInput(
-            @RequestParam("status") String status,
-            @RequestParam(value = "billCode",required = false) String billCode,
-            @RequestParam(value = "refBillCode",required = false)String refBillCode,
-            @RequestParam(value = "amountFrom",required = false) BigDecimal amountFrom,
-            @RequestParam(value = "amountTo",required = false) BigDecimal amountTo,
-            @RequestParam(value = "backFlashDateFrom",required = false)  String backFlashDateFrom,
-            @RequestParam(value = "backFlashDateTo",required = false) String backFlashDateTo,
-            Pageable pageable
+            @ApiParam(value = "反冲状态") @RequestParam("status") String status,
+            @ApiParam(value = "流水号") @RequestParam(value = "billCode",required = false) String billCode,
+            @ApiParam(value = "驳回流水号") @RequestParam(value = "refBillCode",required = false)String refBillCode,
+            @ApiParam(value = "金额从") @RequestParam(value = "amountFrom",required = false) BigDecimal amountFrom,
+            @ApiParam(value = "金额至") @RequestParam(value = "amountTo",required = false) BigDecimal amountTo,
+            @ApiParam(value = "反冲日期从") @RequestParam(value = "backFlashDateFrom",required = false)  String backFlashDateFrom,
+            @ApiParam(value = "反冲日期至") @RequestParam(value = "backFlashDateTo",required = false) String backFlashDateTo,
+            @ApiIgnore Pageable pageable
      ) throws URISyntaxException, ParseException {
         Calendar c = Calendar.getInstance();
         if(StringUtils.hasText(backFlashDateTo)){
@@ -291,8 +315,10 @@ public class BacklashController {
      * @param id
      * @return
      */
+
+    @ApiOperation(value = "根据明细id查询反冲单据和原单据信息", notes = "根据明细id查询反冲单据和原单据信息 开发:")
     @GetMapping("/get/ready/by/detail/id")
-    public ResponseEntity<BacklashDTO> getReadyByDetailId(@RequestParam Long id){
+    public ResponseEntity<BacklashDTO> getReadyByDetailId(@ApiParam(value = "id") @RequestParam Long id){
         return ResponseEntity.ok(backlashService.getReadyByDetailId(id,true));
     }
 
@@ -302,8 +328,9 @@ public class BacklashController {
      * @param id
      * @return
      */
+    @ApiOperation(value = "根据反冲明细id查询具体信息", notes = "根据反冲明细id查询具体信息 开发:")
     @GetMapping("/get/by/backlash/detail/id")
-    public ResponseEntity<BacklashDTO> getBacklashDTOByBacklashDetailId(@RequestParam Long id){
+    public ResponseEntity<BacklashDTO> getBacklashDTOByBacklashDetailId(@ApiParam(value = "id") @RequestParam Long id){
         CashTransactionDetail backlash = detailService.selectById(id);
         BacklashDTO backlashDTO = backlashService.getReadyByDetailId(backlash.getRefCashDetailId(),false);
         CashTransactionDetail detail = backlashService.addAttachmentInfo(id);

@@ -478,7 +478,7 @@ public class UserService extends BaseService<UserMapper, User> {
             }
 
             //设置激活日期
-            if (user.getActivated() && !oldUser.getActivated()) {
+            if (user.getActivated() != null && user.getActivated() && !oldUser.getActivated()) {
                 user.setActivatedDate(ZonedDateTime.now());
             }
 

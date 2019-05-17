@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 /**
  * @author dong.liu on 2017-11-07
  */
+@Api(tags = "银行数据API")
 @RestController
 @RequestMapping("/api/cash/bank/datas")
 public class CashBankDataController {
@@ -138,8 +141,10 @@ public class CashBankDataController {
      * }
      * }
      */
+
+    @ApiOperation(value = "新增单个通用银行", notes = "新增单个通用银行 开发:")
     @PostMapping
-    public ResponseEntity<CashBankData> createCshBank(@RequestBody CashBankData cashBankData) {
+    public ResponseEntity<CashBankData> createCshBank(@ApiParam(value = "付款单头信息") @RequestBody CashBankData cashBankData) {
         return ResponseEntity.ok(cashBankDataService.createCshBank(cashBankData));
     }
 
@@ -219,8 +224,10 @@ public class CashBankDataController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量新增通用银行", notes = "批量新增通用银行 开发:")
     @PostMapping("/batch")
-    public ResponseEntity<List<CashBankData>> createCshBankBatch(@RequestBody List<CashBankData> cashBankDatas) {
+    public ResponseEntity<List<CashBankData>> createCshBankBatch(@ApiParam(value = "付款单头信息") @RequestBody List<CashBankData> cashBankDatas) {
         return ResponseEntity.ok(cashBankDataService.createCshBankBatch(cashBankDatas));
     }
 
@@ -314,8 +321,10 @@ public class CashBankDataController {
      *  }
      * }
      */
+
+    @ApiOperation(value = "修改单个通用银行", notes = "修改单个通用银行 开发:")
     @PutMapping
-    public ResponseEntity<CashBankData> updateCshBank(@RequestBody CashBankData cashBankData) {
+    public ResponseEntity<CashBankData> updateCshBank(@ApiParam(value = "付款单头信息") @RequestBody CashBankData cashBankData) {
         return ResponseEntity.ok(cashBankDataService.updateCshBank(cashBankData));
     }
 
@@ -396,8 +405,10 @@ public class CashBankDataController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量修改通用银行", notes = "批量修改通用银行 开发:")
     @PutMapping("/batch")
-    public ResponseEntity<List<CashBankData>> updateCshBankBatch(@RequestBody List<CashBankData> cashBankDatas) {
+    public ResponseEntity<List<CashBankData>> updateCshBankBatch(@ApiParam(value = "付款单头信息") @RequestBody List<CashBankData> cashBankDatas) {
         return ResponseEntity.ok(cashBankDataService.updateCshBankBatch(cashBankDatas));
     }
 
@@ -448,6 +459,8 @@ public class CashBankDataController {
      * }
      * }
      */
+
+    @ApiOperation(value = "根据id获取一个银行", notes = "根据id获取一个银行 开发:")
     @GetMapping("/{id}")
     public ResponseEntity<CashBankData> getCshBankById(@PathVariable Long id) {
         return ResponseEntity.ok(cashBankDataService.selectById(id));
@@ -512,12 +525,18 @@ public class CashBankDataController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询通用银行", notes = "根据条件分页查询通用银行 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashBankData>> getCshBankByCond(
-            @RequestParam(required = false) String bankCode,
-            @RequestParam(required = false) String bankName,
-            @RequestParam(required = false, value = "enabled") Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "银行代码") @RequestParam(required = false) String bankCode,
+            @ApiParam(value = "银行名称") @RequestParam(required = false) String bankName,
+            @ApiParam(value = "是否启用") @RequestParam(required = false, value = "enabled") Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashBankData> list = cashBankDataService.getCshBankDataByCond(bankCode, bankName, isEnabled, page);
         HttpHeaders httpHeaders = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/bank/datas/query");

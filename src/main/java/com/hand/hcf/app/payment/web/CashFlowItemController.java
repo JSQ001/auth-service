@@ -6,15 +6,13 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.payment.domain.CashFlowItem;
 import com.hand.hcf.app.payment.service.CashFlowItemService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -77,8 +75,10 @@ public class CashFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "新增单个现金流量项", notes = "新增单个现金流量项 开发:")
     @PostMapping
-    public ResponseEntity<CashFlowItem> createCashFlowItem(@RequestBody CashFlowItem cashFlowItem){
+    public ResponseEntity<CashFlowItem> createCashFlowItem(@ApiParam(value = "现金流量项") @RequestBody CashFlowItem cashFlowItem){
         return ResponseEntity.ok(cashFlowItemService.createCashFlowItem(cashFlowItem));
     }
 
@@ -129,8 +129,10 @@ public class CashFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "修改现金流量项表", notes = "修改现金流量项表 开发:")
     @PutMapping
-    public ResponseEntity<CashFlowItem> updateCashFlowItem(@RequestBody CashFlowItem cashFlowItem){
+    public ResponseEntity<CashFlowItem> updateCashFlowItem(@ApiParam(value = "现金流量项") @RequestBody CashFlowItem cashFlowItem){
         return ResponseEntity.ok(cashFlowItemService.updateCashFlowItem(cashFlowItem));
     }
 
@@ -155,6 +157,8 @@ public class CashFlowItemController {
      * @apiUse myID
      * @apiUse MyError
      */
+
+    @ApiOperation(value = "逻辑删除现金流量项表", notes = "逻辑删除现金流量项表 开发:")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCashFlowItem(@PathVariable Long id){
         cashFlowItemService.deleteCashFlowItem(id);
@@ -188,6 +192,8 @@ public class CashFlowItemController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "根据id查询单个现金流量项", notes = "根据id查询单个现金流量项 开发:")
     @GetMapping("/{id}")
     public ResponseEntity<CashFlowItem> getCashFlowItem(@PathVariable Long id){
         return ResponseEntity.ok(cashFlowItemService.selectById(id));
@@ -234,13 +240,19 @@ public class CashFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询现金流量项", notes = "根据条件分页查询现金流量项 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashFlowItem>> getCashFlowItemByCond(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "flowCode", required = false) String flowCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金流量项代码") @RequestParam(value = "flowCode", required = false) String flowCode,
+            @ApiParam(value = "现金流量项名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashFlowItem> list = cashFlowItemService.getCashFlowItemByCond(setOfBookId,flowCode, description,isEnabled, page, false);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/flow/items/query");
@@ -288,13 +300,19 @@ public class CashFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "根据条件是否授权分页查询现金流量项", notes = "根据条件是否授权分页查询现金流量项 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query/enable/dataAuth")
     public ResponseEntity<List<CashFlowItem>> getCashFlowItemByCondEnableDataAuth(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "flowCode", required = false) String flowCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金流量项代码") @RequestParam(value = "flowCode", required = false) String flowCode,
+            @ApiParam(value = "现金流量项名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashFlowItem> list = cashFlowItemService.getCashFlowItemByCond(setOfBookId,flowCode, description,isEnabled, page, true);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/flow/items/query/enable/dataAuth");
@@ -337,12 +355,14 @@ public class CashFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "根据条件不分页查询现金流量项", notes = "根据条件不分页查询现金流量项 开发:")
     @GetMapping("/queryAll")
     public ResponseEntity<List<CashFlowItem>> getCashFlowItemAllByCond(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "flowCode", required = false) String flowCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled){
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金流量项代码") @RequestParam(value = "flowCode", required = false) String flowCode,
+            @ApiParam(value = "现金流量项名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled){
         List<CashFlowItem> list = cashFlowItemService.getCashFlowItemAllByCond(setOfBookId,flowCode, description,isEnabled);
         return ResponseEntity.ok(list);
     }
@@ -402,8 +422,10 @@ public class CashFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量新增现金流量项", notes = "批量新增现金流量项 开发:")
     @PostMapping("/batch")
-    public ResponseEntity<List<CashFlowItem>> createCashFlowItemBatch(@RequestBody List<CashFlowItem> list){
+    public ResponseEntity<List<CashFlowItem>> createCashFlowItemBatch(@ApiParam(value = "现金流量项") @RequestBody List<CashFlowItem> list){
         return ResponseEntity.ok(cashFlowItemService.createCashFlowItemBatch(list));
     }
 
@@ -460,8 +482,10 @@ public class CashFlowItemController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量修改现金流量项表", notes = "批量修改现金流量项表 开发:")
     @PutMapping("/batch")
-    public ResponseEntity<List<CashFlowItem>> updateCashFlowItemBatch(@RequestBody List<CashFlowItem> list){
+    public ResponseEntity<List<CashFlowItem>> updateCashFlowItemBatch(@ApiParam(value = "现金流量项") @RequestBody List<CashFlowItem> list){
         return ResponseEntity.ok(cashFlowItemService.updateCashFlowItemBatch(list));
     }
 
@@ -485,8 +509,10 @@ public class CashFlowItemController {
      *
      * }
      */
+
+    @ApiOperation(value = "批量删除现金流量项表", notes = "批量删除现金流量项表 开发:")
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashFlowItemBatch(@RequestBody List<Long> list){
+    public ResponseEntity deleteCashFlowItemBatch(@ApiParam(value = "现金流量项列表") @RequestBody List<Long> list){
         cashFlowItemService.deleteCashFlowItemBatch(list);
         return ResponseEntity.ok().build();
     }

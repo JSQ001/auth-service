@@ -4,6 +4,9 @@ package com.hand.hcf.app.prepayment.web;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.prepayment.domain.PrepaymentAttachment;
 import com.hand.hcf.app.prepayment.service.PrepaymentAttachmentService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +23,7 @@ import java.util.List;
 /**
  * Created by 刘亮 on 2017/11/20.
  */
+@Api(tags = "预付款附件")
 @RestController
 @RequestMapping("/api/attachment")
 public class CashPrepmentAttachmentController {
@@ -43,6 +47,7 @@ public class CashPrepmentAttachmentController {
      * @apiGroup PrepaymentService
      */
     @RequestMapping(value = "/upload/batch")
+    @ApiOperation(value = "当需要上传文件到本地服务器时，使用", notes = "当需要上传文件到本地服务器时，使用 开发:刘亮")
     public ResponseEntity<PrepaymentAttachment> batchUpload(HttpServletRequest request) {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest)request;
         List<MultipartFile> files = multipartHttpServletRequest.getFiles("file");
@@ -61,7 +66,8 @@ public class CashPrepmentAttachmentController {
      * @apiGroup PrepaymentService
      */
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam("path") String path)
+    @ApiOperation(value = "下载附件", notes = "下载附件 开发:刘亮")
+    public ResponseEntity<InputStreamResource> downloadFile(@ApiParam(value = "路径") @RequestParam("path") String path)
             throws IOException {
         String filePath =path;
         FileSystemResource file = new FileSystemResource(filePath);
@@ -113,7 +119,8 @@ public class CashPrepmentAttachmentController {
     }
      */
     @GetMapping("/get/by/oid")
-    public ResponseEntity<PrepaymentAttachment> getAttachmentByOid(@RequestParam String oid){
+    @ApiOperation(value = "根据附件oid查询附件详情", notes = "根据附件oid查询附件详情 开发:刘亮")
+    public ResponseEntity<PrepaymentAttachment> getAttachmentByOid(@ApiParam(value = "附件oid") @RequestParam String oid){
         PrepaymentAttachment prepaymentAttachment = prepaymentAttachmentService.selectByOId(oid);
         return ResponseEntity.ok(prepaymentAttachment);
     }
