@@ -187,6 +187,76 @@ public class ExpenseReportLine extends Domain{
     private ZonedDateTime auditDate;
 
     /**
+     * 付款方式类型（线上：ONLINE_PAYMENT；线下：OFFLINE_PAYMENT；落地文件：EBANK_PAYMENT）
+     */
+    @NotNull
+    @TableField(value = "payment_method")
+    private String paymentMethod;
+
+    /**
+     * 付款用途ID
+     */
+    @TableField(value = "csh_transaction_class_id")
+    private Long cshTransactionClassId;
+
+    /**
+     * 现金流ID
+     */
+    @TableField(value = "cash_flow_item_id")
+    private Long cashFlowItemId;
+
+    /**
+     * 计划付款日期
+     */
+    @NotNull
+    @TableField(value = "payment_schedule_date")
+    private ZonedDateTime paymentScheduleDate;
+
+    /**
+     * 关联合同资金计划ID
+     */
+    @TableField(value = "con_payment_schedule_line_id")
+    private Long conPaymentScheduleLineId;
+
+    /**
+     * 收款方类型(员工：EMPLOYEE；供应商：VENDER)
+     */
+    @TableField(value = "payee_category")
+    private String payeeCategory;
+
+    /**
+     * 收款方ID
+     */
+    @TableField(value = "payee_id")
+    private Long payeeId;
+
+    /**
+     * 收款方账户
+     */
+    @TableField(value = "account_number")
+    private String accountNumber;
+
+    /**
+     * 收款方户名
+     */
+    @TableField(value = "account_name")
+    private String accountName;
+
+    /**
+     * 是否有票Y/N
+     */
+    @TableField(value = "is_ninvoiced")
+    private String isNinvoiced;
+
+    /**
+     * 税率
+     */
+    @NotNull
+    @TableField(value = "tax_rate")
+    private String taxRate;
+
+
+    /**
      * 附件OID集合
      */
     @TableField(exist = false)
