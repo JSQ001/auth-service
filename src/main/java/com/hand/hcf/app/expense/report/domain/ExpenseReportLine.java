@@ -303,4 +303,10 @@ public class ExpenseReportLine extends Domain{
      */
     @TableField(exist = false)
     private Boolean invoiceExistsFlag;
+
+    /**
+     * 不含税金额
+     */
+    @TableField(exist = false)
+    private BigDecimal noTaxAmount;
 }
