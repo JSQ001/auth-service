@@ -921,7 +921,7 @@
 
     <changeSet id="201902282221001" author="shaofeng.zheng">
         <comment>初始化发票类型</comment>
-        <sqlFile path="classpath:db/liquibase/sql/insert_invoice_type.sql" encoding="UTF-8"/>
+        <sqlFile path="classpath:db/liquibase/expense/sql/insert_invoice_type.sql" encoding="UTF-8"/>
     </changeSet>
 
 

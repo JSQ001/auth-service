@@ -46,6 +46,14 @@ public class InvoiceCertificationDTO {
     @ApiModelProperty(value = "发票代码")
     private String invoiceCode;
 
+    //发票状态
+    @ApiModelProperty(value = "发票状态")
+    private String invoiceStatus;
+
+    //发票状态
+    @ApiModelProperty(value = "发票状态描述")
+    private String invoiceStatusName;
+
     //开票日期
     @ApiModelProperty(value = "开票日期")
     private ZonedDateTime invoiceDate;

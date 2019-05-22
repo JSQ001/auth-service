@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceLineExpence;
+import com.hand.hcf.app.expense.invoice.dto.InvoiceBatchCheckResultDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
@@ -177,9 +178,9 @@ public class InvoiceHeadController {
 
     @PostMapping("/check/invoice/by/headIds")
     @ApiOperation(value = "根据发票头id集合批量验真发票", notes = "根据发票头id集合批量验真发票 开发:xue.han")
-    public ResponseEntity checkInvoice(@ApiParam(value = "发票头id集合") @RequestBody List<Long> headIds){
-        invoiceHeadService.checkInvoice(headIds);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<InvoiceBatchCheckResultDTO> checkInvoice(@ApiParam(value = "发票头id集合") @RequestBody List<Long> headIds){
+
+        return ResponseEntity.ok(invoiceHeadService.checkInvoice(headIds));
     }
 
     /**
@@ -213,7 +214,6 @@ public class InvoiceHeadController {
 
     /**
      * 发票报账明细分页查询
-     * @param createdBy
      * @param invoiceTypeId
      * @param invoiceCode
      * @param invoiceNo
@@ -227,8 +227,6 @@ public class InvoiceHeadController {
      * @param taxRate
      * @param taxAmountFrom
      * @param taxAmountTo
-     * @param createdMethod
-     * @param checkResult
      * @param pageable
      * @return
      * @throws URISyntaxException
