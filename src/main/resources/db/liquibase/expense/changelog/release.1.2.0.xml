@@ -31,4 +31,236 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201905161443001" author="xue.han">
+        <addColumn tableName="exp_adjust_line">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="201905161503001" author="xue.han">
+        <addColumn tableName="exp_adjust_line_temp">
+            <column name="responsibility_center_id" type="bigint" remarks="责任中心id"/>
+            <column name="responsibility_center_code" type="varchar(100)" remarks="责任中心代码"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20190515113706" author="liguo.zhao">
+        <createTable tableName="exp_accrual_type" remarks="费用预提单类型表">
+            <column name="id" type="bigint" remarks="预提单据类型id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_type"/>
+            </column>
+            <column name="exp_accrual_type_code" type="varchar(50)" remarks="单据类型代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_accrual_type_name" type="varchar(100)" remarks="单据类型名称">
+                <constraints nullable="false"/>
+            </column>
+            <column name="set_of_books_id" type="bigint" remarks="帐套id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="bigint" remarks="租户id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="budgt_flag" type="tinyint" remarks="预算管控标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="form_id" type="bigint" remarks="表单id">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visible_user_scope" type="varchar(50)" remarks="可见人员范围">
+                <constraints nullable="false"/>
+            </column>
+            <column name="all_expense" type="tinyint" remarks="是否全部费用类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_flag" type="tinyint" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190515134237" author="liguo.zhao">
+        <createTable tableName="exp_accrual_expense_type" remarks="费用预提单关联费用类型">
+            <column name="id" type="bigint" remarks="费用预提单与费用类型关联id">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_expense_type"/>
+            </column>
+            <column name="exp_accrual_type_id" type="bigint" remarks="预提单据类型id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exp_expense_id" type="bigint" remarks="费用类型id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190515142635" author="liguo.zhao">
+        <createTable tableName="exp_accrual_company" remarks="费用预提单分配公司表">
+            <column name="id" type="bigint" remarks="公司级费用预提单ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_company"/>
+            </column>
+            <column name="exp_accrual_type_id" type="bigint" remarks="预提单据类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="bigint" remarks="公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_flag" type="tinyint" remarks="启用标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190515150628" author="liguo.zhao">
+        <createTable tableName="exp_accrual_type_assign_dp" remarks="费用预提单类型关联部门">
+            <column name="id" type="bigint" remarks="预提单类型关联部门ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_type_assign_dp"/>
+            </column>
+            <column name="exp_accrual_type_id" type="bigint" remarks="费用预提单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="bigint" remarks="部门ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190515151155" author="liguo.zhao">
+        <createTable tableName="exp_accrual_type_asg_u_g" remarks="费用调整单类型关联人员组">
+            <column name="id" type="bigint" remarks="费用调整单类型关联人员组ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_type_asg_u_g"/>
+            </column>
+            <column name="exp_accrual_type_id" type="bigint" remarks="费用预提单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_group_id" type="bigint" remarks="人员组ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190515192546" author="liguo.zhao">
+        <createTable tableName="exp_accrual_dimension" remarks="费用预提单关联维度表">
+            <column name="id" type="bigint" remarks="费用预提单关联维度ID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_accrual_dimension"/>
+            </column>
+            <column type="bigint" name="exp_accrual_type_id" remarks="费用预提单类型ID">
+                <constraints nullable="false"/>
+            </column>
+            <column type="bigint" name="dimension_id" remarks="维度ID">
+                <constraints nullable="false"/>
+            </column>
+            <column type="int" remarks="排序" name="sequence" defaultValue="0"/>
+            <column type="bigint" name="default_value" remarks="默认值"/>
+            <column type="tinyint" remarks="布局位置" name="header_flag"/>
+            <column name="required_flag" remarks="是否必输" type="tinyint" defaultValue="1"/>
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20190516181744" author="liguo.zhao">
+        <addUniqueConstraint tableName="exp_accrual_dimension" columnNames="exp_accrual_type_id,dimension_id"
+                             constraintName="exp_accrual_dimension_u1"/>
+        <addUniqueConstraint tableName="exp_accrual_dimension" columnNames="exp_accrual_type_id,header_flag,sequence"
+                             constraintName="exp_accrual_dimension_u2"/>
+    </changeSet>
+
+    <changeSet id="201905192101001" author="shaofeng.zheng">
+        <comment>修改认证状态、发票状态类型（统一值列表）</comment>
+        <dropColumn tableName="invoice_head" columnName="certification_status"/>
+        <dropColumn tableName="invoice_head" columnName="invoice_status"/>
+        <addColumn tableName="invoice_head">
+            <column name="certification_status" type="varchar(30)" defaultValue="UNCERTIFIED" remarks="认证状态"/>
+            <column name="invoice_status" type="varchar(30)" defaultValue="NORMAL" remarks="发票状态"/>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>
