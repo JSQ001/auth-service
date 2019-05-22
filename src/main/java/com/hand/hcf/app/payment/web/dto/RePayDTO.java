@@ -10,12 +10,13 @@ import java.util.List;
 /**
  * Created by cbc on 2017/12/25.
  */
-@ApiModel(description = "支付")
+@ApiModel(description = "鏀粯")
 @Data
 public class RePayDTO {
-    @ApiModelProperty(value = "支付明细")
+    @ApiModelProperty(value = "鏀粯鏄庣粏")
     private List<CashTransactionDetail> details;
 
-    @ApiModelProperty(value = "支付dto")
+    @ApiModelProperty(value = "鏀粯dto")
     private CashPayDTO payDTO;
 }
+
