@@ -97,6 +97,12 @@ public class ExpenseReportHeader extends Domain{
     private String areaCode;
 
     /**
+     * 发票类目
+     */
+    @TableField(value = "inv_category_code")
+    private String invCategoryCode;
+
+    /**
      * 汇率
      */
     @NotNull

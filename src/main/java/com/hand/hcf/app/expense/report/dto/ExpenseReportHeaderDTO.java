@@ -111,6 +111,10 @@ public class ExpenseReportHeaderDTO extends ExpenseReportHeader{
      */
     private String areaName;
     /**
+     * 发票类目名称
+     */
+    private String invCategoryName;
+    /**
      * 税金分摊方式
      */
     @ApiModelProperty(value = "税金分摊方式")

@@ -58,9 +58,13 @@ public class ExpenseReportDistDTO extends ExpenseReportDist{
      */
     private String companyName;
     /**
-     * 部门名称
+     * 受益部门名称
      */
     private String departmentName;
+    /**
+     * 预算部门名称
+     */
+    private String budgetDepName;
     /**
      * 责任中心名称
      */

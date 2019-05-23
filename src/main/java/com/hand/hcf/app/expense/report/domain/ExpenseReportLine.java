@@ -255,6 +255,25 @@ public class ExpenseReportLine extends Domain{
     @TableField(value = "tax_rate")
     private String taxRate;
 
+    /**
+     * 国家
+     */
+    @NotNull
+    @TableField(value = "country")
+    private String country;
+
+    /**
+     * 地区
+     */
+    @NotNull
+    @TableField(value = "district")
+    private String district;
+
+    /**
+     * 付款方式
+     */
+    @TableField(value = "payment_type")
+    private String paymentType;
 
     /**
      * 附件OID集合
@@ -309,4 +328,35 @@ public class ExpenseReportLine extends Domain{
      */
     @TableField(exist = false)
     private BigDecimal noTaxAmount;
+
+    /**
+     * 国家名称
+     */
+    @TableField(exist = false)
+    private String countryName;
+
+    /**
+     * 地区名称
+     */
+    @TableField(exist = false)
+    private String districtName;
+
+    /**
+     * 收款方类型名称
+     */
+    @TableField(exist = false)
+    private String payeeCategoryName;
+
+    /**
+     * 收款方名称
+     */
+    @TableField(exist = false)
+    private String payeeName;
+
+    /**
+     * 付款方式名称
+     */
+    @TableField(exist = false)
+    private String paymentTypeName;
+
 }

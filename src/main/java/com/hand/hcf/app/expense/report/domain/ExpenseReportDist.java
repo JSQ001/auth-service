@@ -58,10 +58,16 @@ public class ExpenseReportDist extends DimensionDomain {
     private Long expenseTypeId;
 
     /**
-     * 部门ID
+     * 受益部门ID
      */
     @TableField(value = "department_id")
     private Long departmentId;
+
+    /**
+     * 预算部门ID
+     */
+    @TableField(value = "budget_dep_id")
+    private Long budgetDepId;
 
     /**
      * 责任中心ID
@@ -162,6 +168,12 @@ public class ExpenseReportDist extends DimensionDomain {
      */
     @TableField(value = "audit_date")
     private ZonedDateTime auditDate;
+
+    /**
+     * 分摊期间
+     */
+    @TableField(value = "dist_date")
+    private ZonedDateTime distDate;
 
     /**
      * 分摊含税总金额(费用行对应最大值，尾差处理在该数据上)
