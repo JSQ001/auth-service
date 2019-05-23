@@ -1,8 +1,8 @@
-package com.hand.hcf.app.ant.accrualExpense.web;
+package com.hand.hcf.app.ant.accrual.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.ant.accrualExpense.domain.AccruedExpensesHeader;
-import com.hand.hcf.app.ant.accrualExpense.service.AccruedExpensesHeaderService;
+import com.hand.hcf.app.ant.accrual.domain.AccruedExpensesHeader;
+import com.hand.hcf.app.ant.accrual.service.AccruedExpensesHeaderService;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import io.swagger.annotations.ApiParam;
@@ -29,7 +29,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/api/accrual/report")
+@RequestMapping("/api/accrual")
 public class AccruedExpensesController {
 
     @Autowired
@@ -82,6 +82,12 @@ public class AccruedExpensesController {
                 page);
         HttpHeaders totalHeader = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(accruedExpenseReports, totalHeader, HttpStatus.OK);
+    }
+
+    @GetMapping("/header/by/id")
+    public ResponseEntity<AccruedExpensesHeader> getExpenseReportById(@ApiParam(value = "报账单头ID") @RequestParam Long expenseReportId){
+        //return ResponseEntity.ok(accruedExpensesHeaderService.getAccruedReportById(expenseReportId));
+        return null;
     }
 
 }

@@ -1,9 +1,8 @@
-package com.hand.hcf.app.ant.accrualExpense.domain;
+package com.hand.hcf.app.ant.accrual.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -73,20 +72,17 @@ public class AccruedExpensesHeader extends Domain {
      * 创建人名称
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "申请人名称", dataType = "String", readOnly = true)
     private String applicantName;
     /**
      * 创建人编码
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "申请人编码", dataType = "String", readOnly = true)
     private String applicantCode;
 
     /**
      * 责任方
      */
     @TableField(value = "demander_id")
-    @ApiModelProperty(value = "责任方", dataType = "Long")
     private Long demanderId;
 
     /**
@@ -101,7 +97,6 @@ public class AccruedExpensesHeader extends Domain {
      */
     @NotNull
     @TableField(value = "exchange_rate")
-    @ApiModelProperty(value = "汇率", dataType = "BigDecimal", required = true)
     private BigDecimal exchangeRate;
 
     /**
@@ -157,13 +152,11 @@ public class AccruedExpensesHeader extends Domain {
      * 表单ID
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "表单ID", dataType = "Long", readOnly = true)
     private Long formId;
     /**
      * 表单OID
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "表单OID", dataType = "UUID", readOnly = true)
     private UUID formOid;
 
 }
