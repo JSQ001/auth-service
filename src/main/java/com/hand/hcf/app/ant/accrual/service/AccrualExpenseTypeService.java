@@ -1,8 +1,8 @@
-package com.hand.hcf.app.ant.accrualExpense.service;
+package com.hand.hcf.app.ant.accrual.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.ant.accrualExpense.persistence.AccrualExpenseTypeMapper;
+import com.hand.hcf.app.ant.accrual.persistence.AccrualExpenseTypeMapper;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.common.co.FormAuthorizeCO;
 import com.hand.hcf.app.common.co.JudgeUserCO;
@@ -17,7 +17,6 @@ import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualCompanyService;
 import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualTypeAssignDepartmentService;
 import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualTypeAssignUserGroupService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
-import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparingLong;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 /**

@@ -1,4 +1,4 @@
-package com.hand.hcf.core.util;
+package com.hand.hcf.app.core.util;
 
 import java.math.BigDecimal;
 

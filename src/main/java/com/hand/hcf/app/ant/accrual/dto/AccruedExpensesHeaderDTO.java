@@ -1,6 +1,6 @@
-package com.hand.hcf.app.ant.accrualExpense.dto;
+package com.hand.hcf.app.ant.accrual.dto;
 
-import com.hand.hcf.app.ant.accrualExpense.domain.AccruedExpensesHeader;
+import com.hand.hcf.app.ant.accrual.domain.AccruedExpensesHeader;
 import lombok.Data;
 
 /**

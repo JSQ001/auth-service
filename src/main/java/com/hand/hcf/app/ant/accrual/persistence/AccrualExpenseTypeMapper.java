@@ -1,4 +1,4 @@
-package com.hand.hcf.app.ant.accrualExpense.persistence;
+package com.hand.hcf.app.ant.accrual.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;

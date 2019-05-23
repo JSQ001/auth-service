@@ -1,16 +1,16 @@
-package com.hand.hcf.app.ant.accrualExpense.service;
+package com.hand.hcf.app.ant.accrual.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.ant.accrualExpense.domain.AccruedExpensesHeader;
-import com.hand.hcf.app.ant.accrualExpense.persistence.AccruedExpensesHeaderMapper;
+import com.hand.hcf.app.ant.accrual.domain.AccruedExpensesHeader;
+import com.hand.hcf.app.ant.accrual.persistence.AccruedExpensesHeaderMapper;
 import com.hand.hcf.app.common.co.ApprovalFormCO;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;
+import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualTypeService;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
-import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +34,12 @@ public class AccruedExpensesHeaderService extends BaseService<AccruedExpensesHea
     private OrganizationService organizationService;
 
     @Autowired
-    private ExpenseReportTypeService expenseReportTypeService;
+    private ExpenseAccrualTypeService expenseAccrualTypeService;
 
 
     /**
-     *  预提单
+     * 预提单
+     *
      * @param requisitionNumber
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -66,14 +67,14 @@ public class AccruedExpensesHeaderService extends BaseService<AccruedExpensesHea
                                                          Boolean passed,
                                                          Page page) {
         Long currentUserId = OrgInformationUtil.getCurrentUserId();
-        Wrapper<AccruedExpensesHeader> wrapper =new EntityWrapper<AccruedExpensesHeader>()
+        Wrapper<AccruedExpensesHeader> wrapper = new EntityWrapper<AccruedExpensesHeader>()
                 .eq("created_by", currentUserId)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(companyId != null, "companyId", companyId)
                 .eq(documentTypeId != null, "document_type_id", documentTypeId)
-                .eq(demanderId != null, "applicant_id", demanderId)
+                .eq(demanderId != null, "demander_id", demanderId)
                 .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "currency_code", currencyCode)
                 .ge(amountFrom != null, "total_amount", amountFrom)
                 .le(amountTo != null, "total_amount", amountTo)
@@ -91,10 +92,10 @@ public class AccruedExpensesHeaderService extends BaseService<AccruedExpensesHea
             accruedExpensesHeader.setApplicantCode(userById.getEmployeeCode());
             accruedExpensesHeader.setApplicantName(userById.getFullName());
             // 单据类型
-            ExpenseReportType expenseReportType = expenseReportTypeService.selectById(accruedExpensesHeader.getDocumentTypeId());
-            accruedExpensesHeader.setDocumentTypeName(expenseReportType.getReportTypeName());
-            accruedExpensesHeader.setFormId(expenseReportType.getFormId());
-            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
+            ExpenseAccrualType expenseAccrualType = expenseAccrualTypeService.selectById(accruedExpensesHeader.getDocumentTypeId());
+            accruedExpensesHeader.setDocumentTypeName(expenseAccrualType.getExpAccrualTypeName());
+            accruedExpensesHeader.setFormId(expenseAccrualType.getFormId());
+            ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseAccrualType.getFormId());
             accruedExpensesHeader.setFormOid(approvalFormById.getFormOid());
         });
         return accruedExpensesHeaders;

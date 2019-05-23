@@ -1,9 +1,7 @@
-package com.hand.hcf.app.ant.accrualExpense.web;
+package com.hand.hcf.app.ant.accrual.web;
 
-import com.hand.hcf.app.ant.accrualExpense.service.AccrualExpenseTypeService;
+import com.hand.hcf.app.ant.accrual.service.AccrualExpenseTypeService;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;
-import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualTypeService;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
