@@ -2,8 +2,6 @@
 package com.hand.hcf.app;
 
 import com.hand.hcf.app.auth.config.AppCenterProperties;
-//jiu.zhao redis
-//import com.hand.hcf.core.annotation.EnableHcfCache;
 import com.hand.hcf.app.core.annotation.I18nDomainScan;
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
@@ -12,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
@@ -23,8 +20,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 @SpringBootApplication
-//jiu.zhao redis
-//@EnableHcfCache
 @EnableConfigurationProperties({RedisProperties.class, AppCenterProperties.class, DataSourceProperties.class, MybatisProperties.class})
 @ComponentScan(value = {"com.hand.hcf"})
 @I18nDomainScan(value = {"com.hand.hcf"})
