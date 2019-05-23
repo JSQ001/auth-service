@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.domain.Domain;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @description:  单据类型附件权限设置domain类
@@ -26,6 +26,10 @@ import java.io.Serializable;
 @Builder
 @TableName("exp_report_type_attchment")
 public class ExpReportTypeAttchment extends Domain implements Serializable {
+
+    @TableField("id")
+    private Long id;
+
     /**
      * 租户ID
      */
@@ -43,12 +47,6 @@ public class ExpReportTypeAttchment extends Domain implements Serializable {
     private Long setOfBooksId;
 
     /**
-     * 状态;是否启用
-     */
-    @TableField("enabled")
-    private Boolean enabled;
-
-    /**
      * 报账单类型代码
      */
     @NotNull
@@ -63,24 +61,10 @@ public class ExpReportTypeAttchment extends Domain implements Serializable {
     private String reportTypeName;
 
     /**
-     * 附件类型
+     * 状态;是否启用
      */
-    @NotNull
-    @TableField("attachment_type")
-    private String attachmentType;
-
-
-    /**
-     * 是否必须上传
-     */
-    @TableField("uploaded")
-    private Boolean uploaded;
-
-    /**
-     * 是否显示在表单
-     */
-    @TableField("showed")
-    private Boolean showed;
+    @TableField("enabled")
+    private Boolean enabled;
 
 
 }

@@ -1,6 +1,7 @@
 package com.hand.hcf.app.ant.appendix.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.ant.appendix.domain.AttachmentType;
 import com.hand.hcf.app.ant.appendix.domain.ExpReportTypeAttchment;
 import com.hand.hcf.app.ant.appendix.service.ExpReportTypeAttchmentService;
 import com.hand.hcf.app.core.util.PageUtil;
@@ -38,6 +39,7 @@ public class ExpReportTypeAttchController {
     @Autowired
     private ExpReportTypeAttchmentService expReportTypeAttchmentService;
 
+
     /**
      * 新增 单据类型
      *
@@ -50,14 +52,24 @@ public class ExpReportTypeAttchController {
     }
 
     /**
-     * 新增 单据类型附件设置
-     *
-     * @param expReportTypeAttchment
+     * 新增附件类型设置
+     * @param attchmentTypeList
+     * @param id
      * @return
      */
-    @PostMapping("/add/setting")
-    public ResponseEntity<ExpReportTypeAttchment>  createAttachmentSetting(@RequestBody ExpReportTypeAttchment expReportTypeAttchment){
-        return ResponseEntity.ok(expReportTypeAttchmentService.createAttachmentSetting(expReportTypeAttchment));
+    @PostMapping("/save/setting/{id}")
+    public ResponseEntity<List<AttachmentType>>  saveNewSetting(@PathVariable(value = "id" ) String id, @RequestBody List<AttachmentType> attchmentTypeList){
+        return  ResponseEntity.ok(expReportTypeAttchmentService.createAttachmentType(attchmentTypeList,id));
+    }
+
+    /**
+     * 更新附件类型设置
+     * @param attchmentTypeList
+     * @return
+     */
+    @PutMapping("/update/setting")
+    public ResponseEntity<List<AttachmentType>>  udateNewSetting(@RequestBody List<AttachmentType> attchmentTypeList){
+        return  ResponseEntity.ok(expReportTypeAttchmentService.updateAttachmentType(attchmentTypeList));
     }
 
     /**
@@ -80,12 +92,34 @@ public class ExpReportTypeAttchController {
      * @return
      */
     @GetMapping("/query/{id}")
-    public ResponseEntity<ExpReportTypeAttchment> getExpenseBookById(@PathVariable Long id){
+    public ResponseEntity<ExpReportTypeAttchment> getExpReportTypeById(@PathVariable Long id){
         return ResponseEntity.ok(expReportTypeAttchmentService.selectById(id));
     }
 
     /**
-     * 修改 单据类型附件设置
+     * 根据ID查询 附件类型信息
+     *
+     * @param attachTypeId
+     * @return
+     */
+    @GetMapping("/select/{id}")
+    public ResponseEntity<AttachmentType> getAttchmentTypeById(@PathVariable(value = "id" )  String attachTypeId){
+        return ResponseEntity.ok(expReportTypeAttchmentService.getAttachmentTypeById(attachTypeId));
+    }
+
+    /**
+     * 根据外键单据类型id查询 附件类型信息
+     *
+     * @param reportTypeId
+     * @return
+     */
+    @GetMapping("/select/settings/{id}")
+    public ResponseEntity<List<AttachmentType>> getAttchmentTypeListById(@PathVariable(value = "id" )  String reportTypeId){
+        return ResponseEntity.ok(expReportTypeAttchmentService.getAttachmentTypeListById(reportTypeId));
+    }
+
+    /**
+     * 修改 单据类型
      *
      * @param expReportTypeAttchment
      * @return
@@ -96,7 +130,7 @@ public class ExpReportTypeAttchController {
     }
 
     /**
-     * 删除 根据单据类型附件设置id
+     * 删除 根据id删除单据类型
      *
      * @param id
      * @return

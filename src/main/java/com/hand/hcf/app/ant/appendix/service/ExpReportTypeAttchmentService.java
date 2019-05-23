@@ -3,21 +3,24 @@ package com.hand.hcf.app.ant.appendix.service;
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.ant.appendix.domain.AttachmentType;
 import com.hand.hcf.app.ant.appendix.domain.ExpReportTypeAttchment;
+import com.hand.hcf.app.ant.appendix.persistence.AttachmentTypeMapper;
 import com.hand.hcf.app.ant.appendix.persistence.ExpReportTypeAttchMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:  单据类型附件权限设置service
@@ -33,16 +36,20 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
     private ExpReportTypeAttchMapper expReportTypeAttchMapper;
 
     @Autowired
+    private AttachmentTypeMapper attachmentTypeMapper;
+
+    @Autowired
     private ExpenseReportTypeMapper expenseReportTypeMapper;
 
     /**
-     * 新增 单据类型附件设置
+     * 新增 单据类型
      *
      * @param expReportTypeAttchment
      * @return
      */
     @Transactional
     public ExpReportTypeAttchment createAttachmentSetting(ExpReportTypeAttchment expReportTypeAttchment){
+
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
         Long setOfBooksId = OrgInformationUtil.getCurrentSetOfBookId();
         expReportTypeAttchment.setTenantId(tenantId);
@@ -50,6 +57,9 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
         String reportTypeName = null;
         if(null != expReportTypeAttchment) {
             String reportTypeCode = expReportTypeAttchment.getReportTypeCode();
+            if(StringUtils.isEmpty(reportTypeCode)){
+                throw new BizException("create failed");
+            }
             ExpenseReportType expenseReportTypeOne = new  ExpenseReportType();
             expenseReportTypeOne.setTenantId(tenantId);
             expenseReportTypeOne.setSetOfBooksId(setOfBooksId);
@@ -65,6 +75,66 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
     }
 
     /**
+     * 新增 单据类型附件设置
+     *
+     * @param attchmentTypeList
+     * @return
+     */
+    @Transactional
+    public List<AttachmentType> createAttachmentType(List<AttachmentType> attchmentTypeList,String expReportTypeId){
+        if(null == expReportTypeId){
+            throw new BizException(RespCode.SYS_ID_NULL);
+        }
+        Long expReportTypeIdvlaue = Long.valueOf(expReportTypeId);
+        for(AttachmentType attchmentType:attchmentTypeList){
+            AttachmentType attchmentType1 = new AttachmentType();
+            if(null != attchmentType){
+                String attachmentTypeName = attchmentType.getAttachmentTypeName();
+                Boolean showed = attchmentType.getShowed();
+                Boolean uploaded = attchmentType.getUploaded();
+                attchmentType1.setAttachmentTypeName(attachmentTypeName);
+                attchmentType1.setShowed(showed);
+                attchmentType1.setUploaded(uploaded);
+                attchmentType1.setExpReportTypeId(expReportTypeIdvlaue);
+                if(null != attchmentType.getId()){
+                    AttachmentType  attchmentType2 = attachmentTypeMapper.selectById(attchmentType.getId());
+                    if(null != attchmentType2){
+                        int flag = attachmentTypeMapper.updateById(attchmentType1);
+                        if (flag < 0) {
+                            throw new BizException("create failed");
+                        }
+                    }
+                }else {
+                    int flag = attachmentTypeMapper.insert(attchmentType1);
+                    if (flag < 0) {
+                        throw new BizException("create failed");
+                    }
+                }
+            }
+        }
+        return attchmentTypeList ;
+    }
+
+    /**
+     * 更新 单据类型附件设置
+     *
+     * @param attchmentTypeList
+     * @return
+     */
+    @Transactional
+    public List<AttachmentType> updateAttachmentType(List<AttachmentType> attchmentTypeList){
+        for(AttachmentType attchmentType:attchmentTypeList){
+            if(null != attchmentType) {
+                int flag  = attachmentTypeMapper.updateById(attchmentType);
+                if(flag<0){
+                    throw new BizException("update failed");
+                }
+            }
+        }
+        return attchmentTypeList ;
+    }
+
+    /**
      * 自定义条件查询 单据类型附件设置查询(分页)
      */
     public List<ExpReportTypeAttchment> pageAttachmentSettingByCond(String reportTypeId, Page page){
@@ -72,7 +142,7 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
         Long setOfBooksId = OrgInformationUtil.getCurrentSetOfBookId();
         String reportTypeCode = null;
         ExpenseReportType expenseReportTypeOne = new ExpenseReportType();
-        if(null != reportTypeId) {
+        if(StringUtils.isNotEmpty(reportTypeId)) {
              expenseReportTypeOne = expenseReportTypeMapper.selectById(reportTypeId);
              if(null != expenseReportTypeOne ){
                  reportTypeCode = expenseReportTypeOne.getReportTypeCode();
@@ -92,10 +162,25 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
     /**
      * 根据ID查询 单据类型附件设置
      *
-     * @param id
+     * @param attachTypeId --附件类型id
      * @return
      */
+     public AttachmentType getAttachmentTypeById(String attachTypeId ){
+         return attachmentTypeMapper.selectById(attachTypeId);
+     }
 
+    /**
+     * 根据外键id,获取单据对应的所有附件设置信息
+     *
+     * @param attachTypeId --附件类型id
+     * @return
+     */
+    public List<AttachmentType> getAttachmentTypeListById(String attachTypeId ){
+        Long expReportTypeIdvlaue = Long.valueOf(attachTypeId);
+        List<AttachmentType> list = attachmentTypeMapper.selectList(
+                new EntityWrapper<AttachmentType>().eq("exp_report_type_id",expReportTypeIdvlaue));
+        return list;
+    }
 
     /**
      * 修改 单据类型附件设置

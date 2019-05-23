@@ -2,6 +2,7 @@ package com.hand.hcf.app.ant.appendix.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.ant.appendix.domain.ExpReportTypeAttchment;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @description:  单据类型附件权限设置mapper
