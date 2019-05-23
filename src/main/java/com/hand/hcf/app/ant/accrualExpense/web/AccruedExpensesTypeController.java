@@ -1,8 +1,17 @@
 package com.hand.hcf.app.ant.accrualExpense.web;
 
 import com.hand.hcf.app.ant.accrualExpense.service.AccrualExpenseTypeService;
+import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;
+import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualTypeService;
+import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @description:
@@ -14,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/expense/accrual/type")
 public class AccruedExpensesTypeController {
 
+    @Autowired
     private AccrualExpenseTypeService expenseAccrualTypeService;
 
     /**
@@ -21,24 +31,10 @@ public class AccruedExpensesTypeController {
      * @param
      * @return
      */
-//    @GetMapping("/owner/all")
-//    public ResponseEntity<List<ExpenseReportType>> getCurrentUserExpenseReportType(
-//            @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag){
-//        List<ExpenseReportType> result = ExpenseAccrualTypeService.getCurrentUserExpenseReportType(authFlag);
-//        return ResponseEntity.ok(result);
-//    }
-
-//    @GetMapping("/users")
-//    @ApiOperation(value = "根据单据类型id查询有该单据权限的用户", notes = "根据单据类型id查询有该单据权限的用户 修改： 成寿庭")
-//    public ResponseEntity listUsersByApplicationType(@ApiParam(value = "报账类型ID") @RequestParam(value = "expenseReportTypeId") Long expenseReportTypeId,
-//                                                     @ApiParam(value = "用户编码") @RequestParam(value = "userCode", required = false) String userCode,
-//                                                     @ApiParam(value = "用户名称") @RequestParam(value = "userName", required = false) String userName,
-//                                                     @ApiParam(value = "当前页") @RequestParam(defaultValue = "0") int page,
-//                                                     @ApiParam(value = "每页多少条") @RequestParam(defaultValue = "10") int size){
-//        Page queryPage = PageUtil.getPage(page, size);
-//        List<ContactCO> result = expenseReportTypeService.listUsersByExpenseReportType(expenseReportTypeId, userCode, userName, queryPage);
-//
-//        HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
-//        return new ResponseEntity<>(result, headers, HttpStatus.OK);
-//    }
+    @GetMapping("/owner/all")
+    public ResponseEntity<List<ExpenseAccrualType>> getCurrentUserExpenseReportType(
+            @RequestParam(required = false, defaultValue = "true") Boolean authFlag){
+        List<ExpenseAccrualType> result = expenseAccrualTypeService.getCurrentUserExpenseAccrualType(authFlag);
+        return ResponseEntity.ok(result);
+    }
 }
