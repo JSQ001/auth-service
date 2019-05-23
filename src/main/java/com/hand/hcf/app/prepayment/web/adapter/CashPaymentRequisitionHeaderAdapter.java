@@ -77,6 +77,8 @@ public class CashPaymentRequisitionHeaderAdapter {
                dto.setIfApplication(requisitionType.getNeedApply());
                dto.setPaymentMethod(requisitionType.getPaymentMethodCategoryName());
                dto.setPaymentMethodCode(requisitionType.getPaymentMethodCategory());
+               dto.setPaymentType(requisitionType.getPaymentTypeName());
+               dto.setPaymentTypeCode(requisitionType.getPaymentType());
                if(StringUtils.isNotEmpty(requisitionType.getFormOid())){
                    dto.setFormOid(requisitionType.getFormOid());
                }

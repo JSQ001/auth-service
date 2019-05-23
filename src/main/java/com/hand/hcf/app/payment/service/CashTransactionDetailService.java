@@ -674,6 +674,7 @@ public class CashTransactionDetailService extends BaseService<CashTransactionDet
                                                       BigDecimal amountTo,
                                                       ZonedDateTime payDateFrom,
                                                       ZonedDateTime payDateTo,
+                                                      String returnNumber,
                                                       String paymentMethodCategory) {
         List<CashTransactionDetail> cashTransactionDetailList = baseMapper.selectPage(page,
                 new EntityWrapper<CashTransactionDetail>()
@@ -691,6 +692,7 @@ public class CashTransactionDetailService extends BaseService<CashTransactionDet
                         .eq(partnerId != null, "partner_id", partnerId)
                         .ge(payDateFrom != null, "pay_date", payDateFrom)
                         .le(payDateTo != null, "pay_date", payDateTo)
+                        .like(returnNumber != null,"return_number",returnNumber)
                         .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                         .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                         .ge(amountFrom != null, "amount", amountFrom)

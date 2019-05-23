@@ -5,18 +5,17 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.security.domain.PrincipalLite;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.*;
 import com.hand.hcf.app.core.service.MessageService;
-import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.data.DataAuthMetaRealization;
 import com.hand.hcf.app.mdata.implement.web.SupplierImplementControllerImpl;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionType;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionHead;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,7 +100,8 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     private CashPaymentRequisitionHeaderAdapter cashPaymentRequisitionHeaderAdapter;
     @Autowired
     private CashPaymentRequisitionLineAdapter cashPaymentRequisitionLineAdapter;
-
+    @Autowired
+    private DataAuthMetaRealization dataAuthorityMetaHandler;
     /**
      * 预付款单提交
      */
@@ -237,14 +236,14 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             for (Long applicationId : applicationIds) {
                 List<CashPaymentRequisitionLine> cashLines = map.get(applicationId);
                 //取过来的总金额
-                //     Map<String, Double> stringDoubleMap = hcfOrganizationInterface.getApplicationAmountById(applicationId);
+                //     Map<String, Double> stringDoubleMap = prepaymentHcfOrganizationInterface.getApplicationAmountById(applicationId);
                 List<ApplicationAmountCO> applicationAmounts = expenseModuleInterface.getApplicationAmountById(applicationId);
                 Map<String, Double> stringDoubleMap = applicationAmounts.stream().collect(
                         Collectors.groupingBy(ApplicationAmountCO::getCurrencyCode, summingDouble(ApplicationAmountCO::AmountToDouble)));
                 //已关联金额
                 Map<String, Double> arlMap = new HashMap<>();
                 //已关联金额从申请单关联表里面取
-                //   List<PrepaymentRequisitionRelease> releases = hcfOrganizationInterface.queryByRelated(applicationId);
+                //   List<PrepaymentRequisitionRelease> releases = prepaymentHcfOrganizationInterface.queryByRelated(applicationId);
 //                arlMap = releases.stream().collect(
 //                        Collectors.groupingBy(PrepaymentRequisitionRelease::getCurrencyCode, summingDouble(PrepaymentRequisitionRelease::AmountToDouble)));
                 //预付款行的金额
@@ -265,10 +264,10 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                     //预付款行某个币种，总金额
                     Double m1value = entry1.getValue() == null ? 0D : entry1.getValue();
                     //申请单总金额
-//                    Double m2value = stringDoubleMap.get(entry1.getKey()) == null ? 0D : stringDoubleMap.get(entry1.getKey());
-//                    if (m2value < m1value) {
-//                        throw new BizException(RespCode.PREPAY_PREPAYMENT_LINE_AMOUNT_TOO_BIG);
-//                    }
+                   Double m2value = stringDoubleMap.get(entry1.getKey()) == null ? 0D : stringDoubleMap.get(entry1.getKey());
+                   if (m2value < m1value) {
+                       throw new BizException(RespCode.PREPAY_PREPAYMENT_LINE_AMOUNT_TOO_BIG);
+                   }
                 }
             }
             //关联申请
@@ -346,6 +345,9 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
      */
     public List<CashPaymentRequisitionHead> getCashPaymentRequisition(
             String requisitionNumber,
+            Long setOfBooksId,
+            Long companyId,
+            Long unitId,
             Long paymentReqTypeId,
             Long employeeId,
             ZonedDateTime requisitionDateFrom,
@@ -361,6 +363,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             Double noWritedAmountFrom,
             Double noWritedAmountTo,
             Boolean editor,
+            boolean dataAuthFlag,
             Page page) {
 
         if (noWritedAmountFrom != null && noWritedAmountTo != null) {
@@ -369,32 +372,47 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             }
         }
         //未核销从，至，等待三方接口
-        //jiu.zhao 支付
-        /*List<CashWriteOffDocumentAmountCO> documentAmountDTOList = paymentModuleInterface.getCashWriteOffDocumentAmountDTOByInput(noWritedAmountFrom, noWritedAmountTo, null);
+        List<CashWriteOffDocumentAmountCO> documentAmountDTOList = paymentModuleInterface.getCashWriteOffDocumentAmountDTOByInput(noWritedAmountFrom, noWritedAmountTo, null);
 //        if(CollectionUtils.isEmpty(documentAmountDTOList)){
 //            return new ArrayList<>();
 //        }
         Map<Long, CashWriteOffDocumentAmountCO> writeOffDocumentAmountDTOMap = documentAmountDTOList.stream().collect(Collectors.toMap(CashWriteOffDocumentAmountCO::getDocumentHeaderId, (p) -> p));
-*/
 
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"csh_payment_requisition_head");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN,"unit_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"employee_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
 
         Wrapper<CashPaymentRequisitionHead> wrapper = new EntityWrapper<CashPaymentRequisitionHead>()
                 .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
-                .like("requisition_number", requisitionNumber)
-                .eq(paymentReqTypeId != null, "payment_req_type_id", paymentReqTypeId)
                 .eq("created_by", OrgInformationUtil.getCurrentUserId())
+                .like("requisition_number", requisitionNumber)
+                .eq(setOfBooksId != null,"set_of_books_id",setOfBooksId)
+                .eq(companyId != null,"company_id",companyId)
+                .eq(unitId != null,"unit_id",unitId)
+                .eq(paymentReqTypeId != null, "payment_req_type_id", paymentReqTypeId)
                 .eq(employeeId != null, "employee_id", employeeId)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .ge(submitDateFrom != null, "submit_date", submitDateFrom)
                 .le(submitDateTo != null, "submit_date", submitDateTo)
-                // .between(advancePaymentAmountFrom != null && advancePaymentAmountTo != null, "advance_payment_amount", advancePaymentAmountFrom, advancePaymentAmountTo)
-                .ge(advancePaymentAmountFrom != null, "advance_payment_amount", advancePaymentAmountFrom)
-                .le(advancePaymentAmountTo != null, "advance_payment_amount", advancePaymentAmountTo)
+               // .between(advancePaymentAmountFrom != null && advancePaymentAmountTo != null, "advance_payment_amount", advancePaymentAmountFrom, advancePaymentAmountTo)
+                .ge(advancePaymentAmountFrom != null,"advance_payment_amount", advancePaymentAmountFrom)
+                .le(advancePaymentAmountTo != null,"advance_payment_amount", advancePaymentAmountTo)
                 //.eq(status != null, "status", status)
                 .eq(ifWorkflow != null, "if_workflow", ifWorkflow)
                 .eq(checkBy != null, "check_by", checkBy)
+                .and(!StringUtils.isEmpty(dataAuthLabel), dataAuthLabel)
                 .like(StringUtils.isNotEmpty(remark), "description", remark);
+        if (!dataAuthorityMetaHandler.checkEnabledDataAuthority()) {
+            wrapper = wrapper.eq("created_by", OrgInformationUtil.getCurrentUserId());
+        }
         if (editor) {
             wrapper = wrapper.in("status", "1001,1003,1005");
         } else {
@@ -404,14 +422,13 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         if (noWritedAmountFrom == null && noWritedAmountTo == null) {
             wrapper = wrapper
                     .orderBy("requisition_number", false);
-        } else {
+        }else {
             // 获取不满足条件的单据信息
             String ids = "";
-            //jiu.zhao 支付
-            /*List<Long> excludeDocumentList = paymentModuleInterface.getExcludeDocumentCashWriteOffAmountDTOByInput(noWritedAmountFrom, noWritedAmountTo, null);
+            List<Long> excludeDocumentList = paymentModuleInterface.getExcludeDocumentCashWriteOffAmountDTOByInput(noWritedAmountFrom, noWritedAmountTo, null);
             if(CollectionUtils.isNotEmpty(excludeDocumentList)){
                 ids = StringUtils.join(excludeDocumentList, ",");
-            }*/
+            }
             wrapper = wrapper
                     .notExists(!"".equals(ids), "select 1 from dual where id in (" + ids + ")")
                     .ge(noWritedAmountFrom != null, "advance_payment_amount", noWritedAmountFrom)
@@ -443,6 +460,22 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 head.setCreateByName(createdMap.get(head.getCreatedBy()));
             }
 
+            SetOfBooksInfoCO setOfBooksInfoCOId = prepaymentHcfOrganizationInterface.getSetOfBooksInfoCOById(head.getSetOfBooksId(),false);
+                    if(setOfBooksInfoCOId != null){
+                        head.setSetOfBooksCode(setOfBooksInfoCOId.getSetOfBooksCode());
+                        head.setSetOfBooksName(setOfBooksInfoCOId.getSetOfBooksName());
+                    }
+                    //给公司赋值
+            CompanyCO companyCOId = prepaymentHcfOrganizationInterface.getCompanyById(head.getCompanyId());
+                    if(companyCOId !=null ){
+                        head.setCompanyName(companyCOId.getName());
+                    }
+
+                   // 给部门名称赋值
+            DepartmentCO departmentCOId = prepaymentHcfOrganizationInterface.getDepartmentByEmployeeId(head.getEmployeeId());
+                    if(departmentCOId !=null){
+                        head.setUnitName(departmentCOId.getName());
+                    }
 
             if (typeMap.get(head.getPaymentReqTypeId()) != null) {
                 head.setTypeName(typeMap.get(head.getPaymentReqTypeId()));
@@ -526,6 +559,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 
         }
         CashPaymentRequisitionHead head = CashPaymentRequisitionHeaderAdapter.toDomain(dto);
+        head.setSetOfBooksId(OrgInformationUtil.getCurrentSetOfBookId());
         if (head.getId() != null) {
             this.updateById(head);
             CashPaymentRequisitionHeaderCO cashPaymentRequisitionHeaderDTO = new CashPaymentRequisitionHeaderCO();
@@ -569,8 +603,17 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         lineCOS.forEach(lineCO -> {
             lineCO.setPartnerCode(lineCO.getPartnerId().toString());
             //判断付款方式是否是固定系统值列表
-            if (!lineCO.getPaymentMethodCategory().equals("ONLINE_PAYMENT") && !lineCO.getPaymentMethodCategory().equals("OFFLINE_PAYMENT") && !lineCO.getPaymentMethodCategory().equals("EBANK_PAYMENT")) {
+            /*if (!lineCO.getPaymentMethodCategory().equals("ONLINE_PAYMENT") && !lineCO.getPaymentMethodCategory().equals("OFFLINE_PAYMENT") && !lineCO.getPaymentMethodCategory().equals("EBANK_PAYMENT")) {
                 throw new BizException(RespCode.PREPAY_PAYMENT_METHOD_ERROR);
+            }*/
+            //判断付款方式是否是固定系统值列表
+            if (!lineCO.getPaymentType().equals("BANKBILL") &&
+                    !lineCO.getPaymentType().equals("BTR") &&
+                    !lineCO.getPaymentType().equals("CASH") &&
+                    !lineCO.getPaymentType().equals("CHECK") &&
+                    !lineCO.getPaymentType().equals("INTERFACE") &&
+                    !lineCO.getPaymentType().equals("RECORDING_PAYMENT") ) {
+                throw new BizException(RespCode.PREPAY_PAYMENT_TYPE_ERROR);
             }
 
             CashPaymentRequisitionLine line = cashPaymentRequisitionLineAdapter.toDomain(lineCO);
@@ -721,6 +764,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     /*根据预付款单头id删除预付款单头行*/
     @Transactional
     public Boolean deleteHeadAndLineByHeadId(Long headId) {
+        CashPaymentRequisitionHead cashPaymentRequisitionHead = this.selectById(headId);
         Boolean flagHead = this.deleteById(headId);
         List<CashPaymentRequisitionLine> lines = cashPaymentRequisitionLineService.selectList(
                 new EntityWrapper<CashPaymentRequisitionLine>()
@@ -732,7 +776,10 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                     lines.stream().map(CashPaymentRequisitionLine::getPaymentRequisitionHeaderId).collect(Collectors.toList())
             );
         }
-
+        //删除审批流实例
+        Integer entityType = cashPaymentRequisitionHead.getDocumentType();
+        UUID entityOid = UUID.fromString(cashPaymentRequisitionHead.getDocumentOid());
+        workflowClient.deleteApprovalDocument(entityType, entityOid);
         return flagHead && flagLine;
     }
 
@@ -767,10 +814,10 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         }
         if (empFlag.equals(1001)) {
             try {
-                //dtoPage = hcfOrganizationInterface.getContactBankAccountDTO(OrgInformationUtil.getCurrentTenantId(), name, page.getCurrent(), page.getSize());
+                //dtoPage = prepaymentHcfOrganizationInterface.getContactBankAccountDTO(OrgInformationUtil.getCurrentTenantId(), name, page.getCurrent(), page.getSize());
                 List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
                 //jiu.zhao 修改三方接口 20190328
-                /*List<ContactCO> contactCOS = hcfOrganizationInterface.pageConditionNameAndIgnoreIds(null,name,null,null,page).getRecords();
+                /*List<ContactCO> contactCOS = prepaymentHcfOrganizationInterface.pageConditionNameAndIgnoreIds(null,name,null,null,page).getRecords();
                 if(contactCOS != null){
                     contactCOS.stream().forEach(e->{
                         ReceivablesDTO receivablesDTO = new ReceivablesDTO();
@@ -842,7 +889,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         if (empFlag.equals(1001)) {
             try {
 
-                // dtoPage = hcfOrganizationInterface.getContactBankAccountDTO(OrgInformationUtil.getCurrentTenantId(), name,code, page.getCurrent(), page.getSize());
+                // dtoPage = prepaymentHcfOrganizationInterface.getContactBankAccountDTO(OrgInformationUtil.getCurrentTenantId(), name,code, page.getCurrent(), page.getSize());
                 List<ReceivablesDTO> receivablesDTOS = new ArrayList<>();
                 Page<ContactCO> contactCOS = prepaymentHcfOrganizationInterface.pageConditionNameAndIgnoreIds(code, name, null, null, page);
                 if (CollectionUtils.isNotEmpty(contactCOS.getRecords())) {
@@ -1001,7 +1048,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             toContract(head, ContractOperationType.LOGICAL_DELETE, true);
             //驳回，撤回时，释放与申请单的关联
             if (requisitionType.getNeedApply() != null || requisitionType.getNeedApply().booleanValue()) {
-//                hcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
+//                prepaymentHcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
                 expenseModuleInterface.releasePrepaymentRequisitionRelease(head.getId());
             }
         }
@@ -1076,7 +1123,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                     List<CashPaymentRequisitionLine> cashLines = map.get(applicationId);
 
                     //取过来的总金额
-//                    Map<String, Double> stringDoubleMap = HcfOrganizationInterface.getApplicationAmountById(applicationId);
+//                    Map<String, Double> stringDoubleMap = prepaymentHcfOrganizationInterface.getApplicationAmountById(applicationId);
                     List<ApplicationAmountCO> applicationAmounts = expenseModuleInterface.getApplicationAmountById(applicationId);
                     Map<String, Double> stringDoubleMap = applicationAmounts.stream().collect(
                             Collectors.groupingBy(ApplicationAmountCO::getCurrencyCode, summingDouble(ApplicationAmountCO::AmountToDouble)));
@@ -1086,7 +1133,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                             Collectors.groupingBy(ApplicationAmountCO::getCurrencyCode, summingDouble(ApplicationAmountCO::RelatedAmountToDouble)));
 
                     //已关联金额从申请单关联表里面取
-//                    List<PrepaymentRequisitionRelease> releases = HcfOrganizationInterface.queryByRelated(applicationId);
+//                    List<PrepaymentRequisitionRelease> releases = prepaymentHcfOrganizationInterface.queryByRelated(applicationId);
 //                    arlMap = releases.stream().collect(
 //                            Collectors.groupingBy(PrepaymentRequisitionReleaseCO::getCurrencyCode, summingDouble(PrepaymentRequisitionReleaseCO::AmountToDouble)));
                     //预付款行的金额
@@ -1141,7 +1188,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 //拒绝时，释放与申请单的关联
                 if (requisitionType.getNeedApply()) {
                     try {
-//                        hcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
+//                        prepaymentHcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
                         expenseModuleInterface.releasePrepaymentRequisitionRelease(head.getId());
                     } catch (Exception e) {
                         throw new BizException(RespCode.PREPAY_RE_APPLICATION_ERROR);
@@ -1162,7 +1209,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             //撤回时，释放与申请单的关联
             if (requisitionType.getNeedApply()) {
                 try {
-//                    hcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
+//                    prepaymentHcfOrganizationInterface.releasePrepaymentRequisitionRelease(head.getId());
                     expenseModuleInterface.releasePrepaymentRequisitionRelease(head.getId());
                 } catch (Exception e) {
                     throw new BizException(RespCode.PREPAY_RE_APPLICATION_ERROR);
@@ -1212,7 +1259,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
     private void createToApplication(List<CashPaymentRequisitionLine> lines, Long userId, CashPaymentRequisitionHead dataHead) {
         List<PrepaymentRequisitionReleaseCO> requisitionReleases = new ArrayList<>();
         getListRelease(lines, userId, dataHead, requisitionReleases);
-//        hcfOrganizationInterface.createPrepaymentRequisitionRelease(requisitionReleases);
+//        prepaymentHcfOrganizationInterface.createPrepaymentRequisitionRelease(requisitionReleases);
         expenseModuleInterface.createPrepaymentRequisitionRelease(requisitionReleases);
     }
 
@@ -1276,6 +1323,11 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                                 ContactCO userCO = prepaymentHcfOrganizationInterface.getUserById(line.getPartnerId());
                                 empMap.put(line.getPartnerId(), userCO.getFullName());
                                 lineCO.setPartnerName(empMap.get(line.getPartnerId()));
+                                lineCO.setCurrencyName(prepaymentHcfOrganizationInterface.getForeignCurrencyByCode(
+                                        null,
+                                        line.getCurrency(),
+                                        prepaymentHcfOrganizationInterface.getCompanyById(line.getCompanyId()).getSetOfBooksId()).getCurrencyName()
+                                );
                             }
                         } else {
 
@@ -1857,6 +1909,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
      */
     public Page<CashPaymentRequisitionHead> getHeadByQuery(
             Long companyId,
+            Long setOfBooksId,
             String requisitionNumber,
             Long typeId,
             Integer status,
@@ -1869,6 +1922,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
             Double noWriteAmountFrom,
             Double noWriteAmountTo,
             String remark,
+            boolean dataAuthFlag,
             Page<CashPaymentRequisitionHead> page
     ) {
         if (noWriteAmountFrom != null && noWriteAmountTo != null) {
@@ -1876,10 +1930,21 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
                 return page;
             }
         }
-
+        String dataAuthLabel = null;
+        if(dataAuthFlag){
+            Map<String,String> map = new HashMap<>();
+            map.put(DataAuthorityUtil.TABLE_NAME,"csh_payment_requisition_head");
+            map.put(DataAuthorityUtil.SOB_COLUMN,"set_of_books_id");
+            map.put(DataAuthorityUtil.COMPANY_COLUMN,"company_id");
+            map.put(DataAuthorityUtil.UNIT_COLUMN,"unit_id");
+            map.put(DataAuthorityUtil.EMPLOYEE_COLUMN,"employee_id");
+            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
+        }
         Wrapper<CashPaymentRequisitionHead> wrapper = new EntityWrapper<CashPaymentRequisitionHead>()
                 .eq("tenant_id", OrgInformationUtil.getCurrentTenantId())
                 .eq(companyId != null, "company_id", companyId)
+                .eq(setOfBooksId !=null,"set_of_books_id",setOfBooksId)
+                .and(TypeConversionUtils.isNotEmpty(dataAuthLabel),dataAuthLabel)
                 .like(StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
                 .eq(typeId != null, "payment_req_type_id", typeId)
                 .eq(status != null, "status", status)
@@ -1951,6 +2016,12 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
 
         for (CashPaymentRequisitionHead head : records) {
 
+            // 返回账套code、账套name
+            SetOfBooksInfoCO setOfBooksInfoCOById = prepaymentHcfOrganizationInterface.getSetOfBooksInfoCOById(head.getSetOfBooksId(), false);
+            if (setOfBooksInfoCOById != null) {
+                head.setSetOfBooksCode(setOfBooksInfoCOById.getSetOfBooksCode());
+                head.setSetOfBooksName(setOfBooksInfoCOById.getSetOfBooksName());
+            }
             // 部门
             if (unitMap.containsKey(head.getUnitId())) {
                 head.setUnitName(unitMap.get(head.getUnitId()));
@@ -2122,8 +2193,7 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
      * @param requisitionHeaderId
      * @param status
      */
-    //@LcnTransaction
-    public Boolean submitCashPaymentRequisitionByRequisitionNumber(Long requisitionHeaderId, Integer status) {
+    public Boolean checkCashPaymentRequisitionBeforeSubmit(Long requisitionHeaderId) {
         CashPaymentRequisitionHead head = this.selectById(requisitionHeaderId);
         if (head == null) {
             throw new BizException(RespCode.SYS_DATA_NOT_EXISTS);
@@ -2179,15 +2249,6 @@ public class CashPaymentRequisitionHeadService extends BaseService<CashPaymentRe
         WorkFlowDocumentRefCO workFlowDocumentRef = new WorkFlowDocumentRefCO();
 //        workFlowDocumentRef.setCreatedBy(head.getCreatedBy());
         checkRelationApplication(workFlowDocumentRef, head, lines, prepaymentType);
-
-        if (DocumentOperationEnum.APPROVAL.getId().equals(status)) {
-            head.setSubmitDate(ZonedDateTime.now());
-            head.setRequisitionDate(ZonedDateTime.now());
-            head.setStatus(DocumentOperationEnum.APPROVAL.getId());// 修改为审批中
-            updateById(head);
-        } else {
-            updateDocumentStatus(status, head.getId(), "", OrgInformationUtil.getCurrentUserId());
-        }
 
         return true;
     }

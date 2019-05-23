@@ -608,6 +608,8 @@ public class CashWriteOffService extends BaseService<CashWriteOffMapper, CashWri
         if(CollectionUtils.isNotEmpty(cashWriteOffByDocumentMsg)){
             WriteOffInterfaceCO writeOffInterface = new WriteOffInterfaceCO();
             writeOffInterface.setCreatedBy(operatorId);
+            Map<Long, ExpensePaymentScheduleCO> collect = expenseService.getExpPublicReportScheduleByIds(cashWriteOffByDocumentMsg.stream()
+                    .map(CashWriteOff::getDocumentLineId).collect(Collectors.toList())).stream().collect(Collectors.toMap(e -> e.getId(), e -> e));
             List<WriteOffDetailCO> writeOffDetails = cashWriteOffByDocumentMsg.stream().map(cashWriteOff -> {
                 //支付明细信息
                 CashTransactionDetail cashTransactionDetail = cashTransactionDetailService.selectById(cashWriteOff.getCshTransactionDetailId());
@@ -651,18 +653,25 @@ public class CashWriteOffService extends BaseService<CashWriteOffMapper, CashWri
                 writeOffDetail.setPrepaymentPartnerId(cashTransactionDetail.getPartnerId());
                 writeOffDetail.setPrepaymentPartnerCode(cashTransactionDetail.getPartnerCode());
                 writeOffDetail.setDocumentType(cashWriteOff.getDocumentType());
-                /*writeOffDetail.setDocumentCurrency(TypeConversionUtils.parseString(expPublicReportSchedule.getCurrency()));
-                writeOffDetail.setDocumentNumber(TypeConversionUtils.parseString(expPublicReportHead.getBusinessCode()));
+                ExpensePaymentScheduleCO expensePaymentScheduleCO = collect.get(cashWriteOff.getDocumentLineId());
+                writeOffDetail.setDocumentCurrency(expensePaymentScheduleCO.getCurrencyCode());
+                writeOffDetail.setDocumentNumber(cashWriteOff.getDocumentNumber());
                 writeOffDetail.setDocumentHeaderId(cashWriteOff.getDocumentHeaderId());
                 writeOffDetail.setDocumentLineId(cashWriteOff.getDocumentLineId());
-                writeOffDetail.setDocumentCompanyId(TypeConversionUtils.parseLong(expPublicReportSchedule.getCompanyId()));
-                writeOffDetail.setDocumentUnitId(TypeConversionUtils.parseLong(expPublicReportHead.getUnitId()));
-                writeOffDetail.setDocumentExchangeRate(TypeConversionUtils.parseDouble(expPublicReportSchedule.getExchangeRate()));
-                writeOffDetail.setDocumentPaymentMethodCategory(TypeConversionUtils.parseString(expPublicReportSchedule.getPaymentMethod()));
-                writeOffDetail.setDocumentTransactionClassId(TypeConversionUtils.parseLong(expPublicReportSchedule.getCshTransactionClassId()));
-                writeOffDetail.setDocumentPartnerCategory(TypeConversionUtils.parseString(expPublicReportSchedule.getPayeeCategory()));
-                writeOffDetail.setDocumentPartnerId(TypeConversionUtils.parseLong(expPublicReportSchedule.getPayeeId()));
-                writeOffDetail.setDocumentPartnerCode(TypeConversionUtils.parseString(expPublicReportSchedule.getPayeeCode()));*/
+                writeOffDetail.setDocumentCompanyId(expensePaymentScheduleCO.getCompanyId());
+                writeOffDetail.setDocumentUnitId(expensePaymentScheduleCO.getDepartmentId());
+                writeOffDetail.setDocumentExchangeRate(TypeConversionUtils.parseDouble(expensePaymentScheduleCO.getExchangeRate()));
+                writeOffDetail.setDocumentPaymentMethodCategory(expensePaymentScheduleCO.getPaymentMethod());
+                writeOffDetail.setDocumentTransactionClassId(expensePaymentScheduleCO.getCshTransactionClassId());
+                writeOffDetail.setDocumentPartnerCategory(expensePaymentScheduleCO.getPayeeCategory());
+                writeOffDetail.setDocumentPartnerId(expensePaymentScheduleCO.getPayeeId());
+                if("VENDER".equals(expensePaymentScheduleCO.getPayeeCategory())){
+                    VendorInfoCO venInfoCO = supplierService.getOneVendorInfoByArtemis(expensePaymentScheduleCO.getPayeeId().toString());
+                    writeOffDetail.setDocumentPartnerCode(venInfoCO.getVenderCode());
+                }else {
+                    ContactCO userById = organizationService.getUserById(expensePaymentScheduleCO.getPayeeId());
+                    writeOffDetail.setDocumentPartnerCode(userById.getEmployeeCode());
+                }
                 writeOffDetail.setAmount(cashWriteOff.getWriteOffAmount());
                 writeOffDetail.setWriteOffDate(cashWriteOff.getWriteOffDate());
                 writeOffDetail.setWriteOffPeriod(cashWriteOff.getPeriodName());
@@ -711,8 +720,10 @@ public class CashWriteOffService extends BaseService<CashWriteOffMapper, CashWri
      * @param operatorId
      */
     private void changeWriteOffStatus(Long id, String status, Long operatorId,boolean isAccount){
-        CashWriteOff cashWriteOff = new CashWriteOff();
-        cashWriteOff.setId(id);
+        CashWriteOff cashWriteOff = this.selectById(id);
+        if (cashWriteOff == null) {
+            throw new BizException(RespCode.SYS_DATA_NOT_EXISTS);
+        }
         cashWriteOff.setStatus(status);
         if(isAccount){
             cashWriteOff.setIsAccount("Y");
@@ -1049,7 +1060,9 @@ public class CashWriteOffService extends BaseService<CashWriteOffMapper, CashWri
                 null,
                 null,
                 null,
-                sourceId);
+                sourceId,
+                null,
+                null);
         setDocumentMessage(cashWriteOffReserveDTOS);
         return cashWriteOffReserveDTOS;
     }
@@ -1081,7 +1094,9 @@ public class CashWriteOffService extends BaseService<CashWriteOffMapper, CashWri
                 null,
                 null,
                 null,
-                id);
+                id,
+                null,
+                null);
         // 已反冲金额
         BigDecimal reversedAmount = reverseAmount;
         for(CashWriteOffReserveDTO cashWriteOffReserveDTO : cashWriteOffReverseHistory){

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.toolkit.CollectionUtils;
 import com.hand.hcf.app.common.co.InvoiceAuthenticationReturnCO;
 import com.hand.hcf.app.common.co.InvoiceAuthenticationSendCO;
 import com.hand.hcf.app.common.co.InvoiceAuthenticationSendLineCO;
+import com.hand.hcf.app.common.co.InvoiceCheckCO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
@@ -19,6 +20,8 @@ import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.invoice.enums.CertificationEnum;
+import com.hand.hcf.app.expense.invoice.enums.InvoiceStatusEnum;
+import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -68,6 +72,9 @@ public class InvoiceCertificationService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private MapperFacade mapperFacade;
     /**
      * 分页获取发票信息 （已提交或未提交认证）
      * @param invoiceTypeId 单据类型Id
@@ -195,32 +202,35 @@ public class InvoiceCertificationService {
             if (header == null) {
                 throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
             }
-            checkCertificationStatus(certificationStatus, Math.toIntExact(header.getCertificationStatus()));
+            checkCertificationStatus(certificationStatus, header.getCertificationStatus());
             //提交待认证
-            if (CertificationEnum.SUCCESS.getId().equals(certificationStatus)) {
+            if (CertificationEnum.CERTIFIED.getId().equals(certificationStatus)) {
                 header.setCertificationDate(ZonedDateTime.now());
-            } else if (CertificationEnum.FAIL.getId().equals(certificationStatus)) {
+            } else if (CertificationEnum.FAILEDCERTIFIED.getId().equals(certificationStatus)) {
                 header.setCertificationReason(certificationReason);
             }
-            header.setCertificationStatus(certificationStatus.longValue());
+            header.setCertificationStatus(CertificationEnum.parse(certificationStatus).name());
             invoiceHeadService.updateById(header);
         });
     }
 
-    private void checkCertificationStatus(Integer status, Integer certificationStatus) {
+    private void checkCertificationStatus(Integer status, String certificationStatus) {
         switch (status) {
             //提交 (失败以及未提交)
             case 1:
-                if (!(certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId()) ||
-                        certificationStatus.equals(CertificationEnum.FAIL.getId())) ) {
+                if (!(certificationStatus.equals(CertificationEnum.UNCERTIFIED.name())) ||
+                        certificationStatus.equals(CertificationEnum.FAILEDCERTIFIED.name())) {
                     throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
                 }
                 break;
              //认证成功
             case 4:
-                if(certificationStatus.equals(CertificationEnum.UNCERTIFIED.getId())){
+                if(certificationStatus.equals(CertificationEnum.UNCERTIFIED.name())){
                     throw new BizException(RespCode.INVOICE_CERTIFICATION_STATUS_ERROR);
                 }
+                break;
+            default:
+                break;
         }
     }
 
@@ -231,7 +241,7 @@ public class InvoiceCertificationService {
      */
     public void submitInvoiceCertified(List<Long> headerIds,
                                        String taxDate) {
-       List<InvoiceAuthenticationSendLineCO> invoices = new ArrayList<>();
+       List<InvoiceCheckCO> invoices = new ArrayList<>();
         if(CollectionUtils.isEmpty(headerIds)){
             return;
         }
@@ -240,27 +250,16 @@ public class InvoiceCertificationService {
            if(invoiceHead == null){
                throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
            }
-           invoices.add(InvoiceAuthenticationSendLineCO.builder()
-                   .id(id).invoiceCode(invoiceHead.getInvoiceCode())
-                   .invoiceNo(invoiceHead.getInvoiceNo())
-                   .applyTaxPeriod(taxDate)
-                   .buyerTaxNo(BUYER_TAX_NO)
-                   .applyRzlx(APPLYRZLX)
-                   .build());
+            InvoiceCheckCO invoiceCheckCO =  mapperFacade.map(invoiceHead,InvoiceCheckCO.class);
+            invoiceCheckCO.setInvoiceType("04");
+            invoiceCheckCO.setApplyTaxPeriod(taxDate);
+            invoiceCheckCO.setApplyRzlx(APPLYRZLX);
+            invoiceCheckCO.setBuyerTaxNo(BUYER_TAX_NO);
+            invoices.add(invoiceCheckCO);
         });
-        InvoiceAuthenticationReturnCO returnCO = organizationService.invoiceAuthentication(
-                InvoiceAuthenticationSendCO.builder()
-                .batchNo(UUID.randomUUID().toString())
-                .contentRows(headerIds.size())
-                .buyerTaxNo(BUYER_TAX_NO)
-                .invoices(invoices)
-                .build());
-        //提交成功
-        if(RETURN_CODE.equals(returnCO.getReturnCode())){
-            this.updateInvoiceCertifiedStatus(headerIds,CertificationEnum.CERTIFICATION.getId(),null);
-        }else {
-            throw  new BizException(returnCO.getReturnMessage());
-        }
+        //organizationService.invoiceAuthentication(invoices);
+        this.updateInvoiceCertifiedStatus(headerIds,CertificationEnum.CERTIFYING.getId(),null);
+
     }
 
     /**
@@ -274,7 +273,7 @@ public class InvoiceCertificationService {
         if(invoiceHead == null){
             throw new BizException(RespCode.INVOICE_HEADER_IS_NULL);
         }
-        invoiceHead.setInvoiceStatus(invoiceStatus.longValue());
+        invoiceHead.setInvoiceStatus(Objects.requireNonNull(InvoiceStatusEnum.parse(invoiceStatus)).name());
         invoiceHeadService.updateById(invoiceHead);
     }
 }

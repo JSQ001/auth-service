@@ -111,6 +111,16 @@ public class CashPaymentRequisitionLineCO {
     //付款方式类型中文
     private String paymentMethodName;
     /**
+     * 付款方式
+     */
+    private String paymentType;
+    //付款方式中文
+    private String paymentTypeName;
+    //账户属性
+    private String propFlag;
+    //账户属性中文
+    private String propFlagName;
+    /**
      * 现金事务分类id
      */
     @JsonSerialize(using = ToStringSerializer.class)
@@ -209,5 +219,7 @@ public class CashPaymentRequisitionLineCO {
     //申请单信息
 
 
-   private CashPaymentRequisitionHeaderCO prepaymentHead;
+    private CashPaymentRequisitionHeaderCO prepaymentHead;
+
+    private String currencyName;
 }

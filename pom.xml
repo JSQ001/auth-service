@@ -350,6 +350,19 @@
             <artifactId>toolkit-common-logging</artifactId>
             <version>1.15</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.alipay.gfcenter</groupId>
+            <artifactId>gfcenter-common-service-facade</artifactId>
+            <version>1.0.0.20190418</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alipay.revtrans</groupId>
+            <artifactId>revtrans-common-service-facade-cache</artifactId>
+            <version>1.0.0.20160517</version>
+        </dependency>
+
         <!--end蚂蚁内部依赖 需要配置setting.xml-->
     </dependencies>
 

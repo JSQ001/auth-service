@@ -195,6 +195,19 @@ public class CashTransactionDataDTO extends DomainObjectDTO {
 
 	@NotNull
 	private String paymentMethodCategory;
+
+	/**
+	 * 付款方式 (付款方式值列表：ZJ_PAYMENT_TYPE)
+	 */
+	@NotNull
+	private String paymentType;
+
+	/**
+	 * 账户属性 (“对私”（PRIVATE）和“对公”（BUSINESS）)
+	 */
+	@NotNull
+	private String propFlag;
+
     /**
      * 计划付款日期
      */

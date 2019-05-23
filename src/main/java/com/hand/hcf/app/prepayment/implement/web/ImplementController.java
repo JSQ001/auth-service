@@ -11,12 +11,10 @@ import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeService;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionHeadService;
 import com.hand.hcf.app.prepayment.service.CashPaymentRequisitionLineService;
 import com.hand.hcf.app.prepayment.web.dto.CashPrepaymentQueryDTO;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -201,9 +199,8 @@ public class ImplementController {
      * @param status
      * @return
      */
-    public Boolean submitCashPaymentRequisition(@RequestParam(value = "requisitionHeaderId") Long requisitionHeaderId,
-                                                @RequestParam(value = "status") Integer status) {
-        return cashPaymentRequisitionHeadService.submitCashPaymentRequisitionByRequisitionNumber(requisitionHeaderId, status);
+    public Boolean checkCashPaymentRequisitionBeforeSubmit(@RequestParam(value = "requisitionHeaderId") Long requisitionHeaderId) {
+        return cashPaymentRequisitionHeadService.checkCashPaymentRequisitionBeforeSubmit(requisitionHeaderId);
     }
 
     /**

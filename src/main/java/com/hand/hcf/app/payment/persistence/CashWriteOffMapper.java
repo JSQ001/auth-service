@@ -127,7 +127,9 @@ public interface CashWriteOffMapper extends BaseMapper<CashWriteOff> {
                                                               @Param(value = "writeOffReverseAmountFrom") Double writeOffReverseAmountFrom,
                                                               @Param(value = "writeOffReverseAmountTo") Double writeOffReverseAmountTo,
                                                               @Param(value = "createdBy") Long createdBy,
-                                                              @Param(value = "sourceWriteOffId") Long sourceWriteOffId);
+                                                              @Param(value = "sourceWriteOffId") Long sourceWriteOffId,
+                                                              @Param(value = "writeOffDateFrom") ZonedDateTime writeOffDateFrom,
+                                                              @Param(value = "writeOffDateTo") ZonedDateTime writeOffDateTo);
 
     List<CashWriteOffDocumentAmountCO> listDocumentByWriteOffAmount(@Param(value = "unWriteOffAmountFrom") BigDecimal unWriteOffAmountFrom,
                                                                     @Param(value = "unWriteOffAmountTo") BigDecimal unWriteOffAmountTo,

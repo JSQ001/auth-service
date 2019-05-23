@@ -1,27 +1,26 @@
 package com.hand.hcf.app.prepayment.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-//import com.hand.hcf.app.application.dto.CustomFormForOtherRequestDTO;
 import com.hand.hcf.app.common.co.ApplicationTypeCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignRequisitionType;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignRequisitionTypeService;
-import com.hand.hcf.app.prepayment.web.dto.CustomFormForOtherDTO;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
 import java.net.URISyntaxException;
 import java.util.List;
 
 /**
  * Created by 韩雪 on 2017/12/5.
  */
+@Api(tags = "预付款单类型关联申请单类型")
 @RestController
 @RequestMapping("/api/cash/pay/requisition/type/assign/requisition/types")
 public class CashPayRequisitionTypeAssignRequisitionTypeController {
@@ -68,7 +67,8 @@ public class CashPayRequisitionTypeAssignRequisitionTypeController {
     }
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignRequisitionType>> createCashPayRequisitionTypeAssignRequisitionTypeBatch(@RequestBody List<CashPayRequisitionTypeAssignRequisitionType> list){
+    @ApiOperation(value = "批量新增 预付款单类型关联申请单类型", notes = "批量新增 预付款单类型关联申请单类型 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignRequisitionType>> createCashPayRequisitionTypeAssignRequisitionTypeBatch(@ApiParam(value = "预付款单类型关联申请单类型") @RequestBody List<CashPayRequisitionTypeAssignRequisitionType> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignRequisitionTypeService.createCashPayRequisitionTypeAssignRequisitionTypeBatch(list));
     }
 
@@ -111,7 +111,8 @@ public class CashPayRequisitionTypeAssignRequisitionTypeController {
     }
      */
     @PutMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignRequisitionType>> updateCashPayRequisitionTypeAssignRequisitionTypeBatch(@RequestBody List<CashPayRequisitionTypeAssignRequisitionType> list){
+    @ApiOperation(value = "批量修改 预付款单类型关联申请单类型", notes = "批量修改 预付款单类型关联申请单类型 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignRequisitionType>> updateCashPayRequisitionTypeAssignRequisitionTypeBatch(@ApiParam(value = "预付款单类型关联申请单类型") @RequestBody List<CashPayRequisitionTypeAssignRequisitionType> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignRequisitionTypeService.updateCashPayRequisitionTypeAssignRequisitionTypeBatch(list));
     }
 
@@ -137,7 +138,8 @@ public class CashPayRequisitionTypeAssignRequisitionTypeController {
     }
      */
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashPayRequisitionTypeAssignRequisitionTypeBatch(@RequestBody List<Long> list){
+    @ApiOperation(value = "批量删除 预付款单类型关联申请单类型(物理删除)", notes = "批量删除 预付款单类型关联申请单类型(物理删除) 开发:韩雪")
+    public ResponseEntity deleteCashPayRequisitionTypeAssignRequisitionTypeBatch(@ApiParam(value = "主键id") @RequestBody List<Long> list){
         cashPayRequisitionTypeAssignRequisitionTypeService.deleteCashPayRequisitionTypeAssignRequisitionTypeBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -175,9 +177,10 @@ public class CashPayRequisitionTypeAssignRequisitionTypeController {
     ]
      */
     @GetMapping("/query")
+    @ApiOperation(value = "根据预付款单类型id查询所有已关联的申请单类型(分页)", notes = "根据预付款单类型id查询所有已关联的申请单类型(分页) 开发:韩雪")
     public ResponseEntity<List<CashPayRequisitionTypeAssignRequisitionType>> getCashPayRequisitionTypeAssignRequisitionTypeByCond(
-            @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashPayRequisitionTypeAssignRequisitionType> list = cashPayRequisitionTypeAssignRequisitionTypeService.getCashPayRequisitionTypeAssignRequisitionTypeByCond(payRequisitionTypeId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/requisition/types/query");
@@ -237,13 +240,18 @@ public class CashPayRequisitionTypeAssignRequisitionTypeController {
     ]
      */
     @GetMapping("/get/application/type/by/range")
+    @ApiOperation(value = "根据所选范围 查询申请单类型(分页)", notes = "根据所选范围 查询申请单类型(分页) 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<ApplicationTypeCO>> getCustomFormByRange(
-            @RequestParam(value = "setOfBooksId") Long setOfBooksId,
-            @RequestParam(value = "range") String range,
-            @RequestParam(value = "payRequisitionTypeId",required = false) Long payRequisitionTypeId,
-            @RequestParam(value = "code",required = false) String code,
-            @RequestParam(value = "name",required = false) String name,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBooksId") Long setOfBooksId,
+            @ApiParam(value = "所选范围") @RequestParam(value = "range") String range,
+            @ApiParam(value = "支付申请类型ID") @RequestParam(value = "payRequisitionTypeId",required = false) Long payRequisitionTypeId,
+            @ApiParam(value = "申请单类型代码") @RequestParam(value = "code",required = false) String code,
+            @ApiParam(value = "申请单类型名称") @RequestParam(value = "name",required = false) String name,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<ApplicationTypeCO> list = cashPayRequisitionTypeAssignRequisitionTypeService.getCustomFormByRange(setOfBooksId,range,payRequisitionTypeId,code,name,page);
         HttpHeaders headers = PageUtil.getTotalHeader(page);

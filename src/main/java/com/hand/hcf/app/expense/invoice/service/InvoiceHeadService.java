@@ -14,19 +14,16 @@ import com.hand.hcf.app.core.web.dto.MessageDTO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.*;
-import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
-import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
-import com.hand.hcf.app.expense.invoice.dto.InvoiceLineDistDTO;
-import com.hand.hcf.app.expense.invoice.dto.InvoiceLineExpenceWebQueryDTO;
+import com.hand.hcf.app.expense.invoice.dto.*;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceHeadMapper;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceLineDistMapper;
 import com.hand.hcf.app.expense.report.dto.ExpenseReportInvoiceMatchResultDTO;
 import com.hand.hcf.app.expense.report.service.ExpenseReportHeaderService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportLineService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -388,18 +385,46 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
      * @param headIds
      * @return
      */
-    public void checkInvoice(List<Long> headIds){
+    public InvoiceBatchCheckResultDTO checkInvoice(List<Long> headIds){
+        InvoiceDTO invoiceDTO ;
+
+        // 发票批量查验返回信息
+        InvoiceBatchCheckResultDTO invoiceBatchCheckResultDTO = new InvoiceBatchCheckResultDTO();
+        List<InvoiceHead> invoiceHeads = new ArrayList<InvoiceHead>();
+
         for (Long headId : headIds){
             InvoiceHead invoiceHead = invoiceHeadMapper.selectById(headId);
             if (invoiceHead == null){
                 throw new BizException(RespCode.SYS_DATA_NOT_EXISTS);
-            }else {
-                if (invoiceHead.getCheckResult() == false){
-                    invoiceHead.setCheckResult(true);
-                    invoiceHeadMapper.updateById(invoiceHead);
-                }
+            }
+            if(null != invoiceHead.getCheckResult() && invoiceHead.getCheckResult()){
+                continue;
+            }
+
+            // 发票验真
+            invoiceDTO = new InvoiceDTO();
+            invoiceDTO.setInvoiceHead(invoiceHead);
+            invoiceDTO = invoiceCheckReturnDetail(invoiceDTO);
+
+            invoiceBatchCheckResultDTO.setInvoiceBatchNum(invoiceBatchCheckResultDTO.getInvoiceBatchNum()+1);
+
+            // 统计信息
+            if(invoiceDTO.getInvoiceHead().getCheckResult()){   //验真成功
+                // 更新信息
+                invoiceHead.setCheckResult(true);
+                this.updateById(invoiceHead);
+                invoiceBatchCheckResultDTO.setSuccessCheckNum(invoiceBatchCheckResultDTO.getSuccessCheckNum()+1);
+
+            }else{
+                invoiceBatchCheckResultDTO.setErrorCheckNum(invoiceBatchCheckResultDTO.getErrorCheckNum()+1);
+                invoiceHeads.add(invoiceDTO.getInvoiceHead());
             }
         }
+
+        // 验真失败的发票信息
+        invoiceBatchCheckResultDTO.setInvoiceHeadList(invoiceHeads);
+
+        return invoiceBatchCheckResultDTO;
     }
 
     /**
@@ -700,12 +725,10 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                 certificationStatus,
                 isSubmit,
                 page);
-        invoiceCertificationDTOList
-                .stream()
-                .forEach(invoiceCertification -> {
+        invoiceCertificationDTOList.stream().forEach(invoiceCertification -> {
                     SysCodeValueCO sysCodeValueCO = null;
                      sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(
-                            "CREATED_METHOD", invoiceCertification.getCreatedMethod());
+                            "EXPENSE_INVOICE_SOURCE", invoiceCertification.getCreatedMethod());
                     if (sysCodeValueCO != null){
                         invoiceCertification.setCreatedMethodName(sysCodeValueCO.getName());
                     }
@@ -713,6 +736,11 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
                             "INVOICE_CERTIFICATION_STATUS", invoiceCertification.getCertificationStatus());
                     if (sysCodeValueCO != null){
                         invoiceCertification.setCertificationStatusName(sysCodeValueCO.getName());
+                    }
+                    sysCodeValueCO = organizationService.getSysCodeValueByCodeAndValue(
+                            "HX_INVOICE_STATUS", invoiceCertification.getInvoiceStatus());
+                    if (sysCodeValueCO != null){
+                        invoiceCertification.setInvoiceStatusName(sysCodeValueCO.getName());
                     }
                 });
         return invoiceCertificationDTOList;
@@ -810,7 +838,7 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
      * @return
      */
     public ExpenseReportInvoiceMatchResultDTO invoiceVerificationAndCheckCodeAndNumber(InvoiceDTO invoiceDTO){
-        ExpenseReportInvoiceMatchResultDTO dto = new ExpenseReportInvoiceMatchResultDTO(null,1001,null,null,null);
+        ExpenseReportInvoiceMatchResultDTO dto = new ExpenseReportInvoiceMatchResultDTO(null,1001,null,Arrays.asList(invoiceDTO),null);
         try{
             checkInvoiceCodeInvoiceNoExistsOrContinuation(invoiceDTO.getInvoiceHead().getInvoiceCode(),
                     invoiceDTO.getInvoiceHead().getInvoiceNo(),
@@ -821,13 +849,13 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
             dto.setResultMessage(message.getKeyDescription());
             if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_EXISTS)){
                 dto.setStatus(1002);
+                return dto;
             }
             if(e.getCode().equals(RespCode.EXPENSE_REPORT_INVOICE_CONTINUATION)){
                 dto.setStatus(1003);
             }
-            return dto;
         }
-        invoiceDTO = invoiceVerification(invoiceDTO);
+        //invoiceDTO = invoiceVerification(invoiceDTO);
         dto.setInvoiceDTOS(Arrays.asList(invoiceDTO));
         return dto;
     }
@@ -837,35 +865,83 @@ public class InvoiceHeadService extends BaseService<InvoiceHeadMapper,InvoiceHea
      * @param invoiceDTO
      * @return
      */
-    public InvoiceDTO invoiceVerification(InvoiceDTO invoiceDTO){
+    /*public InvoiceDTO invoiceVerification(InvoiceDTO invoiceDTO){
         InvoiceHead invoiceHead = invoiceDTO.getInvoiceHead();
+
+        // 发票查验接口需要发票类型Code,若未传入，则需要通过发票类型ID查询出
+        if(StringUtils.isBlank(invoiceHead.getInvoiceType())){
+            if(null == invoiceHead.getInvoiceTypeId()){
+                throw new BizException(RespCode.INVOICE_CHECK_INVOICE_TYPE_ID_OR_CODE_ISNULL);
+            }
+            InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
+            if(null == invoiceType){
+                throw new BizException(RespCode.INVOICE_CHECK_QUERY_INVOICETYPE_ERROR);
+            }
+
+            invoiceHead.setInvoiceType(invoiceType.getInvoiceTypeCode());
+        }
+
         InvoiceCheckCO invoiceCheckCO = new InvoiceCheckCO();
         BeanUtils.copyProperties(invoiceHead,invoiceCheckCO);
-//        InvoiceType invoiceType = invoiceTypeService.selectById(invoiceHead.getInvoiceTypeId());
 
-        //InvoiceHead实体中无invoiceType字段，无法映射到InvoiceCheckCO中，先临时手动设置
-        invoiceCheckCO.setInvoiceType("04");
-
-        /*InvoiceHeadCO invoiceHeadCO = peripheralService.invoiceCheck(invoiceCheckCO);
+        InvoiceHeadCO invoiceHeadCO = peripheralService.invoiceCheck(invoiceCheckCO);
         invoiceCheckCO.setSetOfBooksId(OrgInformationUtil.getCurrentSetOfBookId());
-        return invoiceHeadCOToDTO(invoiceHeadCO);*/
-        return null;
-    }
+        InvoiceDTO invoiceCheckResultDTO = invoiceHeadCOToDTO(invoiceHeadCO);
+
+        // 获取发票类型名称、发票类型描述
+        if(null == invoiceCheckResultDTO.getInvoiceHead().getInvoiceTypeId() || StringUtils.isBlank(invoiceCheckResultDTO.getInvoiceHead().getInvoiceTypeName())){
+
+            String invoiceTypeCode = invoiceDTO.getInvoiceHead().getInvoiceType();
+            InvoiceType invoiceType = invoiceTypeService.selectOne(new EntityWrapper<InvoiceType>().eq("invoice_type_code", invoiceTypeCode));
+            if(null == invoiceType){
+                throw new BizException(RespCode.INVOICE_CHECK_QUERY_INVOICETYPE_ERROR);
+            }
+
+            invoiceCheckResultDTO.getInvoiceHead().setInvoiceTypeId(invoiceType.getId());
+            invoiceCheckResultDTO.getInvoiceHead().setInvoiceType(invoiceTypeCode);
+            invoiceCheckResultDTO.getInvoiceHead().setInvoiceTypeName(invoiceType.getInvoiceTypeName());
+        }
+
+        return invoiceCheckResultDTO;
+    }*/
 
 
     /**
-     * invoiceCheckReturnDetail : 发票查验（发票验真+发票保存+返回发票详细信息）
+     * invoiceCheckReturnDetail : 发票查验（发票验真+返回发票详细信息）
      * @param invoiceDTO  发票信息
      */
+    @Transactional
     public InvoiceDTO invoiceCheckReturnDetail(InvoiceDTO invoiceDTO){
         // 发票验真
-        InvoiceDTO invoiceResult = invoiceVerification(invoiceDTO);
+        InvoiceDTO invoiceResult = new InvoiceDTO();
+        try{
+            //invoiceResult = invoiceVerification(invoiceDTO);
 
-        //保存发票信息
+        } catch (Exception e){   // 这里发票查验失败不能用异常的形式，批量校验需要循环调用此，将异常信息写入异常字段即可
+
+            invoiceDTO.getInvoiceHead().setCheckResult(false);
+            invoiceDTO.getInvoiceHead().setCheckResultReason(JSONObject.fromObject(e.getMessage()).getString("message"));
+
+            //发票查验失败app也需要发票类型名称
+            if(StringUtils.isBlank(invoiceDTO.getInvoiceHead().getInvoiceTypeName()) || StringUtils.isBlank(invoiceDTO.getInvoiceHead().getInvoiceType())){
+                InvoiceType invoiceType = null;
+
+                if(null != invoiceDTO.getInvoiceHead().getInvoiceTypeId()){
+                    invoiceType = invoiceTypeService.selectById(invoiceDTO.getInvoiceHead().getInvoiceTypeId());
+                }else{
+                    invoiceType = invoiceTypeService.selectOne(new EntityWrapper<InvoiceType>().eq("invoice_type_code", invoiceDTO.getInvoiceHead().getInvoiceType()));
+                }
+
+                invoiceDTO.getInvoiceHead().setInvoiceType(invoiceType.getInvoiceTypeCode());
+                invoiceDTO.getInvoiceHead().setInvoiceTypeId(invoiceType.getId());
+                invoiceDTO.getInvoiceHead().setInvoiceTypeName(invoiceType.getInvoiceTypeName());
+            }
+
+            return invoiceDTO;
+        }
+
+
         invoiceResult.getInvoiceHead().setCheckResult(true);
-        invoiceResult.getInvoiceHead().setCreatedMethod(invoiceDTO.getInvoiceHead().getCreatedMethod());
-        invoiceResult = insertInvoice(invoiceResult);
-
         return invoiceResult;
     }
 

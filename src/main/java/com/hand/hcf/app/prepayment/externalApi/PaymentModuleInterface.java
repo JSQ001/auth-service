@@ -1,13 +1,17 @@
 package com.hand.hcf.app.prepayment.externalApi;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.CashDefaultFlowItemCO;
-import com.hand.hcf.app.common.co.CashTransactionClassCO;
-import com.hand.hcf.app.common.co.CashTransactionClassForOtherCO;
-import com.hand.hcf.app.common.co.CashTransactionDataCreateCO;
+import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.payment.implement.web.PaymentImplementController;
+import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 //import com.hand.hcf.app.apply.payment.PaymentClient;
 //import com.hand.hcf.app.apply.payment.dto.*;
@@ -19,15 +23,12 @@ import java.util.List;
 @Service
 public class PaymentModuleInterface {
     //jiu.zhao 支付
-    /*private static final Logger log = LoggerFactory.getLogger(PaymentModuleInterface.class);
+    private static final Logger log = LoggerFactory.getLogger(PaymentModuleInterface.class);
 
     @Autowired
-    private  PaymentClient paymentClient;
+    private PaymentImplementController paymentClient;
     @Autowired
     private MapperFacade mapper;
-
-
-
 
 
     public  List<PaymentDocumentAmountCO> getPrepaymentPayAndReturnAmount(List<Long> headerIds, Boolean flag, Long employeeId, Long companyId, Long typeId) {
@@ -39,7 +40,6 @@ public class PaymentModuleInterface {
         return paymentClient.listAmountByPrepaymentLineIds(lines);
     }
 
-
     public  List<CashWriteOffDocumentAmountCO> getCashWriteOffDocumentAmountDTOByInput(Double noWriteOffDocumentAmountFrom, Double noWriteOffDocumentAmountTo, Long setOfBooksId) {
         return paymentClient.listDocumentByWriteOffAmount(noWriteOffDocumentAmountFrom != null ?
                         BigDecimal.valueOf(noWriteOffDocumentAmountFrom) : null,
@@ -47,14 +47,13 @@ public class PaymentModuleInterface {
 
     }
 
-    public  Map<Long, List<PublicReportWriteOffCO>> getPrepaymentLineWriteInfo(Long prepaymentHeaderId, List<Long> prepaymentLineIds) {
+    public Map<Long, List<PublicReportWriteOffCO>> getPrepaymentLineWriteInfo(Long prepaymentHeaderId, List<Long> prepaymentLineIds) {
         PrepaymentDocumentIdsCO prepaymentDocumentIdsDTO = new PrepaymentDocumentIdsCO();
         prepaymentDocumentIdsDTO.setHeaderId(prepaymentHeaderId);
         prepaymentDocumentIdsDTO.setLineIds(prepaymentLineIds);
         return paymentClient.listReportWriteOffCO(prepaymentDocumentIdsDTO);
 
-    }*/
-
+    }
 
     public  boolean setPushPrepaymentToPayment(List<CashTransactionDataCreateCO> dataCOS) {
         /*ExceptionDetail exceptionDetail = paymentClient.saveTransactionDataBatch(dataCOS);

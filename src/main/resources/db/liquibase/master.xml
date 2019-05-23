@@ -43,7 +43,7 @@
     <include file="classpath:db/liquibase/expense/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/expense/changelog/initSql.xml" relativeToChangelogFile="false"/>
     <!-- 1.0.0  修改全部放到后面的版本分支上-->
-    <include file="classpath:db/liquibase/expense/version.1.0.0/release20190118.xml" relativeToChangelogFile="false"/>
+    <include file="classpath:db/liquibase/expense/changelog/release.1.0.5.xml" relativeToChangelogFile="false"/>
 	<!-- 1.1.0 版本-->
     <include file="classpath:db/liquibase/expense/changelog/release.1.1.0.xml" relativeToChangelogFile="false"/>
     <!-- 1.2.0 版本-->

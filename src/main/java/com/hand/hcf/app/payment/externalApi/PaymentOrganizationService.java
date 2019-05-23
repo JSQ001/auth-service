@@ -471,4 +471,21 @@ public class PaymentOrganizationService {
     public List<SetOfBooksInfoCO> getSetOfBooksBySetOfBooksCode(String setOfBooksCode) {
         return sobClient.getSetOfBooksBySetOfBooksCode(setOfBooksCode);
     }
+
+    /**
+     * 根据账套id获取账套信息，如果不存在则根据参数决定是否创建一个对象
+     * @param id
+     * @return
+     */
+    public SetOfBooksInfoCO getSetOfBooksInfoCOById(Long id, boolean isNullNew){
+        SetOfBooksInfoCO setOfBooksInfoCO = sobClient.getSetOfBooksById(id);
+        if (isNullNew) {
+            if (setOfBooksInfoCO == null) {
+                SetOfBooksInfoCO result = new SetOfBooksInfoCO();
+                result.setId(id);
+                return result;
+            }
+        }
+        return setOfBooksInfoCO;
+    }
 }

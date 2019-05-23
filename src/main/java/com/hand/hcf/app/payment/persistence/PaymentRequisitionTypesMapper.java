@@ -17,6 +17,8 @@ import java.util.List;
 public interface PaymentRequisitionTypesMapper extends BaseMapper<PaymentRequisitionTypes> {
      List<PaymentRequisitionTypes> selectAcpReqTypesByCompanyId(@Param("setOfBooksId") Long setOfBooksId, @Param("companyId") Long companyId);
 
+    List<PaymentRequisitionTypes> selectAcpReqTypesByCompanyIdEnable(@Param("setOfBooksId") Long setOfBooksId, @Param("enabled") Boolean enabled);
+
     List<PaymentRequisitionTypes> selectByUser(RowBounds page,
                                                @Param("setOfBooksId") Long setOfBooksId,
                                                @Param("companyId") Long companyId,

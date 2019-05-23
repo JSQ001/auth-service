@@ -259,8 +259,8 @@ public class InvoiceHead extends Domain {
      * 认证状态
      */
     @TableField("certification_status")
-    @ApiModelProperty(value = "认证状态",dataType = "Long")
-    private Long certificationStatus;
+    @ApiModelProperty(value = "认证状态",dataType = "String")
+    private String certificationStatus;
 
     /**
      * 认证日期
@@ -280,8 +280,8 @@ public class InvoiceHead extends Domain {
      * 发票状态
      */
     @TableField("invoice_status")
-    @ApiModelProperty(value = "发票状态",dataType = "Long")
-    private Long invoiceStatus;
+    @ApiModelProperty(value = "发票状态",dataType = "String")
+    private String invoiceStatus;
 
     /**
      * String格式的开票日期(给导出用)
@@ -330,5 +330,19 @@ public class InvoiceHead extends Domain {
     @TableField(exist = false)
     @ApiModelProperty(value = "发票行信息",dataType = "List<InvoiceLine>",readOnly = true)
     private List<InvoiceLine> invoiceLineList;
+
+    /**
+     * 发票查验失败原因
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "发票查验失败原因",dataType = "String",readOnly = true)
+    private String checkResultReason;
+
+    /**
+     * 发票类型编码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "发票类型编码",dataType = "String",readOnly = true)
+    private String invoiceType;
 
 }

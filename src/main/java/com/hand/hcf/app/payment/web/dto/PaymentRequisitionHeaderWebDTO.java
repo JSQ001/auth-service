@@ -1,10 +1,12 @@
 package com.hand.hcf.app.payment.web.dto;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -101,4 +103,26 @@ public class PaymentRequisitionHeaderWebDTO extends DomainObjectDTO {
     private String lastRejectType;
     private String rejectType;
     private String rejectReason;
+
+    /**
+     * 账套id
+     */
+    @TableField(exist = false)
+    @JsonSerialize(using = ToStringSerializer.class)
+    @ApiModelProperty(value = "账套id",dataType = "Long")
+    private Long setOfBooksId;
+
+    /**
+     * 账套代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套代码",dataType = "String")
+    private String setOfBooksCode;
+
+    /**
+     * 账套名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "账套名称",dataType = "String")
+    private String setOfBooksName;
 }

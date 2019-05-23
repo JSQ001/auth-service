@@ -12,6 +12,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -23,6 +25,7 @@ import java.util.List;
  * @Date: Created in 15:40 2018/4/3
  * @Modified by
  */
+@Api(tags="付款退款API")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/cash/refund")
@@ -48,8 +51,13 @@ public class CshTransactionDetailRefundController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/document/approve?documentType=PUBLIC_REPORT&documentHeaderId=1&tenantId=1&operatorId=1&operationType=1
      */
+    @ApiOperation(value = "【退票】查询支付明细", notes = "【退票】查询支付明细 开发：bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
-    public ResponseEntity<List<CashTransactionDetail>> queryByCondition(Pageable pageable,
+    public ResponseEntity<List<CashTransactionDetail>> queryByCondition(@ApiIgnore Pageable pageable,
                                                                         String billcode,
                                                                         String payDateFrom,
                                                                         String payDateTo,
@@ -166,8 +174,9 @@ public class CshTransactionDetailRefundController {
      *                 "companyId": "1"
      *                 }
      */
+    @ApiOperation(value = "【核销】保存退票数据", notes = "【核销】保存退票数据 开发：bin.xie")
     @PostMapping("/save")
-    public ResponseEntity<CashTransactionDetail> saveRefundData(@RequestBody CashTransactionDetail dto){
+    public ResponseEntity<CashTransactionDetail> saveRefundData(@ApiParam(value = "支付详情") @RequestBody CashTransactionDetail dto){
         return ResponseEntity.ok(service.saveRefundData(dto));
     }
     /**
@@ -258,8 +267,9 @@ public class CshTransactionDetailRefundController {
      *                 "companyId": "1"
      *                 }
      */
+    @ApiOperation(value = "【退票】修改退票数据", notes = "【退票】修改退票数据 开发：bin.xie")
     @PutMapping("/save")
-    public ResponseEntity<CashTransactionDetail> updateData(@RequestBody CashTransactionDetail dto){
+    public ResponseEntity<CashTransactionDetail> updateData(@ApiParam(value = "支付详情") @RequestBody CashTransactionDetail dto){
         return ResponseEntity.ok(service.updateData(dto));
     }
 
@@ -342,6 +352,7 @@ public class CshTransactionDetailRefundController {
      *                 "companyId": "1"
      *                 }
      */
+    @ApiOperation(value = "【核销】通过退票id查询退票数据", notes = "【核销】通过退票id查询退票数据 开发：bin.xie")
     @GetMapping("/query/{id}")
     public ResponseEntity<CashTransactionDetail> queryById(@PathVariable(value = "id") Long id){
         return ResponseEntity.ok(service.selectRefundById(id));
@@ -438,8 +449,12 @@ public class CshTransactionDetailRefundController {
      *                 }
      *                 ]
      */
-    @GetMapping("/query/myRefund")
-    public ResponseEntity<List<CashTransactionDetail>> queryMyRefundByCondition(Pageable pageable,
+    @ApiOperation(value = "【退票】查询当前用户的退票数据", notes = "【退票】查询当前用户的退票数据 开发：bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })    @GetMapping("/query/myRefund")
+    public ResponseEntity<List<CashTransactionDetail>> queryMyRefundByCondition(@ApiIgnore Pageable pageable,
                                                                                 String  billcode,//退款流水号
                                                                                 String    returnDateFrom,//退款日期从
                                                                                 String    returnDateTo, //退款日期至
@@ -548,6 +563,7 @@ public class CshTransactionDetailRefundController {
      *                 }
      *                 ]
      */
+    @ApiOperation(value = "【退票】查询当前用户的退票数据(指定id)", notes = "【退票】查询当前用户的退票数据(指定id) 开发:bin.xie")
     @GetMapping("/query/myRefund/{id}")
     public ResponseEntity<CashTransactionDetailRefundDTO> queryMyRefundById(@PathVariable(value = "id") Long id){
         return ResponseEntity.ok(service.queryMyRefundById(id));
@@ -561,6 +577,8 @@ public class CshTransactionDetailRefundController {
      * @apiParam (请求参数) {Long} id 退票数据的id
      *
      */
+
+    @ApiOperation(value = "【退票】删除退票数据(指定id)", notes = "【退票】删除退票数据(指定id) 开发:bin.xie")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteRefundById(@PathVariable(value = "id") Long id){
         service.deleteRefundById(id);
@@ -717,8 +735,10 @@ public class CshTransactionDetailRefundController {
      *                 "companyId": "1"
      *                 }
      */
+
+    @ApiOperation(value = "【退票】提交退票", notes = "【退票】提交退票 开发:bin.xie")
     @PostMapping("/operate")
-    public ResponseEntity<CashTransactionDetail> submitRefund(@RequestBody CashTransactionDetail dto){
+    public ResponseEntity<CashTransactionDetail> submitRefund(@ApiParam(value = "支付详情") @RequestBody CashTransactionDetail dto){
 
         return ResponseEntity.ok(service.submitRefund(dto));
     }
@@ -812,8 +832,14 @@ public class CshTransactionDetailRefundController {
      *                 }
      *                 ]
      */
+
+    @ApiOperation(value = "【退票】不检查查询退票", notes = "【退票】不检查查询退票 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/uncheck/query")
-    public ResponseEntity<List<CashTransactionDetail>> uncheckQuery(Pageable pageable,
+    public ResponseEntity<List<CashTransactionDetail>> uncheckQuery(@ApiIgnore Pageable pageable,
                                                                     String  billcode,//退款流水号
                                                                     String    returnDateFrom,//退款日期从
                                                                     String    returnDateTo, //退款日期至
@@ -1002,8 +1028,9 @@ public class CshTransactionDetailRefundController {
      *                 }
      *
      */
+    @ApiOperation(value = "【退票】退票审批", notes = "【退票】退票审批 开发:bin.xie")
     @PostMapping("/approved")
-    public ResponseEntity<CashTransactionDetail> approved(@RequestBody CashTransactionDetail dto){
+    public ResponseEntity<CashTransactionDetail> approved(@ApiParam(value = "支付详情") @RequestBody CashTransactionDetail dto){
 
         return ResponseEntity.ok(service.operate(dto));
     }
@@ -1168,8 +1195,9 @@ public class CshTransactionDetailRefundController {
      *                 }
      *
      */
+    @ApiOperation(value = "【退票】退票被拒绝", notes = "【退票】退票被拒绝 开发:bin.xie")
     @PostMapping("/rejected")
-    public ResponseEntity<CashTransactionDetail> rejected(@RequestBody CashTransactionDetail dto){
+    public ResponseEntity<CashTransactionDetail> rejected(@ApiParam(value = "支付详情") @RequestBody CashTransactionDetail dto){
 
         return ResponseEntity.ok(service.operate(dto));
     }
@@ -1335,8 +1363,13 @@ public class CshTransactionDetailRefundController {
      *                 }]
      *
      */
+    @ApiOperation(value = "【退票】检查查询", notes = "【退票】检查查询 开发:bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/checked/query")
-    public ResponseEntity<List<CashTransactionDetail>> checkedQuery(Pageable pageable,
+    public ResponseEntity<List<CashTransactionDetail>> checkedQuery(@ApiIgnore Pageable pageable,
                                                                     String  billcode,//退款流水号
                                                                     String    returnDateFrom,//退款日期从
                                                                     String    returnDateTo, //退款日期至
@@ -1448,6 +1481,8 @@ public class CshTransactionDetailRefundController {
      *                 }]
      *
      */
+
+    @ApiOperation(value = "【退票】收款查询", notes = "【退票】收款查询 开发:bin.xie")
     @GetMapping("/partner/query/{type}/{flag}")
     public ResponseEntity<List<PartnerSelectDTO>> listPartnerSelect(@PathVariable(value = "type") int type,
                                                                     @PathVariable(value = "flag") int flag){
