@@ -21,6 +21,7 @@ import com.hand.hcf.app.expense.type.domain.ExpenseType;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.util.DataAuthorityUtil;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.implement.web.AuthorizeControllerImpl;
 import com.hand.hcf.app.mdata.implement.web.ContactControllerImpl;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
@@ -199,7 +200,8 @@ public class ExpenseAccrualTypeService extends ServiceImpl<ExpenseAccrualTypeMap
         ).size() > 0){
             throw new BizException(RespCode.EXPENSE_ACCRUAL_TYPE_CODE_IS_EXISTS);
         }
-
+        Long tenantId = OrgInformationUtil.getCurrentTenantId();
+        expenseAccrualType.setTenantId(tenantId);
         expenseAccrualTypeMapper.insert(expenseAccrualType);
 
         //插入 费用预提单类型关联费用类型
