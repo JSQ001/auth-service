@@ -1,12 +1,12 @@
-package com.hand.hcf.app.ant.appendix.service;
+package com.hand.hcf.app.ant.attachment.service;
 
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.ant.appendix.domain.AttachmentType;
-import com.hand.hcf.app.ant.appendix.domain.ExpReportTypeAttchment;
-import com.hand.hcf.app.ant.appendix.persistence.AttachmentTypeMapper;
-import com.hand.hcf.app.ant.appendix.persistence.ExpReportTypeAttchMapper;
+import com.hand.hcf.app.ant.attachment.domain.AttachmentType;
+import com.hand.hcf.app.ant.attachment.domain.ExpReportTypeAttchment;
+import com.hand.hcf.app.ant.attachment.persistence.AttachmentTypeMapper;
+import com.hand.hcf.app.ant.attachment.persistence.ExpReportTypeAttchMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @description:  单据类型附件权限设置service
