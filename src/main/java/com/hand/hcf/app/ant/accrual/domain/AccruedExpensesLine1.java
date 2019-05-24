@@ -2,7 +2,9 @@ package com.hand.hcf.app.ant.accrual.domain;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @description: 预提报账单行表1
@@ -11,6 +13,8 @@ import lombok.Data;
  * @date: 2019/5/20
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("exp_accrued_expenses_line1")
 public class AccruedExpensesLine1 extends Domain {
 

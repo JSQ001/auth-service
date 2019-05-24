@@ -3,7 +3,9 @@ package com.hand.hcf.app.ant.accrual.domain;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -17,6 +19,8 @@ import java.util.UUID;
  * @date: 2019/5/20
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @TableName("exp_accrued_expenses_header")
 public class AccruedExpensesHeader extends Domain {
     /**
