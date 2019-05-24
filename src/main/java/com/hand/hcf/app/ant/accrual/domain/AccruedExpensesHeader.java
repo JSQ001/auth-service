@@ -79,11 +79,23 @@ public class AccruedExpensesHeader extends Domain {
     @TableField(exist = false)
     private String applicantCode;
 
+
+    /**
+     * 责任人编码
+     */
+    @TableField(exist = false)
+    private String demanderCode;
     /**
      * 责任方
      */
     @TableField(value = "demander_id")
     private Long demanderId;
+
+    /**
+     * 责任人名称
+     */
+    @TableField(exist = false)
+    private String demanderName;
 
     /**
      * 币种
@@ -158,5 +170,30 @@ public class AccruedExpensesHeader extends Domain {
      */
     @TableField(exist = false)
     private UUID formOid;
+
+    //公司名称
+    @TableField(exist = false)
+    private String companyName;
+
+    //币种名称
+    @TableField(exist = false)
+    private String currencyName;
+
+
+    /**
+     * 期间从
+     */
+    @TableField(value = "from_date")
+    private String fromDate;
+
+    /**
+     * 期间至
+     */
+    @TableField(value = "to_date")
+    private String toDate;
+
+    //期间范围--只有年月
+    @TableField(exist = false)
+    private String fromToPeriod;
 
 }
