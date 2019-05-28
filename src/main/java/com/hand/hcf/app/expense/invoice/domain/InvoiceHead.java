@@ -284,6 +284,14 @@ public class InvoiceHead extends Domain {
     private Long invoiceStatus;
 
     /**
+     * 公司
+     */
+    @NotNull
+    @TableField(value = "company_id")
+    @ApiModelProperty(value = "公司",dataType = "Long")
+    private Long companyId;
+
+    /**
      * String格式的开票日期(给导出用)
      */
     @TableField(exist = false)
@@ -330,5 +338,18 @@ public class InvoiceHead extends Domain {
     @TableField(exist = false)
     @ApiModelProperty(value = "发票行信息",dataType = "List<InvoiceLine>",readOnly = true)
     private List<InvoiceLine> invoiceLineList;
+
+    /**
+     * 公司名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "公司名称",dataType = "String",readOnly = true)
+    private String companyName;
+    /**
+     * 公司代码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "公司代码",dataType = "String",readOnly = true)
+    private String companyCode;
 
 }

@@ -27,9 +27,9 @@ public class InvoiceTypeMouldHeadColumn extends Domain {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long tenantId;
 
-    //发票类型ID
-    @TableField("invoice_type_id")
-    private Long invoiceTypeId;
+    //模板ID
+    @TableField("template_id")
+    private Long templateId;
 
     //开票日期（不显示：DISABLED；可填写：ENABLED；可填且必填: REQUIRED）
     @TableField("invoice_date")
@@ -103,6 +103,14 @@ public class InvoiceTypeMouldHeadColumn extends Domain {
     //销方开户行/账号（不显示：DISABLED；可填写：ENABLED；可填且必填: REQUIRED）
     @TableField("saler_account")
     private String salerAccount;
+
+    //发票类型ID（不显示：DISABLED；可填写：ENABLED；可填且必填: REQUIRED）
+    @TableField("invoice_type_id")
+    private String invoiceTypeId;
+
+    //OU公司（不显示：DISABLED；可填写：ENABLED；可填且必填: REQUIRED）
+    @TableField("company_id")
+    private String companyId;
 
 }
 

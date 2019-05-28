@@ -26,9 +26,9 @@ public class InvoiceTypeMouldLineColumn extends Domain {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long tenantId;
 
-    //发票类型ID
-    @TableField("invoice_type_id")
-    private Long invoiceTypeId;
+    //模板ID
+    @TableField("template_id")
+    private Long templateId;
 
     //货物或应税劳务、服务名称（不显示：DISABLED；可填写：ENABLED；可填且必填: REQUIRED）
     private String goodsName;

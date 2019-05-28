@@ -30,9 +30,9 @@ public class InvoiceTypeMouldController {
         return ResponseEntity.ok(invoiceTypeMouldService.insertOrUpdateInvoiceTypeMould(invoiceTypeMouldDTO));
     }
 
-    @GetMapping(value = "/query/{invoiceTypeId}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/query/{templateId}",produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "根据发票类型Id获取发票模板", notes = "根据发票类型Id获取发票模板 开发:shaofeng.zheng")
-    public ResponseEntity<InvoiceTypeMouldDTO> getInvoiceTypeMouldByTypeId(@PathVariable("invoiceTypeId") Long invoiceTypeId ){
-        return ResponseEntity.ok(invoiceTypeMouldService.getInvoiceTypeMouldByTypeId(invoiceTypeId));
+    public ResponseEntity<InvoiceTypeMouldDTO> getInvoiceTypeMouldByTypeId(@PathVariable("templateId") Long templateId ){
+        return ResponseEntity.ok(invoiceTypeMouldService.getInvoiceTypeMouldByTypeId(templateId));
     }
 }

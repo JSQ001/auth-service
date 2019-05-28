@@ -39,7 +39,7 @@ public class InvoiceTypeMouldService {
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
         InvoiceTypeMouldHeadColumn head = invoiceTypeMouldDTO.getInvoiceTypeMouldHeadColumn();
         InvoiceTypeMouldLineColumn line = invoiceTypeMouldDTO.getInvoiceTypeMouldLineColumn();
-        InvoiceType invoiceType = invoiceTypeService.selectById(head.getInvoiceTypeId());
+        InvoiceType invoiceType = invoiceTypeService.selectById(head.getTemplateId());
         if(invoiceType == null){
             throw new BizException(RespCode.INVOICE_TYPE_NOT_EXIST);
         }
@@ -68,8 +68,8 @@ public class InvoiceTypeMouldService {
      * @param invoiceTypeId 发票类型Id
      * @return
      */
-    public InvoiceTypeMouldDTO getInvoiceTypeMouldByTypeId(Long invoiceTypeId) {
-        InvoiceType invoiceType = invoiceTypeService.selectById(invoiceTypeId);
+    public InvoiceTypeMouldDTO getInvoiceTypeMouldByTypeId(Long templateId) {
+        InvoiceType invoiceType = invoiceTypeService.selectById(templateId);
         if(invoiceType == null){
             throw new BizException(RespCode.INVOICE_TYPE_NOT_EXIST);
         }
@@ -77,10 +77,10 @@ public class InvoiceTypeMouldService {
                 .builder()
                 .invoiceTypeMouldHeadColumn(headColumnService.selectOne(
                         new EntityWrapper<InvoiceTypeMouldHeadColumn>()
-                                .eq("invoice_type_id",invoiceTypeId)))
+                                .eq("template_id",templateId)))
                 .invoiceTypeMouldLineColumn(lineColumnService.selectOne(
                         new EntityWrapper<InvoiceTypeMouldLineColumn>()
-                                .eq("invoice_type_id",invoiceTypeId)))
+                                .eq("template_id",templateId)))
                 .build();
       return invoiceTypeMouldDTO;
     }
