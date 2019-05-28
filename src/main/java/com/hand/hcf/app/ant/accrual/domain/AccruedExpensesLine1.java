@@ -1,4 +1,4 @@
-package com.hand.hcf.app.ant.accrualExpense.domain;
+package com.hand.hcf.app.ant.accrual.domain;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;

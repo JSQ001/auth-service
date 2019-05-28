@@ -1,5 +1,5 @@
-package com.hand.hcf.app.ant.appendix.persistence;
-import com.hand.hcf.app.ant.appendix.domain.AttachmentType;
+package com.hand.hcf.app.ant.attachment.persistence;
+import com.hand.hcf.app.ant.attachment.domain.AttachmentType;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 
 /**
