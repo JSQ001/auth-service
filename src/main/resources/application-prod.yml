@@ -3,7 +3,7 @@ server:
 spring:
   dbType: mysql
   datasource:
-    url: jdbc:mysql://30.50.48.63:3306/ali_dev?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://30.50.48.76:3306/ali_dev?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
     username: ali_dev
     password: ali_dev
     maximum-pool-size: 10
