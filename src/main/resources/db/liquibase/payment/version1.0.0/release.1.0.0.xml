@@ -337,7 +337,6 @@
     </changeSet>
 
     <changeSet id="201709061557001" author="liang.liu">
-        <validCheckSum>7:6f857aaa89a7f75b8f26a63b8fa84761</validCheckSum>
         <createTable tableName="csh_payment_method" remarks="付款方式表">
             <column name="id" type="bigint" remarks="付款方式id">
                 <constraints primaryKey="true"/>
@@ -1372,7 +1371,6 @@
                              constraintName="unq_acp_req_types_to_users"/>
     </changeSet>
     <changeSet id="201801240922001" author="bin.xie">
-        <validCheckSum>7:4b534f6486d9b37173c6c7a8a9c6ccb1</validCheckSum>
         <createTable tableName="acp_acp_requisition_hds" remarks="付款申请单头表">
             <column name="id" type="bigint" remarks="主键ID">
                 <constraints nullable="false" primaryKeyName="pk_acp_acp_requisition_hds" primaryKey="true"/>
@@ -1701,7 +1699,6 @@
         </createTable>
     </changeSet>
     <changeSet id="201805191549001" author="bin.xie">
-        <validCheckSum>7:bc97e647ce96a5f7aeeebc1211ff4e8c</validCheckSum>
         <dropColumn tableName="csh_transaction_detail" columnName="back_flash_status"/>
         <dropColumn tableName="csh_transaction_detail" columnName="return_date"/>
         <dropColumn tableName="csh_transaction_detail" columnName="back_flash_date"/>
@@ -1794,7 +1791,6 @@
         </addColumn>
     </changeSet>
     <changeSet id="201806071105001" author="bin.xie">
-        <validCheckSum>7:ea5b8eabc65f573d75d6ec7738f83648</validCheckSum>
         <sql>
             INSERT INTO csh_transaction_class
             (id, set_of_book_id, type_code, class_code, description, version_number, is_enabled, is_deleted,
@@ -1824,14 +1820,12 @@
     </changeSet>
 
     <changeSet id="201808221819001" author="bin.xie">
-        <validCheckSum>7:ce2f62a05bb634b9fd379c1be44f719d</validCheckSum>
         <dropNotNullConstraint tableName="csh_transaction_data" columnName="bank_branch_code" columnDataType="varchar(200)"/>
         <dropNotNullConstraint tableName="csh_transaction_data" columnName="bank_branch_name" columnDataType="varchar(200)"/>
         <dropNotNullConstraint tableName="csh_transaction_data" columnName="partner_code" columnDataType="varchar(200)"/>
     </changeSet>
 
     <changeSet id="201808231100001" author="bin.xie">
-        <validCheckSum>7:d432d5bfcdda2eceb97c5b375db1d78a</validCheckSum>
         <dropNotNullConstraint tableName="csh_transaction_detail" columnName="write_off_amount" columnDataType="${amount}"/>
         <dropNotNullConstraint tableName="csh_transaction_detail" columnName="drawee_bank_number" columnDataType="varchar(200)"/>
         <dropNotNullConstraint tableName="csh_transaction_detail" columnName="drawee_bank_province_code" columnDataType="varchar(200)"/>
@@ -1872,7 +1866,6 @@
 
 
     <changeSet id="201809031707001" author="bin.xie">
-        <validCheckSum>7:33e062674f280ddcc47467885426af6a</validCheckSum>
         <renameColumn tableName="csh_banks_datas" oldColumnName="is_enabled" newColumnName="enabled" columnDataType="bit"/>
         <renameColumn tableName="csh_banks_datas" oldColumnName="is_deleted" newColumnName="deleted" columnDataType="bit"/>
 

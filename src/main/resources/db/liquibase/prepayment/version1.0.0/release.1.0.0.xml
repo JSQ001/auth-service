@@ -133,7 +133,6 @@
         <addUniqueConstraint tableName="csh_sob_pay_req_t_ass_company" columnNames="sob_pay_req_type_id,company_id"/>
     </changeSet>
     <changeSet id="201710261719001" author="baochao.chen">
-        <validCheckSum>7:c3dc2b89ed529d9737f3b421798975a6</validCheckSum>
         <createTable tableName="csh_payment_requisition_head" remarks="预付款单头表">
             <column name="id" type="bigint" remarks="id">
                 <constraints nullable="false"

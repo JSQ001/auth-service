@@ -224,7 +224,6 @@
     </changeSet>
 
     <changeSet id="201903180928001" author="shaofeng.zheng">
-        <validCheckSum>8:2556d0c699a08072f6cf70e98387965f</validCheckSum>
         <dropNotNullConstraint tableName="sys_code_value_temp" columnName="value" columnDataType="varchar(200)"/>
     </changeSet>
 
@@ -247,7 +246,6 @@
     </changeSet>
 
     <changeSet id="201903261649001" author="bin.xie">
-        <validCheckSum>8:d5174bac2edce8e62013d2f118a4d482</validCheckSum>
         <addColumn tableName="sys_lov">
             <column name="remarks" type="varchar(1024)" remarks="描述"/>
         </addColumn>
@@ -265,7 +263,6 @@
     </changeSet>
 
     <changeSet id="201904011530001" author="bin.xie">
-        <validCheckSum>8:81d9322fe1fc66f631fe4960e5a2ce2c</validCheckSum>
         <addColumn tableName="sys_page_list">
             <column name="full_router" type="varchar(255)" remarks="全路由"/>
         </addColumn>

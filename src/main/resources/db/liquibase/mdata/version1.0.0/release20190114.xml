@@ -757,7 +757,6 @@
     </changeSet>
 
     <changeSet id="201901251538003" author="yuan.liu">
-        <validCheckSum>8:e1caf60c25b325367b7dcefe22999d63</validCheckSum>
         <comment>初始化sys_location_detail</comment>
         <loadData encoding="UTF-8"
                   file="db/liquibase/mdata/init/csv/sys_location_detail.csv"
@@ -1225,8 +1224,6 @@
         </sql>
     </changeSet>
     <changeSet id="201901081700001" author="zhipeng.chen">
-       <!-- <validCheckSum>8:606598e687dc0491bfdc2caaa9118225</validCheckSum>-->
-       <validCheckSum>8:f1dbc645b8de63225504204aba0abe27</validCheckSum>
         <sql>
             insert into sys_parameter_setting(
             id,
