@@ -29,8 +29,8 @@ public class AttachmentType extends Domain implements Serializable {
      * 附件类型名称
      */
     @NotNull
-    @TableField("attachment_type_name")
-    private String attachmentTypeName;
+    @TableField("attachment_name")
+    private String attachmentName;
 
 
     /**

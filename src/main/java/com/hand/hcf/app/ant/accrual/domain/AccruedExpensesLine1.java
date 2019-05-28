@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
  * @date: 2019/5/20
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @TableName("exp_accrued_expenses_line1")
 public class AccruedExpensesLine1 extends Domain {
 
