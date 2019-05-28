@@ -179,13 +179,6 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
     public List<ExpReportTypeAttchment> pageAttachmentSettingByCond(String docTypeCode,String dcoTypeName, Page page) {
         Long tenantId = OrgInformationUtil.getCurrentTenantId();
         Long setOfBooksId = OrgInformationUtil.getCurrentSetOfBookId();
-    /*    String reportTypeId = null;
-        if (StringUtils.isNotEmpty(reportTypeId)) {
-            ExpReportTypeAttchment expReportTypeAttchment = expReportTypeAttchMapper.selectById(reportTypeId);
-            if (null != expReportTypeAttchment) {
-                docTypeCode = expReportTypeAttchment.getDocTypeCode();
-            }
-        }*/
         List<ExpReportTypeAttchment> list = expReportTypeAttchMapper.selectPage(page,
                 new EntityWrapper<ExpReportTypeAttchment>()
                         .eq("tenant_id", tenantId)
@@ -295,16 +288,10 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
         }
 
         String dataAuthLabel = null;
-       /* if (dataAuthFlag) {
-            Map<String, String> map = new HashMap<>();
-            map.put(DataAuthorityUtil.TABLE_NAME, "exp_accrual_type");
-            map.put(DataAuthorityUtil.SOB_COLUMN, "set_of_books_id");
-            dataAuthLabel = DataAuthorityUtil.getDataAuthLabel(map);
-        }*/
         list = accrualExpenseTypeMapper.selectPage(page,
                 new EntityWrapper<ExpenseAccrualType>()
                         .eq("set_of_books_id", setOfBooksId)
-                        //.ne(expAccrualTypeCode != null, "exp_accrual_type_code", expAccrualTypeCode)
+                        .like("exp_accrual_type_code", expAccrualTypeCode, SqlLike.DEFAULT)
                         .like("exp_accrual_type_name", expAccrualTypeName, SqlLike.DEFAULT)
                         .eq("enable_flag", true)
                         .orderBy("exp_accrual_type_code")
@@ -334,7 +321,7 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
                 new EntityWrapper<ExpenseReportType>()
                         .where("deleted = false")
                         .eq("set_of_books_id", setOfBooksId)
-                        //.ne(reportTypeCode != null, "report_type_code", reportTypeCode)
+                        .like("report_type_code", reportTypeCode, SqlLike.DEFAULT)
                         .like("report_type_name", reportTypeName, SqlLike.DEFAULT)
                         .eq( "enabled", true)
                         .orderBy("report_type_code")

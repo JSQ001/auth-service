@@ -174,7 +174,6 @@ public class ExpReportTypeAttchController {
         List<ExpReportTypeAttchment> expReportTypeAttchmentList = expReportTypeAttchmentService.getByTypeCode(page);
         List<ExpenseReportType> expenseReportTypeList = expReportTypeAttchmentService.getExpenseReportTypeByCond(setOfBooksId,dcoTypeCode,dcoTypeName,page);
         List<ExpenseAccrualType> expenseAccrualTypeList = expReportTypeAttchmentService.getExpenseAccrualTypeByCond(setOfBooksId,dcoTypeCode,dcoTypeName,page);
-        System.out.println("expReportTypeAttchmentList:"+expReportTypeAttchmentList.size());
         for(ExpenseReportType expenseReportType: expenseReportTypeList){
             DocumentType documentType = new DocumentType();
             if(StringUtils.isNotEmpty(expenseReportType.getReportTypeCode()) && StringUtils.isNotEmpty(expenseReportType.getReportTypeName())) {
@@ -191,8 +190,6 @@ public class ExpReportTypeAttchController {
             }
             list.add(documentType);
         }
-        System.out.println("expenseReportTypeList:"+expenseReportTypeList.size());
-        System.out.println("expenseAccrualTypeList:"+expenseAccrualTypeList.size());
         for(ExpReportTypeAttchment expReportTypeAttchment :expReportTypeAttchmentList){
             String typeCode =  expReportTypeAttchment.getDocTypeCode();
             String typeName =  expReportTypeAttchment.getDocTypeName();
@@ -203,7 +200,6 @@ public class ExpReportTypeAttchController {
                 list.remove(documentTypeone);
             }
         }
-        System.out.println("list:"+list.size());
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity(list,httpHeaders, HttpStatus.OK);
     }
