@@ -6,7 +6,6 @@ import com.hand.hcf.app.expense.policy.service.ExpensePolicyRelatedCompanyServic
 import com.hand.hcf.app.expense.policy.service.ExpensePolicyService;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeService;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationTypeService;
-import com.hand.hcf.app.expense.type.domain.ExpenseTypeAssignCompany;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeAssignCompanyService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeAssignUserService;
 import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
@@ -14,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

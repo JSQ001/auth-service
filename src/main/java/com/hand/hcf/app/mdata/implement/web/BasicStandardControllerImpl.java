@@ -2,7 +2,8 @@ package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.BasicCO;
-
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
 import com.hand.hcf.app.mdata.department.domain.Department;
@@ -12,8 +13,6 @@ import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterService;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

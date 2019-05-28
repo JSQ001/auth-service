@@ -2,7 +2,6 @@ package com.hand.hcf.app.mdata.company.service;
 
 import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.plugins.Page;
-
 import com.hand.hcf.app.base.implement.web.CommonControllerImpl;
 import com.hand.hcf.app.common.co.CompanyAssociateUnitCO;
 import com.hand.hcf.app.core.exception.BizException;
@@ -24,7 +23,6 @@ import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterS
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;
 import com.hand.hcf.app.mdata.utils.ParameterCodeConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

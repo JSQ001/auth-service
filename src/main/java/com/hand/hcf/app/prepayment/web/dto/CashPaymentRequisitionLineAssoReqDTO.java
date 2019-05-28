@@ -1,7 +1,5 @@
 package com.hand.hcf.app.prepayment.web.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.prepayment.domain.CashPaymentRequisitionLine;
 import lombok.AllArgsConstructor;
 import lombok.Data;

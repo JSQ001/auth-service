@@ -1,17 +1,11 @@
 package com.hand.hcf.app.base.user.web;
 
-import com.hand.hcf.app.base.tenant.domain.TenantProtocol;
 import com.hand.hcf.app.base.tenant.service.TenantProtocolService;
-import com.hand.hcf.app.base.user.constant.AccountConstants;
-import com.hand.hcf.app.base.user.domain.User;
-import com.hand.hcf.app.base.user.dto.PasswordRuleDTO;
 import com.hand.hcf.app.base.user.dto.UserDTO;
 import com.hand.hcf.app.base.user.service.LoginAttemptService;
 import com.hand.hcf.app.base.user.service.UserService;
 import com.hand.hcf.app.base.userRole.service.UserRoleService;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.exception.core.ValidationError;
-import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for managing the current user's account.

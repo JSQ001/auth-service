@@ -2,24 +2,15 @@ package com.hand.hcf.app.mdata.dataAuthority.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthTableProperty;
 import com.hand.hcf.app.mdata.dataAuthority.service.DataAuthTablePropertyService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.PaginationUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URISyntaxException;

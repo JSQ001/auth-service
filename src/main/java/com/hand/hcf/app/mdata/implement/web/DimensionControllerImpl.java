@@ -7,13 +7,11 @@ import com.hand.hcf.app.common.co.DimensionCO;
 import com.hand.hcf.app.common.co.DimensionDetailCO;
 import com.hand.hcf.app.common.co.DimensionItemCO;
 import com.hand.hcf.app.common.enums.MdataRangeEnum;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItem;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemService;
 import com.hand.hcf.app.mdata.dimension.service.DimensionService;
-
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

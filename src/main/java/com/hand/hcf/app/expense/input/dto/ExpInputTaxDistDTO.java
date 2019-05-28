@@ -1,8 +1,6 @@
 package com.hand.hcf.app.expense.input.dto;
 
 import com.baomidou.mybatisplus.annotations.TableField;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,13 +1,12 @@
 package com.hand.hcf.app.mdata.parameter.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.parameter.domain.ParameterSetting;
 import com.hand.hcf.app.mdata.parameter.dto.ParameterSettingDTO;
 import com.hand.hcf.app.mdata.parameter.enums.ParameterLevel;
 import com.hand.hcf.app.mdata.parameter.service.ParameterSettingService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

@@ -14,7 +14,6 @@ import org.apache.ibatis.reflection.invoker.MethodInvoker;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

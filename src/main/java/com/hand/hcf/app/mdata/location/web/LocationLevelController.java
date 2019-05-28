@@ -10,7 +10,6 @@ import com.hand.hcf.app.mdata.location.dto.LocationLevelAssignDTO;
 import com.hand.hcf.app.mdata.location.service.LocationDTOService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelAssignService;
 import com.hand.hcf.app.mdata.location.service.LocationLevelService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -22,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
 
 import java.util.List;
 

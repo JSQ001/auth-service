@@ -1,8 +1,8 @@
 package com.hand.hcf.app.mdata.dataAuthority.adapter;
 
 import com.hand.hcf.app.common.co.DataAuthTablePropertyCO;
-import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthTableProperty;
 import com.hand.hcf.app.core.enums.DataAuthFilterMethodEnum;
+import com.hand.hcf.app.mdata.dataAuthority.domain.DataAuthTableProperty;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;

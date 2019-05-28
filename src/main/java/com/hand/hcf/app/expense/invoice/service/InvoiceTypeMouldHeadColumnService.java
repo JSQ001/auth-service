@@ -3,7 +3,6 @@ package com.hand.hcf.app.expense.invoice.service;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceTypeMouldHeadColumn;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceTypeMouldHeadColumnMapper;
-
 import org.springframework.stereotype.Service;
 
 /**

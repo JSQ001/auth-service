@@ -1,12 +1,8 @@
 package com.hand.hcf.app.mdata.supplier.service.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hand.hcf.app.common.co.VendorInfoCO;
-
 import lombok.Data;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import java.util.Date;
 import java.util.List;
 
 /**

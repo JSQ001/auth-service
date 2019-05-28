@@ -1,11 +1,11 @@
 package com.hand.hcf.app.mdata.system.service;
 
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.system.domain.MobileValidate;
 import com.hand.hcf.app.mdata.system.persistence.MobileValidateMapper;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.service.BaseI18nService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

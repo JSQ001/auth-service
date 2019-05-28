@@ -6,7 +6,6 @@ import com.hand.hcf.app.common.co.CashPaymentRequisitionHeaderCO;
 import com.hand.hcf.app.prepayment.implement.web.ImplementController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * <p>

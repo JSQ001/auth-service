@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenterGroup;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.ResponsibilityCenterGroupService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;

@@ -1,6 +1,5 @@
 package com.hand.hcf.app.expense.invoice.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.annotations.ApiModel;

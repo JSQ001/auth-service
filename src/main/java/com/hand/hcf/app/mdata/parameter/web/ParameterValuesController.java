@@ -5,7 +5,6 @@ import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.parameter.enums.ParameterLevel;
 import com.hand.hcf.app.mdata.parameter.service.ParameterValuesService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

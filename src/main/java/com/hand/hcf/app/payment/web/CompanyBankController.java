@@ -6,6 +6,7 @@ import com.hand.hcf.app.payment.domain.CompanyBank;
 import com.hand.hcf.app.payment.service.CompanyBankService;
 import com.hand.hcf.app.payment.utils.MyBatisPageUtil;
 import com.hand.hcf.app.payment.web.dto.CompanyBankDTO;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;

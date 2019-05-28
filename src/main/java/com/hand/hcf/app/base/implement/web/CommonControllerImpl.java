@@ -11,7 +11,6 @@ import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.common.co.TenantCO;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.annotation.I18nField;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import io.swagger.annotations.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

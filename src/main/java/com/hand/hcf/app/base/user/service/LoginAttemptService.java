@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.user.service;
 
-import com.hand.hcf.app.base.system.constant.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

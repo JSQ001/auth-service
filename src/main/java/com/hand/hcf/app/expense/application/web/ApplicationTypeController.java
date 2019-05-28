@@ -2,7 +2,6 @@ package com.hand.hcf.app.expense.application.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.application.domain.ApplicationType;
 import com.hand.hcf.app.expense.application.domain.ApplicationTypeAssignCompany;

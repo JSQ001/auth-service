@@ -1,6 +1,5 @@
 package com.hand.hcf.app.auth.service;
 
-import com.hand.hcf.app.auth.constant.CacheConstants;
 import com.hand.hcf.app.auth.dto.ClientDTO;
 import com.hand.hcf.app.auth.persistence.OauthMapper;
 import com.hand.hcf.app.auth.security.BaseTokenService;

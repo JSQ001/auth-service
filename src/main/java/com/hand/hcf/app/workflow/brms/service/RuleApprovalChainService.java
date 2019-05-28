@@ -9,7 +9,6 @@ import com.hand.hcf.app.workflow.brms.persistence.RuleApprovalChainMapper;
 import com.hand.hcf.app.workflow.brms.util.cache.CacheNames;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;

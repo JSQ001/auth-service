@@ -3,7 +3,6 @@ package com.hand.hcf.app.workflow.dto.transfer;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.Value;
 
 import java.util.UUID;
 

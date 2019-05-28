@@ -1,19 +1,10 @@
 package com.hand.hcf.app.workflow.service;
 
-import com.hand.hcf.app.common.co.WorkflowMessageCO;
-import com.hand.hcf.app.common.enums.DocumentOperationEnum;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
-import com.hand.hcf.app.workflow.domain.WorkFlowEventLogs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * Created by houyin.zhang@hand-china.com on 2018/12/10.

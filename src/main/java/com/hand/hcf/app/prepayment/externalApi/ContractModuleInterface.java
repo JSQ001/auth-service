@@ -2,9 +2,8 @@ package com.hand.hcf.app.prepayment.externalApi;
 
 import com.hand.hcf.app.common.co.ContractDocumentRelationCO;
 import com.hand.hcf.app.common.co.ContractHeaderLineCO;
-import com.hand.hcf.app.prepayment.utils.ContractOperationType;
-import com.hand.hcf.app.prepayment.utils.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.prepayment.utils.RespCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,6 @@
 package com.hand.hcf.app.mdata.department.web;
 
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.department.domain.Department;
 import com.hand.hcf.app.mdata.department.dto.DepartmentAssignUserDTO;
@@ -11,7 +12,6 @@ import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
 import com.hand.hcf.app.mdata.system.constant.Constants;
 import com.hand.hcf.app.mdata.utils.HeaderUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.app.core.exception.BizException;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;

@@ -1,13 +1,11 @@
 package com.hand.hcf.app.base.tenant.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.system.service.FrontLocaleService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.tenant.dto.TenantDTO;
 import com.hand.hcf.app.base.tenant.dto.TenantRegisterDTO;
 import com.hand.hcf.app.base.tenant.service.TenantService;
 import com.hand.hcf.app.base.user.service.UserService;
-import com.hand.hcf.app.core.security.AuthoritiesConstants;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
@@ -21,9 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URISyntaxException;
 import java.util.List;

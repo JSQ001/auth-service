@@ -8,7 +8,6 @@ import com.hand.hcf.app.base.lov.web.dto.ColumnDTO;
 import com.hand.hcf.app.base.lov.web.dto.LovColumnInfoDTO;
 import com.hand.hcf.app.base.lov.web.dto.LovInfoDTO;
 import com.hand.hcf.app.base.lov.web.dto.SearchColumnDTO;
-import com.hand.hcf.app.base.system.domain.Interface;
 import com.hand.hcf.app.base.system.domain.InterfaceRequest;
 import com.hand.hcf.app.base.system.domain.InterfaceResponse;
 import com.hand.hcf.app.base.system.service.InterfaceRequestService;
@@ -16,14 +15,14 @@ import com.hand.hcf.app.base.system.service.InterfaceResponseService;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**

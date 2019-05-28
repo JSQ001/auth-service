@@ -2,7 +2,6 @@ package com.hand.hcf.app.mdata.authorize.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.authorize.domain.FormCentralizedAuth;
 import com.hand.hcf.app.mdata.authorize.dto.FormCentralizedAuthDTO;

@@ -1,10 +1,9 @@
 package com.hand.hcf.app.mdata.department.web;
 
+import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.service.DepartmentPositionService;
-import com.hand.hcf.app.core.security.AuthoritiesConstants;
-import com.hand.hcf.app.core.service.BaseI18nService;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

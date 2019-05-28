@@ -4,13 +4,11 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hand.hcf.app.expense.common.domain.DimensionDomain;
-import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 /**
  * @author kai.zhang05@hand-china.com

@@ -1,7 +1,6 @@
 package com.hand.hcf.app.core.annotation;
 
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.core.annotation.I18nDomainScan;
 import com.hand.hcf.app.core.domain.BaseI18nDomain;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.util.ReflectionUtil;

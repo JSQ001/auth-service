@@ -2,7 +2,6 @@ package com.hand.hcf.app.common.co;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
