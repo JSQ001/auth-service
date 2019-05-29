@@ -85,7 +85,6 @@ public class ExpenseReportHeader extends Domain{
     /**
      * 币种
      */
-    @NotNull
     @TableField(value = "currency_code")
     @ApiModelProperty(value = "币种",dataType = "String",required = true)
     private String currencyCode;
@@ -105,7 +104,6 @@ public class ExpenseReportHeader extends Domain{
     /**
      * 汇率
      */
-    @NotNull
     @TableField(value = "exchange_rate")
     @ApiModelProperty(value = "汇率",dataType = "BigDecimal",required = true)
     private BigDecimal exchangeRate;
@@ -278,6 +276,12 @@ public class ExpenseReportHeader extends Domain{
     private String comparisonFlag;
 
     /**
+     * 是否多OU标志
+     */
+    @TableField("multiple_ou_flag")
+    private Boolean multipleOuFlag;
+
+    /**
      * 预算校验返回结果描述
      */
     @TableField(exist = false)
@@ -336,4 +340,5 @@ public class ExpenseReportHeader extends Domain{
      */
     @TableField(exist = false)
     private String comparisonFlagDesc;
+
 }
