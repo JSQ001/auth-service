@@ -16,7 +16,6 @@ import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.ParameterConstant;
 import com.hand.hcf.app.expense.common.utils.RespCode;
-import com.hand.hcf.app.expense.common.utils.SyncLockPrefix;
 import com.hand.hcf.app.expense.invoice.domain.*;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceDTO;
 import com.hand.hcf.app.expense.invoice.service.*;
@@ -32,6 +31,7 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.expense.type.web.dto.OptionDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import com.hand.hcf.app.mdata.implement.web.CompanyControllerImpl;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +39,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,6 +99,9 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private CompanyControllerImpl hcfOrganizationInterface;
 
 
     /**
@@ -222,6 +221,19 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             reportLine.setIndex(index);
             index ++;
             setExpenseReportLineField(reportLine);
+            CompanyCO otherCompany = hcfOrganizationInterface.getById(reportLine.getCompanyId());
+            String companyName = Optional
+                    .ofNullable(otherCompany)
+                    .map(u -> TypeConversionUtils.parseString(u.getName()))
+                    .orElseThrow(() -> new BizException(com.hand.hcf.app.payment.utils.RespCode.SYS_COMPANY_INFO_NOT_EXISTS));
+            String companyCode = Optional
+                    .ofNullable(otherCompany)
+                    .map(u -> TypeConversionUtils.parseString(u.getCompanyCode()))
+                    .orElseThrow(() -> new BizException(com.hand.hcf.app.payment.utils.RespCode.SYS_COMPANY_INFO_NOT_EXISTS));
+            reportLine.setCompanyCode(companyCode);
+            reportLine.setCompanyName(companyName);
+
+
         }
         return reportLineList;
     }

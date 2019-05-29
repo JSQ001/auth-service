@@ -359,4 +359,16 @@ public class ExpenseReportLine extends Domain{
     @TableField(exist = false)
     private String paymentTypeName;
 
+    /**
+     * 公司名称
+     */
+    @TableField(exist = false)
+    private String companyName;
+
+    /**
+     * 公司代码
+     */
+    @TableField(exist = false)
+    private String companyCode;
+
 }
