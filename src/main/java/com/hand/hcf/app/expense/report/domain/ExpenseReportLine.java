@@ -276,6 +276,20 @@ public class ExpenseReportLine extends Domain{
     private String paymentType;
 
     /**
+     * 受益期开始
+     */
+    @NotNull
+    @TableField(value = "expense_date_start")
+    private ZonedDateTime expenseDateStart;
+
+    /**
+     * 受益期结束
+     */
+    @NotNull
+    @TableField(value = "expense_date_end")
+    private ZonedDateTime expenseDateEnd;
+
+    /**
      * 附件OID集合
      */
     @TableField(exist = false)
