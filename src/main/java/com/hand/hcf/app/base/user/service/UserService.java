@@ -493,7 +493,7 @@ public class UserService extends BaseService<UserMapper, User> {
             this.changeLogin(user, email, mobile);
             user.setVersionNumber(oldUser.getVersionNumber());
             user.setLogin(org.springframework.util.StringUtils.hasText(user.getLogin())
-                    ? user.getLogin() : user.getMobile());
+                    ? user.getLogin() : user.getLogin());
             user.setActivated(user.getActivated() != null ? user.getActivated() : oldUser.getActivated());
         }
 
