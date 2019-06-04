@@ -142,11 +142,12 @@ public class ExpenseReportController {
                                                                          @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
                                                                          @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
                                                                          @ApiParam(value = "申请人id") @RequestParam(required = false) Long applicantId,
+                                                                         @ApiParam(value = "需求方id") @RequestParam(required = false) Long demanderId,
                                                                          @ApiParam(value = "状态") @RequestParam(required = false) Integer status,
-                                                                         @ApiParam(value = "币种") @RequestParam(required = false) String currencyCode,
+                                                                         @ApiParam(value = "OU") @RequestParam(required = false) Long companyId,
                                                                          @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
                                                                          @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal amountTo,
-                                                                         @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                                         @ApiParam(value = "摘要") @RequestParam(required = false) String remark,
                                                                          @ApiParam(value = "单据号") @RequestParam(required = false) String requisitionNumber,
                                                                          @ApiParam(value = "编辑中标识，为true时查询1001，1003，1005,2001的单据") @RequestParam(required = false,defaultValue = "false") Boolean editor,
                                                                          @ApiParam(value = "通过标识，为true时查询1002和1004的单据")  @RequestParam(required = false,defaultValue = "false") Boolean passed,
@@ -158,8 +159,9 @@ public class ExpenseReportController {
                 reqDateFrom,
                 reqDateTo,
                 applicantId,
+                demanderId,
                 status,
-                currencyCode,
+                companyId,
                 amountFrom,
                 amountTo,
                 remark,
@@ -202,6 +204,16 @@ public class ExpenseReportController {
     @ApiOperation(value = "保存费用行", notes = "保存费用行 开发:张开")
     public ResponseEntity<ExpenseReportLineDTO> saveExpenseReportLine(@ApiParam(value = "费用行") @RequestBody @Valid ExpenseReportLineDTO dto){
         return ResponseEntity.ok(expenseReportLineService.saveExpenseReportLine(dto,true));
+    }
+
+    /**
+     * 保存报账单行信息
+     */
+
+    @PostMapping("/line/report/save")
+    @ApiOperation(value = "保存报账单行", notes = "保存报账单行")
+    public ResponseEntity<ExpenseReportLineDTO> saveExpenseReportLineNew(@ApiParam(value = "报账单行") @RequestBody @Valid ExpenseReportLineDTO dto){
+        return ResponseEntity.ok(expenseReportLineService.saveExpenseReportLineNew(dto,true));
     }
 
     /**

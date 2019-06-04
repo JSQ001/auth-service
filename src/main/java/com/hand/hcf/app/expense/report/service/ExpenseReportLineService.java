@@ -217,7 +217,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         List<ExpenseReportLine> reportLineList = baseMapper.selectPage(page, new EntityWrapper<ExpenseReportLine>()
                 .eq("exp_report_header_id", headerId));
         for(ExpenseReportLine reportLine : reportLineList){
-            reportLine.setIconUrl(expenseTypeService.getTypeById(reportLine.getExpenseTypeId()).getIconUrl());
+            //reportLine.setIconUrl(expenseTypeService.getTypeById(reportLine.getExpenseTypeId()).getIconUrl());
             reportLine.setIndex(index);
             index ++;
             setExpenseReportLineField(reportLine);
@@ -271,6 +271,37 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         saveExpenseDocumentFields(line.getId(),line.getExpReportHeaderId(),dto.getFields(),expenseType.getId(),isNew);
         // 保存分摊行信息
         saveReportDistMessage(dto,line, expenseType,expenseReportHeader,lineDistRequired,isNew);
+        // 更新头金额
+        updateReportHeaderAmount(expenseReportHeader);
+        // 创建获取修改默认计划付款行
+        expenseReportPaymentScheduleService.saveDefaultPaymentSchedule(expenseReportHeader);
+        BeanUtils.copyProperties(line,dto);
+        return dto;
+    }
+
+    /**
+     * 保存报账单行
+     * @param dto
+     * @param lineDistRequired
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ExpenseReportLineDTO saveExpenseReportLineNew(ExpenseReportLineDTO dto,boolean lineDistRequired){
+        ExpenseReportLine line = new ExpenseReportLine();
+        BeanUtils.copyProperties(dto,line);
+        ExpenseReportHeader expenseReportHeader = checkExpenseLineInfoAndGetHeaderMessage(dto);
+        //判断是否新增
+        boolean isNew = false;
+        if(line.getId() == null){
+            isNew = true;
+            initExpenseReportLineMessage(expenseReportHeader,line);
+        }
+        //更新报账单行基本信息
+        insertOrUpdate(line);
+        // 保存发票信息
+        saveInvoiceMessage(dto,line);
+        // 保存分摊行信息
+        //saveReportDistMessage(dto,line,expenseReportHeader,lineDistRequired,isNew);
         // 更新头金额
         updateReportHeaderAmount(expenseReportHeader);
         // 创建获取修改默认计划付款行
@@ -451,7 +482,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
      * @param reportLine
      */
     private void setExpenseReportLineField(ExpenseReportLine reportLine){
-        ExpenseType expenseType = expenseTypeService.selectById(reportLine.getExpenseTypeId());
+        //ExpenseType expenseType = expenseTypeService.selectById(reportLine.getExpenseTypeId());
         //判断费用行是否存在发票信息
         List<InvoiceDTO> invoiceList = invoiceHeadService.getInvoicesByReportLineId(reportLine.getId());
         if (invoiceList.size() > 0){
@@ -459,11 +490,11 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
         } else {
             reportLine.setInvoiceExistsFlag(false);
         }
-        reportLine.setExpenseTypeName(expenseType.getName());
-        reportLine.setApplicationModel(expenseType.getApplicationModel());
-        reportLine.setContrastSign(expenseType.getContrastSign());
-        reportLine.setContrastAmount(expenseType.getAmount());
-        reportLine.setEntryMode(expenseType.getEntryMode());
+        //reportLine.setExpenseTypeName(expenseType.getName());
+        //reportLine.setApplicationModel(expenseType.getApplicationModel());
+        //reportLine.setContrastSign(expenseType.getContrastSign());
+        //reportLine.setContrastAmount(expenseType.getAmount());
+        //reportLine.setEntryMode(expenseType.getEntryMode());
         if(com.baomidou.mybatisplus.toolkit.StringUtils.isNotEmpty(reportLine.getAttachmentOid())){
             List<String> strings = Arrays.asList(reportLine.getAttachmentOid().split(","));
             reportLine.setAttachmentOidList(strings);

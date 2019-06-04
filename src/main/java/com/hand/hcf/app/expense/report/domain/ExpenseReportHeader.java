@@ -301,6 +301,18 @@ public class ExpenseReportHeader extends Domain{
     @ApiModelProperty(value = "申请人编码",dataType = "String", readOnly = true)
     private String applicantCode;
     /**
+     * 需求方名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "需求方名称",dataType = "String", readOnly = true)
+    private String demanderName;
+    /**
+     * 需求方编码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "需求方编码",dataType = "String", readOnly = true)
+    private String demanderCode;
+    /**
      * 表单ID
      */
     @TableField(exist = false)
@@ -340,5 +352,18 @@ public class ExpenseReportHeader extends Domain{
      */
     @TableField(exist = false)
     private String comparisonFlagDesc;
+
+    /**
+     * OU名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "OU名称",dataType = "String", readOnly = true)
+    private String companyName;
+    /**
+     * OU编码
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "OU编码",dataType = "String", readOnly = true)
+    private String companyCode;
 
 }

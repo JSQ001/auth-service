@@ -396,8 +396,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                                                          ZonedDateTime requisitionDateFrom,
                                                          ZonedDateTime requisitionDateTo,
                                                          Long applicantId,
+                                                         Long demanderId,
                                                          Integer status,
-                                                         String currencyCode,
+                                                         Long companyId,
                                                          BigDecimal amountFrom,
                                                          BigDecimal amountTo,
                                                          String remark,
@@ -412,8 +413,8 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(applicantId != null, "applicant_id", applicantId)
-                //.eq(status != null, "status", status)
-                .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "currency_code", currencyCode)
+                .eq(demanderId != null, "demander_id", demanderId)
+                .eq(companyId != null, "company_id", companyId)
                 .ge(amountFrom != null, "total_amount", amountFrom)
                 .le(amountTo != null, "total_amount", amountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
@@ -427,10 +428,21 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             wrapper = wrapper.eq(status != null, "status", status);
         }
         List<ExpenseReportHeader> expenseReportHeaders = baseMapper.selectPage(page, wrapper);
+
+        //更加id或code取name
         expenseReportHeaders.stream().forEach(expenseReportHeader -> {
-            ContactCO userById = organizationService.getUserById(expenseReportHeader.getApplicantId());
-            expenseReportHeader.setApplicantCode(userById.getEmployeeCode());
-            expenseReportHeader.setApplicantName(userById.getFullName());
+            //申请人
+            ContactCO applicantById = organizationService.getUserById(expenseReportHeader.getApplicantId());
+            expenseReportHeader.setApplicantCode(applicantById.getEmployeeCode());
+            expenseReportHeader.setApplicantName(applicantById.getFullName());
+            //需求方
+            ContactCO demanderById = organizationService.getUserById(expenseReportHeader.getDemanderId());
+            expenseReportHeader.setDemanderCode(demanderById.getEmployeeCode());
+            expenseReportHeader.setDemanderName(demanderById.getFullName());
+            //公司
+            CompanyCO companyById = organizationService.getCompanyById(expenseReportHeader.getCompanyId());
+            expenseReportHeader.setCompanyCode(companyById.getCompanyCode());
+            expenseReportHeader.setCompanyName(companyById.getName());
             // 单据类型
             ExpenseReportType expenseReportType = expenseReportTypeService.selectById(expenseReportHeader.getDocumentTypeId());
             expenseReportHeader.setDocumentTypeName(expenseReportType.getReportTypeName());

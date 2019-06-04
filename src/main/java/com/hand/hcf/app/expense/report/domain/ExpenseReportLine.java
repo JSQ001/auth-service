@@ -60,7 +60,6 @@ public class ExpenseReportLine extends Domain{
     /**
      * 费用发生日期
      */
-    @NotNull
     @TableField(value = "expense_date")
     private ZonedDateTime expenseDate;
 
@@ -110,7 +109,6 @@ public class ExpenseReportLine extends Domain{
     /**
      * 费用金额
      */
-    @NotNull
     @TableField(value = "expense_amount")
     private BigDecimal expenseAmount;
 
@@ -189,7 +187,6 @@ public class ExpenseReportLine extends Domain{
     /**
      * 付款方式类型（线上：ONLINE_PAYMENT；线下：OFFLINE_PAYMENT；落地文件：EBANK_PAYMENT）
      */
-    @NotNull
     @TableField(value = "payment_method")
     private String paymentMethod;
 
@@ -243,6 +240,12 @@ public class ExpenseReportLine extends Domain{
     private String accountName;
 
     /**
+     * 收款方银行分行
+     */
+    @TableField(value = "bank_branch")
+    private String bankBranch;
+
+    /**
      * 是否有票Y/N
      */
     @TableField(value = "is_ninvoiced")
@@ -266,8 +269,8 @@ public class ExpenseReportLine extends Domain{
      * 地区
      */
     @NotNull
-    @TableField(value = "district")
-    private String district;
+    @TableField(value = "city")
+    private String city;
 
     /**
      * 付款方式
@@ -353,7 +356,7 @@ public class ExpenseReportLine extends Domain{
      * 地区名称
      */
     @TableField(exist = false)
-    private String districtName;
+    private String cityName;
 
     /**
      * 收款方类型名称
