@@ -4,4 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.ant.taxreimburse.persistence.ExpBankFlowMapper">
 
+	<update id="updateBankFlow" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+		update
+		      exp_bank_flow
+		  set blend_status = '1'
+		where company_id = #{companyId}
+		  and currency_code = #{currencyCode}
+	</update>
 </mapper>

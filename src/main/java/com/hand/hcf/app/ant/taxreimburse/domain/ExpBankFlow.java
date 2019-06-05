@@ -2,6 +2,7 @@ package com.hand.hcf.app.ant.taxreimburse.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
@@ -75,15 +76,15 @@ public class ExpBankFlow extends Domain {
     /**
      * 勾兑状态
      */
-    @TableField("blend_status_code")
-    private String blendStatusCode;
+    @TableField(value = "blend_status", strategy = FieldStrategy.NOT_NULL)
+    private Boolean blendStatus;
 
 
     /**
      * 报账状态
      */
-    @TableField("status")
-    private Integer status;
+    @TableField(value = "status", strategy = FieldStrategy.NOT_NULL)
+    private Boolean status;
 
     /**
      * 以下字段表中不存在，用于显示在页面上
@@ -98,11 +99,11 @@ public class ExpBankFlow extends Domain {
     @TableField(exist = false)
     private String currencyName;
 
-    /**
+    /*    *//**
      * 勾兑状态描述
-     */
+     *//*
     @TableField(exist = false)
-    private String blendStatus;
+    private String blendStatus;*/
 
 
 }

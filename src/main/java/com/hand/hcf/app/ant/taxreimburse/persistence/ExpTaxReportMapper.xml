@@ -3,5 +3,33 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hand.hcf.app.ant.taxreimburse.persistence.ExpTaxReportMapper">
+    <select id="getBlendDataByGroup" resultType="com.hand.hcf.app.ant.taxreimburse.dto.TaxBlendDataDTO">
+      SELECT
+	     *
+        FROM
+	       (
+            SELECT
+	            etr.company_id,
+	            etr.currency_code,
+	            etr.request_amount_sum,
+	            ebf.flow_amount_sum
+            FROM
+	  ( SELECT company_id, currency_code, sum( request_amount ) request_amount_sum FROM exp_tax_report WHERE blend_status = '0' AND STATUS = '0' GROUP BY company_id, currency_code ) etr,
+	  ( SELECT company_id, currency_code, sum( flow_amount ) flow_amount_sum FROM exp_bank_flow WHERE blend_status = '0' AND STATUS = '0' GROUP BY company_id, currency_code ) ebf
+     WHERE
+	     etr.company_id = ebf.company_id
+	   AND etr.currency_code = ebf.currency_code
+	   ) tb
+     ORDER BY
+	     company_id,
+	     currency_code
+    </select>
 
+	<update id="updateTaxReport" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport">
+		update
+		      exp_tax_report
+		  set blend_status = '1'
+		where company_id = #{companyId}
+		  and currency_code = #{currencyCode}
+	</update>
 </mapper>
