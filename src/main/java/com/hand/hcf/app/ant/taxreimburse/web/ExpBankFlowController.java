@@ -98,7 +98,7 @@ public class ExpBankFlowController {
     }
 
     /**
-     * 导出银行流水数据
+     * 导出银行流水数据 url:/api/exp/bank/flow/export
      *
      * @param request
      * @param response
@@ -188,7 +188,7 @@ public class ExpBankFlowController {
     }
 
     /**
-     * 根据Id 批量删除银行流水数据
+     * 根据Id 批量删除银行流水数据 url:/api/exp/bank/flow/delete
      *
      * @param rowIds
      */

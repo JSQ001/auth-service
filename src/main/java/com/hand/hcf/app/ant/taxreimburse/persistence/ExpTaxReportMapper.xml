@@ -32,4 +32,20 @@
 		where company_id = #{companyId}
 		  and currency_code = #{currencyCode}
 	</update>
+
+	<select id="getCountBygroup" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport">
+		select count(*)
+		from exp_tax_report
+		where blend_status = '1' and STATUS = '0'
+		and company_id = #{companyId}
+		and currency_code = #{currencyCode}
+	</select>
+
+	<update id="updateStatusById" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport">
+		update
+		      exp_tax_report
+		  set status = '1'
+		where id = #{id}
+		and blend_status = '1' and STATUS = '0'
+	</update>
 </mapper>

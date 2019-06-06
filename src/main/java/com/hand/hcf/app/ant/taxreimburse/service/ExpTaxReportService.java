@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
 import com.hand.hcf.app.ant.taxreimburse.dto.TaxBlendDataDTO;
+import com.hand.hcf.app.ant.taxreimburse.persistence.ExpBankFlowMapper;
 import com.hand.hcf.app.ant.taxreimburse.persistence.ExpTaxReportMapper;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.persistence.SysCodeValeMapper;
@@ -20,7 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xu.chen02@hand-china.com
@@ -35,6 +40,9 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
     ExpTaxReportMapper expTaxReportMapper;
 
     @Autowired
+    ExpBankFlowMapper expBankFlowMapper;
+
+    @Autowired
     private CurrencyI18nMapper currencyI18nMapper;
 
     @Autowired
@@ -44,6 +52,10 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
     private CompanyService companyService;
 
     public final String WARNING = "不可删除已勾兑的数据！";
+
+    public final String WARNING1 = "存在其他已勾兑的数据！";
+
+    public final String WARNING2 = "未勾兑的数据不可报账！";
 
 
     /**
@@ -301,18 +313,77 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
      *
      * @param ids
      */
-    public void makeReimburse(String ids) {
+    public Boolean makeReimburse(String ids) {
+        Boolean flag = false;
         String idsArr[] = ids.split(",");
+        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
+        HashSet<String> hashSet = new HashSet<String>();
+        Map<Long,String> map = new HashMap<Long,String>();
+        //将所有id涉及到的companyId、currencyCode组合加入到map中，然后进行比较。
         for (int i = 0; i < idsArr.length; i++) {
             ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
-            //当勾兑状态为1或者true--已勾兑 才可以发起报账
-            if ((expTaxReport.getBlendStatus()) || (expTaxReport.getBlendStatus() == true)) {
-                expTaxReportMapper.deleteById(Long.valueOf(idsArr[i]));
+            Long companyId = expTaxReport.getCompanyId();
+            String currencyCode = expTaxReport.getCurrencyCode();
+            boolean blendStatus = expTaxReport.getBlendStatus();
+            boolean status = expTaxReport.getStatus();
+            if((blendStatus || blendStatus ==true) &&(status == false) ){
+                //当map中不存在此key,或者不存在此vlaue就加入--只有两种同时存在则不加入
+                while(!map.containsKey(companyId) || !map.containsValue(currencyCode)){
+                        map.put(companyId,currencyCode);
+                    }
+            } else{
+                throw new BizException(WARNING2);
             }
-            else {
-                throw new BizException(WARNING);
-            }
+            //第二种方式
+            /*if(blendStatus || blendStatus ==true){
+                String companyAndCurrency = companyId + "-" + currencyCode;
+                hashSet.add(companyAndCurrency);
+            }*/
+
         }
+        //循环获取map中的key,value
+        int sum = 0;//合计map中涉及到的数据的总计
+        for (Map.Entry<Long, String> entry : map.entrySet()) {
+            Long companyId = entry.getKey();
+            String currencyCode = entry.getValue();
+            Wrapper<ExpTaxReport> wrapper =
+                    new EntityWrapper<ExpTaxReport>()
+                            .eq(companyId != null, "company_id", companyId)
+                            .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(currencyCode), "currency_code", currencyCode)
+                            .eq("blend_status", '1')
+                            .eq("status", '0');
+
+            int count  = expTaxReportMapper.selectCount(wrapper);
+            sum =+ count;
+        }
+
+        //根据获取到的companyId、currencyCode查询此分组下已勾兑的未报账的所有数据，然后比较数量
+        // 判断是否全部勾选，若全部勾选，则进行发起报账
+        if(sum==idsArr.length){
+            //更新税金勾兑的数据的报账状态为已勾兑
+            for (int i = 0; i < idsArr.length; i++) {
+                ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
+                expTaxReport.setStatus(true);
+                expTaxReportMapper.updateById(expTaxReport);
+                //expTaxReportMapper.updateStatusById(Long.valueOf(idsArr[i]));
+            }
+            //更新已勾兑的税金申报数据关联的银行流水的报账状态为已报账
+            for (Map.Entry<Long, String> entry : map.entrySet()) {
+                Long companyId = entry.getKey();
+                String currencyCode = entry.getValue();
+                expBankFlowMapper.updateStatueByGroup(companyId,currencyCode);
+            }
+            flag = true;
+
+            //抽取基本
+        }else{
+            //若未全部勾选，则返回提示
+            throw new BizException(WARNING1);
+        }
+
+        //确认以上税金申报数据可以进行报账，然后关联流水数据--根据公司/币种/勾兑状态/报账状态进行，然后跳转页面，
+
+        return flag;
     }
 
 

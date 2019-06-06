@@ -14,8 +14,17 @@ import java.util.List;
  */
 public interface ExpTaxReportMapper extends BaseMapper<ExpTaxReport> {
 
+    //分组获取要勾兑的数据
     List<TaxBlendDataDTO> getBlendDataByGroup();
 
     //根据相同的公司和币种更新数据状态
     void updateTaxReport(Long companyId, String currencyCode);
+
+    //根据ou和币种查询数据的总数
+    int getCountBygroup(Long companyId, String currencyCode);
+
+    //根据id更新税金申报的数据的报账状态
+    void updateStatusById(Long id);
+
+
 }

@@ -120,7 +120,7 @@ public class ExpTaxReportController {
 
 
     /**
-     * 导出税金申报数据
+     * 导出税金申报数据 url:api/exp/tax/report/export
      *
      * @param request
      * @param response
@@ -210,7 +210,7 @@ public class ExpTaxReportController {
 
     /**
      * 根据Id 批量删除税金申报数据
-     *
+     * url:api/exp/tax/report/delete
      * @param ids
      */
     @DeleteMapping("/delete")
@@ -220,7 +220,7 @@ public class ExpTaxReportController {
 
 
     /**
-     * 自动勾兑
+     * 自动勾兑 url:api/exp/tax/report/auto/blend
      */
     @GetMapping("/auto/blend")
     public void autoBlend() {
@@ -242,6 +242,7 @@ public class ExpTaxReportController {
         }
     }
 
+
     @PostMapping("/saveorupdate")
     public ResponseEntity<List<ExpTaxReport>> saveExpTaxReport(@RequestParam String ids, @RequestBody List<ExpTaxReport> expTaxReportList) {
 
@@ -250,7 +251,7 @@ public class ExpTaxReportController {
     }
 
     /**
-     * 根据Id 批量删除税金申报数据
+     * 发起报账 url:/api/exp/bank/flow/make/report
      *
      * @param ids
      */

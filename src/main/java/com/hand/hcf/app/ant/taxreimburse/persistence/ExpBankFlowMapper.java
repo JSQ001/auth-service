@@ -16,4 +16,7 @@ public interface ExpBankFlowMapper extends BaseMapper<ExpBankFlow> {
     //根据相同的公司和币种更新数据状态
     void updateBankFlow(Long companyId, String currencyCode);
 
+    //根据相同的公司和币种更新数据状态
+    void updateStatueByGroup(Long companyId, String currencyCode);
+
 }
