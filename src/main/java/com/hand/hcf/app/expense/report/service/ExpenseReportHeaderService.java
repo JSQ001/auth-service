@@ -338,42 +338,12 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
         expenseReportHeaderDTO.setExpenseDimensions(expenseDimensions);
         setExpenseReportHeaderDto(expenseReportHeaderDTO);
 
-        // 合同信息
-        //jiu.zhao 合同
-        /*if(expenseReportHeaderDTO.getContractHeaderId() != null){
-            List<ContractHeaderCO> contractHeaderCOS = contractService.listContractHeadersByIds(Arrays.asList(expenseReportHeaderDTO.getContractHeaderId()));
-            if(CollectionUtils.isNotEmpty(contractHeaderCOS)){
-                expenseReportHeaderDTO.setContractNumber(contractHeaderCOS.get(0).getContractNumber());
-            }
-        }*/
-        // 收款方信息
-        if (expenseReportHeaderDTO.getPayeeCategory() != null) {
-            if (expenseReportHeaderDTO.getPayeeCategory().equals("EMPLOYEE")) {
-                if (expenseReportHeaderDTO.getPayeeId() != null) {
-                    ContactCO contactCO = organizationService.getUserById(expenseReportHeaderDTO.getPayeeId());
-                    expenseReportHeaderDTO.setPayCode(contactCO.getEmployeeCode());
-                    expenseReportHeaderDTO.setPayName(contactCO.getFullName());
-                }
-            } else if (expenseReportHeaderDTO.getPayeeCategory().equals("VENDER")) {
-                if (expenseReportHeaderDTO.getPayeeId() != null) {
-                    VendorInfoCO info = organizationService.getOneVendorInfoById(expenseReportHeaderDTO.getPayeeId());
-                    expenseReportHeaderDTO.setPayCode(info.getVenderCode());
-                    expenseReportHeaderDTO.setPayName(info.getVenNickname());
-                }
-            }
-        }
         List<ExpenseReportPaymentSchedule> paymentScheduleList = expenseReportPaymentScheduleService.selectList(
                 new EntityWrapper<ExpenseReportPaymentSchedule>()
                         .eq("exp_report_header_id", headerId));
         BigDecimal totalMoney = paymentScheduleList.stream().map(ExpenseReportPaymentSchedule::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         expenseReportHeaderDTO.setPaymentTotalAmount(totalMoney);
-        // 币种
-        CurrencyRateCO currencyRate = organizationService.getForeignCurrencyByCode(null, expenseReportHeaderDTO.getCurrencyCode(), expenseReportHeaderDTO.getSetOfBooksId());
-        expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyName());
-        //税金分摊方式
-        String expTaxDist = organizationService.getParameterValue(expenseReportHeaderDTO.getCompanyId(),
-                expenseReportHeaderDTO.getSetOfBooksId(), ParameterConstant.EXP_TAX_DIST);
-        expenseReportHeaderDTO.setExpTaxDist(expTaxDist);
+
         return expenseReportHeaderDTO;
     }
 
@@ -830,13 +800,13 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             }
         }
         //计划付款行校验
-        List<ExpenseReportPaymentSchedule> expenseReportPaymentSchedules = checkPaymentSchedule(expenseReportHeader);
+//        List<ExpenseReportPaymentSchedule> expenseReportPaymentSchedules = checkPaymentSchedule(expenseReportHeader);
         //校验费用行及分摊行
-        checkExpenseReportLineAndDist(expenseReportHeader);
+//        checkExpenseReportLineAndDist(expenseReportHeader);
         //关联申请单校验
-        checkReleaseRequisition(expenseReportHeader, expTaxDist);
+//        checkReleaseRequisition(expenseReportHeader, expTaxDist);
         // 发送合同信息
-        sendContract(expenseReportHeader, expenseReportPaymentSchedules);
+//        sendContract(expenseReportHeader, expenseReportPaymentSchedules);
         //核销记录生效
         //jiu.zhao 支付
         //paymentService.saveWriteOffTakeEffect(ExpenseDocumentTypeEnum.PUBLIC_REPORT.name(),expenseReportHeader.getId(),Arrays.asList(),LoginInformationUtil.getCurrentUserId());
@@ -1645,6 +1615,9 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             expenseReportHeaderDTO.setFormId(expenseReportType.getFormId());
             ApprovalFormCO approvalFormById = organizationService.getApprovalFormById(expenseReportType.getFormId());
             expenseReportHeaderDTO.setFormOid(approvalFormById.getFormOid());
+            // 币种
+            CurrencyRateCO currencyRate = organizationService.getForeignCurrencyByCode(null, expenseReportHeaderDTO.getCurrencyCode(), expenseReportHeaderDTO.getSetOfBooksId());
+            expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyName());
             //区域
             SysCodeValue sysCodeValueByCode = sysCodeService.getValueBySysCodeAndValue("PERSON_AREA", expenseReportHeaderDTO.getAreaCode());
             expenseReportHeaderDTO.setAreaName(sysCodeValueByCode.getName());

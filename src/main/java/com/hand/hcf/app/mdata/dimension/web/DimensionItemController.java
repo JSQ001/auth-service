@@ -442,7 +442,7 @@ public class DimensionItemController {
     }
 
     /**
-     * @api {post} /api/dimension/item/list/By/dimensionIds/companyId/enabled 【维值】根据维度id集合和enabled字段查询维值
+     * @api {post} /api/dimension/item/list/By/dimensionIds/companyId/forApp 【维值】根据维度id集合和enabled字段查询维值
      * 因为中控的限制，整合了原接口的参数。
      * @apiGroup DimensionItem
      */

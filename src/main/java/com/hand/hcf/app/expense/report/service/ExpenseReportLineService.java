@@ -221,6 +221,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
             reportLine.setIndex(index);
             index ++;
             setExpenseReportLineField(reportLine);
+            //获取公司信息
             CompanyCO otherCompany = hcfOrganizationInterface.getById(reportLine.getCompanyId());
             String companyName = Optional
                     .ofNullable(otherCompany)
@@ -232,6 +233,7 @@ public class ExpenseReportLineService extends BaseService<ExpenseReportLineMappe
                     .orElseThrow(() -> new BizException(com.hand.hcf.app.payment.utils.RespCode.SYS_COMPANY_INFO_NOT_EXISTS));
             reportLine.setCompanyCode(companyCode);
             reportLine.setCompanyName(companyName);
+            //
 
 
         }
