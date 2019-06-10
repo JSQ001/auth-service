@@ -10,14 +10,14 @@ import com.hand.hcf.app.payment.externalApi.PaymentOrganizationService;
 import com.hand.hcf.app.payment.service.PaymentRequisitionTypesService;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionTypesAllDTO;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionTypesDTO;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * @Date: Created in 11:59 2018/1/22
  * @Modified by
  */
+@Api(tags = "付款申请单类型API")
 @RestController
 @RequestMapping("/api/acp/request/type")
 public class PaymentRequisitionTypesController {
@@ -57,8 +58,9 @@ public class PaymentRequisitionTypesController {
      * @apiParam (PaymentRequisitionTypesAllDTO) {PaymentRequisitionTypesAllDTO} paymentRequisitionTypesAllDTO  付款申请类型dto
      *
      */
+    @ApiOperation(value = "付款申请单类型保存", notes = "付款申请单类型保存 开发：bin.xie")
     @PostMapping
-    public ResponseEntity saveTypes(@RequestBody PaymentRequisitionTypesAllDTO paymentRequisitionTypesAllDTO){
+    public ResponseEntity saveTypes(@ApiParam(value = "付款申请类型dto") @RequestBody PaymentRequisitionTypesAllDTO paymentRequisitionTypesAllDTO){
         return ResponseEntity.ok(service.savePaymentRequstTypes(paymentRequisitionTypesAllDTO));
     }
 
@@ -69,11 +71,16 @@ public class PaymentRequisitionTypesController {
      * @apiParam (PaymentRequisitionTypesAllDTO) {PaymentRequisitionTypesAllDTO} paymentRequisitionTypesAllDTO  付款申请类型dto
      *
      */
+    @ApiOperation(value = "付款申请单类型查询", notes = "付款申请单类型查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
-    public ResponseEntity<List<PaymentRequisitionTypesDTO>> getTypesByCondition(@RequestParam(required = false) Long setOfBooksId,
-                                                                                @RequestParam(required = false) String acpReqTypeCode,
-                                                                                @RequestParam(required = false) String description,
-                                                                                Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<PaymentRequisitionTypesDTO>> getTypesByCondition(@ApiParam(value = "帐套id") @RequestParam(required = false) Long setOfBooksId,
+                                                                                @ApiParam(value = "付款申请单类型编码") @RequestParam(required = false) String acpReqTypeCode,
+                                                                                @ApiParam(value = "描述") @RequestParam(required = false) String description,
+                                                                                @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionTypes> list = service.getTypesByCondition(setOfBooksId,acpReqTypeCode,description,page,false);
 
@@ -88,11 +95,16 @@ public class PaymentRequisitionTypesController {
      * @apiParam (PaymentRequisitionTypesAllDTO) {PaymentRequisitionTypesAllDTO} paymentRequisitionTypesAllDTO  付款申请类型dto
      *
      */
+    @ApiOperation(value = "付款申请单类型查询", notes = "付款申请单类型查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query/enable/dataAuth")
-    public ResponseEntity<List<PaymentRequisitionTypesDTO>> getTypesByConditionEnableDataAuth(@RequestParam(required = false) Long setOfBooksId,
-                                                                                              @RequestParam(required = false) String acpReqTypeCode,
-                                                                                              @RequestParam(required = false) String description,
-                                                                                              Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<PaymentRequisitionTypesDTO>> getTypesByConditionEnableDataAuth(@ApiParam("账套id") @RequestParam(required = false) Long setOfBooksId,
+                                                                                              @ApiParam("类型代码") @RequestParam(required = false) String acpReqTypeCode,
+                                                                                              @ApiParam("名称") @RequestParam(required = false) String description,
+                                                                                              @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionTypes> list = service.getTypesByCondition(setOfBooksId,acpReqTypeCode,description,page,true);
 
@@ -107,6 +119,7 @@ public class PaymentRequisitionTypesController {
      * @apiParam (PaymentRequisitionTypesAllDTO) {PaymentRequisitionTypesAllDTO} paymentRequisitionTypesAllDTO  付款申请类型dto
      *
      */
+    @ApiOperation(value = "付款申请单类型通过id查询", notes = "付款申请单类型通过id查询 开发：")
     @GetMapping("/query/{id}")
     public ResponseEntity<PaymentRequisitionTypesAllDTO> getTypeAndOtherInfoByTypeId(@PathVariable("id") Long id){
 
@@ -120,6 +133,7 @@ public class PaymentRequisitionTypesController {
      * @apiParam  {Long} id
      *
      */
+    @ApiOperation(value = "付款申请单类型查询", notes = "付款申请单类型查询 开发：")
     @GetMapping("/queryById/{id}")
     public ResponseEntity<PaymentRequisitionTypesDTO> getTypeById(@PathVariable("id") Long id){
 
@@ -134,7 +148,8 @@ public class PaymentRequisitionTypesController {
      * @Date: Created in 2018/1/22 14:45
      * @Modified by
      */
-    public PaymentRequisitionTypesDTO toDTO(PaymentRequisitionTypes paymentRequisitionTypes){
+    @ApiOperation(value = "实体类转客户端DTO", notes = "实体类转客户端DTO 开发：")
+    public  PaymentRequisitionTypesDTO toDTO(PaymentRequisitionTypes paymentRequisitionTypes){
         SetOfBooksInfoCO standardCO = organizationService.getSetOfBooksById(paymentRequisitionTypes.getSetOfBooksId());
         PaymentRequisitionTypesDTO paymentRequisitionTypesDTO = PaymentRequisitionTypesDTO
                 .builder()
@@ -167,10 +182,18 @@ public class PaymentRequisitionTypesController {
      * @apiParam  {Long} companyId  公司id
      *
      */
+    @ApiOperation(value = "根据公司id付款申请单类型查询", notes = "根据公司id付款申请单类型查询 开发：")
     @GetMapping("/query/{setOfBooksId}/{companyId}")
     public ResponseEntity<List<PaymentRequisitionTypes>> getTypesByCompanyId(@PathVariable("setOfBooksId") Long setOfBooksId,
                                                                              @PathVariable("companyId") Long companyId){
-        return new ResponseEntity(service.selectTypesByCompanyIdAndSetOfBooksId(setOfBooksId,companyId),null, HttpStatus.OK);
+        return new ResponseEntity(service.selectTypesByCompanyIdAndSetOfBooksId(setOfBooksId,companyId),null,HttpStatus.OK);
+    }
+
+
+    @ApiOperation(value = "根据公司id付款申请单类型查询启用状态", notes = "根据公司id付款申请单类型查询启用状态 开发：")
+    @GetMapping("/query/enable/{setOfBooksId}")
+    public ResponseEntity<List<PaymentRequisitionTypes>> getTypesByCompanyIdEnable(@ApiParam("账套id")@PathVariable("setOfBooksId") Long setOfBooksId){
+        return new ResponseEntity(service.selectTypesByCompanyIdAndSetOfBooksIdEnable(setOfBooksId),null,HttpStatus.OK);
     }
 
     /**
@@ -195,14 +218,18 @@ public class PaymentRequisitionTypesController {
      * @apiParam (String) description  名称
      *
      */
-    @ApiOperation(value = "获取用户有权限创建的付款申请单类型", notes = "获取用户有权限创建的付款申请单类型 修改： 赵旭东")
+    @ApiOperation(value = "根据当前员工查询可以新建的付款申请单类型", notes = "根据当前员工查询可以新建的付款申请单类型 修改： 赵旭东")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/{setOfBooksId}/{companyId}/query")
     public ResponseEntity<List<PaymentRequisitionTypesDTO>> getTypeBySetBookIdAndCompanyIdAndCondition(@PathVariable Long setOfBooksId,
-                                                                                                       @PathVariable Long companyId,
-                                                                                                       @RequestParam(required = false) String acpReqTypeCode,
-                                                                                                       @RequestParam(required = false) String description,
-                                                                                                       @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag,
-                                                                                                       Pageable pageable) throws URISyntaxException {
+                                                                                  @PathVariable Long companyId,
+                                                                                  @ApiParam("类型代码") @RequestParam(required = false) String acpReqTypeCode,
+                                                                                  @ApiParam("名称") @RequestParam(required = false) String description,
+                                                                                  @ApiParam("是否包含授权") @RequestParam(required = false, defaultValue = "true") Boolean authFlag,
+                                                                                  @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionTypes> list = service.getTypeBySetBookIdAndCompanyIdAndCondition(setOfBooksId,companyId,acpReqTypeCode,description,page, authFlag);
 
@@ -221,12 +248,17 @@ public class PaymentRequisitionTypesController {
      * @apiParam {Long} id  付款申请类型id
      *
      */
+    @ApiOperation(value = "付款申请单类型查询", notes = "付款申请单类型查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/queryByCompanyId/{companyId}")
     public ResponseEntity<List<PaymentRequisitionTypes>> getTypeByCompanyIdAndCondition(@PathVariable Long companyId,
-                                                                                        @RequestParam(required = false) String acpReqTypeCode,
-                                                                                        @RequestParam(required = false) String description,
-                                                                                        @RequestParam(required = false) Long id,
-                                                                                        Pageable pageable) throws URISyntaxException {
+                                                                                        @ApiParam(value = "类型id") @RequestParam(required = false) String acpReqTypeCode,
+                                                                                        @ApiParam(value = "名称") @RequestParam(required = false) String description,
+                                                                                        @ApiParam(value = "付款申请类型id") @RequestParam(required = false) Long id,
+                                                                                        @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionTypes> list = service.getTypeByCompanyIdAndCondition(acpReqTypeCode,description,id,page,companyId);
 
@@ -238,13 +270,14 @@ public class PaymentRequisitionTypesController {
      * @api {GET} /api/acp/request/type/users 【付款申请单类型】根据单据id查询有该单据权限的用户
      * @apiGroup PaymentService
      */
+    @ApiOperation(value = "根据单据id查询有该单据权限的用户", notes = "根据单据id查询有该单据权限的用户 开发：")
     @GetMapping("/users")
-    public ResponseEntity listUsersByPaymentRequisitionType(@RequestParam(value = "paymentReqTypeId")
+    public ResponseEntity listUsersByPaymentRequisitionType(@ApiParam(value = "类型id") @RequestParam(value = "paymentReqTypeId")
                                                                         Long paymentReqTypeId,
-                                                            @RequestParam(required = false) String userCode,
-                                                            @RequestParam(required = false) String userName,
-                                                            @RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "10") int size){
+                                                            @ApiParam(value = "用户编码") @RequestParam(required = false) String userCode,
+                                                            @ApiParam(value = "用户名称") @RequestParam(required = false) String userName,
+                                                            @ApiParam(value = "当前页") @RequestParam(defaultValue = "0") int page,
+                                                            @ApiParam(value = "每页多少条") @RequestParam(defaultValue = "10") int size){
         Page queryPage = PageUtil.getPage(page, size);
         List<ContactCO> result = service.listUsersByPaymentRequisitionType(paymentReqTypeId,
                 userCode, userName, queryPage);

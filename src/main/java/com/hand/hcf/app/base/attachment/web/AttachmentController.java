@@ -150,8 +150,9 @@ public class AttachmentController {
                                    HttpServletResponse httpServletResponse) throws IOException{
             Attachment attachment = attachmentService.findByOId(oid);
             String objectName = attachment.getPath();
+            String originName = attachment.getName();
             if(StringUtils.isNotBlank(objectName)) {
-                attachmentImpl.downLoadFile(httpServletRequest,httpServletResponse,objectName);
+                attachmentImpl.downLoadFile(httpServletRequest,httpServletResponse,objectName,originName);
             } else{
                 return;
             }

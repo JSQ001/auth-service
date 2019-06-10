@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +46,10 @@ public class CompanyBankPaymentController {
      * @param companyBankPayments
      * @return
      */
+
+    @ApiOperation(value = "新增或修改公司银行的付款方式", notes = "新增或修改公司银行的付款方式 开发：")
     @RequestMapping(value = "/insertOrUpdate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> insertOrUpdate(@RequestBody List<CompanyBankPayment> companyBankPayments) {
+    public ResponseEntity<Boolean> insertOrUpdate(@ApiParam(value = "公司银行付款方式") @RequestBody List<CompanyBankPayment> companyBankPayments) {
         return ResponseEntity.ok(companyBankPaymentService.insertOrUpdateCompanyBankPayment(companyBankPayments));
     }
 
@@ -56,14 +60,15 @@ public class CompanyBankPaymentController {
      * @return
      */
 
+    @ApiOperation(value = "根据id逻辑删除", notes = "根据id逻辑删除 开发：")
     @RequestMapping(value = "/deleteById", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> deleteById(@RequestParam Long id) {
+    public ResponseEntity<Boolean> deleteById(@ApiParam(value = "公司银行付款方式") @RequestParam Long id) {
         return ResponseEntity.ok(companyBankPaymentService.deleteById(id));
     }
 
-
+    @ApiOperation(value = "根据id列表逻辑删除", notes = "根据id列表逻辑删除 开发：")
     @RequestMapping(value = "/deleteByIds", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> deleteByIds(@RequestBody List<Long> ids) {
+    public ResponseEntity<Boolean> deleteByIds(@ApiParam(value = "id列表") @RequestBody List<Long> ids) {
         return ResponseEntity.ok(companyBankPaymentService.deleteByIds(ids));
     }
 
@@ -72,9 +77,13 @@ public class CompanyBankPaymentController {
      * 根据银行账户id查询对应的付款方式dto
      */
 
-
+    @ApiOperation(value = "根据银行账户id查询对应的付款方式dto", notes = "根据银行账户id查询对应的付款方式dto 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @RequestMapping(value = "/getByBankAccountId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CompanyBankPaymentDTO>> selectByBankAccountId(@RequestParam Long id, Pageable pageable) {
+    public ResponseEntity<List<CompanyBankPaymentDTO>> selectByBankAccountId(@ApiParam(value = "账户id") @RequestParam Long id,@ApiIgnore Pageable pageable) {
 
         Page page = MyBatisPageUtil.getPage(pageable);
         Page<CompanyBankPaymentDTO> result = companyBankPaymentService.selectByBankId(id, page);
@@ -84,11 +93,11 @@ public class CompanyBankPaymentController {
         return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
     }
 
-
+    @ApiOperation(value = "根据银行账户id和code查询对应的付款方式dto", notes = "根据银行账户id和code查询对应的付款方式dto 开发：")
     @RequestMapping(value = "/getByBankAccountIdAndCode", method = RequestMethod.GET)
     public ResponseEntity<List<CompanyBankPaymentDTO>> getByBankAccountIdAndCode(
-            @RequestParam Long id,
-            @RequestParam String code) {
+            @ApiParam(value = "账户id") @RequestParam Long id,
+            @ApiParam(value = "账户code") @RequestParam String code) {
         List<CompanyBankPaymentDTO> companyBankPaymentDTOS = companyBankPaymentService.selectByBankIdAndCode(id, code);
         return ResponseEntity.ok(companyBankPaymentDTOS);
     }
@@ -96,8 +105,9 @@ public class CompanyBankPaymentController {
 
     /*  根据银行账户id查询此银行账户下面的付款方式
      * */
+    @ApiOperation(value = "根据银行账户id查询此银行账户下面的付款方式", notes = "根据银行账户id查询此银行账户下面的付款方式 开发：")
     @RequestMapping(value = "/get/companyBankPayment/by/bankAccountId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CompanyBankPaymentDTO>> selectByBankAccountIdNoPage(@RequestParam Long id) {
+    public ResponseEntity<List<CompanyBankPaymentDTO>> selectByBankAccountIdNoPage(@ApiParam(value = "账户id") @RequestParam Long id) {
         List<CompanyBankPaymentDTO> list = new ArrayList<>();
         List<CompanyBankPayment> result = companyBankPaymentService.selectCompanyBankPaymentByBankId(id);
         if (!CollectionUtils.isEmpty(result)) {
@@ -123,10 +133,11 @@ public class CompanyBankPaymentController {
     /*
      * 根据银行账户账号查询此账户下的付款方式
      * */
+    @ApiOperation(value = "根据银行账户账号查询此账户下的付款方式", notes = "根据银行账户账号查询此账户下的付款方式 开发：")
     @RequestMapping(value = "/get/company/bank/payment/by/bank/account/number", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<CompanyBankPaymentDTO>> getByBankAccountNumber(
-            @RequestParam String number,
-            @RequestParam(value = "paymentMethod", required = false) String paymentMethod) {
+            @ApiParam(value = "账户账号") @RequestParam String number,
+            @ApiParam(value = "付款方式") @RequestParam(value = "paymentMethod", required = false) String paymentMethod) {
         List<CompanyBankPaymentDTO> list = new ArrayList<>();
         List<CompanyBank> companyBanks = companyBankService.selectList(
                 new EntityWrapper<CompanyBank>()

@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignUserGroup;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignUserGroupService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/12/29.
  */
+@Api(tags = "预付款单类型关联人员组")
 @RestController
 @RequestMapping("/api/cash/pay/requisition/type/assign/userGroups")
 public class CashPayRequisitionTypeAssignUserGroupController {
@@ -64,7 +66,8 @@ public class CashPayRequisitionTypeAssignUserGroupController {
     }
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignUserGroup>> createCashPayRequisitionTypeAssignUserGroupBatch(@RequestBody List<CashPayRequisitionTypeAssignUserGroup> list){
+    @ApiOperation(value = "批量新增 预付款单类型关联人员组", notes = "批量新增 预付款单类型关联人员组 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignUserGroup>> createCashPayRequisitionTypeAssignUserGroupBatch(@ApiParam(value = "预付款单类型关联人员组") @RequestBody List<CashPayRequisitionTypeAssignUserGroup> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignUserGroupService.createCashPayRequisitionTypeAssignUserGroupBatch(list));
     }
 
@@ -107,7 +110,8 @@ public class CashPayRequisitionTypeAssignUserGroupController {
     }
      */
     @PutMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignUserGroup>> updateCashPayRequisitionTypeAssignUserGroupBatch(@RequestBody List<CashPayRequisitionTypeAssignUserGroup> list){
+    @ApiOperation(value = "批量修改 预付款单类型关联人员组", notes = "批量修改 预付款单类型关联人员组 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignUserGroup>> updateCashPayRequisitionTypeAssignUserGroupBatch(@ApiParam(value = "预付款单类型关联人员组") @RequestBody List<CashPayRequisitionTypeAssignUserGroup> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignUserGroupService.updateCashPayRequisitionTypeAssignUserGroupBatch(list));
     }
 
@@ -133,7 +137,8 @@ public class CashPayRequisitionTypeAssignUserGroupController {
     }
      */
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashPayRequisitionTypeAssignUserGroupBatch(@RequestBody List<Long> list){
+    @ApiOperation(value = "批量删除 预付款单类型关联人员组", notes = "批量删除 预付款单类型关联人员组 开发:韩雪")
+    public ResponseEntity deleteCashPayRequisitionTypeAssignUserGroupBatch(@ApiParam(value = "主键id") @RequestBody List<Long> list){
         cashPayRequisitionTypeAssignUserGroupService.deleteCashPayRequisitionTypeAssignUserGroupBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -171,9 +176,14 @@ public class CashPayRequisitionTypeAssignUserGroupController {
     ]
      */
     @GetMapping("/query")
+    @ApiOperation(value = "根据预付款单类型id查询所有已关联的人员组，分页", notes = "根据预付款单类型id查询所有已关联的人员组，分页 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CashPayRequisitionTypeAssignUserGroup>> getCashPayRequisitionTypeAssignUserGroupByCond(
-            @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashPayRequisitionTypeAssignUserGroup> list = cashPayRequisitionTypeAssignUserGroupService.getCashPayRequisitionTypeAssignUserGroupByCond(payRequisitionTypeId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/userGroups/query");

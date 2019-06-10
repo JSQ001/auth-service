@@ -17,8 +17,10 @@ import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,22 +42,30 @@ import java.util.Map;
  */
 
 @RestController
-@AllArgsConstructor
+//@AllArgsConstructor
 //@PreAuthorize("hasRole('" + AuthoritiesConstants.INTEGRATION_CLIENTS + "')")
 public class PaymentImplementController /*implements PaymentInterface, ApplyPaymentInterface*/ {
     private static final Logger log = LoggerFactory.getLogger(PaymentImplementController.class);
-    private final CashTransactionDataService transactionDataService;
-    private final CashTransactionDetailService cashTransactionDetailService;
-    private final CashWriteOffService cashWriteOffService;
-    private final PaymentRequisitionHeaderService paymentRequisitionHeaderService;
-    private final PaymentRequisitionTypesService paymentRequisitionTypesService;
-    private final MapperFacade mapper;
-    private final CashTransactionClassService cashTransactionClassService;
-    private final CashDefaultFlowItemService cashDefaultFlowItemService;
-
-    private final CashPaymentMethodService cashPaymentMethodService;
-
-    private final CashFlowItemService cashFlowItemService;
+    @Autowired
+    private CashTransactionDataService transactionDataService;
+    @Autowired
+    private CashTransactionDetailService cashTransactionDetailService;
+    @Autowired
+    private CashWriteOffService cashWriteOffService;
+    @Autowired
+    private PaymentRequisitionHeaderService paymentRequisitionHeaderService;
+    @Autowired
+    private PaymentRequisitionTypesService paymentRequisitionTypesService;
+    @Autowired
+    private MapperFacade mapper;
+    @Autowired
+    private CashTransactionClassService cashTransactionClassService;
+    @Autowired
+    private CashDefaultFlowItemService cashDefaultFlowItemService;
+    @Autowired
+    private CashPaymentMethodService cashPaymentMethodService;
+    @Autowired
+    private CashFlowItemService cashFlowItemService;
 
     /**
      * 给artemis、prepayment 提供
@@ -683,17 +693,11 @@ public class PaymentImplementController /*implements PaymentInterface, ApplyPaym
                                             @RequestParam Long documentHeaderId,
                                             @RequestParam Long operatorId,
                                             @RequestParam Integer operationType){
-        try {
-            cashWriteOffService.auditChangeWriteOffStatus(documentType,
-                    documentHeaderId,
-                    OrgInformationUtil.getCurrentTenantId(),
-                    operatorId,
-                    operationType);
-        } catch (BizException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new BizException(RespCode.SYS_FAILED);
-        }
+        cashWriteOffService.auditChangeWriteOffStatus(documentType,
+                documentHeaderId,
+                OrgInformationUtil.getCurrentTenantId(),
+                operatorId,
+                operationType);
         return "SUCCESS";
     }
 
@@ -704,6 +708,7 @@ public class PaymentImplementController /*implements PaymentInterface, ApplyPaym
      * @return
      */
 
+	@Transactional(rollbackFor = Exception.class)
     public Boolean updateFilterFlagByOid(@RequestParam("oid") String oid, @RequestParam("filterFlag") Boolean filterFlag) {
         PaymentRequisitionHeaderWebDTO dto =  paymentRequisitionHeaderService.getHeadByOID(oid);
         PaymentRequisitionHeader header = new PaymentRequisitionHeader();

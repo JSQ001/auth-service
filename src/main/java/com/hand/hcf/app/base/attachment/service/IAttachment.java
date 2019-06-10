@@ -41,7 +41,8 @@ public interface IAttachment {
 
     void downLoadFile(HttpServletRequest httpServletRequest,
                       HttpServletResponse httpServletResponse,
-                      String objectName) throws IOException;
+                      String objectName,
+                      String originName) throws IOException;
 
     void deleteOssFile(String path);
 

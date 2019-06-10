@@ -132,6 +132,7 @@ public class ExcelController {
         }
 
         Page<CashPaymentRequisitionHead> headByQuery = cashPaymentRequisitionHeadService.getHeadByQuery(companyId,
+                null,
                 requisitionNumber,
                 typeId,
                 status,
@@ -144,6 +145,7 @@ public class ExcelController {
                 noWriteAmountFrom,
                 noWriteAmountTo,
                 remark,
+                true,
                 new Page<CashPaymentRequisitionHead>(1, 0));
         int total = TypeConversionUtils.parseInt(headByQuery.getTotal());
         int threadNumber = total > 100000 ? 8 : 2;
@@ -158,7 +160,7 @@ public class ExcelController {
             public List<CashPaymentRequisitionHead> queryDataByPage(Page page) {
 
                 return cashPaymentRequisitionHeadService.getHeadByQuery(
-                        companyId, requisitionNumber, typeId, status, unitId, applyId, finalDateFrom, finalDateTo, amountFrom, amountTo, noWriteAmountFrom, noWriteAmountTo, remark, page
+                        companyId,null, requisitionNumber, typeId, status, unitId, applyId, finalDateFrom, finalDateTo, amountFrom, amountTo, noWriteAmountFrom, noWriteAmountTo, remark,true, page
                 ).getRecords();
             }
 

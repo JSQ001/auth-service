@@ -7,12 +7,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.*;
 
 import java.util.List;
 
 /**
  * Created by 刘亮 on 2018/4/8.
  */
+
+@Api(tags = "支付明细日志API")
 @RestController
 @RequestMapping("/api/detail/log")
 public class DetailLogController {
@@ -48,8 +51,10 @@ public class DetailLogController {
      *
      *
      */
+
+    @ApiOperation(value = "查询单条日志明细", notes = "根据id查询日志详情 开发：刘亮")
     @GetMapping("/get/by/detail/id")
-    public ResponseEntity<List<DetailLogDTO>> getLogsByDetailId(@RequestParam Long detailId){
+    public ResponseEntity<List<DetailLogDTO>> getLogsByDetailId(@ApiParam(value = "详情id") @RequestParam Long detailId){
         List<DetailLogDTO> logs = detailLogService.getLogsByDetailId(detailId);
         return ResponseEntity.ok(logs);
     }

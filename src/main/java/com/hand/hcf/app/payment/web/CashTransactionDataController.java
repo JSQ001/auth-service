@@ -14,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -118,21 +120,27 @@ public class CashTransactionDataController {
      *             }
      *         ]
      */
+    @ApiOperation(value = "根据条件查询待付提交数据", notes = "根据条件查询待付提交数据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping(value = "/query")
     public ResponseEntity getTransactionDataByCond(
-            @RequestParam(required = false) String documentNumber,
-            @RequestParam(required = false) String documentCategory,
-            @RequestParam(required = false) Long employeeId,
-            @RequestParam(required = false) String requisitionDateFrom,
-            @RequestParam(required = false) String requisitionDateTo,
-            @RequestParam(required = false) String paymentMethodCategory,
-            @RequestParam(required = false) String partnerCategory,
-            @RequestParam(required = false) Long partnerId,
-            @RequestParam(required = false) BigDecimal amountFrom,
-            @RequestParam(required = false) BigDecimal amountTo,
-            @RequestParam(required = false) String documentTypeName,
-            @RequestParam(required = false) List<Long> paymentCompanyId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "单据编号") @RequestParam(required = false) String documentNumber,
+            @ApiParam(value = "单据类型") @RequestParam(required = false) String documentCategory,
+            @ApiParam(value = "员工") @RequestParam(required = false) Long employeeId,
+            @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+            @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+            @ApiParam(value = "付款方式类型") @RequestParam(required = false) String paymentMethodCategory,
+            @ApiParam(value = "付款方式") @RequestParam(required = false) String paymentType,
+            @ApiParam(value = "收款方类型") @RequestParam(required = false) String partnerCategory,
+            @ApiParam(value = "收款方") @RequestParam(required = false) Long partnerId,
+            @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+            @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal amountTo,
+            @ApiParam(value = "单据类型名称") @RequestParam(required = false) String documentTypeName,
+            @ApiParam(value = "付款公司") @RequestParam(required = false) List<Long> paymentCompanyId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashTransactionDataWebDTO> result = transactionDataService.getTransactionDataByCond(
                 paymentCompanyId,
@@ -142,6 +150,7 @@ public class CashTransactionDataController {
                 requisitionDateFrom,
                 requisitionDateTo,
                 paymentMethodCategory,
+                paymentType,
                 partnerCategory,
                 partnerId,
                 amountFrom,
@@ -175,8 +184,9 @@ public class CashTransactionDataController {
      *             }
      *         ]
      */
+    @ApiOperation(value = "修改待付提交数据", notes = "修改待付提交数据 开发:")
     @PutMapping
-    public ResponseEntity updateTransactionDataBatch(@RequestBody List<CashTransactionDataWebDTO> list) {
+    public ResponseEntity updateTransactionDataBatch(@ApiParam(value = "通用支付数据") @RequestBody List<CashTransactionDataWebDTO> list) {
         List<CashTransactionDataWebDTO> result = transactionDataService.updateTransactionDataBatch(list);
         return ResponseEntity.ok(result);
     }
@@ -216,9 +226,10 @@ public class CashTransactionDataController {
      *         * 688.24
      *
      */
+    @ApiOperation(value = "按单据头信息查询统一支付结果", notes = "按单据头信息查询统一支付结果 开发:")
     @GetMapping("/paymentResult/header")
-    public ResponseEntity<BigDecimal> queryByDocumentHeaderId(@RequestParam(value = "documentCategory") String documentCategory,
-                                                              @RequestParam(value = "documentHeaderId") Long documentHeaderId) {
+    public ResponseEntity<BigDecimal> queryByDocumentHeaderId(@ApiParam(value = "单据类型") @RequestParam(value = "documentCategory") String documentCategory,
+                                                              @ApiParam(value = "单据头id") @RequestParam(value = "documentHeaderId") Long documentHeaderId) {
         BigDecimal aDouble = transactionDataService.queryByDocumentHeaderId(documentCategory, documentHeaderId, null);
         return ResponseEntity.ok(aDouble);
     }
@@ -247,10 +258,12 @@ public class CashTransactionDataController {
      *         * 688.24
      *
      */
+
+    @ApiOperation(value = "按单据行信息查询统一支付结果", notes = "按单据行信息查询统一支付结果 开发:")
     @GetMapping("/paymentResult/line")
-    public ResponseEntity<BigDecimal> queryByDocumentLineId(@RequestParam(value = "documentCategory") String documentCategory,
-                                                            @RequestParam(value = "documentHeaderId") Long documentHeaderId,
-                                                            @RequestParam(value = "documentLineId") Long documentLineId) {
+    public ResponseEntity<BigDecimal> queryByDocumentLineId(@ApiParam(value = "单据类型") @RequestParam(value = "documentCategory") String documentCategory,
+                                                            @ApiParam(value = "单据头id") @RequestParam(value = "documentHeaderId") Long documentHeaderId,
+                                                            @ApiParam(value = "单据行id") @RequestParam(value = "documentLineId") Long documentLineId) {
 //        PaymentResultDTO result = cashTransactionDetailService.queryByDocumentHeaderId(documentCategory, documentHeaderId, documentLineId);
         BigDecimal aDouble = transactionDataService.queryByDocumentHeaderId(documentCategory, documentHeaderId, documentLineId);
         return ResponseEntity.ok(aDouble);
@@ -291,19 +304,22 @@ public class CashTransactionDataController {
      *         ]
      *
      */
+
+    @ApiOperation(value = "查询对应币种的总金额和总单据数", notes = "查询对应币种的总金额和总单据数 开发:")
     @GetMapping("/select/totalAmountAndDocumentNum")
-    public ResponseEntity getTotalAmountAndDocumentNum(@RequestParam(required = false) String documentNumber,
-                                                       @RequestParam(required = false) String documentCategory,
-                                                       @RequestParam(required = false) Long employeeId,
-                                                       @RequestParam(required = false) String requisitionDateFrom,
-                                                       @RequestParam(required = false) String requisitionDateTo,
-                                                       @RequestParam(required = false) String paymentMethodCategory,
-                                                       @RequestParam(required = false) String partnerCategory,
-                                                       @RequestParam(required = false) Long partnerId,
-                                                       @RequestParam(required = false) BigDecimal amountFrom,
-                                                       @RequestParam(required = false) BigDecimal amountTo,
-                                                       @RequestParam(required = false) List<Long> paymentCompanyId,
-                                                       @RequestParam(required = false) String documentTypeName){
+    public ResponseEntity getTotalAmountAndDocumentNum(@ApiParam(value = "单据编号") @RequestParam(required = false) String documentNumber,
+                                                       @ApiParam(value = "单据类型") @RequestParam(required = false) String documentCategory,
+                                                       @ApiParam(value = "员工") @RequestParam(required = false) Long employeeId,
+                                                       @ApiParam(value = "申请日期从") @RequestParam(required = false) String requisitionDateFrom,
+                                                       @ApiParam(value = "申请日期至") @RequestParam(required = false) String requisitionDateTo,
+                                                       @ApiParam(value = "支付类型") @RequestParam(required = false) String paymentMethodCategory,
+                                                       @ApiParam(value = "付款方式") @RequestParam(required = false) String paymentType,
+                                                       @ApiParam(value = "收款方类型") @RequestParam(required = false) String partnerCategory,
+                                                       @ApiParam(value = "收款方") @RequestParam(required = false) Long partnerId,
+                                                       @ApiParam(value = "金额从") @RequestParam(required = false) BigDecimal amountFrom,
+                                                       @ApiParam(value = "金额至") @RequestParam(required = false) BigDecimal amountTo,
+                                                       @ApiParam(value = "付款公司") @RequestParam(required = false) List<Long> paymentCompanyId,
+                                                       @ApiParam(value = "单据类型名称") @RequestParam(required = false) String documentTypeName){
         List<AmountAndDocumentNumberDTO> result = transactionDataService.getTotalAmountAndDocumentNum(
                                                         paymentCompanyId,
                                                         documentNumber,
@@ -312,6 +328,7 @@ public class CashTransactionDataController {
                                                         requisitionDateFrom == null ? null : TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom) ,
                                                         requisitionDateTo == null? null :  TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo),
                                                         paymentMethodCategory,
+                                                        paymentType,
                                                         partnerCategory,
                                                         partnerId,
                                                         amountFrom,
@@ -361,12 +378,18 @@ public class CashTransactionDataController {
      *         ]
      *
      */
+
+    @ApiOperation(value = "查询关联关系", notes = "查询关联关系 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @PostMapping("/relation/query")
-    public ResponseEntity<List<CashDataPublicReportHeaderDTO>> getAcpAssociated(@RequestParam(value = "reportNumber", required = false) String reportNumber,
-                                                                                @RequestParam(value = "applicationId") Long applicationId,
-                                                                                @RequestParam(value = "allType") Boolean allType,
-                                                                                @RequestBody(required = false) List<Long> formTypes,
-                                                                                @RequestParam(value = "documentTypeId", required = false) Long documentTypeId, Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashDataPublicReportHeaderDTO>> getAcpAssociated(@ApiParam(value = "报账单编号") @RequestParam(value = "reportNumber", required = false) String reportNumber,
+                                                                                @ApiParam(value = "申请人ID") @RequestParam(value = "applicationId") Long applicationId,
+                                                                                @ApiParam(value = "是否所有类型") @RequestParam(value = "allType") Boolean allType,
+                                                                                @ApiParam(value = "关联单据类型") @RequestBody(required = false) List<Long> formTypes,
+                                                                                @ApiParam(value = "单据类型") @RequestParam(value = "documentTypeId", required = false) Long documentTypeId,@ApiIgnore Pageable pageable) throws URISyntaxException {
 
         Page page = PageUtil.getPage(pageable);
         List<CashDataPublicReportHeaderDTO> resultList = cashTransactionDataRelationService.queryReportAssociatedAcp(
@@ -415,14 +438,20 @@ public class CashTransactionDataController {
      *         ]
      *
      */
+
+    @ApiOperation(value = "根据报账单ID查询通用支付数据", notes = "根据报账单ID查询通用支付数据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @PostMapping("/public/query")
-    public ResponseEntity<List<CashTransactionDataWebDTO>> queryPublicPage(@RequestParam(value = "headerId") Long headerId,
-                                                                           @RequestBody List<Long> dataIds,
-                                                                           @RequestParam(value = "partnerCategory", required = false) String partnerCategory,
-                                                                           @RequestParam(value = "partnerId", required = false) Long partnerId,
-                                                                           @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
-                                                                           @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
-                                                                           Pageable pageable)throws URISyntaxException {
+    public ResponseEntity<List<CashTransactionDataWebDTO>> queryPublicPage(@ApiParam(value = "报账单id") @RequestParam(value = "headerId") Long headerId,
+                                                                           @ApiParam(value = "数据id") @RequestBody List<Long> dataIds,
+                                                                           @ApiParam(value = "收款方类型") @RequestParam(value = "partnerCategory", required = false) String partnerCategory,
+                                                                           @ApiParam(value = "收款方") @RequestParam(value = "partnerId", required = false) Long partnerId,
+                                                                           @ApiParam(value = "金额从") @RequestParam(value = "amountFrom", required = false) BigDecimal amountFrom,
+                                                                           @ApiParam(value = "金额至") @RequestParam(value = "amountTo", required = false) BigDecimal amountTo,
+                                                                           @ApiIgnore Pageable pageable)throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         Page<CashTransactionDataWebDTO> result = transactionDataService.selectPublicPage(headerId,dataIds, page, partnerCategory, partnerId, amountFrom, amountTo);
         HttpHeaders headers = PageUtil.generateHttpHeaders(result, "/api/cash/transactionData/public/query");

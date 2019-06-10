@@ -15,26 +15,26 @@ public enum CertificationEnum implements SysEnum {
     /**
      * 待认证
      */
-    CERTIFICATION(1),
+    CERTIFYING(1),
     /**
      * 系统认证
      */
-    SYS_CERTIFICATION(2),
+    SYSCERTIFYING(2),
 
     /**
      * 第三方认证
      */
-    THIRD_CERTIFICATION(3),
+    OTHERCERTIFYING(3),
 
     /**
      * 认证成功
      */
-     SUCCESS(4),
+    CERTIFIED(4),
 
     /**
      * 认证失败
      */
-    FAIL(5)
+    FAILEDCERTIFIED(5)
     ;
     private Integer id;
 
@@ -45,5 +45,20 @@ public enum CertificationEnum implements SysEnum {
     @Override
     public Integer getId() {
         return this.id;
+    }
+
+
+    /**
+     * 根据id返回类型
+     * @param id
+     * @return
+     */
+    public static CertificationEnum parse(Integer id) {
+        for (CertificationEnum certificationEnum : CertificationEnum.values()) {
+            if (certificationEnum.getId().equals(id)) {
+                return certificationEnum;
+            }
+        }
+        return null;
     }
 }

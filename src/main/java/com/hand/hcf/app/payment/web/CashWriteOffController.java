@@ -16,6 +16,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import java.util.List;
 /**
  * Created by kai.zhang on 2017-10-31.
  */
+@Api(tags="核销数据API")
 @RestController
 @RequestMapping("/api/payment/cash/write/off")
 public class CashWriteOffController {
@@ -71,6 +74,8 @@ public class CashWriteOffController {
      * @apiSuccessExample {json} 成功返回样例:
      * SUCCESS
      */
+
+    @ApiOperation(value = "删除核销数据", notes = "删除核销数据 开发:")
     @DeleteMapping("/{id}")
     public void deleteCashWriteOffById(@PathVariable Long id){
         cashWriteOffService.deleteCashWriteOffById(id);
@@ -112,18 +117,24 @@ public class CashWriteOffController {
      * ]
      *
      */
+
+    @ApiOperation(value = "查询核销数据", notes = "查询核销数据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
-    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffDetailByDocumentMsg(@RequestParam Long tenantId,
-                                                                                       @RequestParam Long companyId,
-                                                                                       @RequestParam String partnerCategory,
-                                                                                       @RequestParam Long partnerId,
-                                                                                       @RequestParam Long formId,
-                                                                                       @RequestParam Long exportHeaderId,
-                                                                                       @RequestParam(required = false) Long contractId,
-                                                                                       @RequestParam String documentType,
-                                                                                       @RequestParam Long documentLineId,
-                                                                                       @RequestParam String currencyCode,
-                                                                                       Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffDetailByDocumentMsg(@ApiParam(value = "租户id") @RequestParam Long tenantId,
+                                                                                       @ApiParam(value = "公司id") @RequestParam Long companyId,
+                                                                                       @ApiParam(value = "收款方类型") @RequestParam String partnerCategory,
+                                                                                       @ApiParam(value = "收款方") @RequestParam Long partnerId,
+                                                                                       @ApiParam(value = "表单id") @RequestParam Long formId,
+                                                                                       @ApiParam(value = "报销头id") @RequestParam Long exportHeaderId,
+                                                                                       @ApiParam(value = "合同") @RequestParam(required = false) Long contractId,
+                                                                                       @ApiParam(value = "单据类型") @RequestParam String documentType,
+                                                                                       @ApiParam(value = "单据行id") @RequestParam Long documentLineId,
+                                                                                       @ApiParam(value = "币种代码") @RequestParam String currencyCode,
+                                                                                       @ApiIgnore Pageable pageable) throws URISyntaxException {
         return cashWriteOffService.getCashWriteOffDetailByDocumentMsg(tenantId,
                 companyId,
                 partnerCategory,
@@ -156,11 +167,17 @@ public class CashWriteOffController {
      *      }
      * ]
      */
+
+    @ApiOperation(value = "查询核销历史数据", notes = "查询核销历史数据 开发:")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/history")
-    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffHistory(@RequestParam String documentType,
-                                                                           @RequestParam Long documentHeaderId,
-                                                                           @RequestParam(required = false) Long documentLineId,
-                                                                           Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffHistory(@ApiParam(value = "单据类型") @RequestParam String documentType,
+                                                                           @ApiParam(value = "单据头id") @RequestParam Long documentHeaderId,
+                                                                           @ApiParam(value = "单据行id") @RequestParam(required = false) Long documentLineId,
+                                                                           @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffWebDto> cashWriteOffHistory = cashWriteOffService.getCashWriteOffHistory(documentType, documentHeaderId, documentLineId, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/payment/cash/write/off/history");
@@ -184,10 +201,12 @@ public class CashWriteOffController {
      *      }
      * ]
      */
+
+    @ApiOperation(value = "查询所有核销历史", notes = "查询所有核销历史 开发：")
     @GetMapping("/history/all")
-    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffHistoryAll(@RequestParam String documentType,
-                                                                              @RequestParam Long documentHeaderId,
-                                                                              @RequestParam(required = false) Long documentLineId) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffWebDto>> getCashWriteOffHistoryAll(@ApiParam(value = "单据类型") @RequestParam String documentType,
+                                                                              @ApiParam(value = "单据头id") @RequestParam Long documentHeaderId,
+                                                                              @ApiParam(value = "单据行id") @RequestParam(required = false) Long documentLineId) throws URISyntaxException {
         List<CashWriteOffWebDto> cashWriteOffHistory = cashWriteOffService.getCashWriteOffHistory(documentType, documentHeaderId, documentLineId, null);
         int size = cashWriteOffHistory.size();
         Page page = PageUtil.getPage(0, size);
@@ -223,8 +242,10 @@ public class CashWriteOffController {
      *      }
      * ]
      */
+
+    @ApiOperation(value = "核销请求", notes = "核销请求 开发：")
     @PostMapping("/do")
-    public ResponseEntity<List<CashWriteOffWebDto>> doWriteOff(@RequestBody @Valid CashWriteOffRequestWebDto requestDto){
+    public ResponseEntity<List<CashWriteOffWebDto>> doWriteOff(@ApiParam(value = "核销申请信息") @RequestBody  @Valid CashWriteOffRequestWebDto requestDto){
         cashWriteOffService.writeOff(requestDto);
         return ResponseEntity.ok(requestDto.getCashWriteOffMsg());
     }
@@ -256,8 +277,10 @@ public class CashWriteOffController {
      *      }
      * ]
      */
+
+    @ApiOperation(value = "核销立即生效", notes = "核销立即生效 开发：")
     @PostMapping("/do/at/once")
-    public ResponseEntity<List<CashWriteOffWebDto>> writeOffAtOnce(@RequestBody @Valid CashWriteOffRequestWebDto requestDto){
+    public ResponseEntity<List<CashWriteOffWebDto>> writeOffAtOnce(@ApiParam(value = "核销申请信息") @RequestBody  @Valid CashWriteOffRequestWebDto requestDto){
         cashWriteOffService.writeOffAtOnce(requestDto);
         return ResponseEntity.ok(requestDto.getCashWriteOffMsg());
     }
@@ -281,12 +304,14 @@ public class CashWriteOffController {
      * @apiParam (请求参数) {Long} tenantId 租户
      * @apiParam (请求参数) {Long} lastUpdatedBy 最后更新人
      */
+
+    @ApiOperation(value = "核销生效并与支付平台交互", notes = "核销生效并与支付平台交互 开发：")
     @PostMapping("/effect")
-    public void writeOffTakeEffect(@RequestParam String documentType,
-                                   @RequestParam Long documentHeaderId,
-                                   @RequestBody(required = false) List<Long> documentLineIds,
-                                   @RequestParam Long tenantId,
-                                   @RequestParam Long lastUpdatedBy){
+    public void writeOffTakeEffect(@ApiParam(value = "单据类型") @RequestParam String documentType,
+                                   @ApiParam(value = "单据头id") @RequestParam Long documentHeaderId,
+                                   @ApiParam(value = "单据行id") @RequestBody(required = false) List<Long> documentLineIds,
+                                   @ApiParam(value = "租户id") @RequestParam Long tenantId,
+                                   @ApiParam(value = "最后更新者") @RequestParam Long lastUpdatedBy){
         cashWriteOffService.writeOffTakeEffect(documentType,documentHeaderId,documentLineIds,tenantId,lastUpdatedBy);
     }
 
@@ -312,10 +337,12 @@ public class CashWriteOffController {
     }
      * @apiSuccess (返回信息) {String} result 返回信息:SUCCESS->成功; NO_WRITE_OFF_DATA->无核销数据; NO_NEED_ACCOUNT->无需核算; 其他为报错信息
      * @apiSuccessExample {json} 成功返回样例:
-     * SUCCESSCashWriteOffAccountCO
+     * SUCCESS
      */
+
+    @ApiOperation(value = "核销记录生成凭证", notes = "核销记录生成凭证 开发：")
     @PostMapping("/init/journal")
-    public String writeOffCreateJournalLines(@RequestBody @Valid CashWriteOffAccountCO co){
+    public String writeOffCreateJournalLines(@ApiParam(value = "核销账户信息") @RequestBody @Valid CashWriteOffAccountCO co){
         return cashWriteOffService.writeOffCreateJournalLines(co.getDocumentType(),
                 co.getDocumentHeaderId(),
                 co.getDocumentLineIds(),
@@ -351,8 +378,10 @@ public class CashWriteOffController {
      * @apiSuccessExample {json} 成功返回样例:
      * SUCCESS
      */
+
+    @ApiOperation(value = "核销反冲记录生成凭证", notes = "核销反冲记录生成凭证 开发：")
     @PostMapping("/reverse/init/journal")
-    public String writeOffCreateJournalLinesReverse(@RequestBody @Valid CashWriteOffAccountCO co){
+    public String writeOffCreateJournalLinesReverse(@ApiParam(value = "核销账户信息") @RequestBody @Valid CashWriteOffAccountCO co){
         return cashWriteOffService.writeOffCreateJournalLines(co.getDocumentType(),
                 co.getDocumentHeaderId(),
                 co.getDocumentLineIds(),
@@ -525,18 +554,24 @@ public class CashWriteOffController {
     ]
 
      */
+
+    @ApiOperation(value = "待反冲核销记录查询", notes = "待反冲核销记录查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/wait/reserve/detail")
-    public ResponseEntity<List<CashWriteOffReserveDTO>> getWaitingReserveWriteOffDetail(@RequestParam(required = false) String documentNumber,
-                                                                                        @RequestParam(required = false) Long applicantId,
-                                                                                        @RequestParam(required = false) String sourceDocumentNumber,
-                                                                                        @RequestParam(required = false) String billCode,
-                                                                                        @RequestParam(required = false) String createdDateFrom,
-                                                                                        @RequestParam(required = false) String createdDateTo,
-                                                                                        @RequestParam(required = false) BigDecimal writeOffAmountFrom,
-                                                                                        @RequestParam(required = false) BigDecimal writeOffAmountTo,
-                                                                                        @RequestParam(required = false) String writeOffDateFrom,
-                                                                                        @RequestParam(required = false) String writeOffDateTo,
-                                                                                        Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffReserveDTO>> getWaitingReserveWriteOffDetail(@ApiParam(value = "核销单据编号") @RequestParam(required = false) String documentNumber,
+                                                                                        @ApiParam(value = "单据申请人ID") @RequestParam(required = false) Long applicantId,
+                                                                                        @ApiParam(value = "被核销单据编号") @RequestParam(required = false) String sourceDocumentNumber,
+                                                                                        @ApiParam(value = "支付流水号") @RequestParam(required = false) String billCode,
+                                                                                        @ApiParam(value = "单据创建日期从") @RequestParam(required = false) String createdDateFrom,
+                                                                                        @ApiParam(value = "单据创建日期至") @RequestParam(required = false) String createdDateTo,
+                                                                                        @ApiParam(value = "核销金额从") @RequestParam(required = false) BigDecimal writeOffAmountFrom,
+                                                                                        @ApiParam(value = "核销金额至") @RequestParam(required = false) BigDecimal writeOffAmountTo,
+                                                                                        @ApiParam(value = "核销反冲日期从") @RequestParam(required = false) String writeOffDateFrom,
+                                                                                        @ApiParam(value = "核销反冲日期至") @RequestParam(required = false) String writeOffDateTo,
+                                                                                        @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffReserveDTO> waitingReserveWriteOffDetail = cashWriteOffService.getWaitingReserveWriteOffDetail(documentNumber,
                 applicantId,
@@ -725,22 +760,28 @@ public class CashWriteOffController {
     ]
 
      */
+
+    @ApiOperation(value = "我发起的反冲", notes = "我发起的反冲 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/user/reserved/detail")
-    public ResponseEntity<List<CashWriteOffReserveDTO>> getUserReservedWriteOffDetail(@RequestParam(required = false) String documentNumber,
-                                                                                      @RequestParam(required = false) Long applicantId,
-                                                                                      @RequestParam(required = false) String sourceDocumentNumber,
-                                                                                      @RequestParam(required = false) String billCode,
-                                                                                      @RequestParam(required = false) String createdDateFrom,
-                                                                                      @RequestParam(required = false) String createdDateTo,
-                                                                                      @RequestParam(required = false) BigDecimal writeOffAmountFrom,
-                                                                                      @RequestParam(required = false) BigDecimal writeOffAmountTo,
-                                                                                      @RequestParam(required = false) String status,
-                                                                                      @RequestParam(required = false) Long approvalId,
-                                                                                      @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
-                                                                                      @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
-                                                                                      @RequestParam(required = false) String writeOffDateFrom,
-                                                                                      @RequestParam(required = false) String writeOffDateTo,
-                                                                                      Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffReserveDTO>> getUserReservedWriteOffDetail(@ApiParam(value = "报账单编号") @RequestParam(required = false) String documentNumber,
+                                                                                      @ApiParam(value = "单据申请人ID") @RequestParam(required = false) Long applicantId,
+                                                                                      @ApiParam(value = "被核销单据编号") @RequestParam(required = false) String sourceDocumentNumber,
+                                                                                      @ApiParam(value = "支付流水号") @RequestParam(required = false) String billCode,
+                                                                                      @ApiParam(value = "单据创建日期从") @RequestParam(required = false) String createdDateFrom,
+                                                                                      @ApiParam(value = "单据创建日期至") @RequestParam(required = false) String createdDateTo,
+                                                                                      @ApiParam(value = "核销金额从") @RequestParam(required = false) BigDecimal writeOffAmountFrom,
+                                                                                      @ApiParam(value = "核销金额至") @RequestParam(required = false) BigDecimal writeOffAmountTo,
+                                                                                      @ApiParam(value = "核销状态") @RequestParam(required = false) String status,
+                                                                                      @ApiParam(value = "审核人ID") @RequestParam(required = false) Long approvalId,
+                                                                                      @ApiParam(value = "核销反冲金额从") @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
+                                                                                      @ApiParam(value = "核销反冲金额至") @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
+                                                                                      @ApiParam(value = "核销日期从") @RequestParam(required = false) String writeOffDateFrom,
+                                                                                      @ApiParam(value = "核销日期至") @RequestParam(required = false) String writeOffDateTo,
+                                                                                      @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffReserveDTO> userReservedWriteOffDetail = cashWriteOffService.getUserReservedWriteOffDetail(documentNumber,
                 applicantId,
@@ -933,22 +974,28 @@ public class CashWriteOffController {
     ]
 
      */
+
+    @ApiOperation(value = "待复核反冲记录查询", notes = "待复核反冲记录查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/rechecking/reserve/detail")
-    public ResponseEntity<List<CashWriteOffReserveDTO>> getRecheckingReservedWriteOffDetail(@RequestParam(required = false) String documentNumber,
-                                                                                            @RequestParam(required = false) Long applicantId,
-                                                                                            @RequestParam(required = false) String sourceDocumentNumber,
-                                                                                            @RequestParam(required = false) String billCode,
-                                                                                            @RequestParam(required = false) String createdDateFrom,
-                                                                                            @RequestParam(required = false) String createdDateTo,
-                                                                                            @RequestParam(required = false) BigDecimal writeOffAmountFrom,
-                                                                                            @RequestParam(required = false) BigDecimal writeOffAmountTo,
-                                                                                            @RequestParam(required = false) Long approvalId,
-                                                                                            @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
-                                                                                            @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
-                                                                                            @RequestParam(required = false) String writeOffDateFrom,
-                                                                                            @RequestParam(required = false) String writeOffDateTo,
-                                                                                            @RequestParam(required = false) Long createdBy,
-                                                                                            Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffReserveDTO>> getRecheckingReservedWriteOffDetail(@ApiParam(value = "报账单编号") @RequestParam(required = false) String documentNumber,
+                                                                                            @ApiParam(value = "单据申请人ID") @RequestParam(required = false) Long applicantId,
+                                                                                            @ApiParam(value = "被核销单据编号") @RequestParam(required = false) String sourceDocumentNumber,
+                                                                                            @ApiParam(value = "支付流水号") @RequestParam(required = false) String billCode,
+                                                                                            @ApiParam(value = "单据创建日期从") @RequestParam(required = false) String createdDateFrom,
+                                                                                            @ApiParam(value = "单据创建日期至") @RequestParam(required = false) String createdDateTo,
+                                                                                            @ApiParam(value = "核销金额从") @RequestParam(required = false) BigDecimal writeOffAmountFrom,
+                                                                                            @ApiParam(value = "核销金额至") @RequestParam(required = false) BigDecimal writeOffAmountTo,
+                                                                                            @ApiParam(value = "审核人ID") @RequestParam(required = false) Long approvalId,
+                                                                                            @ApiParam(value = "核销反冲金额从") @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
+                                                                                            @ApiParam(value = "核销反冲金额至") @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
+                                                                                            @ApiParam(value = "核销日期从") @RequestParam(required = false) String writeOffDateFrom,
+                                                                                            @ApiParam(value = "核销日期至") @RequestParam(required = false) String writeOffDateTo,
+                                                                                            @ApiParam(value = "创建人") @RequestParam(required = false) Long createdBy,
+                                                                                            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffReserveDTO> recheckingReservedWriteOffDetail = cashWriteOffService.getRecheckReservedWriteOffDetail(documentNumber,
                 applicantId,
@@ -1142,22 +1189,29 @@ public class CashWriteOffController {
     ]
 
      */
+
+
+    @ApiOperation(value = "已复核反冲记录查询", notes = "已复核反冲记录查询 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/rechecked/reserve/detail")
-    public ResponseEntity<List<CashWriteOffReserveDTO>> getRecheckedReservedWriteOffDetail(@RequestParam(required = false) String documentNumber,
-                                                                                           @RequestParam(required = false) Long applicantId,
-                                                                                           @RequestParam(required = false) String sourceDocumentNumber,
-                                                                                           @RequestParam(required = false) String billCode,
-                                                                                           @RequestParam(required = false) String createdDateFrom,
-                                                                                           @RequestParam(required = false) String createdDateTo,
-                                                                                           @RequestParam(required = false) BigDecimal writeOffAmountFrom,
-                                                                                           @RequestParam(required = false) BigDecimal writeOffAmountTo,
-                                                                                           @RequestParam(required = false) Long approvalId,
-                                                                                           @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
-                                                                                           @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
-                                                                                           @RequestParam(required = false) String writeOffDateFrom,
-                                                                                           @RequestParam(required = false) String writeOffDateTo,
-                                                                                           @RequestParam(required = false) Long createdBy,
-                                                                                           Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffReserveDTO>> getRecheckedReservedWriteOffDetail(@ApiParam(value = "报账单编号") @RequestParam(required = false) String documentNumber,
+                                                                                           @ApiParam(value = "单据申请人ID") @RequestParam(required = false) Long applicantId,
+                                                                                           @ApiParam(value = "被核销单据编号") @RequestParam(required = false) String sourceDocumentNumber,
+                                                                                           @ApiParam(value = "支付流水号") @RequestParam(required = false) String billCode,
+                                                                                           @ApiParam(value = "单据创建日期从") @RequestParam(required = false) String createdDateFrom,
+                                                                                           @ApiParam(value = "单据创建日期至") @RequestParam(required = false) String createdDateTo,
+                                                                                           @ApiParam(value = "核销金额从") @RequestParam(required = false) BigDecimal writeOffAmountFrom,
+                                                                                           @ApiParam(value = "核销金额至") @RequestParam(required = false) BigDecimal writeOffAmountTo,
+                                                                                           @ApiParam(value = "审核人ID") @RequestParam(required = false) Long approvalId,
+                                                                                           @ApiParam(value = "核销反冲金额从") @RequestParam(required = false) BigDecimal writeOffReverseAmountFrom,
+                                                                                           @ApiParam(value = "核销反冲金额至") @RequestParam(required = false) BigDecimal writeOffReverseAmountTo,
+                                                                                           @ApiParam(value = "核销日期从") @RequestParam(required = false) String writeOffDateFrom,
+                                                                                           @ApiParam(value = "核销日期至") @RequestParam(required = false) String writeOffDateTo,
+                                                                                           @ApiParam(value = "创建人") @RequestParam(required = false) Long createdBy,
+                                                                                           @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffReserveDTO> recheckedReservedWriteOffDetail = cashWriteOffService.getRecheckReservedWriteOffDetail(documentNumber,
                 applicantId,
@@ -1336,14 +1390,16 @@ public class CashWriteOffController {
     ]
 
      */
+
+    @ApiOperation(value = "核销反冲历史记录查询", notes = "核销反冲历史记录查询 开发：")
     @GetMapping("/reserved/history/detail")
-    public ResponseEntity<List<CashWriteOffReserveDTO>> getCashWriteOffReverseHistory(@RequestParam Long sourceWriteOffId) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffReserveDTO>> getCashWriteOffReverseHistory(@ApiParam(value = "反冲来源ID") @RequestParam Long sourceWriteOffId) throws URISyntaxException {
         List<CashWriteOffReserveDTO> cashWriteOffReverseHistory = cashWriteOffService.getCashWriteOffReverseHistory(sourceWriteOffId);
         int size = cashWriteOffReverseHistory.size();
         Page page = PageUtil.getPage(1, size);
         page.setTotal(size);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/payment/cash/write/off/reserved/history/detail");
-        return new ResponseEntity(cashWriteOffReverseHistory,httpHeaders, HttpStatus.OK);
+        return new ResponseEntity(cashWriteOffReverseHistory,httpHeaders,HttpStatus.OK);
     }
 
     /**
@@ -1358,11 +1414,13 @@ public class CashWriteOffController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/do/reserved?id=1&reverseAmount=20
      */
+
+    @ApiOperation(value = "发起核销反冲", notes = "发起核销反冲 开发：")
     @PostMapping("/do/reserved")
-    public ResponseEntity doCashWriteOffReverse(@RequestParam Long id,
-                                                @RequestParam BigDecimal reverseAmount,
-                                                @RequestParam(required = false) String remark,
-                                                @RequestParam(required = false) String attachmentOid) {
+    public ResponseEntity doCashWriteOffReverse(@ApiParam(value = "id") @RequestParam Long id,
+                                                @ApiParam(value = "反冲金额") @RequestParam BigDecimal reverseAmount,
+                                                @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                @ApiParam(value = "附件OID") @RequestParam(required = false) String attachmentOid) {
         cashWriteOffService.doCashWriteOffReverse(id,reverseAmount,remark,attachmentOid);
         return ResponseEntity.ok().build();
     }
@@ -1376,8 +1434,10 @@ public class CashWriteOffController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/reserved/cancel?id=1
      */
+
+    @ApiOperation(value = "核销反冲作废", notes = "核销反冲作废 开发：")
     @DeleteMapping("/reserved/cancel")
-    public ResponseEntity cancelCashWriteOffReverse(@RequestParam Long id){
+    public ResponseEntity cancelCashWriteOffReverse(@ApiParam(value = "id") @RequestParam Long id){
         cashWriteOffService.cancelCashWriteOffReverse(id);
         return ResponseEntity.ok().build();
     }
@@ -1394,11 +1454,13 @@ public class CashWriteOffController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/do/reserved/again?id=1&reverseAmount=20
      */
+
+    @ApiOperation(value = "重新发起核销反冲", notes = "重新发起核销反冲 开发：")
     @PostMapping("/do/reserved/again")
-    public ResponseEntity doCashWriteOffReverseAgain(@RequestParam Long id,
-                                                     @RequestParam BigDecimal reverseAmount,
-                                                     @RequestParam(required = false) String remark,
-                                                     @RequestParam(required = false) String attachmentOid){
+    public ResponseEntity doCashWriteOffReverseAgain(@ApiParam(value = "id") @RequestParam Long id,
+                                                     @ApiParam(value = "反冲金额") @RequestParam BigDecimal reverseAmount,
+                                                     @ApiParam(value = "备注") @RequestParam(required = false) String remark,
+                                                     @ApiParam(value = "附件OID") @RequestParam(required = false) String attachmentOid){
         cashWriteOffService.doCashWriteOffReverseAgain(id,reverseAmount,remark,attachmentOid);
         return ResponseEntity.ok().build();
     }
@@ -1414,10 +1476,12 @@ public class CashWriteOffController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/operation/reserved?id=1&operationType=1&approvalOpinions=cs
      */
+
+    @ApiOperation(value = "核销反冲复核", notes = "核销反冲复核 开发：")
     @PostMapping("/operation/reserved")
-    public ResponseEntity cashWriteOffReverseRecheck(@RequestParam Long id,
-                                                     @RequestParam Integer operationType,
-                                                     @RequestParam String approvalOpinions){
+    public ResponseEntity cashWriteOffReverseRecheck(@ApiParam(value = "id") @RequestParam Long id,
+                                                     @ApiParam(value = "操作类型") @RequestParam Integer operationType,
+                                                     @ApiParam(value = "审核意见") @RequestParam String approvalOpinions){
         cashWriteOffService.cashWriteOffReverseRecheck(id,operationType,approvalOpinions);
         return ResponseEntity.ok().build();
     }
@@ -1433,6 +1497,8 @@ public class CashWriteOffController {
      * @apiSuccessExample {json} 成功返回样例:
      * true
      */
+
+    @ApiOperation(value = "是否核算", notes = "是否核算 开发：")
     @GetMapping("/judge/post/accounting/service")
     public ResponseEntity<Boolean> judgePostAccountingService(){
         return ResponseEntity.ok(cashWriteOffService.judgePostAccountingService(OrgInformationUtil.getCurrentCompanyOid()));
@@ -1452,12 +1518,14 @@ public class CashWriteOffController {
      * @apiParamExample {json}请求样例：
      * /api/payment/cash/write/off/document/approve?documentType=PUBLIC_REPORT&documentHeaderId=1&tenantId=1&operatorId=1&operationType=1
      */
+
+    @ApiOperation(value = "单据审核修改核销记录状态", notes = "单据审核修改核销记录状态 开发：")
     @PostMapping("/document/approve")
-    public ResponseEntity<String> auditChangeWriteOffStatus(@RequestParam String documentType,
-                                                            @RequestParam Long documentHeaderId,
-                                                            @RequestParam Long tenantId,
-                                                            @RequestParam Long operatorId,
-                                                            @RequestParam Integer operationType){
+    public ResponseEntity<String> auditChangeWriteOffStatus(@ApiParam(value = "单据类型") @RequestParam String documentType,
+                                                            @ApiParam(value = "单据头id") @RequestParam Long documentHeaderId,
+                                                            @ApiParam(value = "租户id") @RequestParam Long tenantId,
+                                                            @ApiParam(value = "操作者") @RequestParam Long operatorId,
+                                                            @ApiParam(value = "操作类型") @RequestParam Integer operationType){
         try {
             cashWriteOffService.auditChangeWriteOffStatus(documentType,
                     documentHeaderId,
@@ -1528,14 +1596,20 @@ public class CashWriteOffController {
     }
     ]
      */
+
+    @ApiOperation(value = "预付款查询核销明细", notes = "预付款查询核销明细 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/of/prepayment/detail")
-    public ResponseEntity<List<CashWriteOffHistoryDTO>> getPrepaymentWriteOffDetail(@RequestParam(value = "prepaymentRequisitionId") Long prepaymentRequisitionId,
-                                                                                    @RequestParam(value = "documentNumber",required = false) String documentNumber,
-                                                                                    @RequestParam(value = "documentFormName",required = false) String documentFormName,
-                                                                                    Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<CashWriteOffHistoryDTO>> getPrepaymentWriteOffDetail(@ApiParam(value = "预付款申请ID") @RequestParam(value = "prepaymentRequisitionId") Long prepaymentRequisitionId,
+                                                                                    @ApiParam(value = "核销单据编号") @RequestParam(value = "documentNumber",required = false) String documentNumber,
+                                                                                    @ApiParam(value = "核销单据类型") @RequestParam(value = "documentFormName",required = false) String documentFormName,
+                                                                                    @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashWriteOffHistoryDTO> prepaymentWriteOffDetail = cashWriteOffService.getPrepaymentWriteOffDetail(prepaymentRequisitionId, documentNumber, documentFormName, page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/payment/cash/write/off/of/prepayment/detail");
-        return new ResponseEntity<>(prepaymentWriteOffDetail,httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(prepaymentWriteOffDetail,httpHeaders,HttpStatus.OK);
     }
 }

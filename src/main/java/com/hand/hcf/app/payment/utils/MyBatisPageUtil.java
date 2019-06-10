@@ -13,6 +13,6 @@ public class MyBatisPageUtil {
      * @return
      */
     public static Page getPage(Pageable pageable){
-        return  new Page(pageable.getPageNumber()+1,pageable.getPageSize());
+        return  new com.baomidou.mybatisplus.plugins.Page(pageable.getPageNumber()+1,pageable.getPageSize());
     }
 }

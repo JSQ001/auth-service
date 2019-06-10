@@ -14,6 +14,5 @@ public class CompanyLevelCO {
     //公司级别描述
     private String description;
 
-    //jiu.zhao TODO
     private Long id;
 }

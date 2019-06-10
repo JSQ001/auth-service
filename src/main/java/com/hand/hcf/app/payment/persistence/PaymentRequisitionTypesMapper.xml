@@ -36,6 +36,16 @@
         where art.set_of_books_id = #{setOfBooksId}
     </select>
 
+    <select id="selectAcpReqTypesByCompanyIdEnable"  resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionTypes">
+
+       select  art.*
+         from csh_req_types art
+        where art.set_of_books_id = #{setOfBooksId}
+        <if test="enabled != null">
+            and enabled = #{enabled}
+        </if>
+    </select>
+
     <select id="selectByUser" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionTypes">
 
         SELECT

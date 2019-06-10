@@ -159,4 +159,14 @@ public class InvoiceCheckCO {
      * 红冲标志
      */
     private String redFlag;
+
+    /**
+     * applyTaxPeriod 申请认证税款所属期
+     */
+    private String applyTaxPeriod;
+
+    /**
+     * applyRzlx 认证类型
+     */
+    private String applyRzlx;
 }

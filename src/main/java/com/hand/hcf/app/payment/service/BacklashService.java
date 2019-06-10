@@ -477,6 +477,7 @@ public class BacklashService {
         //单据信息
         //付款单据DTO
         PayDocumentDTO payDocumentDTO = PayDocumentDTO.builder()
+                .documentCategory(detail.getDocumentCategory())
                 .currency(detail.getCurrency())
                 .documentApplicant(detail.getEmployeeName())
                 .documentCode(detail.getDocumentNumber())

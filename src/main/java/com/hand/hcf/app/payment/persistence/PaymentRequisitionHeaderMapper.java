@@ -7,6 +7,8 @@ import com.hand.hcf.app.payment.domain.PaymentRequisitionHeader;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -30,5 +32,22 @@ public interface PaymentRequisitionHeaderMapper extends BaseMapper<PaymentRequis
     /**
      * 付款申请单财务查询
      */
-    List<PaymentRequisitionHeader> queryHeaders(Pagination page, @Param("ew") Wrapper<PaymentRequisitionHeader> wrapper);
+    List<PaymentRequisitionHeader> queryHeaders(@Param("ew") Wrapper<PaymentRequisitionHeader> wrapper);
+
+    /**
+     * 付款申请单财务查询（数据权限）
+     */
+    List<PaymentRequisitionHeader>  queryPaymentRequisitionHeaders(String requisitionNumber,
+                                                                   Long setOfBooksId,
+                                                                   Long companyId,
+                                                                   Long acpReqTypeId,
+                                                                   Long employeeId,
+                                                                   String status,
+                                                                   Long unitId,
+                                                                   ZonedDateTime requisitionDateFrom,
+                                                                   ZonedDateTime requisitionDateTo,
+                                                                   BigDecimal functionAmountFrom,
+                                                                   BigDecimal functionAmountTo,
+                                                                   String description,
+                                                                   String dataAuthLabel);
 }

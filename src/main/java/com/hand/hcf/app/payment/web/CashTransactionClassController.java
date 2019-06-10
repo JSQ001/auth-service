@@ -10,6 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.annotations.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/9/7.
  */
+@Api(tags = "现金事务分类API")
 @RestController
 @RequestMapping("/api/cash/transaction/classes")
 public class CashTransactionClassController {
@@ -78,8 +81,10 @@ public class CashTransactionClassController {
      *   "versionNumber": 1
      * }
      */
+
+    @ApiOperation(value = "新增单个现金事务分类", notes = "新增单个现金事务分类 开发：")
     @PostMapping
-    public ResponseEntity<CashTransactionClass> createCashTransactionClass(@RequestBody CashTransactionClass cashTransactionClass){
+    public ResponseEntity<CashTransactionClass> createCashTransactionClass(@ApiParam(value = "现金事务分类") @RequestBody CashTransactionClass cashTransactionClass){
         return ResponseEntity.ok(cashTransactionClassService.createCashTransactionClass(cashTransactionClass));
     }
 
@@ -137,8 +142,9 @@ public class CashTransactionClassController {
      *   "versionNumber": 1
      * }
      */
+    @ApiOperation(value = "修改单个现金事务分类", notes = "修改单个现金事务分类 开发：")
     @PutMapping
-    public ResponseEntity<CashTransactionClass> updateCashTransactionClass(@RequestBody CashTransactionClass cashTransactionClass){
+    public ResponseEntity<CashTransactionClass> updateCashTransactionClass(@ApiParam(value = "现金事务分类") @RequestBody CashTransactionClass cashTransactionClass){
         return ResponseEntity.ok(cashTransactionClassService.updateCashTransactionClass(cashTransactionClass));
     }
 
@@ -163,8 +169,10 @@ public class CashTransactionClassController {
      * @apiUse myID
      * @apiUse MyError
      */
+
+    @ApiOperation(value = "逻辑删除单个现金事务分类", notes = "逻辑删除单个现金事务分类 开发：")
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteCashTransactionClass(@PathVariable Long id){
+    public ResponseEntity deleteCashTransactionClass(@ApiParam(value = "id") @PathVariable Long id){
         cashTransactionClassService.deleteCashTransactionClass(id);
         return ResponseEntity.ok().build();
     }
@@ -200,6 +208,8 @@ public class CashTransactionClassController {
      *   "setOfBookName": "默认账套"
      * }
      */
+
+    @ApiOperation(value = "根据id查询单个现金事务分类", notes = "根据id查询单个现金事务分类 开发：")
     @GetMapping("/{id}")
     public ResponseEntity<CashTransactionClass> getCashTransactionClass(@PathVariable Long id){
         return ResponseEntity.ok(cashTransactionClassService.getCashTransactionClass(id));
@@ -250,14 +260,20 @@ public class CashTransactionClassController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件分页查询现金事务分类", notes = "根据条件分页查询现金事务分类 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query")
     public ResponseEntity<List<CashTransactionClass>> getCashTransactionClassByCond(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "classCode", required = false) String classCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "typeCode", required = false) String typeCode,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金事务分类代码") @RequestParam(value = "classCode", required = false) String classCode,
+            @ApiParam(value = "现金事务分类名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "现金事务类型代码") @RequestParam(value = "typeCode", required = false) String typeCode,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashTransactionClass> list = cashTransactionClassService.getCashTransactionClassByCond(setOfBookId,classCode, description,typeCode,isEnabled, page, false);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/transaction/classes/query");
@@ -309,14 +325,20 @@ public class CashTransactionClassController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件是否授权分页查询现金事务分类", notes = "根据条件是否授权分页查询现金事务分类 开发：")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/query/enable/dataAuth")
     public ResponseEntity<List<CashTransactionClass>> getCashTransactionClassByCondEnableDataAuth(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "classCode", required = false) String classCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "typeCode", required = false) String typeCode,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金事务分类") @RequestParam(value = "classCode", required = false) String classCode,
+            @ApiParam(value = "现金事务分类名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "现金事务类型代码") @RequestParam(value = "typeCode", required = false) String typeCode,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashTransactionClass> list = cashTransactionClassService.getCashTransactionClassByCond(setOfBookId,classCode, description,typeCode,isEnabled, page, true);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/cash/transaction/classes/query/enable/dataAuth");
@@ -365,13 +387,15 @@ public class CashTransactionClassController {
      *  }
      * ]
      */
+
+    @ApiOperation(value = "根据条件不分页查询现金事务分类", notes = "根据条件不分页查询现金事务分类 开发：")
     @GetMapping("/queryAll")
     public ResponseEntity<List<CashTransactionClass>> getCashTransactionClassAllByCond(
-            @RequestParam(value = "setOfBookId") Long setOfBookId,
-            @RequestParam(value = "classCode", required = false) String classCode,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "typeCode", required = false) String typeCode,
-            @RequestParam(value = "enabled", required = false) Boolean isEnabled){
+            @ApiParam(value = "账套ID") @RequestParam(value = "setOfBookId") Long setOfBookId,
+            @ApiParam(value = "现金事务分类代码") @RequestParam(value = "classCode", required = false) String classCode,
+            @ApiParam(value = "现金事务分类名称") @RequestParam(value = "description", required = false) String description,
+            @ApiParam(value = "现金事务类型代码") @RequestParam(value = "typeCode", required = false) String typeCode,
+            @ApiParam(value = "是否启用") @RequestParam(value = "enabled", required = false) Boolean isEnabled){
         List<CashTransactionClass> list = cashTransactionClassService.getCashTransactionClassAllByCond(setOfBookId,classCode, description,typeCode,isEnabled);
         return ResponseEntity.ok(list);
     }
@@ -412,8 +436,10 @@ public class CashTransactionClassController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量新增现金事务分类", notes = "批量新增现金事务分类 开发：")
     @PostMapping("/batch")
-    public ResponseEntity<List<CashTransactionClass>> createCashTransactionClassBatch(@RequestBody List<CashTransactionClass> list){
+    public ResponseEntity<List<CashTransactionClass>> createCashTransactionClassBatch(@ApiParam(value = "现金事务分类") @RequestBody List<CashTransactionClass> list){
         return ResponseEntity.ok(cashTransactionClassService.createCashTransactionClassBatch(list));
     }
 
@@ -452,8 +478,10 @@ public class CashTransactionClassController {
      * }
      * ]
      */
+
+    @ApiOperation(value = "批量修改现金事务分类", notes = "批量修改现金事务分类 开发：")
     @PutMapping("/batch")
-    public ResponseEntity<List<CashTransactionClass>> updateCashTransactionClassBatch(@RequestBody List<CashTransactionClass> list){
+    public ResponseEntity<List<CashTransactionClass>> updateCashTransactionClassBatch(@ApiParam(value = "现金事务分类") @RequestBody List<CashTransactionClass> list){
         return ResponseEntity.ok(cashTransactionClassService.updateCashTransactionClassBatch(list));
     }
 
@@ -477,8 +505,10 @@ public class CashTransactionClassController {
      *
      * }
      */
+
+    @ApiOperation(value = "批量删除现金事务分类", notes = "批量删除现金事务分类 开发：")
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashTransactionClassBatch(@RequestBody List<Long> list){
+    public ResponseEntity deleteCashTransactionClassBatch(@ApiParam(value = "现金事务列表") @RequestBody List<Long> list){
         cashTransactionClassService.deleteCashTransactionClassBatch(list);
         return ResponseEntity.ok().build();
     }

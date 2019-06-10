@@ -3,6 +3,7 @@ package com.hand.hcf.app.payment.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
+import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
@@ -228,10 +229,37 @@ public class PaymentRequisitionLineService extends BaseService<PaymentRequisitio
                         paymentRequisitionLine.getCshTransactionClassId())
                         .getDescription());
 
+                //设置付款方式类型
+                /*paymentRequisitionLineWebDTO.setPaymentMethodCategoryName(organizationService.getSysCodeValueByCodeAndValue(
+                        SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
+                        paymentRequisitionLine.getPaymentMethodCategory()).getName());*/
+                if (paymentRequisitionLine.getPaymentMethodCategory() != null && !paymentRequisitionLine.getPaymentMethodCategory().equals("")){
+                    SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(
+                            SystemCustomEnumerationType.CSH_PAYMENT_TYPE,
+                            paymentRequisitionLine.getPaymentMethodCategory());
+                    if (sysCodeValueByCodeAndValue != null){
+                        paymentRequisitionLineWebDTO.setPaymentMethodCategoryName(sysCodeValueByCodeAndValue.getName());
+                    }
+                }
+                //设置付款方式
+                if (paymentRequisitionLine.getPaymentType() != null && !paymentRequisitionLine.getPaymentType().equals("")){
+                    SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(
+                            "ZJ_PAYMENT_TYPE",
+                            paymentRequisitionLine.getPaymentType());
+                    if (sysCodeValueByCodeAndValue != null){
+                        paymentRequisitionLineWebDTO.setPaymentTypeName(sysCodeValueByCodeAndValue.getName());
+                    }
+                }
+                //设置账户属性
+                if (paymentRequisitionLine.getPropFlag() != null && !paymentRequisitionLine.getPropFlag().equals("")){
+                    SysCodeValueCO sysCodeValueByCodeAndValue = organizationService.getSysCodeValueByCodeAndValue(
+                            "PROP_FLAG",
+                            paymentRequisitionLine.getPropFlag());
+                    if (sysCodeValueByCodeAndValue != null){
+                        paymentRequisitionLineWebDTO.setPropFlagName(sysCodeValueByCodeAndValue.getName());
+                    }
+                }
 
-                paymentRequisitionLineWebDTO.setPaymentMethodCategoryName(organizationService.getSysCodeValueByCodeAndValue(
-                        PaymentSystemCustomEnumerationType.CSH_PAYMENT_TYPE,
-                        paymentRequisitionLine.getPaymentMethodCategory()).getName());
                 //取合同信息
                 //bo.liu 合同
                 /*if (paymentRequisitionLine.getContractHeaderId() != null && paymentRequisitionLine.getPaymentScheduleLineId() != null) {

@@ -7,7 +7,10 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.common.co.CashPaymentRequisitionHeaderCO;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
@@ -19,6 +22,7 @@ import java.time.ZonedDateTime;
  * @author baochao.chen@hand-china.com
  * @since 2017-10-26
  */
+@ApiModel(description = "预付款单行表实体类")
 @Data
 @TableName("csh_payment_requisition_line")
 public class CashPaymentRequisitionLine extends Domain {
@@ -96,6 +100,23 @@ public class CashPaymentRequisitionLine extends Domain {
 	 */
 	@TableField("payment_method_category")
 	private String paymentMethodCategory;
+
+	/**
+	 * 付款方式 (付款方式值列表：ZJ_PAYMENT_TYPE)
+	 */
+	@ApiModelProperty(value = "付款方式")
+	@TableField("payment_type")
+	@NotNull
+	private String paymentType;
+
+	/**
+	 * 账户属性 (“对私”（PRIVATE）和“对公”（BUSINESS）)
+	 */
+	@ApiModelProperty(value = "账户属性")
+	@TableField("prop_flag")
+	@NotNull
+	private String propFlag;
+
 	/**
 	 * 现金事务分类id
 	 */

@@ -3,6 +3,8 @@ package com.hand.hcf.app.payment.web;
 
 import com.hand.hcf.app.payment.service.PaymentRequisitionLineService;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionLineWebDTO;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date: Created in 12:02 2018/1/24
  * @Modified by
  */
+@Api(tags = "付款申请单行API")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/acp/requisition/line")
@@ -30,6 +33,7 @@ public class PaymentRequisitionLineController {
      * @apiDescription 根据付款申请单行ID获取付款申请行
      * @apiParam (paymentRequisitionLineDTO) {Long} id  付款申请单行ID
      */
+    @ApiOperation(value = "根据付款申请单行ID获取付款申请行", notes = "根据付款申请单行ID获取付款申请行 开发：bin.xie")
     @GetMapping("/query/{id}")
     public ResponseEntity<PaymentRequisitionLineWebDTO> queryLineById(@PathVariable(value = "id") Long id){
         return ResponseEntity.ok(service.selectByLineId(id));

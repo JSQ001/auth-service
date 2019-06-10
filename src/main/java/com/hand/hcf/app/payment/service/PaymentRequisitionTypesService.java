@@ -159,6 +159,12 @@ public class PaymentRequisitionTypesService extends BaseService<PaymentRequisiti
         return baseMapper.selectAcpReqTypesByCompanyId(setOfBooksId,companyId);
     }
 
+    @Transactional(readOnly = true)
+    public List<PaymentRequisitionTypes> selectTypesByCompanyIdAndSetOfBooksIdEnable(Long setOfBooksId){
+
+        return baseMapper.selectAcpReqTypesByCompanyIdEnable(setOfBooksId,true);
+    }
+
     /**
      * @Author: bin.xie
      * @Description: 根据当前机构当前账套分页查询类型

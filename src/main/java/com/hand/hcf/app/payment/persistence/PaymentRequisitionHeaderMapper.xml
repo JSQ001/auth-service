@@ -78,4 +78,48 @@
         where a.HEADER_ID = #{headId}
     </select>
 
+    <select id="queryPaymentRequisitionHeaders" resultType="com.hand.hcf.app.payment.domain.PaymentRequisitionHeader">
+        select carh.* ,rct.set_of_books_id from csh_acp_requisition_hds carh ,csh_req_types rct
+            where carh.acp_req_type_id = rct.id
+            <if test=" requisitionNumber != null ">
+                AND carh.requisition_number  like  concat(concat('%',#{requisitionNumber}),'%')
+            </if>
+            <if test="setOfBooksId != null ">
+                AND rct.set_of_books_id = #{setOfBooksId}
+            </if>
+            <if test="companyId != null ">
+                AND carh.company_id = #{companyId}
+            </if>
+            <if test="acpReqTypeId != null ">
+                AND carh.acp_req_type_id = #{acpReqTypeId}
+            </if>
+            <if test="employeeId != null ">
+                AND carh.employee_id = #{employeeId}
+            </if>
+            <if test="status != null ">
+                AND carh.status = #{status}
+            </if>
+            <if test="unitId != null ">
+                AND carh.unit_id = #{unitId}
+            </if>
+            <if test="requisitionDateFrom != null ">
+                AND carh.requisition_date  &gt; #{requisitionDateFrom}
+            </if>
+            <if test="requisitionDateTo != null ">
+                AND carh.requisition_date &lt; #{requisitionDateTo}
+            </if>
+            <if test="functionAmountFrom != null ">
+                AND carh.function_amount &gt; #{functionAmountFrom}
+            </if>
+            <if test="functionAmountTo != null ">
+                AND carh.function_amount &lt; #{functionAmountTo}
+            </if>
+            <if test="description != null ">
+                AND carh.description like  concat(concat('%',#{description}),'%')
+            </if>
+            <if test="dataAuthLabel != null ">
+                AND   #{dataAuthLabel}
+            </if>
+
+    </select>
 </mapper>

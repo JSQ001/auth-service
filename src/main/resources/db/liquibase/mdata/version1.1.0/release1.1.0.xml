@@ -84,4 +84,15 @@
                       newColumnName="responsibility_center_name"
                       columnDataType="varchar(255)"/>
     </changeSet>
+
+
+    <changeSet id="201905051830001" author="bin.xie">
+        <comment>导入参数定义数据</comment>
+        <sql>truncate table sys_parameter_setting</sql>
+        <sql>truncate table sys_para_module_status</sql>
+        <sql>truncate table sys_parameter</sql>
+        <sql>truncate table sys_parameter_values</sql>
+        <sql>truncate table sys_parameter_module</sql>
+        <sqlFile path="classpath:db/liquibase/mdata/version1.1.0/parameter.sql" encoding="UTF-8"/>
+    </changeSet>
 </databaseChangeLog>

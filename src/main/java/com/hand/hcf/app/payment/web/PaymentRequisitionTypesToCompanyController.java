@@ -6,12 +6,14 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.payment.domain.PaymentRequisitionTypesToCompany;
 import com.hand.hcf.app.payment.service.PaymentRequisitionTypesToCompanyService;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionTypesCompanyDTO;
+import io.swagger.annotations.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.Map;
  * @Date: Created in 11:37 2018/1/25
  * @Modified by
  */
+@Api(tags = "借款申请单分配机构API")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/acp/request/type/company")
@@ -50,13 +53,19 @@ public class PaymentRequisitionTypesToCompanyController {
      * @apiParam {Long} acpReqTypeId 类型id
      *
      */
+    @ApiOperation(value = "查询该类别分配的公司", notes = "查询该类别分配的公司 开发：bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/{setOfBooksId}/queryCompany")
-    public ResponseEntity<List<PaymentRequisitionTypesToCompany>> getContractTypeAssignCompanys(@RequestParam Long acpReqTypeId, @PathVariable Long setOfBooksId,
-                                                                                                Pageable pageable) throws URISyntaxException {
+    public ResponseEntity<List<PaymentRequisitionTypesToCompany>> getContractTypeAssignCompanys(@ApiParam(value = "类型id") @RequestParam Long acpReqTypeId,
+                                                                                                @PathVariable Long setOfBooksId,
+                                                                                                @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<PaymentRequisitionTypesToCompany> resultDTOList = service.getAcpReqTypeAssignCompanys(acpReqTypeId, page, setOfBooksId);
         HttpHeaders headers = PageUtil.generateHttpHeaders(page, "/api/acp/request/type/" + setOfBooksId + "/queryCompany");
-        return new ResponseEntity(resultDTOList,headers, HttpStatus.OK);
+        return new ResponseEntity(resultDTOList,headers,HttpStatus.OK);
     }
 
 
@@ -73,15 +82,20 @@ public class PaymentRequisitionTypesToCompanyController {
      * @apiParam {Pageable} pageable 分页
      *
      */
+    @ApiOperation(value = "付款申请单类型分配公司过滤查询", notes = "付款申请单类型分配公司过滤查询 开发：bin.xie")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     @GetMapping("/{setOfBooksId}/companies/query/filter")
     public ResponseEntity getCompanyByCondFiter(
-            @RequestParam Long acpReqTypesId,
-            @RequestParam(required = false) String companyCode,
-            @RequestParam(required = false) String companyName,
-            @RequestParam(required = false) String companyCodeFrom,
-            @RequestParam(required = false) String companyCodeTo,
+            @ApiParam(value = "类型id") @RequestParam Long acpReqTypesId,
+            @ApiParam(value = "公司代码") @RequestParam(required = false) String companyCode,
+            @ApiParam(value = "公司名称") @RequestParam(required = false) String companyName,
+            @ApiParam(value = "公司代码从") @RequestParam(required = false) String companyCodeFrom,
+            @ApiParam(value = "公司代码至") @RequestParam(required = false) String companyCodeTo,
             @PathVariable Long setOfBooksId,
-            Pageable pageable
+            @ApiIgnore Pageable pageable
     ) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CompanyCO> result = service.getCompanyByConditionFilter(setOfBooksId, acpReqTypesId, companyCode,
@@ -123,8 +137,9 @@ public class PaymentRequisitionTypesToCompanyController {
      *  }
      *
      */
+    @ApiOperation(value = "付款申请单类型分配公司", notes = "付款申请单类型分配公司 开发：bin.xie")
     @PostMapping("/{setOfBooksId}/batchAssignCompany")
-    public ResponseEntity batchAssignCompany(@RequestBody PaymentRequisitionTypesCompanyDTO paymentRequisitionTypesCompanyDTO,
+    public ResponseEntity batchAssignCompany(@ApiParam(value = "付款申请单类型公司DTO") @RequestBody PaymentRequisitionTypesCompanyDTO paymentRequisitionTypesCompanyDTO,
                                              @PathVariable Long setOfBooksId) {
         return ResponseEntity.ok(service.saveAcpReqTypesToCompany(paymentRequisitionTypesCompanyDTO));
     }
@@ -143,9 +158,10 @@ public class PaymentRequisitionTypesToCompanyController {
      *  }
      *
      */
+    @ApiOperation(value = "更新付款申请单类型分配公司", notes = "更新付款申请单类型分配公司 开发：")
     @PutMapping("/{setOfBooksId}/updateCompany")
     public ResponseEntity updateCompanyEnabledById(@PathVariable Long setOfBooksId,
-                                                   @RequestBody PaymentRequisitionTypesToCompany paymentRequisitionTypesToCompany){
+                                                   @ApiParam(value = "付款申请单类型分配公司") @RequestBody PaymentRequisitionTypesToCompany paymentRequisitionTypesToCompany){
         return ResponseEntity.ok(service.updateCompanyEnabledById(paymentRequisitionTypesToCompany));
     }
 }

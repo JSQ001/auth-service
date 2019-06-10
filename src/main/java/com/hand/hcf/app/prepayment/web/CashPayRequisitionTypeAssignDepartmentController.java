@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.prepayment.domain.CashPayRequisitionTypeAssignDepartment;
 import com.hand.hcf.app.prepayment.service.CashPayRequisitionTypeAssignDepartmentService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 /**
  * Created by 韩雪 on 2017/12/29.
  */
+@Api(tags = "预付款单类型关联部门")
 @RestController
 @RequestMapping("/api/cash/pay/requisition/type/assign/departments")
 public class CashPayRequisitionTypeAssignDepartmentController {
@@ -64,7 +66,8 @@ public class CashPayRequisitionTypeAssignDepartmentController {
     }
      */
     @PostMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignDepartment>> createCashPayRequisitionTypeAssignDepartmentBatch(@RequestBody List<CashPayRequisitionTypeAssignDepartment> list){
+    @ApiOperation(value = "批量新增 预付款单类型关联部门", notes = "批量新增 预付款单类型关联部门 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignDepartment>> createCashPayRequisitionTypeAssignDepartmentBatch(@ApiParam(value = "预付款单类型关联部门") @RequestBody List<CashPayRequisitionTypeAssignDepartment> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignDepartmentService.createCashPayRequisitionTypeAssignDepartmentBatch(list));
     }
 
@@ -107,7 +110,8 @@ public class CashPayRequisitionTypeAssignDepartmentController {
     }
      */
     @PutMapping("/batch")
-    public ResponseEntity<List<CashPayRequisitionTypeAssignDepartment>> updateCashPayRequisitionTypeAssignDepartmentBatch(@RequestBody List<CashPayRequisitionTypeAssignDepartment> list){
+    @ApiOperation(value = "批量修改 预付款单类型关联部门", notes = "批量修改 预付款单类型关联部门 开发:韩雪")
+    public ResponseEntity<List<CashPayRequisitionTypeAssignDepartment>> updateCashPayRequisitionTypeAssignDepartmentBatch(@ApiParam(value = "预付款单类型关联部门") @RequestBody List<CashPayRequisitionTypeAssignDepartment> list){
         return ResponseEntity.ok(cashPayRequisitionTypeAssignDepartmentService.updateCashPayRequisitionTypeAssignDepartmentBatch(list));
     }
 
@@ -134,7 +138,8 @@ public class CashPayRequisitionTypeAssignDepartmentController {
     }
      */
     @DeleteMapping("/batch")
-    public ResponseEntity deleteCashPayRequisitionTypeAssignDepartmentBatch(@RequestBody List<Long> list){
+    @ApiOperation(value = "批量删除 预付款单类型关联部门(物理删除)", notes = "批量删除 预付款单类型关联部门(物理删除) 开发:韩雪")
+    public ResponseEntity deleteCashPayRequisitionTypeAssignDepartmentBatch(@ApiParam(value = "主键id") @RequestBody List<Long> list){
         cashPayRequisitionTypeAssignDepartmentService.deleteCashPayRequisitionTypeAssignDepartmentBatch(list);
         return ResponseEntity.ok().build();
     }
@@ -172,9 +177,14 @@ public class CashPayRequisitionTypeAssignDepartmentController {
     ]
      */
     @GetMapping("/query")
+    @ApiOperation(value = "根据预付款单类型id查询所有已关联的部门(分页)", notes = "根据预付款单类型id查询所有已关联的部门(分页) 开发:韩雪")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页多少条", dataType = "int"),
+    })
     public ResponseEntity<List<CashPayRequisitionTypeAssignDepartment>> getCashPayRequisitionTypeAssignDepartmentByCond(
-            @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
-            Pageable pageable) throws URISyntaxException {
+            @ApiParam(value = "预付款单类型ID") @RequestParam(value = "payRequisitionTypeId") Long payRequisitionTypeId,
+            @ApiIgnore Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
         List<CashPayRequisitionTypeAssignDepartment> list = cashPayRequisitionTypeAssignDepartmentService.getCashPayRequisitionTypeAssignDepartmentByCond(payRequisitionTypeId,page);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page,"/api/cash/pay/requisition/type/assign/departments/query");
