@@ -1617,10 +1617,14 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
             expenseReportHeaderDTO.setFormOid(approvalFormById.getFormOid());
             // 币种
             CurrencyRateCO currencyRate = organizationService.getForeignCurrencyByCode(null, expenseReportHeaderDTO.getCurrencyCode(), expenseReportHeaderDTO.getSetOfBooksId());
-            expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyName());
+            expenseReportHeaderDTO.setCurrencyName(currencyRate.getCurrencyCode() + "-" + currencyRate.getCurrencyName());
             //区域
-            SysCodeValue sysCodeValueByCode = sysCodeService.getValueBySysCodeAndValue("PERSON_AREA", expenseReportHeaderDTO.getAreaCode());
-            expenseReportHeaderDTO.setAreaName(sysCodeValueByCode.getName());
+            SysCodeValue sysCodeValueByCode = sysCodeService.getValueBySysCodeAndValue("REPORT_AREA", expenseReportHeaderDTO.getAreaCode());
+            String AreaName = Optional
+                    .ofNullable(sysCodeValueByCode)
+                    .map(u -> TypeConversionUtils.parseString(u.getName()))
+                    .orElseThrow(() -> new BizException("SYS_CODE_REPORT_AREA_NOT_EXISTS"));
+            expenseReportHeaderDTO.setAreaName(AreaName);
             //附件
             if(com.baomidou.mybatisplus.toolkit.StringUtils.isNotEmpty(expenseReportHeaderDTO.getAttachmentOid())){
                 List<String> strings = Arrays.asList(expenseReportHeaderDTO.getAttachmentOid().split(","));
