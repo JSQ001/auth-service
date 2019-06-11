@@ -5,7 +5,6 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.dimension.domain.DimensionItemAssignCompany;
 import com.hand.hcf.app.mdata.dimension.service.DimensionItemAssignCompanyService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

@@ -14,8 +14,6 @@ import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
 import com.hand.hcf.app.mdata.department.dto.DepartmentPositionImportDTO;
 import com.hand.hcf.app.mdata.department.persistence.DepartmentPositionMapper;
-import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
-import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,9 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

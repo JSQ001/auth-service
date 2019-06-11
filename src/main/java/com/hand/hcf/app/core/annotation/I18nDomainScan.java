@@ -1,6 +1,5 @@
 package com.hand.hcf.app.core.annotation;
 
-import com.hand.hcf.app.core.annotation.I18nDomainScannerRegistrar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;

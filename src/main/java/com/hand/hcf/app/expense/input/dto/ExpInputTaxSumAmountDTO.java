@@ -1,16 +1,10 @@
 package com.hand.hcf.app.expense.input.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @description

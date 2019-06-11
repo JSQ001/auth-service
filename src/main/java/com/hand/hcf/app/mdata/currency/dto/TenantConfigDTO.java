@@ -1,13 +1,10 @@
 package com.hand.hcf.app.mdata.currency.dto;
 
-import com.hand.hcf.app.core.domain.DomainEnable;
 import com.hand.hcf.app.core.domain.DomainLogicEnable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * 汇率容差DTO

@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.FormTypeEnum;
-import com.hand.hcf.app.core.domain.SystemCustomEnumerationType;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;

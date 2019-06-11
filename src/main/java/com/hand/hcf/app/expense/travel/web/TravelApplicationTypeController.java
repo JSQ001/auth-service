@@ -7,7 +7,6 @@ import com.hand.hcf.app.expense.travel.dto.TravelApplicationTypeDTO;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationTypeService;
 import com.hand.hcf.app.expense.travel.web.dto.TravelApplicationTypeDimensionDTO;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseTypeWebDTO;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

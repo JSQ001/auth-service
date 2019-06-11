@@ -9,7 +9,6 @@ import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.location.domain.Location;
 import com.hand.hcf.app.mdata.location.domain.LocationDetail;
 import com.hand.hcf.app.mdata.location.domain.LocationLevel;
-
 import com.hand.hcf.app.mdata.location.domain.LocationLevelAssign;
 import com.hand.hcf.app.mdata.parameter.persistence.LocationLevelMapper;
 import com.hand.hcf.app.mdata.setOfBooks.domain.SetOfBooks;

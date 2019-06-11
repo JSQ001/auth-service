@@ -1,13 +1,13 @@
 package com.hand.hcf.app.mdata.currency.cover;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.hand.hcf.app.core.component.ApplicationContextProvider;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.currency.domain.CurrencyRate;
 import com.hand.hcf.app.mdata.currency.domain.CurrencyStatus;
 import com.hand.hcf.app.mdata.currency.dto.CompanyStandardCurrencyDTO;
 import com.hand.hcf.app.mdata.currency.dto.CurrencyRateDTO;
 import com.hand.hcf.app.mdata.currency.service.CurrencyStatusService;
-import com.hand.hcf.app.core.component.ApplicationContextProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 

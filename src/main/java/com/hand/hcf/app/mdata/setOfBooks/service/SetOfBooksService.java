@@ -22,7 +22,6 @@ import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.currency.dto.CurrencyRateDTO;
 import com.hand.hcf.app.mdata.currency.service.CurrencyI18nService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
-import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
 import com.hand.hcf.app.mdata.period.domain.PeriodSet;
@@ -36,23 +35,15 @@ import com.hand.hcf.app.mdata.setOfBooks.persistence.SetOfBooksMapper;
 import com.hand.hcf.app.mdata.system.constant.CacheConstants;
 import com.hand.hcf.app.mdata.utils.RespCode;
 import ma.glasnost.orika.MapperFacade;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by fanfuqiang 2018/11/20

@@ -1,10 +1,7 @@
 package com.hand.hcf.app.expense.application.enums;
 
 
-
 import com.baomidou.mybatisplus.enums.IEnum;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 
 import java.io.Serializable;
 

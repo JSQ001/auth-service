@@ -5,7 +5,6 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.travel.domain.TravelApplicationTypeAssignCompany;
 import com.hand.hcf.app.expense.travel.service.TravelApplicationTypeAssignCompanyService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

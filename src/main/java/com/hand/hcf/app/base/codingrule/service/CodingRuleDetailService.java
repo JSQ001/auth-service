@@ -12,7 +12,6 @@ import com.hand.hcf.app.base.codingrule.domain.CodingRuleValue;
 import com.hand.hcf.app.base.codingrule.domain.enums.CodingRuleTypeEnum;
 import com.hand.hcf.app.base.codingrule.persistence.CodingRuleDetailMapper;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
-import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.util.DataFilteringUtil;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
@@ -21,7 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

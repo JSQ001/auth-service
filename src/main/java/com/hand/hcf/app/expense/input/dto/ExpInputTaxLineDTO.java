@@ -1,6 +1,5 @@
 package com.hand.hcf.app.expense.input.dto;
 
-import com.hand.hcf.app.expense.input.domain.ExpInputTaxHeader;
 import com.hand.hcf.app.expense.input.domain.ExpInputTaxLine;
 import lombok.AllArgsConstructor;
 import lombok.Data;

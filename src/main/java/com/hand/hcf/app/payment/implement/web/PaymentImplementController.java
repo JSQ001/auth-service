@@ -12,7 +12,6 @@ import com.hand.hcf.app.payment.utils.SpecificationUtil;
 import com.hand.hcf.app.payment.web.dto.CashTransactionDataWebDTO;
 import com.hand.hcf.app.payment.web.dto.CashWriteOffRequestWebDto;
 import com.hand.hcf.app.payment.web.dto.PaymentRequisitionHeaderWebDTO;
-import lombok.AllArgsConstructor;
 import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

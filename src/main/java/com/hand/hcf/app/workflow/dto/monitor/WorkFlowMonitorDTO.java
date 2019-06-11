@@ -1,13 +1,10 @@
 package com.hand.hcf.app.workflow.dto.monitor;
 
 
-import com.hand.hcf.app.workflow.brms.dto.ReturnNode;
-import com.hand.hcf.app.workflow.brms.dto.RuleApprovalChainDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**

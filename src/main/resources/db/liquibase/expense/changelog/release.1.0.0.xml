@@ -146,7 +146,6 @@
 
 
     <changeSet id="201811070949001" author="bin.xie">
-        <validCheckSum>8:9d82d5cb59a73bf00e2c437dd08599a9</validCheckSum>
         <createTable tableName="exp_expense_type_icon" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_art_expense_type_icon"/>
@@ -1387,7 +1386,6 @@
 
 
     <changeSet id="201812111132001" author="bin.xie">
-        <validCheckSum>8:3f332f9f75d0304720362bfdfb1e4500</validCheckSum>
         <createTable tableName="exp_adjust_line_temp" remarks="费用调整单行导入临时表">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_adjust_line_temp"/>

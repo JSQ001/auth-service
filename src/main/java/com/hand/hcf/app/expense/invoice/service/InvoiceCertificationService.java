@@ -2,9 +2,6 @@ package com.hand.hcf.app.expense.invoice.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.common.co.InvoiceAuthenticationReturnCO;
-import com.hand.hcf.app.common.co.InvoiceAuthenticationSendCO;
-import com.hand.hcf.app.common.co.InvoiceAuthenticationSendLineCO;
 import com.hand.hcf.app.common.co.InvoiceCheckCO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
@@ -15,10 +12,6 @@ import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceHead;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceCertificationDTO;
-import com.hand.hcf.app.core.domain.ExportConfig;
-import com.hand.hcf.app.core.handler.ExcelExportHandler;
-import com.hand.hcf.app.core.service.ExcelExportService;
-import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.expense.invoice.enums.CertificationEnum;
 import com.hand.hcf.app.expense.invoice.enums.InvoiceStatusEnum;
 import ma.glasnost.orika.MapperFacade;
@@ -36,7 +29,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * @author shaofeng.zheng@hand-china.com

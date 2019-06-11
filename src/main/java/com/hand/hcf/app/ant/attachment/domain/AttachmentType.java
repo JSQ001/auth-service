@@ -1,12 +1,9 @@
-package com.hand.hcf.app.ant.appendix.domain;
+package com.hand.hcf.app.ant.attachment.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,8 +29,8 @@ public class AttachmentType extends Domain implements Serializable {
      * 附件类型名称
      */
     @NotNull
-    @TableField("attachment_type_name")
-    private String attachmentTypeName;
+    @TableField("attachment_name")
+    private String attachmentName;
 
 
     /**

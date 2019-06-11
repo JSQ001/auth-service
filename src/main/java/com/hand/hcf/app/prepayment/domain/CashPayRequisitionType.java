@@ -9,12 +9,11 @@ import com.hand.hcf.app.common.enums.CashPayRequisitionTypeBasisEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeEmployeeEnum;
 import com.hand.hcf.app.common.enums.CashPayRequisitionTypeTypeEnum;
 import com.hand.hcf.app.core.domain.DomainLogicEnable;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 

@@ -12,7 +12,6 @@ import com.hand.hcf.app.base.codingrule.persistence.CodingRuleObjectMapper;
 import com.hand.hcf.app.base.system.constant.CacheConstants;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service

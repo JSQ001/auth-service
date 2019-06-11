@@ -9,15 +9,12 @@ import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.dto.UserGroupDTO;
 import com.hand.hcf.app.mdata.contact.dto.UserGroupMappingDTO;
 import com.hand.hcf.app.mdata.contact.service.UserGroupService;
-import com.hand.hcf.app.core.security.AuthoritiesConstants;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 

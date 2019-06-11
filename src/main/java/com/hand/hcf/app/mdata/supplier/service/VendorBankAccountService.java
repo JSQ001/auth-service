@@ -11,7 +11,6 @@ import com.hand.hcf.app.mdata.bank.dto.BankAccountDTO;
 import com.hand.hcf.app.mdata.bank.service.BankInfoService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.contact.dto.UserDTO;
-import com.hand.hcf.app.mdata.implement.web.BankInfoControllerImpl;
 import com.hand.hcf.app.mdata.supplier.constants.Constants;
 import com.hand.hcf.app.mdata.supplier.domain.VendorBankAccount;
 import com.hand.hcf.app.mdata.supplier.domain.VendorInfo;

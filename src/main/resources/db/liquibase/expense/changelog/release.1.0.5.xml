@@ -618,7 +618,6 @@
     </changeSet>
 
     <changeSet id="201902281025001" author="shilin.mao">
-        <validCheckSum>8:179a143753cf6e9f644d6f56e8917398</validCheckSum>
         <createTable tableName="exp_input_tax_header" remarks="进项税业务单头表">
             <column name="id" type="bigint" remarks="主键id">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_header"/>
@@ -704,7 +703,6 @@
         </createTable>
     </changeSet>
     <changeSet id="201902281025002" author="shilin.mao">
-        <validCheckSum>8:d9a8a34e8eb4d9586e89b7cc74050cb8</validCheckSum>
         <createTable tableName="exp_input_tax_line" remarks="进项税业务单行表">
             <column name="id" type="bigint" remarks="主键id">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_line"/>
@@ -782,7 +780,6 @@
     </changeSet>
 
     <changeSet id="201902281025003" author="shilin.mao">
-        <validCheckSum>8:5478ffcb491bf65198bc2d7caf4ae8b0</validCheckSum>
         <createTable tableName="exp_input_tax_dist" remarks="进项税业务分摊行行表">
             <column name="id" type="bigint" remarks="主键id">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_exp_input_tax_dist"/>

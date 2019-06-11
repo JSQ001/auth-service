@@ -1,24 +1,28 @@
 package com.hand.hcf.app.base.userRole.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.base.userRole.domain.*;
+import com.hand.hcf.app.base.userRole.domain.ContentList;
+import com.hand.hcf.app.base.userRole.domain.Role;
+import com.hand.hcf.app.base.userRole.domain.RoleFunction;
+import com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO;
 import com.hand.hcf.app.base.userRole.dto.FunctionPageDTO;
 import com.hand.hcf.app.base.userRole.dto.RoleFunctionDTO;
-import com.hand.hcf.app.base.userRole.dto.ContentFunctionDTO;
 import com.hand.hcf.app.base.userRole.persistence.RoleFunctionMapper;
 import com.hand.hcf.app.base.userRole.persistence.UserRoleMapper;
 import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**

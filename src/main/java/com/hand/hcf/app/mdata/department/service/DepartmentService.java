@@ -13,7 +13,6 @@ import com.hand.hcf.app.core.exception.core.ValidationError;
 import com.hand.hcf.app.core.exception.core.ValidationException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
@@ -23,7 +22,6 @@ import com.hand.hcf.app.mdata.contact.dto.UserDTO;
 import com.hand.hcf.app.mdata.contact.enums.EmployeeStatusEnum;
 import com.hand.hcf.app.mdata.contact.service.ContactService;
 import com.hand.hcf.app.mdata.department.domain.Department;
-
 import com.hand.hcf.app.mdata.department.domain.DepartmentImportDTO;
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
 import com.hand.hcf.app.mdata.department.domain.enums.DepartmentPositionCode;
@@ -36,7 +34,6 @@ import com.hand.hcf.app.mdata.system.enums.DataSourceTypeEnum;
 import com.hand.hcf.app.mdata.utils.PathUtil;
 import com.hand.hcf.app.mdata.utils.PatternMatcherUtil;
 import com.hand.hcf.app.mdata.utils.RespCode;
-
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -52,19 +49,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*import com.hand.hcf.app.mdata.client.department.DepartmentGroupDepartmentCO;*/

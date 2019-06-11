@@ -1,7 +1,5 @@
 package com.hand.hcf.app.workflow.brms.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;

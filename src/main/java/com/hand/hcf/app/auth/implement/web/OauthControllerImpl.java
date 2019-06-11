@@ -1,6 +1,5 @@
 package com.hand.hcf.app.auth.implement.web;
 
-import com.hand.hcf.app.auth.service.OauthService;
 import com.hand.hcf.app.auth.dto.ClientDTO;
 import com.hand.hcf.app.auth.service.OauthService;
 import com.hand.hcf.app.common.co.ClientCO;

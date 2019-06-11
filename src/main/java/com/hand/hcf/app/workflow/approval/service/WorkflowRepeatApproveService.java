@@ -1,7 +1,6 @@
 package com.hand.hcf.app.workflow.approval.service;
 
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-import com.hand.hcf.app.core.service.MessageService;
 import com.hand.hcf.app.workflow.approval.constant.MessageConstants;
 import com.hand.hcf.app.workflow.approval.dto.*;
 import com.hand.hcf.app.workflow.approval.implement.WorkflowAutoApproveAction;

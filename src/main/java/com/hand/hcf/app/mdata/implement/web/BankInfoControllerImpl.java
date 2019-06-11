@@ -1,15 +1,9 @@
 package com.hand.hcf.app.mdata.implement.web;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.hand.hcf.app.mdata.bank.domain.BankInfo;
 import com.hand.hcf.app.mdata.bank.dto.BankInfoDTO;
 import com.hand.hcf.app.mdata.bank.service.BankInfoService;
-
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;

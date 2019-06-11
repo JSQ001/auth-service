@@ -1,17 +1,16 @@
 package com.hand.hcf.app.mdata.legalEntity.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.util.PageUtil;
+import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
 import com.hand.hcf.app.mdata.company.service.CompanyService;
 import com.hand.hcf.app.mdata.legalEntity.domain.LegalEntity;
 import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.service.BaseI18nService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
-import com.hand.hcf.app.core.util.PaginationUtil;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

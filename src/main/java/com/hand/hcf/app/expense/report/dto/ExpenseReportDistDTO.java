@@ -1,10 +1,7 @@
 package com.hand.hcf.app.expense.report.dto;
 
 import com.hand.hcf.app.expense.report.domain.ExpenseReportDist;
-import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @author kai.zhang05@hand-china.com

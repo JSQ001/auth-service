@@ -1,4 +1,4 @@
-package com.hand.hcf.app.ant.appendix.domain;
+package com.hand.hcf.app.ant.attachment.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
@@ -12,12 +12,11 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 /**
- * @description:  单据类型附件权限设置domain类
  * @author xu.chen02@hand-china.com
  * @version 1.0
+ * @description: 单据类型附件权限设置domain类
  * @date 2019/5/16 14:12
  */
 @Data
@@ -50,21 +49,19 @@ public class ExpReportTypeAttchment extends Domain implements Serializable {
      * 报账单类型代码
      */
     @NotNull
-    @TableField("report_type_code")
-    private String reportTypeCode;
+    @TableField("doc_type_code")
+    private String docTypeCode;
 
     /**
      * 报账单类型名称
      */
     @NotNull
-    @TableField("report_type_name")
-    private String reportTypeName;
+    @TableField("doc_type_name")
+    private String docTypeName;
 
     /**
      * 状态;是否启用
      */
     @TableField("enabled")
     private Boolean enabled;
-
-
 }

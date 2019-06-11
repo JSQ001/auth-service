@@ -1,11 +1,8 @@
-
-
 package com.hand.hcf.app.auth.security;
 
 import com.hand.hcf.app.auth.constant.CacheConstants;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 

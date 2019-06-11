@@ -1,8 +1,6 @@
 package com.hand.hcf.app.base.lov.web.dto;
 
-import com.hand.hcf.app.base.lov.domain.Lov;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 

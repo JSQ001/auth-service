@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.annotation.I18nField;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import io.swagger.annotations.*;
 
 import javax.validation.constraints.NotNull;
 

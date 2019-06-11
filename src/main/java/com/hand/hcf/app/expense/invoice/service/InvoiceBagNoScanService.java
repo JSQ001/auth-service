@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceBagNoScan;
 import com.hand.hcf.app.expense.invoice.persistence.InvoiceBagNoScanMapper;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package com.hand.hcf.app.mdata.currency.web;
 
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.currency.cover.CurrencyI18nCover;
 import com.hand.hcf.app.mdata.currency.domain.CurrencyI18n;
@@ -7,7 +8,6 @@ import com.hand.hcf.app.mdata.currency.dto.CurrencyI18nDTO;
 import com.hand.hcf.app.mdata.currency.service.CurrencyI18nService;
 import com.hand.hcf.app.mdata.currency.service.CurrencyRateService;
 import com.hand.hcf.app.mdata.utils.RespCode;
-import com.hand.hcf.app.core.exception.BizException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;

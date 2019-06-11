@@ -1,6 +1,7 @@
-package com.hand.hcf.app.ant.appendix.persistence;
-import com.hand.hcf.app.ant.appendix.domain.AttachmentType;
+package com.hand.hcf.app.ant.attachment.persistence;
+
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.ant.attachment.domain.AttachmentType;
 
 /**
  * @description:  单据对应附件设置mapper

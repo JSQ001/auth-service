@@ -1,11 +1,11 @@
 package com.hand.hcf.app.workflow.service;
 
+import com.hand.hcf.app.core.exception.BizException;
+import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.workflow.constant.LocaleMessageConstants;
 import com.hand.hcf.app.workflow.domain.QuickReply;
 import com.hand.hcf.app.workflow.enums.QuickReplyStatusEnum;
 import com.hand.hcf.app.workflow.persistence.QuickReplyMapper;
-import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.service.BaseService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

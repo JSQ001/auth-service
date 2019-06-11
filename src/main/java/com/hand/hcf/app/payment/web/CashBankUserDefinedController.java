@@ -6,12 +6,12 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.PaginationUtil;
 import com.hand.hcf.app.payment.domain.CashBankUserDefined;
 import com.hand.hcf.app.payment.service.CashBankUserDefinedService;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;

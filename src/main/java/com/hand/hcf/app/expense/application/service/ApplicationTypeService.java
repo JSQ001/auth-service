@@ -1,6 +1,5 @@
 package com.hand.hcf.app.expense.application.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.StringUtils;
@@ -15,7 +14,6 @@ import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeAndUserGroupD
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDTO;
 import com.hand.hcf.app.expense.application.web.dto.ApplicationTypeDimensionDTO;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
-import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.common.utils.StringUtil;
 import com.hand.hcf.app.expense.init.dto.SourceTypeTargetTypeDTO;

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.dimension.domain.Dimension;
 import com.hand.hcf.app.mdata.dimension.service.DimensionService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;

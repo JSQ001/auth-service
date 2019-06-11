@@ -1,8 +1,8 @@
 package com.hand.hcf.app.mdata.parameter.web;
 
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.mdata.parameter.dto.ParameterModuleDTO;
 import com.hand.hcf.app.mdata.parameter.service.ParameterModuleService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

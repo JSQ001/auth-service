@@ -6,7 +6,6 @@ import com.hand.hcf.app.mdata.responsibilityCenter.domain.DepartmentSobResponsib
 import com.hand.hcf.app.mdata.responsibilityCenter.domain.ResponsibilityCenter;
 import com.hand.hcf.app.mdata.responsibilityCenter.dto.DepartmentSobResponsibilityDTO;
 import com.hand.hcf.app.mdata.responsibilityCenter.service.DepartmentSobResponsibilityService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 @Api(tags = "部门责任中心配置")
 @RestController

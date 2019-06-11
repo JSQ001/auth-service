@@ -4,18 +4,19 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.travel.service.TravelAssociatePeopleService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  * 差旅申请单关联人员表前端控制器
