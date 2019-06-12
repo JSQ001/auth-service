@@ -4,13 +4,8 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
-<<<<<<< HEAD
-//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
-import com.hand.hcf.app.base.codingrule.domain.enums.DocumentTypeEnum;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.service.SysCodeService;
-=======
->>>>>>> 71c8cebdda7c756fd95817bbaf987298f3e3e6f9
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.domain.ExportConfig;
@@ -361,7 +356,6 @@ public class ExpenseReportHeaderService extends BaseService<ExpenseReportHeaderM
      * @param requisitionDateTo
      * @param applicantId
      * @param status
-     * @param currencyCode
      * @param amountFrom
      * @param amountTo
      * @param remark
