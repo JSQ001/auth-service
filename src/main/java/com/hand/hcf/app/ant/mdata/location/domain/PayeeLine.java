@@ -13,13 +13,13 @@ import lombok.Data;
 @Data
 @TableName("sys_payee_header")
 @ApiModel(description = "收款方表头信息")
-public class PayeeLine implements Domain {
+public class PayeeLine extends Domain {
     /**
      * 收款方头id
      */
     @TableField(value = "header_id")
     @ApiModelProperty(value = "收款方头id",dataType = "Long")
-    private String headerId;
+    private Long headerId;
 
     /**
      * 收款方银行账号
