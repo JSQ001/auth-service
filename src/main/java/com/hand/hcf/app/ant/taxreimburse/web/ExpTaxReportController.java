@@ -253,11 +253,26 @@ public class ExpTaxReportController {
     /**
      * 发起报账 url:/api/exp/bank/flow/make/report
      *
-     * @param ids
+     * @param rowIds
      */
     @PostMapping("/make/report")
-    public void makeReimburse(@RequestParam String ids) {
-        expTaxReportService.makeReimburse(ids);
+    public Boolean makeReimburse(@RequestParam String rowIds) {
+
+        return expTaxReportService.makeReimburse(rowIds);
+    }
+
+    /**
+     * 详情页面税金明细信息显示
+     * @param reimburseHeaderId
+     * @param pageable
+     * @return
+     */
+    @GetMapping("list/by/headId")
+    public ResponseEntity<List<ExpTaxReport>> getTaxReportDetail(@RequestParam(required = false) String reimburseHeaderId,Pageable pageable ){
+        Page page = PageUtil.getPage(pageable);
+        List<ExpTaxReport> expTaxReportList = expTaxReportService.getTaxReportDetailList(reimburseHeaderId,page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(expTaxReportList, httpHeaders, HttpStatus.OK);
     }
 
 }

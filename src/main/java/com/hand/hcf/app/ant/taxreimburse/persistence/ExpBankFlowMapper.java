@@ -17,6 +17,9 @@ public interface ExpBankFlowMapper extends BaseMapper<ExpBankFlow> {
     void updateBankFlow(Long companyId, String currencyCode);
 
     //根据相同的公司和币种更新数据状态
-    void updateStatueByGroup(Long companyId, String currencyCode);
+    void updateStatusByGroup(Long companyId, String currencyCode,Long taxReimburseHeadId);
+
+    //根据外键taxReimburseHeadId修改数据--删除报账单时调用
+    int updateBankFlowByHeadId(Long taxReimburseHeadId);
 
 }

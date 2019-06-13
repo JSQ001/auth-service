@@ -196,4 +196,19 @@ public class ExpBankFlowController {
     public void delete(@RequestParam String rowIds) {
         expBankFlowService.deleteBankFlow(rowIds);
     }
+
+
+    /**
+     * 报账单详情页面支付明细信息显示
+     * @param reimburseHeaderId
+     * @param pageable
+     * @return
+     */
+    @GetMapping("list/by/headId")
+    public ResponseEntity<List<ExpBankFlow>> getTaxReportDetail(@RequestParam String reimburseHeaderId,Pageable pageable ){
+        Page page = PageUtil.getPage(pageable);
+        List<ExpBankFlow> expBankFlowList = expBankFlowService.getBankFlowDetailList(reimburseHeaderId,page);
+        HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
+        return new ResponseEntity<>(expBankFlowList, httpHeaders, HttpStatus.OK);
+    }
 }

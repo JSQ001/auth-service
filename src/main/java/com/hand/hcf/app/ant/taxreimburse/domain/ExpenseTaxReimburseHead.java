@@ -18,7 +18,7 @@ import java.util.List;
  * @remark 国内税金缴纳报账单头表
  */
 @Data
-@TableName("exp_tax_reimburse_line")
+@TableName("exp_tax_reimburse_head")
 public class ExpenseTaxReimburseHead extends Domain{
     /**
      * 单据编号
@@ -39,14 +39,14 @@ public class ExpenseTaxReimburseHead extends Domain{
     private Long setOfBooksId;
 
     /**
-     * 公司
+     * 报账人公司
      */
     @NotNull
     @TableField(value = "company_id")
     private Long companyId;
 
     /**
-     * 部门
+     * 报账人部门
      */
     @TableField(value = "department_id")
     private Long departmentId;
@@ -57,6 +57,35 @@ public class ExpenseTaxReimburseHead extends Domain{
     @NotNull
     @TableField(value = "applicant_id")
     private Long applicantId;
+
+    /**
+     * 申请日期-报账日期
+     */
+    @TableField(value = "requisition_date")
+    private ZonedDateTime requisitionDate;
+
+
+    /**
+     * 受益人公司
+     */
+    @NotNull
+    @TableField(value = "benefited_company_id")
+    private Long benefitedCompanyId;
+
+    /**
+     * 受益人部门
+     */
+    @NotNull
+    @TableField(value = "benefited_depart_id")
+    private Long benefitedDepartId;
+
+    /**
+     * 受益人-使用人
+     */
+    @NotNull
+    @TableField(value = "benefited_id")
+    private Long benefitedId;
+
 
     /**
      * 币种
@@ -87,9 +116,8 @@ public class ExpenseTaxReimburseHead extends Domain{
     /**
      * 备注
      */
-    @TableField(value = "description")
-    @ApiModelProperty(value = "备注",dataType = "String")
-    private String description;
+    @TableField(value = "remark")
+    private String remark;
 
     /**
      * 单据类型id
@@ -102,27 +130,19 @@ public class ExpenseTaxReimburseHead extends Domain{
      * 单据类型名称
      */
     @NotNull
-    @TableField(value = "document_type_nam")
-    private Long documentTypeName;
+    @TableField(value = "document_type_name")
+    private String documentTypeName;
 
     /**
-     * 申请日期
-     */
-    @TableField(value = "requisition_date")
-    private ZonedDateTime requisitionDate;
-
-    /**
-     * 状态
+     * 状态--非税金报账状态
      */
     @TableField(value = "status")
-    @ApiModelProperty(value = "状态",dataType = "Integer")
     private Integer status;
 
     /**
      * 审核状态
      */
     @TableField(value = "audit_flag")
-    @ApiModelProperty(value = "审核状态",dataType = "String")
     private String auditFlag;
 
     /**
@@ -162,15 +182,65 @@ public class ExpenseTaxReimburseHead extends Domain{
      * 申请人名称
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "申请人名称",dataType = "String", readOnly = true)
     private String applicantName;
 
     /**
      * 申请人编码
      */
     @TableField(exist = false)
-    @ApiModelProperty(value = "申请人编码",dataType = "String", readOnly = true)
     private String applicantCode;
+
+    /**
+     * 报账人公司名称
+     */
+    @TableField(exist = false)
+    private String companyName;
+
+    /**
+     * 报账人部门名称
+     */
+    @TableField(exist = false)
+    private String departmentName;
+
+    /**
+     * 受益人名称
+     */
+    @TableField(exist = false)
+    private String benefitedName;
+
+    /**
+     * 受益人编码
+     */
+    @TableField(exist = false)
+    private String benefitedCode;
+
+    /**
+     * 受益人公司名称
+     */
+    @TableField(exist = false)
+    private String benefitedCompanyName;
+
+    /**
+     * 受益人部门名称
+     */
+    @TableField(exist = false)
+    private String benefitedDepartName;
+
+    /**
+     * 创建人名称
+     */
+    @TableField(exist = false)
+    private String createByName;
+
+    /**
+     * 创建人编码
+     */
+    @TableField(exist = false)
+    private String createByCode;
+
+    //币种名称
+    @TableField(exist = false)
+    private String currencyName;
 
     /**
      * 单据类型名称

@@ -12,12 +12,21 @@
 		  and currency_code = #{currencyCode}
 	</update>
 
-	<update id="updateStatueByGroup" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+	<update id="updateStatusByGroup" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
 		update
 		      exp_bank_flow
-		  set status = '1'
+		  set status = '1',
+		      exp_reimburse_header_id = #{taxReimburseHeadId}
 		where company_id = #{companyId}
 		  and currency_code = #{currencyCode}
 		  and blend_status = '1'
+	</update>
+
+	<update id="updateBankFlowByHeadId" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+		update
+		      exp_bank_flow
+		  set status = '0',
+		      exp_reimburse_header_id = null
+		where  exp_reimburse_header_id = #{taxReimburseHeadId}
 	</update>
 </mapper>

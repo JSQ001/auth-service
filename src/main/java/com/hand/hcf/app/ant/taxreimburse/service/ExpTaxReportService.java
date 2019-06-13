@@ -53,9 +53,11 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
 
     public final String WARNING = "不可删除已勾兑的数据！";
 
-    public final String WARNING1 = "存在其他已勾兑的数据！";
+    public final String WARNING1 = "存在其他已勾兑的数据未勾选！";
 
     public final String WARNING2 = "未勾兑的数据不可报账！";
+
+    public final String WARNING3 = "已报账的数据不可再次报账！";
 
 
     /**
@@ -272,10 +274,9 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
             //当勾兑状态为0或者false--未勾兑时 才可以删除
             if ((!expTaxReport.getBlendStatus()) || (expTaxReport.getBlendStatus() == false)) {
                 expTaxReportMapper.deleteById(Long.valueOf(idsArr[i]));
+            } else {
+                throw new BizException(WARNING);
             }
-            else {
-                    throw new BizException(WARNING);
-                }
         }
     }
 
@@ -300,7 +301,7 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
     }
 
 
-    public List<ExpTaxReport> saveExpTaxReport(String ids, List<ExpTaxReport> expTaxReportList){
+    public List<ExpTaxReport> saveExpTaxReport(String ids, List<ExpTaxReport> expTaxReportList) {
         String idsArr[] = ids.split(",");
         for (int i = 0; i < idsArr.length; i++) {
             ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
@@ -314,33 +315,9 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
      * @param ids
      */
     public Boolean makeReimburse(String ids) {
-        Boolean flag = false;
+        Boolean flag = false;//返回是否可以发起报账的标志
         String idsArr[] = ids.split(",");
-        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
-        HashSet<String> hashSet = new HashSet<String>();
-        Map<Long,String> map = new HashMap<Long,String>();
-        //将所有id涉及到的companyId、currencyCode组合加入到map中，然后进行比较。
-        for (int i = 0; i < idsArr.length; i++) {
-            ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
-            Long companyId = expTaxReport.getCompanyId();
-            String currencyCode = expTaxReport.getCurrencyCode();
-            boolean blendStatus = expTaxReport.getBlendStatus();
-            boolean status = expTaxReport.getStatus();
-            if((blendStatus || blendStatus ==true) &&(status == false) ){
-                //当map中不存在此key,或者不存在此vlaue就加入--只有两种同时存在则不加入
-                while(!map.containsKey(companyId) || !map.containsValue(currencyCode)){
-                        map.put(companyId,currencyCode);
-                    }
-            } else{
-                throw new BizException(WARNING2);
-            }
-            //第二种方式
-            /*if(blendStatus || blendStatus ==true){
-                String companyAndCurrency = companyId + "-" + currencyCode;
-                hashSet.add(companyAndCurrency);
-            }*/
-
-        }
+        Map<Long, String> map = getMap(ids);//也可以使用hashSet存储
         //循环获取map中的key,value
         int sum = 0;//合计map中涉及到的数据的总计
         for (Map.Entry<Long, String> entry : map.entrySet()) {
@@ -353,38 +330,134 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                             .eq("blend_status", '1')
                             .eq("status", '0');
 
-            int count  = expTaxReportMapper.selectCount(wrapper);
-            sum =+ count;
+            int count = expTaxReportMapper.selectCount(wrapper);
+            sum = +count;
         }
 
         //根据获取到的companyId、currencyCode查询此分组下已勾兑的未报账的所有数据，然后比较数量
         // 判断是否全部勾选，若全部勾选，则进行发起报账
-        if(sum==idsArr.length){
-            //更新税金勾兑的数据的报账状态为已勾兑
-            for (int i = 0; i < idsArr.length; i++) {
-                ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
-                expTaxReport.setStatus(true);
-                expTaxReportMapper.updateById(expTaxReport);
-                //expTaxReportMapper.updateStatusById(Long.valueOf(idsArr[i]));
-            }
-            //更新已勾兑的税金申报数据关联的银行流水的报账状态为已报账
-            for (Map.Entry<Long, String> entry : map.entrySet()) {
-                Long companyId = entry.getKey();
-                String currencyCode = entry.getValue();
-                expBankFlowMapper.updateStatueByGroup(companyId,currencyCode);
-            }
+        if (sum == idsArr.length) {
             flag = true;
-
-            //抽取基本
-        }else{
+        } else {
             //若未全部勾选，则返回提示
             throw new BizException(WARNING1);
         }
-
         //确认以上税金申报数据可以进行报账，然后关联流水数据--根据公司/币种/勾兑状态/报账状态进行，然后跳转页面，
-
         return flag;
     }
 
+    /**
+     * 根据选择的税金申报数据的id,返回涉及到的公司和币种的kv组合，以便判断是否全部将同组合的数据勾选，然后查询出对应已勾兑的银行流水的数据
+     *
+     * @param ids
+     * @return
+     */
+    public Map<Long, String> getMap(String ids) {
+        Map<Long, String> map = new HashMap<>();
+        String idsArr[] = ids.split(",");
+        //将所有id涉及到的companyId、currencyCode组合加入到map中，然后进行比较。
+        for (int i = 0; i < idsArr.length; i++) {
+            ExpTaxReport expTaxReport = expTaxReportMapper.selectById(idsArr[i]);
+            Long companyId = expTaxReport.getCompanyId();
+            String currencyCode = expTaxReport.getCurrencyCode();
+            boolean blendStatus = expTaxReport.getBlendStatus();
+            boolean status = expTaxReport.getStatus();
+            if (status == false) {
+                if (blendStatus || blendStatus == true) {
+                    //当map中不存在此key,或者不存在此vlaue就加入--只有两种同时存在则不加入
+                    while (!map.containsKey(companyId) || !map.containsValue(currencyCode)) {
+                        map.put(companyId, currencyCode);
+                    }
+                } else {
+                    throw new BizException(WARNING2);
+                }
+            } else if (status == true) {
+                throw new BizException(WARNING3);
+            }
+        }
+        return map;
+    }
+
+
+    /**
+     * 根据外键获取税金明细信息(分页查询）--导出数据用
+     *
+     * @param headerId
+     * @param page
+     * @return
+     */
+    public Page<ExpTaxReport> getTaxReportDetail(String headerId, Page page) {
+        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)) {
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpTaxReport> wrapper = new EntityWrapper<ExpTaxReport>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expTaxReportList = this.selectPage(page, wrapper).getRecords();
+            expTaxReportList.stream().forEach(expTaxReport -> {
+                //公司转化
+                if (null != expTaxReport.getCompanyId()) {
+                    Company company = companyService.selectById(expTaxReport.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expTaxReport.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return page.setRecords(expTaxReportList);
+    }
+
+    /**
+     * 根据外键导出税金明细信息
+     *
+     * @param headerId
+     * @return
+     */
+    public List<ExpTaxReport> exportTaxDetail(String headerId){
+        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)) {
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpTaxReport> wrapper = new EntityWrapper<ExpTaxReport>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expTaxReportList = this.selectList(wrapper);
+            expTaxReportList.stream().forEach(expTaxReport -> {
+                //公司转化
+                if (null != expTaxReport.getCompanyId()) {
+                    Company company = companyService.selectById(expTaxReport.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expTaxReport.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return expTaxReportList;
+    }
+
+
+    /**
+     * 根据外键获取税金明细信息(分页查询）--报账单详情数据税金信息查询
+     *
+     * @param headerId
+     * @param page
+     * @return
+     */
+    public List<ExpTaxReport> getTaxReportDetailList(String headerId, Page page) {
+        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)){
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpTaxReport> wrapper = new EntityWrapper<ExpTaxReport>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expTaxReportList = expTaxReportMapper.selectPage(page, wrapper);
+            expTaxReportList.stream().forEach(expTaxReport -> {
+                //公司转化
+                if (null != expTaxReport.getCompanyId()) {
+                    Company company = companyService.selectById(expTaxReport.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expTaxReport.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return expTaxReportList;
+    }
 
 }

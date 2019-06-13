@@ -92,6 +92,18 @@ public class ExpTaxReport extends Domain {
     @TableField(value ="status",strategy = FieldStrategy.NOT_NULL)
     private Boolean status;
 
+    /**
+     * 备注
+     */
+    @TableField(value = "remark")
+    private String remark;
+
+    /**
+     * 国内税金缴纳报账单头Id
+     */
+    @TableField(value = "exp_reimburse_header_id")
+    private Long expReimburseHeaderId;
+
 
     /**
      * 以下字段表中不存在，用于显示在页面上

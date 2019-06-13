@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -227,13 +228,11 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
             //当勾兑状态为0或者false--未勾兑时 才可以删除
             if ((!expBankFlow.getBlendStatus()) || (expBankFlow.getBlendStatus() == false)) {
                 expBankFlowMapper.deleteById(Long.valueOf(idsArr[i]));
-            }
-            else {
+            } else {
                 throw new BizException(WARNING);
             }
         }
     }
-
 
     /**
      * 根据相同的公司和币种更新数据状态
@@ -244,5 +243,87 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
     public void updateBankFlow(Long companyId, String currencyCode) {
         expBankFlowMapper.updateBankFlow(companyId, currencyCode);
     }
+
+    /**
+     * 根据外键获取税金明细信息(分页查询）--报账单详情数据税金信息查询
+     *
+     * @param headerId
+     * @param page
+     * @return
+     */
+    public List<ExpBankFlow> getBankFlowDetailList(String headerId, Page page) {
+        List<ExpBankFlow> expBankFlowList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)){
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpBankFlow> wrapper = new EntityWrapper<ExpBankFlow>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expBankFlowList = expBankFlowMapper.selectPage(page, wrapper);
+            expBankFlowList.stream().forEach(expBankFlow -> {
+                //公司转化
+                if (null != expBankFlow.getCompanyId()) {
+                    Company company = companyService.selectById(expBankFlow.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expBankFlow.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return expBankFlowList;
+    }
+
+    /**
+     * 根据外键获取支付明细信息(分页查询）--导出数据用
+     *
+     * @param headerId
+     * @param page
+     * @return
+     */
+    public Page<ExpBankFlow> getPaymentDetail(String headerId, Page page) {
+        List<ExpBankFlow> expBankFlowList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)) {
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpBankFlow> wrapper = new EntityWrapper<ExpBankFlow>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expBankFlowList = this.selectPage(page, wrapper).getRecords();
+            expBankFlowList.stream().forEach(expBankFlow -> {
+                //公司转化
+                if (null != expBankFlow.getCompanyId()) {
+                    Company company = companyService.selectById(expBankFlow.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expBankFlow.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return page.setRecords(expBankFlowList);
+    }
+
+    /**
+     * 根据外键导出支付明细信息
+     *
+     * @param headerId
+     * @return
+     */
+    public List<ExpBankFlow> exportPaymentDeatil(String headerId){
+        List<ExpBankFlow> expBankFlowList = new ArrayList<>();
+        if(StringUtils.isNotEmpty(headerId)) {
+            Long expReimburseHeaderId = Long.valueOf(headerId);
+            Wrapper<ExpBankFlow> wrapper = new EntityWrapper<ExpBankFlow>()
+                    .eq(expReimburseHeaderId != null, "exp_reimburse_header_id", expReimburseHeaderId);
+            expBankFlowList = this.selectList(wrapper);
+            expBankFlowList.stream().forEach(expBankFlow -> {
+                //公司转化
+                if (null != expBankFlow.getCompanyId()) {
+                    Company company = companyService.selectById(expBankFlow.getCompanyId());
+                    if (StringUtils.isNotEmpty(company.getName())) {
+                        expBankFlow.setCompanyName(company.getName());
+                    }
+                }
+            });
+        }
+        return expBankFlowList;
+    }
+
+
 
 }
