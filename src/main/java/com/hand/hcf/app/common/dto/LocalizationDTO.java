@@ -16,9 +16,13 @@ public class LocalizationDTO implements Serializable {
 
     private String type;
 
+    private String countryCode;
+
     private String country;
 
     private String state;
+
+    private String cityCode;
 
     private String city;
 

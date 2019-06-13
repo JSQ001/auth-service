@@ -79,6 +79,13 @@ public class PayeeLine extends Domain {
     private String account_address;
 
     /**
+     * 占用状态
+     */
+    @TableField(value = "status")
+    @ApiModelProperty(value = "占用状态",dataType = "String")
+    private String status;
+
+    /**
      * 扩展字段
      */
     @TableField(value = "attribute1")

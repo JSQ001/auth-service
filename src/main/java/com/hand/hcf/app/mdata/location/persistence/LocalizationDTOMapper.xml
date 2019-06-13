@@ -5,6 +5,7 @@
     <select id="getLocalizationCountryByCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
         SELECT
         l.code as code,
+        l.country_code AS country_code,
         l.type as type,
         ld.country as country
         FROM sys_location l
@@ -186,5 +187,22 @@
                 </foreach>
             </if>
         order by l.code
+    </select>
+
+
+    <select id="getCityByCountryCode" resultType="com.hand.hcf.app.common.dto.LocalizationDTO">
+        SELECT
+        l.CODE AS CODE,
+        l.city_code AS city_code,
+        l.type AS type,
+        ld.city AS city
+        FROM
+        sys_location l
+        LEFT JOIN sys_location_detail ld ON l.CODE = ld.CODE
+        WHERE
+        l.type = 'CITY'
+        AND country_code = #{countryCode}
+        AND ld.language = #{language}
+        ORDER BY CONVERT(city USING gbk ) COLLATE gbk_chinese_ci ASC
     </select>
 </mapper>

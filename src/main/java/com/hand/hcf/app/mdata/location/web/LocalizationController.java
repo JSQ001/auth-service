@@ -207,4 +207,25 @@ public class LocalizationController {
         headers.add("Link","/api/localization/query/stateAndCity");
         return new ResponseEntity<>(cityList, headers, HttpStatus.OK);
     }
+
+    /**
+     *  根据国家code获取城市列表（适用下拉框取值）
+     * @param countryCode 国家代码
+     * @param page
+     * @param size
+     * @return
+     */
+    @RequestMapping(value = "/localization/query/cityByCountryCode", method = RequestMethod.GET)
+    public ResponseEntity<List<LocalizationDTO>> getCityByCountryCode(@RequestParam(required = false) String countryCode,
+                                                                              @RequestParam(value = "page", required = false,defaultValue = "0") int page,
+                                                                              @RequestParam(value = "size", required = false,defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page,size);
+        Page mybatisPage = PageUtil.getPage(pageable);
+        String language= OrgInformationUtil.getCurrentLanguage();
+        Page<LocalizationDTO> result = localizationDTOService.getCityByCountryCode(countryCode, language, mybatisPage);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", "" + result.getTotal());
+        headers.add("Link","/api/localization/query/cityByCountryCode");
+        return new ResponseEntity<>(result.getRecords(), headers, HttpStatus.OK);
+    }
 }

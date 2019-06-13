@@ -46,4 +46,16 @@ public interface LocalizationDTOMapper{
                                     @Param("vendorType") String vendorType,
                                     @Param("language") String language,
                                     @Param("cityIds") List<Long> cityIds);
+
+
+    /**
+     * 根据国家code获取城市列表
+     * @param countryCode 国家代码
+     * @param language 语言类型
+     * @param page 分页对象
+     * @return
+     */
+    public List<LocalizationDTO> getCityByCountryCode(@Param("countryCode") String countryCode,
+                                                              @Param("language") String language,
+                                                              Pagination page);
 }
