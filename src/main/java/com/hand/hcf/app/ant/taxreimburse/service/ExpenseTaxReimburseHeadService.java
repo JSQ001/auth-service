@@ -40,7 +40,7 @@ import java.util.UUID;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description:
+ * @description:国内税金缴纳报账单service
  * @date 2019/6/6 16:11
  */
 @Service
@@ -78,7 +78,23 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
 
     public final String WARNING2 = "未勾兑的数据不可报账！";
 
-
+    /**
+     * 查询所有报账单头信息
+     * @param documentTypeId
+     * @param requisitionDateFrom
+     * @param requisitionDateTo
+     * @param applicantId
+     * @param status
+     * @param currencyCode
+     * @param amountFrom
+     * @param amountTo
+     * @param remark
+     * @param benefitedId
+     * @param benefitedDepartName
+     * @param requisitionNumber
+     * @param page
+     * @return
+     */
     public List<ExpenseTaxReimburseHead> getTaxReimburseList(
             Long documentTypeId,
             ZonedDateTime requisitionDateFrom,
@@ -90,7 +106,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             BigDecimal amountTo,
             String remark,
             Long benefitedId,
-            String benefitedDepartId,
+            String benefitedDepartName,
             String requisitionNumber,
             Page page) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
@@ -104,7 +120,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
                 .le(amountTo != null, "total_amount", amountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
                 .eq(benefitedId != null, "benefited_id", benefitedId)
-                .eq(benefitedDepartId != null, "benefited_depart_id", benefitedDepartId)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(benefitedDepartName), "benefited_depart_name", benefitedDepartName)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
                 .orderBy("requisition_number", false);
         List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList = expenseTaxReimburseHeadMapper.selectPage(page, wrapper);
@@ -125,7 +141,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @param amountTo
      * @param remark
      * @param benefitedId
-     * @param benefitedDepartId
+     * @param benefitedDepartName
      * @param requisitionNumber
      * @param page
      * @return
@@ -141,7 +157,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             BigDecimal amountTo,
             String remark,
             Long benefitedId,
-            String benefitedDepartId,
+            String benefitedDepartName,
             String requisitionNumber,
             Page page) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
@@ -155,7 +171,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
                 .le(amountTo != null, "total_amount", amountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
                 .eq(benefitedId != null, "benefited_id", benefitedId)
-                .eq(benefitedDepartId != null, "benefited_depart_id", benefitedDepartId)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(benefitedDepartName), "benefited_depart_name", benefitedDepartName)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
                 .orderBy("requisition_number", false);
         List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList = this.selectPage(page, wrapper).getRecords();
@@ -176,7 +192,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @param amountTo
      * @param remark
      * @param benefitedId
-     * @param benefitedDepartId
+     * @param benefitedDepartName
      * @param requisitionNumber
      * @return
      */
@@ -191,7 +207,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             BigDecimal amountTo,
             String remark,
             Long benefitedId,
-            String benefitedDepartId,
+            String benefitedDepartName,
             String requisitionNumber) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
                 .eq(documentTypeId != null, "document_type_id", documentTypeId)
@@ -204,7 +220,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
                 .le(amountTo != null, "total_amount", amountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(remark), "description", remark)
                 .eq(benefitedId != null, "benefited_id", benefitedId)
-                .eq(benefitedDepartId != null, "benefited_depart_id", benefitedDepartId)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(benefitedDepartName), "benefited_depart_name", benefitedDepartName)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(requisitionNumber), "requisition_number", requisitionNumber)
                 .orderBy("requisition_number", false);
         List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList = this.selectList(wrapper);
@@ -294,12 +310,12 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             }
         }
         //受益部门转化
-        if (null != expenseTaxReimburseHead.getBenefitedDepartId()) {
+        /*if (null != expenseTaxReimburseHead.getBenefitedDepartId()) {
             Department department = departmentMapper.selectOneSimpleById(expenseTaxReimburseHead.getBenefitedDepartId());
             if (null != department) {
                 expenseTaxReimburseHead.setBenefitedDepartName(department.getName());
             }
-        }
+        }*/
 
 
         //创建人转化
@@ -517,5 +533,26 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
         }
         return flag;
     }
+
+    /**
+     * 批量-报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     * @param ids
+     * @return
+     */
+    public boolean deleteReimburseBatchs(String ids){
+        Boolean flag = false;
+        String idsArr[] = ids.split(",");
+        for (int i = 0; i < idsArr.length; i++) {
+            ExpenseTaxReimburseHead expenseTaxReimburseHead = expenseTaxReimburseHeadMapper.selectById(idsArr[i]);
+            if(null != expenseTaxReimburseHead && expenseTaxReimburseHead.getStatus()==1001){
+                 flag = deleteById(idsArr[i]);
+            } else{
+                return flag;
+            }
+        }
+        return flag;
+    }
+
+
 
 }

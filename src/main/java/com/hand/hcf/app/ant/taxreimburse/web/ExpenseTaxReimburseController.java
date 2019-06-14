@@ -7,20 +7,17 @@ import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseHead;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpBankFlowService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpTaxReportService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpenseTaxReimburseHeadService;
-import com.hand.hcf.app.common.co.WorkFlowDocumentRefCO;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
-import com.hand.hcf.app.expense.common.dto.BudgetCheckResultDTO;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -64,7 +60,7 @@ public class ExpenseTaxReimburseController {
 
 
     /**
-     * 查询所有报账单头信息--url-
+     * 查询所有报账单头信息--url-/api/exp/tax/reimburse/head/list
      *
      * @param documentTypeId
      * @param requisitionDateFrom
@@ -76,7 +72,7 @@ public class ExpenseTaxReimburseController {
      * @param amountTo
      * @param remark
      * @param benefited_id
-     * @param departmentId
+     * @param benefitedDepartName
      * @param requisitionNumber
      * @param pageable
      * @return
@@ -93,7 +89,7 @@ public class ExpenseTaxReimburseController {
             @RequestParam(required = false) BigDecimal amountTo,
             @RequestParam(required = false) String remark,
             @RequestParam(required = false) Long benefited_id,
-            @RequestParam(required = false) String departmentId,
+            @RequestParam(required = false) String benefitedDepartName,
             @RequestParam(required = false) String requisitionNumber,
             Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
@@ -110,7 +106,7 @@ public class ExpenseTaxReimburseController {
                 amountTo,
                 remark,
                 benefited_id,
-                departmentId,
+                benefitedDepartName,
                 requisitionNumber,
                 page
         );
@@ -150,7 +146,7 @@ public class ExpenseTaxReimburseController {
      * @param amountTo
      * @param remark
      * @param benefitedId
-     * @param benefitedDepartId
+     * @param benefitedDepartName
      * @param requisitionNumber
      * @throws IOException
      */
@@ -169,7 +165,7 @@ public class ExpenseTaxReimburseController {
             @RequestParam(required = false) BigDecimal amountTo,
             @RequestParam(required = false) String remark,
             @RequestParam(required = false) Long benefitedId,
-            @RequestParam(required = false) String benefitedDepartId,
+            @RequestParam(required = false) String benefitedDepartName,
             @RequestParam(required = false) String requisitionNumber)
             throws IOException {
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
@@ -185,7 +181,7 @@ public class ExpenseTaxReimburseController {
                 amountTo,
                 remark,
                 benefitedId,
-                benefitedDepartId,
+                benefitedDepartName,
                 requisitionNumber,
                 new Page<ExpenseTaxReimburseHead>(1, 0));
         int total = TypeConversionUtils.parseInt(taxReimburseHeadByPage.getTotal());
@@ -214,7 +210,7 @@ public class ExpenseTaxReimburseController {
                         amountTo,
                         remark,
                         benefitedId,
-                        benefitedDepartId,
+                        benefitedDepartName,
                         requisitionNumber);
                 return list;
             }
@@ -372,6 +368,16 @@ public class ExpenseTaxReimburseController {
     @RequestMapping(value = "/detele/by/headId", method = RequestMethod.POST)
     public boolean deleteById(@RequestParam  String documentId){
         return expenseTaxReimburseHeadService.deleteById(documentId);
+    }
+
+    /**
+     * 批量-报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     * url:/api/exp/tax/reimburse/head/batch/delete
+     * @param ids
+     */
+    @DeleteMapping("/head/batch/delete")
+    public boolean deleteBatch(@RequestParam String ids) {
+        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids);
     }
 
 }

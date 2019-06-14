@@ -80,6 +80,12 @@ public class ExpenseTaxReimburseHead extends Domain{
     private Long benefitedDepartId;
 
     /**
+     * 受益人部门名称
+     */
+    @TableField(value = "benefited_depart_name")
+    private String benefitedDepartName;
+
+    /**
      * 受益人-使用人
      */
     @NotNull
@@ -219,12 +225,6 @@ public class ExpenseTaxReimburseHead extends Domain{
      */
     @TableField(exist = false)
     private String benefitedCompanyName;
-
-    /**
-     * 受益人部门名称
-     */
-    @TableField(exist = false)
-    private String benefitedDepartName;
 
     /**
      * 创建人名称
