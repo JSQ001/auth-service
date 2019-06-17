@@ -1,7 +1,5 @@
 package com.hand.hcf.app.ant.taxreimburse.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -10,10 +8,10 @@ import java.math.BigDecimal;
  * @author xu.chen02@hand-china.com
  * @version 1.0
  * @description:
- * @date 2019/5/29 14:33
+ * @date 2019/6/4 20:17
  */
 @Data
-public class ExpBankFlowDTO {
+public class TaxBlendDataDTO {
     /**
      * 公司id
      */
@@ -25,8 +23,14 @@ public class ExpBankFlowDTO {
     private String currencyCode;
 
     /**
+     * 申报总金额
+     */
+    private BigDecimal requestAmountSum;
+
+    /**
      * 流水金额
      */
     private BigDecimal flowAmountSum;
+
 
 }
