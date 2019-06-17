@@ -252,7 +252,7 @@
             <column name="start_date_time" type="timestamp" remarks="起始日期">
                 <constraints nullable="false"/>
             </column>
-            <column name="end_date_time" type="timestamp" remarks="目标日期">
+            <column name="end_date_time" type="timestamp" defaultValue="${now}" remarks="目标日期">
                 <constraints nullable="false"/>
             </column>
             <column name="remark" type="varchar(200)" remarks="备注"/>

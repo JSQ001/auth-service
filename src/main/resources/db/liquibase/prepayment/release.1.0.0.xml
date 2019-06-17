@@ -169,7 +169,7 @@
             <column name="approval_date" type="timestamp" remarks="审批日期"></column>
             <column name="approved_by" type="varchar(30)" remarks="审批人id"></column>
             <column name="audit_flag" type="varchar(30)" remarks="审核标志"/>
-            <column name="audit_date" type="varchar(30)" remarks="审核日期"/>
+            <column name="audit_date" type="timestamp" defaultValue="${now}" remarks="审核日期"/>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
                 <constraints nullable="false"/>
             </column>

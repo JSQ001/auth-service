@@ -467,7 +467,7 @@
             <column name="payment_method_category" type="varchar(30)" remarks="付款方式类型">
                 <constraints nullable="true"/>
             </column>
-            <column name="requisition_payment_date" type="timestamp" remarks="计划付款日期">
+            <column name="requisition_payment_date" type="timestamp" defaultValue="${now}" remarks="计划付款日期">
                 <constraints nullable="true"/>
             </column>
             <column name="csh_transaction_type_code" type="varchar(30)" remarks="现金事务类型代码">
@@ -778,10 +778,6 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
-    </changeSet>
-    <changeSet id="201710111914001" author="baochao.chen">
-        <addNotNullConstraint tableName="csh_transaction_data" columnName="requisition_payment_date"
-                              columnDataType="timestamp"/>
     </changeSet>
     <changeSet id="201710120952001" author="liang.liu">
         <addColumn tableName="csh_payment_method">

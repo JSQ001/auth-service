@@ -1753,7 +1753,7 @@
 
     <changeSet id="201903051011001" author="kai.zhang">
         <addColumn tableName="exp_report_header">
-            <column name="requisition_date" type="timestamp" remarks="申请日期">
+            <column name="requisition_date" type="timestamp" defaultValue="${now}" remarks="申请日期">
                 <constraints nullable="false"/>
             </column>
             <column name="contract_header_id" type="bigint" remarks="关联合同头ID"/>
@@ -1867,7 +1867,7 @@
             <column name="start_date" type="timestamp" remarks="开始日期">
                 <constraints nullable="false"/>
             </column>
-            <column name="end_date" type="timestamp" remarks="结束日期">
+            <column name="end_date" type="timestamp" defaultValue="${now}" remarks="结束日期">
                 <constraints nullable="false"/>
             </column>
             <column name="order_mode" type="varchar(1)" remarks="订票模式(1代表统一订，2代表分开订)">
@@ -2457,22 +2457,22 @@
             <column name="enabled"            type="bigint"       remarks="状态">
                 <constraints nullable="false"/>
         </column>
-            <column name="start_date"         type="timestamp"    remarks="有效日期从" >
-                <constraints nullable="false"/>
+        <column name="start_date" type="timestamp" defaultValue="${now}"   remarks="有效日期从" >
+            <constraints nullable="false"/>
         </column>
             <column name="end_date"           type="timestamp"    remarks="有效日期至">
                 <constraints nullable="true"/>
         </column>
-            <column name="description"        type="varchar(300)" remarks="备注" >
+        <column name="description"        type="varchar(300)" remarks="备注" >
                 <constraints nullable="true"/>
         </column>
-            <column name="created_date"       type="timestamp"    remarks="创建日期">
-                <constraints nullable="false"/>
+        <column name="created_date"  type="timestamp"  defaultValue="${now}"    remarks="创建日期">
+            <constraints nullable="false"/>
         </column>
             <column name="created_by"         type="bigint"       remarks="创建用户ID" >
                 <constraints nullable="false"/>
         </column>
-            <column name="last_updated_date"  type="timestamp"    remarks="最后更新日期">
+            <column name="last_updated_date"  type="timestamp" defaultValue="${now}"    remarks="最后更新日期">
                 <constraints nullable="false"/>
         </column>
             <column name="last_updated_by"    type="bigint"       remarks="最后更新用户ID" >
@@ -2536,10 +2536,9 @@
         <dropColumn tableName="invoice_expense_type_rules" columnName="start_date"/>
         <dropColumn tableName="invoice_expense_type_rules" columnName="end_date"/>
     </changeSet>
-
     <changeSet id="2019042215425002" author="shuqiang.luo">
         <addColumn tableName="invoice_expense_type_rules">
-            <column name="start_date"         type="timestamp"    remarks="有效日期从" >
+            <column name="start_date"   defaultValue="${now}"      type="timestamp"    remarks="有效日期从" >
                 <constraints nullable="false"/>
             </column>
             <column name="end_date"           type="timestamp"    remarks="有效日期至">
@@ -2580,13 +2579,13 @@
         <column name="enabled"         type="bigint"    remarks="状态" >
             <constraints nullable="false"/>
         </column>
-        <column name="created_date"       type="timestamp"    remarks="创建日期">
+        <column name="created_date"  type="timestamp"  defaultValue="${now}"  remarks="创建日期">
             <constraints nullable="false"/>
         </column>
-        <column name="created_by"         type="bigint"       remarks="创建用户ID" >
+        <column name="created_by"         type="bigint" remarks="创建用户ID" >
             <constraints nullable="false"/>
         </column>
-        <column name="last_updated_date"  type="timestamp"    remarks="最后更新日期">
+        <column name="last_updated_date"  type="timestamp" defaultValue="${now}"   remarks="最后更新日期">
             <constraints nullable="false"/>
         </column>
         <column name="last_updated_by"    type="bigint"       remarks="最后更新用户ID" >

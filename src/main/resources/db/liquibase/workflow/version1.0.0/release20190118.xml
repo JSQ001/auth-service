@@ -27,7 +27,7 @@
             </column>
             <column name="start_date" type="timestamp" remarks="有效日期从">
             </column>
-            <column name="end_date" type="timestamp" remarks="有效日期至">
+            <column name="end_date" type="timestamp" defaultValue="${now}" remarks="有效日期至">
                 <constraints nullable="false"/>
             </column>
             <column name="authorization_notes" type="varchar(2000)" remarks="备注">
