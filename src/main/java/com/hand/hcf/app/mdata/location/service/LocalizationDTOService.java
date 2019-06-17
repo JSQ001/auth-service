@@ -223,4 +223,25 @@ public class LocalizationDTOService {
         }
         return localizationDTOMapper.listCityByIds("CHN000000000",vendorType,language,cityIds);
     }
+
+
+
+    /**
+     * 根据国家code获取城市列表
+     * @param countryCode 国家代码
+     * @param language 语言类型
+     * @param includeList 筛选条件
+     * @param page 分页对象
+     * @return
+     */
+    public Page<LocalizationDTO> getCityByCountryCode( String countryCode,
+                                                       String cityCode,
+                                                       String countryName,
+                                                       String cityName,
+                                                       String language,
+                                                       Page<LocalizationDTO> page) {
+        List<LocalizationDTO> localizationDTOList = localizationDTOMapper.getCityByCountryCode(countryCode, cityCode, countryName, cityName, language, page);
+        if(CollectionUtils.isNotEmpty(localizationDTOList)){page.setRecords(localizationDTOList);}
+        return page;
+    }
 }
