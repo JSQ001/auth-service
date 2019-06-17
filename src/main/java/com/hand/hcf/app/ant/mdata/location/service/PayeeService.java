@@ -27,7 +27,7 @@ public class PayeeService extends BaseService<PayeeHeaderMapper, PayeeHeader>{
     /**
      * 根据条件查询收款方头
      */
-    public Page<PayeeHeaderDTO> queryForHeader(Long payeeHeaderId, String payeeType,
+    public Page<PayeeHeaderDTO> selectForReport(Long payeeHeaderId, String payeeType,
                                       String payeeCountryCode, String payeeCityCode,
                                       String payerCountryCode, String payerCityCode,
                                       String payeeCode, String payeeName,

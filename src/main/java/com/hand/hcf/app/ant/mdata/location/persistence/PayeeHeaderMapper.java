@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface PayeeHeaderMapper extends BaseMapper<PayeeHeader>{
     List<PayeeHeaderDTO> selectForReport(@Param("payeeHeaderId") Long payeeHeaderId,
-                                         @Param("payeeHeaderId") String payeeType,
+                                         @Param("payeeType") String payeeType,
                                          @Param("payeeCountryCode") String payeeCountryCode,
                                          @Param("payeeCityCode") String payeeCityCode,
                                          @Param("payerCountryCode") String payerCountryCode,

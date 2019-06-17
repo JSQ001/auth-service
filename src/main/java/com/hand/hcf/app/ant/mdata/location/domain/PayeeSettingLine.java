@@ -36,4 +36,10 @@ public class PayeeSettingLine extends Domain {
     @ApiModelProperty(value = "是否必填",dataType = "Boolean")
     private Boolean isNacessaryFlag;
 
+    /**
+     * 字段值编码
+     */
+    @TableField(value = "rele_field_name")
+    @ApiModelProperty(value = "字段值编码",dataType = "String")
+    private String releFieldName;
 }

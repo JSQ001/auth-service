@@ -201,7 +201,18 @@
         LEFT JOIN sys_location_detail ld ON l.CODE = ld.CODE
         WHERE
         l.type = 'CITY'
-        AND country_code = #{countryCode}
+        <if test="countryCode != null and countryCode != ''">
+            AND l.country_code = #{countryCode,jdbcType=VARCHAR}
+        </if>
+        <if test="cityCode != null and cityCode != ''">
+            AND l.city_code = #{cityCode,jdbcType=VARCHAR}
+        </if>
+        <if test="countryName != null and countryName != ''">
+            AND l.country = LIKE concat('%', concat(#{countryName,jdbcType=VARCHAR}, '%'))
+        </if>
+        <if test="cityName != null and cityName != ''">
+            AND l.city = LIKE concat('%', concat(#{cityName,jdbcType=VARCHAR}, '%'))
+        </if>
         AND ld.language = #{language}
         ORDER BY CONVERT(city USING gbk ) COLLATE gbk_chinese_ci ASC
     </select>

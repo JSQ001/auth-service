@@ -39,8 +39,8 @@ public class PayeeController {
     /**
      * 根据条件分页查询收款方头信息
      */
-    @RequestMapping(value = "/query", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PayeeHeaderDTO>> query(@RequestParam(value = "payeeHeaderId") Long payeeHeaderId,
+    @RequestMapping(value = "/selectForReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<PayeeHeaderDTO>> selectForReport(@RequestParam(value = "payeeHeaderId", required = false) Long payeeHeaderId,
                                                       @RequestParam(value = "payeeType", required = false) String payeeType,
                                                       @RequestParam(value = "payeeCountryCode", required = false) String payeeCountryCode,
                                                       @RequestParam(value = "payeeCityCode", required = false) String payeeCityCode,
@@ -49,7 +49,7 @@ public class PayeeController {
                                                       @RequestParam(value = "payeeCode", required = false) String payeeCode,
                                                       @RequestParam(value = "payeeName", required = false) String payeeName,
                                                       Pageable pageable) throws URISyntaxException {
-        Page<PayeeHeaderDTO> page = payeeService.queryForHeader(payeeHeaderId, payeeType,
+        Page<PayeeHeaderDTO> page = payeeService.selectForReport(payeeHeaderId, payeeType,
                 payeeCountryCode, payeeCityCode,
                 payerCountryCode, payerCityCode,
                 payeeCode, payeeName,

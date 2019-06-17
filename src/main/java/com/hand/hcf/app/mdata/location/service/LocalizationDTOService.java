@@ -236,9 +236,12 @@ public class LocalizationDTOService {
      * @return
      */
     public Page<LocalizationDTO> getCityByCountryCode( String countryCode,
-                                                               String language,
-                                                               Page<LocalizationDTO> page) {
-        List<LocalizationDTO> localizationDTOList = localizationDTOMapper.getCityByCountryCode(countryCode, language, page);
+                                                       String cityCode,
+                                                       String countryName,
+                                                       String cityName,
+                                                       String language,
+                                                       Page<LocalizationDTO> page) {
+        List<LocalizationDTO> localizationDTOList = localizationDTOMapper.getCityByCountryCode(countryCode, cityCode, countryName, cityName, language, page);
         if(CollectionUtils.isNotEmpty(localizationDTOList)){page.setRecords(localizationDTOList);}
         return page;
     }

@@ -22,7 +22,7 @@ public class PayeeLine extends Domain {
     private Long headerId;
 
     /**
-     * 收款方银行账号
+     * 收款方账户名
      */
     @TableField(value = "account_name")
     @ApiModelProperty(value = "收款方银行账号",dataType = "String")
@@ -43,20 +43,6 @@ public class PayeeLine extends Domain {
     private String bankCode;
 
     /**
-     * 开户城市
-     */
-    @TableField(value = "bank_city_code")
-    @ApiModelProperty(value = "开户城市",dataType = "String")
-    private String bankCityCode;
-
-    /**
-     * 开户省
-     */
-    @TableField(value = "bank_province_code")
-    @ApiModelProperty(value = "开户省",dataType = "String")
-    private String bankProvinceCode;
-
-    /**
      * 联系人
      */
     @TableField(value = "link_man")
@@ -68,8 +54,9 @@ public class PayeeLine extends Domain {
      * 联系电话
      */
     @TableField(value = "phone")
-    @ApiModelProperty(value = "联系人",dataType = "String")
+    @ApiModelProperty(value = "联系电话",dataType = "String")
     private String phone;
+
 
     /**
      * 联系地址
@@ -84,6 +71,69 @@ public class PayeeLine extends Domain {
     @TableField(value = "status")
     @ApiModelProperty(value = "占用状态",dataType = "String")
     private String status;
+
+    /**
+     * bsb code
+     */
+    @TableField(value = "bsb_code")
+    @ApiModelProperty(value = "bsb code",dataType = "String")
+    private String bsbCode;
+
+    /**
+     * sort code
+     */
+    @TableField(value = "sort_code")
+    @ApiModelProperty(value = "sort code",dataType = "String")
+    private String sortCode;
+
+    /**
+     * IBAN
+     */
+    @TableField(value = "iban")
+    @ApiModelProperty(value = "IBAN",dataType = "String")
+    private String iban;
+
+    /**
+     * Beneficiary Name
+     */
+    @TableField(value = "beneficiary_name")
+    @ApiModelProperty(value = "Beneficiary Name",dataType = "String")
+    private String beneficiaryName;
+
+    /**
+     * SWIFT No.
+     */
+    @TableField(value = "swift_no")
+    @ApiModelProperty(value = "SWIFT No.",dataType = "String")
+    private String swiftNo;
+
+    /**
+     * Beneficiary Account No.
+     */
+    @TableField(value = "beneficiary_account_no")
+    @ApiModelProperty(value = "Beneficiary Account No.",dataType = "String")
+    private String beneficiaryAccountNo;
+
+    /**
+     * Routing No./SWIFT No.
+     */
+    @TableField(value = "routing_swift_no")
+    @ApiModelProperty(value = "Routing No./SWIFT No.",dataType = "String")
+    private String routingSwiftNo;
+
+    /**
+     * Statement Letter (财资准备)
+     */
+    @TableField(value = "statement_letter")
+    @ApiModelProperty(value = "Statement Letter (财资准备)",dataType = "String")
+    private String statementLetter;
+
+    /**
+     * Supporting documents
+     */
+    @TableField(value = "supporting_documents")
+    @ApiModelProperty(value = "Supporting documents",dataType = "String")
+    private String supportingDocuments;
 
     /**
      * 扩展字段

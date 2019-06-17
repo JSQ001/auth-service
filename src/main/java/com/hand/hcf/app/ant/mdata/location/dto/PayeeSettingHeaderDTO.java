@@ -1,7 +1,6 @@
 package com.hand.hcf.app.ant.mdata.location.dto;
 
-import com.hand.hcf.app.ant.mdata.location.domain.PayeeHeader;
-import com.hand.hcf.app.ant.mdata.location.domain.PayeeLine;
+import com.hand.hcf.app.ant.mdata.location.domain.PayeeSettingHeader;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,15 +12,15 @@ import java.util.List;
  * @create 2019-6-13 10:08:29
  * @remark
  */
-@ApiModel(description = "收款方头信息")
+@ApiModel(description = "收款方配置头信息")
 @Data
-public class PayeeHeaderDTO extends PayeeHeader {
+public class PayeeSettingHeaderDTO extends PayeeSettingHeader {
 
     /**
-     * 收款方详细信息
+     * 收款方配置字段信息
      */
     @ApiModelProperty(value = "收款方详细信息")
-    private List<PayeeSettingLineDTO> payeeLineDTOList;
+    private List<PayeeSettingLineDTO> PayeeSettingLineDTOList;
 
     /**
      * 收款方国家名称

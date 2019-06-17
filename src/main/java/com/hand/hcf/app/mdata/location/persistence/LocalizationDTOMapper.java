@@ -51,11 +51,17 @@ public interface LocalizationDTOMapper{
     /**
      * 根据国家code获取城市列表
      * @param countryCode 国家代码
+     * @param cityCode 城市代码
+     * @param countryName 国家名称
+     * @param cityName 城市名称
      * @param language 语言类型
      * @param page 分页对象
      * @return
      */
     public List<LocalizationDTO> getCityByCountryCode(@Param("countryCode") String countryCode,
-                                                              @Param("language") String language,
-                                                              Pagination page);
+                                                      @Param("cityCode") String cityCode,
+                                                      @Param("countryName") String countryName,
+                                                      @Param("cityName") String cityName,
+                                                      @Param("language") String language,
+                                                      Pagination page);
 }
