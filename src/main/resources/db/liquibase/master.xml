@@ -51,4 +51,8 @@
     <!-- payment模块 -->
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.1.0.xml" relativeToChangelogFile="false"/>
+
+    <!--ant费用小类-->
+    <include file="classpath:db/liquibase/ant/release.1.0.0.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>
