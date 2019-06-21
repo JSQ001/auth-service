@@ -350,10 +350,6 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
      * @throws Exception
      */
     public UUID importBankFlow(MultipartFile file) throws Exception {
-        //导入之前清除所有未勾兑的数据
-        Wrapper wrapper = new EntityWrapper<ExpBankFlow>()
-                .eq("blend_status", 0);
-        expBankFlowMapper.delete(wrapper);
         UUID batchNumber = UUID.randomUUID();
         InputStream in = file.getInputStream();
         ExcelImportHandler<ExpBankFlowTempDomain> excelImportHandler = new ExcelImportHandler<ExpBankFlowTempDomain>() {
@@ -399,7 +395,11 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
         //当错误结果为零/空的时候才可正式导入到正式表中
         if(null != importResultDTO){
             if(importResultDTO.getFailureEntities()==0 && importResultDTO.getErrorData().size()==0) {
-
+                //导入之前清除所有未勾兑的数据
+                Wrapper wrapper = new EntityWrapper<ExpBankFlow>()
+                        .eq("blend_status", 0);
+                expBankFlowMapper.delete(wrapper);
+                //根据批次号从临时表中获取所有全部成功的数据
                 List<ExpBankFlowTempDomain> expBankFlowTempDomainList = expBankFlowTempDomainService.listImportMessageByTransactionID(transactionID, page);
                 List<ExpBankFlow> expBankFlowList = expBankFlowTempDomainList.stream().map(expTaxReportTempDomain -> {
                     ExpBankFlow expBankFlow = new ExpBankFlow();

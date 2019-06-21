@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -88,10 +89,35 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
         importDataList.stream().forEach(item -> {
             //公司合法校验
             String companyCode = item.getCompanyCode();
-            if(!com.hand.hcf.app.mdata.utils.StringUtil.isNullOrEmpty(companyCode)){
+            if(StringUtils.isNotEmpty(companyCode)){
                 CompanyCO companyCO = companyService.getByCompanyCode(companyCode);
                 if(companyCO != null){
-                    item.setCompanyId(companyCO.getId());
+                    Long companyId = companyCO.getId();
+                    item.setCompanyId(companyId);
+                    //根据导入数据的OU+期间+税种查询系统中是否已经存在“已勾兑”状态以及金额差值是否相等的相同数据
+                    String taxCategoryName = item.getTaxCategoryName();
+                    String requestPeroid = item.getRequestPeriod();
+                    String requestAmountStr = item.getRequestAmount();
+                    if (StringUtils.isNotEmpty(taxCategoryName) && StringUtils.isNotEmpty(requestPeroid)) {
+                        Wrapper wrapper = new EntityWrapper<ExpTaxReport>()
+                                .eq(companyId != null, "company_id", companyId)
+                                .eq(taxCategoryName != null, "tax_category_name", taxCategoryName)
+                                .eq(requestPeroid != null, "request_period", requestPeroid)
+                                .eq("blend_status", 1);
+                        List<ExpTaxReport> taxReportList = expTaxReportMapper.selectList(wrapper);
+                        BigDecimal sumAmount = BigDecimal.ZERO;
+                        if (taxReportList.size() > 0) {
+                            for (ExpTaxReport taxReport : taxReportList) {
+                                sumAmount = sumAmount.add(taxReport.getRequestAmount());
+                            }
+                            BigDecimal requestAmount = new BigDecimal(requestAmountStr);
+                            BigDecimal value = requestAmount.subtract(sumAmount);
+                            if (Math.abs(value.doubleValue()) == 0) {
+                                item.setErrorFlag(true);
+                                item.setErrorDetail(item.getErrorDetail() +item.getCompanyCode()+"+"+item.getTaxCategoryName()+"+"+item.getRequestPeriod()+"存在已勾兑申报数据;");
+                            }
+                        }
+                    }
                 }else {
                     item.setErrorFlag(true);
                     item.setErrorDetail(item.getErrorDetail() +item.getCompanyCode()+":"+ "此OU对应公司不存在;");
@@ -106,29 +132,6 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
                     item.setErrorDetail(item.getErrorDetail() +item.getRequestAmount()+":"+"申报金额必须大于零;");
                 }
             }
-        });
-        //唯一性校验
-        importDataList.stream().forEach(item -> {
-            String companyCode = item.getCompanyCode();
-            String taxCategoryName = item.getTaxCategoryName();
-            String requestPeroid = item.getRequestPeriod();
-            String requestAmountStr = item.getRequestAmount();
-            CompanyCO companyCO = companyService.getByCompanyCode(companyCode);
-            Long companyId = null;
-            if(companyCO != null){
-                companyId = companyCO.getId();
-            }
-            /**
-             * 税务会计多次导入（全量）本月申报数据，在导入时，系统首先根据OU+期间清空系统中未勾兑的申报数据，
-             */
-            if(StringUtils.isNotEmpty(companyCode) && StringUtils.isNotEmpty(taxCategoryName) && StringUtils.isNotEmpty(requestPeroid)){
-                Wrapper wrapper = new EntityWrapper<ExpTaxReport>()
-                        .eq(companyId != null, "company_id", companyId)
-                        .ge(requestPeroid != null, "request_period", requestPeroid)
-                        .eq("blend_status", 0);
-                expTaxReportMapper.delete(wrapper);
-            }
-
         });
     }
 

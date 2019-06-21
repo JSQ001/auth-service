@@ -531,10 +531,6 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
      * @throws Exception
      */
     public UUID importTaxReport(MultipartFile file) throws Exception {
-        //导入之前清除所有未勾兑的数据
-        Wrapper wrapper = new EntityWrapper<ExpTaxReport>()
-                .eq("blend_status", 0);
-        expTaxReportMapper.delete(wrapper);
         UUID batchNumber = UUID.randomUUID();
         InputStream in = file.getInputStream();
         ExcelImportHandler<ExpTaxReportTempDomain> excelImportHandler = new ExcelImportHandler<ExpTaxReportTempDomain>() {
@@ -647,6 +643,14 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
         //当错误结果为零/空的时候才可正式导入到正式表中
         if(null != importResultDTO){
             if(importResultDTO.getFailureEntities()==0 && importResultDTO.getErrorData().size()==0) {
+                /**
+                 * 税务会计多次导入（全量）本月申报数据，在导入时，系统首先根据OU+期间清空系统中未勾兑的申报数据
+                 * 此步骤只能在确认无错误时删除，不能提前删除原数据表中数据
+                 */
+                Wrapper wrapper = new EntityWrapper<ExpTaxReport>()
+                        .eq("blend_status", 0);
+                expTaxReportMapper.delete(wrapper);
+                //根据批次号从临时表中获取所有全部成功的数据
                 List<ExpTaxReportTempDomain> expTaxReportTempDomainList = taxReportTempDomainService.listImportMessageByTransactionID(transactionID, page);
                 List<ExpTaxReport> expTaxReportList = expTaxReportTempDomainList.stream().map(expTaxReportTempDomain -> {
                     ExpTaxReport expTaxReport = new ExpTaxReport();
@@ -677,13 +681,12 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                         companyId = companyCO.getId();
                     }
                     if (StringUtils.isNotEmpty(companyCode) && StringUtils.isNotEmpty(taxCategoryName) && StringUtils.isNotEmpty(requestPeroid)) {
-                        //首先清空OU+期间+未勾兑
                         //其次根据导入数据的OU+期间+税种查询系统中是否已经存在“已勾兑”状态的相同数据
                         Wrapper wrapper1 = new EntityWrapper<ExpTaxReport>()
                                 .eq(companyId != null, "company_id", companyId)
-                                .ge(requestPeroid != null, "request_period", requestPeroid)
+                                .eq(taxCategoryName != null, "tax_category_name", taxCategoryName)
+                                .eq(requestPeroid != null, "request_period", requestPeroid)
                                 .eq("blend_status", 1);
-                        expTaxReportMapper.delete(wrapper1);
                         List<ExpTaxReport> taxReportList = this.selectList(wrapper1);
                         BigDecimal sumAmount = BigDecimal.ZERO;
                         //如果存在则计算该条导入数据与原数据的申报金额的差值（如果查到多条，则计算累差），并生成一条新的申报资料
@@ -691,15 +694,15 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                             for (ExpTaxReport taxReport : taxReportList) {
                                 sumAmount = sumAmount.add(taxReport.getRequestAmount());
                             }
-                            BigDecimal value = sumAmount.subtract(new BigDecimal(requestAmountStr));
-                            if (value.doubleValue() > 0) {
+                            BigDecimal requestAmount = new BigDecimal(requestAmountStr);
+                            BigDecimal value = requestAmount.subtract(sumAmount);
+                            if (Math.abs(value.doubleValue()) > 0) {
                                 //申报金额映射
                                 expTaxReport.setRequestAmount(value);
                             }
                         } else {
                             expTaxReport.setRequestAmount(new BigDecimal(requestAmountStr));
                         }
-
                     }
                     //会计科目映射
                     if (StringUtils.isNotEmpty(expTaxReportTempDomain.getBusinessSubcategoryName())) {
@@ -736,7 +739,6 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                     expTaxReport.setStatus(false);
                     return expTaxReport;
                 }).collect(Collectors.toList());
-                System.out.println("===expTaxReportList==" + expTaxReportList.size());
                 //导入之前到清空未勾兑的数据
                 flag = this.insertBatch(expTaxReportList);
 
