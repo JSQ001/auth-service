@@ -70,7 +70,7 @@ public class ExpBankFlow extends Domain {
     /**
      * 流水金额
      */
-    @TableField("flow_amount")
+    @TableField(value = "flow_amount")
     private BigDecimal flowAmount;
 
     /**

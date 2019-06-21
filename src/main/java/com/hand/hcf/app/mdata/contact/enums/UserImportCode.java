@@ -6,7 +6,7 @@ public final class UserImportCode {
     //错误信息起始行
     public final static int EXCEL_BASEROW_ERROR = 3;
 
-    public final static String TEMPLATE_PATH = "/templates/import_newUserInfoTemplate.xlsx";
+    public final static String TEMPLATE_PATH = "/templates/import_newuserInfoTemplate.xlsx";
 
     public final static String IMPORT_ERROR_PATH = "/templates/import_error_newUserInfoTemplate.xlsx";
 

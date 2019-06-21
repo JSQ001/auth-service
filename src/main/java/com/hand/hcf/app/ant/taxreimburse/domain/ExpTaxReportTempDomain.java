@@ -11,12 +11,12 @@ import java.math.BigDecimal;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description: 税金申报信息类
+ * @description: 税金申报信导入临时domain
  * @date 2019/5/29 10:18
  */
 @Data
-@TableName("exp_tax_report")
-public class ExpTaxReport extends Domain {
+@TableName("exp_tax_report_temp")
+public class ExpTaxReportTempDomain extends Domain {
 
     /**
      * id-唯一识别号
@@ -24,37 +24,40 @@ public class ExpTaxReport extends Domain {
     @TableField(value = "id")
     private Long Id;
 
+
+    /**
+     * 导入数据的行号
+     */
+    @TableField(value = "row_number")
+    private String rowNumber;
+
+
     /**
      * 公司id
      */
     @TableField(value = "company_id")
     private Long companyId;
 
+    /**
+     * 公司代码code
+     */
+    @TableField(value = "company_code")
+    private String companyCode;
+
 
     /**
-     * 预算部门id
+     * 预算部门code
      */
-    @TableField(value = "budget_department_id")
-    private Long budgetDepartmentId;
+    @TableField("budget_department_code")
+    private String budgetDepartmentCode;
 
 
     /**
-     * 收益部门id
+     * 受益部门code
      */
-    @TableField(value = "benefit_department_id")
-    private Long benefitDepartmentId;
+    @TableField("benefit_department_code")
+    private String benefitDepartmentCode;
 
-    /**
-     * 币种代码
-     */
-    @TableField(value = "currency_code")
-    private String currencyCode;
-
-    /**
-     * 勾兑状态
-     */
-    @TableField(value = "blend_status",strategy = FieldStrategy.NOT_NULL)
-    private Boolean blendStatus;
 
     /**
      * 税种代码
@@ -63,29 +66,34 @@ public class ExpTaxReport extends Domain {
     private String taxCategoryCode;
 
     /**
-     * 税种名称
+     * 税种名称name
      */
-    //@TableField(exist = false)
     @TableField(value = "tax_category_name")
     private String taxCategoryName;
 
     /**
-     * 科目代码
+     * 业务小类代码--科目代码
      */
     @TableField(value = "business_subcategory_code")
     private String businessSubcategoryCode;
 
     /**
-     * 会计科目
+     * 业务小类名称-会计科目名称
      */
     @TableField(value = "business_subcategory_name")
     private String businessSubcategoryName;
 
     /**
+     * 地方代码code
+     */
+    @TableField(value = "location_code")
+    private String locationCode;
+
+    /**
      * 申报金额
      */
     @TableField(value = "request_amount")
-    private BigDecimal requestAmount;
+    private String requestAmount;
 
     /**
      * 申报期间
@@ -94,36 +102,22 @@ public class ExpTaxReport extends Domain {
     private String requestPeriod;
 
     /**
-     * 报账状态
+     * 临时表字段--批次号
      */
-    @TableField(value ="status",strategy = FieldStrategy.NOT_NULL)
-    private Boolean status;
+    @TableField(value = "batch_number")
+    private String batchNumber;
 
     /**
-     * 备注
+     * 错误明细
      */
-    @TableField(value = "remark")
-    private String remark;
+    @TableField(value = "error_detail")
+    private String errorDetail;
 
     /**
-     * 国内税金缴纳报账单头Id
+     * 错误标记
      */
-    @TableField(value = "exp_reimburse_header_id")
-    private Long expReimburseHeaderId;
+    @TableField(value = "error_flag")
+    private Boolean errorFlag;
 
-
-    /**
-     * 以下字段表中不存在，用于显示在页面上
-     */
-    /**
-     * 公司名称
-     */
-    @TableField(exist = false)
-    private String companyName;
-
-
-    //币种名称
-    @TableField(exist = false)
-    private String currencyName;
 
 }

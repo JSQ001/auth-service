@@ -31,14 +31,15 @@ public class ExpenseTaxReimburseVoucherController {
 
     /**
      * 详情页面凭证信息显示-api/exp/tax/reimburse/voucher/list/by/headId
+     *
      * @param reimburseHeaderId
      * @param pageable
      * @return
      */
     @GetMapping("list/by/headId")
-    public ResponseEntity<List<ExpenseTaxReimburseVoucher>> getTaxReportDetail(@RequestParam(required = false) String reimburseHeaderId, Pageable pageable ){
+    public ResponseEntity<List<ExpenseTaxReimburseVoucher>> getTaxReportDetail(@RequestParam(required = false) String reimburseHeaderId, Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        List<ExpenseTaxReimburseVoucher> taxReimburseVoucherList = expenseTaxReimburseVoucherService.getTaxReportDetailList(reimburseHeaderId,page);
+        List<ExpenseTaxReimburseVoucher> taxReimburseVoucherList = expenseTaxReimburseVoucherService.getTaxReportDetailList(reimburseHeaderId, page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(taxReimburseVoucherList, httpHeaders, HttpStatus.OK);
     }

@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseHead;
+import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseVoucher;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpBankFlowService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpTaxReportService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpenseTaxReimburseHeadService;
+import com.hand.hcf.app.ant.taxreimburse.service.ExpenseTaxReimburseVoucherService;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
@@ -57,6 +59,9 @@ public class ExpenseTaxReimburseController {
 
     @Autowired
     private ExcelExportService excelExportService;
+
+    @Autowired
+    private ExpenseTaxReimburseVoucherService taxReimburseVoucherService;
 
 
     /**
@@ -339,40 +344,94 @@ public class ExpenseTaxReimburseController {
         }, threadNumber, request, response);
     }
 
+    /**
+     * 导出凭证数据信息-行页面
+     *
+     * @param request
+     * @param response
+     * @param exportConfig
+     * @param expReimburseHeaderId
+     * @throws IOException
+     */
+    @RequestMapping("/line/voucher/export")
+    public void exportVoucherDetail(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestBody ExportConfig exportConfig,
+            @RequestParam String expReimburseHeaderId
+    ) throws IOException {
+        Page<ExpenseTaxReimburseVoucher> taxReimburseVoucherPage = taxReimburseVoucherService.getVoucherDetail(
+                expReimburseHeaderId,
+                new Page<ExpTaxReport>(1, 0));
+        int total = TypeConversionUtils.parseInt(taxReimburseVoucherPage.getTotal());
+        String name = exportConfig.getFileName();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = "_" + sdf.format(new Date());
+        String fileName = name + date;
+        exportConfig.setFileName(fileName);
+        int threadNumber = total > 100000 ? 8 : 2;
+        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpenseTaxReimburseVoucher, ExpenseTaxReimburseVoucher>() {
+            @Override
+            public int getTotal() {
+                return total;
+            }
+
+            @Override
+            public List<ExpenseTaxReimburseVoucher> queryDataByPage(Page page) {
+                List<ExpenseTaxReimburseVoucher> list = taxReimburseVoucherService.exportVoucherDeatil(expReimburseHeaderId);
+                return list;
+            }
+
+            @Override
+            public ExpenseTaxReimburseVoucher toDTO(ExpenseTaxReimburseVoucher t) {
+                return t;
+            }
+
+            @Override
+            public Class<ExpenseTaxReimburseVoucher> getEntityClass() {
+                return ExpenseTaxReimburseVoucher.class;
+            }
+        }, threadNumber, request, response);
+    }
+
 
     /**
-     *  报账单提交
+     * 报账单提交
+     *
      * @param documentId
      * @return
      */
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public boolean submit(@RequestParam  String documentId){
+    public boolean submit(@RequestParam String documentId) {
         return expenseTaxReimburseHeadService.submit(documentId);
     }
 
     /**
-     *  报账单撤回-只有审批中的才可撤回
+     * 报账单撤回-只有审批中的才可撤回
+     *
      * @param documentId
      * @return
      */
     @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
-    public boolean withdraw(@RequestParam  String documentId){
+    public boolean withdraw(@RequestParam String documentId) {
         return expenseTaxReimburseHeadService.withdraw(documentId);
     }
 
     /**
-     *  报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     * 报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     *
      * @param documentId
      * @return
      */
     @RequestMapping(value = "/detele/by/headId", method = RequestMethod.POST)
-    public boolean deleteById(@RequestParam  String documentId){
+    public boolean deleteById(@RequestParam String documentId) {
         return expenseTaxReimburseHeadService.deleteById(documentId);
     }
 
     /**
      * 批量-报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
      * url:/api/exp/tax/reimburse/head/batch/delete
+     *
      * @param ids
      */
     @DeleteMapping("/head/batch/delete")
