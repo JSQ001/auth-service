@@ -20,7 +20,7 @@
         </createProcedure>
     </changeSet>
 
-    <changeSet id="2019011014293617" author="admin">
+    <!--<changeSet id="2019011014293617" author="admin">
         <createTable tableName="sys_user" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_user"/>
@@ -64,8 +64,8 @@
             <column name="reset_password" type="bit" defaultValue="0" remarks="是否需要重置密码"/>
             <column name="version_number" type="int" defaultValue="1" remarks=""/>
         </createTable>
-    </changeSet>
-    <changeSet id="2019011014293618" author="admin">
+    </changeSet>-->
+    <!--<changeSet id="2019011014293618" author="admin">
         <createTable tableName="sys_user_authority" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_user_authority"/>
@@ -77,8 +77,8 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-    </changeSet>
-    <changeSet id="2019011014293619" author="admin">
+    </changeSet>-->
+   <!-- <changeSet id="2019011014293619" author="admin">
         <createTable tableName="sys_form_gui_widget_relation" remarks="表单类型与控件关联关系">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_form_gui_widget_relation"/>
@@ -98,9 +98,9 @@
             <column name="report_show" type="bit" remarks=""/>
             <column name="report_orm_key" type="varchar(36)" remarks=""/>
         </createTable>
-    </changeSet>
+    </changeSet>-->
 
-    <changeSet id="201901101429364" author="admin">
+    <!--<changeSet id="201901101429364" author="admin">
         <createTable tableName="sys_attachment" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_attachment"/>
@@ -130,8 +130,8 @@
             <column name="last_updated_date" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="version_number" type="int" defaultValue="1" remarks=""/>
         </createTable>
-    </changeSet>
-    <changeSet id="201901101429365" author="admin">
+    </changeSet>-->
+    <!--<changeSet id="201901101429365" author="admin">
         <createTable tableName="sys_authority" remarks="">
             <column name="id" type="bigint" remarks="">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_sys_authority"/>
@@ -141,7 +141,7 @@
             </column>
         </createTable>
     </changeSet>
-
+-->
 
 
     <changeSet id="2019011014293623" author="admin">

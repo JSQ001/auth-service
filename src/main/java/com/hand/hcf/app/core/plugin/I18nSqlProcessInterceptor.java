@@ -294,7 +294,7 @@ public class I18nSqlProcessInterceptor implements Interceptor {
                         Object ew = parameterMap.get("ew");
                         if (ew != null) {
                             if (domainClass.isAssignableFrom(ew.getClass())) {
-                                //mapper.selectOne,本质不是用哪个方法,而是用wrapper的姿势
+                                //persistence.selectOne,本质不是用哪个方法,而是用wrapper的姿势
                                 List<ParameterMapping> parameterMappingList = boundSql.getParameterMappings();
                                 List<String> parametersStrList = parameterMappingList.stream().map(s -> s.getProperty()).collect(Collectors.toList());
 

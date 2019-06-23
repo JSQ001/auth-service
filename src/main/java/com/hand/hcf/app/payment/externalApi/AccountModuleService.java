@@ -28,7 +28,7 @@ public class AccountModuleService {
         paymentDetailDto.setPaymentDetails(paymentDetails);
         PaymentInterface paymentInterfaceClient = new PaymentInterface();
         // 赋值
-        mapper.map(paymentDetailDto,paymentInterfaceClient);
+        persistence.map(paymentDetailDto,paymentInterfaceClient);
         return accountingService.initializePaymentGeneralLedgerJournalLine(paymentInterfaceClient);
     }*/
 
@@ -41,7 +41,7 @@ public class AccountModuleService {
 //        com.hand.hcf.app.apply.accounting.dto.writeOff.WriteOffInterface writeOffInterfaceClient = new com.hand.hcf.app.apply.accounting.dto.writeOff.WriteOffInterface();
 //
 //        // 赋值
-//        mapper.map(writeOffInterface,writeOffInterfaceClient);
+//        persistence.map(writeOffInterface,writeOffInterfaceClient);
 //        return accountingService.initializeWriteOffGeneralLedgerJournalLine(writeOffInterfaceClient);
 //    }
 

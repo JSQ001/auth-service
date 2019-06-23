@@ -14,7 +14,7 @@ public class PaymentAccountingService {
     /*@Autowired
     private AccountingClient accountingClient;
     @Autowired
-    private MapperFacade mapper;
+    private MapperFacade persistence;
 
     *//**
      * 核销数据生成凭证
@@ -62,7 +62,7 @@ public class PaymentAccountingService {
         }
         List<PaymentDetailCO> paymentDetailCO = new ArrayList<>();
         //赋值
-        paymentDetailCO =  mapper.mapAsList(paymentDetails,PaymentDetailCO.class);
+        paymentDetailCO =  persistence.mapAsList(paymentDetails,PaymentDetailCO.class);
 
         PaymentInterfaceCO paymentInterfaceCO = new PaymentInterfaceCO();
         paymentInterfaceCO.setCreatedBy(createdBy);
