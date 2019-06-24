@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
+import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxCalculation;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseHead;
 import com.hand.hcf.app.ant.taxreimburse.persistence.ExpBankFlowMapper;
+import com.hand.hcf.app.ant.taxreimburse.persistence.ExpTaxCalculationMapper;
 import com.hand.hcf.app.ant.taxreimburse.persistence.ExpTaxReportMapper;
 import com.hand.hcf.app.ant.taxreimburse.persistence.ExpenseTaxReimburseHeadMapper;
 import com.hand.hcf.app.common.co.ContactCO;
@@ -28,6 +30,7 @@ import com.hand.hcf.app.mdata.department.persistence.DepartmentMapper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -40,7 +43,7 @@ import java.util.UUID;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description:国内税金缴纳报账单service
+ * @description:国内税金缴纳报账单service-国际共用
  * @date 2019/6/6 16:11
  */
 @Service
@@ -68,6 +71,9 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
     private ExpTaxReportMapper expTaxReportMapper;
 
     @Autowired
+    private ExpTaxCalculationMapper expTaxCalculationMapper;
+
+    @Autowired
     private ExpBankFlowMapper expBankFlowMapper;
 
     @Autowired
@@ -78,6 +84,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
     /**
      * 查询所有报账单头信息
      *
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -94,6 +101,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @return
      */
     public List<ExpenseTaxReimburseHead> getTaxReimburseList(
+            Long typeId,
             Long documentTypeId,
             ZonedDateTime requisitionDateFrom,
             ZonedDateTime requisitionDateTo,
@@ -108,7 +116,8 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             String requisitionNumber,
             Page page) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
-                .eq(documentTypeId != null, "document_type_id", documentTypeId)
+                .eq(typeId != null, "document_type_id", typeId)
+               // .eq(documentTypeId != null, "document_type_id", documentTypeId)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(applicantId != null, "applicant_id", applicantId)
@@ -129,6 +138,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
     /**
      * 分页查询报账单头信息
      *
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -145,6 +155,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @return
      */
     public Page<ExpenseTaxReimburseHead> getTaxReimburseHeadByPage(
+            Long typeId,
             Long documentTypeId,
             ZonedDateTime requisitionDateFrom,
             ZonedDateTime requisitionDateTo,
@@ -159,7 +170,8 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             String requisitionNumber,
             Page page) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
-                .eq(documentTypeId != null, "document_type_id", documentTypeId)
+                .eq(typeId != null, "document_type_id", typeId)
+               // .eq(documentTypeId != null, "document_type_id", documentTypeId)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(applicantId != null, "applicant_id", applicantId)
@@ -195,6 +207,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @return
      */
     public List<ExpenseTaxReimburseHead> exportTaxReimburseHead(
+            Long typeId,
             Long documentTypeId,
             ZonedDateTime requisitionDateFrom,
             ZonedDateTime requisitionDateTo,
@@ -208,7 +221,8 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             String benefitedDepartName,
             String requisitionNumber) {
         Wrapper<ExpenseTaxReimburseHead> wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
-                .eq(documentTypeId != null, "document_type_id", documentTypeId)
+                .eq(typeId != null, "document_type_id", typeId)
+                //.eq(documentTypeId != null, "document_type_id", documentTypeId)
                 .ge(requisitionDateFrom != null, "requisition_date", requisitionDateFrom)
                 .le(requisitionDateTo != null, "requisition_date", requisitionDateTo)
                 .eq(applicantId != null, "applicant_id", applicantId)
@@ -384,7 +398,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             //本币总金额
             expenseTaxReimburseHead.setFunctionalAmount(sumAmount);
 
-            //受益人公司
+            //受益人部门
             if (null != expenseTaxReimburseHead.getBenefitedId()) {
                 Long userId = expenseTaxReimburseHead.getBenefitedId();
                 Contact contact = contactService.getContactByUserId(userId);
@@ -392,6 +406,7 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
             }
 
             //单据类型相关信息
+            //Todo 等待确认好此单据类型的后，再修改
             expenseTaxReimburseHead.setDocumentTypeId(1138438668785152002L);
             expenseTaxReimburseHead.setDocumentTypeName("国内税金缴纳报账单");
 
@@ -418,6 +433,65 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
                     expBankFlowMapper.updateStatusByGroup(companyId, currencyCode, taxReimburseHeadId);
                 }
             }
+        } else {
+            //头信息编辑的保存
+            expenseTaxReimburseHeadMapper.updateById(expenseTaxReimburseHead);
+        }
+        return expenseTaxReimburseHead;
+    }
+
+    /**
+     * 保存新建的报账单头信息，并且发起报账后修改对应数据的状态和外键
+     *
+     * @param typeId
+     * @param expenseTaxReimburseHead
+     * @return
+     */
+    public ExpenseTaxReimburseHead saveInternalReimburseHead(String typeId, ExpenseTaxReimburseHead expenseTaxReimburseHead) {
+        if (expenseTaxReimburseHead.getId() == null) {
+            expenseTaxReimburseHead.setTenantId(
+                    expenseTaxReimburseHead.getTenantId() != null ? expenseTaxReimburseHead.getTenantId() : OrgInformationUtil.getCurrentTenantId());
+            expenseTaxReimburseHead.setSetOfBooksId(
+                    expenseTaxReimburseHead.getSetOfBooksId() != null ? expenseTaxReimburseHead.getSetOfBooksId() : OrgInformationUtil.getCurrentSetOfBookId());
+            expenseTaxReimburseHead.setRequisitionNumber(
+                    commonService.getCoding(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(), expenseTaxReimburseHead.getCompanyId(), null));
+            expenseTaxReimburseHead.setRequisitionDate(
+                    expenseTaxReimburseHead.getRequisitionDate() == null ? ZonedDateTime.now() : expenseTaxReimburseHead.getRequisitionDate());
+            expenseTaxReimburseHead.setStatus(DocumentOperationEnum.GENERATE.getId());
+            //创建人相关信息
+            expenseTaxReimburseHead.setCreatedBy(OrgInformationUtil.getCurrentUserId());
+            expenseTaxReimburseHead.setCreatedDate(ZonedDateTime.now());
+            expenseTaxReimburseHead.setLastUpdatedBy(OrgInformationUtil.getCurrentUserId());
+            expenseTaxReimburseHead.setLastUpdatedDate(ZonedDateTime.now());
+            //审批状态
+            expenseTaxReimburseHead.setAuditFlag("N");
+            expenseTaxReimburseHead.setDocumentOid(UUID.randomUUID().toString());
+            BigDecimal sumAmount = BigDecimal.ZERO;
+
+            //总金额
+            expenseTaxReimburseHead.setTotalAmount(sumAmount);
+            //本币总金额
+            expenseTaxReimburseHead.setFunctionalAmount(sumAmount);
+
+            //受益人部门
+            if (null != expenseTaxReimburseHead.getBenefitedId()) {
+                Long userId = expenseTaxReimburseHead.getBenefitedId();
+                Contact contact = contactService.getContactByUserId(userId);
+                expenseTaxReimburseHead.setBenefitedCompanyId(contact.getCompanyId());
+            }
+            if (null != expenseTaxReimburseHead.getBenefitedDepartId()) {
+                Department department = departmentMapper.selectOneSimpleById(expenseTaxReimburseHead.getBenefitedDepartId());
+                if (null != department) {
+                    expenseTaxReimburseHead.setBenefitedDepartName(department.getName());
+                }
+            }
+
+            //单据类型相关信息
+            expenseTaxReimburseHead.setDocumentTypeId(Long.valueOf(typeId));
+            //Todo 等待确认好此单据类型的后，再修改
+            expenseTaxReimburseHead.setDocumentTypeName("国际税金计提报账单");
+            //新建
+            expenseTaxReimburseHeadMapper.insert(expenseTaxReimburseHead);
         } else {
             //头信息编辑的保存
             expenseTaxReimburseHeadMapper.updateById(expenseTaxReimburseHead);
@@ -507,30 +581,44 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      */
     public boolean deleteById(String documentId) {
         Boolean flag = false;
-        List<ExpTaxReport> expTaxReportList = new ArrayList<>();
-        List<ExpBankFlow> expBankFlowList = new ArrayList<>();
         if (StringUtils.isNotEmpty(documentId)) {
             Wrapper<ExpTaxReport> taxReportWrapper = new EntityWrapper<ExpTaxReport>()
                     .eq(documentId != null, "exp_reimburse_header_id", documentId);
-            expTaxReportList = expTaxReportMapper.selectList(taxReportWrapper);
+            List<ExpTaxReport> expTaxReportList = expTaxReportMapper.selectList(taxReportWrapper);
             Wrapper<ExpBankFlow> expBankFlowWrapper = new EntityWrapper<ExpBankFlow>()
                     .eq(documentId != null, "exp_reimburse_header_id", documentId);
-            expBankFlowList = expBankFlowMapper.selectList(expBankFlowWrapper);
-
-            ExpenseTaxReimburseHead expenseTaxReimburseHead = expenseTaxReimburseHeadMapper.selectById(documentId);
-            if (null != expenseTaxReimburseHead) {
-                int taxUpdates = 0;
-                int taxBanks = 0;
-                if (expTaxReportList.size() > 0) {
+            List<ExpBankFlow>  expBankFlowList = expBankFlowMapper.selectList(expBankFlowWrapper);
+            int taxUpdates = 0;
+            int taxBanks = 0;
+            if (expTaxReportList.size() > 0) {
                     taxUpdates = expTaxReportMapper.updateTaxByHeadId(Long.valueOf(documentId));
-                }
-                if (expBankFlowList.size() > 0) {
+            }
+            if (expBankFlowList.size() > 0) {
                     taxBanks = expBankFlowMapper.updateBankFlowByHeadId(Long.valueOf(documentId));
-                }
-                int success = expenseTaxReimburseHeadMapper.deleteById(expenseTaxReimburseHead);
-                if (taxUpdates + taxBanks + success > 0) {
+            }
+            int success = expenseTaxReimburseHeadMapper.deleteById(Long.valueOf(documentId));
+            if (taxUpdates + taxBanks + success > 0) {
                     flag = true;
-                }
+            }
+        }
+        return flag;
+    }
+
+    /**
+     * 删除--删除头信息，先删除头信息
+     *
+     * @param documentId
+     * @return
+     */
+    public boolean deleteInternalReportById(String documentId) {
+        Boolean flag = false;
+        if (StringUtils.isNotEmpty(documentId)) {
+            Wrapper<ExpTaxCalculation> taxCalculationWrapper = new EntityWrapper<ExpTaxCalculation>()
+                    .eq(documentId != null, "exp_reimburse_header_id", documentId);
+            int taxUpdates = expTaxCalculationMapper.delete(taxCalculationWrapper);
+            int success = expenseTaxReimburseHeadMapper.deleteById(Long.valueOf(documentId));
+            if (taxUpdates + success > 0) {
+                flag = true;
             }
         }
         return flag;
@@ -542,13 +630,17 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
      * @param ids
      * @return
      */
-    public boolean deleteReimburseBatchs(String ids) {
+    public boolean deleteReimburseBatchs(String ids,@RequestParam String typeFlag) {
         Boolean flag = false;
         String idsArr[] = ids.split(",");
         for (int i = 0; i < idsArr.length; i++) {
             ExpenseTaxReimburseHead expenseTaxReimburseHead = expenseTaxReimburseHeadMapper.selectById(idsArr[i]);
             if (null != expenseTaxReimburseHead && expenseTaxReimburseHead.getStatus() == 1001) {
-                flag = deleteById(idsArr[i]);
+                if("domestic".equals(typeFlag)) {
+                    flag = deleteById(idsArr[i]);
+                } else if("internal".equals(typeFlag)){
+                    flag = deleteInternalReportById(idsArr[i]);
+                }
             } else {
                 return flag;
             }

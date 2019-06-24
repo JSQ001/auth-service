@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description: 国内税金缴纳报账单controller
+ * @description: 国内税金缴纳报账单controller--国际税金计提共用
  * @date 2019/6/10 10:26
  */
 @RestController
@@ -67,6 +67,7 @@ public class ExpenseTaxReimburseController {
     /**
      * 查询所有报账单头信息--url-/api/exp/tax/reimburse/head/list
      *
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -76,14 +77,15 @@ public class ExpenseTaxReimburseController {
      * @param amountFrom
      * @param amountTo
      * @param remark
-     * @param benefited_id
+     * @param benefitedId
      * @param benefitedDepartName
      * @param requisitionNumber
      * @param pageable
      * @return
      */
-    @GetMapping("/head/list")
+    @GetMapping("/head/list/{reimburseTypeId}")
     public ResponseEntity<List<ExpenseTaxReimburseHead>> getTaxReimburseHeadList(
+            @PathVariable(value = "reimburseTypeId") Long typeId,
             @RequestParam(required = false) Long documentTypeId,
             @RequestParam(required = false) String requisitionDateFrom,
             @RequestParam(required = false) String requisitionDateTo,
@@ -93,7 +95,7 @@ public class ExpenseTaxReimburseController {
             @RequestParam(required = false) BigDecimal amountFrom,
             @RequestParam(required = false) BigDecimal amountTo,
             @RequestParam(required = false) String remark,
-            @RequestParam(required = false) Long benefited_id,
+            @RequestParam(required = false) Long benefitedId,
             @RequestParam(required = false) String benefitedDepartName,
             @RequestParam(required = false) String requisitionNumber,
             Pageable pageable) {
@@ -101,6 +103,7 @@ public class ExpenseTaxReimburseController {
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
         ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
         List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList = expenseTaxReimburseHeadService.getTaxReimburseList(
+                typeId,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -110,7 +113,7 @@ public class ExpenseTaxReimburseController {
                 amountFrom,
                 amountTo,
                 remark,
-                benefited_id,
+                benefitedId,
                 benefitedDepartName,
                 requisitionNumber,
                 page
@@ -141,6 +144,7 @@ public class ExpenseTaxReimburseController {
      * @param request
      * @param response
      * @param exportConfig
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -155,11 +159,12 @@ public class ExpenseTaxReimburseController {
      * @param requisitionNumber
      * @throws IOException
      */
-    @RequestMapping("/head/export")
+    @RequestMapping("/head/export/{reimburseTypeId}")
     public void export(
             HttpServletRequest request,
             HttpServletResponse response,
             @RequestBody ExportConfig exportConfig,
+            @PathVariable(value = "reimburseTypeId") Long typeId,
             @RequestParam(required = false) Long documentTypeId,
             @RequestParam(required = false) String requisitionDateFrom,
             @RequestParam(required = false) String requisitionDateTo,
@@ -176,6 +181,7 @@ public class ExpenseTaxReimburseController {
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
         ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
         Page<ExpenseTaxReimburseHead> taxReimburseHeadByPage = expenseTaxReimburseHeadService.getTaxReimburseHeadByPage(
+                typeId,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -205,6 +211,7 @@ public class ExpenseTaxReimburseController {
             @Override
             public List<ExpenseTaxReimburseHead> queryDataByPage(Page page) {
                 List<ExpenseTaxReimburseHead> list = expenseTaxReimburseHeadService.exportTaxReimburseHead(
+                        typeId,
                         documentTypeId,
                         reqDateFrom,
                         reqDateTo,
@@ -242,6 +249,18 @@ public class ExpenseTaxReimburseController {
     @PostMapping("/head/save/{ids}")
     public ResponseEntity<ExpenseTaxReimburseHead> saveExpenseReportHeader(@PathVariable(value = "ids") String ids, @RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
         return ResponseEntity.ok(expenseTaxReimburseHeadService.saveTaxReimburseHead(ids, expenseTaxReimburseHead));
+    }
+
+    /**
+     * 国际税金计提-新建报账单
+     *
+     * @param typeId
+     * @param expenseTaxReimburseHead
+     * @return
+     */
+    @PostMapping("/head/new/{typeId}")
+    public ResponseEntity<ExpenseTaxReimburseHead> saveInternalReimburseHeader(@PathVariable(value = "typeId") String typeId,@RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
+        return ResponseEntity.ok(expenseTaxReimburseHeadService.saveInternalReimburseHead(typeId,expenseTaxReimburseHead));
     }
 
     /**
@@ -423,9 +442,15 @@ public class ExpenseTaxReimburseController {
      * @param documentId
      * @return
      */
-    @RequestMapping(value = "/detele/by/headId", method = RequestMethod.POST)
-    public boolean deleteById(@RequestParam String documentId) {
-        return expenseTaxReimburseHeadService.deleteById(documentId);
+    @DeleteMapping(value = "/detele/by/headId")
+    public boolean deleteById(@RequestParam String documentId,@RequestParam String typeFlag) {
+        boolean flag = false;
+        if("domestic".equals(typeFlag)){
+            flag = expenseTaxReimburseHeadService.deleteById(documentId);
+        } else if("internal".equals(typeFlag)){
+            flag = expenseTaxReimburseHeadService.deleteInternalReportById(documentId);
+        }
+        return flag;
     }
 
     /**
@@ -435,8 +460,8 @@ public class ExpenseTaxReimburseController {
      * @param ids
      */
     @DeleteMapping("/head/batch/delete")
-    public boolean deleteBatch(@RequestParam String ids) {
-        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids);
+    public boolean deleteBatch(@RequestParam String ids,@RequestParam String typeFlag) {
+        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids,typeFlag);
     }
 
 }
