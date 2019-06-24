@@ -201,7 +201,7 @@ public class ExpReportTypeAttchController {
      * @param docTypeCode
      * @return
      */
-    @GetMapping("/get/settings/{docTypeCode}")
+    @GetMapping("/select/settings/byCode/{docTypeCode}")
     public ResponseEntity<List<AttachmentType>> getAttachmentTypeListByCode(@PathVariable(value = "docTypeCode") String docTypeCode) {
         return ResponseEntity.ok(expReportTypeAttchmentService.getAttachmentTypeListByCode(docTypeCode));
     }
