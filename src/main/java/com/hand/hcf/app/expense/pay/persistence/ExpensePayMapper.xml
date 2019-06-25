@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.expense.pay.persistence.ExpensePayMapper">
+    <select id="queryPayDepartmentInfo" resultType="com.hand.hcf.app.expense.pay.domain.ExpensePayAssignDepartment">
+         select
+            id as "id",
+            department_oid as "departmentOid",
+            department_code as "departmentCode",
+            name as "name",
+            (case when status = 101 then 'true' else 'false' end)  as "status"
+             from sys_department
+             where id in
+             (select  department_id as "departmentId" from exp_report_income_department where report_type_id = #{reportTypeId})
+            order by last_updated_date desc
+    </select>
+
+    <select id="queryPayDepartmentFilter" resultType="com.hand.hcf.app.expense.pay.domain.ExpensePayAssignDepartment">
+         select
+            id as "id",
+            department_oid as "departmentOid",
+            department_code as "departmentCode",
+            name as "name",
+            (case when status = 101 then 'true' else 'false' end)  as "status"
+             from sys_department
+             where id not in
+             (select  department_id as "departmentId" from exp_report_pay_department where report_type_id = #{reportTypeId})
+            <if test="departmentCode != null and departmentCode != ''">
+                AND department_code LIKE concat(concat('%', #{departmentCode}), '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE concat(concat('%', #{name}), '%')
+            </if>
+            <if test="departmentFrom != null and departmentFrom != ''">
+                AND department_code  &gt; #{departmentFrom}
+            </if>
+            <if test="departmentTo != null and departmentTo != ''">
+                AND department_code &lt;  #{departmentTo}
+            </if>
+            order by last_updated_date desc
+    </select>
+
+    <insert id="distributionDepartment">
+        insert into exp_report_pay_department (id,report_type_id,department_id)
+        values (#{id},#{reportTypeId},#{departmentId})
+    </insert>
+    <update id="changeDepartmentStatus">
+          update sys_department set status = #{status} where id = #{departmentId}
+    </update>
+</mapper>
