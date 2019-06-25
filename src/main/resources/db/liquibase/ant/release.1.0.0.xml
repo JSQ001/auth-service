@@ -13,7 +13,91 @@
 
     <changeSet id="2019061814306" author="jsq">
         <createTable tableName="ant_exp_expense_category" remarks="费用小类表">
-            <column name="id" type="bigint" remarks="费用小类表ID">
+        <column name="id" type="bigint" remarks="费用小类表ID">
+            <constraints
+                    nullable="false"
+                    primaryKey="true"
+                    primaryKeyName="pk_ant_exp_expense_category_id"/>
+        </column>
+        <column name="set_of_book_id" type="bigint" remarks="账套ID">
+            <constraints nullable="false"/>
+        </column>
+        <column name="code" type="varchar(50)" remarks="费用小类代码">
+            <constraints nullable="false"/>
+        </column>
+        <column name="category_type" type="varchar(50)" remarks="费用小类类型">
+            <constraints nullable="false"/>
+        </column>
+        <column name="name" type="varchar(200)" remarks="费用小类名称">
+            <constraints nullable="false"/>
+        </column>
+        <column name="is_purchase" type="boolean" remarks="是否采购">
+            <constraints nullable="false"/>
+        </column>
+        <column name="module" type="varchar(50)" remarks="所属模块">
+            <constraints nullable="false"/>
+        </column>
+        <column name="tax" type="varchar(20)" remarks="税率">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="company_id" type="bigint" remarks="公司"/>
+        <column name="budget_dept_id" type="bigint" remarks="预算部门"/>
+        <column name="benefit_dept_id" type="bigint" remarks="受益部门"/>
+        <column name="adress" type="varchar(200)" remarks="区域"/>
+        <column name="detail" type="varchar(200)" remarks="明细"/>
+        <column name="from" type="varchar(50)" remarks="来往"/>
+        <column name="project" type="varchar(50)" remarks="项目"/>
+        <column name="product" type="varchar(50)" remarks="产品"/>
+        <column name="industry" type="varchar(50)" remarks="行业"/>
+        <column name="transfer" type="varchar(50)" remarks="转账"/>
+        <column name="standby" type="varchar(50)" remarks="备用"/>
+
+        <column name="is_enabled" type="boolean" remarks="状态">
+            <constraints nullable="false"/>
+        </column>
+        <column name="version_number" type="int" remarks="版本号">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="is_deleted" type="boolean" defaultValue="false" remarks="删除标志">
+            <constraints nullable="false"/>
+        </column>
+        <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+            <constraints nullable="false"/>
+        </column>
+        <column name="created_by" type="bigint" remarks="创建用户ID">
+            <constraints nullable="false"/>
+        </column>
+        <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+            <constraints nullable="false"/>
+        </column>
+        <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+        <addUniqueConstraint tableName="ant_exp_expense_category" columnNames="set_of_book_id,code" constraintName="idx_unq_ant_exp_expense_category"/>
+
+        <createTable tableName="ant_exp_expense_category_authority" remarks="费用小类表">
+        <column name="id" type="bigint" remarks="费用小类关联权限表ID">
+            <constraints
+                    nullable="false"
+                    primaryKey="true"
+                    primaryKeyName="pk_ant_exp_expense_category_authority_id"/>
+        </column>
+        <column name="category_id" type="bigint" remarks="费用小类id">
+            <constraints nullable="false"/>
+        </column>
+        <column name="type" type="varchar(20)" remarks="适用类型">
+            <constraints nullable="false"/>
+        </column>
+        <column name="com_or_dept_id" type="bigint" remarks="公司或部门id"/>
+    </createTable>
+    </changeSet>
+
+    <changeSet id="2019062514306" author="jsq">
+        <createTable tableName="ant_exp_withholding_expense_reimburse" remarks="预提费用报帐表">
+            <column name="id" type="bigint" remarks="预提费用报帐表ID">
                 <constraints
                         nullable="false"
                         primaryKey="true"
@@ -22,46 +106,35 @@
             <column name="set_of_book_id" type="bigint" remarks="账套ID">
                 <constraints nullable="false"/>
             </column>
-            <column name="code" type="varchar(50)" remarks="费用小类代码">
+            <column name="document_type" type="bigint" remarks="单据类型"/>
+            <column name="tenant_id" remarks="租户ID" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="category_type" type="varchar(50)" remarks="费用小类类型">
+            <column name="duty_person_id" remarks="责任人" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="name" type="varchar(200)" remarks="费用小类名称">
+            <column name="document_number" type="varchar(30)" remarks="单据编号">
                 <constraints nullable="false"/>
             </column>
-            <column name="is_purchase" type="boolean" remarks="是否采购">
+            <column name="amount" type="double" remarks="预提金额"/>
+            <column name="comment" type="varchar(2000)" remarks="摘要"/>
+            <column name="period" type="varchar(20)" remarks="记账期间">
                 <constraints nullable="false"/>
             </column>
-            <column name="module" type="varchar(50)" remarks="所属模块">
+            <column name="category_type_id" type="bigint" remarks="费用小类id">
                 <constraints nullable="false"/>
             </column>
-            <column name="tax" type="varchar(20)" remarks="税率">
+            <column name="auto_sterilisation" type="boolean" defaultValue="false" remarks="次月是否冲销">
                 <constraints nullable="false"/>
             </column>
+            <column name="attachmentOid" type="varchar(30)" remarks="附件oid"/>
 
-            <column name="company_id" type="bigint" remarks="公司"/>
-            <column name="budget_dept_id" type="bigint" remarks="预算部门"/>
-            <column name="benefit_dept_id" type="bigint" remarks="受益部门"/>
-            <column name="adress" type="varchar(200)" remarks="区域"/>
-            <column name="detail" type="varchar(200)" remarks="明细"/>
-            <column name="from" type="varchar(50)" remarks="来往"/>
-            <column name="project" type="varchar(50)" remarks="项目"/>
-            <column name="product" type="varchar(50)" remarks="产品"/>
-            <column name="industry" type="varchar(50)" remarks="行业"/>
-            <column name="transfer" type="varchar(50)" remarks="转账"/>
-            <column name="standby" type="varchar(50)" remarks="备用"/>
-
-
-
-            <column name="is_enabled" type="boolean" remarks="状态">
+            <column name="status" type="varchar(50)" remarks="预提状态">
                 <constraints nullable="false"/>
             </column>
             <column name="version_number" type="int" remarks="版本号">
                 <constraints nullable="false"/>
             </column>
-
             <column name="is_deleted" type="boolean" defaultValue="false" remarks="删除标志">
                 <constraints nullable="false"/>
             </column>
@@ -78,23 +151,5 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addUniqueConstraint tableName="ant_exp_expense_category" columnNames="set_of_book_id,code" constraintName="idx_unq_ant_exp_expense_category"/>
-
-        <createTable tableName="ant_exp_expense_category_authority" remarks="费用小类表">
-            <column name="id" type="bigint" remarks="费用小类关联权限表ID">
-                <constraints
-                        nullable="false"
-                        primaryKey="true"
-                        primaryKeyName="pk_ant_exp_expense_category_authority_id"/>
-            </column>
-            <column name="category_id" type="bigint" remarks="费用小类id">
-                <constraints nullable="false"/>
-            </column>
-            <column name="type" type="varchar(20)" remarks="适用类型">
-                <constraints nullable="false"/>
-            </column>
-            <column name="com_or_dept_id" type="bigint" remarks="公司或部门id"/>
-        </createTable>
     </changeSet>
-
 </databaseChangeLog>
