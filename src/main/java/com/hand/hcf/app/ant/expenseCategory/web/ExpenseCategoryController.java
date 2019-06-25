@@ -45,10 +45,11 @@ public class ExpenseCategoryController {
         return ResponseEntity.ok(expenseCategoryService.selectById(id));
     }
 
+
     @GetMapping("/delete/{id}")
     @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
     ResponseEntity<Boolean> deleteExpenseCategory(@PathVariable Long id){
         return ResponseEntity.ok(expenseCategoryService.deleteById(id));
     }
-
+/**/
 }
