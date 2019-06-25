@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.accrual.persistence.AccruedExpensesReimbuseMapper">
+	<!-- 查询预提报销数据 -->
+    <select id="queryAccruedExpensesReimbuse" resultType="com.hand.hcf.app.ant.accrual.domain.AccruedReimburse">
+		SELECT
+			eaeh.requisition_number as "requisitionNumber",
+			eaeh.document_type_id as "expAccrualTypeId",
+			(select exp_accrual_type_name from exp_accrual_type where id = eaeh.document_type_id) as "expAccrualTypeName",
+			eaeh.created_date as "createdDate",
+			eaeh.applicant_id as "applicantId",
+			(select user_name from sys_user where id = eaeh.applicant_id) as "applicantName",
+			eaeh.demander_id as "demanderId",
+			(select user_name from sys_user where id = eaeh.demander_id) as "demanderName",
+			eaeh.total_amount as "totalAmount",
+			eaeh.description as "description",
+			eaeh.status as "status"
+		FROM
+		exp_accrued_expenses_header eaeh
+		where 1 = 1
+		<if test="requisitionNumber!=null">
+			and eaeh.requisition_number LIKE concat('%', concat(#{requisitionNumber}, '%'))
+		</if>
+		<if test="accrualDateFrom != null">
+			and eaeh.invoice_date &gt;= #{accrualDateFrom}
+		</if>
+		<if test="accrualDateTo != null">
+			and eaeh.invoice_date &lt;= #{accrualDateTo}
+		</if>
+		<if test="expAccrualTypeId != null">
+			and eaeh.document_type_id = #{expAccrualTypeId}
+		</if>
+		<if test="status != null">
+			and eaeh.status = #{status}
+		</if>
+		<if test="demanderId != null">
+			and eaeh.demander_id = #{demanderId}
+		</if>
+		<if test="accrualAmountFrom != null">
+			and eaeh.total_amount &lt;= #{accrualAmountFrom}
+		</if>
+		<if test="accrualAmountTo != null">
+			and eaeh.total_amount &lt;= #{accrualAmountTo}
+		</if>
+	</select>
+
+
+</mapper>
