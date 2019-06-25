@@ -2,11 +2,11 @@ package com.hand.hcf.app.ant.taxreimburse.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 
 /**
  * @author xu.chen02@hand-china.com
@@ -53,8 +53,8 @@ public class ExpTaxReport extends Domain {
     /**
      * 勾兑状态
      */
-    @TableField("blend_status_code")
-    private String blendStatusCode;
+    @TableField(value = "blend_status",strategy = FieldStrategy.NOT_NULL)
+    private Boolean blendStatus;
 
     /**
      * 税种代码
@@ -89,8 +89,20 @@ public class ExpTaxReport extends Domain {
     /**
      * 报账状态
      */
-    @TableField("status")
-    private Integer status;
+    @TableField(value ="status",strategy = FieldStrategy.NOT_NULL)
+    private Boolean status;
+
+    /**
+     * 备注
+     */
+    @TableField(value = "remark")
+    private String remark;
+
+    /**
+     * 国内税金缴纳报账单头Id
+     */
+    @TableField(value = "exp_reimburse_header_id")
+    private Long expReimburseHeaderId;
 
 
     /**
@@ -111,11 +123,5 @@ public class ExpTaxReport extends Domain {
     //币种名称
     @TableField(exist = false)
     private String currencyName;
-
-    /**
-     * 勾兑状态描述
-     */
-    @TableField(exist = false)
-    private String blendStatus;
 
 }

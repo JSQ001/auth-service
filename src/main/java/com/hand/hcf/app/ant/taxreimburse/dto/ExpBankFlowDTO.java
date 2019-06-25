@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
@@ -11,20 +13,20 @@ import lombok.Data;
  * @date 2019/5/29 14:33
  */
 @Data
-public class ExpBankFlowDTO extends ExpBankFlow {
+public class ExpBankFlowDTO {
     /**
-     * 公司名称
+     * 公司id
      */
-    private String companyName;
+    private Long companyId;
 
     /**
-     * 税种名称
+     * 币种代码
      */
-    private String taxCategoryName;
+    private String currencyCode;
 
     /**
-     * 会计科目名称
+     * 流水金额
      */
-    private String accountTitle;
+    private BigDecimal flowAmountSum;
 
 }

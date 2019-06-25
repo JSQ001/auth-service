@@ -43,7 +43,7 @@
         <result column="remark" property="remark"/>
         <result column="approved_dead_line_date" property="approvedDeadLineDate"/>
         <!-- <association property="chnCardType" javaType="java.lang.String"
-                      select="com.handchina.yunmart.artemis.module.bankcard.bankcardtype.mapper.BankCardTypeMapper.selectDescriptionByCardTypeCode"
+                      select="com.handchina.yunmart.artemis.module.bankcard.bankcardtype.persistence.BankCardTypeMapper.selectDescriptionByCardTypeCode"
                       column="card_type_code"/>-->
     </resultMap>
 

@@ -102,7 +102,7 @@ public class PaymentModuleInterface {
      */
     public  List<CashTransactionClassCO> listCashTransactionClassBySetOfBookId(Long setOfBookId) {
         //bo.liu 支付
-//        List<CashTransactionClassCO> cashTransactionClassDTOS = mapper.mapAsList(paymentClient.listCashTransactionClassBySetOfBookId(setOfBookId), CashTransactionClassCO.class);
+//        List<CashTransactionClassCO> cashTransactionClassDTOS = persistence.mapAsList(paymentClient.listCashTransactionClassBySetOfBookId(setOfBookId), CashTransactionClassCO.class);
 //        return cashTransactionClassDTOS;
         return null;
     }
@@ -115,7 +115,7 @@ public class PaymentModuleInterface {
      */
     public CashTransactionClassCO selectCashTransactionClassById(Long cashTransactionClassId) {
         //bo.liu 支付
-        //return mapper.map(paymentClient.getCashTransactionClassById(cashTransactionClassId), CashTransactionClassCO.class);
+        //return persistence.map(paymentClient.getCashTransactionClassById(cashTransactionClassId), CashTransactionClassCO.class);
         return null;
 
     }
@@ -128,7 +128,7 @@ public class PaymentModuleInterface {
      */
     public  List<CashTransactionClassCO> listCashTransactionClassByIdList(List<Long> cashTransactionClassIdList) {
         //bo.liu 支付
-//        List<CashTransactionClassCO> list = mapper.mapAsList(paymentClient.listCashTransactionClassByIdList(cashTransactionClassIdList), CashTransactionClassCO.class);
+//        List<CashTransactionClassCO> list = persistence.mapAsList(paymentClient.listCashTransactionClassByIdList(cashTransactionClassIdList), CashTransactionClassCO.class);
 //        return list;
         return null;
     }
@@ -143,7 +143,7 @@ public class PaymentModuleInterface {
         //bo.liu 支付
 //        Page<CashTransactionClassCO>  casPage = paymentClient.listCashTransactionClassForPerPayByRange(cashTransactionClassForOtherCO, page);
 //        page.setTotal(casPage.getTotal());
-//        List<CashTransactionClassCO> cashTransactionClassDTOs = mapper.mapAsList(
+//        List<CashTransactionClassCO> cashTransactionClassDTOs = persistence.mapAsList(
 //                casPage.getRecords(),
 //                CashTransactionClassCO.class);
 //        return cashTransactionClassDTOs;

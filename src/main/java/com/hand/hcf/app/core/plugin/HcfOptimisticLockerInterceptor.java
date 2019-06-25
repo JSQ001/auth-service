@@ -50,7 +50,7 @@ public class HcfOptimisticLockerInterceptor implements Interceptor {
             HashMap map = (HashMap) param;
             Wrapper ew = null;
             if (map.containsKey(NAME_ENTITY_WRAPPER)) {
-                // mapper.update(updEntity, EntityWrapper<>(whereEntity);
+                // persistence.update(updEntity, EntityWrapper<>(whereEntity);
                 ew = (Wrapper) map.get(NAME_ENTITY_WRAPPER);
             }
             //else updateById(entity) -->> change updateById(entity) to updateById(@Param("et") entity)
