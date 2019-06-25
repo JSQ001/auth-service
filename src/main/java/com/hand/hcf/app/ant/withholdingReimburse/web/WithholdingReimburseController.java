@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "费用小类")
+@Api(tags = "预提报帐")
 @RestController
-@RequestMapping("/api/expense/category")
+@RequestMapping("/api/expense/withholding/reimburse")
 public class WithholdingReimburseController {
 
     @Autowired
@@ -27,7 +27,7 @@ public class WithholdingReimburseController {
 
     @GetMapping("/query/page")
     @ApiOperation(value = "费用小类分页查询", notes = "费用小类分页查询（当前帐套下） 开发:jsq")
-    ResponseEntity<List<WithholdingReimburse>> queryPages(@RequestParam String categoryType, Pageable pageable){
+    ResponseEntity<List<WithholdingReimburse>> queryReimburseByPages(@RequestParam String categoryType, Pageable pageable){
         Page page = PageUtil.getPage(pageable);
         List<WithholdingReimburse> list = withholdingReimburseService.queryPages(categoryType,page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/category/query/page");
@@ -36,14 +36,14 @@ public class WithholdingReimburseController {
 
     @PostMapping("/saveOrUpdate")
     @ApiOperation(value = "新建费用小类", notes = "新建费用小类 开发:jsq")
-    ResponseEntity<WithholdingReimburse> create(@ApiParam(value = "费用类小类信息") @RequestBody WithholdingReimburse expenseCategory){
+    ResponseEntity<WithholdingReimburse> createWithholdingReimburse(@ApiParam(value = "费用类小类信息") @RequestBody WithholdingReimburse expenseCategory){
         return ResponseEntity.ok(withholdingReimburseService.insertOrUpdateWithholdingReimburse(expenseCategory));
     }
 
     @GetMapping("/{id}")
     @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
     ResponseEntity<WithholdingReimburse> getWithholdingReimburseById(@PathVariable Long id){
-        return ResponseEntity.ok(withholdingReimburseService.selectById(id));
+        return ResponseEntity.ok(withholdingReimburseService.selectDocumentById(id));
     }
 
 

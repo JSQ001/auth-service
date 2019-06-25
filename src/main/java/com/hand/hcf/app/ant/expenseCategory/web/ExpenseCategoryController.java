@@ -26,9 +26,12 @@ public class ExpenseCategoryController {
 
     @GetMapping("/query/page")
     @ApiOperation(value = "费用小类分页查询", notes = "费用小类分页查询（当前帐套下） 开发:jsq")
-    ResponseEntity<List<ExpenseCategory>> queryPages(@RequestParam String categoryType, Pageable pageable){
+    ResponseEntity<List<ExpenseCategory>> queryPages(
+            @RequestParam String categoryType,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name, Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        List<ExpenseCategory> list = expenseCategoryService.queryPages(categoryType,page);
+        List<ExpenseCategory> list = expenseCategoryService.queryPages(code,name,categoryType,page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/category/query/page");
         return new ResponseEntity<List<ExpenseCategory>>(list, httpHeaders, HttpStatus.OK);
     }

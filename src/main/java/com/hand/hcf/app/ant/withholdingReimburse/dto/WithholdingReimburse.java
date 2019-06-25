@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 
 @ApiModel(description = "费用小类")
@@ -40,22 +41,29 @@ public class WithholdingReimburse extends Domain {
             using = ToStringSerializer.class   //用字符串类型序列化id
     )
     private Long id;
+
     /**
-     * 费用代码
+     * 单据编号
      */
-    @ApiModelProperty(value = "单据类型")
+    @ApiModelProperty(value = "单据编号")
     @NotNull(message = RespCode.SYS_FIELD_IS_NULL)
-    @TableField(value = "document_type")
-    private String documentType;
+    @TableField(value = "document_number")
+    private String documentNumber;
 
     /**
-     * 费用名称
+     * 单据类型id
      */
-    @ApiModelProperty(value = "名称")
-    @I18nField
-    @TableField(value = "name", condition = SqlConditionExpanse.LIKE)
-    private String name;
+    @ApiModelProperty(value = "单据类型id")
+    @NotNull(message = RespCode.SYS_FIELD_IS_NULL)
+    @TableField(value = "document_type_id")
+    private String documentTypeId;
 
+    /**
+     * 单据类型名称
+     */
+    @ApiModelProperty(value = "单据类型名称")
+    @TableField(exist = false)
+    private String documentTypeName;
 
     /**
      * 账套
@@ -65,9 +73,19 @@ public class WithholdingReimburse extends Domain {
     @TableField(value = "set_of_book_id")
     private Long setOfBooksId;
 
+    /**
+     * 账套名称
+     */
     @TableField(exist = false)
     @ApiModelProperty(value = "账套名称")
     private String setOfBooksName;
+
+    /**
+     * 创建人名称
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "创建人名称")
+    private String createdByName;
 
     /**
      * 租户ID
@@ -88,9 +106,9 @@ public class WithholdingReimburse extends Domain {
     /**
      * 预提金额
      */
-    @ApiModelProperty(value = "预提金额")
-    @TableField(value = "amount")
-    private Double amount;
+    @ApiModelProperty(value = "预提金额",dataType = "BigDecimal")
+    @TableField(value = "amount" )
+    private BigDecimal amount;
 
 
     /**
@@ -100,12 +118,6 @@ public class WithholdingReimburse extends Domain {
     @TableField(value = "comment")
     private String comment;
 
-    /**
-     * 记账期间
-     */
-    @ApiModelProperty(value = "记账期间")
-    @TableField(value = "period")
-    private String period;
 
     /**
      * 责任人id
@@ -114,6 +126,13 @@ public class WithholdingReimburse extends Domain {
     @JsonSerialize(using = ToStringSerializer.class)
     @TableField(value = "duty_person_id")
     private Long dutyPersonId;
+
+    /**
+     * 责任人名称
+     */
+    @ApiModelProperty(value = "责任人名称")
+    @TableField(exist = false)
+    private Long dutyPersonName;
 
 
     /*

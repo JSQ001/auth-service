@@ -106,7 +106,7 @@
             <column name="set_of_book_id" type="bigint" remarks="账套ID">
                 <constraints nullable="false"/>
             </column>
-            <column name="document_type" type="bigint" remarks="单据类型"/>
+            <column name="document_type_id" type="bigint" remarks="单据类型"/>
             <column name="tenant_id" remarks="租户ID" type="bigint">
                 <constraints nullable="false"/>
             </column>
@@ -116,11 +116,9 @@
             <column name="document_number" type="varchar(30)" remarks="单据编号">
                 <constraints nullable="false"/>
             </column>
-            <column name="amount" type="double" remarks="预提金额"/>
+            <column name="amount" type="decimal" remarks="预提金额"/>
             <column name="comment" type="varchar(2000)" remarks="摘要"/>
-            <column name="period" type="varchar(20)" remarks="记账期间">
-                <constraints nullable="false"/>
-            </column>
+
             <column name="category_type_id" type="bigint" remarks="费用小类id">
                 <constraints nullable="false"/>
             </column>
