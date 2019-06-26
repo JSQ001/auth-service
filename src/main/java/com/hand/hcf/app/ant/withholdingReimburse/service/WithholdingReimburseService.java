@@ -62,7 +62,6 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
             List<String> attachmentOidList = Arrays.asList(strings);
             List<AttachmentCO> attachments = organizationService.listAttachmentsByOids(attachmentOidList);
             withholdingReimburse.setAttachments(attachments);
-            System.out.println(attachments);
         }
         return withholdingReimburse;
     }
@@ -71,7 +70,6 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
     * 分页查询
     */
     public List<WithholdingReimburse> queryPages(String categoryType, Page page){
-        System.out.println(categoryType);
         return  withholdingReimburseMapper.selectPage(page,new EntityWrapper<WithholdingReimburse>()
                 .eq("set_of_book_id",OrgInformationUtil.getCurrentSetOfBookId())
                 .orderBy("last_updated_date")
