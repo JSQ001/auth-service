@@ -259,8 +259,20 @@ public class ExpenseTaxReimburseController {
      * @return
      */
     @PostMapping("/head/new/{typeId}")
-    public ResponseEntity<ExpenseTaxReimburseHead> saveInternalReimburseHeader(@PathVariable(value = "typeId") String typeId,@RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
-        return ResponseEntity.ok(expenseTaxReimburseHeadService.saveInternalReimburseHead(typeId,expenseTaxReimburseHead));
+    public ResponseEntity<ExpenseTaxReimburseHead> saveInternalReimburseHeader(@PathVariable(value = "typeId") String typeId, @RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
+        return ResponseEntity.ok(expenseTaxReimburseHeadService.saveInternalReimburseHead(typeId, expenseTaxReimburseHead));
+    }
+
+    /**
+     * 批量更新报账单头信息--国际国内报账单(保存功能）
+     *
+     * url:/api/exp/tax/reimburse/update/header/data
+     * @param expenseTaxReimburseHeadList
+     * @return
+     */
+    @PostMapping("/update/header/data")
+    public ResponseEntity<List<ExpenseTaxReimburseHead>>  updateHeaderData(@RequestBody List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList){
+        return ResponseEntity.ok(expenseTaxReimburseHeadService.updateHeaderData(expenseTaxReimburseHeadList));
     }
 
     /**
@@ -415,7 +427,7 @@ public class ExpenseTaxReimburseController {
 
 
     /**
-     * 报账单提交
+     * 报账单提交--国际国内报账单
      *
      * @param documentId
      * @return
@@ -443,11 +455,11 @@ public class ExpenseTaxReimburseController {
      * @return
      */
     @DeleteMapping(value = "/detele/by/headId")
-    public boolean deleteById(@RequestParam String documentId,@RequestParam String typeFlag) {
+    public boolean deleteById(@RequestParam String documentId, @RequestParam String typeFlag) {
         boolean flag = false;
-        if("domestic".equals(typeFlag)){
+        if ("domestic".equals(typeFlag)) {
             flag = expenseTaxReimburseHeadService.deleteById(documentId);
-        } else if("internal".equals(typeFlag)){
+        } else if ("internal".equals(typeFlag)) {
             flag = expenseTaxReimburseHeadService.deleteInternalReportById(documentId);
         }
         return flag;
@@ -458,10 +470,11 @@ public class ExpenseTaxReimburseController {
      * url:/api/exp/tax/reimburse/head/batch/delete
      *
      * @param ids
+     * @param typeFlag
      */
     @DeleteMapping("/head/batch/delete")
-    public boolean deleteBatch(@RequestParam String ids,@RequestParam String typeFlag) {
-        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids,typeFlag);
+    public boolean deleteBatch(@RequestParam String ids, @RequestParam String typeFlag) {
+        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids, typeFlag);
     }
 
 }

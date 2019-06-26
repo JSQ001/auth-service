@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.taxreimburse.persistence.ExpTaxCalculationTempDomainMapper">
+
+    <resultMap id="queryInfoMap" type="com.hand.hcf.app.core.web.dto.ImportResultDTO">
+        <result column="successEntities" property="successEntities"/>
+        <result column="failureEntities" property="failureEntities"/>
+        <collection property="errorData" select="queryErrorData"
+                    column="{transactionId=transaction_id}"/>
+    </resultMap>
+    <select id="queryInfo" resultMap="queryInfoMap">
+        SELECT (SELECT
+        COUNT(0) AS successEntities
+        FROM exp_tax_calculation_temp
+        WHERE batch_number = #{transactionId}
+        AND error_flag = 0) AS successEntities,
+        (SELECT
+        COUNT(0) AS failureEntities
+        FROM exp_tax_calculation_temp
+        WHERE batch_number = #{transactionId}
+        AND error_flag = 1) AS failureEntities,
+        #{transactionId} AS transaction_id
+        FROM dual
+
+    </select>
+
+
+    <resultMap id="errorDataMap" type="com.hand.hcf.app.core.web.dto.ImportErrorDTO">
+        <result column="row_number" property="index"/>
+        <result column="error" property="error"/>
+    </resultMap>
+    <select id="queryErrorData" resultMap="errorDataMap">
+        select t.row_number AS row_number,
+        t.error_detail AS error
+        FROM exp_tax_calculation_temp t
+        WHERE t.batch_number = #{transactionId}
+        AND t.error_flag = 1
+    </select>
+
+</mapper>

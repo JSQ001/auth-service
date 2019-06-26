@@ -29,9 +29,13 @@ public class TaxReimburseConstans {
 
     public final static String BANK_FLOW_IMPORT_TEMPLATE_PATH = "/templates/bankflowdataimportTemplate.xlsx";
 
+    public final static String TAX_CALCULATION_IMPORT_TEMPLATE_PATH = "/templates/taxcalculationdataimportTemplate.xlsx";
+
     public final static String TAX_REPORT_IMPORT_ERROR_TEMPLATE_PATH = "/templates/taxreporterrordataImportTemplate.xlsx";
 
     public final static String BANK_FLOW_IMPORT_ERROR_TEMPLATE_PATH = "/templates/bankflowerrordataimportTemplate.xlsx";
+
+    public final static String TAX_CALCULATION_IMPORT_ERROR_TEMPLATE_PATH = "/templates/taxcalculationerrordataimportTemplate.xlsx";
 
     public static final int ROW_NUMBER_ERROR = 0;
     public static final int COMPANY_CODE_ERROR = 1;
@@ -52,6 +56,12 @@ public class TaxReimburseConstans {
     public static final int currency_code_error = 9;
     public static final int bank_remark_error = 13;
 
+    public static final int CALCULATION_ROW_NUMBER_ERROR = 0;
+    public static final int CALCULATION_COMPANY_CODE_ERROR = 1;
+    public static final int CALCULATION_TAX_CATEGORY_NAME_ERROR = 2;
+    public static final int CALCULATION_CURRENCY_CODE_ERROR = 3;
+    public static final int CALCULATION_REQUEST_AMOUNT = 4;
+    public static final int CALCULATION_BUSINESS_REMARK_ERROR = 6;
 
 
 }

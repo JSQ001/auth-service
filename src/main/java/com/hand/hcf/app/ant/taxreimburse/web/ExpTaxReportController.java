@@ -38,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -373,6 +372,16 @@ public class ExpTaxReportController {
     @PostMapping("/confirm/import/{transactionID}")
     public ResponseEntity confirmImport(@PathVariable(value = "transactionID") String transactionID) {
         return ResponseEntity.ok(expTaxReportService.confirmImport(transactionID));
+    }
+
+    /**
+     * 批量更新税金申报明细信息 url:api/exp/tax/report/update/tax/data (保存功能）
+     * @param expTaxReportList
+     * @return
+     */
+    @PostMapping("/update/tax/data")
+    public ResponseEntity<List<ExpTaxReport>>  saveTaxReport(@RequestBody List<ExpTaxReport> expTaxReportList){
+        return ResponseEntity.ok(expTaxReportService.saveTaxReport(expTaxReportList));
     }
 
 

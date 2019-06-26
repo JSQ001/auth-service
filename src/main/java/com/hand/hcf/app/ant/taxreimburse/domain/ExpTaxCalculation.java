@@ -2,7 +2,6 @@ package com.hand.hcf.app.ant.taxreimburse.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
@@ -39,7 +38,7 @@ public class ExpTaxCalculation extends Domain {
 
 
     /**
-     * 收益部门id
+     * 受益部门id
      */
     @TableField(value = "benefit_department_id")
     private Long benefitDepartmentId;
@@ -51,13 +50,13 @@ public class ExpTaxCalculation extends Domain {
     private String currencyCode;
 
     /**
-     * 税种代码
+     * 税种代码--业务小类代码
      */
     @TableField(value = "tax_category_code")
     private String taxCategoryCode;
 
     /**
-     * 税种名称
+     * 税种名称--业务小类名称
      */
     //@TableField(exist = false)
     @TableField(value = "tax_category_name")
@@ -86,6 +85,12 @@ public class ExpTaxCalculation extends Domain {
      */
     @TableField(value = "remark")
     private String remark;
+
+    /**
+     * 计提期间
+     */
+    @TableField(value = "request_period")
+    private String requestPeriod;
 
     /**
      * 国内税金缴纳报账单头Id

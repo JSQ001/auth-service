@@ -5,15 +5,17 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description: 税金申报信导入临时domain
- * @date 2019/5/29 10:18
+ * @description: 计提明细信息导入临时类
+ * @date 2019/6/25 10:18
  */
 @Data
-@TableName("exp_tax_report_temp")
-public class ExpTaxReportTempDomain extends Domain {
+@TableName("exp_tax_calculation_temp")
+public class ExpTaxCalculationTempDomain extends Domain {
 
     /**
      * id-唯一识别号
@@ -21,13 +23,11 @@ public class ExpTaxReportTempDomain extends Domain {
     @TableField(value = "id")
     private Long Id;
 
-
     /**
      * 导入数据的行号
      */
     @TableField(value = "row_number")
     private String rowNumber;
-
 
     /**
      * 公司id
@@ -41,20 +41,11 @@ public class ExpTaxReportTempDomain extends Domain {
     @TableField(value = "company_code")
     private String companyCode;
 
-
     /**
-     * 预算部门code
+     * 币种代码
      */
-    @TableField("budget_department_code")
-    private String budgetDepartmentCode;
-
-
-    /**
-     * 受益部门code
-     */
-    @TableField("benefit_department_code")
-    private String benefitDepartmentCode;
-
+    @TableField(value = "currency_code")
+    private String currencyCode;
 
     /**
      * 税种代码--业务小类代码
@@ -63,37 +54,26 @@ public class ExpTaxReportTempDomain extends Domain {
     private String taxCategoryCode;
 
     /**
-     * 税种名称name --业务小类名称
+     * 税种名称--业务小类名称
      */
+    //@TableField(exist = false)
     @TableField(value = "tax_category_name")
     private String taxCategoryName;
 
     /**
-     * 科目代码
-     */
-    @TableField(value = "business_subcategory_code")
-    private String businessSubcategoryCode;
-
-    /**
-     * 会计科目名称
-     */
-    @TableField(value = "business_subcategory_name")
-    private String businessSubcategoryName;
-
-    /**
-     * 地方代码code
-     */
-    @TableField(value = "location_code")
-    private String locationCode;
-
-    /**
-     * 申报金额
+     * 计提金额
      */
     @TableField(value = "request_amount")
     private String requestAmount;
 
     /**
-     * 申报期间
+     * 备注
+     */
+    @TableField(value = "remark")
+    private String remark;
+
+    /**
+     * 计提期间
      */
     @TableField(value = "request_period")
     private String requestPeriod;
@@ -116,5 +96,19 @@ public class ExpTaxReportTempDomain extends Domain {
     @TableField(value = "error_flag")
     private Boolean errorFlag;
 
+
+    /**
+     * 以下字段表中不存在，用于显示在页面上
+     */
+    /**
+     * 公司名称
+     */
+    @TableField(exist = false)
+    private String companyName;
+
+
+    //币种名称
+    @TableField(exist = false)
+    private String currencyName;
 
 }

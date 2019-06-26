@@ -39,7 +39,7 @@ public class ExpTaxReport extends Domain {
 
 
     /**
-     * 收益部门id
+     * 受益部门id
      */
     @TableField(value = "benefit_department_id")
     private Long benefitDepartmentId;
@@ -53,7 +53,7 @@ public class ExpTaxReport extends Domain {
     /**
      * 勾兑状态
      */
-    @TableField(value = "blend_status",strategy = FieldStrategy.NOT_NULL)
+    @TableField(value = "blend_status", strategy = FieldStrategy.NOT_NULL)
     private Boolean blendStatus;
 
     /**
@@ -96,7 +96,7 @@ public class ExpTaxReport extends Domain {
     /**
      * 报账状态
      */
-    @TableField(value ="status",strategy = FieldStrategy.NOT_NULL)
+    @TableField(value = "status", strategy = FieldStrategy.NOT_NULL)
     private Boolean status;
 
     /**

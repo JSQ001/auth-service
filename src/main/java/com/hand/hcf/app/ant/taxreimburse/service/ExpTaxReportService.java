@@ -113,10 +113,12 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                                                    Boolean status,/*报账状态*/
                                                    Page page) {
         String taxCategoryCode = null;
+        String taxCategoryName = null;
         if (StringUtils.isNotEmpty(taxCategoryId)) {
             SysCodeValue sysCodeValue = sysCodeValeMapper.selectById(taxCategoryId);
             //根据传递过来的Id获取到传递过来的taxCategoryCode
             taxCategoryCode = sysCodeValue.getValue();
+            taxCategoryName = sysCodeValue.getName();
         }
 
         Wrapper<ExpTaxReport> wrapper = new EntityWrapper<ExpTaxReport>()
@@ -128,7 +130,8 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
                 .ge(requestAmountFrom != null, "request_amount", requestAmountFrom)
                 .le(requestAmountTo != null, "request_amount", requestAmountTo)
                 .like(org.apache.commons.lang3.StringUtils.isNotEmpty(businessSubcategoryName), "business_subcategory_name", businessSubcategoryName)
-                .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(taxCategoryCode), "tax_category_code", taxCategoryCode)
+                .like(org.apache.commons.lang3.StringUtils.isNotEmpty(taxCategoryName), "tax_category_name", taxCategoryName)
+               // .eq(org.apache.commons.lang3.StringUtils.isNotEmpty(taxCategoryCode), "tax_category_code", taxCategoryCode)
                 .eq(status != null, "status", status);
         List<ExpTaxReport> expTaxReportList = expTaxReportMapper.selectPage(page, wrapper);
         converDesc(expTaxReportList);
@@ -641,8 +644,8 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
             page = PageUtil.getPage(0, 30);
         }
         //当错误结果为零/空的时候才可正式导入到正式表中
-        if(null != importResultDTO){
-            if(importResultDTO.getFailureEntities()==0 && importResultDTO.getErrorData().size()==0) {
+        if (null != importResultDTO) {
+            if (importResultDTO.getFailureEntities() == 0 && importResultDTO.getErrorData().size() == 0) {
                 /**
                  * 税务会计多次导入（全量）本月申报数据，在导入时，系统首先根据OU+期间清空系统中未勾兑的申报数据
                  * 此步骤只能在确认无错误时删除，不能提前删除原数据表中数据
@@ -749,6 +752,20 @@ public class ExpTaxReportService extends BaseService<ExpTaxReportMapper, ExpTaxR
             }
         }
         return flag;
+    }
+
+    /**
+     * 批量更新税金明细信息
+     * @param expTaxReportList
+     * @return
+     */
+    public List<ExpTaxReport> saveTaxReport(List<ExpTaxReport> expTaxReportList) {
+        expTaxReportList.stream().forEach(expTaxReport -> {
+            Wrapper wrapper = new EntityWrapper<ExpTaxReport>()
+                    .eq(expTaxReport.getId() != null, "id", expTaxReport.getId());
+            expTaxReportMapper.update(expTaxReport,wrapper);
+        });
+        return expTaxReportList;
     }
 
 

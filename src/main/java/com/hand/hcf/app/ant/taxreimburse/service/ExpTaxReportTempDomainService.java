@@ -1,7 +1,6 @@
 package com.hand.hcf.app.ant.taxreimburse.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
@@ -43,13 +42,13 @@ import java.util.UUID;
 public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempDomainMapper, ExpTaxReportTempDomain> {
 
     @Autowired
-    ExpTaxReportTempDomainMapper expTaxReportTempDomainMapper;
+    private ExpTaxReportTempDomainMapper expTaxReportTempDomainMapper;
 
     @Autowired
     private CompanyService companyService;
 
     @Autowired
-    ExpTaxReportMapper expTaxReportMapper;
+    private ExpTaxReportMapper expTaxReportMapper;
 
     /**
      * 删除之前全部数据
@@ -89,9 +88,9 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
         importDataList.stream().forEach(item -> {
             //公司合法校验
             String companyCode = item.getCompanyCode();
-            if(StringUtils.isNotEmpty(companyCode)){
+            if (StringUtils.isNotEmpty(companyCode)) {
                 CompanyCO companyCO = companyService.getByCompanyCode(companyCode);
-                if(companyCO != null){
+                if (companyCO != null) {
                     Long companyId = companyCO.getId();
                     item.setCompanyId(companyId);
                     //根据导入数据的OU+期间+税种查询系统中是否已经存在“已勾兑”状态以及金额差值是否相等的相同数据
@@ -114,22 +113,22 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
                             BigDecimal value = requestAmount.subtract(sumAmount);
                             if (Math.abs(value.doubleValue()) == 0) {
                                 item.setErrorFlag(true);
-                                item.setErrorDetail(item.getErrorDetail() +item.getCompanyCode()+"+"+item.getTaxCategoryName()+"+"+item.getRequestPeriod()+"存在已勾兑申报数据;");
+                                item.setErrorDetail(item.getErrorDetail() + item.getCompanyCode() + "+" + item.getTaxCategoryName() + "+" + item.getRequestPeriod() + "存在已勾兑申报数据;");
                             }
                         }
                     }
-                }else {
+                } else {
                     item.setErrorFlag(true);
-                    item.setErrorDetail(item.getErrorDetail() +item.getCompanyCode()+":"+ "此OU对应公司不存在;");
+                    item.setErrorDetail(item.getErrorDetail() + item.getCompanyCode() + ":" + "此OU对应公司不存在;");
                 }
             }
-            //税种的合法性--待校验
+            //ToDo 税种的合法性--待校验
 
             //申报金额必须大于零
-            if(StringUtils.isNotEmpty(item.getRequestAmount())){
-                if (Double.valueOf(item.getRequestAmount())<=0) {
+            if (StringUtils.isNotEmpty(item.getRequestAmount())) {
+                if (Double.valueOf(item.getRequestAmount()) <= 0) {
                     item.setErrorFlag(true);
-                    item.setErrorDetail(item.getErrorDetail() +item.getRequestAmount()+":"+"申报金额必须大于零;");
+                    item.setErrorDetail(item.getErrorDetail() + item.getRequestAmount() + ":" + "申报金额必须大于零;");
                 }
             }
         });
@@ -138,6 +137,7 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
 
     /**
      * 验证该批次号数据是否存在
+     *
      * @param transactionID
      * @return
      */
@@ -146,14 +146,15 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
         List<ExpTaxReportTempDomain> expTaxReportTempDomainList = selectList(
                 new EntityWrapper<ExpTaxReportTempDomain>()
                         .eq("batch_number", transactionID));
-        if(expTaxReportTempDomainList.size()>0){
-            flag =true;
+        if (expTaxReportTempDomainList.size() > 0) {
+            flag = true;
         }
         return flag;
     }
 
     /**
      * 根据批次号查询结果
+     *
      * @param transactionID
      * @return
      */
@@ -162,7 +163,12 @@ public class ExpTaxReportTempDomainService extends BaseService<ExpTaxReportTempD
     }
 
 
-    //导入失败后,导出错误信息
+    /**
+     * 导入失败后,导出错误信息
+     *
+     * @param transactionID
+     * @return
+     */
     public byte[] exportFailedData(String transactionID) {
         List<ExpTaxReportTempDomain> expTaxReportTempDomainList = selectList(
                 new EntityWrapper<ExpTaxReportTempDomain>()

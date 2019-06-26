@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -526,6 +525,20 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
         }
         return map;
     }
+
+    /**
+     * 批量更新报账单头信息--国际国内报账单(保存功能）
+     * @param expenseTaxReimburseHeadList
+     * @return
+     */
+     public List<ExpenseTaxReimburseHead>  updateHeaderData(List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList){
+         expenseTaxReimburseHeadList.stream().forEach(expenseTaxReimburseHead -> {
+             Wrapper wrapper = new EntityWrapper<ExpenseTaxReimburseHead>()
+                     .eq(expenseTaxReimburseHead.getId() != null, "id", expenseTaxReimburseHead.getId());
+             expenseTaxReimburseHeadMapper.update(expenseTaxReimburseHead,wrapper);
+         });
+         return expenseTaxReimburseHeadList;
+     }
 
     /**
      * 提交--修改状态

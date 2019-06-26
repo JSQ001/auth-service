@@ -13,7 +13,6 @@ import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.service.ExcelImportService;
 import com.hand.hcf.app.core.util.DateUtil;
 import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.TypeConversionUtils;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
@@ -451,7 +450,6 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
                     expBankFlow.setStatus(false);
                     return expBankFlow;
                 }).collect(Collectors.toList());
-                System.out.println("===expBankFlowList==" + expBankFlowList.size());
                 //导入之前到清空未勾兑的数据
                 flag = this.insertBatch(expBankFlowList);
                 //导入完毕后删除临时表的数据
@@ -463,5 +461,18 @@ public class ExpBankFlowService extends BaseService<ExpBankFlowMapper, ExpBankFl
         return flag;
     }
 
+    /**
+     * 批量更新税金明细信息
+     * @param expBankFlowList
+     * @return
+     */
+    public List<ExpBankFlow> saveBankFlow(List<ExpBankFlow> expBankFlowList) {
+        expBankFlowList.stream().forEach(expBankFlow -> {
+            Wrapper wrapper = new EntityWrapper<ExpBankFlow>()
+                    .eq(expBankFlow.getId() != null, "id", expBankFlow.getId());
+            expBankFlowMapper.update(expBankFlow,wrapper);
+        });
+        return expBankFlowList;
+    }
 
 }
