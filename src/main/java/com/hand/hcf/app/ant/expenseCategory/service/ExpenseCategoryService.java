@@ -34,9 +34,10 @@ public class ExpenseCategoryService extends BaseService<ExpenseCategoryMapper, E
     private CompanyOrDeptAuthorityMapper companyOrDeptAuthorityMapper;
 
 
-    public List<ExpenseCategory> queryPages(String code, String name, String categoryType,Page page){
+    public List<ExpenseCategory> queryPages(String code, String name, String categoryType,String enabledFlag,Page page){
         return  expenseCategoryMapper.selectPage(page,new EntityWrapper<ExpenseCategory>()
                 .eq("category_type",categoryType)
+                .eq(enabledFlag != null,"enabled_flag",enabledFlag)
                 .like(code!=null,"code",code)
                 .like(name!=null,"name",name)
                 .eq("set_of_book_id",OrgInformationUtil.getCurrentSetOfBookId())

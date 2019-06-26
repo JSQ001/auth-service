@@ -4,18 +4,22 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.withholdingReimburse.dto.WithholdingReimburse;
 import com.hand.hcf.app.ant.withholdingReimburse.persistence.WithholdingReimburseMapper;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.enums.DocumentOperationEnum;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualService;
 import com.hand.hcf.app.expense.common.domain.enums.ExpenseDocumentTypeEnum;
+import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.service.CommonService;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -30,6 +34,9 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
 
     @Autowired
     private ExpenseAccrualService expenseAccrualService;
+
+    @Autowired
+    private OrganizationService organizationService;
     /*
      * 设置dto
      */
@@ -41,6 +48,12 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
         // 设置创建人名称
         withholdingReimburse.setCreatedByName(OrgInformationUtil.getUser().getUsername());
 
+        // 设置责任人名称
+        if(withholdingReimburse.getCreatedBy().equals(withholdingReimburse.getDutyPersonId())){
+            withholdingReimburse.setDutyPersonName(withholdingReimburse.getCreatedByName());
+        }else {
+            withholdingReimburse.setDutyPersonName(OrgInformationUtil.getUser().getUsername());
+        }
         return withholdingReimburse;
     }
 
@@ -78,9 +91,17 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
         if(withholdingReimburse.getTenantId()==null){
             withholdingReimburse.setTenantId(OrgInformationUtil.getCurrentTenantId());
         }
-        withholdingReimburse.setDocumentNumber(commonService.getCoding(ExpenseDocumentTypeEnum.PUBLIC_REPORT.getCategory(),OrgInformationUtil.getCurrentCompanyId(),null));
+        withholdingReimburse.setDocumentNumber(commonService.getCoding(ExpenseDocumentTypeEnum.EXPENSE_ACCRUAL.getCategory(),OrgInformationUtil.getCurrentCompanyId(),""));
         withholdingReimburse.setStatus(DocumentOperationEnum.GENERATE.getId().toString());
         withholdingReimburse.setAmount(BigDecimal.ZERO);
+
+        // 设置附件信息
+        if (StringUtils.isNotEmpty(withholdingReimburse.getAttachmentOid())){
+            String[] strings = withholdingReimburse.getAttachmentOid().split(",");
+            List<String> attachmentOidList = Arrays.asList(strings);
+            List<AttachmentCO> attachments = organizationService.listAttachmentsByOids(attachmentOidList);
+            withholdingReimburse.setAttachments(attachments);
+        }
 
         if(withholdingReimburse.getId()!= null){
             // 更新的时候，设置最后更新时间

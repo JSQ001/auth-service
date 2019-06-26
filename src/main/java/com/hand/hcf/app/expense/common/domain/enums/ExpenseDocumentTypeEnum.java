@@ -15,7 +15,7 @@ import java.io.Serializable;
 public enum ExpenseDocumentTypeEnum implements IEnum {
     /* 单据类型枚举*/
     PUBLIC_REPORT(801001, "PUBLIC_REPORT","报账单") ,
-    WITH_HOLDING_REIMBURSE(901001, "WITH_HOLDING_REIMBURSE","预提报帐") ,
+    EXPENSE_ACCRUAL(801012,"ACCRUAL_TYPE","费用预提单"),
     EXPENSE_ADJUST(801006, "ADJUST_TYPE","费用调整单"),
     EXP_REQUISITION(801009, "EXP_REQUISITION","费用申请单"),
     TRAVEL_APPLICATION(801010, "TRAVEL_APPLICATION","差旅申请单"),

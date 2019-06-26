@@ -86,7 +86,7 @@ public class ExpenseCategory extends Domain {
     /*
      * 是否删除
      * */
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "删除")
     @TableField(value = "is_deleted")
     private boolean delete;
 

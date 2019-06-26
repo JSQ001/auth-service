@@ -26,8 +26,11 @@ public class WithholdingReimburseController {
     private WithholdingReimburseService withholdingReimburseService;
 
     @GetMapping("/query/page")
-    @ApiOperation(value = "费用小类分页查询", notes = "费用小类分页查询（当前帐套下） 开发:jsq")
-    ResponseEntity<List<WithholdingReimburse>> queryReimburseByPages(@RequestParam String categoryType, Pageable pageable){
+    @ApiOperation(value = "预提报帐分页查询", notes = "预提报帐分页查询（当前帐套下） 开发:jsq")
+    ResponseEntity<List<WithholdingReimburse>> queryReimburseByPages(
+            @RequestParam String categoryType, Pageable pageable
+
+    ){
         Page page = PageUtil.getPage(pageable);
         List<WithholdingReimburse> list = withholdingReimburseService.queryPages(categoryType,page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/category/query/page");
@@ -47,7 +50,7 @@ public class WithholdingReimburseController {
     }
 
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
     ResponseEntity<Boolean> deleteWithholdingReimburse(@PathVariable Long id){
         return ResponseEntity.ok(withholdingReimburseService.deleteById(id));

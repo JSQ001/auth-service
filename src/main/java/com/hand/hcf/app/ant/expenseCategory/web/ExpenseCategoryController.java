@@ -29,9 +29,10 @@ public class ExpenseCategoryController {
     ResponseEntity<List<ExpenseCategory>> queryPages(
             @RequestParam String categoryType,
             @RequestParam(required = false) String code,
+            @RequestParam(required = false) String enabledFlag,
             @RequestParam(required = false) String name, Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        List<ExpenseCategory> list = expenseCategoryService.queryPages(code,name,categoryType,page);
+        List<ExpenseCategory> list = expenseCategoryService.queryPages(code,name,categoryType,enabledFlag,page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/category/query/page");
         return new ResponseEntity<List<ExpenseCategory>>(list, httpHeaders, HttpStatus.OK);
     }
@@ -49,7 +50,7 @@ public class ExpenseCategoryController {
     }
 
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
     ResponseEntity<Boolean> deleteExpenseCategory(@PathVariable Long id){
         return ResponseEntity.ok(expenseCategoryService.deleteById(id));

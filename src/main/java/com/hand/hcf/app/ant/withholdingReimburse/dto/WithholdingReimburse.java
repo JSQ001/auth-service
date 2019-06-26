@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.core.annotation.I18nField;
 import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.expense.common.utils.RespCode;
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @ApiModel(description = "费用小类")
@@ -132,7 +134,7 @@ public class WithholdingReimburse extends Domain {
      */
     @ApiModelProperty(value = "责任人名称")
     @TableField(exist = false)
-    private Long dutyPersonName;
+    private String dutyPersonName;
 
 
     /*
@@ -157,6 +159,13 @@ public class WithholdingReimburse extends Domain {
     @ApiModelProperty(value = "附件oid")
     @TableField(value = "attachmentOid")
     private String attachmentOid;
+
+    /*
+     * 附件
+     * */
+    @ApiModelProperty(value = "附件")
+    @TableField(exist = false)
+    private List<AttachmentCO> attachments;
 
 
 }
