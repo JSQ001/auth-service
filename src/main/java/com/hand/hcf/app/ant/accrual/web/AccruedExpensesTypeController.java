@@ -5,8 +5,6 @@ import com.hand.hcf.app.ant.accrual.service.AccrualExpenseTypeService;
 import com.hand.hcf.app.common.co.ContactCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

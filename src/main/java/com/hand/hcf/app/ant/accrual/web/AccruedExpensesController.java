@@ -6,7 +6,6 @@ import com.hand.hcf.app.ant.accrual.dto.AccruedExpensesHeaderDTO;
 import com.hand.hcf.app.ant.accrual.service.AccruedExpensesHeaderService;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

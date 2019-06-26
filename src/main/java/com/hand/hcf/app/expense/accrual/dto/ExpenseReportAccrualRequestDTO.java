@@ -1,10 +1,8 @@
 package com.hand.hcf.app.expense.accrual.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hand.hcf.app.core.serializer.CollectionToStringSerializer;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssign;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
 import com.hand.hcf.app.expense.report.dto.DepartmentOrUserGroupDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

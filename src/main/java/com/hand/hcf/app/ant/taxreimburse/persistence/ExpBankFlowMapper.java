@@ -3,8 +3,6 @@ package com.hand.hcf.app.ant.taxreimburse.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 
-import java.util.List;
-
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0

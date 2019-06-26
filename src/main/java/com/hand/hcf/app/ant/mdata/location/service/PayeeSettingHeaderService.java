@@ -1,6 +1,5 @@
 package com.hand.hcf.app.ant.mdata.location.service;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.mdata.location.domain.PayeeSettingHeader;
 import com.hand.hcf.app.ant.mdata.location.dto.PayeeSettingHeaderDTO;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author zihao.yang

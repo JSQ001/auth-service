@@ -1,18 +1,16 @@
 package com.hand.hcf.app.ant.expenseCategory.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.expenseCategory.dto.CompanyOrDeptAuthority;
 import com.hand.hcf.app.ant.expenseCategory.dto.ExpenseCategory;
 import com.hand.hcf.app.ant.expenseCategory.persistence.CompanyOrDeptAuthorityMapper;
 import com.hand.hcf.app.ant.expenseCategory.persistence.ExpenseCategoryMapper;
 import com.hand.hcf.app.core.service.BaseService;
+import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.baomidou.mybatisplus.plugins.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-
 
 import java.time.ZonedDateTime;
 import java.util.List;

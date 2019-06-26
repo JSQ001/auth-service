@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0

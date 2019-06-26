@@ -14,23 +14,23 @@ import com.hand.hcf.app.expense.common.utils.RespCode;
 import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
 import com.hand.hcf.app.expense.income.domain.ExpenseTypeAssignDepartment;
 import com.hand.hcf.app.expense.income.dto.ExpenseReportIncomeRequestDTO;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeExpenseType;
-import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
-import com.hand.hcf.app.expense.report.service.ExpenseReportTypeExpenseTypeService;
-import com.hand.hcf.app.expense.type.domain.*;
 import com.hand.hcf.app.expense.income.persistence.ExpenseIncomeMapper;
-import org.springframework.data.domain.Pageable;
+import com.hand.hcf.app.expense.report.service.ExpenseReportTypeExpenseTypeService;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import springfox.documentation.annotations.ApiIgnore;
+
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

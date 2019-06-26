@@ -2,7 +2,6 @@ package com.hand.hcf.app.expense.tax.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hand.hcf.app.core.serializer.CollectionToStringSerializer;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
 import com.hand.hcf.app.expense.report.dto.DepartmentOrUserGroupDTO;
 import com.hand.hcf.app.expense.tax.domain.ExpenseTaxAssign;
 import io.swagger.annotations.ApiModel;
