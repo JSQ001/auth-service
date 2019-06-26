@@ -335,7 +335,7 @@ public class RuleService {
                     /*List<RuleConditionDTO> sourceRuleConditionDTOs = sourceRuleApproverDTO.getRuleConditionList();
                     if (!StringUtils.isEmpty(sourceRuleConditionDTOs)) {
                         sourceRuleConditionDTOs.forEach(sourceRuleConditionDTO -> {
-                            RuleCondition targetRuleCondition = mapper.map(sourceRuleConditionDTO, RuleCondition.class);
+                            RuleCondition targetRuleCondition = persistence.map(sourceRuleConditionDTO, RuleCondition.class);
                             StringWriter sw = new StringWriter();
                             ObjectMapper persistence = new ObjectMapper();
                             try {

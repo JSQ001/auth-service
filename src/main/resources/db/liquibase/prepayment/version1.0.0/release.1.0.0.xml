@@ -169,7 +169,7 @@
             <column name="approval_date" type="timestamp" remarks="审批日期"></column>
             <column name="approved_by" type="varchar(30)" remarks="审批人id"></column>
             <column name="audit_flag" type="varchar(30)" remarks="审核标志"/>
-            <column name="audit_date" type="varchar(30)" remarks="审核日期"/>
+            <column name="audit_date" type="timestamp" defaultValue="${now}" remarks="审核日期"/>
             <column name="created_date" type="timestamp" remarks="创建日期" defaultValue="${now}">
                 <constraints nullable="false"/>
             </column>
@@ -544,7 +544,9 @@
     <changeSet id="201801292020001" author="liang.liu">
         <modifyDataType tableName="csh_payment_requisition_head" columnName="approved_by" newDataType="bigint"/>
         <modifyDataType tableName="csh_payment_requisition_head" columnName="audit_flag" newDataType="boolean"/>
+<!--
         <modifyDataType tableName="csh_payment_requisition_head" columnName="audit_date" newDataType="timestamp"/>
+-->
     </changeSet>
    <!--<changeSet id="201801292108002" author="liang.liu">
         <dropNotNullConstraint tableName="csh_payment_requisition_head" columnName="audit_date" columnDataType="timestamp"/>

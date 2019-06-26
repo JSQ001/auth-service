@@ -6,49 +6,55 @@
     <include file="classpath:db/liquibase/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
 
     <!-- 初始化表结构 这个不允许直接改 -->
+<!--
     <include file="classpath:db/liquibase/base/init/initDB.xml" relativeToChangelogFile="false"/>
+-->
     <!-- 初始化系统数据  这个不允许直接改-->
-    <include file="classpath:db/liquibase/base/init/load_system_data.xml" relativeToChangelogFile="false"/>
-    <!-- 0.8.5  修改全部放到后面的版本分支上-->
+  <!--  <include file="classpath:db/liquibase/base/init/load_system_data.xml" relativeToChangelogFile="false"/>
+    &lt;!&ndash; 0.8.5  修改全部放到后面的版本分支上&ndash;&gt;
     <include file="classpath:db/liquibase/base/v0.8.5/release20190110.xml" relativeToChangelogFile="false"/>
-    <!-- 1.0.0  修改全部放到后面的版本分支上-->
+    &lt;!&ndash; 1.0.0  修改全部放到后面的版本分支上&ndash;&gt;
     <include file="classpath:db/liquibase/base/v1.0.0/release20190401.xml" relativeToChangelogFile="false"/>
-	<!-- 1.1.0 修改全部放到后面的版本分支上 -->
+	&lt;!&ndash; 1.1.0 修改全部放到后面的版本分支上 &ndash;&gt;
     <include file="classpath:db/liquibase/base/v1.1.0/release-1.1.0.xml" relativeToChangelogFile="false"/>
-    <!-- 1.2.0 修改全部放到后面的版本分支上 -->
+    &lt;!&ndash; 1.2.0 修改全部放到后面的版本分支上 &ndash;&gt;
     <include file="classpath:db/liquibase/base/v1.2.0/release-1.2.0.xml" relativeToChangelogFile="false"/>
 
-    <!-- 主数据建表语句 -->
+    &lt;!&ndash; 主数据建表语句 &ndash;&gt;
     <include file="classpath:db/liquibase/mdata/version1.0.0/init.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/mdata/version1.0.0/release20190114.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/mdata/version1.1.0/release1.1.0.xml" relativeToChangelogFile="false"/>
-    <!-- workflow表初始化 -->
-    <!-- 初始化表结构 -->
+    &lt;!&ndash; workflow表初始化 &ndash;&gt;
+    &lt;!&ndash; 初始化表结构 &ndash;&gt;
     <include file="classpath:db/liquibase/workflow/initTable/initTable.xml" relativeToChangelogFile="false"/>
-    <!-- 初始化表数据 -->
+    &lt;!&ndash; 初始化表数据 &ndash;&gt;
     <include file="classpath:db/liquibase/workflow/initSql/load_init_data.xml" relativeToChangelogFile="false"/>
-    <!-- 初始化表索引 -->
+    &lt;!&ndash; 初始化表索引 &ndash;&gt;
     <include file="classpath:db/liquibase/workflow/initTable/initUnionIndex.xml" relativeToChangelogFile="false"/>
-    <!--  加载BRMS 工作流相关的表 -->
+    &lt;!&ndash;  加载BRMS 工作流相关的表 &ndash;&gt;
     <include file="classpath:db/liquibase/workflow/initTable/initBrmsTable.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/workflow/version1.0.0/release20190118.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/workflow/v1.1.0/release20190501.xml" relativeToChangelogFile="false"/>
 
-    <!-- prepayment表初始化 -->
+    &lt;!&ndash; prepayment表初始化 &ndash;&gt;
     <include file="classpath:db/liquibase/prepayment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>
-	<!--1.1.0版本-->
+	&lt;!&ndash;1.1.0版本&ndash;&gt;
     <include file="classpath:db/liquibase/prepayment/version1.0.0/release.1.1.0.xml" relativeToChangelogFile="false"/>
 
-    <!-- expense表初始化 -->
+    &lt;!&ndash; expense表初始化 &ndash;&gt;
     <include file="classpath:db/liquibase/expense/changelog/release.1.0.0.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/expense/changelog/initSql.xml" relativeToChangelogFile="false"/>
-    <!-- 1.0.0  修改全部放到后面的版本分支上-->
+    &lt;!&ndash; 1.0.0  修改全部放到后面的版本分支上&ndash;&gt;
     <include file="classpath:db/liquibase/expense/changelog/release.1.0.5.xml" relativeToChangelogFile="false"/>
-	<!-- 1.1.0 版本-->
+	&lt;!&ndash; 1.1.0 版本&ndash;&gt;
     <include file="classpath:db/liquibase/expense/changelog/release.1.1.0.xml" relativeToChangelogFile="false"/>
-    <!-- 1.2.0 版本-->
+    &lt;!&ndash; 1.2.0 版本&ndash;&gt;
     <include file="classpath:db/liquibase/expense/changelog/release.1.2.0.xml" relativeToChangelogFile="false"/>
-    <!-- payment模块 -->
+    &lt;!&ndash; payment模块 &ndash;&gt;
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.0.0.xml" relativeToChangelogFile="false"/>
     <include file="classpath:db/liquibase/payment/version1.0.0/release.1.1.0.xml" relativeToChangelogFile="false"/>
+-->
+    <!--ant费用小类-->
+    <include file="classpath:db/liquibase/ant/release.1.0.0.xml" relativeToChangelogFile="false"/>
+
 </databaseChangeLog>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.mdata.location.persistence.PayeeSettingHeaderMapper">
+
+    <select id="queryHeader" resultType="com.hand.hcf.app.ant.mdata.location.dto.PayeeSettingHeaderDTO">
+		SELECT
+		h.*
+		FROM
+		sys_payee_setting_header h
+		<where>
+			<if test="payeeSettingHeaderId != null">
+				AND h.id = #{payeeSettingHeaderId}
+			</if>
+			<if test="payeeCountryCode != null and payeeCountryCode != ''">
+				AND h.payee_country_code = #{payeeCountryCode,jdbcType=VARCHAR}
+			</if>
+			<if test="payeeCityCode != null and payeeCityCode != ''">
+				AND h.payee_city_code = #{payeeCityCode,jdbcType=VARCHAR}
+			</if>
+			<if test="payerCountryCode != null and payerCountryCode != ''">
+				AND h.payer_country_code = #{payerCountryCode,jdbcType=VARCHAR}
+			</if>
+			<if test="payerCityCode != null and payerCityCode != ''">
+				AND h.payer_city_code = #{payerCityCode,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+</mapper>
