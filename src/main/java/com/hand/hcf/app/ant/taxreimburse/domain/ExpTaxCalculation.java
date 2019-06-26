@@ -2,7 +2,6 @@ package com.hand.hcf.app.ant.taxreimburse.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 
@@ -11,12 +10,12 @@ import java.math.BigDecimal;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description: 税金申报信息类
+ * @description: 计提明细信息类
  * @date 2019/5/29 10:18
  */
 @Data
-@TableName("exp_tax_report")
-public class ExpTaxReport extends Domain {
+@TableName("exp_tax_calculation")
+public class ExpTaxCalculation extends Domain {
 
     /**
      * id-唯一识别号
@@ -51,19 +50,13 @@ public class ExpTaxReport extends Domain {
     private String currencyCode;
 
     /**
-     * 勾兑状态
-     */
-    @TableField(value = "blend_status", strategy = FieldStrategy.NOT_NULL)
-    private Boolean blendStatus;
-
-    /**
-     * 税种代码
+     * 税种代码--业务小类代码
      */
     @TableField(value = "tax_category_code")
     private String taxCategoryCode;
 
     /**
-     * 税种名称
+     * 税种名称--业务小类名称
      */
     //@TableField(exist = false)
     @TableField(value = "tax_category_name")
@@ -82,28 +75,22 @@ public class ExpTaxReport extends Domain {
     private String businessSubcategoryName;
 
     /**
-     * 申报金额
+     * 计提金额
      */
     @TableField(value = "request_amount")
     private BigDecimal requestAmount;
-
-    /**
-     * 申报期间
-     */
-    @TableField(value = "request_period")
-    private String requestPeriod;
-
-    /**
-     * 报账状态
-     */
-    @TableField(value = "status", strategy = FieldStrategy.NOT_NULL)
-    private Boolean status;
 
     /**
      * 备注
      */
     @TableField(value = "remark")
     private String remark;
+
+    /**
+     * 计提期间
+     */
+    @TableField(value = "request_period")
+    private String requestPeriod;
 
     /**
      * 国内税金缴纳报账单头Id
