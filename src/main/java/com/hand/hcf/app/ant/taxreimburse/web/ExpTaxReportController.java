@@ -255,12 +255,15 @@ public class ExpTaxReportController {
         }
     }
 
-
+    /**
+     * 保存未勾兑的税金申报数据 api/exp/tax/report/saveorupdate
+     * @param ids
+     * @param expTaxReportList
+     * @return
+     */
     @PostMapping("/saveorupdate")
     public ResponseEntity<List<ExpTaxReport>> saveExpTaxReport(@RequestParam String ids, @RequestBody List<ExpTaxReport> expTaxReportList) {
-
-        expTaxReportService.saveExpTaxReport(ids, expTaxReportList);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(expTaxReportService.saveExpTaxReport(ids, expTaxReportList));
     }
 
     /**

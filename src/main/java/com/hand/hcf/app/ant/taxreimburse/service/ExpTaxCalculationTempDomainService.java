@@ -263,10 +263,9 @@ public class ExpTaxCalculationTempDomainService extends BaseService<ExpTaxCalcul
                     return expTaxCalculation;
                 }).collect(Collectors.toList());
                 //将数据批量插入税金计提正式表中
-                System.out.println(expTaxCalculationList);
                 flag = expTaxCalculationService.insertBatch(expTaxCalculationList);
 
-                //导入完毕后删除临时表的数据
+                //导入完毕后删除临时表的数据r
                 if (flag) {
                     this.deleteImportData(transactionID);
                 }

@@ -421,7 +421,6 @@ public class ExpenseTaxReimburseHeadService extends BaseService<ExpenseTaxReimbu
                     expTaxReport.setStatus(true);
                     expTaxReport.setExpReimburseHeaderId(taxReimburseHeadId);
                     //更新税金申报的数据状态，并且设置外键taxReimburseHeadId
-                    System.out.println("id" + expTaxReport.getId());
                     expTaxReportMapper.updateStatusById(Long.valueOf(idsArr[i]), taxReimburseHeadId);
                 }
                 Map<Long, String> map = getMap(ids);
