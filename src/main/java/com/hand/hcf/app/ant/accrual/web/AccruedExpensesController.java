@@ -2,19 +2,18 @@ package com.hand.hcf.app.ant.accrual.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.accrual.domain.AccruedExpensesHeader;
+import com.hand.hcf.app.ant.accrual.dto.AccruedExpensesHeaderDTO;
 import com.hand.hcf.app.ant.accrual.service.AccruedExpensesHeaderService;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;
@@ -85,9 +84,15 @@ public class AccruedExpensesController {
     }
 
     @GetMapping("/header/by/id")
-    public ResponseEntity<AccruedExpensesHeader> getExpenseReportById(@ApiParam(value = "报账单头ID") @RequestParam Long expenseReportId){
+    public ResponseEntity<AccruedExpensesHeader> getExpenseReportById(@ApiParam(value = "预提单头ID") @RequestParam Long expenseReportId){
         //return ResponseEntity.ok(accruedExpensesHeaderService.getAccruedReportById(expenseReportId));
         return null;
+    }
+
+    @PostMapping("/header/save")
+    public ResponseEntity<AccruedExpensesHeader> saveAccrualHeader(@ApiParam(value = "预提单头") @RequestBody  AccruedExpensesHeaderDTO accruedExpensesHeaderDTO){
+        return ResponseEntity.ok(accruedExpensesHeaderService.saveAccrualHeader(accruedExpensesHeaderDTO,null,false));
+
     }
 
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.excel.persistence.ExcelTemplateFieldMapper">
+
+    <select id="selectTemplateField" resultType="com.hand.hcf.app.ant.excel.domain.ExcelTemplateField">
+      SELECT
+	t.field_name
+     FROM
+	excel_template_field t
+     WHERE
+	t.excel_template_id = #{excelTemplateId}
+    </select>
+</mapper>
