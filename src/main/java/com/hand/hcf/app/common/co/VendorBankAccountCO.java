@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.web.dto.DomainObjectDTO;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 /**

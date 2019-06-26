@@ -15,16 +15,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.util.StringUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
 
 /**
  * @description: 获取登陆信息工具类

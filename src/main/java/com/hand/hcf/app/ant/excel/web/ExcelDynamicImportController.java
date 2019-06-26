@@ -198,6 +198,32 @@ public class ExcelDynamicImportController {
     }
 
     /**
+     * 更新启用标志
+     *
+     * @param id
+     * @param enableFlag
+     * @return
+     */
+    @PutMapping("/update/enableFlag")
+    public ResponseEntity<Boolean> updateEnableFlag(@RequestParam("id") Long id,
+                                                @RequestParam("enableFlag") Boolean enableFlag) {
+        return ResponseEntity.ok(excelTemplateMappingFieldService.updateEnableFlag(id, enableFlag));
+    }
+
+    /**
+     * 更新必输标志
+     *
+     * @param id
+     * @param requiredFlag
+     * @return
+     */
+    @PutMapping("/update/requiredFlag")
+    public ResponseEntity<Boolean> updateRequiredFlag(@RequestParam("id") Long id,
+                                                      @RequestParam("requiredFlag") Boolean requiredFlag) {
+        return ResponseEntity.ok(excelTemplateMappingFieldService.updateRequiredFlag(id, requiredFlag));
+    }
+
+    /**
      * 删除映射字段
      *
      * @param id

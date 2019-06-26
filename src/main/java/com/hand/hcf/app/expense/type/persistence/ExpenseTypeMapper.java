@@ -2,7 +2,6 @@ package com.hand.hcf.app.expense.type.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
-import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.BasicCO;
 import com.hand.hcf.app.expense.type.bo.ExpenseBO;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;

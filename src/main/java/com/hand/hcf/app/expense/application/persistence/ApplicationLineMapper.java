@@ -6,7 +6,6 @@ import com.hand.hcf.app.expense.application.web.dto.ApplicationLineWebDTO;
 import com.hand.hcf.app.expense.common.dto.CurrencyAmountDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 

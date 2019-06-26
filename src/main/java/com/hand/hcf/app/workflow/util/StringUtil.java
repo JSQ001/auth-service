@@ -1,17 +1,11 @@
 package com.hand.hcf.app.workflow.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by yangqi on 2016/7/13.

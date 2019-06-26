@@ -1,6 +1,5 @@
 package com.hand.hcf.app.expense.common.externalApi;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service

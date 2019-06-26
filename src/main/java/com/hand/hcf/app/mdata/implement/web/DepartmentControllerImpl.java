@@ -2,11 +2,9 @@ package com.hand.hcf.app.mdata.implement.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.common.co.*;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.contact.web.adapter.UserAdapter;
 import com.hand.hcf.app.mdata.department.domain.DepartmentPosition;
-import com.hand.hcf.app.common.co.DepartmentGroupDepartmentCO;
 import com.hand.hcf.app.mdata.department.service.*;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,12 +1,9 @@
 package com.hand.hcf.app.expense.application.service;
 
-import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.application.domain.PrepaymentRequisitionRelease;
 import com.hand.hcf.app.expense.application.persistence.PrepaymentRequisitionReleaseMapper;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author qianjun.gong@hand-china.com

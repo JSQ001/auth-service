@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.payment.service.CashBankQueryAllService;
 import com.hand.hcf.app.payment.web.dto.BankQueryAllDTO;
+import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URISyntaxException;

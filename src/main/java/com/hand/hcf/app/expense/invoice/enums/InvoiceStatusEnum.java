@@ -1,7 +1,6 @@
 package com.hand.hcf.app.expense.invoice.enums;
 
 import com.hand.hcf.app.core.enums.SysEnum;
-import com.hand.hcf.app.expense.type.domain.enums.FieldDataTypeEnum;
 
 /**
  * @author shaofeng.zheng@hand-china.com

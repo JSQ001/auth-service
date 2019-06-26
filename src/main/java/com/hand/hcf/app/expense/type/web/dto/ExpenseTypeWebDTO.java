@@ -1,6 +1,5 @@
 package com.hand.hcf.app.expense.type.web.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hand.hcf.app.expense.type.domain.ExpenseField;
 import com.hand.hcf.app.expense.type.domain.ExpenseType;

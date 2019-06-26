@@ -12,6 +12,10 @@ import com.hand.hcf.app.payment.service.CompanyBankService;
 import com.hand.hcf.app.payment.utils.MyBatisPageUtil;
 import com.hand.hcf.app.payment.utils.RespCode;
 import com.hand.hcf.app.payment.web.dto.CompanyBankPaymentDTO;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;

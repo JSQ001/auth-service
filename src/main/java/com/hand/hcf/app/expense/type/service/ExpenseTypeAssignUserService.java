@@ -13,8 +13,6 @@ import com.hand.hcf.app.expense.type.domain.ExpenseTypeAssignUser;
 import com.hand.hcf.app.expense.type.domain.enums.AssignUserEnum;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeAssignUserMapper;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeMapper;
-import org.springframework.stereotype.Service;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

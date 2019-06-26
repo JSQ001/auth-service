@@ -1,6 +1,9 @@
 package com.hand.hcf.app.workflow.approval.implement;
 
-import com.hand.hcf.app.workflow.approval.dto.*;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowApproval;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowInstance;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowTask;
+import com.hand.hcf.app.workflow.approval.dto.WorkflowUser;
 import com.hand.hcf.app.workflow.approval.service.WorkflowActionService;
 import com.hand.hcf.app.workflow.approval.util.WorkflowAction;
 import com.hand.hcf.app.workflow.approval.util.WorkflowResult;

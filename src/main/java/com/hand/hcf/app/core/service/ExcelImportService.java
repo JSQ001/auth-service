@@ -9,30 +9,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.reflection.Reflector;
 import org.apache.ibatis.reflection.invoker.Invoker;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
 
 /**
  * @author kai.zhang05@hand-china.com
@@ -135,18 +119,13 @@ public class ExcelImportService {
         importSheet(workbook, isMany, columnNameRow, excelImportHandler, nThreads);
     }
 
+    //同步产品代码---20190619 by cx
     private <T> void importSheet(Workbook workbook,
                                  Boolean isMany,
                                  int columnNameRow,
                                  ExcelImportHandler<T> excelImportHandler,
                                  int nThreads) throws Exception {
         Date now = new Date();
-        nThreads = nThreads > 1 ? nThreads : 1;
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(nThreads, nThreads,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>());
-        Lock lock = new ReentrantLock();
-        List<Exception> runTimeExceptionList = new ArrayList<Exception>();
         // sheet data
         if (!isMany) {
             log.info("开始单sheet页导入");
@@ -154,7 +133,7 @@ public class ExcelImportService {
             if (sheet == null) {
                 return;
             }
-            importSheetData(sheet, columnNameRow, excelImportHandler, threadPoolExecutor, lock, runTimeExceptionList);
+            importSheetData(sheet, columnNameRow, excelImportHandler);
         }else{
             log.info("开始多sheet页导入");
             int activeSheetIndex = workbook.getNumberOfSheets();
@@ -164,18 +143,15 @@ public class ExcelImportService {
                     return;
                 }
                 log.info("开始导入sheet页 {} 的数据", sheet.getSheetName());
-                importSheetData(sheet, columnNameRow, excelImportHandler, threadPoolExecutor, lock, runTimeExceptionList);
+                importSheetData(sheet, columnNameRow, excelImportHandler);
             }
         }
-        log.debug("导入结束！共计{0}毫秒", System.currentTimeMillis()- now.getTime());
+        log.debug("导入结束！共计{}毫秒", System.currentTimeMillis()- now.getTime());
     }
 
     private <T> void importSheetData(Sheet sheet,
                                      int columnNameRow,
-                                     ExcelImportHandler<T> excelImportHandler,
-                                     ThreadPoolExecutor threadPoolExecutor,
-                                     Lock lock,
-                                     List<Exception> runTimeExceptionList) throws Exception {
+                                     ExcelImportHandler<T> excelImportHandler) throws Exception {
         if(columnNameRow < 0){
             columnNameRow = 0;
         }
@@ -203,82 +179,33 @@ public class ExcelImportService {
                 // 数据逐条校验
                 if(ExcelImportHandler.ONE_RECORD == excelImportHandler.getCheckFrequency()){
                     List<T> ts = Arrays.asList(entity);
-                    asyncCheckAndPersistenceAndClear(ts,excelImportHandler,threadPoolExecutor,lock,runTimeExceptionList);
+                    asyncCheckAndPersistenceAndClear(ts, excelImportHandler);
                 }else{
                     entities.add(entity);
                 }
             }
             if(ExcelImportHandler.ONE_RECORD != excelImportHandler.getCheckFrequency() && entities.size() >= excelImportHandler.checkBatchAndPersistenceSize()){
                 // 异步校验需要重新创建List，并将原容器清空
-                List entitiesCopy = new ArrayList(entities);
+                List<T> entitiesCopy = new ArrayList<>(entities);
                 entities.clear();
-                asyncCheckAndPersistenceAndClear(entitiesCopy, excelImportHandler,threadPoolExecutor,lock,runTimeExceptionList);
+                asyncCheckAndPersistenceAndClear(entitiesCopy, excelImportHandler);
             }
             rowIndex++;
         }
         // 尾数处理
         if(ExcelImportHandler.ONE_RECORD != excelImportHandler.getCheckFrequency() && entities.size() > 0){
             // 异步校验需要重新创建List，并将原容器清空
-            List entitiesCopy = new ArrayList(entities);
+            List<T> entitiesCopy = new ArrayList<>(entities);
             entities.clear();
-            asyncCheckAndPersistenceAndClear(entitiesCopy, excelImportHandler,threadPoolExecutor,lock,runTimeExceptionList);
+            asyncCheckAndPersistenceAndClear(entitiesCopy, excelImportHandler);
         }
-        threadPoolExecutor.shutdown();
-        while(true){
-            // 线程池线程执行完毕
-            if (threadPoolExecutor.isTerminated()) {
-                // 先判断有没有线程发生异常,若有则抛出
-                if (CollectionUtils.isNotEmpty(runTimeExceptionList)) {
-                    Exception exception = runTimeExceptionList.get(0);
-                    log.debug("导入错误：");
-                    throw exception;
-                }
-                if(CollectionUtils.isNotEmpty(entities)){
-                    checkAndPersistenceAndClear(entities, excelImportHandler);
-                }
-                log.debug("导入结束!");
-                break;
-            }
-        }
-        System.out.println(rowNumberCache.toString());
+
     }
 
     private <T> void asyncCheckAndPersistenceAndClear(List<T> entities,
-                                                      ExcelImportHandler<T> excelImportHandler,
-                                                      ThreadPoolExecutor threadPoolExecutor,
-                                                      Lock lock,
-                                                      List<Exception> runTimeExceptionList){
-        // 线程池任务队列容量超过2条时，主线程睡眠50ms，防止内存溢出
-        while(threadPoolExecutor.getQueue().size() > 2){
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if(!threadPoolExecutor.isShutdown()){
-            threadPoolExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    excelImportHandler.setThreadLocal();
-                    try{
-                        checkAndPersistenceAndClear(entities,excelImportHandler);
-                    } catch (Exception exception) {
-                        // 使用锁机制，防止runTimeExceptionList中放入多个异常信息
-                        if (lock.tryLock()) {
-                            try {
-                                threadPoolExecutor.shutdownNow();
-                                runTimeExceptionList.add(exception);
-                            } catch (Exception e) {
+                                                      ExcelImportHandler<T> excelImportHandler){
 
-                            } finally {
-                                lock.unlock();
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        checkAndPersistenceAndClear(entities,excelImportHandler);
     }
 
     private <T> void checkAndPersistenceAndClear(List<T> entities, ExcelImportHandler<T> excelImportHandler){
@@ -295,7 +222,7 @@ public class ExcelImportService {
      * @param setablePropertyNames
      * @param columnMap
      */
-    private <T> void initColumnMap(Row rowX, List<String> setablePropertyNames, Map<Integer,String> columnMap, ExcelImportHandler<T> excelImportHandler){
+    private <T> void initColumnMap(Row rowX, List<String> setablePropertyNames, Map<Integer,String> columnMap,ExcelImportHandler<T> excelImportHandler){
         for (int i = 0; i < setablePropertyNames.size(); i++) {
             // cell
             Cell cell = rowX.getCell(i);

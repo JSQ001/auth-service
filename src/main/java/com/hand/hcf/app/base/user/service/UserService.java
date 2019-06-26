@@ -5,20 +5,18 @@ package com.hand.hcf.app.base.user.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.SqlHelper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.base.attachment.AttachmentService;
-import com.hand.hcf.app.base.system.constant.CacheConstants;
 import com.hand.hcf.app.base.system.constant.Constants;
-import com.hand.hcf.app.base.system.constant.SyncLockPrefix;
 import com.hand.hcf.app.base.system.domain.PasswordHistory;
 import com.hand.hcf.app.base.system.enums.DeviceVerificationStatus;
 import com.hand.hcf.app.base.system.service.PasswordHistoryService;
 import com.hand.hcf.app.base.tenant.domain.Tenant;
 import com.hand.hcf.app.base.user.constant.AccountConstants;
-import com.hand.hcf.app.base.user.domain.SMSToken;
 import com.hand.hcf.app.base.user.domain.User;
 import com.hand.hcf.app.base.user.domain.UserLoginBind;
-import com.hand.hcf.app.base.user.dto.*;
-import com.hand.hcf.app.base.user.enums.SMSTokenType;
+import com.hand.hcf.app.base.user.dto.PasswordUpdateDTO;
+import com.hand.hcf.app.base.user.dto.UserDTO;
+import com.hand.hcf.app.base.user.dto.UserQO;
+import com.hand.hcf.app.base.user.dto.UserRoleListDTO;
 import com.hand.hcf.app.base.user.enums.UserLockedEnum;
 import com.hand.hcf.app.base.user.persistence.UserLoginBindMapper;
 import com.hand.hcf.app.base.user.persistence.UserMapper;
@@ -29,21 +27,18 @@ import com.hand.hcf.app.common.co.UserCO;
 import com.hand.hcf.app.common.enums.UserStatusEnum;
 import com.hand.hcf.app.core.domain.enumeration.LanguageEnum;
 import com.hand.hcf.app.core.exception.BizException;
-import com.hand.hcf.app.core.exception.core.ObjectNotFoundException;
 import com.hand.hcf.app.core.security.domain.Authority;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -498,7 +493,7 @@ public class UserService extends BaseService<UserMapper, User> {
             this.changeLogin(user, email, mobile);
             user.setVersionNumber(oldUser.getVersionNumber());
             user.setLogin(org.springframework.util.StringUtils.hasText(user.getLogin())
-                    ? user.getLogin() : user.getMobile());
+                    ? user.getLogin() : user.getLogin());
             user.setActivated(user.getActivated() != null ? user.getActivated() : oldUser.getActivated());
         }
 

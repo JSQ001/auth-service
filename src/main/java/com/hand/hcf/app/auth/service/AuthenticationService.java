@@ -3,14 +3,12 @@ package com.hand.hcf.app.auth.service;
 import com.hand.hcf.app.auth.config.AppCenterProperties;
 import com.hand.hcf.app.auth.domain.enumeration.Function;
 import com.hand.hcf.app.auth.dto.AuthenticationCode;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author qingsheng.chen

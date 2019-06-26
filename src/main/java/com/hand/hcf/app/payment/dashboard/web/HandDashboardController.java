@@ -1,18 +1,9 @@
 package com.hand.hcf.app.payment.dashboard.web;
 
-import com.hand.hcf.app.core.util.DateUtil;
-import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.payment.dashboard.dto.PaymentSituationDTO;
 import com.hand.hcf.app.payment.dashboard.service.HandDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 
 @RestController
 @RequestMapping("/api/dashboard")

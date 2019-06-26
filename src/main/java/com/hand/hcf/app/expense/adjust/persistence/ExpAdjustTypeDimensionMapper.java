@@ -1,7 +1,7 @@
 package com.hand.hcf.app.expense.adjust.persistence;
 
-import com.hand.hcf.app.expense.adjust.domain.ExpAdjustTypeDimension;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.expense.adjust.domain.ExpAdjustTypeDimension;
 
 /**
  * 费用调整单关联维度(ExpAdjustTypeDimension)表Mapper接口

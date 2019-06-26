@@ -5,7 +5,6 @@ import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.invoice.domain.InvoiceType;
 import com.hand.hcf.app.expense.invoice.dto.InvoiceTypeDTO;
 import com.hand.hcf.app.expense.invoice.service.InvoiceTypeService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

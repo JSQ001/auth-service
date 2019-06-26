@@ -3,7 +3,6 @@ package com.hand.hcf.app.expense.application.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 import com.hand.hcf.app.common.co.*;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.exception.BizException;
@@ -46,12 +45,10 @@ import com.hand.hcf.app.expense.type.service.ExpenseTypeService;
 import com.hand.hcf.app.expense.type.web.dto.ExpenseFieldDTO;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
-
 import lombok.extern.slf4j.Slf4j;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -65,6 +62,8 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+//import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 
 /**
  * <p> </p>

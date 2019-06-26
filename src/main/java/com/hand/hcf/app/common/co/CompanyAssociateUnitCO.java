@@ -1,6 +1,5 @@
 package com.hand.hcf.app.common.co;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -194,87 +194,6 @@ public class ExcelDynamicImportService {
                 });*/
     }
 
-    /**
-     * 取消导入
-     *
-     * @param transactionId
-     * @return
-     */
-    public Boolean deleteImportData(String transactionId) {
-        return excelTemplateTempService.delete(new EntityWrapper<ExcelTemplateTempDomain>()
-                .eq("batch_number", transactionId));
-    }
-
-    /**
-     * 导出错误信息
-     */
-    /*public byte[] exportFailedData(String transactionId) {
-        List<ExcelTemplateTempDomain> excelTemplateTempDomains = excelTemplateTempService.selectList(
-                new EntityWrapper<ExcelTemplateTempDomain>()
-                        .eq("batch_number", transactionId)
-                        .eq("error_flag", 1));
-        InputStream in = null;
-        ByteArrayOutputStream bos = null;
-        XSSFWorkbook workbook = null;
-        try {
-            in = StreamUtil.getResourceStream(ExcelTemplateImportCode.ERROR_TEMPLATE_PATH);
-            workbook = new XSSFWorkbook(in);
-            XSSFSheet sheet = workbook.getSheetAt(0);
-            int startRow = ExcelTemplateImportCode.EXCEL_BASEROW_ERROR;
-            Row row = null;
-            Cell cell = null;
-            for (ExcelTemplateTempDomain importDTO : excelTemplateTempDomains) {
-                row = sheet.createRow(startRow++);
-                cell = row.createCell(ExcelTemplateImportCode.ROW_NUMBER);
-                cell.setCellValue(importDTO.getRowNumber());
-                //其他字段
-                cell = row.createCell(ExcelTemplateImportCode.REMARK_ERROR);
-                cell.setCellValue(importDTO.getFieldCode());
-                cell = row.createCell(ExcelTemplateImportCode.COMPANY_CODE_ERROR);
-                cell.setCellValue(importDTO.getFieldName());
-            }
-            bos = new ByteArrayOutputStream();
-            workbook.write(bos);
-            bos.flush();
-            workbook.close();
-            return bos.toByteArray();
-        } catch (Exception e) {
-            throw new BizException(RespCode.READ_FILE_FAILED);
-        } finally {
-            try {
-                if (bos != null) {
-                    bos.close();
-                }
-                if (workbook != null) {
-                    workbook.close();
-                }
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e) {
-                throw new BizException(RespCode.READ_FILE_FAILED);
-            }
-        }
-    }*/
-    @Transactional
-    public Boolean confirmImport(String transactionID) {
-       /* List<ExcelTemplateTempDomain> lines = excelTemplateTempService.selectList(new EntityWrapper<ExcelTemplateTempDomain>()
-                .eq(transactionID != null,"batch_number",transactionID)
-                .eq("error_flag",0));
-        GeneralLedgerWorkOrderHead head = this.selectById(lines.get(0).getWorkOrderHeaderId());
-        if (head == null) {
-            throw new BizException(RespCode.SYS_ID_NULL);
-        }
-        lines.forEach(line -> {
-            AtomicReference<BigDecimal> amount = new AtomicReference<>(head.getAmount());
-            head.setAmount(amount.updateAndGet(v -> v.add(line.getEnteredAmountDr())));
-        });
-        this.updateById(head);
-        excelTemplateTempService.confirmImport(transactionID);
-        excelTemplateTempService.delete(new EntityWrapper<ExcelTemplateTempDomain>().eq("batch_number",transactionID));*/
-        return true;
-    }
-
     public void dataHandle(String batchNumber, Long expenseTypeId) throws InvocationTargetException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException {
         //临时表中数据处理
         List<ExcelTemplateTempDomain> excelTemplateTempDomains = excelTemplateTempService.selectList(
@@ -313,7 +232,7 @@ public class ExcelDynamicImportService {
                         } else {
                             importDTO.setExpenseTypeId(expenseType.getId());
                         }
-                    }else {
+                    } else {
                         importDTO.setExpenseTypeId(expenseType.getId());
                     }
                     excelTemplateTempService.updateById(importDTO);

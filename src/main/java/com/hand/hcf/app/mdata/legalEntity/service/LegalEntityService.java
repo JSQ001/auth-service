@@ -2,7 +2,6 @@ package com.hand.hcf.app.mdata.legalEntity.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-/*import com.hand.hcf.app.client.attachment.AttachmentCO;*/
 import com.baomidou.mybatisplus.toolkit.StringUtils;
 import com.hand.hcf.app.common.co.AttachmentCO;
 import com.hand.hcf.app.common.co.BasicCO;
@@ -11,7 +10,6 @@ import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.core.util.DataAuthorityUtil;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
 import com.hand.hcf.app.mdata.company.domain.Company;
@@ -31,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+/*import com.hand.hcf.app.client.attachment.AttachmentCO;*/
 
 /**
  * 法人实体业务逻辑层

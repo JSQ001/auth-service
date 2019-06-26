@@ -3,7 +3,6 @@ package com.hand.hcf.app.base.userRole.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.base.userRole.domain.ContentFunctionRelation;
 import com.hand.hcf.app.base.userRole.domain.FunctionList;
-import com.hand.hcf.app.base.userRole.domain.PageList;
 import com.hand.hcf.app.base.userRole.service.ContentFunctionRelationService;
 import com.hand.hcf.app.core.util.PageUtil;
 import org.springframework.data.domain.Pageable;

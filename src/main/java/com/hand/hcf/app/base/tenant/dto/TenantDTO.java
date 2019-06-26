@@ -1,6 +1,5 @@
 package com.hand.hcf.app.base.tenant.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

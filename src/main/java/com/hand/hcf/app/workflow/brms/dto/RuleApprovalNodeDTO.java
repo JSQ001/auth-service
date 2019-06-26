@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.hand.hcf.app.workflow.brms.domain.DroolsRuleDetailResult;
-import com.hand.hcf.app.workflow.brms.domain.RuleNoticeAction;
 import com.hand.hcf.app.workflow.brms.enums.RuleApprovalEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

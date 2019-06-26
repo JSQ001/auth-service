@@ -8,13 +8,16 @@ import com.hand.hcf.app.payment.service.CashTransactionDataService;
 import com.hand.hcf.app.payment.web.dto.AmountAndDocumentNumberDTO;
 import com.hand.hcf.app.payment.web.dto.CashDataPublicReportHeaderDTO;
 import com.hand.hcf.app.payment.web.dto.CashTransactionDataWebDTO;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;

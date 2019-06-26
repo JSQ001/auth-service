@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.taxreimburse.persistence.ExpBankFlowMapper">
+
+	<update id="updateBankFlow" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+		update
+		      exp_bank_flow
+		  set blend_status = '1'
+		where company_id = #{companyId}
+		  and currency_code = #{currencyCode}
+	</update>
+
+	<update id="updateStatusByGroup" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+		update
+		      exp_bank_flow
+		  set status = '1',
+		      exp_reimburse_header_id = #{taxReimburseHeadId}
+		where company_id = #{companyId}
+		  and currency_code = #{currencyCode}
+		  and blend_status = '1'
+	</update>
+
+	<update id="updateBankFlowByHeadId" parameterType = "com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow">
+		update
+		      exp_bank_flow
+		  set status = '0',
+		      exp_reimburse_header_id = null
+		where  exp_reimburse_header_id = #{taxReimburseHeadId}
+	</update>
+</mapper>

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.domain.Domain;
-import com.hand.hcf.app.core.domain.DomainI18n;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

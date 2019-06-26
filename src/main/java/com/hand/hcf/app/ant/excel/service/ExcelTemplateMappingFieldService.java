@@ -21,6 +21,7 @@ import com.hand.hcf.app.expense.type.domain.ExpenseTypeExpandField;
 import com.hand.hcf.app.expense.type.persistence.ExpenseTypeExpandFieldMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +136,32 @@ public class ExcelTemplateMappingFieldService extends BaseService<ExcelTemplateM
         });
         return excelTemplateFieldList;
 
+    }
+
+    /**
+     * 更新启用标志
+     * @param id
+     * @param enableFlag
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateEnableFlag(Long id, Boolean enableFlag) {
+        ExcelTemplateMappingField excelTemplateMappingField = this.selectById(id);
+        excelTemplateMappingField.setEnableFlag(enableFlag == null ? false : enableFlag);
+        return this.updateById(excelTemplateMappingField);
+    }
+
+    /**
+     * 更新必输标志
+     * @param id
+     * @param requiredFlag
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateRequiredFlag(Long id, Boolean requiredFlag) {
+        ExcelTemplateMappingField excelTemplateMappingField = this.selectById(id);
+        excelTemplateMappingField.setRequiredFlag(requiredFlag == null ? false : requiredFlag);
+        return this.updateById(excelTemplateMappingField);
     }
 
 }

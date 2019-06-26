@@ -23,7 +23,6 @@ import com.hand.hcf.app.mdata.department.service.DepartmentGroupService;
 import com.hand.hcf.app.mdata.department.service.DepartmentService;
 import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
 import com.hand.hcf.app.mdata.utils.RespCode;
-
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,12 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**

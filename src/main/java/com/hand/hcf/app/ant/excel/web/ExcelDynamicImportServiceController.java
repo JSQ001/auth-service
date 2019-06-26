@@ -5,7 +5,6 @@ import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.web.dto.ImportResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,38 +58,10 @@ public class ExcelDynamicImportServiceController {
     }
 
     /**
-     * @param transactionId
-     * @return
-     * @api {DELETE} /api/excel/import/delete/{transactionId} 取消导入
-     * 删除导入的数据 点击取消时删除当前导入的数据（删除临时表数据)
-     */
-    @DeleteMapping(value = "/import/delete/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity deleteImportData(@PathVariable("transactionId") String transactionId) {
-        return ResponseEntity.ok(excelDynamicImportService.deleteImportData(transactionId));
-    }
-
-    /**
-     * @api {GET} /api/excel/import/error/export/{transactionId} 导出错误信息
-     * @apiGroup ResponsibilityCenter
-     * @apiParam {String} transactionId 批次Id
-     * @apiSuccess {byte[]} byte excel文件
-     */
-    /*@GetMapping("/import/error/export/{transactionId}")
-    public ResponseEntity errorExport(@PathVariable("transactionId") String transactionId) throws IOException {
-        return ResponseEntity.ok(excelDynamicImportService.exportFailedData(transactionId));
-    }*/
-
-    /**
-     * 点击确定时 把临时表数据新增到正式表中
      *
-     * @param transactionID
+     * @param transactionOid
      * @return
      */
-    @PostMapping("/import/new/confirm/{transactionID}")
-    public ResponseEntity confirmImport(@PathVariable("transactionID") String transactionID) {
-        return ResponseEntity.ok(excelDynamicImportService.confirmImport(transactionID));
-    }
-
     @GetMapping("/import/query/result/{transactionOid}")
     public ResponseEntity queryResultInfo(@PathVariable("transactionOid") String transactionOid) {
         ImportResultDTO importResultDTO = excelDynamicImportService.queryImportResultInfo(transactionOid);

@@ -3,19 +3,11 @@ package com.hand.hcf.app.core.handler;
 import com.baomidou.mybatisplus.entity.TableInfo;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.mapper.MetaObjectHandler;
-import com.baomidou.mybatisplus.toolkit.GlobalConfigUtils;
-import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.baomidou.mybatisplus.toolkit.MapUtils;
-import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.baomidou.mybatisplus.toolkit.TableInfoHelper;
+import com.baomidou.mybatisplus.toolkit.*;
 import com.hand.hcf.app.core.util.ReflectHelper;
 import com.hand.hcf.app.core.util.ReflectionUtil;
 import org.apache.ibatis.executor.ErrorContext;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
-import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.Configuration;
@@ -27,11 +19,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 源自 MybatisDefaultParameterHandler 类

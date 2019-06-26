@@ -1,7 +1,7 @@
 package com.hand.hcf.app.expense.invoice.persistence;
 
-import com.hand.hcf.app.expense.invoice.domain.InvoiceBagNoScan;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
+import com.hand.hcf.app.expense.invoice.domain.InvoiceBagNoScan;
 
 /**
  * @description 发票袋号码扫描(InvoiceBagNoScan)表Mapper接口

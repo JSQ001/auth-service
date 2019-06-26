@@ -5,7 +5,6 @@ import com.hand.hcf.app.common.co.CompanyCO;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportTypeCompany;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeCompanyService;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;

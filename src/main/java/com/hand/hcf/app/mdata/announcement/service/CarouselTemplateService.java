@@ -7,7 +7,6 @@ import com.hand.hcf.app.mdata.announcement.domain.CarouselTemplate;
 import com.hand.hcf.app.mdata.announcement.dto.CarouselTemplateDTO;
 import com.hand.hcf.app.mdata.announcement.enums.CarouselTemplateTypeEnum;
 import com.hand.hcf.app.mdata.announcement.persistence.CarouselTemplateMapper;
-import com.hand.hcf.app.core.util.LoginInformationUtil;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

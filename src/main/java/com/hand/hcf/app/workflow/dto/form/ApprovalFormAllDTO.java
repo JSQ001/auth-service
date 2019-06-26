@@ -1,7 +1,6 @@
 package com.hand.hcf.app.workflow.dto.form;
 
 import com.hand.hcf.app.workflow.domain.ApprovalForm;
-import com.hand.hcf.app.workflow.domain.WorkFlowDocumentRef;
 import lombok.*;
 
 /**

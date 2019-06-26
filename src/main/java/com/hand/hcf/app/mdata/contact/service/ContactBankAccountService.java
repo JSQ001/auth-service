@@ -18,15 +18,8 @@ import com.hand.hcf.app.mdata.contact.dto.ContactBankAccountDTO;
 import com.hand.hcf.app.mdata.contact.dto.ContactDTO;
 import com.hand.hcf.app.mdata.contact.persistence.ContactBankAccountMapper;
 import com.hand.hcf.app.mdata.contact.utils.UserInfoEncryptUtil;
-import com.hand.hcf.app.mdata.department.domain.Department;
-import com.hand.hcf.app.mdata.department.domain.enums.DepartmentTypeEnum;
-import com.hand.hcf.app.mdata.department.service.DepartmentService;
-import com.hand.hcf.app.mdata.department.service.DepartmentUserService;
-import com.hand.hcf.app.mdata.externalApi.HcfOrganizationInterface;
-import com.hand.hcf.app.mdata.legalEntity.dto.LegalEntityDTO;
 import com.hand.hcf.app.mdata.legalEntity.service.LegalEntityService;
 import com.hand.hcf.app.mdata.utils.RespCode;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

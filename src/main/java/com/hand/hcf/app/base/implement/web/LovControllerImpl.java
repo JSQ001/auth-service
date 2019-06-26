@@ -2,7 +2,6 @@ package com.hand.hcf.app.base.implement.web;
 
 import com.hand.hcf.app.base.lov.service.LovService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
