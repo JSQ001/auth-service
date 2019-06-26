@@ -54,6 +54,16 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
         }else {
             withholdingReimburse.setDutyPersonName(OrgInformationUtil.getUser().getUsername());
         }
+
+        // 设置附件信息
+        if (StringUtils.isNotEmpty(withholdingReimburse.getAttachmentOid())){
+            String[] strings = withholdingReimburse.getAttachmentOid().split(",");
+
+            List<String> attachmentOidList = Arrays.asList(strings);
+            List<AttachmentCO> attachments = organizationService.listAttachmentsByOids(attachmentOidList);
+            withholdingReimburse.setAttachments(attachments);
+            System.out.println(attachments);
+        }
         return withholdingReimburse;
     }
 
@@ -94,14 +104,6 @@ public class WithholdingReimburseService extends BaseService<WithholdingReimburs
         withholdingReimburse.setDocumentNumber(commonService.getCoding(ExpenseDocumentTypeEnum.EXPENSE_ACCRUAL.getCategory(),OrgInformationUtil.getCurrentCompanyId(),""));
         withholdingReimburse.setStatus(DocumentOperationEnum.GENERATE.getId().toString());
         withholdingReimburse.setAmount(BigDecimal.ZERO);
-
-        // 设置附件信息
-        if (StringUtils.isNotEmpty(withholdingReimburse.getAttachmentOid())){
-            String[] strings = withholdingReimburse.getAttachmentOid().split(",");
-            List<String> attachmentOidList = Arrays.asList(strings);
-            List<AttachmentCO> attachments = organizationService.listAttachmentsByOids(attachmentOidList);
-            withholdingReimburse.setAttachments(attachments);
-        }
 
         if(withholdingReimburse.getId()!= null){
             // 更新的时候，设置最后更新时间
