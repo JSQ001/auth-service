@@ -33,13 +33,19 @@ public class ExcelTemplateMappingField extends Domain {
     /**
      * 映射模板id
      */
-    @TableField(value = "id")
-    private Long id;
+    @TableField(value = "mapping_template_id")
+    private Long mappingTemplateId;
+
+    /**
+     * 字段代码
+     */
+    @TableField(value = "field_code")
+    private String fieldCode;
 
     /**
      * 字段名称
      */
-    @TableField(value="field_name")
+    @TableField(value = "field_name")
     private String fieldName;
 
     /**
@@ -49,21 +55,34 @@ public class ExcelTemplateMappingField extends Domain {
     private Boolean requiredFlag;
 
     /**
-     * 取值来源
+     * 是否启用
+     */
+    @TableField(value = "enable_flag")
+    private Boolean enableFlag;
+
+    /**
+     * 取值逻辑
      */
     @TableField(value="value_source")
     private String valueSource;
 
     /**
-     * 模板名称
+     * 取值逻辑名称
      */
-    @TableField(value="template_name")
-    private String templateName;
+    @TableField(exist = false)
+    private String valueSourceName;
 
     /**
      * 取值字段
      */
     @TableField(value="value_field")
     private String valueField;
+
+    /**
+     * 取值字段名称
+     */
+    @TableField(value="value_field_name")
+    private String valueFieldName;
+
 
 }

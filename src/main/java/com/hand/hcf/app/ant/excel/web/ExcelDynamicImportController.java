@@ -143,7 +143,7 @@ public class ExcelDynamicImportController {
                                                          @RequestParam(value = "page", defaultValue = "0") int page,
                                                          @RequestParam(value = "size", defaultValue = "10") int size) {
         Page queryPage = PageUtil.getPage(page, size);
-        List<ExcelTemplateMapping> excelTemplateMappingFields = excelTemplateMappingService.pageExcelTemplateMappingByCond(expenseTypeId,expenseAttribute,queryPage);
+        List<ExcelTemplateMapping> excelTemplateMappingFields = excelTemplateMappingService.pageExcelTemplateMappingByCond(expenseTypeId, expenseAttribute, queryPage);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(queryPage);
         return new ResponseEntity<>(excelTemplateMappingFields, httpHeaders, HttpStatus.OK);
     }
@@ -161,10 +161,11 @@ public class ExcelDynamicImportController {
 
     /**
      * 删除底稿映射模板
+     *
      * @param id
      */
     @DeleteMapping("/mapping/field/delete/{id}")
-    public void deleteExcelTemplateMapping(@PathVariable Long id){
+    public void deleteExcelTemplateMapping(@PathVariable Long id) {
         excelTemplateMappingService.deleteExcelTemplateMapping(id);
     }
 
@@ -184,32 +185,53 @@ public class ExcelDynamicImportController {
     /**
      * 映射字段保存
      *
-     * @param excelTemplateMappingFields
+     * @param excelTemplateMappingField
      * @param id
      * @return
      */
     @PostMapping("/{id}/template/mapping/field")
-    public ResponseEntity<List<ExcelTemplateMappingField>> saveExcelTemplateMappingInfo(@RequestBody List<ExcelTemplateMappingField> excelTemplateMappingFields,
-                                                                                        @PathVariable("id") Long id) {
-        for (int i = 0; i < excelTemplateMappingFields.size(); i++) {
-            excelTemplateMappingFieldService.saveExcelTemplateInfo(excelTemplateMappingFields.get(i), id);
-        }
-        return ResponseEntity.ok(excelTemplateMappingFields);
+    public ResponseEntity<ExcelTemplateMappingField> saveExcelTemplateMappingInfo(@RequestBody ExcelTemplateMappingField excelTemplateMappingField,
+                                                                                  @PathVariable("id") Long id) {
+
+        return ResponseEntity.ok(excelTemplateMappingFieldService.saveExcelTemplateInfo(excelTemplateMappingField, id));
+
+    }
+
+    /**
+     * 删除映射字段
+     *
+     * @param id
+     */
+    @DeleteMapping("/{id}/template/mapping/field/delete")
+    public void deleteExcelTemplateMappingInfo(@PathVariable Long id) {
+        excelTemplateMappingFieldService.deleteExcelTemplateMappingField(id);
     }
 
     /**
      * 映射字段取值查询
      */
-    @GetMapping("/{id}/mapping/field/query")
+    @GetMapping("/mapping/field/query")
     public ResponseEntity<List<ExcelTemplateMappingDTO>> getMappingFieldByCond(
-            @PathVariable("id") Long id,
+            @RequestParam(value = "id", required = false) Long id,
             Pageable pageable) throws URISyntaxException {
         Page page = PageUtil.getPage(pageable);
-       List<ExcelTemplateMappingDTO> list = excelTemplateMappingFieldService.getMappingFieldByCond(id, page);
-        HttpHeaders headers = new HttpHeaders();
-        PageUtil.getTotalHeader(page);
+        List<ExcelTemplateMappingDTO> list = excelTemplateMappingFieldService.getMappingFieldByCond(id, page);
+        HttpHeaders headers = PageUtil.getTotalHeader(page);
         return new ResponseEntity(list, headers, HttpStatus.OK);
     }
 
+    /**
+     * 查询映射页面模板字段
+     */
+    @GetMapping("/template/fields/query")
+    public ResponseEntity<List<ExcelTemplateField>> queryTemplateField(
+            @RequestParam(value = "id", required = false) Long expenseTypeId,
+            Pageable pageable) throws URISyntaxException {
+        Page page = PageUtil.getPage(pageable);
+        List<ExcelTemplateField> list = excelTemplateMappingFieldService.getTemplateFieldByCond(expenseTypeId, page);
+        HttpHeaders headers = PageUtil.getTotalHeader(page);
+        return new ResponseEntity(list, headers, HttpStatus.OK);
+
+    }
 
 }

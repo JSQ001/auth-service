@@ -31,6 +31,12 @@ public class ExcelTemplateField extends Domain {
     private String fieldName;
 
     /**
+     * 模板字段代码
+     */
+    @TableField(value = "field_code")
+    private String fieldCode;
+
+    /**
      * 备注
      */
     @TableField(value="remark")

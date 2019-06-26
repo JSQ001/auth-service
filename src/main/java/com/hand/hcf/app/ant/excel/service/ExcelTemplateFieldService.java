@@ -22,7 +22,7 @@ import java.util.List;
 public class ExcelTemplateFieldService extends BaseService<ExcelTemplateFieldMapper, ExcelTemplateField> {
 
     @Autowired
-    ExcelTemplateFieldMapper excelTemplateMapperField;
+    private ExcelTemplateFieldMapper excelTemplateMapperField;
 
     public List<ExcelTemplateField> queryExcelTemplateField(Long excelTemplateId) {
 
