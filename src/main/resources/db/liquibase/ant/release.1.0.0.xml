@@ -46,7 +46,7 @@
         <column name="benefit_dept_id" type="bigint" remarks="受益部门"/>
         <column name="adress" type="varchar(200)" remarks="区域"/>
         <column name="detail" type="varchar(200)" remarks="明细"/>
-        <column name="from" type="varchar(50)" remarks="来往"/>
+        <column name="source" type="varchar(50)" remarks="来往"/>
         <column name="project" type="varchar(50)" remarks="项目"/>
         <column name="product" type="varchar(50)" remarks="产品"/>
         <column name="industry" type="varchar(50)" remarks="行业"/>
@@ -208,5 +208,128 @@
         </createTable>
 
     </changeSet>-->
+
+    <changeSet id="2019062714306" author="jsq">
+        <createTable tableName="ant_invoice_header" remarks="发票头表">
+            <column name="id" type="bigint" remarks="发票头表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_ant_invoice_header_id"/>
+            </column>
+            <column name="set_of_book_id" type="bigint" remarks="账套ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" remarks="租户ID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_type" type="varchar(20)" remarks="发票类型">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_code" type="varchar(20)" remarks="发票代码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="invoice_number" type="varchar(20)" remarks="发票号码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="buyer_OU" type="varchar(20)" remarks="购方机构OU">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_tax_total_amount" type="decimal" remarks="价税合计金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(20)" remarks="币种"/>
+
+            <column name="make_invoice_date" type="timestamp" defaultValue="${now}" remarks="开票日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="take_invoice_date" type="timestamp" remarks="收票日期"/>
+
+            <column name="seller_company_id" type="bigint" remarks="销方公司ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seller_tax_number" type="varchar(20)" remarks="销售方税号"/>
+            <column name="seller_company_address" type="varchar(200)" remarks="销售方公司地址"/>
+            <column name="seller_company_phone" type="varchar(50)" remarks="销售方公司电话"/>
+            <column name="seller_bank_name" type="varchar(50)" remarks="销售方开户行名称"/>
+            <column name="seller_bank_account" type="varchar(50)" remarks="销方银行账号"/>
+
+            <column name="buyer_header_info" type="varchar(100)" remarks="购方抬头信息">
+                <constraints nullable="false"/>
+            </column>
+            <column name="buyer_tax_number" type="varchar(20)" remarks="购方税号"/>
+            <column name="buyer_company_address" type="varchar(200)" remarks="购方公司地址"/>
+            <column name="buyer_company_phone" type="varchar(50)" remarks="购方公司电话"/>
+            <column name="buyer_bank_name" type="varchar(50)" remarks="购方开户行名称"/>
+            <column name="buyer_bank_account" type="varchar(50)" remarks="购方银行账号"/>
+
+            <column name="comment" type="varchar(2000)" remarks="摘要"/>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="ant_invoice_line" remarks="发票头行表">
+            <column name="id" type="bigint" remarks="发票行表ID">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_ant_invoice_header_line_id"/>
+            </column>
+            <column name="header_id" type="bigint" remarks="发票头ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line_number" type="int" remarks="发票行号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_tax_total_amount" type="decimal" remarks="价税合计金额">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax" type="varchar(20)" remarks="税率">
+                <constraints nullable="false"/>
+            </column>
+            <column name="no_tax_amount" type="decimal" remarks="不含税金额"/>
+            <column name="goods_name" type="varchar(200)" remarks="货物或应税劳务、服务名称"/>
+            <column name="specification" type="varchar(20)" remarks="规格型号"/>
+            <column name="unit" type="varchar(20)" remarks="单位"/>
+            <column name="quantity" type="int" remarks="数量"/>
+            <column name="price" type="decimal" remarks="单价"/>
+
+            <column name="version_number" type="int" remarks="版本号">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false" remarks="删除标志">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValue="${now}" remarks="创建日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="bigint" remarks="创建用户ID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_date" type="timestamp" defaultValue="${now}" remarks="最后更新日期">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="bigint" remarks="最后更新用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

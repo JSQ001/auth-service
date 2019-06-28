@@ -152,7 +152,7 @@ public class ExpenseCategory extends Domain {
      * 来往
      * */
     @ApiModelProperty(value = "来往")
-    @TableField(value = "from")
+    @TableField(value = "source")
     private String from;
 
     /*

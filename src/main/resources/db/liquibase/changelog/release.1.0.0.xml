@@ -4,7 +4,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet id="201807181107370" author="admin">
+<!--    <changeSet id="201807181107370" author="admin">
         <createTable tableName="oauth_access_token" remarks="">
             <column name="token_id" type="varchar(255)" remarks="">
                 <constraints nullable="true"/>
@@ -133,5 +133,5 @@
             INSERT INTO oauth_client_details(client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('ArtemisWeb', NULL, '{noop}nLCnwdIhizWbykHyuZM6TpQDd7KwK9IXDK8LGsa7SOW', 'read,write', 'password,refresh_token', NULL, 'ROLE_ADMIN,ROLE_USER', 7200, NULL, NULL, NULL);
             INSERT INTO oauth_client_details(client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('implement-integration', NULL, '{noop}K2QzPPz3fqQNEnsbwupD1b1IDPPg0RfkdWalXysL7wd', 'read,write', 'client_credentials', NULL, 'ROLE_INTEGRATION_CLIENTS', 7200, NULL, NULL, NULL);
         </sql>
-    </changeSet>
+    </changeSet>-->
 </databaseChangeLog>
