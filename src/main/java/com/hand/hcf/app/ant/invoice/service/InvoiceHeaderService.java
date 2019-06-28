@@ -17,6 +17,9 @@ public class InvoiceHeaderService extends BaseService<InvoiceHeaderMapper,Invoic
     @Autowired
     private InvoiceHeaderMapper invoiceHeaderMapper;
 
+    @Autowired
+    private AntInvoiceLineService invoiceLineService;
+
     /*
     * 分页条件查询发票头信息
      */
@@ -26,10 +29,10 @@ public class InvoiceHeaderService extends BaseService<InvoiceHeaderMapper,Invoic
     }
 
     public InvoiceHeader myInsertOrUpdate(InvoiceHeader invoiceHeader){
-
+        invoiceHeader.getInvoiceLines().forEach(item->item.setHeaderId(invoiceHeader.getId()));
         if(this.insertOrUpdate(invoiceHeader)){
             // 插入行表
-
+            invoiceLineService.insertBatch(invoiceHeader.getInvoiceLines());
         }
         return invoiceHeader;
     }

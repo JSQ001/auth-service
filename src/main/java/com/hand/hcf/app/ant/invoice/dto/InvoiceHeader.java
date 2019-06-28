@@ -147,7 +147,7 @@ public class InvoiceHeader extends Domain {
      * 销售方公司电话
      */
     @ApiModelProperty(value = "销售方公司电话")
-    @TableField(value = "seller_company_address")
+    @TableField(value = "seller_company_phone")
     private String sellerCompanyPhone;
 
     /**
