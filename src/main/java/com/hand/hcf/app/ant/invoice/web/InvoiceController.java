@@ -29,11 +29,10 @@ public class InvoiceController {
     @GetMapping("/header/query/page")
     @ApiOperation(value = "发票头分页查询", notes = "发票头分页查询 开发:jsq")
     ResponseEntity<List<InvoiceHeader>> queryHeaderPages(
-            @RequestParam String categoryType, Pageable pageable
-
-    ){
+            @RequestParam(required = false ) Long id,
+            Pageable pageable){
         Page page = PageUtil.getPage(pageable);
-        List<InvoiceHeader> list = invoiceHeaderService.queryHeaderPages(page);
+        List<InvoiceHeader> list = invoiceHeaderService.queryHeaderPages(id,page);
         HttpHeaders httpHeaders = PageUtil.generateHttpHeaders(page, "/api/expense/category/query/page");
         return new ResponseEntity<List<InvoiceHeader>>(list, httpHeaders, HttpStatus.OK);
     }
@@ -48,18 +47,12 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceHeaderService.myInsertOrUpdate(invoiceHeader));
     }
 
-      /*
-    @GetMapping("/{id}")
-    @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
-    ResponseEntity<WithholdingReimburse> getWithholdingReimburseById(@PathVariable Long id){
-        return ResponseEntity.ok(withholdingReimburseService.selectDocumentById(id));
-    }
 
 
-    @DeleteMapping("/delete/{id}")
-    @ApiOperation(value = "根据ID查询", notes = "根据ID查询 开发:jsq")
+
+    @DeleteMapping("/header/delete/{id}")
+    @ApiOperation(value = "删除发票", notes = "删除发票 开发:jsq")
     ResponseEntity<Boolean> deleteWithholdingReimburse(@PathVariable Long id){
-        return ResponseEntity.ok(withholdingReimburseService.deleteById(id));
+        return ResponseEntity.ok(invoiceHeaderService.deleteInvoiceById(id));
     }
-*/
 }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.hcf.app.ant.invoice.persistence.InvoiceHeaderMapper">
+
+    <resultMap id="AntInvoiceHeader" type="com.hand.hcf.app.ant.invoice.dto.InvoiceHeader">
+        <id column="id" property="id"/>
+        <result column="set_of_book_id" property="setOfBookId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="invoice_type" property="invoiceType"/>
+        <result column="invoice_code" property="invoiceCode"/>
+        <result column="invoice_number" property="invoiceNumber"/>
+        <result column="buyer_OU" property="buyerOU"/>
+        <result column="buyerOUName" property="buyerOUName"/>
+        <result column="price_tax_total_amount" property="priceTaxTotalAmount"/>
+        <result column="currency" property="currency"/>
+        <result column="make_invoice_date" property="makeInvoiceDate"/>
+        <result column="seller_company_id" property="sellerCompanyId"/>
+        <result column="sellerCompanyName" property="sellerCompanyName"/>
+        <result column="seller_tax_number" property="sellerTaxNumber"/>
+        <result column="seller_company_address" property="sellerCompanyAddress"/>
+        <result column="seller_company_phone" property="sellerCompanyPhone"/>
+        <result column="seller_bank_name" property="sellerBankName"/>
+        <result column="seller_bank_account" property="sellerBankAccount"/>
+        <result column="buyer_header_info" property="buyerHeaderInfo"/>
+        <result column="buyer_tax_number" property="buyerTaxNumber"/>
+        <result column="buyer_company_address" property="buyerCompanyAddress"/>
+        <result column="buyer_company_phone" property="buyerCompanyPhone"/>
+        <result column="buyer_bank_name" property="buyerBankName"/>
+        <result column="buyer_bank_account" property="buyerBankAccount"/>
+        <result column="comment" property="comment"/>
+        <result column="version_number" property="versionNumber"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+    </resultMap>
+
+    <resultMap id="AntInvoiceHeaderLine" extends="AntInvoiceHeader" type="com.hand.hcf.app.ant.invoice.dto.InvoiceHeader">
+        <collection property="invoiceLines" ofType="com.hand.hcf.app.ant.invoice.dto.InvoiceLine">
+            <id column="lineId" property="id"/>
+            <result column="header_id" property="headerId"/>
+            <result column="line_number" property="lineNumber"/>
+            <result column="line_price_tax_total_amount" property="priceTaxTotalAmount"/>
+            <result column="tax" property="taxRate"/>
+            <result column="no_tax_amount" property="noTaxAmount"/>
+            <result column="goods_name" property="goodsName"/>
+            <result column="specification" property="specification"/>
+            <result column="unit" property="unit"/>
+            <result column="quantity" property="quantity"/>
+            <result column="price" property="price"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectHeaderLines" resultMap="AntInvoiceHeaderLine">
+        select
+          h.*,
+          l.id as lineId,
+          l.header_id,
+          l.line_number,
+          l.price_tax_total_amount as line_price_tax_total_amount,
+          l.goods_name,
+          l.specification,
+          l.unit,
+          l.quantity,
+          l.price,
+          c.name as buyerOUName,
+          c1.name as sellerCompanyName
+          from  ant_invoice_header h, ant_invoice_line l, sys_company c, sys_company c1
+        <where>
+            <if test="id != null">
+                and h.id = #{id}
+            </if>
+            h.id = l.header_id
+            and c.id = h.buyer_OU
+            and c1.id = h.seller_company_id
+        </where>
+        order by h.invoice_code
+    </select>
+    
+    <delete id="deleteInvoiceById" parameterType="java.lang.Long">
+        delete h,l
+        FROM ant_invoice_header h,ant_invoice_line l
+        WHERE  h.id =#{id}  and h.id = l.header_id
+    </delete>
+</mapper>

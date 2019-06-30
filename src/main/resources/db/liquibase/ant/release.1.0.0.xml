@@ -284,6 +284,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <addUniqueConstraint tableName="ant_invoice_header" columnNames="set_of_book_id,invoice_code" constraintName="idx_unq_ant_invoice_header_code"/>
 
         <createTable tableName="ant_invoice_line" remarks="发票头行表">
             <column name="id" type="bigint" remarks="发票行表ID">

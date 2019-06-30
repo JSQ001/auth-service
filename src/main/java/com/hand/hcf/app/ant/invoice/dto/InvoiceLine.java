@@ -61,7 +61,7 @@ public class InvoiceLine extends Domain {
     @NotNull
     @TableField("tax")
     @ApiModelProperty(value = "税率",dataType = "String",required = true)
-    private String tax;
+    private String taxRate;
 
     /**
      * 不含税金额

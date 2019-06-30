@@ -49,7 +49,7 @@ public class InvoiceHeader extends Domain {
     @TableField("set_of_book_id")
     @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty(value = "账套ID",dataType = "Long",required = true)
-    private Long setOfBooksId;
+    private Long setOfBookId;
 
     /**
      * 发票类型
@@ -82,6 +82,15 @@ public class InvoiceHeader extends Domain {
     @NotNull(message = RespCode.SYS_FIELD_IS_NULL)
     @TableField(value = "buyer_OU")
     private String buyerOU;
+
+    /**
+     * 购方机构OU名称
+     */
+    @ApiModelProperty(value = "购方机构OU名称")
+    @NotNull(message = RespCode.SYS_FIELD_IS_NULL)
+    @TableField(exist = false)
+    private String buyerOUName;
+
 
     /**
      * 价税合计金额
@@ -126,8 +135,10 @@ public class InvoiceHeader extends Domain {
      * 销方公司名称
      */
     @ApiModelProperty(value = "销方公司名称")
+    @NotNull(message = RespCode.SYS_FIELD_IS_NULL)
     @TableField(exist = false)
     private String sellerCompanyName;
+
 
     /**
      * 销售方税号
