@@ -5,18 +5,25 @@ import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
 import com.hand.hcf.app.ant.taxreimburse.dto.TaxBlendDataDTO;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpBankFlowService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpTaxReportService;
+import com.hand.hcf.app.ant.taxreimburse.utils.TaxReimburseConstans;
 import com.hand.hcf.app.base.code.domain.SysCodeValue;
 import com.hand.hcf.app.base.code.service.SysCodeService;
+import com.hand.hcf.app.base.util.FileUtil;
 import com.hand.hcf.app.core.domain.ExportConfig;
+import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
+import com.hand.hcf.app.core.web.dto.ImportResultDTO;
+import com.hand.hcf.app.mdata.utils.RespCode;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +41,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author xu.chen02@hand-china.com
@@ -56,6 +67,7 @@ public class ExpTaxReportController {
 
     @Autowired
     private ExcelExportService excelExportService;
+
 
     /**
      * 获取税金申报List的数据-分页查询
@@ -211,6 +223,7 @@ public class ExpTaxReportController {
     /**
      * 根据Id 批量删除税金申报数据
      * url:api/exp/tax/report/delete
+     *
      * @param ids
      */
     @DeleteMapping("/delete")
@@ -242,12 +255,15 @@ public class ExpTaxReportController {
         }
     }
 
-
+    /**
+     * 保存未勾兑的税金申报数据 api/exp/tax/report/saveorupdate
+     * @param ids
+     * @param expTaxReportList
+     * @return
+     */
     @PostMapping("/saveorupdate")
     public ResponseEntity<List<ExpTaxReport>> saveExpTaxReport(@RequestParam String ids, @RequestBody List<ExpTaxReport> expTaxReportList) {
-
-        expTaxReportService.saveExpTaxReport(ids, expTaxReportList);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(expTaxReportService.saveExpTaxReport(ids, expTaxReportList));
     }
 
     /**
@@ -263,16 +279,113 @@ public class ExpTaxReportController {
 
     /**
      * 详情页面税金明细信息显示
+     *
      * @param reimburseHeaderId
      * @param pageable
      * @return
      */
-    @GetMapping("list/by/headId")
-    public ResponseEntity<List<ExpTaxReport>> getTaxReportDetail(@RequestParam(required = false) String reimburseHeaderId,Pageable pageable ){
+    @GetMapping("/list/by/headId")
+    public ResponseEntity<List<ExpTaxReport>> getTaxReportDetail(@RequestParam(required = false) String reimburseHeaderId, Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        List<ExpTaxReport> expTaxReportList = expTaxReportService.getTaxReportDetailList(reimburseHeaderId,page);
+        List<ExpTaxReport> expTaxReportList = expTaxReportService.getTaxReportDetailList(reimburseHeaderId, page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(expTaxReportList, httpHeaders, HttpStatus.OK);
     }
+
+
+    /**
+     * 下载税金申报数据导入模板-url:/api/exp/tax/report/download/template
+     *
+     * @return
+     */
+    @GetMapping("/download/template")
+    public ResponseEntity<byte[]> exportTaxReportTemplate() {
+        byte[] bytes = FileUtil.getFileBinaryForDownload(FileUtil.getTemplatePath(TaxReimburseConstans.TAX_REPORT_IMPORT_TEMPLATE_PATH, LoginInformationUtil.getCurrentLanguage()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+    }
+
+    /**
+     * 使用模板导入数据---两个List共用一个 ---导入第一步
+     * url:/api/exp/tax/report/import/template/data
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/import/template/data")
+    public ResponseEntity<Map<String, UUID>> importPublicData(@RequestParam("file") MultipartFile file) throws Exception {
+        try {
+            UUID transactionOid = expTaxReportService.importPublicData(file);
+            Map<String, UUID> result = new HashMap<>();
+            result.put("transactionOid", transactionOid);
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            throw new BizException(RespCode.SYS_READ_FILE_ERROR);
+        }
+    }
+
+    /**
+     * 查询导入结果 导入第二步 查询导入成功多少，失败多少，失败的数据有哪些
+     * url:/api/exp/tax/report/query/result/Info/{transactionID}
+     *
+     * @param transactionID
+     * @return
+     * @throws IOException
+     */
+    @GetMapping("/query/result/Info/{transactionID}")
+    public ResponseEntity queryResultInfo(@PathVariable("transactionID") String transactionID) throws IOException {
+        ImportResultDTO importResultDTO = expTaxReportService.queryResultInfo(transactionID);
+        return ResponseEntity.ok(importResultDTO);
+    }
+
+    /**
+     * 导出错误信息  导出错误信息excel
+     * url:/api/exp/tax/report/import/export/error/data/{transactionID}
+     *
+     * @param transactionID
+     * @throws IOException
+     */
+    @GetMapping("/export/error/data/{transactionID}")
+    public ResponseEntity exportErrorData(
+            @PathVariable("transactionID") String transactionID) throws IOException {
+        return ResponseEntity.ok(expTaxReportService.exportFailedData(transactionID));
+    }
+
+    /**
+     * 删除导入的数据 点击取消时删除当前导入的数据（删除临时表数据)
+     * url:/api/exp/tax/report/delete/import/data/{transactionID}
+     *
+     * @param transactionID
+     * @return
+     */
+    @DeleteMapping("/delete/import/data/{transactionID}")
+    public ResponseEntity deleteImportData(@PathVariable("transactionID") String transactionID) {
+        return ResponseEntity.ok(expTaxReportService.deleteImportData(transactionID));
+    }
+
+    /**
+     * 点击确定时 把临时表数据新增到正式表中
+     * url:/api/exp/tax/report/confirm/import/{transactionID}
+     *
+     * @param transactionID
+     * @return
+     */
+    @PostMapping("/confirm/import/{transactionID}")
+    public ResponseEntity confirmImport(@PathVariable(value = "transactionID") String transactionID) {
+        return ResponseEntity.ok(expTaxReportService.confirmImport(transactionID));
+    }
+
+    /**
+     * 批量更新税金申报明细信息 url:api/exp/tax/report/update/tax/data (保存功能）
+     * @param expTaxReportList
+     * @return
+     */
+    @PostMapping("/update/tax/data")
+    public ResponseEntity<List<ExpTaxReport>>  saveTaxReport(@RequestBody List<ExpTaxReport> expTaxReportList){
+        return ResponseEntity.ok(expTaxReportService.saveTaxReport(expTaxReportList));
+    }
+
 
 }

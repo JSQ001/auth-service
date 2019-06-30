@@ -3,18 +3,23 @@ package com.hand.hcf.app.ant.taxreimburse.web;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpBankFlowService;
+import com.hand.hcf.app.ant.taxreimburse.utils.TaxReimburseConstans;
+import com.hand.hcf.app.base.util.FileUtil;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
+import com.hand.hcf.app.core.util.LoginInformationUtil;
 import com.hand.hcf.app.core.util.PageUtil;
 import com.hand.hcf.app.core.util.TypeConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +50,7 @@ public class ExpBankFlowController {
 
     @Autowired
     private ExcelExportService excelExportService;
+
 
     /**
      * 获取银行流水List的数据-分页查询
@@ -200,15 +206,39 @@ public class ExpBankFlowController {
 
     /**
      * 报账单详情页面支付明细信息显示
+     *
      * @param reimburseHeaderId
      * @param pageable
      * @return
      */
-    @GetMapping("list/by/headId")
-    public ResponseEntity<List<ExpBankFlow>> getTaxReportDetail(@RequestParam String reimburseHeaderId,Pageable pageable ){
+    @GetMapping("/list/by/headId")
+    public ResponseEntity<List<ExpBankFlow>> getTaxReportDetail(@RequestParam String reimburseHeaderId, Pageable pageable) {
         Page page = PageUtil.getPage(pageable);
-        List<ExpBankFlow> expBankFlowList = expBankFlowService.getBankFlowDetailList(reimburseHeaderId,page);
+        List<ExpBankFlow> expBankFlowList = expBankFlowService.getBankFlowDetailList(reimburseHeaderId, page);
         HttpHeaders httpHeaders = PageUtil.getTotalHeader(page);
         return new ResponseEntity<>(expBankFlowList, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * 下载税金申报数据导入模板-url:/api/exp/bank/flow/download/template
+     *
+     * @return
+     */
+    @GetMapping("/download/template")
+    public ResponseEntity<byte[]> exportBankFlowTemplate() {
+        byte[] bytes = FileUtil.getFileBinaryForDownload(FileUtil.getTemplatePath(TaxReimburseConstans.BANK_FLOW_IMPORT_TEMPLATE_PATH, LoginInformationUtil.getCurrentLanguage()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+    }
+
+    /**
+     * 批量更新银行流水支付明细信息 url:api/exp/bank/flow/update/bank/flow/data (保存功能）
+     * @param expBankFlowList
+     * @return
+     */
+    @PostMapping("/update/bank/flow/data")
+    public ResponseEntity<List<ExpBankFlow>>  saveTaxReport(@RequestBody List<ExpBankFlow> expBankFlowList){
+        return ResponseEntity.ok(expBankFlowService.saveBankFlow(expBankFlowList));
     }
 }

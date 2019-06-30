@@ -24,7 +24,7 @@ public interface ExpTaxReportMapper extends BaseMapper<ExpTaxReport> {
     int getCountBygroup(Long companyId, String currencyCode);
 
     //根据id更新税金申报的数据的报账状态
-    void updateStatusById(Long id,Long taxReimburseHeadId);
+    void updateStatusById(Long id, Long taxReimburseHeadId);
 
     //根据外键taxReimburseHeadId修改数据--删除报账单时调用
     int updateTaxByHeadId(Long taxReimburseHeadId);

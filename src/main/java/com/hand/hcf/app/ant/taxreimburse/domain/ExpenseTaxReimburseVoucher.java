@@ -92,17 +92,17 @@ public class ExpenseTaxReimburseVoucher extends Domain{
     private String benefitedDepartDesc;
 
     /**
-     * 区域
+     * 区域id
      */
-    @NotNull
-    @TableField(value = "area_id")
-    private Long areaId;
+//    @NotNull
+//    @TableField(value = "area_id")
+//    private Long areaId;
 
     /**
      * 区域
      */
     @NotNull
-    @TableField(exist = false)
+    @TableField(value = "area_name")
     private String areaName;
 
     /**
@@ -184,16 +184,40 @@ public class ExpenseTaxReimburseVoucher extends Domain{
     private String industrySegmentDesc;
 
     /**
-     * 本币借方
+     * 本币借贷方--原本币借方和本币贷方只保留其中一个
      */
-    @TableField(value = "local_currency_debit")
+    @TableField(value = "local_currency_lender")
     private String localCurrencyDebit;
 
     /**
-     * 本币贷方
+     *借贷方向
      */
-    @TableField(value = "local_currency_lender")
-    private String localCurrencyLender;
+    @TableField(value = "lender_debit_directuin")
+    private String lenderDebitDirectuin;
+
+    /**
+     * 原币金额
+     */
+    @TableField(value = "total_amount")
+    private BigDecimal totalAmount;
+
+    /**
+     * 本币金额
+     */
+    @TableField(value = "functional_amount")
+    private BigDecimal functionalAmount;
+
+    /**
+     * 币种代码
+     */
+    @TableField(value = "currency_code")
+    private String currencyCode;
+
+    /**
+     * 汇率
+     */
+    @TableField(value = "exchange_rate")
+    private BigDecimal exchangeRate;
 
     /**
      * 备用段1
@@ -239,5 +263,9 @@ public class ExpenseTaxReimburseVoucher extends Domain{
      */
     @TableField(value = "status")
     private Integer status;
+
+    //币种名称
+    @TableField(exist = false)
+    private String currencyName;
 
 }

@@ -19,7 +19,7 @@ import java.util.List;
  */
 @Data
 @TableName("exp_tax_reimburse_head")
-public class ExpenseTaxReimburseHead extends Domain{
+public class ExpenseTaxReimburseHead extends Domain {
     /**
      * 单据编号
      */
@@ -155,7 +155,7 @@ public class ExpenseTaxReimburseHead extends Domain{
      * 审核日期
      */
     @TableField(value = "audit_date")
-    @ApiModelProperty(value = "审核日期",dataType = "String")
+    @ApiModelProperty(value = "审核日期", dataType = "String")
     private ZonedDateTime auditDate;
 
     /**
