@@ -6,18 +6,12 @@ import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssign;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssignDepartment;
 import com.hand.hcf.app.expense.accrual.dto.ExpenseReportAccrualRequestDTO;
 import com.hand.hcf.app.expense.accrual.service.ExpenseAccrualService;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
-import com.hand.hcf.app.expense.income.domain.ExpenseTypeAssignDepartment;
-import com.hand.hcf.app.expense.income.dto.ExpenseReportIncomeRequestDTO;
-import com.hand.hcf.app.expense.income.service.ExpenseIncomeService;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 

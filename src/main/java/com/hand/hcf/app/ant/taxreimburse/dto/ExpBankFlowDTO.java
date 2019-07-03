@@ -1,7 +1,5 @@
 package com.hand.hcf.app.ant.taxreimburse.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import lombok.Data;
 
 import java.math.BigDecimal;

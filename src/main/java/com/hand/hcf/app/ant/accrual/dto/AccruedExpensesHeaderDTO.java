@@ -1,7 +1,10 @@
 package com.hand.hcf.app.ant.accrual.dto;
 
 import com.hand.hcf.app.ant.accrual.domain.AccruedExpensesHeader;
+import com.hand.hcf.app.expense.type.domain.ExpenseDimension;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @description:
@@ -59,4 +62,9 @@ public class AccruedExpensesHeaderDTO extends AccruedExpensesHeader {
      * 创建人编码
      */
     private String applicantCode;
+
+    /**
+     * 单据维度布局
+     */
+    private List<ExpenseDimension> expenseDimensions;
 }

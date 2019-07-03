@@ -1,7 +1,5 @@
 package com.hand.hcf.app.ant.taxreimburse.dto;
 
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableName;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
 

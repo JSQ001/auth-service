@@ -3,21 +3,16 @@ package com.hand.hcf.app.expense.accrual.service;
 import com.baomidou.mybatisplus.enums.SqlLike;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.hand.hcf.app.common.co.ApprovalFormCO;
 import com.hand.hcf.app.common.co.SetOfBooksInfoCO;
-import com.hand.hcf.app.common.co.SysCodeValueCO;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseI18nService;
 import com.hand.hcf.app.core.service.BaseService;
-import com.hand.hcf.app.core.util.DataAuthorityUtil;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssign;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssignDepartment;
 import com.hand.hcf.app.expense.accrual.dto.ExpenseReportAccrualRequestDTO;
 import com.hand.hcf.app.expense.accrual.persistence.ExpenseAccrualMapper;
 import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.common.utils.RespCode;
-import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.hand.hcf.app.expense.common.utils.StringUtil;
 import com.hand.hcf.app.expense.report.service.ExpenseReportTypeExpenseTypeService;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import springfox.documentation.annotations.ApiIgnore;
-import org.springframework.util.CollectionUtils;
+
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**

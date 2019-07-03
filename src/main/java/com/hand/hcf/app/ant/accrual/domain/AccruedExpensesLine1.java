@@ -11,6 +11,7 @@ import lombok.Data;
  * @date: 2019/5/20
  */
 @Data
+
 @TableName("exp_accrued_expenses_line1")
 public class AccruedExpensesLine1 extends Domain {
 

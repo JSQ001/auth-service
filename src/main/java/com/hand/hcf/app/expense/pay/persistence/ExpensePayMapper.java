@@ -1,8 +1,6 @@
 package com.hand.hcf.app.expense.pay.persistence;
 
 import com.baomidou.mybatisplus.mapper.BaseMapper;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
-import com.hand.hcf.app.expense.income.domain.ExpenseTypeAssignDepartment;
 import com.hand.hcf.app.expense.pay.domain.ExpensePayAssign;
 import com.hand.hcf.app.expense.pay.domain.ExpensePayAssignDepartment;
 import org.apache.ibatis.annotations.Param;

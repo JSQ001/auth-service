@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.hand.hcf.app.core.annotation.I18nField;
-import com.hand.hcf.app.core.domain.Domain;
 import com.hand.hcf.app.core.domain.DomainI18nEnable;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -2,12 +2,8 @@ package com.hand.hcf.app.ant.taxreimburse.domain;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.hand.hcf.app.core.domain.Domain;
 import lombok.Data;
-
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 
 /**
  * @author xu.chen02@hand-china.com
