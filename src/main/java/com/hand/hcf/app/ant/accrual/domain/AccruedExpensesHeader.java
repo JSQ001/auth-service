@@ -200,4 +200,34 @@ public class AccruedExpensesHeader extends Domain {
     @TableField(exist = false)
     private String fromToPeriod;
 
+    /**
+     * 审核状态
+     */
+    @TableField(value = "audit_flag")
+    private String auditFlag;
+
+    /**
+     * 审核日期
+     */
+    @TableField(value = "audit_date")
+    private ZonedDateTime auditDate;
+
+    /**
+     * 单据OID
+     */
+    @TableField(value = "document_oid")
+    private String documentOid;
+
+    /**
+     * 创建凭证标志
+     */
+    @TableField("je_creation_status")
+    private Boolean jeCreationStatus;
+
+    /**
+     * 创建凭证日期
+     */
+    @TableField("je_creation_date")
+    private ZonedDateTime jeCreationDate;
+
 }

@@ -1,7 +1,6 @@
 package com.hand.hcf.app.ant.mdata.location.dto;
 
 import com.hand.hcf.app.ant.mdata.location.domain.PayeeHeader;
-import com.hand.hcf.app.ant.mdata.location.domain.PayeeLine;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

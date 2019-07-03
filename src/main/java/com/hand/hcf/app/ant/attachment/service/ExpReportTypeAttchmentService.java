@@ -12,11 +12,9 @@ import com.hand.hcf.app.base.util.RespCode;
 import com.hand.hcf.app.core.exception.BizException;
 import com.hand.hcf.app.core.service.BaseService;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualType;
-import com.hand.hcf.app.expense.common.externalApi.OrganizationService;
 import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import com.hand.hcf.app.expense.report.persistence.ExpenseReportTypeMapper;
 import com.hand.hcf.app.mdata.base.util.OrgInformationUtil;
-import com.hand.hcf.app.workflow.implement.web.WorkflowControllerImpl;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,13 +43,8 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
     private ExpenseReportTypeMapper expenseReportTypeMapper;
 
     @Autowired
-    private OrganizationService organizationService;
-
-    @Autowired
     private AccrualExpenseTypeMapper accrualExpenseTypeMapper;
 
-    @Autowired
-    private WorkflowControllerImpl workflowClient;
 
     /**
      * 新增 单据类型
@@ -322,5 +315,26 @@ public class ExpReportTypeAttchmentService extends BaseService<ExpReportTypeAttc
                         .orderBy("report_type_code")
         );
         return list;
+    }
+
+    /**
+     * 附件设置专用接口
+     */
+    /**
+     * 根据单据类型代码获取单据对应的所有附件设置信息
+     *
+     * @param docTypeCode --单据类型代码
+     * @return
+     */
+    public List<AttachmentType> getAttachmentTypeListByCode(String docTypeCode) {
+        ExpReportTypeAttchment expReportTypeAttchment = this.selectOne(
+                new EntityWrapper<ExpReportTypeAttchment>().eq("doc_type_code", docTypeCode));
+        Long expReportTypeId = null;//此expReportTypeId并不是类型定义中的单据类型id，而是单据附件设置表中的Id
+        if(null != expReportTypeAttchment){
+            expReportTypeId = expReportTypeAttchment.getId();
+        }
+        List<AttachmentType> attachmentTypes = attachmentTypeMapper.selectList(
+                new EntityWrapper<AttachmentType>().eq("exp_report_type_id", expReportTypeId));
+        return attachmentTypes;
     }
 }

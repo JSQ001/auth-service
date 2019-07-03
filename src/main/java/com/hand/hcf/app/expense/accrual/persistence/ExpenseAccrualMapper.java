@@ -3,8 +3,6 @@ package com.hand.hcf.app.expense.accrual.persistence;
 import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssign;
 import com.hand.hcf.app.expense.accrual.domain.ExpenseAccrualAssignDepartment;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
-import com.hand.hcf.app.expense.income.domain.ExpenseTypeAssignDepartment;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

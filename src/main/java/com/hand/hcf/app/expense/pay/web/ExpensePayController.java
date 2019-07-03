@@ -2,15 +2,10 @@ package com.hand.hcf.app.expense.pay.web;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.core.util.PageUtil;
-import com.hand.hcf.app.expense.income.domain.ExpenseIncomeAssign;
-import com.hand.hcf.app.expense.income.domain.ExpenseTypeAssignDepartment;
-import com.hand.hcf.app.expense.income.dto.ExpenseReportIncomeRequestDTO;
-import com.hand.hcf.app.expense.income.service.ExpenseIncomeService;
 import com.hand.hcf.app.expense.pay.domain.ExpensePayAssign;
 import com.hand.hcf.app.expense.pay.domain.ExpensePayAssignDepartment;
 import com.hand.hcf.app.expense.pay.dto.ExpenseReportPayRequestDTO;
 import com.hand.hcf.app.expense.pay.service.ExpensePayService;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportType;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

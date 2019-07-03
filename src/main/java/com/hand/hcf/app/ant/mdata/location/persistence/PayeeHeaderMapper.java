@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.mapper.BaseMapper;
 import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import com.hand.hcf.app.ant.mdata.location.domain.PayeeHeader;
 import com.hand.hcf.app.ant.mdata.location.dto.PayeeHeaderDTO;
-import com.hand.hcf.app.expense.report.domain.ExpenseReportHeader;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

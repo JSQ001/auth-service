@@ -39,7 +39,7 @@ public class ExpTaxReport extends Domain {
 
 
     /**
-     * 收益部门id
+     * 受益部门id
      */
     @TableField(value = "benefit_department_id")
     private Long benefitDepartmentId;
@@ -53,43 +53,50 @@ public class ExpTaxReport extends Domain {
     /**
      * 勾兑状态
      */
-    @TableField(value = "blend_status",strategy = FieldStrategy.NOT_NULL)
+    @TableField(value = "blend_status", strategy = FieldStrategy.NOT_NULL)
     private Boolean blendStatus;
 
     /**
      * 税种代码
      */
-    @TableField("tax_category_code")
+    @TableField(value = "tax_category_code")
     private String taxCategoryCode;
 
     /**
-     * 业务小类代码
+     * 税种名称
      */
-    @TableField("business_subcategory_code")
+    //@TableField(exist = false)
+    @TableField(value = "tax_category_name")
+    private String taxCategoryName;
+
+    /**
+     * 科目代码
+     */
+    @TableField(value = "business_subcategory_code")
     private String businessSubcategoryCode;
 
     /**
-     * 业务小类名称
+     * 会计科目
      */
-    @TableField("business_subcategory_name")
+    @TableField(value = "business_subcategory_name")
     private String businessSubcategoryName;
 
     /**
      * 申报金额
      */
-    @TableField("request_amount")
+    @TableField(value = "request_amount")
     private BigDecimal requestAmount;
 
     /**
      * 申报期间
      */
-    @TableField("request_period")
+    @TableField(value = "request_period")
     private String requestPeriod;
 
     /**
      * 报账状态
      */
-    @TableField(value ="status",strategy = FieldStrategy.NOT_NULL)
+    @TableField(value = "status", strategy = FieldStrategy.NOT_NULL)
     private Boolean status;
 
     /**
@@ -114,11 +121,6 @@ public class ExpTaxReport extends Domain {
     @TableField(exist = false)
     private String companyName;
 
-    /**
-     * 税种名称
-     */
-    @TableField(exist = false)
-    private String taxCategoryName;
 
     //币种名称
     @TableField(exist = false)

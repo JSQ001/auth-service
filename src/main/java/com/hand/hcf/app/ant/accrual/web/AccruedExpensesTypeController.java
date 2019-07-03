@@ -62,4 +62,5 @@ public class AccruedExpensesTypeController {
         HttpHeaders headers = PageUtil.getTotalHeader(queryPage);
         return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
+
 }

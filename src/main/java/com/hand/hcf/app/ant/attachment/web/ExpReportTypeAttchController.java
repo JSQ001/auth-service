@@ -196,4 +196,14 @@ public class ExpReportTypeAttchController {
         return new ResponseEntity(list,httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * 附件设置专用
+     * @param docTypeCode
+     * @return
+     */
+    @GetMapping("/select/settings/byCode/{docTypeCode}")
+    public ResponseEntity<List<AttachmentType>> getAttachmentTypeListByCode(@PathVariable(value = "docTypeCode") String docTypeCode) {
+        return ResponseEntity.ok(expReportTypeAttchmentService.getAttachmentTypeListByCode(docTypeCode));
+    }
+
 }

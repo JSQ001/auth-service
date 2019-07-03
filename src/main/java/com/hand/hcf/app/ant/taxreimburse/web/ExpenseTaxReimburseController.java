@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpBankFlow;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpTaxReport;
 import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseHead;
+import com.hand.hcf.app.ant.taxreimburse.domain.ExpenseTaxReimburseVoucher;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpBankFlowService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpTaxReportService;
 import com.hand.hcf.app.ant.taxreimburse.service.ExpenseTaxReimburseHeadService;
+import com.hand.hcf.app.ant.taxreimburse.service.ExpenseTaxReimburseVoucherService;
 import com.hand.hcf.app.core.domain.ExportConfig;
 import com.hand.hcf.app.core.handler.ExcelExportHandler;
 import com.hand.hcf.app.core.service.ExcelExportService;
@@ -17,15 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +33,7 @@ import java.util.List;
 /**
  * @author xu.chen02@hand-china.com
  * @version 1.0
- * @description: 国内税金缴纳报账单controller
+ * @description: 国内税金缴纳报账单controller--国际税金计提共用
  * @date 2019/6/10 10:26
  */
 @RestController
@@ -58,10 +52,14 @@ public class ExpenseTaxReimburseController {
     @Autowired
     private ExcelExportService excelExportService;
 
+    @Autowired
+    private ExpenseTaxReimburseVoucherService taxReimburseVoucherService;
+
 
     /**
      * 查询所有报账单头信息--url-/api/exp/tax/reimburse/head/list
      *
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -71,14 +69,15 @@ public class ExpenseTaxReimburseController {
      * @param amountFrom
      * @param amountTo
      * @param remark
-     * @param benefited_id
+     * @param benefitedId
      * @param benefitedDepartName
      * @param requisitionNumber
      * @param pageable
      * @return
      */
-    @GetMapping("/head/list")
+    @GetMapping("/head/list/{reimburseTypeId}")
     public ResponseEntity<List<ExpenseTaxReimburseHead>> getTaxReimburseHeadList(
+            @PathVariable(value = "reimburseTypeId") Long typeId,
             @RequestParam(required = false) Long documentTypeId,
             @RequestParam(required = false) String requisitionDateFrom,
             @RequestParam(required = false) String requisitionDateTo,
@@ -88,7 +87,7 @@ public class ExpenseTaxReimburseController {
             @RequestParam(required = false) BigDecimal amountFrom,
             @RequestParam(required = false) BigDecimal amountTo,
             @RequestParam(required = false) String remark,
-            @RequestParam(required = false) Long benefited_id,
+            @RequestParam(required = false) Long benefitedId,
             @RequestParam(required = false) String benefitedDepartName,
             @RequestParam(required = false) String requisitionNumber,
             Pageable pageable) {
@@ -96,6 +95,7 @@ public class ExpenseTaxReimburseController {
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
         ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
         List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList = expenseTaxReimburseHeadService.getTaxReimburseList(
+                typeId,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -105,7 +105,7 @@ public class ExpenseTaxReimburseController {
                 amountFrom,
                 amountTo,
                 remark,
-                benefited_id,
+                benefitedId,
                 benefitedDepartName,
                 requisitionNumber,
                 page
@@ -136,6 +136,7 @@ public class ExpenseTaxReimburseController {
      * @param request
      * @param response
      * @param exportConfig
+     * @param typeId
      * @param documentTypeId
      * @param requisitionDateFrom
      * @param requisitionDateTo
@@ -150,11 +151,12 @@ public class ExpenseTaxReimburseController {
      * @param requisitionNumber
      * @throws IOException
      */
-    @RequestMapping("/head/export")
+    @RequestMapping("/head/export/{reimburseTypeId}")
     public void export(
             HttpServletRequest request,
             HttpServletResponse response,
             @RequestBody ExportConfig exportConfig,
+            @PathVariable(value = "reimburseTypeId") Long typeId,
             @RequestParam(required = false) Long documentTypeId,
             @RequestParam(required = false) String requisitionDateFrom,
             @RequestParam(required = false) String requisitionDateTo,
@@ -171,6 +173,7 @@ public class ExpenseTaxReimburseController {
         ZonedDateTime reqDateFrom = TypeConversionUtils.getStartTimeForDayYYMMDD(requisitionDateFrom);
         ZonedDateTime reqDateTo = TypeConversionUtils.getEndTimeForDayYYMMDD(requisitionDateTo);
         Page<ExpenseTaxReimburseHead> taxReimburseHeadByPage = expenseTaxReimburseHeadService.getTaxReimburseHeadByPage(
+                typeId,
                 documentTypeId,
                 reqDateFrom,
                 reqDateTo,
@@ -200,6 +203,7 @@ public class ExpenseTaxReimburseController {
             @Override
             public List<ExpenseTaxReimburseHead> queryDataByPage(Page page) {
                 List<ExpenseTaxReimburseHead> list = expenseTaxReimburseHeadService.exportTaxReimburseHead(
+                        typeId,
                         documentTypeId,
                         reqDateFrom,
                         reqDateTo,
@@ -237,6 +241,30 @@ public class ExpenseTaxReimburseController {
     @PostMapping("/head/save/{ids}")
     public ResponseEntity<ExpenseTaxReimburseHead> saveExpenseReportHeader(@PathVariable(value = "ids") String ids, @RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
         return ResponseEntity.ok(expenseTaxReimburseHeadService.saveTaxReimburseHead(ids, expenseTaxReimburseHead));
+    }
+
+    /**
+     * 国际税金计提-新建报账单
+     *
+     * @param typeId
+     * @param expenseTaxReimburseHead
+     * @return
+     */
+    @PostMapping("/head/new/{typeId}")
+    public ResponseEntity<ExpenseTaxReimburseHead> saveInternalReimburseHeader(@PathVariable(value = "typeId") String typeId, @RequestBody ExpenseTaxReimburseHead expenseTaxReimburseHead) {
+        return ResponseEntity.ok(expenseTaxReimburseHeadService.saveInternalReimburseHead(typeId, expenseTaxReimburseHead));
+    }
+
+    /**
+     * 批量更新报账单头信息--国际国内报账单(保存功能）
+     *
+     * url:/api/exp/tax/reimburse/update/header/data
+     * @param expenseTaxReimburseHeadList
+     * @return
+     */
+    @PostMapping("/update/header/data")
+    public ResponseEntity<List<ExpenseTaxReimburseHead>>  updateHeaderData(@RequestBody List<ExpenseTaxReimburseHead> expenseTaxReimburseHeadList){
+        return ResponseEntity.ok(expenseTaxReimburseHeadService.updateHeaderData(expenseTaxReimburseHeadList));
     }
 
     /**
@@ -339,45 +367,106 @@ public class ExpenseTaxReimburseController {
         }, threadNumber, request, response);
     }
 
+    /**
+     * 导出凭证数据信息-行页面
+     *
+     * @param request
+     * @param response
+     * @param exportConfig
+     * @param expReimburseHeaderId
+     * @throws IOException
+     */
+    @RequestMapping("/line/voucher/export")
+    public void exportVoucherDetail(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @RequestBody ExportConfig exportConfig,
+            @RequestParam String expReimburseHeaderId
+    ) throws IOException {
+        Page<ExpenseTaxReimburseVoucher> taxReimburseVoucherPage = taxReimburseVoucherService.getVoucherDetail(
+                expReimburseHeaderId,
+                new Page<ExpTaxReport>(1, 0));
+        int total = TypeConversionUtils.parseInt(taxReimburseVoucherPage.getTotal());
+        String name = exportConfig.getFileName();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = "_" + sdf.format(new Date());
+        String fileName = name + date;
+        exportConfig.setFileName(fileName);
+        int threadNumber = total > 100000 ? 8 : 2;
+        excelExportService.exportAndDownloadExcel(exportConfig, new ExcelExportHandler<ExpenseTaxReimburseVoucher, ExpenseTaxReimburseVoucher>() {
+            @Override
+            public int getTotal() {
+                return total;
+            }
+
+            @Override
+            public List<ExpenseTaxReimburseVoucher> queryDataByPage(Page page) {
+                List<ExpenseTaxReimburseVoucher> list = taxReimburseVoucherService.exportVoucherDeatil(expReimburseHeaderId);
+                return list;
+            }
+
+            @Override
+            public ExpenseTaxReimburseVoucher toDTO(ExpenseTaxReimburseVoucher t) {
+                return t;
+            }
+
+            @Override
+            public Class<ExpenseTaxReimburseVoucher> getEntityClass() {
+                return ExpenseTaxReimburseVoucher.class;
+            }
+        }, threadNumber, request, response);
+    }
+
 
     /**
-     *  报账单提交
+     * 报账单提交--国际国内报账单
+     *
      * @param documentId
      * @return
      */
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
-    public boolean submit(@RequestParam  String documentId){
+    public boolean submit(@RequestParam String documentId) {
         return expenseTaxReimburseHeadService.submit(documentId);
     }
 
     /**
-     *  报账单撤回-只有审批中的才可撤回
+     * 报账单撤回-只有审批中的才可撤回
+     *
      * @param documentId
      * @return
      */
     @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
-    public boolean withdraw(@RequestParam  String documentId){
+    public boolean withdraw(@RequestParam String documentId) {
         return expenseTaxReimburseHeadService.withdraw(documentId);
     }
 
     /**
-     *  报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     * 报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
+     *
      * @param documentId
      * @return
      */
-    @RequestMapping(value = "/detele/by/headId", method = RequestMethod.POST)
-    public boolean deleteById(@RequestParam  String documentId){
-        return expenseTaxReimburseHeadService.deleteById(documentId);
+    @DeleteMapping(value = "/detele/by/headId")
+    public boolean deleteById(@RequestParam String documentId, @RequestParam String typeFlag) {
+        boolean flag = false;
+        if ("domestic".equals(typeFlag)) {
+            flag = expenseTaxReimburseHeadService.deleteById(documentId);
+        } else if ("internal".equals(typeFlag)) {
+            flag = expenseTaxReimburseHeadService.deleteInternalReportById(documentId);
+        }
+        return flag;
     }
 
     /**
      * 批量-报账单删除-只有编辑中的才可删除，并且修改税金/银行数据状态
      * url:/api/exp/tax/reimburse/head/batch/delete
+     *
      * @param ids
+     * @param typeFlag
      */
     @DeleteMapping("/head/batch/delete")
-    public boolean deleteBatch(@RequestParam String ids) {
-        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids);
+    public boolean deleteBatch(@RequestParam String ids, @RequestParam String typeFlag) {
+        return expenseTaxReimburseHeadService.deleteReimburseBatchs(ids, typeFlag);
     }
 
 }

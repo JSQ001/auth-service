@@ -31,7 +31,8 @@ public interface ExcelImportHandler<T> {
      * @return
      */
     default int checkBatchAndPersistenceSize(){
-        return 30;
+        //同步产品代码---20190619 by cx --这个类只修改了此处
+        return 3000;
     }
 
     /**
